@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>glTF2Sharp</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/vpenades/glTF2Sharp/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/vpenades/glTF2Sharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vpenades/glTF2Sharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Vicente Penades</Authors>
+    <Description>A library for reading and writing glTF 3D models</Description>
+    <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
+    <PackageTags>glTF 3D</PackageTags>
+    <Version>1.0.0-alpha0001</Version>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Debug\" />
+  </ItemGroup>
+
+</Project>
