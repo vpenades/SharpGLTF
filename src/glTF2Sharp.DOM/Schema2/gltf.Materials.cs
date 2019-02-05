@@ -66,7 +66,7 @@ namespace glTF2Sharp.Schema2
 
         public Boolean DoubleSided
         {
-            get => _doubleSided ?? _doubleSidedDefault;
+            get => _doubleSided.AsValue(_doubleSidedDefault);
             set => _doubleSided = value.AsNullable(_doubleSidedDefault);
         }
 
@@ -115,7 +115,7 @@ namespace glTF2Sharp.Schema2
                     this,
                     "Emissive",
                     _GetEmissiveTexture,
-                    () => { var rgb = _emissiveFactor ?? _emissiveFactorDefault; return new Vector4(rgb, 1); },
+                    () => { var rgb = _emissiveFactor.AsValue(_emissiveFactorDefault); return new Vector4(rgb, 1); },
                     value => _emissiveFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_emissiveFactorDefault)
                     );
 
@@ -236,7 +236,7 @@ namespace glTF2Sharp.Schema2
                 material,
                 "BaseColor",
                 _GetBaseTexture,
-                () => (_baseColorFactor ?? _baseColorFactorDefault),
+                () => _baseColorFactor.AsValue(_baseColorFactorDefault),
                 value => _baseColorFactor = value.AsNullable(_baseColorFactorDefault)
                 );
 
@@ -281,7 +281,7 @@ namespace glTF2Sharp.Schema2
                 material,
                 "Diffuse",
                 _GetDiffuseTexture,
-                () => (_diffuseFactor ?? _diffuseFactorDefault),
+                () => _diffuseFactor.AsValue(_diffuseFactorDefault),
                 value => _diffuseFactor = value.AsNullable(_diffuseFactorDefault)
                 );
 
@@ -299,7 +299,7 @@ namespace glTF2Sharp.Schema2
                 material,
                 "Specular",
                 null,
-                () => { var rgb = _specularFactor ?? _specularFactorDefault; return new Vector4(rgb, 1); },
+                () => { var rgb = _specularFactor.AsValue(_specularFactorDefault); return new Vector4(rgb, 1); },
                 value => _specularFactor = new Vector3(value.X,value.Y,value.Z).AsNullable(_specularFactorDefault)
                 );
         }
@@ -307,7 +307,7 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
-        internal Material _AddLogicalMaterial()
+        public Material AddLogicalMaterial()
         {
             var mat = new Material();
 
@@ -316,7 +316,7 @@ namespace glTF2Sharp.Schema2
             return mat;
         }
 
-        internal Material _AddLogicalMaterial(IReadOnlyList<string> channelKeys)
+        public Material AddLogicalMaterial(IReadOnlyList<string> channelKeys)
         {
             var mat = Material.CreateBestChoice(channelKeys);
 
@@ -325,7 +325,7 @@ namespace glTF2Sharp.Schema2
             return mat;
         }
 
-        internal Material _AddLogicalMaterial(Type mtype)
+        public Material AddLogicalMaterial(Type mtype)
         {
             Material mat = null;
 

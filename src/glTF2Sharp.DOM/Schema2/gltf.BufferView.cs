@@ -13,22 +13,29 @@ namespace glTF2Sharp.Schema2
 
         internal BufferView() { }
 
-        internal BufferView(Buffer buffer, int byteLength, int? byteOffset, int? byteStride, BufferMode? target)
+        internal BufferView(Buffer buffer, int? byteLength, int? byteOffset, int? byteStride, BufferMode? target)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.NotNull(buffer.LogicalParent, nameof(buffer));
-            Guard.MustBeGreaterThan(byteLength, 0, nameof(byteLength));
+            if (byteLength.HasValue) Guard.MustBeGreaterThan(byteLength.Value, 0, nameof(byteLength));
 
             if (byteOffset.HasValue) Guard.MustBeGreaterThan(byteOffset.Value, 0, nameof(byteOffset));
-            if (byteStride.HasValue)
+
+            if (byteStride.HasValue && target.HasValue)
             {
-                // valid byeStrides are : 1, 2, 4 and multiples of 4
-                Guard.MustBeGreaterThan(byteStride.Value, 0, nameof(byteOffset));
+                if (target.Value == BufferMode.ELEMENT_ARRAY_BUFFER)
+                {
+                    Guard.IsTrue(byteStride.Value == 2 || byteStride.Value == 4, nameof(byteStride));
+                }
+                else if (target.Value == BufferMode.ELEMENT_ARRAY_BUFFER)
+                {
+                    Guard.IsTrue((byteStride.Value % 4) == 0, nameof(byteStride));
+                }
             }
 
             this._buffer = buffer.LogicalIndex;
 
-            this._byteLength = byteLength;
+            this._byteLength = byteLength.AsValue(buffer._Data.Length);
 
             this._byteOffset = byteOffset;
             this._byteStride = byteStride;
@@ -210,27 +217,7 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
-        #region Buffer and BufferView manipulation APIs
-
-        public Buffer CreateBuffer(int byteCount)
-        {
-            var buffer = new Buffer(byteCount);
-            _buffers.Add(buffer);
-
-            return buffer;
-        }       
-
-        public Buffer CreateBuffer(ReadOnlySpan<Byte> data)
-        {
-            Guard.IsFalse(data.IsEmpty, nameof(data));
-
-            var buffer = new Buffer(data);
-            _buffers.Add(buffer);
-
-            return buffer;
-        }
-
-        public BufferView CreateBufferView(Buffer buffer, int byteLength, int? byteOffset = null, int? byteStride = null, BufferMode? target = null)
+        public BufferView CreateBufferView(Buffer buffer, int? byteLength = null, int? byteOffset = null, int? byteStride = null, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -242,51 +229,19 @@ namespace glTF2Sharp.Schema2
             return bv;
         }
 
-        private BufferView CreateIndexBufferView(ReadOnlySpan<Byte> data)
+        public BufferView CreateIndexBufferView(ReadOnlySpan<Byte> data)
         {
             var buffer = CreateBuffer(data);
 
             return CreateBufferView(buffer, data.Length, null, null, BufferMode.ELEMENT_ARRAY_BUFFER);
         }
 
-        private BufferView CreateVertexBufferView(ReadOnlySpan<Byte> data, int byteStride)
+        public BufferView CreateVertexBufferView(ReadOnlySpan<Byte> data, int byteStride)
         {
             var buffer = CreateBuffer(data);
 
             return CreateBufferView(buffer, data.Length, null, byteStride, BufferMode.ARRAY_BUFFER);
-        }
-
-        /// <summary>
-        /// Merges all the Buffer objects into a single, big one.
-        /// </summary>
-        /// <remarks>
-        /// When merging the buffers, it also adjusts the BufferView offsets so the data they point to remains the same.
-        /// </remarks>
-        public void MergeBuffers()
-        {
-            // retrieve all buffers and merge them into a single, big buffer
-
-            var views = _bufferViews
-                .OrderByDescending(item => item.Data.Count)
-                .ToArray();
-
-            if (views.Length <= 1) return; // nothing to do.
-
-            var sbbuilder = new _StaticBufferBuilder(0);
-
-            foreach (var bv in views) bv._ConvertToStaticBuffer(sbbuilder);
-
-            this._buffers.Clear();
-
-            var b = new Buffer
-            {
-                _Data = sbbuilder.ToArray()
-            };
-
-            this._buffers.Add(b);
-        }
-
-        #endregion
+        }        
     }
 
     /// <summary>

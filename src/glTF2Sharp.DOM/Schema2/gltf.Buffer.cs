@@ -97,4 +97,83 @@ namespace glTF2Sharp.Schema2
 
         #endregion
     }
+
+    public partial class ModelRoot
+    {
+        public Buffer CreateBuffer(int byteCount)
+        {
+            var buffer = new Buffer(byteCount);
+            _buffers.Add(buffer);
+
+            return buffer;
+        }
+
+        public Buffer CreateBuffer(ReadOnlySpan<Byte> data)
+        {
+            Guard.IsFalse(data.IsEmpty, nameof(data));
+
+            var buffer = new Buffer(data);
+            _buffers.Add(buffer);
+
+            return buffer;
+        }
+
+        public Buffer CreateIndexBuffer(params int[] indices)
+        {
+            var buffer = CreateBuffer(indices.Length * 4);
+
+            var accessor = Memory.IntegerAccessor.Create(buffer._Data, IndexType.UNSIGNED_INT);
+
+            for (int i = 0; i < indices.Length; ++i)
+            {
+                accessor[i] = (UInt32)indices[i];
+            }
+
+            return buffer;
+        }
+
+        public Buffer CreateVector3Buffer(params Vector3[] vectors)
+        {
+            var buffer = CreateBuffer(vectors.Length * 12);
+
+            var accessor = new Memory.Vector3Accessor(new ArraySegment<byte>(buffer._Data), 0, ComponentType.FLOAT, false);
+
+            for(int i=0; i < vectors.Length; ++i)
+            {
+                accessor[i] = vectors[i];
+            }
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Merges all the Buffer objects into a single, big one.
+        /// </summary>
+        /// <remarks>
+        /// When merging the buffers, it also adjusts the BufferView offsets so the data they point to remains the same.
+        /// </remarks>
+        public void MergeBuffers()
+        {
+            // retrieve all buffers and merge them into a single, big buffer
+
+            var views = _bufferViews
+                .OrderByDescending(item => item.Data.Count)
+                .ToArray();
+
+            if (views.Length <= 1) return; // nothing to do.
+
+            var sbbuilder = new _StaticBufferBuilder(0);
+
+            foreach (var bv in views) bv._ConvertToStaticBuffer(sbbuilder);
+
+            this._buffers.Clear();
+
+            var b = new Buffer
+            {
+                _Data = sbbuilder.ToArray()
+            };
+
+            this._buffers.Add(b);
+        }
+    }
 }

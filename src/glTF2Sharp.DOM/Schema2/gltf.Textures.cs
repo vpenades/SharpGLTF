@@ -33,7 +33,7 @@ namespace glTF2Sharp.Schema2
 
         public Double Scale
         {
-            get => this._scale ?? _scaleDefault;
+            get => this._scale.AsValue(_scaleDefault);
             set => this._scale = value.AsNullable(_scaleDefault);
         }
 

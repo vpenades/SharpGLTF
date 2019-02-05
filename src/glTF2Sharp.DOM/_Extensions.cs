@@ -180,10 +180,15 @@ namespace glTF2Sharp
             }
         }
 
-        internal static T? AsNullable<T>(this T value, T defval) where T : struct, IEquatable<T>
+        internal static T AsValue<T>(this T? value, T defval) where T : struct
+        {
+            return value ?? defval;
+        }
+
+        internal static T? AsNullable<T>(this T value, T defval) where T : struct
         {
             return value.Equals(defval) ? (T?)null : value;
-        }
+        }        
 
         internal static T? AsNullable<T>(this T value, T defval, T minval, T maxval) where T : struct, IEquatable<T>, IComparable<T>
         {

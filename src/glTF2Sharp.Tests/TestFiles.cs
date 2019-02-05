@@ -32,9 +32,9 @@ namespace glTF2Sharp
             NUnit.Framework.TestContext.Progress.WriteLine("Checking out test files... It might take a while, please, wait.");
             NUnit.Framework.TestContext.Progress.WriteLine("...");
 
-            GitUtils.Syncronize("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
-            GitUtils.Syncronize("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);
-            GitUtils.Syncronize("https://github.com/bghgary/glTF-Asset-Generator.git", _GeneratedAssetsDir);            
+            TestUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
+            TestUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);
+            TestUtils.SyncronizeGitRepository("https://github.com/bghgary/glTF-Asset-Generator.git", _GeneratedAssetsDir);            
         }
 
         #endregion

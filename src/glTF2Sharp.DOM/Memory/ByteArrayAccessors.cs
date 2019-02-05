@@ -180,7 +180,7 @@ namespace glTF2Sharp.Memory
     {
         #region constructors
 
-        public static IntegerAccessor Create(Byte[] data, Schema2.IndexType type, Boolean normalized)
+        public static IntegerAccessor Create(Byte[] data, Schema2.IndexType type)
         {
             return Create(new BYTES(data), type);
         }        

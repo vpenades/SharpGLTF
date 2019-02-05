@@ -42,13 +42,17 @@ namespace glTF2Sharp.Schema2
             }
         }
 
-        public PrimitiveType DrawPrimitiveType => this._mode.HasValue ? _mode.Value : _modeDefault;           
+        public PrimitiveType DrawPrimitiveType
+        {
+            get => this._mode.AsValue(_modeDefault);
+            set => this._mode = value.AsNullable(_modeDefault);
+        }
 
         public int MorpthTargets => _targets.Count;
 
         public BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
 
-        public IReadOnlyDictionary<String, Accessor> VertexAccessors => new LinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
+        public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
 
         public Accessor IndexAccessor
         {
@@ -58,26 +62,48 @@ namespace glTF2Sharp.Schema2
 
                 return this.LogicalParent.LogicalParent._LogicalAccessors[this._indices.Value];
             }
+            set
+            {
+                if (value == null) this._indices = null;
+                else
+                {
+                    Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, value,nameof(value));
+                    this._indices = value.LogicalIndex;
+                }
+            }
         }
 
         #endregion
 
         #region API
 
-        public IReadOnlyList<KeyValuePair<String,Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
+        public Accessor GetVertexAccessor(string attributeKey)
         {
-            Guard.NotNull(vb,nameof(vb));
-            Guard.MustShareLogicalParent(this.LogicalParent, vb, nameof(vb));
+            Guard.NotNullOrEmpty(attributeKey, nameof(attributeKey));
 
-            return VertexAccessors
-                .Where(key => key.Value.Buffer ==vb)
-                .OrderBy(item => item.Value.ByteOffset)
-                .ToArray();
+            if (!_attributes.TryGetValue(attributeKey, out int idx)) return null;
+
+            return this.LogicalParent.LogicalParent._LogicalAccessors[idx];
         }
+
+        public void SetVertexAccessor(string attributeKey, Accessor accessor)
+        {
+            Guard.NotNullOrEmpty(attributeKey, nameof(attributeKey));
+
+            if (accessor != null)
+            {
+                Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, accessor, nameof(accessor));
+                _attributes[attributeKey] = accessor.LogicalIndex;                
+            }
+            else
+            {
+                _attributes.Remove(attributeKey);
+            }
+        }        
 
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
-            return new LinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
+            return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
         }
 
         public void SetMorphTargetAccessors(int idx, IReadOnlyDictionary<String, Accessor> accessors)
@@ -85,7 +111,7 @@ namespace glTF2Sharp.Schema2
             Guard.NotNull(accessors, nameof(accessors));
             foreach (var kvp in accessors)
             {
-                Guard.MustShareLogicalParent(this.LogicalParent, kvp.Value,nameof(accessors));
+                Guard.MustShareLogicalParent(this.LogicalParent, kvp.Value, nameof(accessors));
             }
 
             while (_targets.Count <= idx) _targets.Add(new Dictionary<string, int>());
@@ -94,7 +120,7 @@ namespace glTF2Sharp.Schema2
 
             target.Clear();
 
-            foreach(var kvp in accessors)
+            foreach (var kvp in accessors)
             {
                 target[kvp.Key] = kvp.Value.LogicalIndex;
             }
@@ -134,23 +160,17 @@ namespace glTF2Sharp.Schema2
                 .Distinct();
 
             return indices.Select(idx => this.LogicalParent.LogicalParent.LogicalBufferViews[idx]);            
-        }        
-
-        internal void _SetVertexAccessors(IReadOnlyDictionary<string, Accessor> attributes)
-        {
-            this._attributes.Clear();
-
-            foreach (var attribute in attributes)
-            {
-                this._attributes[attribute.Key] = attribute.Value.LogicalIndex;
-            }            
         }
 
-        internal void _SetIndexAccessors(Accessor indices, PrimitiveType ptype = PrimitiveType.TRIANGLES)
+        public IReadOnlyList<KeyValuePair<String, Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
         {
-            if (indices != null) this._indices = indices.LogicalIndex;
+            Guard.NotNull(vb, nameof(vb));
+            Guard.MustShareLogicalParent(this.LogicalParent, vb, nameof(vb));
 
-            _mode = ptype;
+            return VertexAccessors
+                .Where(key => key.Value.Buffer == vb)
+                .OrderBy(item => item.Value.ByteOffset)
+                .ToArray();
         }
 
         private Accessor _GetAccessor(IReadOnlyDictionary<string, int> attributes, string attribute)
@@ -217,6 +237,15 @@ namespace glTF2Sharp.Schema2
 
         public IReadOnlyList<float> MorphWeights => _weights.Select(item => (float)item).ToArray();
 
+        public MeshPrimitive CreatePrimitive()
+        {
+            var mp = new MeshPrimitive();
+
+            _primitives.Add(mp);
+
+            return mp;
+        }
+
         internal MeshPrimitive _AddPrimitive(IReadOnlyDictionary<string, Accessor> attributes, Accessor indices, PrimitiveType ptype)
         {
             if (attributes == null) throw new ArgumentNullException(nameof(attributes));
@@ -232,8 +261,13 @@ namespace glTF2Sharp.Schema2
 
             _primitives.Add(mp);
 
-            mp._SetVertexAccessors(attributes);
-            mp._SetIndexAccessors(indices, ptype);           
+            foreach(var kvp in attributes)
+            {
+                mp.SetVertexAccessor(kvp.Key, kvp.Value);
+            }
+
+            mp.IndexAccessor = indices;
+            mp.DrawPrimitiveType = ptype;
 
             return mp;
         }
@@ -419,63 +453,12 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
-        /*
-        public void AddMeshes(MeshCollectionBuilder<int> meshes)
+        public Mesh CreateMesh()
         {
-            Guard.NotNull(meshes, nameof(meshes));
-
-            var buffers = _CreateSharedMeshBuffers(meshes._VertexBuffers, meshes._IndexBuffers);
-
-            this._meshes.Clear();            
-
-            foreach (var k in meshes.Keys)
-            {
-                var srcMesh = meshes[k];
-
-                var dstMesh = new Mesh();
-                this._meshes.Add(dstMesh);
-
-                foreach (var p in srcMesh._Primitives)
-                {
-                    dstMesh._AddPrimitive(p, buffers);
-                }
-            }
-        }        
-
-        public Mesh AddMesh(MeshBuilder srcMesh)
-        {
-            Guard.NotNull(srcMesh, nameof(srcMesh));
-
-            var buffers = _CreateSharedMeshBuffers(srcMesh._VertexBuffers, srcMesh._IndexBuffers);
-
             var dstMesh = new Mesh();
             this._meshes.Add(dstMesh);
 
-            foreach (var p in srcMesh._Primitives)
-            {
-                dstMesh._AddPrimitive(p, buffers);
-            }
-
             return dstMesh;
         }
-
-        private IReadOnlyDictionary<_DataBuffer, BufferView> _CreateSharedMeshBuffers(IEnumerable<_DataBuffer> vertexBuffers, IEnumerable<_DataBuffer> indexBuffers)
-        {
-            var dict = new Dictionary<_DataBuffer, BufferView>(ReferenceComparer<_DataBuffer>.Instance);
-
-            foreach(var vb in vertexBuffers)
-            {
-                dict[vb] = CreateVertexBufferView(vb._Data, vb._ByteStride);
-            }
-
-            foreach (var vb in indexBuffers)
-            {
-                dict[vb] = CreateIndexBufferView(vb._Data);
-            }
-
-            return dict;
-        }*/
-    }
-
-    
+    }    
 }
