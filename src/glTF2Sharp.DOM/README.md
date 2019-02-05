@@ -36,5 +36,7 @@ var model = Schema2.ModelRoot.Load("model.gltf");
 #### Alternative glTF2 c# libraries
 
 [Khronos Group glTF-CSharp-Loader](https://github.com/KhronosGroup/glTF-CSharp-Loader)
+
 [Khronos Group UnityGLTF](https://github.com/KhronosGroup/UnityGLTF)
+
 [glTF viewer using SharpDX](https://github.com/ousttrue/DXGLTF)
