@@ -15,16 +15,29 @@ prepare all the stuff required to fill the data; example:
 ```c#
 class VertexColumn
 {
-    private string _Attribute;
-    private boolean _Normalized;    
-    private encoding _Encoding;    
+    private string _Attribute;    
     private dimensions _Dimensions;    
     private readonly List<Vector4> _Rows = new List<Vector4>();
 }
 
-class Indices
+class VertexView
 {
-    private encoding;
+public VertexView(IEnumerable<VertexColumn> columns)
+{
+fill columns
+}
+
+private VertexColumn _Position;
+private VertexColumn _Normals;
+
+public int UseRow(params Vector4[] row);
+
+public int UseRow(in SomeVertexStruct vertex);
+
+}
+
+class Indices
+{    
     private readonly List<int> _Rows = new List<int();
     private primitiveType;
 }
@@ -37,6 +50,32 @@ class MeshPrimitive
     private int _MaterialIndex;
 
     // morphing? how
+}
+
+class Mesh
+{
+private string Name;
+private List<MeshPrimitive> _Primitives;
+private List<float> _MorphWeights;
+
+private List<Schema2.Node> _TargetNodes; // created mesh will be assigned to these
+}
+
+
+class VertexEncoding
+{
+Encoding;
+bool normalized;
+}
+
+class MeshCollection
+{
+private Dicionaty<string,VertexEncoding> _VertexEncoding();
+
+private readonly List<Mesh> _Meshes;
+
+
+public IEnumerable<Schema2.Mesh> Commit(Schema2.ModelRoot root);
 }
 
 
