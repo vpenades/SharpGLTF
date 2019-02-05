@@ -31,8 +31,7 @@ namespace glTF2Sharp.Schema2
             var mesh = root.CreateMesh();
 
             var primitive = mesh.CreatePrimitive();
-            primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;
-            // primitive.Material = root.AddLogicalMaterial(typeof(MaterialPBRMetallicRoughness));
+            primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;            
 
             var positions = root.CreateVector3Buffer
                 (
