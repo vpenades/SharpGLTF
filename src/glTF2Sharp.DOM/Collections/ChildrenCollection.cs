@@ -7,7 +7,7 @@ using System.Text;
 namespace glTF2Sharp.Collections
 {
     [System.Diagnostics.DebuggerDisplay("{Count}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(_CollectionDebugView<>))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CollectionDebugView<>))]
     [Serializable]
     sealed class ChildrenCollection<T,TParent> : IList<T> , IReadOnlyList<T>
         where T: class, IChildOf<TParent>
@@ -173,29 +173,5 @@ namespace glTF2Sharp.Collections
         }
 
         #endregion        
-    }
-
-    
-    internal sealed class _CollectionDebugView<T>
-    {
-        // https://referencesource.microsoft.com/#mscorlib/system/collections/generic/debugview.cs,29
-
-        public _CollectionDebugView(ICollection<T> collection)
-        {
-            _Collection = collection ?? throw new ArgumentNullException(nameof(collection));
-        }
-
-        private readonly ICollection<T> _Collection;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
-        public T[] Items
-        {
-            get
-            {
-                T[] items = new T[_Collection.Count];
-                _Collection.CopyTo(items, 0);
-                return items;
-            }
-        }
-    }
+    }    
 }

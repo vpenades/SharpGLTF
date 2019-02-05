@@ -631,37 +631,6 @@ namespace glTF2Sharp.Schema2
 	
 	}
 
-	partial class Image : LogicalChildOfRoot
-	{
-	
-		private String _uri;
-		
-		private String _mimeType;
-		
-		private Int32? _bufferView;
-		
-	
-		protected override void SerializeProperties(JsonWriter writer)
-		{
-			base.SerializeProperties(writer);
-			SerializeProperty(writer,"uri",_uri);
-			SerializeProperty(writer,"mimeType",_mimeType);
-			SerializeProperty(writer,"bufferView",_bufferView);
-		}
-	
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
-			switch(property)
-			{
-				case "uri": _uri = DeserializeValue<String>(reader); break;
-				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;
-				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader,property); break;
-			}
-		}
-	
-	}
-
 	partial class TextureInfo : glTFProperty
 	{
 	
@@ -1186,6 +1155,37 @@ namespace glTF2Sharp.Schema2
 				case "scenes": DeserializeList<Scene>(reader,_scenes); break;
 				case "skins": DeserializeList<Skin>(reader,_skins); break;
 				case "textures": DeserializeList<Texture>(reader,_textures); break;
+				default: base.DeserializeProperty(reader,property); break;
+			}
+		}
+	
+	}
+
+	partial class Image : LogicalChildOfRoot
+	{
+	
+		private String _uri;
+		
+		private String _mimeType;
+		
+		private Int32? _bufferView;
+		
+	
+		protected override void SerializeProperties(JsonWriter writer)
+		{
+			base.SerializeProperties(writer);
+			SerializeProperty(writer,"uri",_uri);
+			SerializeProperty(writer,"mimeType",_mimeType);
+			SerializeProperty(writer,"bufferView",_bufferView);
+		}
+	
+		protected override void DeserializeProperty(JsonReader reader, string property)
+		{
+			switch(property)
+			{
+				case "uri": _uri = DeserializeValue<String>(reader); break;
+				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;
+				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
 				default: base.DeserializeProperty(reader,property); break;
 			}
 		}

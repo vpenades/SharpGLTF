@@ -4,7 +4,7 @@ using System.Text;
 
 using NUnit.Framework;
 
-namespace glTF2Sharp
+namespace glTF2Sharp.Schema2
 {
     [TestFixture]
     public class LoadModelTests
@@ -55,7 +55,7 @@ namespace glTF2Sharp
 
             try
             {                
-                Schema2.ModelRoot.Load(filePath);
+                ModelRoot.Load(filePath);
                 Assert.Fail("Did not throw!");
             }
             catch(ModelException ex)
@@ -74,6 +74,8 @@ namespace glTF2Sharp
         {
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
+                TestContext.Progress.WriteLine($"Loading {f}...");
+
                 var root = _LoadModel(f);
                 Assert.NotNull(root);
 
@@ -88,6 +90,8 @@ namespace glTF2Sharp
         {
             foreach (var f in TestFiles.GetFilePathsWithSpecularGlossinessPBR())
             {
+                TestContext.Progress.WriteLine($"Loading {f}...");
+
                 var root = _LoadModel(f);
                 Assert.NotNull(root);
             }
@@ -97,11 +101,11 @@ namespace glTF2Sharp
 
         #region model loading
 
-        static Schema2.ModelRoot _LoadModel(string filePath)
+        static ModelRoot _LoadModel(string filePath)
         {
             try
             {
-                return Schema2.ModelRoot.Load(filePath);
+                return ModelRoot.Load(filePath);
             }
             catch(ExtensionException eex)            
             {

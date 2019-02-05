@@ -1,179 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace glTF2Sharp.Schema2
-{
-    using IO;
-    using Collections;
-
-    using ROOT = ModelRoot;    
-
-    public abstract class glTFProperty : JsonSerializable
-    {
-        #region data
-
-        // should be a hashset where the comparer is the Type
-        private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
-
-        private Object _extras;
-
-        #endregion
-
-        #region API        
-
-        public T GetExtension<T>() where T : JsonSerializable { return _extensions.OfType<T>().FirstOrDefault(); }
-
-        public void SetExtension<T>(T value) where T : JsonSerializable
-        {
-            var idx = _extensions.IndexOf(item => item.GetType() == typeof(T));
-
-            if (idx < 0) { _extensions.Add(value);  return; }
-            
-            if (value == null) _extensions.RemoveAt(idx);
-            else _extensions[idx] = value;
-        }
-
-        #endregion
-
-        #region serialization API
-
-        protected override void SerializeProperties(JsonWriter writer)
-        {
-            SerializeProperty(writer, "extensions", _extensions);
-            // SerializeProperty(writer, "extras", _extras);
-        }
-
-        protected override void DeserializeProperty(JsonReader reader, string property)
-        {
-            switch (property)
-            {
-                case "extras": reader.Skip(); break;
-                case "extensions": _DeserializeExtensions(reader, _extensions); break;
-                // case "extras": _extras = DeserializeValue<Object>(reader); break;
-                
-                default: reader.Skip(); break;                
-            }
-        }
-        
-
-        private static void _DeserializeExtensions(JsonReader reader, IList<JsonSerializable> extensions)
-        {
-            while (true)
-            {
-                reader.Read();
-
-                if (reader.TokenType == JsonToken.EndObject) break;
-                if (reader.TokenType == JsonToken.EndArray) break;
-
-                if (reader.TokenType == JsonToken.StartArray)
-                {
-                    while(true)
-                    {
-                        if (reader.TokenType == JsonToken.EndArray) break;
-
-                        _DeserializeExtensions(reader, extensions);
-                    }
-
-                    break;
-                }
-
-                if (reader.TokenType == JsonToken.StartObject) continue;                
-
-                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-                var key = reader.Value as String;
-
-                var val = ExtensionsFactory.Create(key);
-
-                if (val == null) reader.Skip();
-                else
-                {
-                    val.DeserializeObject(reader);
-                    extensions.Add(val);
-                }
-            }
-        }        
-
-        #endregion
-    }
-
-    public abstract partial class LogicalChildOfRoot : IChildOf<ROOT>
-    {
-        public ROOT LogicalParent { get; private set; }
-
-        void IChildOf<ROOT>._SetLogicalParent(ROOT parent) { LogicalParent = parent; }
-
-        public String Name { get => _name; internal set => _name = value; }
-
-        #region validation
-
-        protected bool ShareLogicalParent(params LogicalChildOfRoot[] items)
-        {
-            return items.All(item => Object.ReferenceEquals(this.LogicalParent, item.LogicalParent));
-        }
-
-        public override IEnumerable<Exception> Validate()
-        {
-            foreach (var ex in base.Validate()) yield return ex;
-
-            if (_name == null) yield break;
-
-            // todo, verify the name does not have invalid characters
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("{Version} {MinVersion} {Generator} {Copyright}")]
-    public partial class Asset
-    {
-        #region lifecycle
-
-        internal static Asset CreateDefault(string copyright)
-        {
-            return new Asset()
-            {
-                _generator = "glTF2Sharp",
-                _copyright = copyright,
-                _version = MAXVERSION.ToString()                
-            };
-        }
-
-        #endregion
-
-        #region properties
-
-        private static readonly Version ZEROVERSION = new Version(0, 0);
-
-        private static readonly Version MINVERSION = new Version(2, 0);
-        private static readonly Version MAXVERSION = new Version(2, 0);
-
-        public string Copyright { get => _copyright; set => _copyright = value; }
-        public string Generator { get => _generator; set => _generator = value; }
-
-        public Version Version { get => Version.TryParse(_version, out Version ver) ? ver : ZEROVERSION; }
-        public Version MinVersion { get => Version.TryParse(_minVersion, out Version ver) ? ver : ZEROVERSION; }
-
-        #endregion
-
-        #region API
-
-        public override IEnumerable<Exception> Validate()
-        {
-            foreach (var ex in base.Validate()) yield return ex;
-
-            if (string.IsNullOrWhiteSpace(_version)) yield return new ModelException(this, "version number is missing");            
-
-            var curVer = this.Version;
-            var minVer = this.MinVersion;            
-
-            if (curVer < MINVERSION) yield return new ModelException(this, $"invalid version number {this.Version} expected {MINVERSION}");
-            if (curVer > MAXVERSION) yield return new ModelException(this, $"invalid version number {this.Version} expected {MAXVERSION}");            
-        }
-
-        #endregion
-    }        
+{    
+    using Collections;    
 
     [System.Diagnostics.DebuggerDisplay("Model Root")]
     public partial class ModelRoot
@@ -193,19 +24,19 @@ namespace glTF2Sharp.Schema2
             _extensionsUsed = new List<string>();
             _extensionsRequired = new List<string>();
 
-            _accessors = new ChildrenCollection<Accessor, ROOT>(this);
-            _animations = new ChildrenCollection<Animation, ROOT>(this);
-            _buffers = new ChildrenCollection<Buffer, ROOT>(this);
-            _bufferViews = new ChildrenCollection<BufferView, ROOT>(this);
-            _cameras = new ChildrenCollection<Camera, ROOT>(this);
-            _images = new ChildrenCollection<Image, ROOT>(this);
-            _materials = new ChildrenCollection<Material, ROOT>(this);
-            _meshes = new ChildrenCollection<Mesh, ROOT>(this);
-            _nodes = new ChildrenCollection<Node, ROOT>(this);
-            _samplers = new ChildrenCollection<Sampler, ROOT>(this);
-            _scenes = new ChildrenCollection<Scene, ROOT>(this);
-            _skins = new ChildrenCollection<Skin, ROOT>(this);
-            _textures = new ChildrenCollection<Texture, ROOT>(this);            
+            _accessors = new ChildrenCollection<Accessor, ModelRoot>(this);
+            _animations = new ChildrenCollection<Animation, ModelRoot>(this);
+            _buffers = new ChildrenCollection<Buffer, ModelRoot>(this);
+            _bufferViews = new ChildrenCollection<BufferView, ModelRoot>(this);
+            _cameras = new ChildrenCollection<Camera, ModelRoot>(this);
+            _images = new ChildrenCollection<Image, ModelRoot>(this);
+            _materials = new ChildrenCollection<Material, ModelRoot>(this);
+            _meshes = new ChildrenCollection<Mesh, ModelRoot>(this);
+            _nodes = new ChildrenCollection<Node, ModelRoot>(this);
+            _samplers = new ChildrenCollection<Sampler, ModelRoot>(this);
+            _scenes = new ChildrenCollection<Scene, ModelRoot>(this);
+            _skins = new ChildrenCollection<Skin, ModelRoot>(this);
+            _textures = new ChildrenCollection<Texture, ModelRoot>(this);            
         }
 
         #endregion

@@ -16,10 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Schema2\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\glTF2Sharp.DOM\glTF2Sharp.DOM.csproj" />
   </ItemGroup>
 

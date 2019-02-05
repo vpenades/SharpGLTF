@@ -221,8 +221,8 @@ namespace glTF2Sharp.Schema2
         {
             if (attributes == null) throw new ArgumentNullException(nameof(attributes));
             if (indices == null) throw new ArgumentNullException(nameof(indices));
-            if (!this.ShareLogicalParent(attributes.Values.ToArray())) throw new ArgumentException("Root mismatch",nameof(attributes));
-            if (!this.ShareLogicalParent(indices)) throw new ArgumentException("Root mismatch", nameof(indices));
+            if (!this.SharesLogicalParent(attributes.Values.ToArray())) throw new ArgumentException("Root mismatch",nameof(attributes));
+            if (!this.SharesLogicalParent(indices)) throw new ArgumentException("Root mismatch", nameof(indices));
 
             // we can also check for Accessor ByteOffset match, padding, etc
 
@@ -416,7 +416,6 @@ namespace glTF2Sharp.Schema2
 
         #endregion
     }
-
 
     public partial class ModelRoot
     {

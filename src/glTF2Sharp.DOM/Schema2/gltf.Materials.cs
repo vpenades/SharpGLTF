@@ -36,7 +36,16 @@ namespace glTF2Sharp.Schema2
 
             return m;
         }
-        
+
+        public static Material CreateMaterialUnlit()
+        {
+            var m = new Material();
+
+            m.SetExtension(new MaterialUnlit_KHR());
+
+            return m;
+        }
+
         #endregion
 
         #region properties
@@ -322,6 +331,7 @@ namespace glTF2Sharp.Schema2
 
             if (mtype == typeof(MaterialPBRMetallicRoughness)) mat = Material.CreatePBRMetallicRoughness();
             if (mtype == typeof(MaterialPBRSpecularGlossiness_KHR)) mat = Material.CreateMaterialPBRSpecularGlossiness();
+            if (mtype == typeof(MaterialUnlit_KHR)) mat = Material.CreateMaterialUnlit();
 
             if (mat == null) throw new ArgumentException(nameof(mtype));
 
@@ -329,7 +339,6 @@ namespace glTF2Sharp.Schema2
 
             return mat;
         }
-
     }
 
 

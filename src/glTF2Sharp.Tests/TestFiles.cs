@@ -28,7 +28,9 @@ namespace glTF2Sharp
             if (_RemotesChecked) return;
             _RemotesChecked = true;
 
-            NUnit.Framework.TestContext.Progress.WriteLine("Checking out test files...");
+            NUnit.Framework.TestContext.Progress.WriteLine("...");
+            NUnit.Framework.TestContext.Progress.WriteLine("Checking out test files... It might take a while, please, wait.");
+            NUnit.Framework.TestContext.Progress.WriteLine("...");
 
             GitUtils.Syncronize("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
             GitUtils.Syncronize("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);

@@ -33,7 +33,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
         /// <summary>
         /// directory within the solution where the generated code is emitted
         /// </summary>
-        public static string TargetProjectDirectory => "glTF2Sharp.DOM\\Schema2";
+        public static string TargetProjectDirectory => "glTF2Sharp.DOM\\Schema2\\Generated";
 
         /// <summary>
         /// namespace of the emitted generated code

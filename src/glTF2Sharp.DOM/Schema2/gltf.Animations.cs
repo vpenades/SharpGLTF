@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace glTF2Sharp.Schema2
 {
-    using Collections;
-    using System.Linq;
+    using Collections;    
 
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public partial class Animation
@@ -190,7 +190,6 @@ namespace glTF2Sharp.Schema2
 
         #endregion
     }
-
 
     public partial class ModelRoot
     {

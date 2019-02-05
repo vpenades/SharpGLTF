@@ -67,6 +67,14 @@ namespace glTF2Sharp.IO
             writer.WriteValue(value.Value);
         }
 
+        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Vector2? value, System.Numerics.Vector2? defval = null)
+        {
+            if (!value.HasValue) return;
+            if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+            writer.WritePropertyName(name);
+            _Serialize(writer, value.Value);
+        }
+
         protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Vector3? value, System.Numerics.Vector3? defval = null)
         {
             if (!value.HasValue) return;
@@ -172,10 +180,11 @@ namespace glTF2Sharp.IO
             if (value is Double vfpd) { writer.WriteValue(vfpd); return; }
             if (value is Decimal vfpx) { writer.WriteValue(vfpx); return; }
 
+            if (value is System.Numerics.Vector2 vvv2) { writer.WriteVector2(vvv2); return; }
             if (value is System.Numerics.Vector3 vvv3) { writer.WriteVector3(vvv3); return; }
             if (value is System.Numerics.Vector4 vvv4) { writer.WriteVector4(vvv4); return; }
-            if (value is System.Numerics.Quaternion vqq4) { writer.WriteQuaternion(vqq4); return; }
-            if (value is System.Numerics.Matrix4x4 vm44) { writer.WriteMatrix4x4(vm44); return; }
+            if (value is System.Numerics.Quaternion qqq4) { writer.WriteQuaternion(qqq4); return; }
+            if (value is System.Numerics.Matrix4x4 mm44) { writer.WriteMatrix4x4(mm44); return; }
 
             if (value is JsonSerializable vgltf) { vgltf.Serialize(writer); return; }
 

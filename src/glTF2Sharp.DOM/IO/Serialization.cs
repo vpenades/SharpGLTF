@@ -24,20 +24,14 @@ namespace glTF2Sharp.IO
         public static T GetValueAs<T>(this JsonReader reader) where T : struct
         {
             return (T)reader.GetValueAs(typeof(T));
-        }
+        }        
 
-        public static System.Numerics.Vector3 ReadVector3(this JsonReader reader)
+        public static void WriteVector2(this JsonWriter writer, System.Numerics.Vector2 v)
         {
-            if (reader.TokenType == JsonToken.StartArray) reader.Read();
-            var x = reader.GetValueAs<float>();
-
-            reader.Read();
-            var y = reader.GetValueAs<float>();
-
-            reader.Read();
-            var z = reader.GetValueAs<float>();
-
-            return new System.Numerics.Vector3(x, y, z);
+            writer.WriteStartArray();
+            writer.WriteValue(v.X);
+            writer.WriteValue(v.Y);            
+            writer.WriteEndArray();
         }
 
         public static void WriteVector3(this JsonWriter writer, System.Numerics.Vector3 v)
