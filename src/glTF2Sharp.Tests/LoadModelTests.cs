@@ -7,14 +7,14 @@ using NUnit.Framework;
 namespace glTF2Sharp
 {
     [TestFixture]
-    public class LoadTests
+    public class LoadModelTests
     {
         #region setup
 
         [OneTimeSetUp]
         public void Setup()
         {
-            TestFiles.CheckDataDirectories();
+            TestFiles.CheckoutDataDirectories();
         }
 
         #endregion
@@ -28,24 +28,41 @@ namespace glTF2Sharp
             {
                 var model = _LoadModel(f);
 
-                // Assert.NotNull(model);
+                Assert.NotNull(model);
             }
         }
 
         
-        [TestCase(0)]
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(4)]
-        [TestCase(5)]
+        [TestCase(0)]        
+        [TestCase(6)]
         public void LoadCompatibilityModelTest(int idx)
         {
             var filePath = TestFiles.GetCompatibilityFilePath(idx);
 
             var model = _LoadModel(filePath);
 
-            // Assert.NotNull(model);
+            Assert.NotNull(model);
+        }
+
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
+        [TestCase(4)]
+        [TestCase(5)]
+        public void LoadInvalidModelsTest(int idx)
+        {
+            var filePath = TestFiles.GetCompatibilityFilePath(idx);
+
+            try
+            {                
+                Schema2.ModelRoot.Load(filePath);
+                Assert.Fail("Did not throw!");
+            }
+            catch(ModelException ex)
+            {
+                TestContext.WriteLine($"{filePath} threw {ex.Message}");
+            }
+                       
         }
 
         #endregion
@@ -58,7 +75,7 @@ namespace glTF2Sharp
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
                 var root = _LoadModel(f);
-                // Assert.NotNull(root);
+                Assert.NotNull(root);
 
                 // var fileName = System.IO.Path.GetFileNameWithoutExtension(f);
 
@@ -86,9 +103,9 @@ namespace glTF2Sharp
             {
                 return Schema2.ModelRoot.Load(filePath);
             }
-            catch(Schema2.ModelException mex)            
+            catch(ExtensionException eex)            
             {
-                TestContext.WriteLine($"{filePath} ERROR: {mex.Message}");
+                TestContext.WriteLine($"{filePath} ERROR: {eex.Message}");
 
                 return null;
             }

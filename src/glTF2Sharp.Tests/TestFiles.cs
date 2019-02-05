@@ -23,7 +23,7 @@ namespace glTF2Sharp
             _CustomAssetsDir = System.IO.Path.Combine(workingDir, "CustomAssets");
         }
 
-        public static void CheckDataDirectories()
+        public static void CheckoutDataDirectories()
         {
             if (_RemotesChecked) return;
             _RemotesChecked = true;
@@ -68,15 +68,23 @@ namespace glTF2Sharp
                 files = files.Concat(custom);
             }            
 
-            return files.OrderBy(item => item).ToArray();
+            return files
+                .OrderBy(item => item)
+                .Where(item => !item.Contains("\\glTF-Draco\\"))
+                .ToArray();
         }
 
         public static string[] GetGeneratedFilePaths()
         {
             var dir = System.IO.Path.Combine(_GeneratedAssetsDir, "Output");
 
-            var gltf = System.IO.Directory.GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories);
-            var glbb = System.IO.Directory.GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories);
+            var gltf = System.IO.Directory
+                .GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories)
+                .Where(item => !item.Contains("Output\\Compatibility\\Compatibility"));
+
+            var glbb = System.IO.Directory
+                .GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories)
+                .Where(item => !item.Contains("Output\\Compatibility\\Compatibility"));
 
             return gltf.Concat(glbb).OrderBy(item => item).ToArray();
         }

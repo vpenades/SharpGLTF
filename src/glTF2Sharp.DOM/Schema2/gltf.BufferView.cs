@@ -90,7 +90,6 @@ namespace glTF2Sharp.Schema2
 
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
         }
-
         
         public Func<int, int> CreateIndexDecoder(IndexType it, int byteOffset)
         {
@@ -122,7 +121,6 @@ namespace glTF2Sharp.Schema2
 
             return idx => reader[idx];          
         }
-
         
         public Func<int,Vector2> CreateVector2Decoder(ComponentType ct,bool normalized, int offset)
         {

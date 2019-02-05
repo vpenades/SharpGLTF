@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace glTF2Sharp.Schema2
+namespace glTF2Sharp
 {
+    using IO;
+
     public class ModelException : Exception
     {
         #region lifecycle
@@ -52,6 +54,23 @@ namespace glTF2Sharp.Schema2
         public bool HasFix => _ProposedFix != null;
         public String FixDescription => _ProposedFixDescription;
         public void ApplyFix() { _ProposedFix.Invoke(); }
+
+        #endregion
+    }
+
+    public class ExtensionException : ModelException
+    {
+        #region lifecycle
+
+        internal ExtensionException(JsonSerializable target, String message) : base(target, message)
+        {
+
+        }
+
+        internal ExtensionException(JsonSerializable target, String message, Action fix, String fixDesc) : base(target, message, fix, fixDesc)
+        {
+
+        }
 
         #endregion
     }

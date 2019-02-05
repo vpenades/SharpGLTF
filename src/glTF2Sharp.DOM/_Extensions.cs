@@ -7,6 +7,9 @@ namespace glTF2Sharp
 {
     using Schema2;    
 
+    /// <summary>
+    /// Extensions used internally.
+    /// </summary>
     static class _Extensions
     {
         #region private numerics extensions

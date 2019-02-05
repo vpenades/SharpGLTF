@@ -31,7 +31,36 @@ namespace glTF2Sharp.Memory
 
             if (normalized)
             {
-                throw new NotImplementedException();
+                switch(type)
+                {
+                    case Schema2.ComponentType.BYTE:
+                        {
+                            accessor._Setter = accessor._SetNormalizedS8;
+                            accessor._Getter = accessor._GetNormalizedS8;
+                            return accessor;
+                        }
+
+                    case Schema2.ComponentType.UNSIGNED_BYTE:
+                        {
+                            accessor._Setter = accessor._SetNormalizedU8;
+                            accessor._Getter = accessor._GetNormalizedU8;
+                            return accessor;
+                        }
+
+                    case Schema2.ComponentType.SHORT:
+                        {
+                            accessor._Setter = accessor._SetNormalizedS16;
+                            accessor._Getter = accessor._GetNormalizedS16;
+                            return accessor;
+                        }
+
+                    case Schema2.ComponentType.UNSIGNED_SHORT:
+                        {
+                            accessor._Setter = accessor._SetNormalizedU16;
+                            accessor._Getter = accessor._GetNormalizedU16;
+                            return accessor;
+                        }                    
+                }
             }
             else
             {
@@ -91,6 +120,18 @@ namespace glTF2Sharp.Memory
 
         private Single _GetValueU32(int byteOffset, int index) { return _GetValue<UInt32>(byteOffset, index); }
         private void _SetValueU32(int byteOffset, int index, Single value) { _SetValue<UInt32>(byteOffset, index, (UInt32)value); }
+
+        private Single _GetNormalizedU8(int byteOffset, int index) { return _GetValueU8(byteOffset, index) / 255.0f; }
+        private void _SetNormalizedU8(int byteOffset, int index, Single value) { _SetValueU8(byteOffset, index, value * 255.0f); }
+
+        private Single _GetNormalizedS8(int byteOffset, int index) { return Math.Max(_GetValueS8(byteOffset, index) / 127.0f,-1); }
+        private void _SetNormalizedS8(int byteOffset, int index, Single value) { _SetValueS8(byteOffset, index, (Single)Math.Round(value * 127.0f)); }
+
+        private Single _GetNormalizedU16(int byteOffset, int index) { return _GetValueU16(byteOffset, index) / 65535.0f; }
+        private void _SetNormalizedU16(int byteOffset, int index, Single value) { _SetValueU16(byteOffset, index, value * 65535.0f); }
+
+        private Single _GetNormalizedS16(int byteOffset, int index) { return Math.Max(_GetValueS16(byteOffset, index) / 32767.0f, -1); }
+        private void _SetNormalizedS16(int byteOffset, int index, Single value) { _SetValueS16(byteOffset, index, (Single)Math.Round(value * 32767.0f)); }
 
         private T _GetValue<T>(int byteOffset, int index) where T : unmanaged
         {

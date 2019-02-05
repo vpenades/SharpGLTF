@@ -97,11 +97,4 @@ namespace glTF2Sharp.Schema2
 
         #endregion
     }
-    
-    
-
-    
-
-    
-
 }

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace glTF2Sharp.Schema2
 {
+    using IO;
     using Collections;
 
     using ROOT = ModelRoot;    
@@ -278,7 +279,7 @@ namespace glTF2Sharp.Schema2
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                exx.Add(new ModelException(this, $"Incompatible Extension found: {iex}")); // fix: attempt to remove given extension
+                exx.Add(new ExtensionException(this, $"Incompatible Extension found: {iex}")); // fix: attempt to remove given extension
             }
 
             if (exx.Count > 0) return exx;

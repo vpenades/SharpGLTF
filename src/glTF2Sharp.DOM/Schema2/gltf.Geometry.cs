@@ -175,14 +175,17 @@ namespace glTF2Sharp.Schema2
 
             // Number of vertices or indices(1) is not compatible with used drawing mode('TRIANGLES').
 
-            var indexAccessor = IndexAccessor;
+            var idxAccessor = IndexAccessor;
 
-            switch (DrawPrimitiveType)
+            if (idxAccessor != null)
             {
-                case PrimitiveType.TRIANGLES:
-                    if ((indexAccessor.Count % 3) != 0) exx.Add(new ModelException(this, $"Indices count {indexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
-                    break;
+                switch (DrawPrimitiveType)
+                {
+                    case PrimitiveType.TRIANGLES:
+                        if ((idxAccessor.Count % 3) != 0) exx.Add(new ModelException(this, $"Indices count {idxAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
+                        break;
 
+                }
             }
 
             return exx;

@@ -38,7 +38,7 @@ namespace glTF2Sharp.Schema2
             return magic == GLTFHEADER;
         }
 
-        public static IReadOnlyDictionary<uint, Byte[]> ReadBinaryFile(Stream stream)
+        public static IReadOnlyDictionary<UInt32, Byte[]> ReadBinaryFile(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
 
@@ -97,6 +97,14 @@ namespace glTF2Sharp.Schema2
 
         #region write
 
+        /// <summary>
+        /// Tells if a given model can be stored as Binary format.
+        /// </summary>
+        /// <param name="model">the model to test</param>
+        /// <returns>null if it can be stored as binary, or an exception object if it can't</returns>
+        /// <remarks>
+        /// Due to the limitations of Binary Format, not all models can be saved as Binary.
+        /// </remarks>
         public static Exception IsBinaryCompatible(ROOT model)
         {
             try

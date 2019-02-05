@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/vpenades/glTF2Sharp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Authors>Vicente Penades</Authors>
-    <Description>A library for reading and writing glTF 3D models</Description>
+    <Description>A library for reading and writing glTF 3D models in C#</Description>
     <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
     <PackageTags>glTF 3D</PackageTags>
     <Version>1.0.0-alpha0001</Version>

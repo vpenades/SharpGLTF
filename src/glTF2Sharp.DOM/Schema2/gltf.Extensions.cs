@@ -4,6 +4,8 @@ using System.Text;
 
 namespace glTF2Sharp.Schema2
 {
+    using IO;
+
     static class ExtensionsFactory
     {
         static ExtensionsFactory()
