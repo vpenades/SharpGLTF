@@ -564,7 +564,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
             yield return "protected override void DeserializeProperty(JsonReader reader, string property)".Indent(1);
             yield return "{".Indent(1);
-            yield return "switch(property)".Indent(2);
+            yield return "switch (property)".Indent(2);
             yield return "{".Indent(2);
 
             foreach (var l in _DeserializerSwitchBody.Indent(3)) yield return l;

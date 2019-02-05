@@ -4,21 +4,30 @@ using System.Linq;
 
 namespace glTF2Sharp.Schema2
 {
-    using Collections;
+    using Collections;    
 
-    using ROOT = ModelRoot;
-
-    public abstract partial class LogicalChildOfRoot : IChildOf<ROOT>
+    /// <summary>
+    /// All gltf elements stored in ModelRoot must inherit from this class.
+    /// </summary>
+    public abstract partial class LogicalChildOfRoot : IChildOf<ModelRoot>
     {
-        public ROOT LogicalParent { get; private set; }
-
-        void IChildOf<ROOT>._SetLogicalParent(ROOT parent) { LogicalParent = parent; }
+        #region properties
 
         public String Name
         {
             get => _name;
             internal set => _name = value;
         }
+
+        #endregion
+
+        #region IChildOf<ROOT>
+
+        public ModelRoot LogicalParent { get; private set; }
+
+        void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }
+
+        #endregion        
 
         #region validation
 

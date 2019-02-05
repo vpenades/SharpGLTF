@@ -11,13 +11,13 @@ namespace glTF2Sharp.Schema2
 
     public delegate Byte[] AssetReader(String assetName);
 
-    public delegate void AssetWriter(String assetName, Byte[] assetData);    
+    public delegate void AssetWriter(String assetName, Byte[] assetData);
 
     public class ReadSettings
     {
         public ReadSettings()
         {
-            
+
         }
 
         internal ReadSettings(string filePath)
@@ -26,10 +26,10 @@ namespace glTF2Sharp.Schema2
 
             var dir = Path.GetDirectoryName(filePath);
 
-            FileReader = asset => File.ReadAllBytes(Path.Combine(dir, asset));            
+            FileReader = asset => File.ReadAllBytes(Path.Combine(dir, asset));
         }
 
-        public AssetReader FileReader { get; set; }        
+        public AssetReader FileReader { get; set; }
     }
 
     public class WriteSettings
@@ -38,7 +38,7 @@ namespace glTF2Sharp.Schema2
 
         internal WriteSettings(string filePath)
         {
-            Guard.FilePathMustBeValid(filePath,nameof(filePath));
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
             var dir = Path.GetDirectoryName(filePath);
 

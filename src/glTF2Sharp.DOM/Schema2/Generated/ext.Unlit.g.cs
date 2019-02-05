@@ -25,7 +25,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				default: base.DeserializeProperty(reader,property); break;
 			}

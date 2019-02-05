@@ -9,9 +9,9 @@ namespace glTF2Sharp.Collections
     [System.Diagnostics.DebuggerDisplay("{Count}")]
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CollectionDebugView<>))]
     [Serializable]
-    sealed class ChildrenCollection<T,TParent> : IList<T> , IReadOnlyList<T>
-        where T: class, IChildOf<TParent>
-        where TParent:class
+    sealed class ChildrenCollection<T, TParent> : IList<T>, IReadOnlyList<T>
+        where T : class, IChildOf<TParent>
+        where TParent : class
     {
         #region lifecycle
 
@@ -38,15 +38,16 @@ namespace glTF2Sharp.Collections
         public T this[int index]
         {
             get
-            {                
+            {
                 if (_Collection == null) throw new ArgumentOutOfRangeException(nameof(index));
                 return _Collection[index];
             }
+
             set
             {
                 // new value must be an orphan
                 Guard.NotNull(value, nameof(value));
-                Guard.MustBeNull(value.LogicalParent, nameof(value.LogicalParent));                
+                Guard.MustBeNull(value.LogicalParent, nameof(value.LogicalParent));
 
                 if (_Collection == null) throw new ArgumentOutOfRangeException(nameof(index));
 
@@ -56,11 +57,9 @@ namespace glTF2Sharp.Collections
                 if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(null); }
                 _Collection[index] = null;
 
-
                 // adopt the new child
                 _Collection[index] = value;
                 if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(_Parent); }
-
             }
         }
 
@@ -82,14 +81,14 @@ namespace glTF2Sharp.Collections
 
             item._SetLogicalParent(_Parent);
 
-            _Collection.Add(item);            
+            _Collection.Add(item);
         }
 
         public void Clear()
         {
             if (_Collection == null) return;
 
-            foreach(var item in _Collection)
+            foreach (var item in _Collection)
             {
                 item._SetLogicalParent(null);
             }
@@ -106,7 +105,7 @@ namespace glTF2Sharp.Collections
         {
             if (_Collection == null) return;
             _Collection.CopyTo(array, arrayIndex);
-        }        
+        }
 
         public int IndexOf(T item)
         {
@@ -132,7 +131,7 @@ namespace glTF2Sharp.Collections
 
             RemoveAt(idx);
 
-            return true;            
+            return true;
         }
 
         public void RemoveAt(int index)
@@ -158,8 +157,8 @@ namespace glTF2Sharp.Collections
         }
 
         public int Use(T item)
-        {            
-            Guard.NotNull(item, nameof(item));            
+        {
+            Guard.NotNull(item, nameof(item));
             // in this case we delay the LogicalParent==null check to the "Add" method below
 
             var idx = this.IndexOf(item);
@@ -172,6 +171,6 @@ namespace glTF2Sharp.Collections
             return idx;
         }
 
-        #endregion        
-    }    
+        #endregion
+    }
 }

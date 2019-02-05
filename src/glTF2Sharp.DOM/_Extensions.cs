@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace glTF2Sharp
 {
-    using Schema2;    
+    using Schema2;
 
     /// <summary>
     /// Extensions used internally.
@@ -158,7 +158,6 @@ namespace glTF2Sharp
             return new ArraySegment<T>(array.Array, array.Offset + offset, count);
         }
 
-
         internal static void CopyTo<T>(this T[] src, int srcOffset, IList<T> dst, int dstOffset, int count)
         {
             var srcArray = new ArraySegment<T>(src);
@@ -188,7 +187,7 @@ namespace glTF2Sharp
         internal static T? AsNullable<T>(this T value, T defval) where T : struct
         {
             return value.Equals(defval) ? (T?)null : value;
-        }        
+        }
 
         internal static T? AsNullable<T>(this T value, T defval, T minval, T maxval) where T : struct, IEquatable<T>, IComparable<T>
         {

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace glTF2Sharp.Schema2
 {
-    using Collections;    
+    using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Mesh[{LogicalIndex}] {Name}")]
     public partial class Mesh

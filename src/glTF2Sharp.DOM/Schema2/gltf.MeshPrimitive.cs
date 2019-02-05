@@ -52,7 +52,7 @@ namespace glTF2Sharp.Schema2
 
         public BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
 
-        public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
+        public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
 
         public Accessor IndexAccessor
         {
@@ -60,8 +60,9 @@ namespace glTF2Sharp.Schema2
             {
                 if (!this._indices.HasValue) return null;
 
-                return this.LogicalParent.LogicalParent._LogicalAccessors[this._indices.Value];
+                return this.LogicalParent.LogicalParent.LogicalAccessors[this._indices.Value];
             }
+
             set
             {
                 if (value == null) this._indices = null;
@@ -83,7 +84,7 @@ namespace glTF2Sharp.Schema2
 
             if (!_attributes.TryGetValue(attributeKey, out int idx)) return null;
 
-            return this.LogicalParent.LogicalParent._LogicalAccessors[idx];
+            return this.LogicalParent.LogicalParent.LogicalAccessors[idx];
         }
 
         public void SetVertexAccessor(string attributeKey, Accessor accessor)
@@ -103,7 +104,7 @@ namespace glTF2Sharp.Schema2
 
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
-            return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent._LogicalAccessors[alidx]);
+            return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
         }
 
         public void SetMorphTargetAccessors(int idx, IReadOnlyDictionary<String, Accessor> accessors)
@@ -146,11 +147,11 @@ namespace glTF2Sharp.Schema2
             {
                 for (int i = 0; i < MorpthTargets; ++i)
                 {
-                    foreach(var key in attributes)
+                    foreach (var key in attributes)
                     {
                         var morpthAccessors = GetMorphTargetAccessors(i);
                         if (morpthAccessors.TryGetValue(key, out Accessor accessor)) accessors.Add(accessor);
-                    }                    
+                    }
                 }
             }
 
@@ -177,7 +178,7 @@ namespace glTF2Sharp.Schema2
         {
             if (!attributes.TryGetValue(attribute, out int idx)) return null;
 
-            return this.LogicalParent.LogicalParent._LogicalAccessors[idx];
+            return this.LogicalParent.LogicalParent.LogicalAccessors[idx];
         }
 
         private String _DebuggerDisplay_TryIdentifyContent()
@@ -193,18 +194,13 @@ namespace glTF2Sharp.Schema2
         {
             var exx = base.Validate().ToList();
 
-            // Number of vertices or indices(1) is not compatible with used drawing mode('TRIANGLES').
-
-            var idxAccessor = IndexAccessor;
-
-            if (idxAccessor != null)
+            if (IndexAccessor != null)
             {
                 switch (DrawPrimitiveType)
                 {
                     case PrimitiveType.TRIANGLES:
-                        if ((idxAccessor.Count % 3) != 0) exx.Add(new ModelException(this, $"Indices count {idxAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
+                        if ((IndexAccessor.Count % 3) != 0) exx.Add(new ModelException(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
                         break;
-
                 }
             }
 
@@ -212,5 +208,5 @@ namespace glTF2Sharp.Schema2
         }
 
         #endregion
-    }    
+    }
 }

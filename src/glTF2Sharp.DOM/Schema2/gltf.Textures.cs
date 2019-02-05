@@ -89,7 +89,6 @@ namespace glTF2Sharp.Schema2
             _minFilter = min;
             _wrapS = ws;
             _wrapT = wt;
-
         }
 
         #endregion
@@ -292,7 +291,7 @@ namespace glTF2Sharp.Schema2
 
             return img;
         }
-        
+
         public Sampler UseLogicalSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             foreach (var s in this._samplers)
@@ -311,7 +310,7 @@ namespace glTF2Sharp.Schema2
         {
             if (image == null) return null;
 
-            if (image != null) Guard.MustShareLogicalParent(this, image,nameof(image));
+            if (image != null) Guard.MustShareLogicalParent(this, image, nameof(image));
             if (sampler != null) Guard.MustShareLogicalParent(this, sampler, nameof(sampler));
 
             var tex = _textures.FirstOrDefault(item => item.Source == image && item.Sampler == sampler);
@@ -326,7 +325,7 @@ namespace glTF2Sharp.Schema2
             return tex;
         }
 
-        internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet) where T:TextureInfo, new()
+        internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet) where T : TextureInfo, new()
         {
             var tex = UseLogicalTexture(image, sampler);
             if (tex == null) return null;
@@ -338,5 +337,4 @@ namespace glTF2Sharp.Schema2
             };
         }
     }
-
 }

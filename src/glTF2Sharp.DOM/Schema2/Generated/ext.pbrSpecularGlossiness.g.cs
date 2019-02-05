@@ -45,7 +45,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "diffuseFactor": _diffuseFactor = DeserializeValue<Vector4?>(reader); break;
 				case "diffuseTexture": _diffuseTexture = DeserializeValue<TextureInfo>(reader); break;

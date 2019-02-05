@@ -32,15 +32,17 @@ namespace glTF2Sharp.Collections
 
         public T Value
         {
-            get => _Child;
+            get => this._Child;
             set
             {
-                if (Value == this._Child) return;
+                if (this.Value == this._Child)
+                {
+                    return;
+                }
 
                 // orphan the current child
                 if (this._Child != null) { this._Child._SetLogicalParent(null); }
                 this._Child = null;
-
 
                 // adopt the new child
                 this._Child = value;

@@ -110,7 +110,7 @@ namespace glTF2Sharp.Schema2
             try
             {
                 Guard.NotNull(model, nameof(model));
-                Guard.IsTrue(model._LogicalBuffers.Count <= 1, nameof(model), $"{nameof(model)} GLB only supports one binary buffer, {model._LogicalBuffers.Count} found.");
+                Guard.IsTrue(model.LogicalBuffers.Count <= 1, nameof(model), $"{nameof(model)} GLB only supports one binary buffer, {model.LogicalBuffers.Count} found.");
             }
             catch (Exception ex)
             {
@@ -136,7 +136,7 @@ namespace glTF2Sharp.Schema2
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 
-            var buffer = model._LogicalBuffers.Count > 0 ? model._LogicalBuffers[0]._Data : null;
+            var buffer = model.LogicalBuffers.Count > 0 ? model.LogicalBuffers[0]._Data : null;
             if (buffer != null && buffer.Length == 0) buffer = null;
 
             var binPadding = buffer == null ? 0 : buffer.Length & 3; if (binPadding != 0) binPadding = 4 - binPadding;

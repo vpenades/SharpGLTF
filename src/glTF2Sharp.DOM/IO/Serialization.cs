@@ -24,13 +24,13 @@ namespace glTF2Sharp.IO
         public static T GetValueAs<T>(this JsonReader reader) where T : struct
         {
             return (T)reader.GetValueAs(typeof(T));
-        }        
+        }
 
         public static void WriteVector2(this JsonWriter writer, System.Numerics.Vector2 v)
         {
             writer.WriteStartArray();
             writer.WriteValue(v.X);
-            writer.WriteValue(v.Y);            
+            writer.WriteValue(v.Y);
             writer.WriteEndArray();
         }
 

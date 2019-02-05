@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace glTF2Sharp.Schema2
-{    
-    using Collections;    
+{
+    using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Model Root")]
     public partial class ModelRoot
@@ -14,7 +14,7 @@ namespace glTF2Sharp.Schema2
         public static ModelRoot CreateNew()
         {
             var root = new ModelRoot();
-            root._asset = Asset.CreateDefault("");
+            root._asset = Asset.CreateDefault(string.Empty);
 
             return root;
         }
@@ -41,57 +41,35 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region internal API        
-
-        internal Mesh _AddLogicalMesh()
-        {
-            var mesh = new Mesh();
-
-            _meshes.Add(mesh);
-
-            return mesh;
-        }
-
-        internal Skin _AddLogicalSkin()
-        {
-            var skin = new Skin();
-
-            _skins.Add(skin);
-
-            return skin;
-        }        
-
-        #endregion
-
         #region properties
 
         public Asset Asset => _asset;
 
-        public IEnumerable<String> ExtensionsRequired           => this._extensionsRequired;
+        public IEnumerable<String> ExtensionsRequired           => _extensionsRequired;
 
-        public IEnumerable<String> IncompatibleExtensions       => this._extensionsRequired.Except(ExtensionsFactory.SupportedExtensions);
+        public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions);
         
         internal IReadOnlyList<Material>    _LogicalMaterials   => _materials;
         internal IReadOnlyList<Texture>     _LogicalTextures    => _textures;
         internal IReadOnlyList<Sampler>     _LogicalSamplers    => _samplers;
         internal IReadOnlyList<Image>       _LogicalImages      => _images;
 
-        public IReadOnlyList<Mesh>          LogicalMeshes      => _meshes;
-        internal IReadOnlyList<Skin>        _LogicalSkins       => _skins;
-        internal IReadOnlyList<Camera>      _LogicalCameras     => _cameras;
+        public IReadOnlyList<Mesh>          LogicalMeshes       => _meshes;
+        public IReadOnlyList<Skin>          LogicalSkins        => _skins;
+        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;
 
-        internal IReadOnlyList<Buffer>      _LogicalBuffers     => _buffers;
-        public IReadOnlyList<BufferView>    LogicalBufferViews => _bufferViews;
-        internal IReadOnlyList<Accessor>    _LogicalAccessors => _accessors;
+        public IReadOnlyList<Buffer>        LogicalBuffers      => _buffers;
+        public IReadOnlyList<BufferView>    LogicalBufferViews  => _bufferViews;
+        public IReadOnlyList<Accessor>      LogicalAccessors    => _accessors;
 
-        internal IReadOnlyList<Node>        _LogicalNodes       => _nodes;
+        public IReadOnlyList<Node>          LogicalNodes        => _nodes;
 
-        public IReadOnlyList<Scene>       LogicalScenes   => _scenes;
-        public IReadOnlyList<Animation>   Animations      => _animations;
+        public IReadOnlyList<Scene>         LogicalScenes       => _scenes;
+        public IReadOnlyList<Animation>     Animations          => _animations;
 
-        public Scene DefaultScene =>        _scenes.Count == 0 ? null : _scenes[_scene ?? 0];
+        public Scene                        DefaultScene        => _scenes.Count == 0 ? null : _scenes[_scene ?? 0];
 
-        #endregion                
+        #endregion
 
         #region validation
 
@@ -101,12 +79,12 @@ namespace glTF2Sharp.Schema2
 
             // 1st check version number
 
-            if (Asset == null) exx.Add(new ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset                
+            if (Asset == null) exx.Add(new ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
             else exx.AddRange(Asset.Validate());
 
             if (exx.Count > 0) return exx;
 
-            // 2nd check incompatible extensions            
+            // 2nd check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
             {
@@ -129,6 +107,6 @@ namespace glTF2Sharp.Schema2
             return exx;
         }
 
-        #endregion        
+        #endregion
     }
 }

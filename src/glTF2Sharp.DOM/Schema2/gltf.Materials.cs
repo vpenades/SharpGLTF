@@ -50,7 +50,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalMaterials.IndexOfReference(this);                     
+        public int LogicalIndex => this.LogicalParent._LogicalMaterials.IndexOfReference(this);
 
         public AlphaMode Alpha
         {
@@ -118,7 +118,6 @@ namespace glTF2Sharp.Schema2
                     () => { var rgb = _emissiveFactor.AsValue(_emissiveFactorDefault); return new Vector4(rgb, 1); },
                     value => _emissiveFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_emissiveFactorDefault)
                     );
-
             }
         }
 
@@ -246,7 +245,7 @@ namespace glTF2Sharp.Schema2
                 "Metallic",
                 _GetMetallicTexture,
                 () => new Vector4( (float) (_metallicFactor ?? _metallicFactorDefault)),
-                value => _metallicFactor = ((double)value.X).AsNullable(_metallicFactorDefault,_metallicFactorMaximum,_metallicFactorMaximum)
+                value => _metallicFactor = ((double)value.X).AsNullable(_metallicFactorDefault, _metallicFactorMaximum, _metallicFactorMaximum)
                 );
 
             yield return new MaterialChannelView
@@ -255,7 +254,7 @@ namespace glTF2Sharp.Schema2
                 "Roughness",
                 null,
                 () => new Vector4((float)(_roughnessFactor ?? _roughnessFactorDefault)),
-                value => _roughnessFactor = ((double)value.X).AsNullable(_roughnessFactorDefault,_roughnessFactorMinimum,_roughnessFactorMaximum)
+                value => _roughnessFactor = ((double)value.X).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum)
                 );
         }
     }
@@ -291,7 +290,7 @@ namespace glTF2Sharp.Schema2
                 "Glossiness",
                 _GetGlossinessTexture,
                 () => new Vector4((float)(_glossinessFactor ?? _glossinessFactorDefault)),
-                value => _glossinessFactor = ((double)value.X).AsNullable(_glossinessFactorDefault,_glossinessFactorMinimum,_glossinessFactorMaximum)
+                value => _glossinessFactor = ((double)value.X).AsNullable(_glossinessFactorDefault, _glossinessFactorMinimum, _glossinessFactorMaximum)
                 );
 
             yield return new MaterialChannelView
@@ -340,7 +339,4 @@ namespace glTF2Sharp.Schema2
             return mat;
         }
     }
-
-
-
 }

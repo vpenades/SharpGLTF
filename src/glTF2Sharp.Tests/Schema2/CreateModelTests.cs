@@ -9,24 +9,23 @@ namespace glTF2Sharp.Schema2
     [TestFixture]
     public class CreateModelTests
     {
-        [Test]
+        [Test(Description = "Creates an empty model")]
         public void CreateEmptyScene()
         {
             var root = ModelRoot.CreateNew();
 
             var scene = root.UseScene("Empty Scene");
 
-            Assert.NotNull(scene);
-            Assert.AreEqual("Empty Scene", scene.Name);
+            Assert.NotNull(scene);            
             Assert.AreEqual("Empty Scene", root.DefaultScene.Name);            
         }
 
-        [Test]
+        [Test(Description ="Creates a model with a triangle mesh")]
         public void CreateTriangleScene()
         {
-            var root = ModelRoot.CreateNew();            
+            // Notice!! Although this is a valid way of creating a gltf mesh, it will be extremely GPU inefficient.
 
-            // create a mesh with a triangle
+            var root = ModelRoot.CreateNew();            
 
             var mesh = root.CreateMesh();
 
@@ -40,16 +39,16 @@ namespace glTF2Sharp.Schema2
                 new System.Numerics.Vector3(10, -10, 0)
                 );
 
-            var indices = root.CreateIndexBuffer(0, 1, 2);
+            var indices = root.CreateIndexBuffer( 0, 1, 2 );
 
             var positionsView = root.CreateBufferView(positions,null,null,null, BufferMode.ARRAY_BUFFER);
             var indicesView =   root.CreateBufferView(indices, null, null, null, BufferMode.ELEMENT_ARRAY_BUFFER);
 
             var positionsAccessor = root.CreateAccessor();
-            positionsAccessor.SetVertexData(positionsView, ComponentType.FLOAT, ElementType.VEC3, false, 0, 3);
+            positionsAccessor.SetVertexData(positionsView, 0, ComponentType.FLOAT, ElementType.VEC3, false, 3);
 
             var indicesAccessor = root.CreateAccessor();
-            indicesAccessor.SetIndexData(indicesView, IndexType.UNSIGNED_INT, 0, 3);
+            indicesAccessor.SetIndexData(indicesView, 0, IndexType.UNSIGNED_INT, 3);
 
             primitive.SetVertexAccessor("POSITION", positionsAccessor);
             primitive.IndexAccessor = indicesAccessor;
@@ -58,9 +57,11 @@ namespace glTF2Sharp.Schema2
 
             var scene = root.UseScene("Empty Scene");
 
-            var triangleNode = scene.AddNode("Triangle");
+            var node = scene.AddNode("Triangle");
 
-            triangleNode.Mesh = mesh;
+            // assign the mesh we previously created
+
+            node.Mesh = mesh;
 
             // save
 

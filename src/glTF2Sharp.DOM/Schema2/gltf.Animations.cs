@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace glTF2Sharp.Schema2
 {
-    using Collections;    
+    using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public partial class Animation
@@ -135,7 +135,7 @@ namespace glTF2Sharp.Schema2
             {
                 var idx = this._target?._NodeId ?? -1;
                 if (idx < 0) return null;
-                return this.LogicalParent.LogicalParent._LogicalNodes[idx];
+                return this.LogicalParent.LogicalParent.LogicalNodes[idx];
             }
         }
 
@@ -184,9 +184,9 @@ namespace glTF2Sharp.Schema2
 
         public AnimationInterpolationMode Mode => _interpolation ?? _interpolationDefault;
 
-        public Accessor Input => this.LogicalParent.LogicalParent._LogicalAccessors[this._input];
+        public Accessor Input => this.LogicalParent.LogicalParent.LogicalAccessors[this._input];
 
-        public Accessor Output => this.LogicalParent.LogicalParent._LogicalAccessors[this._output];
+        public Accessor Output => this.LogicalParent.LogicalParent.LogicalAccessors[this._output];
 
         #endregion
     }

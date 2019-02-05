@@ -6,7 +6,9 @@ using System.Text;
 
 namespace glTF2Sharp.Schema2
 {
-    [System.Diagnostics.DebuggerTypeProxy(typeof(BufferView._DebugView))]
+    using BYTES = ArraySegment<Byte>;
+
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugView))]
     public partial class BufferView
     {
         #region lifecycle
@@ -53,12 +55,12 @@ namespace glTF2Sharp.Schema2
 
         public int ByteStride => this._byteStride ?? 0;
 
-        public ArraySegment<Byte> Data
+        public BYTES Data
         {
             get
             {
-                var buffer = this.LogicalParent._LogicalBuffers[this._buffer];
-                return new ArraySegment<byte>(buffer._Data, this._byteOffset ?? 0, this._byteLength);
+                var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
+                return new BYTES(buffer._Data, this._byteOffset ?? 0, this._byteLength);
             }
         }
 
@@ -69,19 +71,19 @@ namespace glTF2Sharp.Schema2
                 var idx = LogicalIndex;
 
                 return this.LogicalParent
-                    ._LogicalAccessors
+                    .LogicalAccessors
                     .Where(accessor => accessor._LogicalBufferViewIndex == idx);
             }
         }
 
         #endregion
 
-        #region API        
+        #region API
 
         internal void _ConvertToStaticBuffer(_StaticBufferBuilder targetBuffer)
         {
             // retrieve old buffer
-            var srcBuf = this.LogicalParent._LogicalBuffers[this._buffer]._Data;
+            var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer]._Data;
             var data = new Byte[this._byteLength];
             Array.Copy(srcBuf, this._byteOffset ?? 0, data, 0, this._byteLength);
 
@@ -97,16 +99,16 @@ namespace glTF2Sharp.Schema2
 
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
         }
-        
+
         public Func<int, int> CreateIndexDecoder(IndexType it, int byteOffset)
         {
-            Guard.IsTrue(this.ByteStride == 0,null,"bytestride must be zero");            
+            Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
 
             var reader = Memory.IntegerAccessor.Create(this.Data.Slice(byteOffset), it);
 
-            return idx => (int)reader[idx];            
+            return idx => (int)reader[idx];
         }
-        
+
         public Func<int, Object> CreateValueDecoder(ElementType et, ComponentType ct, bool normalized, int offset)
         {
             switch (et)
@@ -119,20 +121,16 @@ namespace glTF2Sharp.Schema2
                 default: throw new NotImplementedException();
             }
         }
-        
-        public Func<int,Single> CreateScalarDecoder(ComponentType ct, int offset)
-        {
-            // var reader = new ScalarIndexer(this.Data, this.ByteStride, offset, ct.ToDevice(false));
 
+        public Func<int, Single> CreateScalarDecoder(ComponentType ct, int offset)
+        {
             var reader = new Memory.ScalarAccessor(this.Data.Slice(offset), this.ByteStride, ct, false);
 
-            return idx => reader[idx];          
+            return idx => reader[idx];
         }
-        
+
         public Func<int,Vector2> CreateVector2Decoder(ComponentType ct,bool normalized, int offset)
         {
-            // var reader = new Vector2Reader(this.Data, this.ByteStride, offset, ct.ToDevice(normalized));
-
             var reader = new Memory.Vector2Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
 
             return idx => reader[idx];
@@ -140,8 +138,6 @@ namespace glTF2Sharp.Schema2
 
         public Func<int, Vector3> CreateVector3Decoder(ComponentType ct, bool normalized, int offset)
         {
-            // var reader = new Vector3Indexer(this.Data, this.ByteStride, offset, ct.ToDevice(normalized));
-
             var reader = new Memory.Vector3Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
 
             return idx => reader[idx];
@@ -149,8 +145,6 @@ namespace glTF2Sharp.Schema2
 
         public Func<int, Vector4> CreateVector4Decoder(ComponentType ct, bool normalized, int offset)
         {
-            // var reader = new Vector4Indexer(this.Data, this.ByteStride, offset, ct.ToDevice(normalized));
-
             var reader = new Memory.Vector4Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
 
             return idx => reader[idx];
@@ -158,8 +152,6 @@ namespace glTF2Sharp.Schema2
 
         public Func<int, Quaternion> CreateQuaternionDecoder(ComponentType ct, bool normalized, int offset)
         {
-            // var reader = new QuaternionIndexer(this.Data, this.ByteStride, offset, ct.ToDevice(normalized));
-
             var reader = new Memory.QuaternionAccessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
 
             return idx => reader[idx];
@@ -167,8 +159,6 @@ namespace glTF2Sharp.Schema2
 
         public Func<int, Matrix4x4> CreateMatrix4x4Decoder(ComponentType ct, bool normalized, int offset)
         {
-            // var reader = new Matrix4x4Indexer(this.Data, this.ByteStride, offset, ct.ToDevice(normalized));
-
             var reader = new Memory.Matrix4x4Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
 
             return idx => reader[idx];
@@ -187,29 +177,6 @@ namespace glTF2Sharp.Schema2
             return accessors
                 .Select(item => item.ByteOffset)
                 .All(o => o < this.ByteStride);
-        }
-
-        #endregion       
-
-        #region debug        
-
-        [System.Diagnostics.DebuggerDisplay("BufferView[{_Value.LogicalIndex}] {_Value.Name} {_Value._target} Bytes:{_Value.Buffer1.Count}")]
-        internal sealed class _DebugView
-        {
-            public _DebugView(BufferView value) { _Value = value; }
-
-            public int LogicalIndex => _Value.LogicalParent.LogicalBufferViews.IndexOfReference(_Value);
-
-            private readonly BufferView _Value;
-
-            public int ByteStride => _Value._byteStride ?? 0;
-
-            public int ByteLength => _Value._byteLength;
-
-            public BufferMode? BufferMode => _Value._target;
-
-            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
-            public Accessor[] Accessors => _Value.Accessors.ToArray();
         }
 
         #endregion

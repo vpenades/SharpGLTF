@@ -196,6 +196,7 @@ namespace glTF2Sharp.IO
                     writer.WritePropertyName(item.Key);
                     _Serialize(writer, item.Value);
                 }
+
                 writer.WriteEndObject();
 
                 return;

@@ -136,7 +136,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "name": _name = DeserializeValue<String>(reader); break;
 				default: base.DeserializeProperty(reader,property); break;
@@ -167,7 +167,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializeValue<Int32>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
@@ -197,7 +197,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializeValue<Int32>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
@@ -228,7 +228,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "count": _count = DeserializeValue<Int32>(reader); break;
 				case "indices": _indices = DeserializeValue<AccessorSparseIndices>(reader); break;
@@ -285,7 +285,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
@@ -319,7 +319,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "node": _node = DeserializeValue<Int32?>(reader); break;
 				case "path": _path = DeserializeValue<PathType>(reader); break;
@@ -346,7 +346,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "sampler": _sampler = DeserializeValue<Int32>(reader); break;
 				case "target": _target = DeserializeValue<AnimationChannelTarget>(reader); break;
@@ -377,7 +377,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "input": _input = DeserializeValue<Int32>(reader); break;
 				case "interpolation": _interpolation = DeserializeValue<AnimationInterpolationMode>(reader); break;
@@ -407,7 +407,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "channels": DeserializeList<AnimationChannel>(reader,_channels); break;
 				case "samplers": DeserializeList<AnimationSampler>(reader,_samplers); break;
@@ -440,7 +440,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "copyright": _copyright = DeserializeValue<String>(reader); break;
 				case "generator": _generator = DeserializeValue<String>(reader); break;
@@ -470,7 +470,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "uri": _uri = DeserializeValue<String>(reader); break;
 				case "byteLength": _byteLength = DeserializeValue<Int32>(reader); break;
@@ -511,7 +511,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "buffer": _buffer = DeserializeValue<Int32>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
@@ -549,7 +549,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "xmag": _xmag = DeserializeValue<Double>(reader); break;
 				case "ymag": _ymag = DeserializeValue<Double>(reader); break;
@@ -588,7 +588,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "aspectRatio": _aspectRatio = DeserializeValue<Double?>(reader); break;
 				case "yfov": _yfov = DeserializeValue<Double>(reader); break;
@@ -620,7 +620,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "orthographic": _orthographic = DeserializeValue<CameraOrthographic>(reader); break;
 				case "perspective": _perspective = DeserializeValue<CameraPerspective>(reader); break;
@@ -650,7 +650,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "index": _index = DeserializeValue<Int32>(reader); break;
 				case "texCoord": _texCoord = DeserializeValue<Int32?>(reader); break;
@@ -693,7 +693,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "baseColorFactor": _baseColorFactor = DeserializeValue<Vector4?>(reader); break;
 				case "baseColorTexture": _baseColorTexture = DeserializeValue<TextureInfo>(reader); break;
@@ -721,7 +721,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "scale": _scale = DeserializeValue<Double?>(reader); break;
 				default: base.DeserializeProperty(reader,property); break;
@@ -747,7 +747,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "strength": _strength = DeserializeValue<Double?>(reader); break;
 				default: base.DeserializeProperty(reader,property); break;
@@ -796,7 +796,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "pbrMetallicRoughness": _pbrMetallicRoughness = DeserializeValue<MaterialPBRMetallicRoughness>(reader); break;
 				case "normalTexture": _normalTexture = DeserializeValue<MaterialNormalTextureInfo>(reader); break;
@@ -840,7 +840,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "attributes": DeserializeDictionary<Int32>(reader,_attributes); break;
 				case "indices": _indices = DeserializeValue<Int32?>(reader); break;
@@ -872,7 +872,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "primitives": DeserializeList<MeshPrimitive>(reader,_primitives); break;
 				case "weights": DeserializeList<Double>(reader,_weights); break;
@@ -922,7 +922,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "camera": _camera = DeserializeValue<Int32?>(reader); break;
 				case "children": DeserializeList<Int32>(reader,_children); break;
@@ -964,7 +964,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "magFilter": _magFilter = DeserializeValue<TextureInterpolationMode>(reader); break;
 				case "minFilter": _minFilter = DeserializeValue<TextureMipMapMode>(reader); break;
@@ -991,7 +991,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "nodes": DeserializeList<Int32>(reader,_nodes); break;
 				default: base.DeserializeProperty(reader,property); break;
@@ -1021,7 +1021,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "inverseBindMatrices": _inverseBindMatrices = DeserializeValue<Int32?>(reader); break;
 				case "skeleton": _skeleton = DeserializeValue<Int32?>(reader); break;
@@ -1049,7 +1049,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "sampler": _sampler = DeserializeValue<Int32?>(reader); break;
 				case "source": _source = DeserializeValue<Int32?>(reader); break;
@@ -1136,7 +1136,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "extensionsUsed": DeserializeList<String>(reader,_extensionsUsed); break;
 				case "extensionsRequired": DeserializeList<String>(reader,_extensionsRequired); break;
@@ -1181,7 +1181,7 @@ namespace glTF2Sharp.Schema2
 	
 		protected override void DeserializeProperty(JsonReader reader, string property)
 		{
-			switch(property)
+			switch (property)
 			{
 				case "uri": _uri = DeserializeValue<String>(reader); break;
 				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;

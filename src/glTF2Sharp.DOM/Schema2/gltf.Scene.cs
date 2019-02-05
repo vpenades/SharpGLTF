@@ -15,7 +15,7 @@ namespace glTF2Sharp.Schema2
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
     public partial class Node : IVisualNodeContainer
-    {        
+    {
         #region lifecycle
 
         public Node()
@@ -28,7 +28,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties - hierarchy
 
-        public int LogicalIndex => this.LogicalParent._LogicalNodes.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
 
         public Node VisualParent => this.LogicalParent._GetVisualParentNode(this);        
 
@@ -115,15 +115,14 @@ namespace glTF2Sharp.Schema2
 
         public Skin Skin
         {
-            get => this._skin.HasValue ? this.LogicalParent._LogicalSkins[this._skin.Value] : null;
+            get => this._skin.HasValue ? this.LogicalParent.LogicalSkins[this._skin.Value] : null;
             set
             {
                 Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
-                var idx = this.LogicalParent._LogicalSkins.IndexOfReference(value);
+                var idx = this.LogicalParent.LogicalSkins.IndexOfReference(value);
                 this._skin = idx < 0 ? (int?)null : idx;
             }
         }
-
 
         public IReadOnlyList<float> MorphWeights => _weights == null ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
 
@@ -152,7 +151,7 @@ namespace glTF2Sharp.Schema2
             // a class declared in the extension... but then, it makes edition horribly complicated.
             // maybe it's better to have a non serializable _LodLevel that is applied when serializing.
 
-            var allChildren = _children.Select(idx => LogicalParent._LogicalNodes[idx]);            
+            var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);            
 
             return allChildren;
         }
@@ -189,7 +188,7 @@ namespace glTF2Sharp.Schema2
             var meshIdx = mesh.LogicalIndex;
 
             return mesh.LogicalParent
-                ._LogicalNodes
+                .LogicalNodes
                 .Where(item => item._mesh.HasValue && item._mesh.Value == meshIdx);
         }
 
@@ -198,7 +197,7 @@ namespace glTF2Sharp.Schema2
             var meshIdx = skin.LogicalIndex;
 
             return skin.LogicalParent
-                ._LogicalNodes
+                .LogicalNodes
                 .Where(item => item._skin.HasValue && item._skin.Value == meshIdx);
         }
 
@@ -209,7 +208,7 @@ namespace glTF2Sharp.Schema2
             // check out of range indices
             foreach (var idx in this._children)
             {
-                if (idx < 0 || idx >= this.LogicalParent._LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
             }
 
             // check duplicated indices
@@ -220,7 +219,7 @@ namespace glTF2Sharp.Schema2
 
             // check circular references
             var p = this;
-            while(true)
+            while (true)
             {
                 p = p.VisualParent;
                 if (p == null) break;
@@ -257,7 +256,7 @@ namespace glTF2Sharp.Schema2
 
         internal IReadOnlyList<int> _VisualChildrenIndices => _nodes;
 
-        public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent._LogicalNodes[idx]);
+        public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent.LogicalNodes[idx]);
 
         public BoundingBox3? WorldBounds3 => BoundingBox3.Create(this);
 
@@ -294,9 +293,9 @@ namespace glTF2Sharp.Schema2
             foreach (var ex in base.Validate()) yield return ex;
 
             // check out of range indices
-            foreach(var idx in this._nodes)
+            foreach (var idx in this._nodes)
             {
-                if (idx < 0 || idx >= this.LogicalParent._LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
             }
 
             // check duplicated indices
@@ -305,8 +304,6 @@ namespace glTF2Sharp.Schema2
 
         // TODO: AddVisualChild must return a "NodeBuilder"
         // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_nodes); }        
-
-        
 
         #endregion
     }
@@ -317,7 +314,7 @@ namespace glTF2Sharp.Schema2
         {
             Guard.MustBeGreaterThanOrEqualTo(index, 0, nameof(index));
 
-            while(index >= _scenes.Count)
+            while (index >= _scenes.Count)
             {
                 _scenes.Add(new Scene());
             }

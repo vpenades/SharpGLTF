@@ -28,13 +28,13 @@ namespace glTF2Sharp.Schema2
         {
             _min = new List<double>();
             _max = new List<double>();
-        }        
+        }
 
         #endregion
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalAccessors.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
 
         internal int _LogicalBufferViewIndex => this._bufferView ?? -1; // todo: clarify behaviour when BufferView is not define.
 
@@ -42,13 +42,13 @@ namespace glTF2Sharp.Schema2
 
         public int Count => this._count;
 
-        public int ByteOffset => _byteOffset ?? 0;        
+        public int ByteOffset => _byteOffset ?? 0;
 
-        public ElementType Element => this._type;        
+        public ElementType Element => this._type;
 
         public ComponentType Component => this._componentType;
 
-        public Boolean Normalized => this._normalized ?? false;        
+        public Boolean Normalized => this._normalized ?? false;
 
         public int ItemByteSize => Component.ByteLength() * Element.Length();
 
@@ -69,7 +69,7 @@ namespace glTF2Sharp.Schema2
 
         #region API
 
-        internal void SetDataBuffer(BufferView buffer, int byteOffset, ComponentType ct, ElementType et, int count)
+        internal void SetData(BufferView buffer, int byteOffset, ComponentType encoding, ElementType dimensions, int count)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -78,16 +78,16 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThan(count, 0, nameof(count));
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = ct;
+            this._componentType = encoding;
             this._normalized = false;
-            this._type = et;
+            this._type = dimensions;
             this._byteOffset = byteOffset;
             this._count = count;
 
             _UpdateBounds(this._type.Length());
         }
 
-        public void SetIndexData(BufferView buffer, IndexType type, int byteOffset, int count)
+        public void SetIndexData(BufferView buffer, int byteOffset, IndexType encoding, int count)
         {
             Guard.NotNull(buffer,nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer,nameof(buffer));
@@ -95,10 +95,9 @@ namespace glTF2Sharp.Schema2
 
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, 0, nameof(byteOffset));
             Guard.MustBeGreaterThan(count, 0, nameof(count));
-            
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = type.ToComponent();
+            this._componentType = encoding.ToComponent();
             this._type = ElementType.SCALAR;
             this._normalized = null;
             this._byteOffset = byteOffset;
@@ -107,7 +106,7 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds(1);
         }
 
-        public void SetVertexData(BufferView buffer, ComponentType ctype, ElementType etype, bool? normalized, int byteOffset, int count)
+        public void SetVertexData(BufferView buffer, int byteOffset, ComponentType encoding, ElementType dimensions, bool normalized, int count)
         {
             Guard.NotNull(buffer,nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -117,14 +116,14 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThan(count, 0, nameof(count));
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = ctype;
-            this._normalized = normalized;
-            this._type = etype;            
+            this._componentType = encoding;
+            this._normalized = normalized.AsNullable(false);
+            this._type = dimensions;
             this._byteOffset = byteOffset;
             this._count = count;
 
             _UpdateBounds(this._type.Length());
-        }        
+        }
 
         public ArraySegment<Byte> GetVertexBytes(int vertexIdx)
         {
@@ -148,7 +147,7 @@ namespace glTF2Sharp.Schema2
         public Byte[] GetColumnBytes()
         {
             var dstStride = Component.ByteLength() * Element.Length();
-            var srcStride = Math.Max(dstStride, Buffer.ByteStride);                
+            var srcStride = Math.Max(dstStride, Buffer.ByteStride);
 
             var srcData = Buffer.Data.GetSegment(this.ByteOffset, srcStride * Count);
             var dstData = new Byte[dstStride * Count];
@@ -172,13 +171,12 @@ namespace glTF2Sharp.Schema2
 
             var decoder = Buffer.CreateIndexDecoder(this.Component.ToIndex(), this.ByteOffset);
 
-            return _TryGetColumn<int>(decoder);            
+            return _TryGetColumn<int>(decoder);
         }
 
-        
-        public T[] TryGetAttribute<T>() where T:struct
+        public T[] TryGetAttribute<T>() where T : struct
         {
-            switch(this._type)
+            switch (this._type)
             {
                 case ElementType.SCALAR:
                     {
@@ -222,8 +220,8 @@ namespace glTF2Sharp.Schema2
             }
         }
 
-        
-        private T[] _TryGetColumn<T>(Func<int, T> decoder) where T:struct
+        private T[] _TryGetColumn<T>(Func<int, T> decoder)
+            where T : struct
         {
             var dstBuff = new T[_count];
 
@@ -231,7 +229,7 @@ namespace glTF2Sharp.Schema2
             {
                 dstBuff[i] = decoder.Invoke(i);
             }
-            
+
             if (this._sparse != null)
             {
                 this._sparse.CopyTo(this, dstBuff);
@@ -258,9 +256,9 @@ namespace glTF2Sharp.Schema2
                 for (int i = 0; i < Count; ++i)
                 {
                     var scalar = decoder.Invoke(i);
-                    
+
                     if (scalar < this._min[0]) this._min[0] = scalar;
-                    if (scalar > this._max[0]) this._max[0] = scalar;                    
+                    if (scalar > this._max[0]) this._max[0] = scalar;
                 }
             }
 
@@ -348,7 +346,7 @@ namespace glTF2Sharp.Schema2
 
             if (_min.Count != _max.Count) { exxx.Add(new ModelException(this, "min and max length mismatch")); return exxx; }
 
-            for(int i=0; i < _min.Count; ++i)
+            for (int i = 0; i < _min.Count; ++i)
             {
                 if (_min[i] > _max[i]) exxx.Add(new ModelException(this, $"min[{i}] is larger than max[{i}]"));
             }
@@ -361,7 +359,6 @@ namespace glTF2Sharp.Schema2
 
     public partial class AccessorSparse
     {
-        
         public void CopyTo(Accessor srcAccessor, Byte[] dstBuffer, int dstStride)
         {
             if (this._count == 0) return;
@@ -373,11 +370,11 @@ namespace glTF2Sharp.Schema2
             {
                 var key = idxDecoder.Invoke(i);
 
-                valCopier(i, dstBuffer, dstStride, key);                
+                valCopier(i, dstBuffer, dstStride, key);
             }
         }
 
-        public void CopyTo<T>(Accessor srcAccessor, T[] dstBuffer) where T:struct
+        public void CopyTo<T>(Accessor srcAccessor, T[] dstBuffer) where T : struct
         {
             if (this._count == 0) return;
 
@@ -395,7 +392,6 @@ namespace glTF2Sharp.Schema2
 
     public partial class AccessorSparseIndices
     {
-        
         public Func<int, int> GetDecoder(ROOT root)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
@@ -409,7 +405,7 @@ namespace glTF2Sharp.Schema2
 
             var indices = new int[count];
 
-            for(int i=0; i < indices.Length; ++i)
+            for (int i = 0; i < indices.Length; ++i)
             {
                 indices[i] = srcDecoder(i);
             }
@@ -420,8 +416,8 @@ namespace glTF2Sharp.Schema2
 
     public partial class AccessorSparseValues
     {
-        
-        public Func<int, T> GetDecoder<T>(ROOT root, ElementType et, ComponentType ct, bool normalized) where T:struct
+        public Func<int, T> GetDecoder<T>(ROOT root, ElementType et, ComponentType ct, bool normalized)
+            where T : struct
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
 
@@ -430,7 +426,7 @@ namespace glTF2Sharp.Schema2
             return idx => (T)decoder(idx);
         }
 
-        public Action<int,IList<Byte>,int, int> CopyTo(ROOT root, ElementType et, ComponentType ct)
+        public Action<int, IList<Byte>, int, int> CopyTo(ROOT root, ElementType et, ComponentType ct)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
 
@@ -438,14 +434,12 @@ namespace glTF2Sharp.Schema2
             var srcStride = Math.Max(srcBuffer.ByteStride, itemLen);
 
             return (srcIdx, dstBuff, dstStride, dstIdx) =>
-            {                
+            {
                 srcBuffer.Data.CopyTo(srcStride * srcIdx, dstBuff, dstStride * dstIdx, itemLen);
             };
-            
         }
     }
 
-    
     public partial class ModelRoot
     {
         public Accessor CreateAccessor()
@@ -456,46 +450,5 @@ namespace glTF2Sharp.Schema2
 
             return accessor;
         }
-
-        internal Accessor _CreateVertexAccessor(BufferView buffer, ComponentType ctype, ElementType etype, bool? normalized, int extraByteOffset, int count)
-        {
-            var accessor = new Accessor();
-
-            _accessors.Add(accessor);
-
-            accessor.SetVertexData(buffer, ctype, etype, normalized, extraByteOffset, count);
-
-            return accessor;
-        }        
-
-        internal Accessor _CreateIndexAccessor(BufferView buffer, IndexType encoding, int extraByteOffset, int count)
-        {
-            var accessor = new Accessor();
-
-            _accessors.Add(accessor);
-
-            accessor.SetIndexData(buffer, encoding, extraByteOffset, count);
-
-            return accessor;
-        }
-
-        /*
-        internal Accessor _CreateDataAccessor(Byte[] data, Runtime.Encoding.DimensionType dtype, int count)
-        {
-            var buffer = new Buffer(data);
-            _buffers.Add(buffer);
-
-            var bufferView = CreateBufferView(buffer, data.Length, null, null, null);
-
-            var accessor = new Accessor();
-
-            _accessors.Add(accessor);
-
-            accessor.SetDataBuffer(bufferView, 0, ComponentType.FLOAT, dtype.ToSchema2(), count);
-
-            return accessor;
-        }*/
     }
-
-   
 }

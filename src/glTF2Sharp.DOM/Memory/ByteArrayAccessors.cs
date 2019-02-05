@@ -31,7 +31,7 @@ namespace glTF2Sharp.Memory
 
             if (normalized)
             {
-                switch(type)
+                switch (type)
                 {
                     case Schema2.ComponentType.BYTE:
                         {
@@ -59,12 +59,12 @@ namespace glTF2Sharp.Memory
                             accessor._Setter = accessor._SetNormalizedU16;
                             accessor._Getter = accessor._GetNormalizedU16;
                             return accessor;
-                        }                    
+                        }
                 }
             }
             else
             {
-                switch(type)
+                switch (type)
                 {
                     case Schema2.ComponentType.BYTE:
                         {
@@ -100,6 +100,9 @@ namespace glTF2Sharp.Memory
                             accessor._Getter = accessor._GetValueU32;
                             return accessor;
                         }
+
+                    case Schema2.ComponentType.FLOAT:
+                        break;
                 }
             }
 
@@ -124,7 +127,7 @@ namespace glTF2Sharp.Memory
         private Single _GetNormalizedU8(int byteOffset, int index) { return _GetValueU8(byteOffset, index) / 255.0f; }
         private void _SetNormalizedU8(int byteOffset, int index, Single value) { _SetValueU8(byteOffset, index, value * 255.0f); }
 
-        private Single _GetNormalizedS8(int byteOffset, int index) { return Math.Max(_GetValueS8(byteOffset, index) / 127.0f,-1); }
+        private Single _GetNormalizedS8(int byteOffset, int index) { return Math.Max(_GetValueS8(byteOffset, index) / 127.0f, -1); }
         private void _SetNormalizedS8(int byteOffset, int index, Single value) { _SetValueS8(byteOffset, index, (Single)Math.Round(value * 127.0f)); }
 
         private Single _GetNormalizedU16(int byteOffset, int index) { return _GetValueU16(byteOffset, index) / 65535.0f; }
@@ -148,6 +151,7 @@ namespace glTF2Sharp.Memory
         #region data
 
         delegate Single _GetterCallback(int byteOffset, int index);
+
         delegate void _SetterCallback(int byteOffset, int index, Single value);
 
         private BYTES _Data;
@@ -183,11 +187,11 @@ namespace glTF2Sharp.Memory
         public static IntegerAccessor Create(Byte[] data, Schema2.IndexType type)
         {
             return Create(new BYTES(data), type);
-        }        
+        }
 
         public static IntegerAccessor Create(BYTES data, Schema2.IndexType type)
         {
-            var accessor = new IntegerAccessor { _Data = data };            
+            var accessor = new IntegerAccessor { _Data = data };
 
             switch (type)
             {
@@ -237,6 +241,7 @@ namespace glTF2Sharp.Memory
         #region data
 
         delegate UInt32 _GetterCallback(int index);
+
         delegate void _SetterCallback(int index, UInt32 value);
 
         private BYTES _Data;
@@ -255,7 +260,6 @@ namespace glTF2Sharp.Memory
 
         #endregion
     }
-   
 
     public interface IWordAccessor
     {
@@ -281,7 +285,7 @@ namespace glTF2Sharp.Memory
             set => _Accesor[index * _ByteStride, 0] = value;
         }
 
-        public System.Numerics.Vector4 GetWord(int index) => new System.Numerics.Vector4(this[index],0,0,0);
+        public System.Numerics.Vector4 GetWord(int index) => new System.Numerics.Vector4(this[index], 0, 0, 0);
 
         public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = word.X;
     }
@@ -304,6 +308,7 @@ namespace glTF2Sharp.Memory
                 index *= _ByteStride;
                 return new System.Numerics.Vector2(_Accesor[index, 0], _Accesor[index, 1]);
             }
+
             set
             {
                 index *= _ByteStride;
@@ -335,6 +340,7 @@ namespace glTF2Sharp.Memory
                 index *= _ByteStride;
                 return new System.Numerics.Vector3(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2]);
             }
+
             set
             {
                 index *= _ByteStride;
@@ -346,7 +352,7 @@ namespace glTF2Sharp.Memory
 
         public System.Numerics.Vector4 GetWord(int index) { var v = this[index]; return new System.Numerics.Vector4(v.X, v.Y, v.Z, 0); }
 
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = new System.Numerics.Vector3(word.X, word.Y,word.Z);
+        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = new System.Numerics.Vector3(word.X, word.Y, word.Z);
     }
 
     public struct Vector4Accessor: IWordAccessor
@@ -367,6 +373,7 @@ namespace glTF2Sharp.Memory
                 index *= _ByteStride;
                 return new System.Numerics.Vector4(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
+
             set
             {
                 index *= _ByteStride;
@@ -400,6 +407,7 @@ namespace glTF2Sharp.Memory
                 index *= _ByteStride;
                 return new System.Numerics.Quaternion(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
+
             set
             {
                 index *= _ByteStride;
@@ -439,6 +447,7 @@ namespace glTF2Sharp.Memory
                     _Accesor[index, 12], _Accesor[index, 13], _Accesor[index, 14], _Accesor[index, 15]
                     );
             }
+
             set
             {
                 index *= _ByteStride;
@@ -461,6 +470,4 @@ namespace glTF2Sharp.Memory
             }
         }
     }
-
-
 }

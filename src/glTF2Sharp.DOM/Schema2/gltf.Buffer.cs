@@ -16,14 +16,14 @@ namespace glTF2Sharp.Schema2
 
         internal Buffer(int byteCount)
         {
-            Guard.MustBeGreaterThan(byteCount, 0, nameof(byteCount));            
+            Guard.MustBeGreaterThan(byteCount, 0, nameof(byteCount));
 
             _Data = new byte[byteCount];
         }
 
         internal Buffer(IReadOnlyList<Byte> data)
         {
-            Guard.NotNullOrEmpty(data,nameof(data));
+            Guard.NotNullOrEmpty(data, nameof(data));
 
             _Data = data.ToArray();
         }
@@ -48,7 +48,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalBuffers.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalBuffers.IndexOfReference(this);
 
         #endregion
 
@@ -69,7 +69,7 @@ namespace glTF2Sharp.Schema2
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
                 ?? externalReferenceSolver?.Invoke(uri);
-        }        
+        }
 
         #endregion
 
@@ -86,7 +86,7 @@ namespace glTF2Sharp.Schema2
         internal void _WriteToInternal()
         {
             this._uri = null;
-            this._byteLength = _Data.Length;            
+            this._byteLength = _Data.Length;
         }
 
         internal void _ClearAfterWrite()
@@ -138,7 +138,7 @@ namespace glTF2Sharp.Schema2
 
             var accessor = new Memory.Vector3Accessor(new ArraySegment<byte>(buffer._Data), 0, ComponentType.FLOAT, false);
 
-            for(int i=0; i < vectors.Length; ++i)
+            for (int i = 0; i < vectors.Length; ++i)
             {
                 accessor[i] = vectors[i];
             }

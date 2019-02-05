@@ -28,7 +28,7 @@ namespace glTF2Sharp
             // 2.- Relies on GetFullPath() for path checking
             // 3.- checks if it is a directory
 
-            Guard.NotNullOrEmpty(filePath,parameterName,message);
+            Guard.NotNullOrEmpty(filePath, parameterName, message);
 
             filePath = System.IO.Path.GetFullPath(filePath);
 
@@ -57,9 +57,9 @@ namespace glTF2Sharp
 
         public static void NotNull(object target, string parameterName, string message = "")
         {
-            if (target != null) return;            
+            if (target != null) return;
             if (string.IsNullOrWhiteSpace(message)) throw new ArgumentNullException(parameterName);
-            throw new ArgumentNullException(parameterName, message);            
+            throw new ArgumentNullException(parameterName, message);
         }
 
         public static void MustBeNull(object target, string parameterName, string message = "")
@@ -78,12 +78,12 @@ namespace glTF2Sharp
             NotNull(target, parameterName, message);
 
             if (target.Any()) return;
-            
+
             if (string.IsNullOrWhiteSpace(message)) message = $"{parameterName} cannot be empty.";
-            throw new ArgumentException(message, parameterName);            
+            throw new ArgumentException(message, parameterName);
         }
 
-        #endregion        
+        #endregion
 
         #region comparison
 
@@ -106,9 +106,8 @@ namespace glTF2Sharp
                     where TValue : IComparable<TValue>
         {
             if (value.CompareTo(max) < 0) return;
-            
+
             throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be less than {max}.");
-            
         }
 
         public static void MustBeLessThanOrEqualTo<TValue>(TValue value, TValue max, string parameterName)
@@ -124,25 +123,24 @@ namespace glTF2Sharp
             where TValue : IComparable<TValue>
         {
             if (value.CompareTo(min) > 0) return;
-            
-            throw new ArgumentOutOfRangeException(parameterName,$"Value {value} must be greater than {min}.");            
+
+            throw new ArgumentOutOfRangeException(parameterName, $"Value {value} must be greater than {min}.");
         }
 
         public static void MustBeGreaterThanOrEqualTo<TValue>(TValue value, TValue min, string parameterName)
             where TValue : IComparable<TValue>
         {
             if (value.CompareTo(min) >= 0) return;
-            
-            throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be greater than or equal to {min}.");            
+
+            throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be greater than or equal to {min}.");
         }
 
         public static void MustBeBetweenOrEqualTo<TValue>(TValue value, TValue minInclusive, TValue maxInclusive, string parameterName)
             where TValue : IComparable<TValue>
         {
             if (value.CompareTo(minInclusive) >= 0 || value.CompareTo(maxInclusive) <= 0) return;
-            
+
             throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be greater than or equal to {minInclusive} and less than or equal to {maxInclusive}.");
-            
         }
 
         #endregion
@@ -152,16 +150,15 @@ namespace glTF2Sharp
         public static void IsTrue(bool target, string parameterName, string message = "")
         {
             if (target) return;
-            
+
             throw new ArgumentException(message, parameterName);
-            
         }
 
-        public static void IsFalse(bool target, string parameterName, string message ="")
+        public static void IsFalse(bool target, string parameterName, string message = "")
         {
             if (!target) return;
-            
-            throw new ArgumentException(message, parameterName);            
+
+            throw new ArgumentException(message, parameterName);
         }
 
         #endregion
@@ -179,7 +176,7 @@ namespace glTF2Sharp
             if (b is null) throw new ArgumentNullException(parameterName);
 
             if (a != b.LogicalParent) throw new ArgumentException("LogicalParent mismatch", parameterName);
-        }        
+        }
 
         #endregion
     }

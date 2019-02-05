@@ -16,7 +16,7 @@ namespace glTF2Sharp
             _Target = target;
         }
 
-        internal ModelException(JsonSerializable target, String message,Action fix, String fixDesc) : base(message)
+        internal ModelException(JsonSerializable target, String message, Action fix, String fixDesc) : base(message)
         {
             _Target = target;
             _ProposedFix = fix;

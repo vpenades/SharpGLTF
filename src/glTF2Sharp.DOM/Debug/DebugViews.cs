@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace glTF2Sharp.Debug
 {
     /// <summary>
     /// class to visualize collection items during debug
-    /// </summary>        
+    /// </summary>
     internal sealed class _CollectionDebugView<T>
     {
         // https://referencesource.microsoft.com/#mscorlib/system/collections/generic/debugview.cs,29
@@ -28,5 +29,24 @@ namespace glTF2Sharp.Debug
                 return items;
             }
         }
+    }
+
+    [System.Diagnostics.DebuggerDisplay("BufferView[{_Value.LogicalIndex}] {_Value.Name} {_Value._target} Bytes:{_Value.Buffer1.Count}")]
+    internal sealed class _BufferDebugView
+    {
+        public _BufferDebugView(Schema2.BufferView value) { _Value = value; }
+
+        public int LogicalIndex => _Value.LogicalParent.LogicalBufferViews.IndexOfReference(_Value);
+
+        private readonly Schema2.BufferView _Value;
+
+        public int ByteStride => _Value.ByteStride;
+
+        public int ByteLength => _Value.Data.Count;
+
+        public Schema2.BufferMode? DeviceBufferTarget => _Value.DeviceBufferTarget;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
     }
 }

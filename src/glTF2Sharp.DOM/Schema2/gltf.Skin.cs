@@ -32,7 +32,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalSkins.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalSkins.IndexOfReference(this);
 
         public IEnumerable<Node> VisualParents => Node.GetNodesUsingSkin(this);
 
@@ -41,7 +41,7 @@ namespace glTF2Sharp.Schema2
         // Skeleton property points to the node that is the root of a joints hierarchy.
         public Node Skeleton
         {
-            get => this._skeleton.HasValue ? this.LogicalParent._LogicalNodes[this._skeleton.Value] : null;
+            get => this._skeleton.HasValue ? this.LogicalParent.LogicalNodes[this._skeleton.Value] : null;
             set
             {
                 if (value != null) Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
@@ -57,7 +57,7 @@ namespace glTF2Sharp.Schema2
         {
             var idx = n.LogicalIndex;
 
-            return n.LogicalParent._LogicalSkins.Where(s => s._ContainsNode(idx));
+            return n.LogicalParent.LogicalSkins.Where(s => s._ContainsNode(idx));
         }
 
         internal bool _ContainsNode(int nodeIdx) { return _joints.Contains(nodeIdx); }
@@ -66,14 +66,14 @@ namespace glTF2Sharp.Schema2
         {
             if (!this._inverseBindMatrices.HasValue) return null;
 
-            return this.LogicalParent._LogicalAccessors[this._inverseBindMatrices.Value];
+            return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
         }
 
         public KeyValuePair<Node, Matrix4x4> GetJoint(int idx)
         {
             var nodeIdx = _joints[idx];
 
-            var node = this.LogicalParent._LogicalNodes[nodeIdx];
+            var node = this.LogicalParent.LogicalNodes[nodeIdx];
 
             var matrix = (Matrix4x4)GetInverseBindMatricesAccessor().TryGetAttribute<Matrix4x4>()[idx];
 
@@ -140,6 +140,4 @@ namespace glTF2Sharp.Schema2
 
         #endregion
     }
-
-
 }

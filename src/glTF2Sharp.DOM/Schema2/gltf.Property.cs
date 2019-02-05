@@ -11,14 +11,13 @@ namespace glTF2Sharp.Schema2
     public abstract class glTFProperty : JsonSerializable
     {
         #region data
-
-        // should be a hashset where the comparer is the Type
+        
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
         private Object _extras;
 
         #endregion
-
+        
         #region API        
 
         public T GetExtension<T>() where T : JsonSerializable { return _extensions.OfType<T>().FirstOrDefault(); }
@@ -54,7 +53,6 @@ namespace glTF2Sharp.Schema2
                 default: reader.Skip(); break;
             }
         }
-
 
         private static void _DeserializeExtensions(JsonReader reader, IList<JsonSerializable> extensions)
         {

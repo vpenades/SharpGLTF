@@ -16,7 +16,7 @@ namespace glTF2Sharp.Collections
     {
         #region lifecycle
 
-        public ReadOnlyLinqDictionary(IReadOnlyDictionary<TKey,TValueIn> dict, Func<TValueIn,TValueOut> valConverter)
+        public ReadOnlyLinqDictionary(IReadOnlyDictionary<TKey, TValueIn> dict, Func<TValueIn, TValueOut> valConverter)
         {
             _Source = dict;
             _ValueConverter = valConverter;
@@ -68,7 +68,7 @@ namespace glTF2Sharp.Collections
             return _Source
                 .Select(item => new KeyValuePair<TKey, TValueOut>(item.Key, cvt(item.Value)))
                 .GetEnumerator();
-        }        
+        }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
@@ -80,7 +80,6 @@ namespace glTF2Sharp.Collections
 
         #endregion
     }
-
 
     struct LinqDictionary<TKey, TValueIn, TValueOut> : IDictionary<TKey, TValueOut>
     {
@@ -99,7 +98,7 @@ namespace glTF2Sharp.Collections
 
         private readonly IDictionary<TKey, TValueIn> _Source;
         private readonly Func<TValueOut, TValueIn> _InConverter;
-        private readonly Func<TValueIn, TValueOut> _OutConverter;        
+        private readonly Func<TValueIn, TValueOut> _OutConverter;
 
         #endregion
 
@@ -122,7 +121,7 @@ namespace glTF2Sharp.Collections
             }
         }
 
-        public int Count => _Source.Count;        
+        public int Count => _Source.Count;
 
         public bool IsReadOnly => throw new NotImplementedException();
 

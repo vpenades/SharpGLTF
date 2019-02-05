@@ -8,13 +8,13 @@ namespace glTF2Sharp
 {
     public struct BoundingBox3
     {
-        #region constructors        
+        #region constructors
 
         public static BoundingBox3? UnionOf(IEnumerable<BoundingBox3?> bounds)
         {
             var final = Empty;
 
-            foreach(var b in bounds.Where(item => item.HasValue))
+            foreach (var b in bounds.Where(item => item.HasValue))
             {
                 final = final.IsEmpty ? b.Value : new BoundingBox3(final, b.Value);
             }
