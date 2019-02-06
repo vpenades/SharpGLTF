@@ -18,6 +18,7 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [ ] Animation utilities.
 - [ ] Material utilities
 - [ ] Skinning utilities
+- [ ] Morphing utilities
 - [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
 
 ### TODO
