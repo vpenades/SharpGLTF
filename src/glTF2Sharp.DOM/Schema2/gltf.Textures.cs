@@ -59,17 +59,17 @@ namespace glTF2Sharp.Schema2
     {
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalTextures.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalTextures.IndexOfReference(this);
 
         public Sampler Sampler
         {
-            get => _sampler.HasValue ? LogicalParent._LogicalSamplers[_sampler.Value] : null;
+            get => _sampler.HasValue ? LogicalParent.LogicalSamplers[_sampler.Value] : null;
             set => _sampler = value == null ? null : (int?)LogicalParent._UseLogicalSampler(value);
         }
 
         public Image Source
         {
-            get => _source.HasValue ? LogicalParent._LogicalImages[_source.Value] : null;
+            get => _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
             set => _source = value == null ? null : (int?)LogicalParent._UseLogicalImage(value);
         }
 
@@ -95,7 +95,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalSamplers.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalSamplers.IndexOfReference(this);
 
         public TextureInterpolationMode MagFilter => _magFilter ?? TextureInterpolationMode.LINEAR;
 
@@ -132,7 +132,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalImages.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalImages.IndexOfReference(this);
 
         public bool IsPng => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("png");
         public bool IsJpeg => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("jpg") | _mimeType.Contains("jpeg");

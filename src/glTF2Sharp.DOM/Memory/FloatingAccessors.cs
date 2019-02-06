@@ -185,6 +185,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Single Scalar values
+    /// </summary>
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Single>))]
     public struct ScalarAccessor : IAccessor<Single>
     {
@@ -231,6 +234,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Vector2 values
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector2>))]
     public struct Vector2Accessor : IAccessor<Vector2>
     {
@@ -287,6 +293,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Vector3 values
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector3>))]
     public struct Vector3Accessor: IAccessor<Vector3>
     {
@@ -344,6 +353,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Vector4 values
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector4>))]
     public struct Vector4Accessor: IAccessor<Vector4>
     {
@@ -402,6 +414,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Quaternion values
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Quaternion>))]
     public struct QuaternionAccessor : IAccessor<Quaternion>
     {
@@ -460,6 +475,9 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
+    /// <summary>
+    /// Wraps an encoded byte array and exposes it as a collection of Matrix4x4 values
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Matrix4x4>))]
     public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
     {

@@ -158,11 +158,16 @@ namespace glTF2Sharp.Schema2
 
         public Node AddNode(string name)
         {
-            return this.LogicalParent._AddLogicalNode(this._children);
+            var node = this.LogicalParent._AddLogicalNode(this._children);
+            node.Name = name;
+            return node;
         }
 
         public void AddNode(Node node)
         {
+            Guard.NotNull(node,nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
             var idx = this.LogicalParent._UseLogicaNode(node);
 
             this._children.Add(idx);
@@ -185,6 +190,8 @@ namespace glTF2Sharp.Schema2
 
         public static IEnumerable<Node> GetNodesUsingMesh(Mesh mesh)
         {
+            if (mesh == null) return Enumerable.Empty<Node>();
+
             var meshIdx = mesh.LogicalIndex;
 
             return mesh.LogicalParent
@@ -194,6 +201,8 @@ namespace glTF2Sharp.Schema2
 
         public static IEnumerable<Node> GetNodesUsingSkin(Skin skin)
         {
+            if (skin == null) return Enumerable.Empty<Node>();
+
             var meshIdx = skin.LogicalIndex;
 
             return skin.LogicalParent

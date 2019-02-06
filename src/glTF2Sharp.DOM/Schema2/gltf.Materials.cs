@@ -50,7 +50,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent._LogicalMaterials.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalMaterials.IndexOfReference(this);
 
         public AlphaMode Alpha
         {
@@ -178,7 +178,7 @@ namespace glTF2Sharp.Schema2
 
         public String Semantic => _Semantic;
 
-        public Texture Texture => _TextureInfoGetter?.Invoke(false) == null ? null : _Material.LogicalParent._LogicalTextures[_TextureInfoGetter(false)._LogicalTextureIndex];
+        public Texture Texture => _TextureInfoGetter?.Invoke(false) == null ? null : _Material.LogicalParent.LogicalTextures[_TextureInfoGetter(false)._LogicalTextureIndex];
 
         public int Set => _TextureInfoGetter?.Invoke(false) == null ? 0 : _TextureInfoGetter(false).TextureSet;
 

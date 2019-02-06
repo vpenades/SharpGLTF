@@ -8,13 +8,23 @@ namespace glTF2Sharp.Schema2
 
     static class ExtensionsFactory
     {
+        #region supported extensions must be registered here
+
         static ExtensionsFactory()
         {
             RegisterExtension("KHR_materials_pbrSpecularGlossiness", () => new MaterialPBRSpecularGlossiness_KHR());
             RegisterExtension("KHR_materials_unlit", () => new MaterialUnlit_KHR());
-        }
+        }        
+
+        #endregion
+
+        #region data
 
         private static readonly Dictionary<string, Func<JsonSerializable>> _Extensions = new Dictionary<string, Func<JsonSerializable>>();
+
+        #endregion
+
+        #region API
 
         public static IEnumerable<string> SupportedExtensions => _Extensions.Keys;
 
@@ -23,11 +33,13 @@ namespace glTF2Sharp.Schema2
             _Extensions[persistentName] = activator;
         }
 
-        public static JsonSerializable Create(string key)
+        internal static JsonSerializable Create(string key)
         {
             if (!_Extensions.TryGetValue(key, out Func<JsonSerializable> activator)) return null;
 
             return activator.Invoke();
         }
+
+        #endregion
     }
 }

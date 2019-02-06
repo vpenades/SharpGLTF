@@ -45,7 +45,7 @@ namespace glTF2Sharp.Schema2
             var indicesView =   root.CreateBufferView(indices, null, null, null, BufferMode.ELEMENT_ARRAY_BUFFER);
 
             var positionsAccessor = root.CreateAccessor();
-            positionsAccessor.SetVertexData(positionsView, 0, ComponentType.FLOAT, ElementType.VEC3, false, 3);
+            positionsAccessor.SetVertexData(positionsView, 0, ElementType.VEC3, ComponentType.FLOAT, false, 3);
 
             var indicesAccessor = root.CreateAccessor();
             indicesAccessor.SetIndexData(indicesView, 0, IndexType.UNSIGNED_INT, 3);

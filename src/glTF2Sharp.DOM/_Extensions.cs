@@ -199,6 +199,21 @@ namespace glTF2Sharp
             return value;
         }
 
+        internal static String AsNullable(this string value)
+        {
+            return string.IsNullOrEmpty(value) ? null : value;
+        }
+
+        internal static String AsEmptyNullable(this string value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? null : value;
+        }
+
+        internal static String AsName(this string name)
+        {
+            return string.IsNullOrWhiteSpace(name) ? null : name;
+        }        
+
         #endregion
 
         #region vertex & index accessors

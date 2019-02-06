@@ -10,8 +10,8 @@ namespace glTF2Sharp.Memory
     using ENCODING = Schema2.IndexType;
 
     /// <summary>
-    /// Helper structure to access any Byte array as an array of Integers/>
-    /// </summary>
+    /// Wraps an encoded byte array and exposes it as a collection of UInt32 indices
+    /// </summary
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<UInt32>))]
     public struct IntegerAccessor : IAccessor<UInt32>
     {

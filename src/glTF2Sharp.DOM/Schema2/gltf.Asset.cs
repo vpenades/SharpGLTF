@@ -15,7 +15,8 @@ namespace glTF2Sharp.Schema2
             {
                 _generator = "glTF2Sharp",
                 _copyright = copyright,
-                _version = MAXVERSION.ToString()
+                _version = MAXVERSION.ToString(),
+                _minVersion = MINVERSION.ToString()
             };
         }
 
@@ -24,15 +25,14 @@ namespace glTF2Sharp.Schema2
         #region properties
 
         private static readonly Version ZEROVERSION = new Version(0, 0);
-
         private static readonly Version MINVERSION = new Version(2, 0);
         private static readonly Version MAXVERSION = new Version(2, 0);
 
-        public string Copyright { get => _copyright; set => _copyright = value; }
-        public string Generator { get => _generator; set => _generator = value; }
+        public string Copyright { get => _copyright; set => _copyright = value.AsEmptyNullable(); }
+        public string Generator { get => _generator; set => _generator = value.AsEmptyNullable(); }
 
-        public Version Version { get => Version.TryParse(_version, out Version ver) ? ver : ZEROVERSION; }
-        public Version MinVersion { get => Version.TryParse(_minVersion, out Version ver) ? ver : ZEROVERSION; }
+        public Version Version      => Version.TryParse(   _version, out Version ver) ? ver : ZEROVERSION;
+        public Version MinVersion   => Version.TryParse(_minVersion, out Version ver) ? ver : ZEROVERSION;
 
         #endregion
 

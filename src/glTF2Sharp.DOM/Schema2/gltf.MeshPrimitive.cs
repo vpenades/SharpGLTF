@@ -33,7 +33,7 @@ namespace glTF2Sharp.Schema2
 
         public Material Material
         {
-            get => this._material.HasValue ? LogicalParent.LogicalParent._LogicalMaterials[this._material.Value] : null;
+            get => this._material.HasValue ? LogicalParent.LogicalParent.LogicalMaterials[this._material.Value] : null;
             set
             {
                 if (value != null) Guard.MustShareLogicalParent(LogicalParent.LogicalParent, value, nameof(value));

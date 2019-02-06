@@ -142,6 +142,9 @@ namespace glTF2Sharp.Memory
     }
 
 
+    /// <summary>
+    /// Wraps a collection of Scalar values and exposes it as a collection of Vector4 values
+    /// </summary>
     struct _MapScalarToVector4 : IAccessor<Vector4>
     {
         public _MapScalarToVector4(ScalarAccessor source)
@@ -168,6 +171,9 @@ namespace glTF2Sharp.Memory
         public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
     }
 
+    /// <summary>
+    /// Wraps a collection of Vector2 values and exposes it as a collection of Vector4 values
+    /// </summary>
     struct _MapVector2ToVector4 : IAccessor<Vector4>
     {
         public _MapVector2ToVector4(Vector2Accessor source)
@@ -194,6 +200,9 @@ namespace glTF2Sharp.Memory
         public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
     }
 
+    /// <summary>
+    /// Wraps a collection of Vector3 values and exposes it as a collection of Vector4 values
+    /// </summary>
     struct _MapVector3ToVector4 : IAccessor<Vector4>
     {
         public _MapVector3ToVector4(Vector3Accessor source)
@@ -220,6 +229,9 @@ namespace glTF2Sharp.Memory
         public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
     }
 
+    /// <summary>
+    /// Wraps a collection of Quaternion values and exposes it as a collection of Vector4 values
+    /// </summary>
     struct _MapQuaternionToVector4 : IAccessor<Vector4>
     {
         public _MapQuaternionToVector4(QuaternionAccessor source)

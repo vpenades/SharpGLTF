@@ -25,4 +25,19 @@ namespace glTF2Sharp.Schema2
 
         #endregion        
     }
+
+    public partial class ModelRoot
+    {
+        public Camera CreateCamera(string name = null)
+        {
+            var camera = new Camera
+            {
+                Name = name
+            };
+
+            _cameras.Add(camera);
+
+            return camera;
+        }
+    }
 }

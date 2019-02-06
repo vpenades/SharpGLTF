@@ -22,7 +22,7 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent.Animations.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalAnimations.IndexOfReference(this);
 
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
 
@@ -193,9 +193,12 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
-        public Animation CreateAnimation()
+        public Animation CreateAnimation(string name = null)
         {
-            var anim = new Animation();
+            var anim = new Animation
+            {
+                Name = name
+            };
 
             _animations.Add(anim);
 

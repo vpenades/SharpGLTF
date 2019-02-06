@@ -47,27 +47,34 @@ namespace glTF2Sharp.Schema2
 
         public IEnumerable<String> ExtensionsRequired           => _extensionsRequired;
 
-        public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions);
-        
-        internal IReadOnlyList<Material>    _LogicalMaterials   => _materials;
-        internal IReadOnlyList<Texture>     _LogicalTextures    => _textures;
-        internal IReadOnlyList<Sampler>     _LogicalSamplers    => _samplers;
-        internal IReadOnlyList<Image>       _LogicalImages      => _images;
+        public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions).ToList();
 
-        public IReadOnlyList<Mesh>          LogicalMeshes       => _meshes;
-        public IReadOnlyList<Skin>          LogicalSkins        => _skins;
-        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;
+        #endregion
+
+        #region Logical resouces
+
+        public IReadOnlyList<Material>      LogicalMaterials    => _materials;
+        public IReadOnlyList<Texture>       LogicalTextures     => _textures;
+        public IReadOnlyList<Sampler>       LogicalSamplers     => _samplers;
+        public IReadOnlyList<Image>         LogicalImages       => _images;
 
         public IReadOnlyList<Buffer>        LogicalBuffers      => _buffers;
         public IReadOnlyList<BufferView>    LogicalBufferViews  => _bufferViews;
         public IReadOnlyList<Accessor>      LogicalAccessors    => _accessors;
 
+        public IReadOnlyList<Mesh>          LogicalMeshes       => _meshes;
+        public IReadOnlyList<Skin>          LogicalSkins        => _skins;
+        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;        
+
         public IReadOnlyList<Node>          LogicalNodes        => _nodes;
-
         public IReadOnlyList<Scene>         LogicalScenes       => _scenes;
-        public IReadOnlyList<Animation>     Animations          => _animations;
+        public IReadOnlyList<Animation>     LogicalAnimations   => _animations;
 
-        public Scene                        DefaultScene        => _scenes.Count == 0 ? null : _scenes[_scene ?? 0];
+        #endregion
+
+        #region Visual Tree
+
+        public Scene DefaultScene => _scenes.Count == 0 ? null : _scenes[_scene ?? 0];
 
         #endregion
 

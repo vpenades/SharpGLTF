@@ -10,7 +10,7 @@ namespace glTF2Sharp.Schema2
 
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
-    [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{Buffer.LogicalIndex}][{ByteOffset}...] => {Dimension}_{Packing}[{_count}]")]
+    [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{Buffer.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
     public partial class Accessor
     {
         #region debug
@@ -67,9 +67,9 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region API
+        #region Data Buffer API
 
-        internal void SetData(BufferView buffer, int byteOffset, ComponentType encoding, ElementType dimensions, int count)
+        internal void SetData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -78,11 +78,12 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThan(count, 0, nameof(count));
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = encoding;
-            this._normalized = false;
-            this._type = dimensions;
             this._byteOffset = byteOffset;
             this._count = count;
+
+            this._type = dimensions;
+            this._componentType = encoding;
+            this._normalized = normalized.AsNullable(false);            
 
             _UpdateBounds();
         }
@@ -108,11 +109,12 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThan(count, 0, nameof(count));
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = encoding.ToComponent();
-            this._type = ElementType.SCALAR;
-            this._normalized = null;
             this._byteOffset = byteOffset;
             this._count = count;
+
+            this._type = ElementType.SCALAR;
+            this._componentType = encoding.ToComponent();            
+            this._normalized = null;            
 
             _UpdateBounds();
         }
@@ -130,7 +132,7 @@ namespace glTF2Sharp.Schema2
 
         #region Vertex Buffer API
 
-        public void SetVertexData(BufferView buffer, int byteOffset, ComponentType encoding, ElementType dimensions, bool normalized, int count)
+        public void SetVertexData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
         {
             Guard.NotNull(buffer,nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -140,11 +142,12 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThan(count, 0, nameof(count));
 
             this._bufferView = buffer.LogicalIndex;
-            this._componentType = encoding;
-            this._normalized = normalized.AsNullable(false);
-            this._type = dimensions;
             this._byteOffset = byteOffset;
             this._count = count;
+
+            this._type = dimensions;
+            this._componentType = encoding;
+            this._normalized = normalized.AsNullable(false);
 
             _UpdateBounds();
         }
@@ -280,9 +283,12 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
-        public Accessor CreateAccessor()
+        public Accessor CreateAccessor(string name = null)
         {
-            var accessor = new Accessor();
+            var accessor = new Accessor
+            {
+                Name = name
+            };
 
             _accessors.Add(accessor);
 

@@ -7,7 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "glTF2Sharp.CodeGen", "glTF2
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "glTF2Sharp.DOM", "glTF2Sharp.DOM\glTF2Sharp.DOM.csproj", "{FEC1B7D4-36F7-45C4-8F33-EB210C3127D4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "glTF2Sharp.Tests", "glTF2Sharp.Tests\glTF2Sharp.Tests.csproj", "{A2F7458A-6646-4BC9-8042-375E25CB2396}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "glTF2Sharp.Tests", "glTF2Sharp.Tests\glTF2Sharp.Tests.csproj", "{A2F7458A-6646-4BC9-8042-375E25CB2396}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
+	ProjectSection(SolutionItems) = preProject
+		..\README.md = ..\README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

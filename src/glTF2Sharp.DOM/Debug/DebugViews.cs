@@ -50,7 +50,7 @@ namespace glTF2Sharp.Debug
         public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
     }
 
-    [System.Diagnostics.DebuggerDisplay(" {_Value._target} Bytes:{_Value.Buffer1.Count}")]
+    [System.Diagnostics.DebuggerDisplay("{_Value.Count}")]
     internal sealed class _MemoryAccessorDebugView<T>
         where T:unmanaged
     {
