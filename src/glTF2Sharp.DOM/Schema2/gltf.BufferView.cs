@@ -49,11 +49,11 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent.LogicalBufferViews.IndexOfReference(this);
+        public int LogicalIndex                 => this.LogicalParent.LogicalBufferViews.IndexOfReference(this);
 
-        public BufferMode? DeviceBufferTarget => this._target;
+        public BufferMode? DeviceBufferTarget   => this._target;
 
-        public int ByteStride => this._byteStride ?? 0;
+        public int ByteStride                   => this._byteStride.AsValue(0);
 
         public BYTES Data
         {
@@ -100,68 +100,55 @@ namespace glTF2Sharp.Schema2
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
         }
 
-        public Func<int, int> CreateIndexDecoder(IndexType it, int byteOffset)
+        public Memory.IntegerAccessor CreateIndexDecoder(int byteOffset, IndexType encoding)
         {
             Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
 
-            var reader = Memory.IntegerAccessor.Create(this.Data.Slice(byteOffset), it);
-
-            return idx => (int)reader[idx];
+            return Memory.IntegerAccessor.Create(this.Data.Slice(byteOffset), encoding);
         }
 
-        public Func<int, Object> CreateValueDecoder(ElementType et, ComponentType ct, bool normalized, int offset)
+        public Memory.IAccessor<Vector4> CreateVertexDecoder(int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized)
         {
-            switch (et)
+            var srcData = this.Data.Slice(byteOffset);
+
+            switch (dimensions)
             {
-                case ElementType.SCALAR: { var d = CreateScalarDecoder(ct, offset); return idx => d(idx); }
-                case ElementType.VEC2: { var d = CreateVector2Decoder(ct, normalized, offset); return idx => d(idx); }
-                case ElementType.VEC3: { var d = CreateVector3Decoder(ct, normalized, offset); return idx => d(idx); }
-                case ElementType.VEC4: { var d = CreateVector4Decoder(ct, normalized, offset); return idx => d(idx); }
-                case ElementType.MAT4: { var d = CreateMatrix4x4Decoder(ct, normalized, offset); return idx => d(idx); }
+                case ElementType.SCALAR: return new Memory.ScalarAccessor(srcData, this.ByteStride, encoding, normalized);
+                case ElementType.VEC2: return new Memory.Vector2Accessor(srcData, this.ByteStride, encoding, normalized);
+                case ElementType.VEC3: return new Memory.Vector3Accessor(srcData, this.ByteStride, encoding, normalized);
+                case ElementType.VEC4: return new Memory.Vector4Accessor(srcData, this.ByteStride, encoding, normalized);
                 default: throw new NotImplementedException();
-            }
+            }            
         }
 
-        public Func<int, Single> CreateScalarDecoder(ComponentType ct, int offset)
+        public Memory.ScalarAccessor CreateScalarDecoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.ScalarAccessor(this.Data.Slice(offset), this.ByteStride, ct, false);
-
-            return idx => reader[idx];
+            return new Memory.ScalarAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);            
         }
 
-        public Func<int,Vector2> CreateVector2Decoder(ComponentType ct,bool normalized, int offset)
+        public Memory.Vector2Accessor CreateVector2Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.Vector2Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
-
-            return idx => reader[idx];
+            return new Memory.Vector2Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Func<int, Vector3> CreateVector3Decoder(ComponentType ct, bool normalized, int offset)
+        public Memory.Vector3Accessor CreateVector3Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.Vector3Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
-
-            return idx => reader[idx];
+            return new Memory.Vector3Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Func<int, Vector4> CreateVector4Decoder(ComponentType ct, bool normalized, int offset)
+        public Memory.Vector4Accessor CreateVector4Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.Vector4Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
-
-            return idx => reader[idx];
+            return new Memory.Vector4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Func<int, Quaternion> CreateQuaternionDecoder(ComponentType ct, bool normalized, int offset)
+        public Memory.QuaternionAccessor CreateQuaternionDecoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.QuaternionAccessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
-
-            return idx => reader[idx];
+            return new Memory.QuaternionAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Func<int, Matrix4x4> CreateMatrix4x4Decoder(ComponentType ct, bool normalized, int offset)
+        public Memory.Matrix4x4Accessor CreateMatrix4x4Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
         {
-            var reader = new Memory.Matrix4x4Accessor(this.Data.Slice(offset), this.ByteStride, ct, normalized);
-
-            return idx => reader[idx];
+            return new Memory.Matrix4x4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
         /// <summary>
@@ -172,7 +159,7 @@ namespace glTF2Sharp.Schema2
         public bool IsInterleaved(IEnumerable<Accessor> accessors)
         {
             Guard.NotNullOrEmpty(Accessors, nameof(accessors));
-            Guard.IsTrue(accessors.All(item => item.Buffer == this), nameof(accessors));
+            Guard.IsTrue(accessors.All(item => item.SourceBufferView == this), nameof(accessors));
 
             return accessors
                 .Select(item => item.ByteOffset)

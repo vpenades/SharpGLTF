@@ -75,7 +75,7 @@ namespace glTF2Sharp.Schema2
 
             var node = this.LogicalParent.LogicalNodes[nodeIdx];
 
-            var matrix = (Matrix4x4)GetInverseBindMatricesAccessor().TryGetAttribute<Matrix4x4>()[idx];
+            var matrix = (Matrix4x4)GetInverseBindMatricesAccessor().CastToMatrix4x4Array()[idx];
 
             return new KeyValuePair<Node, Matrix4x4>(node, matrix);
         }

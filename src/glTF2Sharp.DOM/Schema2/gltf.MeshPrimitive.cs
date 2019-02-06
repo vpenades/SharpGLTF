@@ -169,7 +169,7 @@ namespace glTF2Sharp.Schema2
             Guard.MustShareLogicalParent(this.LogicalParent, vb, nameof(vb));
 
             return VertexAccessors
-                .Where(key => key.Value.Buffer == vb)
+                .Where(key => key.Value.SourceBufferView == vb)
                 .OrderBy(item => item.Value.ByteOffset)
                 .ToArray();
         }

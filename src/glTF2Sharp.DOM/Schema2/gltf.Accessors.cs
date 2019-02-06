@@ -17,7 +17,7 @@ namespace glTF2Sharp.Schema2
 
         internal string _DebuggerDisplay_TryIdentifyContent()
         {
-            return $"{Element}_{Component}[{_count}]";
+            return $"{Dimensions}_{Encoding}[{_count}]";
         }
 
         #endregion
@@ -34,25 +34,25 @@ namespace glTF2Sharp.Schema2
 
         #region properties
 
-        public int LogicalIndex => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
+        public int LogicalIndex                 => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
+        
+        internal int _LogicalBufferViewIndex    => this._bufferView.AsValue(-1);
 
-        internal int _LogicalBufferViewIndex => this._bufferView ?? -1; // todo: clarify behaviour when BufferView is not define.
+        public BufferView SourceBufferView      => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
 
-        public BufferView Buffer => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
+        public int Count                        => this._count;
 
-        public int Count => this._count;
+        public int ByteOffset                   => this._byteOffset.AsValue(0);
 
-        public int ByteOffset => _byteOffset ?? 0;
+        public ElementType Dimensions           => this._type;
 
-        public ElementType Element => this._type;
+        public ComponentType Encoding           => this._componentType;
 
-        public ComponentType Component => this._componentType;
+        public Boolean Normalized               => this._normalized.AsValue(false);
 
-        public Boolean Normalized => this._normalized ?? false;
+        public Boolean IsSparse                 => this._sparse != null;
 
-        public int ItemByteSize => Component.ByteLength() * Element.Length();
-
-        public bool IsSparse => _sparse != null;
+        public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();        
 
         public BoundingBox3? LocalBounds3
         {
@@ -84,8 +84,19 @@ namespace glTF2Sharp.Schema2
             this._byteOffset = byteOffset;
             this._count = count;
 
-            _UpdateBounds(this._type.Length());
+            _UpdateBounds();
         }
+
+        public Memory.Matrix4x4Accessor CastToMatrix4x4Array()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.MAT4, nameof(Dimensions));
+
+            return SourceBufferView.CreateMatrix4x4Decoder(this.ByteOffset, this._componentType, this.Normalized);
+        }
+
+        #endregion
+
+        #region Index Buffer API
 
         public void SetIndexData(BufferView buffer, int byteOffset, IndexType encoding, int count)
         {
@@ -103,8 +114,25 @@ namespace glTF2Sharp.Schema2
             this._byteOffset = byteOffset;
             this._count = count;
 
-            _UpdateBounds(1);
+            _UpdateBounds();
         }
+
+        public Int32[] TryGetIndices()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));            
+
+            var accessor = SourceBufferView.CreateIndexDecoder(this.ByteOffset, this.Encoding.ToIndex());
+
+            var indices = new int[accessor.Count];
+
+            Memory.AccessorsUtils.Copy<Int32>(accessor, indices);
+
+            return indices;
+        }
+
+        #endregion
+
+        #region Vertex Buffer API
 
         public void SetVertexData(BufferView buffer, int byteOffset, ComponentType encoding, ElementType dimensions, bool normalized, int count)
         {
@@ -122,124 +150,24 @@ namespace glTF2Sharp.Schema2
             this._byteOffset = byteOffset;
             this._count = count;
 
-            _UpdateBounds(this._type.Length());
+            _UpdateBounds();
         }
 
-        public ArraySegment<Byte> GetVertexBytes(int vertexIdx)
+        public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)
         {
             if (_sparse != null) throw new InvalidOperationException("Can't be used on Acessors with Sparse Data");
 
-            var byteSize = Component.ByteLength() * Element.Length();
-            var byteStride = Math.Max(byteSize, Buffer.ByteStride);
+            var byteSize = Encoding.ByteLength() * Dimensions.DimCount();
+            var byteStride = Math.Max(byteSize, SourceBufferView.ByteStride);
             var byteOffset = vertexIdx * byteStride;
 
-            return Buffer.Data.GetSegment(this.ByteOffset + vertexIdx * byteStride, byteSize);
+            return SourceBufferView.Data.GetSegment(this.ByteOffset + vertexIdx * byteStride, byteSize);
         }
 
-        public IReadOnlyList<ArraySegment<Byte>> GetVertices()
+        internal void _UpdateBounds()
         {
-            throw new NotImplementedException();
+            var count = this._type.DimCount();
 
-            // if sparse exist, create a dictionary with the indices
-        }
-
-        /*
-        public Byte[] GetColumnBytes()
-        {
-            var dstStride = Component.ByteLength() * Element.Length();
-            var srcStride = Math.Max(dstStride, Buffer.ByteStride);
-
-            var srcData = Buffer.Data.GetSegment(this.ByteOffset, srcStride * Count);
-            var dstData = new Byte[dstStride * Count];
-
-            for(int i=0; i < Count; ++i)
-            {
-                srcData.CopyTo(i * srcStride, dstData, i * dstStride, dstStride);
-            }
-
-            if (this._sparse != null)
-            {
-                this._sparse.CopyTo(this, dstData, dstStride);
-            }
-
-            return dstData;
-        }*/
-
-        public Int32[] TryGetIndices()
-        {
-            if (this._type != ElementType.SCALAR) throw new InvalidOperationException();
-
-            var decoder = Buffer.CreateIndexDecoder(this.Component.ToIndex(), this.ByteOffset);
-
-            return _TryGetColumn<int>(decoder);
-        }
-
-        public T[] TryGetAttribute<T>() where T : struct
-        {
-            switch (this._type)
-            {
-                case ElementType.SCALAR:
-                    {
-                        var decoder = Buffer.CreateScalarDecoder(this._componentType, this.ByteOffset);
-                        return (T[])(Array)_TryGetColumn(decoder);
-                    }
-
-                case ElementType.VEC2:
-                    {
-                        var decoder = Buffer.CreateVector2Decoder(this._componentType, this.Normalized, this.ByteOffset);
-                        return (T[])(Array)_TryGetColumn(decoder);
-                    }
-
-                case ElementType.VEC3:
-                    {
-                        var decoder = Buffer.CreateVector3Decoder(this._componentType, this.Normalized, this.ByteOffset);
-
-                        // this is a special case because although Tangets
-                        // are expected to be Vector4, sometimes are found as Vector3
-                        // Bug found in AnimatedMorphCube
-
-                        if (typeof(T) == typeof(Vector3)) return (T[])(Array)_TryGetColumn(decoder);
-                        if (typeof(T) == typeof(Vector4)) return (T[])(Array)_TryGetColumn(decoder).Select(item => new Vector4(item, 0)).ToArray();
-
-                        throw new NotImplementedException();
-                    }
-
-                case ElementType.VEC4:
-                    {
-                        var decoder = Buffer.CreateVector4Decoder(this._componentType, this.Normalized, this.ByteOffset);
-                        return (T[])(Array)_TryGetColumn(decoder);
-                    }
-
-                case ElementType.MAT4:
-                    {
-                        var decoder = Buffer.CreateMatrix4x4Decoder(this._componentType, this.Normalized, this.ByteOffset);
-                        return (T[])(Array)_TryGetColumn(decoder);
-                    }
-
-                default: throw new NotImplementedException();
-            }
-        }
-
-        private T[] _TryGetColumn<T>(Func<int, T> decoder)
-            where T : struct
-        {
-            var dstBuff = new T[_count];
-
-            for (int i = 0; i < dstBuff.Length; ++i)
-            {
-                dstBuff[i] = decoder.Invoke(i);
-            }
-
-            if (this._sparse != null)
-            {
-                this._sparse.CopyTo(this, dstBuff);
-            }
-
-            return dstBuff;
-        }
-
-        internal void _UpdateBounds(int count)
-        {
             var bounds = new double[count];
             this._min.Clear();
             this._min.AddRange(bounds);
@@ -251,24 +179,21 @@ namespace glTF2Sharp.Schema2
 
             if (count == 1)
             {
-                var decoder = Buffer.CreateScalarDecoder(this.Component, this.ByteOffset);
+                var accessor = SourceBufferView.CreateScalarDecoder(this.ByteOffset, this.Encoding, this.Normalized);
 
-                for (int i = 0; i < Count; ++i)
-                {
-                    var scalar = decoder.Invoke(i);
+                var minmax = Memory.AccessorsUtils.GetBounds(accessor);
 
-                    if (scalar < this._min[0]) this._min[0] = scalar;
-                    if (scalar > this._max[0]) this._max[0] = scalar;
-                }
+                this._min[0] = minmax.Item1;
+                this._max[0] = minmax.Item2;
             }
 
             if (count == 2)
             {
-                var decoder = Buffer.CreateVector2Decoder(this.Component, this.Normalized, this.ByteOffset);
+                var accessor = SourceBufferView.CreateVector2Decoder(this.ByteOffset, this.Encoding, this.Normalized);
 
                 for (int i = 0; i < Count; ++i)
                 {
-                    var v2 = decoder.Invoke(i);
+                    var v2 = accessor[i];
 
                     if (v2.X < this._min[0]) this._min[0] = v2.X;
                     if (v2.X > this._max[0]) this._max[0] = v2.X;
@@ -279,11 +204,11 @@ namespace glTF2Sharp.Schema2
 
             if (count == 3)
             {
-                var decoder = Buffer.CreateVector3Decoder(this.Component, this.Normalized, this.ByteOffset);
+                var accessor = SourceBufferView.CreateVector3Decoder(this.ByteOffset, this.Encoding, this.Normalized);
 
                 for (int i = 0; i < Count; ++i)
                 {
-                    var v3 = decoder.Invoke(i);
+                    var v3 = accessor[i];
 
                     if (v3.X < this._min[0]) this._min[0] = v3.X;
                     if (v3.X > this._max[0]) this._max[0] = v3.X;
@@ -296,11 +221,11 @@ namespace glTF2Sharp.Schema2
 
             if (count == 4)
             {
-                var decoder = Buffer.CreateVector4Decoder(this.Component, this.Normalized, this.ByteOffset);
+                var accessor = SourceBufferView.CreateVector4Decoder(this.ByteOffset, this.Encoding, this.Normalized);
 
                 for (int i = 0; i < Count; ++i)
                 {
-                    var v4 = decoder.Invoke(i);
+                    var v4 = accessor[i];
 
                     if (v4.X < this._min[0]) this._min[0] = v4.X;
                     if (v4.X > this._max[0]) this._max[0] = v4.X;
@@ -330,15 +255,15 @@ namespace glTF2Sharp.Schema2
             if (_count < 0) exxx.Add(new ModelException(this, $"Count is out of range"));
             if (_byteOffset < 0) exxx.Add(new ModelException(this, $"ByteOffset is out of range"));
 
-            if (Buffer.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
+            if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
-                var len = Component.ByteLength() * Element.Length();
+                var len = Encoding.ByteLength() * Dimensions.DimCount();
                 if ((len & 3) != 0) exxx.Add(new ModelException(this, $"Expected length to be multiple of 4, found {len}"));
             }
 
-            if (Buffer.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
+            if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
-                var len = Component.ByteLength() * Element.Length();
+                var len = Encoding.ByteLength() * Dimensions.DimCount();
                 if (len != 1 && len != 2 && len != 4) exxx.Add(new ModelException(this, $"Expected length to be 1, 2 or 4, found {len}"));
             }
 
@@ -355,90 +280,7 @@ namespace glTF2Sharp.Schema2
         }
 
         #endregion
-    }
-
-    public partial class AccessorSparse
-    {
-        public void CopyTo(Accessor srcAccessor, Byte[] dstBuffer, int dstStride)
-        {
-            if (this._count == 0) return;
-
-            var idxDecoder = this._indices.GetDecoder(srcAccessor.LogicalParent);
-            var valCopier = this._values.CopyTo(srcAccessor.LogicalParent, srcAccessor.Element, srcAccessor.Component);
-
-            for (int i = 0; i < this._count; ++i)
-            {
-                var key = idxDecoder.Invoke(i);
-
-                valCopier(i, dstBuffer, dstStride, key);
-            }
-        }
-
-        public void CopyTo<T>(Accessor srcAccessor, T[] dstBuffer) where T : struct
-        {
-            if (this._count == 0) return;
-
-            var idxDecoder = this._indices.GetDecoder(srcAccessor.LogicalParent);
-            var valDecoder = this._values.GetDecoder<T>(srcAccessor.LogicalParent, srcAccessor.Element, srcAccessor.Component, srcAccessor.Normalized);
-
-            for (int i = 0; i < this._count; ++i)
-            {
-                var key = idxDecoder.Invoke(i);
-                var val = valDecoder.Invoke(i);
-                dstBuffer[key] = val;
-            }
-        }
-    }
-
-    public partial class AccessorSparseIndices
-    {
-        public Func<int, int> GetDecoder(ROOT root)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-
-            return srcBuffer.CreateIndexDecoder(this._componentType, this._byteOffset ?? 0);
-        }
-
-        public IReadOnlyList<int> GetIndices(ROOT root, int count)
-        {
-            var srcDecoder = GetDecoder(root);
-
-            var indices = new int[count];
-
-            for (int i = 0; i < indices.Length; ++i)
-            {
-                indices[i] = srcDecoder(i);
-            }
-
-            return indices;
-        }
-    }
-
-    public partial class AccessorSparseValues
-    {
-        public Func<int, T> GetDecoder<T>(ROOT root, ElementType et, ComponentType ct, bool normalized)
-            where T : struct
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-
-            var decoder = srcBuffer.CreateValueDecoder(et, ct, normalized, this._byteOffset ?? 0);
-
-            return idx => (T)decoder(idx);
-        }
-
-        public Action<int, IList<Byte>, int, int> CopyTo(ROOT root, ElementType et, ComponentType ct)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-
-            var itemLen = et.Length() * ct.ByteLength();
-            var srcStride = Math.Max(srcBuffer.ByteStride, itemLen);
-
-            return (srcIdx, dstBuff, dstStride, dstIdx) =>
-            {
-                srcBuffer.Data.CopyTo(srcStride * srcIdx, dstBuff, dstStride * dstIdx, itemLen);
-            };
-        }
-    }
+    }   
 
     public partial class ModelRoot
     {

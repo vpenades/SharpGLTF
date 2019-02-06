@@ -203,13 +203,29 @@ namespace glTF2Sharp
 
         #region vertex & index accessors
 
-        public static int ByteLength(this IndexType t)
+        public static int ByteLength(this IndexType encoding)
         {
-            switch (t)
+            switch (encoding)
             {
                 case IndexType.UNSIGNED_BYTE: return 1;
                 case IndexType.UNSIGNED_SHORT: return 2;
                 case IndexType.UNSIGNED_INT: return 4;
+
+                default: throw new NotImplementedException();
+            }
+        }
+
+        public static int ByteLength(this ComponentType encoding)
+        {
+            switch (encoding)
+            {
+                case ComponentType.BYTE: return 1;
+                case ComponentType.SHORT: return 2;
+                case ComponentType.FLOAT: return 4;
+
+                case ComponentType.UNSIGNED_BYTE: return 1;
+                case ComponentType.UNSIGNED_SHORT: return 2;
+                case ComponentType.UNSIGNED_INT: return 4;
 
                 default: throw new NotImplementedException();
             }
@@ -237,27 +253,11 @@ namespace glTF2Sharp
 
                 default: throw new NotImplementedException();
             }
-        }
+        }           
 
-        public static int ByteLength(this ComponentType t)
+        public static int DimCount(this ElementType dimension)
         {
-            switch (t)
-            {
-                case ComponentType.BYTE: return 1;
-                case ComponentType.SHORT: return 2;
-                case ComponentType.FLOAT: return 4;
-
-                case ComponentType.UNSIGNED_BYTE: return 1;
-                case ComponentType.UNSIGNED_SHORT: return 2;
-                case ComponentType.UNSIGNED_INT: return 4;
-
-                default: throw new NotImplementedException();
-            }
-        }        
-
-        public static int Length(this ElementType t)
-        {
-            switch (t)
+            switch (dimension)
             {
                 case ElementType.SCALAR: return 1;
                 case ElementType.VEC2: return 2;
@@ -270,7 +270,7 @@ namespace glTF2Sharp
             }
         }
 
-        internal static ElementType ToElement(this int l)
+        internal static ElementType ToDimension(this int l)
         {
             switch (l)
             {

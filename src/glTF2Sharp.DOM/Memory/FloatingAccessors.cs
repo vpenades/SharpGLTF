@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 
 namespace glTF2Sharp.Memory
 {
+    
     using BYTES = ArraySegment<Byte>;
+
+    
 
     /// <summary>
     /// Helper structure to access any Byte array as an array of <see cref="Schema2.ComponentType"/>
     /// </summary>
-    public struct FloatingAccessor
+    struct FloatingAccessor
     {
         #region constructors
 
@@ -162,6 +166,8 @@ namespace glTF2Sharp.Memory
 
         #region API
 
+        public int ByteLength => _Data.Count;
+
         public Single this[int index]
         {
             get => _Getter(0, index);
@@ -172,103 +178,12 @@ namespace glTF2Sharp.Memory
         {
             get => _Getter(byteOffset, index);
             set => _Setter(byteOffset, index, value);
-        }
+        }        
 
         #endregion
     }
 
-    /// <summary>
-    /// Helper structure to access any Byte array as an array of <see cref="Schema2.IndexType"/>
-    /// </summary>
-    public struct IntegerAccessor
-    {
-        #region constructors
-
-        public static IntegerAccessor Create(Byte[] data, Schema2.IndexType type)
-        {
-            return Create(new BYTES(data), type);
-        }
-
-        public static IntegerAccessor Create(BYTES data, Schema2.IndexType type)
-        {
-            var accessor = new IntegerAccessor { _Data = data };
-
-            switch (type)
-            {
-                case Schema2.IndexType.UNSIGNED_BYTE:
-                    {
-                        accessor._Setter = accessor._SetValueU8;
-                        accessor._Getter = accessor._GetValueU8;
-                        return accessor;
-                    }
-
-                case Schema2.IndexType.UNSIGNED_SHORT:
-                    {
-                        accessor._Setter = accessor._SetValueU16;
-                        accessor._Getter = accessor._GetValueU16;
-                        return accessor;
-                    }
-
-                case Schema2.IndexType.UNSIGNED_INT:
-                    {
-                        accessor._Setter = accessor._SetValue<UInt32>;
-                        accessor._Getter = accessor._GetValue<UInt32>;
-                        return accessor;
-                    }
-            }
-
-            throw new NotSupportedException();
-        }
-
-        private UInt32 _GetValueU8(int index) { return _GetValue<Byte>(index); }
-        private void _SetValueU8(int index, UInt32 value) { _SetValue<Byte>(index, (Byte)value); }
-
-        private UInt32 _GetValueU16(int index) { return _GetValue<UInt16>(index); }
-        private void _SetValueU16(int index, UInt32 value) { _SetValue<UInt16>(index, (UInt16)value); }
-
-        private T _GetValue<T>(int index) where T : unmanaged
-        {
-            return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index];
-        }
-
-        private void _SetValue<T>(int index, T value) where T : unmanaged
-        {
-            System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index] = value;
-        }
-
-        #endregion
-
-        #region data
-
-        delegate UInt32 _GetterCallback(int index);
-
-        delegate void _SetterCallback(int index, UInt32 value);
-
-        private BYTES _Data;
-        private _GetterCallback _Getter;
-        private _SetterCallback _Setter;
-
-        #endregion
-
-        #region API
-
-        public UInt32 this[int idx]
-        {
-            get => _Getter(idx);
-            set => _Setter(idx, value);
-        }
-
-        #endregion
-    }
-
-    public interface IWordAccessor
-    {
-        System.Numerics.Vector4 GetWord(int index);
-
-        void SetWord(int index, in System.Numerics.Vector4 word);
-    }
-
-    public struct ScalarAccessor : IWordAccessor
+    public struct ScalarAccessor : IAccessor<Single> , IAccessor<Vector4>
     {
         public ScalarAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -279,18 +194,26 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
+        public int Count => _Accesor.ByteLength / _ByteStride;
+        
         public Single this[int index]
         {
             get => _Accesor[index * _ByteStride, 0];
             set => _Accesor[index * _ByteStride, 0] = value;
+        }        
+
+        Vector4 IAccessor<Vector4>.this[int index]
+        {
+            get => new Vector4(this[index], 0, 0, 0);
+            set => this[index] = value.X;
         }
 
-        public System.Numerics.Vector4 GetWord(int index) => new System.Numerics.Vector4(this[index], 0, 0, 0);
+        public void CopyTo(ArraySegment<Single> dst) { AccessorsUtils.Copy<Single>(this, dst); }
 
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = word.X;
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }        
     }
 
-    public struct Vector2Accessor : IWordAccessor
+    public struct Vector2Accessor : IAccessor<Vector2>, IAccessor<Vector4>
     {
         public Vector2Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -301,12 +224,14 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
-        public System.Numerics.Vector2 this[int index]
+        public int Count => _Accesor.ByteLength / _ByteStride;
+
+        public Vector2 this[int index]
         {
             get
             {
                 index *= _ByteStride;
-                return new System.Numerics.Vector2(_Accesor[index, 0], _Accesor[index, 1]);
+                return new Vector2(_Accesor[index, 0], _Accesor[index, 1]);
             }
 
             set
@@ -317,12 +242,18 @@ namespace glTF2Sharp.Memory
             }
         }
 
-        public System.Numerics.Vector4 GetWord(int index) { var v = this[index]; return new System.Numerics.Vector4(v.X, v.Y, 0, 0); }
+        Vector4 IAccessor<Vector4>.this[int index]
+        {
+            get { var v = this[index]; return new Vector4(v.X, v.Y, 0, 0); }
+            set => this[index] = new Vector2(value.X, value.Y);
+        }
 
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = new System.Numerics.Vector2(word.X, word.Y);
+        public void CopyTo(ArraySegment<Vector2> dst) { AccessorsUtils.Copy<Vector2>(this, dst); }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
     }
 
-    public struct Vector3Accessor: IWordAccessor
+    public struct Vector3Accessor: IAccessor<Vector3>, IAccessor<Vector4>
     {
         public Vector3Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -333,12 +264,14 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
-        public System.Numerics.Vector3 this[int index]
+        public int Count => _Accesor.ByteLength / _ByteStride;
+
+        public Vector3 this[int index]
         {
             get
             {
                 index *= _ByteStride;
-                return new System.Numerics.Vector3(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2]);
+                return new Vector3(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2]);
             }
 
             set
@@ -350,12 +283,18 @@ namespace glTF2Sharp.Memory
             }
         }
 
-        public System.Numerics.Vector4 GetWord(int index) { var v = this[index]; return new System.Numerics.Vector4(v.X, v.Y, v.Z, 0); }
+        Vector4 IAccessor<Vector4>.this[int index]
+        {
+            get { var v = this[index]; return new Vector4(v.X, v.Y, v.Z, 0); }
+            set => this[index] = new Vector3(value.X, value.Y, value.Z);
+        }
 
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = new System.Numerics.Vector3(word.X, word.Y, word.Z);
+        public void CopyTo(ArraySegment<Vector3> dst) { AccessorsUtils.Copy<Vector3>(this, dst); }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
     }
 
-    public struct Vector4Accessor: IWordAccessor
+    public struct Vector4Accessor: IAccessor<Vector4>
     {
         public Vector4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -366,12 +305,14 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
-        public System.Numerics.Vector4 this[int index]
+        public int Count => _Accesor.ByteLength / _ByteStride;
+
+        public Vector4 this[int index]
         {
             get
             {
                 index *= _ByteStride;
-                return new System.Numerics.Vector4(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
+                return new Vector4(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
 
             set
@@ -382,14 +323,12 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 2] = value.Z;
                 _Accesor[index, 3] = value.W;
             }
-        }
+        }        
 
-        public System.Numerics.Vector4 GetWord(int index) => this[index];
-
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = word;
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
     }
 
-    public struct QuaternionAccessor : IWordAccessor
+    public struct QuaternionAccessor : IAccessor<Quaternion>, IAccessor<Vector4>
     {
         public QuaternionAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -400,12 +339,14 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
-        public System.Numerics.Quaternion this[int index]
+        public int Count => _Accesor.ByteLength / _ByteStride;
+
+        public Quaternion this[int index]
         {
             get
             {
                 index *= _ByteStride;
-                return new System.Numerics.Quaternion(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
+                return new Quaternion(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
 
             set
@@ -418,12 +359,18 @@ namespace glTF2Sharp.Memory
             }
         }
 
-        public System.Numerics.Vector4 GetWord(int index) { var v = this[index]; return new System.Numerics.Vector4(v.X, v.Y, v.Z, v.W); }
+        Vector4 IAccessor<Vector4>.this[int index]
+        {
+            get { var v = this[index]; return new Vector4(v.X, v.Y, v.Z, v.W); }
+            set => this[index] = new Quaternion(value.X, value.Y, value.Z, value.W);
+        }
 
-        public void SetWord(int index, in System.Numerics.Vector4 word) => this[index] = new System.Numerics.Quaternion(word.X, word.Y, word.Z, word.W);
+        public void CopyTo(ArraySegment<Quaternion> dst) { AccessorsUtils.Copy<Quaternion>(this, dst); }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
     }
 
-    public struct Matrix4x4Accessor
+    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
     {
         public Matrix4x4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
@@ -434,12 +381,14 @@ namespace glTF2Sharp.Memory
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
 
-        public System.Numerics.Matrix4x4 this[int index]
+        public int Count => _Accesor.ByteLength / _ByteStride;
+
+        public Matrix4x4 this[int index]
         {
             get
             {
                 index *= _ByteStride;
-                return new System.Numerics.Matrix4x4
+                return new Matrix4x4
                     (
                     _Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3],
                     _Accesor[index, 4], _Accesor[index, 5], _Accesor[index, 6], _Accesor[index, 7],
@@ -469,5 +418,7 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 15] = value.M44;
             }
         }
+
+        public void CopyTo(ArraySegment<Matrix4x4> dst) { AccessorsUtils.Copy<Matrix4x4>(this, dst); }
     }
 }
