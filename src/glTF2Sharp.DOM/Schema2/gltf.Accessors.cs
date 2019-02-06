@@ -117,17 +117,13 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Int32[] TryGetIndices()
+        public UInt32[] TryGetIndices()
         {
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));            
 
-            var accessor = SourceBufferView.CreateIndexDecoder(this.ByteOffset, this.Encoding.ToIndex());
-
-            var indices = new int[accessor.Count];
-
-            Memory.AccessorsUtils.Copy<Int32>(accessor, indices);
-
-            return indices;
+            return SourceBufferView
+                .CreateIndexDecoder(this.ByteOffset, this.Encoding.ToIndex())
+                .ToArray();
         }
 
         #endregion

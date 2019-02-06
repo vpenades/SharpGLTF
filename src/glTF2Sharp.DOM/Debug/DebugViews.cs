@@ -49,4 +49,16 @@ namespace glTF2Sharp.Debug
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
     }
+
+    [System.Diagnostics.DebuggerDisplay(" {_Value._target} Bytes:{_Value.Buffer1.Count}")]
+    internal sealed class _MemoryAccessorDebugView<T>
+        where T:unmanaged
+    {
+        public _MemoryAccessorDebugView(Memory.IAccessor<T> value) { _Value = value; }        
+
+        private readonly Memory.IAccessor<T> _Value;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public T[] Accessors => _Value.ToArray();
+    }
 }

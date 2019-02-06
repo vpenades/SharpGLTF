@@ -46,9 +46,9 @@ namespace glTF2Sharp.Schema2
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
 
-            var accessor = srcBuffer.CreateIndexDecoder(this._byteOffset ?? 0, this._componentType) as Memory.IAccessor<int>;
+            var accessor = srcBuffer.CreateIndexDecoder(this._byteOffset ?? 0, this._componentType);
 
-            return index => accessor[index];
+            return index => (int)accessor[index];
         }
 
         public IReadOnlyList<int> GetIndices(ROOT root, int count)

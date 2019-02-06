@@ -1,57 +1,56 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Collections;
 
 namespace glTF2Sharp.Memory
-{
-    using System.Collections;
+{    
     using BYTES = ArraySegment<Byte>;
 
+    using ENCODING = Schema2.IndexType;
+
     /// <summary>
-    /// Helper structure to access any Byte array as an array of <see cref="Schema2.IndexType"/>
+    /// Helper structure to access any Byte array as an array of Integers/>
     /// </summary>
-    public struct IntegerAccessor : IAccessor<UInt32>, IAccessor<Int32>, IReadOnlyCollection<UInt32>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<UInt32>))]
+    public struct IntegerAccessor : IAccessor<UInt32>
     {
         #region constructors
 
-        public static IntegerAccessor Create(Byte[] data, Schema2.IndexType encoding)
-        {
-            return Create(new BYTES(data), encoding);
-        }
+        public IntegerAccessor(Byte[] data, ENCODING encoding)
+            : this(new BYTES(data), encoding) { }
 
-        public static IntegerAccessor Create(BYTES data, Schema2.IndexType encoding)
+        public IntegerAccessor(BYTES data, ENCODING encoding)
         {
-            var accessor = new IntegerAccessor
-            {
-                _Data = data,
-                _ByteStride = encoding.ByteLength()
-            };
+            _Data = data;
+            _ByteStride = encoding.ByteLength();
+            this._Setter = null;
+            this._Getter = null;
 
             switch (encoding)
             {
-                case Schema2.IndexType.UNSIGNED_BYTE:
+                case ENCODING.UNSIGNED_BYTE:
                     {
-                        accessor._Setter = accessor._SetValueU8;
-                        accessor._Getter = accessor._GetValueU8;
-                        return accessor;
+                        this._Setter = this._SetValueU8;
+                        this._Getter = this._GetValueU8;
+                        break;
                     }
 
-                case Schema2.IndexType.UNSIGNED_SHORT:
+                case ENCODING.UNSIGNED_SHORT:
                     {
-                        accessor._Setter = accessor._SetValueU16;
-                        accessor._Getter = accessor._GetValueU16;
-                        return accessor;
+                        this._Setter = this._SetValueU16;
+                        this._Getter = this._GetValueU16;
+                        break;
                     }
 
-                case Schema2.IndexType.UNSIGNED_INT:
+                case ENCODING.UNSIGNED_INT:
                     {
-                        accessor._Setter = accessor._SetValue<UInt32>;
-                        accessor._Getter = accessor._GetValue<UInt32>;
-                        return accessor;
+                        this._Setter = this._SetValue<UInt32>;
+                        this._Getter = this._GetValue<UInt32>;
+                        break;
                     }
-            }
-
-            throw new NotSupportedException();
+                default: throw new ArgumentException(nameof(encoding));
+            }            
         }
 
         private UInt32 _GetValueU8(int index) { return _GetValue<Byte>(index); }
@@ -78,10 +77,10 @@ namespace glTF2Sharp.Memory
 
         delegate void _SetterCallback(int index, UInt32 value);
 
-        private BYTES _Data;
-        private int _ByteStride;
-        private _GetterCallback _Getter;
-        private _SetterCallback _Setter;
+        private readonly BYTES _Data;
+        private readonly int _ByteStride;
+        private readonly _GetterCallback _Getter;
+        private readonly _SetterCallback _Setter;
 
         #endregion
 
@@ -93,21 +92,15 @@ namespace glTF2Sharp.Memory
         {
             get => _Getter(index);
             set => _Setter(index, value);
-        }
+        }        
 
-        int IAccessor<int>.this[int index]
-        {
-            get => (Int32)_Getter(index);
-            set => _Setter(index, (UInt32)value);
-        }
-
-        public void CopyTo(ArraySegment<UInt32> dst) { AccessorsUtils.Copy<UInt32>(this, dst); }
-
-        public void CopyTo(ArraySegment<Int32> dst) { AccessorsUtils.Copy<Int32>(this, dst); }
+        public void CopyTo(ArraySegment<UInt32> dst) { AccessorsUtils.Copy<UInt32>(this, dst); }        
 
         public IEnumerator<UInt32> GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
+
+        public (UInt32, UInt32) GetBounds() { throw new NotImplementedException(); }
 
         #endregion
     }

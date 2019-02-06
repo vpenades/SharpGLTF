@@ -5,111 +5,114 @@ using System.Numerics;
 using System.Collections;
 
 namespace glTF2Sharp.Memory
-{
-    
-    using BYTES = ArraySegment<Byte>;    
+{    
+    using BYTES = ArraySegment<Byte>;
+
+    using ENCODING = Schema2.ComponentType;
 
     /// <summary>
-    /// Helper structure to access any Byte array as an array of <see cref="Schema2.ComponentType"/>
+    /// Helper structure to access any Byte array as an array of floating Singles/>
     /// </summary>
     struct FloatingAccessor
     {
         #region constructors
 
-        public static FloatingAccessor Create(Byte[] data, Schema2.ComponentType type, Boolean normalized)
+        public FloatingAccessor(Byte[] data, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), encoding, normalized) { }        
+
+        public FloatingAccessor(BYTES data, ENCODING encoding, Boolean normalized)
         {
-            return Create(new BYTES(data), type, normalized);
-        }
+            this._Data = data;
+            this._Getter = null;
+            this._Setter = null;
 
-        public static FloatingAccessor Create(BYTES data, Schema2.ComponentType type, Boolean normalized)
-        {
-            var accessor = new FloatingAccessor { _Data = data };
-
-            if (type == Schema2.ComponentType.FLOAT)
+            if (encoding == ENCODING.FLOAT)
             {
-                accessor._Setter = accessor._SetValue<Single>;
-                accessor._Getter = accessor._GetValue<Single>;
-                return accessor;
-            }
-
-            if (normalized)
-            {
-                switch (type)
-                {
-                    case Schema2.ComponentType.BYTE:
-                        {
-                            accessor._Setter = accessor._SetNormalizedS8;
-                            accessor._Getter = accessor._GetNormalizedS8;
-                            return accessor;
-                        }
-
-                    case Schema2.ComponentType.UNSIGNED_BYTE:
-                        {
-                            accessor._Setter = accessor._SetNormalizedU8;
-                            accessor._Getter = accessor._GetNormalizedU8;
-                            return accessor;
-                        }
-
-                    case Schema2.ComponentType.SHORT:
-                        {
-                            accessor._Setter = accessor._SetNormalizedS16;
-                            accessor._Getter = accessor._GetNormalizedS16;
-                            return accessor;
-                        }
-
-                    case Schema2.ComponentType.UNSIGNED_SHORT:
-                        {
-                            accessor._Setter = accessor._SetNormalizedU16;
-                            accessor._Getter = accessor._GetNormalizedU16;
-                            return accessor;
-                        }
-                }
+                this._Setter = this._SetValue<Single>;
+                this._Getter = this._GetValue<Single>;
             }
             else
             {
-                switch (type)
+                if (normalized)
                 {
-                    case Schema2.ComponentType.BYTE:
-                        {
-                            accessor._Setter = accessor._SetValueS8;
-                            accessor._Getter = accessor._GetValueS8;
-                            return accessor;
-                        }
+                    switch (encoding)
+                    {
+                        case ENCODING.BYTE:
+                            {
+                                this._Setter = this._SetNormalizedS8;
+                                this._Getter = this._GetNormalizedS8;
+                                break;
+                            }
 
-                    case Schema2.ComponentType.UNSIGNED_BYTE:
-                        {
-                            accessor._Setter = accessor._SetValueU8;
-                            accessor._Getter = accessor._GetValueU8;
-                            return accessor;
-                        }
+                        case ENCODING.UNSIGNED_BYTE:
+                            {
+                                this._Setter = this._SetNormalizedU8;
+                                this._Getter = this._GetNormalizedU8;
+                                break;
+                            }
 
-                    case Schema2.ComponentType.SHORT:
-                        {
-                            accessor._Setter = accessor._SetValueS16;
-                            accessor._Getter = accessor._GetValueS16;
-                            return accessor;
-                        }
+                        case ENCODING.SHORT:
+                            {
+                                this._Setter = this._SetNormalizedS16;
+                                this._Getter = this._GetNormalizedS16;
+                                break;
+                            }
 
-                    case Schema2.ComponentType.UNSIGNED_SHORT:
-                        {
-                            accessor._Setter = accessor._SetValueU16;
-                            accessor._Getter = accessor._GetValueU16;
-                            return accessor;
-                        }
-
-                    case Schema2.ComponentType.UNSIGNED_INT:
-                        {
-                            accessor._Setter = accessor._SetValueU32;
-                            accessor._Getter = accessor._GetValueU32;
-                            return accessor;
-                        }
-
-                    case Schema2.ComponentType.FLOAT:
-                        break;
+                        case ENCODING.UNSIGNED_SHORT:
+                            {
+                                this._Setter = this._SetNormalizedU16;
+                                this._Getter = this._GetNormalizedU16;
+                                break;
+                            }
+                        default: throw new ArgumentException(nameof(encoding));
+                    }
                 }
-            }
+                else
+                {
+                    switch (encoding)
+                    {
+                        case ENCODING.BYTE:
+                            {
+                                this._Setter = this._SetValueS8;
+                                this._Getter = this._GetValueS8;
+                                break;
+                            }
 
-            throw new NotSupportedException();
+                        case ENCODING.UNSIGNED_BYTE:
+                            {
+                                this._Setter = this._SetValueU8;
+                                this._Getter = this._GetValueU8;
+                                break;
+                            }
+
+                        case ENCODING.SHORT:
+                            {
+                                this._Setter = this._SetValueS16;
+                                this._Getter = this._GetValueS16;
+                                break;
+                            }
+
+                        case ENCODING.UNSIGNED_SHORT:
+                            {
+                                this._Setter = this._SetValueU16;
+                                this._Getter = this._GetValueU16;
+                                break;
+                            }
+
+                        case ENCODING.UNSIGNED_INT:
+                            {
+                                this._Setter = this._SetValueU32;
+                                this._Getter = this._GetValueU32;
+                                break;
+                            }
+
+                        case ENCODING.FLOAT:
+                            break;
+
+                        default: throw new ArgumentException(nameof(encoding));
+                    }
+                }
+            }            
         }
 
         private Single _GetValueU8(int byteOffset, int index) { return _GetValue<Byte>(byteOffset, index); }
@@ -157,9 +160,9 @@ namespace glTF2Sharp.Memory
 
         delegate void _SetterCallback(int byteOffset, int index, Single value);
 
-        private BYTES _Data;
-        private _GetterCallback _Getter;
-        private _SetterCallback _Setter;
+        private readonly BYTES _Data;
+        private readonly _GetterCallback _Getter;
+        private readonly _SetterCallback _Setter;
 
         #endregion
 
@@ -182,19 +185,30 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
-    public struct ScalarAccessor : IAccessor<Single> , IAccessor<Vector4>, IReadOnlyCollection<Single>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Single>))]
+    public struct ScalarAccessor : IAccessor<Single>
     {
-        public ScalarAccessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data), byteStride, type, normalized) { }
+        #region constructors
 
-        public ScalarAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public ScalarAccessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
+        public ScalarAccessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 1, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 1, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
         
@@ -202,36 +216,45 @@ namespace glTF2Sharp.Memory
         {
             get => _Accesor[index * _ByteStride, 0];
             set => _Accesor[index * _ByteStride, 0] = value;
-        }        
+        }                
 
-        Vector4 IAccessor<Vector4>.this[int index]
-        {
-            get => new Vector4(this[index], 0, 0, 0);
-            set => this[index] = value.X;
-        }
-
-        public void CopyTo(ArraySegment<Single> dst) { AccessorsUtils.Copy<Single>(this, dst); }
-
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+        public void CopyTo(ArraySegment<Single> dst) { AccessorsUtils.Copy<Single>(this, dst); }        
 
         public IEnumerator<Single> GetEnumerator() { return new AccessorEnumerator<Single>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Single>(this); }
+
+        public (Single, Single) GetBounds() { return AccessorsUtils.GetBounds(this); }
+
+        public IAccessor<Vector4> AsVector4() { return new _MapScalarToVector4(this); }        
+
+        #endregion
     }
 
-    public struct Vector2Accessor : IAccessor<Vector2>, IAccessor<Vector4>, IReadOnlyCollection<Vector2>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector2>))]
+    public struct Vector2Accessor : IAccessor<Vector2>
     {
-        public Vector2Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data),byteStride,type,normalized) { }
+        #region constructors
+
+        public Vector2Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data),byteStride,encoding,normalized) { }
         
-        public Vector2Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public Vector2Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 2, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 2, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
 
@@ -249,36 +272,45 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
             }
-        }
+        }        
 
-        Vector4 IAccessor<Vector4>.this[int index]
-        {
-            get { var v = this[index]; return new Vector4(v.X, v.Y, 0, 0); }
-            set => this[index] = new Vector2(value.X, value.Y);
-        }
-
-        public void CopyTo(ArraySegment<Vector2> dst) { AccessorsUtils.Copy<Vector2>(this, dst); }
-
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+        public void CopyTo(ArraySegment<Vector2> dst) { AccessorsUtils.Copy<Vector2>(this, dst); }        
 
         public IEnumerator<Vector2> GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
+
+        public (Vector2, Vector2) GetBounds() { return AccessorsUtils.GetBounds(this); }
+
+        public IAccessor<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }        
+
+        #endregion
     }
 
-    public struct Vector3Accessor: IAccessor<Vector3>, IAccessor<Vector4>, IReadOnlyCollection<Vector3>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector3>))]
+    public struct Vector3Accessor: IAccessor<Vector3>
     {
-        public Vector3Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data), byteStride, type, normalized) { }
+        #region constructors
 
-        public Vector3Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public Vector3Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
+        public Vector3Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 3, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 3, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
 
@@ -297,36 +329,45 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 1] = value.Y;
                 _Accesor[index, 2] = value.Z;
             }
-        }
+        }        
 
-        Vector4 IAccessor<Vector4>.this[int index]
-        {
-            get { var v = this[index]; return new Vector4(v.X, v.Y, v.Z, 0); }
-            set => this[index] = new Vector3(value.X, value.Y, value.Z);
-        }
-
-        public void CopyTo(ArraySegment<Vector3> dst) { AccessorsUtils.Copy<Vector3>(this, dst); }
-
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+        public void CopyTo(ArraySegment<Vector3> dst) { AccessorsUtils.Copy<Vector3>(this, dst); }        
 
         public IEnumerator<Vector3> GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
+
+        public (Vector3, Vector3) GetBounds() { return AccessorsUtils.GetBounds(this); }
+
+        public IAccessor<Vector4> AsVector4() { return new _MapVector3ToVector4(this); }
+
+        #endregion
     }
 
-    public struct Vector4Accessor: IAccessor<Vector4>, IReadOnlyCollection<Vector4>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector4>))]
+    public struct Vector4Accessor: IAccessor<Vector4>
     {
-        public Vector4Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data), byteStride, type, normalized) { }
+        #region constructors
 
-        public Vector4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public Vector4Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
+        public Vector4Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 4, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
 
@@ -353,21 +394,38 @@ namespace glTF2Sharp.Memory
         public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+
+        public IAccessor<Vector4> AsVector4() { return this; }
+
+        #endregion
     }
 
-    public struct QuaternionAccessor : IAccessor<Quaternion>, IAccessor<Vector4>, IReadOnlyCollection<Quaternion>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Quaternion>))]
+    public struct QuaternionAccessor : IAccessor<Quaternion>
     {
-        public QuaternionAccessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data), byteStride, type, normalized) { }
+        #region constructors
 
-        public QuaternionAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public QuaternionAccessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
+        public QuaternionAccessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 4, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
 
@@ -387,36 +445,45 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 2] = value.Z;
                 _Accesor[index, 3] = value.W;
             }
-        }
+        }        
 
-        Vector4 IAccessor<Vector4>.this[int index]
-        {
-            get { var v = this[index]; return new Vector4(v.X, v.Y, v.Z, v.W); }
-            set => this[index] = new Quaternion(value.X, value.Y, value.Z, value.W);
-        }
-
-        public void CopyTo(ArraySegment<Quaternion> dst) { AccessorsUtils.Copy<Quaternion>(this, dst); }
-
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+        public void CopyTo(ArraySegment<Quaternion> dst) { AccessorsUtils.Copy<Quaternion>(this, dst); }        
 
         public IEnumerator<Quaternion> GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
+
+        public (Quaternion, Quaternion) GetBounds() { throw new NotImplementedException(); }
+
+        public IAccessor<Vector4> AsVector4() { return new _MapQuaternionToVector4(this); }
+
+        #endregion
     }
 
-    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>, IReadOnlyCollection<Matrix4x4>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Matrix4x4>))]
+    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
     {
-        public Matrix4x4Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
-            : this(new BYTES(data), byteStride, type, normalized) { }
+        #region constructors
 
-        public Matrix4x4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+        public Matrix4x4Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
+        public Matrix4x4Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = FloatingAccessor.Create(data, type, normalized);
-            _ByteStride = Math.Max(type.ByteLength() * 16, byteStride);
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
+            _ByteStride = Math.Max(encoding.ByteLength() * 16, byteStride);
         }
+
+        #endregion
+
+        #region data
 
         private FloatingAccessor _Accesor;
         private readonly int _ByteStride;
+
+        #endregion
+
+        #region API
 
         public int Count => _Accesor.ByteLength / _ByteStride;
 
@@ -461,5 +528,9 @@ namespace glTF2Sharp.Memory
         public IEnumerator<Matrix4x4> GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
+
+        public (Matrix4x4, Matrix4x4) GetBounds() { throw new NotImplementedException(); }
+
+        #endregion
     }
 }

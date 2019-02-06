@@ -104,7 +104,7 @@ namespace glTF2Sharp.Schema2
         {
             Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
 
-            return Memory.IntegerAccessor.Create(this.Data.Slice(byteOffset), encoding);
+            return new Memory.IntegerAccessor(this.Data.Slice(byteOffset), encoding);
         }
 
         public Memory.IAccessor<Vector4> CreateVertexDecoder(int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized)
@@ -113,9 +113,9 @@ namespace glTF2Sharp.Schema2
 
             switch (dimensions)
             {
-                case ElementType.SCALAR: return new Memory.ScalarAccessor(srcData, this.ByteStride, encoding, normalized);
-                case ElementType.VEC2: return new Memory.Vector2Accessor(srcData, this.ByteStride, encoding, normalized);
-                case ElementType.VEC3: return new Memory.Vector3Accessor(srcData, this.ByteStride, encoding, normalized);
+                case ElementType.SCALAR: return new Memory.ScalarAccessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
+                case ElementType.VEC2: return new Memory.Vector2Accessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
+                case ElementType.VEC3: return new Memory.Vector3Accessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
                 case ElementType.VEC4: return new Memory.Vector4Accessor(srcData, this.ByteStride, encoding, normalized);
                 default: throw new NotImplementedException();
             }            

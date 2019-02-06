@@ -6,20 +6,20 @@ using System.Text;
 
 namespace glTF2Sharp.Memory
 {
-    public interface IAccessor<T>
+    public interface IAccessor<T> : IReadOnlyCollection<T>
         where T : unmanaged
-    {
-        int Count { get; }
+    {        
         T this[int index] { get; set; }
 
         void CopyTo(ArraySegment<T> dst);
-    }
 
+        (T, T) GetBounds();
+    }
 
     struct AccessorEnumerator<T> : IEnumerator<T>
         where T: unmanaged
     {
-        #region lifecycle
+        #region lifecycle        
 
         public AccessorEnumerator(IAccessor<T> accessor)
         {
@@ -74,7 +74,7 @@ namespace glTF2Sharp.Memory
         {
             var c = src.Count;
             for (int i = 0; i < c; ++i) dst.Array[dst.Offset + i] = src[i];
-        }        
+        }                
 
         public static (Single, Single) GetBounds(ScalarAccessor accesor)
         {
@@ -124,7 +124,7 @@ namespace glTF2Sharp.Memory
             return (min, max);
         }
 
-        public static (Vector4, Vector4) GetBounds(Vector4Accessor accesor)
+        public static (Vector4, Vector4) GetBounds(IAccessor<Vector4> accesor)
         {
             var min = new Vector4(Single.MaxValue);
             var max = new Vector4(Single.MinValue);
@@ -139,5 +139,110 @@ namespace glTF2Sharp.Memory
 
             return (min, max);
         }
+    }
+
+
+    struct _MapScalarToVector4 : IAccessor<Vector4>
+    {
+        public _MapScalarToVector4(ScalarAccessor source)
+        {
+            _Accessor = source;
+        }
+
+        private ScalarAccessor _Accessor;
+
+        public int Count => _Accessor.Count;
+
+        public Vector4 this[int index]
+        {
+            get => new Vector4(_Accessor[index], 0, 0, 0);
+            set => _Accessor[index] = value.X;
+        }        
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+
+        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+    }
+
+    struct _MapVector2ToVector4 : IAccessor<Vector4>
+    {
+        public _MapVector2ToVector4(Vector2Accessor source)
+        {
+            _Accessor = source;
+        }
+
+        private Vector2Accessor _Accessor;
+
+        public int Count => _Accessor.Count;
+
+        public Vector4 this[int index]
+        {
+            get { var v = _Accessor[index]; return new Vector4(v.X, v.Y, 0, 0); }
+            set => _Accessor[index] = new Vector2(value.X, value.Y);
+        }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+
+        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+    }
+
+    struct _MapVector3ToVector4 : IAccessor<Vector4>
+    {
+        public _MapVector3ToVector4(Vector3Accessor source)
+        {
+            _Accessor = source;
+        }
+
+        private Vector3Accessor _Accessor;
+
+        public int Count => _Accessor.Count;
+
+        public Vector4 this[int index]
+        {
+            get { var v = _Accessor[index]; return new Vector4(v.X, v.Y, v.Z, 0); }
+            set => _Accessor[index] = new Vector3(value.X, value.Y, value.Z);
+        }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+
+        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+    }
+
+    struct _MapQuaternionToVector4 : IAccessor<Vector4>
+    {
+        public _MapQuaternionToVector4(QuaternionAccessor source)
+        {
+            _Accessor = source;
+        }
+
+        private QuaternionAccessor _Accessor;
+
+        public int Count => _Accessor.Count;
+
+        public Vector4 this[int index]
+        {
+            get { var v = _Accessor[index]; return new Vector4(v.X, v.Y, v.Z, v.W); }
+            set => _Accessor[index] = new Quaternion(value.X, value.Y, value.Z, value.W);
+        }
+
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+
+        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
     }
 }

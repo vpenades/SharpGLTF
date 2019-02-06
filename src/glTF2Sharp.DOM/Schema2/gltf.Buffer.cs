@@ -122,7 +122,7 @@ namespace glTF2Sharp.Schema2
         {
             var buffer = CreateBuffer(indices.Length * 4);
 
-            var accessor = Memory.IntegerAccessor.Create(buffer._Data, IndexType.UNSIGNED_INT);
+            var accessor = new Memory.IntegerAccessor(buffer._Data, IndexType.UNSIGNED_INT);
 
             for (int i = 0; i < indices.Length; ++i)
             {
