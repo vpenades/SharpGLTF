@@ -90,6 +90,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.Matrix4x4Accessor CastToMatrix4x4Accessor()
         {
+            Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.MAT4, nameof(Dimensions));
 
             return SourceBufferView.CreateMatrix4x4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
@@ -121,6 +122,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.IntegerAccessor CastToIndicesAccessor()
         {
+            Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
             return SourceBufferView.CreateIndicesAccessor(this.ByteOffset, this.Encoding.ToIndex());
         }

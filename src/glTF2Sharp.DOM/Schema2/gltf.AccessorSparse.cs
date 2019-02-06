@@ -5,87 +5,130 @@ using System.Text;
 
 namespace glTF2Sharp.Schema2
 {
+    // TODO:
+    // AccessorSparse is a single child of an Accessor
+    // when an Accessor defines an AccessorSparse, it becomes a "two layers" collection.
+    // the layer at the bottom is the data of the base accessor
+    // the layer on top, replaces just a few elements in the base accessor.
+    // Unlike many other objects in the API, AccessorSparse does not implement IChildOf<Accessor>
+    // which would allow AccessorSparse to access the interal data of its parent.
+    // So we have two choices here:
+    // 1- Implement IChildOf<Accessor> and finish the SingleChild<T> collection object
+    // 2- Make these classes non public, and expose them with a public view object.
+    // 3- Make the whole Accessor+AccessorSparse block non public, and expose them with a public view.
+
     using ROOT = ModelRoot;
 
     public partial class AccessorSparse
     {
-        public void CopyTo(Accessor srcAccessor, Byte[] dstBuffer, int dstStride)
+        internal AccessorSparse() { }
+
+        internal AccessorSparse(BufferView indices, int indicesOffset, IndexType indicesEncoding, BufferView values, int valuesOffset, int count)
         {
-            if (this._count == 0) return;
+            Guard.NotNull(indices, nameof(indices));
+            Guard.NotNull(values, nameof(values));
+            Guard.MustBeGreaterThanOrEqualTo(count, _countMinimum,nameof(count));
 
-            var idxDecoder = this._indices.GetDecoder(srcAccessor.LogicalParent);
-            var valCopier = this._values.CopyTo(srcAccessor.LogicalParent, srcAccessor.Dimensions, srcAccessor.Encoding);
-
-            for (int i = 0; i < this._count; ++i)
-            {
-                var key = idxDecoder.Invoke(i);
-
-                valCopier(i, dstBuffer, dstStride, key);
-            }
+            this._count = count;
+            this._indices = new AccessorSparseIndices(indices, indicesOffset, indicesEncoding);
+            this._values = new AccessorSparseValues(values, valuesOffset);
         }
 
-        public void CopyTo(Accessor srcAccessor, Vector4[] dstBuffer)
+        public int Count => _count; // what is this!?? TODO: check with specs        
+
+        public Memory.SparseAccessor<Single> GetScalarAccesor(Accessor baseAccessor)
         {
-            if (this._count == 0) return;
+            var bot = baseAccessor.CastToScalarAccessor();
+            var top = this._values.CastToScalarAccessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
+            var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
 
-            var idxDecoder = this._indices.GetDecoder(srcAccessor.LogicalParent);
-            var valDecoder = this._values.GetDecoder(srcAccessor.LogicalParent, srcAccessor.Encoding, srcAccessor.Dimensions, srcAccessor.Normalized);
+            return new Memory.SparseAccessor<Single>(bot, top, idx);
+        }
 
-            for (int i = 0; i < this._count; ++i)
-            {
-                var key = idxDecoder.Invoke(i);
-                var val = valDecoder[i];
-                dstBuffer[key] = val;
-            }
+        public Memory.SparseAccessor<Vector2> GetVector2Accesor(Accessor baseAccessor)
+        {
+            var bot = baseAccessor.CastToVector2Accessor();
+            var top = this._values.CastToVector2Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
+            var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
+
+            return new Memory.SparseAccessor<Vector2>(bot, top, idx);
+        }
+
+        public Memory.SparseAccessor<Vector3> GetVector3Accesor(Accessor baseAccessor)
+        {
+            var bot = baseAccessor.CastToVector3Accessor();
+            var top = this._values.CastToVector3Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
+            var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
+
+            return new Memory.SparseAccessor<Vector3>(bot, top, idx);
+        }
+
+        public Memory.SparseAccessor<Vector4> GetVector4Accesor(Accessor baseAccessor)
+        {
+            var bot = baseAccessor.CastToVector4Accessor();
+            var top = this._values.CastToVector4Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
+            var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
+
+            return new Memory.SparseAccessor<Vector4>(bot, top, idx);
         }
     }
 
     public partial class AccessorSparseIndices
     {
-        public Func<int, int> GetDecoder(ROOT root)
+        internal AccessorSparseIndices() { }
+
+        internal AccessorSparseIndices(BufferView bv, int byteOffset, IndexType encoding)
+        {
+            Guard.NotNull(bv,nameof(bv));
+            Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
+
+            this._bufferView = bv.LogicalIndex;
+            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);
+            this._componentType = encoding;
+        }
+
+        public Memory.IntegerAccessor CastToIndicesAccessor(ROOT root)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
-
-            var accessor = srcBuffer.CreateIndicesAccessor(this._byteOffset ?? 0, this._componentType);
-
-            return index => (int)accessor[index];
-        }
-
-        public IReadOnlyList<int> GetIndices(ROOT root, int count)
-        {
-            var srcDecoder = GetDecoder(root);
-
-            var indices = new int[count];
-
-            for (int i = 0; i < indices.Length; ++i)
-            {
-                indices[i] = srcDecoder(i);
-            }
-
-            return indices;
-        }
+            return srcBuffer.CreateIndicesAccessor(this._byteOffset ?? 0, this._componentType);
+        }        
     }
 
     public partial class AccessorSparseValues
     {
-        public Memory.IAccessor<Vector4> GetDecoder(ROOT root, ComponentType encoding, ElementType dimensions, Boolean normalized)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
+        internal AccessorSparseValues() { }
 
-            return srcBuffer.CreateVertexAccessor(this._byteOffset ?? 0, dimensions, encoding, normalized);
+        internal AccessorSparseValues(BufferView bv, int byteOffset)
+        {
+            Guard.NotNull(bv, nameof(bv));
+            Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
+
+            this._bufferView = bv.LogicalIndex;
+            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);            
         }
 
-        public Action<int, IList<Byte>, int, int> CopyTo(ROOT root, ElementType et, ComponentType ct)
+        public Memory.ScalarAccessor CastToScalarAccessor(ROOT root, ComponentType encoding, Boolean normalized)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
+            return srcBuffer.CreateScalarAccessor(this._byteOffset ?? 0, encoding, normalized);
+        }
 
-            var itemLen = et.DimCount() * ct.ByteLength();
-            var srcStride = Math.Max(srcBuffer.ByteStride, itemLen);
+        public Memory.Vector2Accessor CastToVector2Accessor(ROOT root, ComponentType encoding, Boolean normalized)
+        {
+            var srcBuffer = root.LogicalBufferViews[this._bufferView];
+            return srcBuffer.CreateVector2Accessor(this._byteOffset ?? 0, encoding, normalized);
+        }
 
-            return (srcIdx, dstBuff, dstStride, dstIdx) =>
-            {
-                srcBuffer.Data.CopyTo(srcStride * srcIdx, dstBuff, dstStride * dstIdx, itemLen);
-            };
+        public Memory.Vector3Accessor CastToVector3Accessor(ROOT root, ComponentType encoding, Boolean normalized)
+        {
+            var srcBuffer = root.LogicalBufferViews[this._bufferView];
+            return srcBuffer.CreateVector3Accessor(this._byteOffset ?? 0, encoding, normalized);
+        }
+
+        public Memory.Vector4Accessor CastToVector4Accessor(ROOT root, ComponentType encoding, Boolean normalized)
+        {
+            var srcBuffer = root.LogicalBufferViews[this._bufferView];
+            return srcBuffer.CreateVector4Accessor(this._byteOffset ?? 0, encoding, normalized);
         }
     }
 }
