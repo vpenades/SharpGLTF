@@ -11,6 +11,8 @@ namespace glTF2Sharp.Schema2
         IEnumerable<Node> VisualChildren { get; }
 
         Node AddNode(string name);
+
+        Node FindNode(string name);
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
@@ -173,6 +175,11 @@ namespace glTF2Sharp.Schema2
             this._children.Add(idx);
         }
 
+        public Node FindNode(string name)
+        {
+            return this.VisualChildren.FirstOrDefault(item => item.Name == name);
+        }
+
         // TODO: AddVisualChild must return a "NodeBuilder"
         // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_children); }
 
@@ -295,6 +302,11 @@ namespace glTF2Sharp.Schema2
             var idx = this.LogicalParent._UseLogicaNode(node);
 
             this._nodes.Add(idx);
+        }
+
+        public Node FindNode(string name)
+        {
+            return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }
 
         public override IEnumerable<Exception> Validate()

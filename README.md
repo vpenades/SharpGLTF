@@ -11,13 +11,20 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [x] Reading and writing *.glb* files.
 - [x] Logical Data Access.
 - [x] Visual Tree Access.
-- [x] Vertex and Index buffer decoding.
-- [ ] gltf.Extra field ; *Help Need*
+- [x] Vertex and Index buffer encoding/decoding.
 - [ ] Scene Evaluation.
+- [ ] GPU Evaluation.
 - [ ] Mesh Building utilities.
 - [ ] Animation utilities.
 - [ ] Material utilities
+- [ ] Skinning utilities
 - [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
+
+### TODO
+
+- gltf.Extra field support, right now it is ignored.
+- Matrix2x2 and Matrix3x3 support. This is due to missing types in System.Numerics.Vectors
+- Camera API
 
 ### Supported Extensions
 
@@ -30,7 +37,7 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [ ] [KHR_texture_transform](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform)
 - [ ] [MSFT_texture_dds](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_texture_dds)
 - [ ] [MSFT_lod](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_lod)
-  - When this extension is used, the model's visual tree needs to be abstracted, which requires an extensive API rework.
+  - When this extension is used, the model's visual tree needs to be abstracted, which requires an extensive API rework, or a full API layer.
 - [ ] [MSFT_packing_normalRoughnessMetallic](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_packing_normalRoughnessMetallic)
 - [ ] [MSFT_packing_occlusionRoughnessMetallic](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_packing_occlusionRoughnessMetallic)
 - [ ] [AGI_articulations](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations)

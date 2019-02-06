@@ -74,8 +74,6 @@ namespace glTF2Sharp.Schema2
         {
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
-                TestContext.Progress.WriteLine($"Loading {f}...");
-
                 var root = _LoadModel(f);
                 Assert.NotNull(root);
 
@@ -90,10 +88,45 @@ namespace glTF2Sharp.Schema2
         {
             foreach (var f in TestFiles.GetFilePathsWithSpecularGlossinessPBR())
             {
-                TestContext.Progress.WriteLine($"Loading {f}...");
-
                 var root = _LoadModel(f);
                 Assert.NotNull(root);
+            }
+        }
+
+        #endregion
+
+        #region test polly model
+
+        [Test(Description ="Example of traversing the visual tree all the way to individual vertices and indices")]
+        public void TestLoadPolly()
+        {
+            var model = _LoadModel(TestFiles.GetPollyFilePath());            
+
+            var scene = model.DefaultScene;
+
+            var pollyNode = scene.FindNode("Polly_Display");            
+
+            var pollyPrimitive = pollyNode.Mesh.Primitives[0];
+
+            var pollyIndices = pollyPrimitive.IndexAccessor.CastToIndicesAccessor();
+            var pollyPositions = pollyPrimitive.VertexAccessors["POSITION"].CastToVector3Accessor();
+            var pollyNormals = pollyPrimitive.VertexAccessors["NORMAL"].CastToVector3Accessor();
+
+            for (int i=0; i < pollyIndices.Count; i+=3)
+            {
+                var a = (int)pollyIndices[i + 0];
+                var b = (int)pollyIndices[i + 1];
+                var c = (int)pollyIndices[i + 2];
+
+                var ap = pollyPositions[a];
+                var bp = pollyPositions[b];
+                var cp = pollyPositions[c];
+
+                var an = pollyNormals[a];
+                var bn = pollyNormals[b];
+                var cn = pollyNormals[c];
+
+                TestContext.WriteLine($"Triangle {ap} {an} {bp} {bn} {cp} {cn}");
             }
         }
 
@@ -105,6 +138,8 @@ namespace glTF2Sharp.Schema2
         {
             try
             {
+                TestContext.Progress.WriteLine($"Loading {filePath.ToShortDisplayPath()}");
+
                 return ModelRoot.Load(filePath);
             }
             catch(ExtensionException eex)            

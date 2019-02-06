@@ -6,6 +6,21 @@ namespace glTF2Sharp
 {
     static class TestUtils
     {
+        public static string ToShortDisplayPath(this string path)
+        {
+            var dir = System.IO.Path.GetDirectoryName(path);
+            var fxt = System.IO.Path.GetFileName(path);
+
+            const int maxdir = 12;
+
+            if (dir.Length > maxdir)
+            {
+                dir = "..." + dir.Substring(dir.Length - maxdir);
+            }
+
+            return System.IO.Path.Combine(dir, fxt);
+        }
+
         public static string GetAttachmentPath(this NUnit.Framework.TestContext context, string fileName)
         {
             if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));

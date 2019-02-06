@@ -10,7 +10,7 @@ namespace glTF2Sharp.Schema2
 
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
-    [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{Buffer.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
+    [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{SourceBufferView.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
     public partial class Accessor
     {
         #region debug
@@ -88,11 +88,11 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.Matrix4x4Accessor CastToMatrix4x4Array()
+        public Memory.Matrix4x4Accessor CastToMatrix4x4Accessor()
         {
             Guard.IsTrue(this.Dimensions == ElementType.MAT4, nameof(Dimensions));
 
-            return SourceBufferView.CreateMatrix4x4Decoder(this.ByteOffset, this._componentType, this.Normalized);
+            return SourceBufferView.CreateMatrix4x4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
         #endregion
@@ -119,15 +119,12 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public UInt32[] TryGetIndices()
+        public Memory.IntegerAccessor CastToIndicesAccessor()
         {
-            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));            
-
-            return SourceBufferView
-                .CreateIndexDecoder(this.ByteOffset, this.Encoding.ToIndex())
-                .ToArray();
+            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
+            return SourceBufferView.CreateIndicesAccessor(this.ByteOffset, this.Encoding.ToIndex());
         }
-
+        
         #endregion
 
         #region Vertex Buffer API
@@ -150,6 +147,30 @@ namespace glTF2Sharp.Schema2
             this._normalized = normalized.AsNullable(false);
 
             _UpdateBounds();
+        }
+
+        public Memory.ScalarAccessor CastToScalarAccessor()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
+            return SourceBufferView.CreateScalarAccessor(this.ByteOffset, this.Encoding, this.Normalized);
+        }
+
+        public Memory.Vector2Accessor CastToVector2Accessor()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.VEC2, nameof(Dimensions));
+            return SourceBufferView.CreateVector2Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+        }
+
+        public Memory.Vector3Accessor CastToVector3Accessor()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.VEC3, nameof(Dimensions));
+            return SourceBufferView.CreateVector3Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+        }
+
+        public Memory.Vector4Accessor CastToVector4Accessor()
+        {
+            Guard.IsTrue(this.Dimensions == ElementType.VEC4, nameof(Dimensions));
+            return SourceBufferView.CreateVector4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)
@@ -178,9 +199,7 @@ namespace glTF2Sharp.Schema2
 
             if (count == 1)
             {
-                var accessor = SourceBufferView.CreateScalarDecoder(this.ByteOffset, this.Encoding, this.Normalized);
-
-                var minmax = Memory.AccessorsUtils.GetBounds(accessor);
+                var minmax = this.CastToScalarAccessor().GetBounds();
 
                 this._min[0] = minmax.Item1;
                 this._max[0] = minmax.Item2;
@@ -188,53 +207,44 @@ namespace glTF2Sharp.Schema2
 
             if (count == 2)
             {
-                var accessor = SourceBufferView.CreateVector2Decoder(this.ByteOffset, this.Encoding, this.Normalized);
+                var minmax = this.CastToVector2Accessor().GetBounds();
 
-                for (int i = 0; i < Count; ++i)
-                {
-                    var v2 = accessor[i];
+                this._min[0] = minmax.Item1.X;
+                this._max[0] = minmax.Item2.X;
 
-                    if (v2.X < this._min[0]) this._min[0] = v2.X;
-                    if (v2.X > this._max[0]) this._max[0] = v2.X;
-                    if (v2.Y < this._min[1]) this._min[1] = v2.Y;
-                    if (v2.Y > this._max[1]) this._max[1] = v2.Y;
-                }
+                this._min[1] = minmax.Item1.Y;
+                this._max[1] = minmax.Item2.Y;
             }
 
             if (count == 3)
             {
-                var accessor = SourceBufferView.CreateVector3Decoder(this.ByteOffset, this.Encoding, this.Normalized);
+                var minmax = this.CastToVector3Accessor().GetBounds();
 
-                for (int i = 0; i < Count; ++i)
-                {
-                    var v3 = accessor[i];
+                this._min[0] = minmax.Item1.X;
+                this._max[0] = minmax.Item2.X;
 
-                    if (v3.X < this._min[0]) this._min[0] = v3.X;
-                    if (v3.X > this._max[0]) this._max[0] = v3.X;
-                    if (v3.Y < this._min[1]) this._min[1] = v3.Y;
-                    if (v3.Y > this._max[1]) this._max[1] = v3.Y;
-                    if (v3.Z < this._min[2]) this._min[2] = v3.Z;
-                    if (v3.Z > this._max[2]) this._max[2] = v3.Z;
-                }
+                this._min[1] = minmax.Item1.Y;
+                this._max[1] = minmax.Item2.Y;
+
+                this._min[2] = minmax.Item1.Z;
+                this._max[2] = minmax.Item2.Z;
             }
 
             if (count == 4)
             {
-                var accessor = SourceBufferView.CreateVector4Decoder(this.ByteOffset, this.Encoding, this.Normalized);
+                var minmax = this.CastToVector4Accessor().GetBounds();
 
-                for (int i = 0; i < Count; ++i)
-                {
-                    var v4 = accessor[i];
+                this._min[0] = minmax.Item1.X;
+                this._max[0] = minmax.Item2.X;
 
-                    if (v4.X < this._min[0]) this._min[0] = v4.X;
-                    if (v4.X > this._max[0]) this._max[0] = v4.X;
-                    if (v4.Y < this._min[1]) this._min[1] = v4.Y;
-                    if (v4.Y > this._max[1]) this._max[1] = v4.Y;
-                    if (v4.Z < this._min[2]) this._min[2] = v4.Z;
-                    if (v4.Z > this._max[2]) this._max[2] = v4.Z;
-                    if (v4.W < this._min[3]) this._min[3] = v4.W;
-                    if (v4.W > this._max[3]) this._max[3] = v4.W;
-                }
+                this._min[1] = minmax.Item1.Y;
+                this._max[1] = minmax.Item2.Y;
+
+                this._min[2] = minmax.Item1.Z;
+                this._max[2] = minmax.Item2.Z;
+
+                this._min[3] = minmax.Item1.W;
+                this._max[3] = minmax.Item2.W;
             }
 
             if (count > 4)
@@ -257,7 +267,7 @@ namespace glTF2Sharp.Schema2
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if ((len & 3) != 0) exxx.Add(new ModelException(this, $"Expected length to be multiple of 4, found {len}"));
+                if (len > 0 && (len & 3) != 0) exxx.Add(new ModelException(this, $"Expected length to be multiple of 4, found {len}"));
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)

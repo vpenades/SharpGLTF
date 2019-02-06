@@ -8,6 +8,8 @@ namespace glTF2Sharp.Schema2
 {
     using BYTES = ArraySegment<Byte>;
 
+    using ENCODING = ComponentType;
+
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugView))]
     public partial class BufferView
     {
@@ -100,14 +102,14 @@ namespace glTF2Sharp.Schema2
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
         }
 
-        public Memory.IntegerAccessor CreateIndexDecoder(int byteOffset, IndexType encoding)
+        public Memory.IntegerAccessor CreateIndicesAccessor(int byteOffset, IndexType encoding)
         {
             Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
 
             return new Memory.IntegerAccessor(this.Data.Slice(byteOffset), encoding);
         }
 
-        public Memory.IAccessor<Vector4> CreateVertexDecoder(int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized)
+        public Memory.IAccessor<Vector4> CreateVertexAccessor(int byteOffset, ElementType dimensions, ENCODING encoding, Boolean normalized)
         {
             var srcData = this.Data.Slice(byteOffset);
 
@@ -121,32 +123,32 @@ namespace glTF2Sharp.Schema2
             }            
         }
 
-        public Memory.ScalarAccessor CreateScalarDecoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.ScalarAccessor CreateScalarAccessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.ScalarAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);            
         }
 
-        public Memory.Vector2Accessor CreateVector2Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.Vector2Accessor CreateVector2Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.Vector2Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector3Accessor CreateVector3Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.Vector3Accessor CreateVector3Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.Vector3Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector4Accessor CreateVector4Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.Vector4Accessor CreateVector4Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.Vector4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.QuaternionAccessor CreateQuaternionDecoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.QuaternionAccessor CreateQuaternionAccessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.QuaternionAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Matrix4x4Accessor CreateMatrix4x4Decoder(int byteOffset, ComponentType encoding, Boolean normalized)
+        public Memory.Matrix4x4Accessor CreateMatrix4x4Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
         {
             return new Memory.Matrix4x4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }

@@ -46,7 +46,7 @@ namespace glTF2Sharp.Schema2
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
 
-            var accessor = srcBuffer.CreateIndexDecoder(this._byteOffset ?? 0, this._componentType);
+            var accessor = srcBuffer.CreateIndicesAccessor(this._byteOffset ?? 0, this._componentType);
 
             return index => (int)accessor[index];
         }
@@ -72,7 +72,7 @@ namespace glTF2Sharp.Schema2
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
 
-            return srcBuffer.CreateVertexDecoder(this._byteOffset ?? 0, dimensions, encoding, normalized);
+            return srcBuffer.CreateVertexAccessor(this._byteOffset ?? 0, dimensions, encoding, normalized);
         }
 
         public Action<int, IList<Byte>, int, int> CopyTo(ROOT root, ElementType et, ComponentType ct)
