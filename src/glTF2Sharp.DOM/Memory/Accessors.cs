@@ -6,7 +6,7 @@ using System.Text;
 
 namespace glTF2Sharp.Memory
 {
-    public interface IAccessor<T> // : IReadOnlyList<T>
+    public interface IAccessor<T>
         where T : unmanaged
     {
         int Count { get; }

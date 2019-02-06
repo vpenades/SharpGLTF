@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
+using System.Collections;
 
 namespace glTF2Sharp.Memory
 {
     
-    using BYTES = ArraySegment<Byte>;
-
-    
+    using BYTES = ArraySegment<Byte>;    
 
     /// <summary>
     /// Helper structure to access any Byte array as an array of <see cref="Schema2.ComponentType"/>
@@ -183,8 +182,11 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
-    public struct ScalarAccessor : IAccessor<Single> , IAccessor<Vector4>
+    public struct ScalarAccessor : IAccessor<Single> , IAccessor<Vector4>, IReadOnlyCollection<Single>
     {
+        public ScalarAccessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data), byteStride, type, normalized) { }
+
         public ScalarAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -210,11 +212,18 @@ namespace glTF2Sharp.Memory
 
         public void CopyTo(ArraySegment<Single> dst) { AccessorsUtils.Copy<Single>(this, dst); }
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }        
+        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+
+        public IEnumerator<Single> GetEnumerator() { return new AccessorEnumerator<Single>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Single>(this); }
     }
 
-    public struct Vector2Accessor : IAccessor<Vector2>, IAccessor<Vector4>
+    public struct Vector2Accessor : IAccessor<Vector2>, IAccessor<Vector4>, IReadOnlyCollection<Vector2>
     {
+        public Vector2Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data),byteStride,type,normalized) { }
+        
         public Vector2Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -251,10 +260,17 @@ namespace glTF2Sharp.Memory
         public void CopyTo(ArraySegment<Vector2> dst) { AccessorsUtils.Copy<Vector2>(this, dst); }
 
         public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+
+        public IEnumerator<Vector2> GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
     }
 
-    public struct Vector3Accessor: IAccessor<Vector3>, IAccessor<Vector4>
+    public struct Vector3Accessor: IAccessor<Vector3>, IAccessor<Vector4>, IReadOnlyCollection<Vector3>
     {
+        public Vector3Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data), byteStride, type, normalized) { }
+
         public Vector3Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -292,10 +308,17 @@ namespace glTF2Sharp.Memory
         public void CopyTo(ArraySegment<Vector3> dst) { AccessorsUtils.Copy<Vector3>(this, dst); }
 
         public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+
+        public IEnumerator<Vector3> GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
     }
 
-    public struct Vector4Accessor: IAccessor<Vector4>
+    public struct Vector4Accessor: IAccessor<Vector4>, IReadOnlyCollection<Vector4>
     {
+        public Vector4Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data), byteStride, type, normalized) { }
+
         public Vector4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -326,10 +349,17 @@ namespace glTF2Sharp.Memory
         }        
 
         public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+
+        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
     }
 
-    public struct QuaternionAccessor : IAccessor<Quaternion>, IAccessor<Vector4>
+    public struct QuaternionAccessor : IAccessor<Quaternion>, IAccessor<Vector4>, IReadOnlyCollection<Quaternion>
     {
+        public QuaternionAccessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data), byteStride, type, normalized) { }
+
         public QuaternionAccessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -368,10 +398,17 @@ namespace glTF2Sharp.Memory
         public void CopyTo(ArraySegment<Quaternion> dst) { AccessorsUtils.Copy<Quaternion>(this, dst); }
 
         public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+
+        public IEnumerator<Quaternion> GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
     }
 
-    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
+    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>, IReadOnlyCollection<Matrix4x4>
     {
+        public Matrix4x4Accessor(Byte[] data, int byteStride, Schema2.ComponentType type, Boolean normalized)
+            : this(new BYTES(data), byteStride, type, normalized) { }
+
         public Matrix4x4Accessor(BYTES data, int byteStride, Schema2.ComponentType type, Boolean normalized)
         {
             _Accesor = FloatingAccessor.Create(data, type, normalized);
@@ -420,5 +457,9 @@ namespace glTF2Sharp.Memory
         }
 
         public void CopyTo(ArraySegment<Matrix4x4> dst) { AccessorsUtils.Copy<Matrix4x4>(this, dst); }
+
+        public IEnumerator<Matrix4x4> GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
     }
 }

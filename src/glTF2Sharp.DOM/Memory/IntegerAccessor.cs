@@ -4,12 +4,13 @@ using System.Text;
 
 namespace glTF2Sharp.Memory
 {
+    using System.Collections;
     using BYTES = ArraySegment<Byte>;
 
     /// <summary>
     /// Helper structure to access any Byte array as an array of <see cref="Schema2.IndexType"/>
     /// </summary>
-    public struct IntegerAccessor : IAccessor<UInt32>, IAccessor<Int32>
+    public struct IntegerAccessor : IAccessor<UInt32>, IAccessor<Int32>, IReadOnlyCollection<UInt32>
     {
         #region constructors
 
@@ -103,6 +104,10 @@ namespace glTF2Sharp.Memory
         public void CopyTo(ArraySegment<UInt32> dst) { AccessorsUtils.Copy<UInt32>(this, dst); }
 
         public void CopyTo(ArraySegment<Int32> dst) { AccessorsUtils.Copy<Int32>(this, dst); }
+
+        public IEnumerator<UInt32> GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
 
         #endregion
     }
