@@ -17,6 +17,7 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [ ] Mesh Building utilities.
 - [ ] Animation utilities.
 - [ ] Material utilities
+- [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
 
 ### Supported Extensions
 
