@@ -12,7 +12,7 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [x] Logical Data Access.
 - [x] Visual Tree Access.
 - [x] Vertex and Index buffer decoding.
-- [ ] gltf.Extra field ; *Help Neeed*
+- [ ] gltf.Extra field ; *Help Need*
 - [ ] Scene Evaluation.
 - [ ] Mesh Building utilities.
 - [ ] Animation utilities.
