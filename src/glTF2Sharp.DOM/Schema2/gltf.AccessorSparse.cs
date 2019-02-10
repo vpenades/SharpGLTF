@@ -38,7 +38,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.SparseAccessor<Single> GetScalarAccesor(Accessor baseAccessor)
         {
-            var bot = baseAccessor.CastToScalarAccessor();
+            var bot = baseAccessor.CastToScalarAccessor(false);
             var top = this._values.CastToScalarAccessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
             var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
 
@@ -47,7 +47,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.SparseAccessor<Vector2> GetVector2Accesor(Accessor baseAccessor)
         {
-            var bot = baseAccessor.CastToVector2Accessor();
+            var bot = baseAccessor.CastToVector2Accessor(false);
             var top = this._values.CastToVector2Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
             var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
 
@@ -56,7 +56,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.SparseAccessor<Vector3> GetVector3Accesor(Accessor baseAccessor)
         {
-            var bot = baseAccessor.CastToVector3Accessor();
+            var bot = baseAccessor.CastToVector3Accessor(false);
             var top = this._values.CastToVector3Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
             var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
 
@@ -65,7 +65,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.SparseAccessor<Vector4> GetVector4Accesor(Accessor baseAccessor)
         {
-            var bot = baseAccessor.CastToVector4Accessor();
+            var bot = baseAccessor.CastToVector4Accessor(false);
             var top = this._values.CastToVector4Accessor(baseAccessor.LogicalParent, baseAccessor.Encoding, baseAccessor.Normalized);
             var idx = this._indices.CastToIndicesAccessor(baseAccessor.LogicalParent);
 

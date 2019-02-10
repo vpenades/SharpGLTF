@@ -151,27 +151,39 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.ScalarAccessor CastToScalarAccessor()
+        public Memory.IAccessor<Single> CastToScalarAccessor(bool useSparse=true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
-            return SourceBufferView.CreateScalarAccessor(this.ByteOffset, this.Encoding, this.Normalized);
+
+            if (this._sparse != null && useSparse) return this._sparse.GetScalarAccesor(this);
+
+            return SourceBufferView.CreateScalarAccessor(this.ByteOffset, this.Encoding, this.Normalized);            
         }
 
-        public Memory.Vector2Accessor CastToVector2Accessor()
+        public Memory.IAccessor<Vector2> CastToVector2Accessor(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC2, nameof(Dimensions));
+
+            if (this._sparse != null && useSparse) return this._sparse.GetVector2Accesor(this);
+
             return SourceBufferView.CreateVector2Accessor(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
-        public Memory.Vector3Accessor CastToVector3Accessor()
+        public Memory.IAccessor<Vector3> CastToVector3Accessor(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC3, nameof(Dimensions));
+
+            if (this._sparse != null && useSparse) return this._sparse.GetVector3Accesor(this);
+
             return SourceBufferView.CreateVector3Accessor(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
-        public Memory.Vector4Accessor CastToVector4Accessor()
+        public Memory.IAccessor<Vector4> CastToVector4Accessor(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC4, nameof(Dimensions));
+
+            if (this._sparse != null && useSparse) return this._sparse.GetVector4Accesor(this);
+
             return SourceBufferView.CreateVector4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
         }
 

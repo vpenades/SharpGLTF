@@ -134,7 +134,7 @@ namespace glTF2Sharp.Schema2
 
         #region model loading
 
-        static ModelRoot _LoadModel(string filePath)
+        public static ModelRoot _LoadModel(string filePath)
         {
             try
             {
