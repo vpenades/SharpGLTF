@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace glTF2Sharp.Memory
@@ -9,6 +10,7 @@ namespace glTF2Sharp.Memory
     /// Special accessor to wrap over a base accessor and a sparse accessor
     /// </summary>
     /// <typeparam name="T"></typeparam>
+    [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
     public struct SparseAccessor<T> : IAccessor<T>
         where T : unmanaged
     {
@@ -31,13 +33,24 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IAccessor<T> _BottomItems;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IAccessor<T> _TopItems;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Dictionary<int, int> _Mapping;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private T[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _BottomItems.Count;
 
         public T this[int index]
         {
@@ -46,9 +59,7 @@ namespace glTF2Sharp.Memory
             {
                 if (_Mapping.TryGetValue(index, out int topIndex)) _TopItems[topIndex] = value;
             }
-        }
-
-        public int Count => _BottomItems.Count;
+        }        
 
         public void CopyTo(ArraySegment<T> dst) { AccessorsUtils.Copy(this, dst); }
 

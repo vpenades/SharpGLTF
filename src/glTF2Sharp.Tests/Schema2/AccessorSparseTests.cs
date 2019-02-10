@@ -11,39 +11,19 @@ namespace glTF2Sharp.Schema2
     public class AccessorSparseTests
     {
         [Test]
-        public void LoadMorphCubeModel()
+        public void LoadSparseModels()
         {
-            foreach (var path in TestFiles.GetGeneratedFilePaths())
-            {
-                var model = ModelRoot.Load(path);
-                Assert.NotNull(model);
-
-                var primitives = model.LogicalMeshes
-                    .SelectMany(item => item.Primitives)
-                    .Where(item => item.MorpthTargets > 0);
-                
-                foreach (var primitive in primitives)
-                {
-                    var basePositions = primitive.GetVertexAccessor("POSITION").CastToVector3Accessor();
-
-                    for (int i = 0; i < primitive.MorpthTargets; ++i)
-                    {
-                        var morphs = primitive.GetMorphTargetAccessors(i);
-                        Assert.NotNull(morphs);
-
-                        var morphPositions = morphs["POSITION"].CastToVector3Accessor();
-
-                        // Assert.AreEqual(basePositions.Count, morphPositions.Count);
-
-                        if (morphs["POSITION"].IsSparse)
-                        {
-                            TestContext.WriteLine($"{path}");
-                        }
-                    }
-                }                
-            }
-
+            var path = TestFiles.GetSampleFilePaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
             
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            var primitive = model.LogicalMeshes[0].Primitives[0];
+
+            var accessor = primitive.GetVertexAccessor("POSITION");
+
+            var basePositions = accessor.CastToVector3Accessor(false);
+            var goodPositions = accessor.CastToVector3Accessor(true);
         }
     }
 }

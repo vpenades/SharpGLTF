@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace glTF2Sharp.Debug
@@ -48,17 +49,5 @@ namespace glTF2Sharp.Debug
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
-    }
-
-    [System.Diagnostics.DebuggerDisplay("{_Value.Count}")]
-    internal sealed class _MemoryAccessorDebugView<T>
-        where T:unmanaged
-    {
-        public _MemoryAccessorDebugView(Memory.IAccessor<T> value) { _Value = value; }        
-
-        private readonly Memory.IAccessor<T> _Value;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
-        public T[] Accessors => _Value.ToArray();
-    }
+    }    
 }

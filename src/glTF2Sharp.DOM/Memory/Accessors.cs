@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 
 namespace glTF2Sharp.Memory
-{
+{    
     public interface IAccessor<T> : IReadOnlyCollection<T>
         where T : unmanaged
     {        

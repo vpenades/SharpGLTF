@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Collections;
+using System.Linq;
 
 namespace glTF2Sharp.Memory
 {    
@@ -12,7 +13,7 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of UInt32 indices
     /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<UInt32>))]
+    [System.Diagnostics.DebuggerDisplay("Integer Accessor {Count}")]
     public struct IntegerAccessor : IAccessor<UInt32>
     {
         #region constructors
@@ -77,15 +78,26 @@ namespace glTF2Sharp.Memory
 
         delegate void _SetterCallback(int index, UInt32 value);
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly BYTES _Data;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly _GetterCallback _Getter;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly _SetterCallback _Setter;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private UInt32[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Data.Count / _ByteStride;
 
         public UInt32 this[int index]

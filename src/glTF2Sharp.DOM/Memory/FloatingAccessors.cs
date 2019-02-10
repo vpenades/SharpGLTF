@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
 using System.Collections;
+using System.Linq;
 
 namespace glTF2Sharp.Memory
 {    
@@ -188,7 +189,7 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Single Scalar values
     /// </summary>
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Single>))]
+    [System.Diagnostics.DebuggerDisplay("Scalar Accessor {Count}")]
     public struct ScalarAccessor : IAccessor<Single>
     {
         #region constructors
@@ -206,13 +207,20 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Single[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accesor.ByteLength / _ByteStride;
         
         public Single this[int index]
@@ -236,8 +244,8 @@ namespace glTF2Sharp.Memory
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Vector2 values
-    /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector2>))]
+    /// </summary>    
+    [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
     public struct Vector2Accessor : IAccessor<Vector2>
     {
         #region constructors
@@ -255,8 +263,14 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Vector2[] _DebugItems => this.ToArray();
 
         #endregion
 
@@ -295,8 +309,8 @@ namespace glTF2Sharp.Memory
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Vector3 values
-    /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector3>))]
+    /// </summary>    
+    [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
     public struct Vector3Accessor: IAccessor<Vector3>
     {
         #region constructors
@@ -314,13 +328,20 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Vector3[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accesor.ByteLength / _ByteStride;
 
         public Vector3 this[int index]
@@ -355,8 +376,8 @@ namespace glTF2Sharp.Memory
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Vector4 values
-    /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Vector4>))]
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
     public struct Vector4Accessor: IAccessor<Vector4>
     {
         #region constructors
@@ -374,13 +395,20 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Vector4[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accesor.ByteLength / _ByteStride;
 
         public Vector4 this[int index]
@@ -416,8 +444,8 @@ namespace glTF2Sharp.Memory
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Quaternion values
-    /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Quaternion>))]
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Quaternion Accessor {Count}")]
     public struct QuaternionAccessor : IAccessor<Quaternion>
     {
         #region constructors
@@ -435,13 +463,20 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Quaternion[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accesor.ByteLength / _ByteStride;
 
         public Quaternion this[int index]
@@ -477,8 +512,8 @@ namespace glTF2Sharp.Memory
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Matrix4x4 values
-    /// </summary
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MemoryAccessorDebugView<Matrix4x4>))]
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("MAtrix4x4 Accessor {Count}")]
     public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
     {
         #region constructors
@@ -496,13 +531,20 @@ namespace glTF2Sharp.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Matrix4x4[] _DebugItems => this.ToArray();
 
         #endregion
 
         #region API
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accesor.ByteLength / _ByteStride;
 
         public Matrix4x4 this[int index]
