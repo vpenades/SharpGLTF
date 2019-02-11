@@ -10,9 +10,9 @@ namespace glTF2Sharp.Schema2
     {
         IEnumerable<Node> VisualChildren { get; }
 
-        Node AddNode(string name);
+        Node AddVisualNode(string name);
 
-        Node FindNode(string name);
+        Node FindVisualNode(string name);
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
@@ -158,7 +158,7 @@ namespace glTF2Sharp.Schema2
             return allChildren;
         }
 
-        public Node AddNode(string name)
+        public Node AddVisualNode(string name)
         {
             var node = this.LogicalParent._AddLogicalNode(this._children);
             node.Name = name;
@@ -175,7 +175,7 @@ namespace glTF2Sharp.Schema2
             this._children.Add(idx);
         }
 
-        public Node FindNode(string name)
+        public Node FindVisualNode(string name)
         {
             return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }
@@ -292,19 +292,19 @@ namespace glTF2Sharp.Schema2
             return VisualChildren.Any(item => item._ContainsVisualNode(node, true));
         }
 
-        public Node AddNode(string name)
+        public Node AddVisualNode(String name)
         {
             return this.LogicalParent._AddLogicalNode(this._nodes);
         }
 
-        public void AddNode(Node node)
+        public void AddVisualNode(Node node)
         {
             var idx = this.LogicalParent._UseLogicaNode(node);
 
             this._nodes.Add(idx);
         }
 
-        public Node FindNode(string name)
+        public Node FindVisualNode(String name)
         {
             return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }

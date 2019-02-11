@@ -11,14 +11,14 @@ namespace glTF2Sharp.Schema2
     {
         #region lifecycle
 
-        public static Material CreateBestChoice(IReadOnlyList<String> channelKeys)
+        internal static Material CreateBestChoice(IReadOnlyList<String> channelKeys)
         {
             if (channelKeys.Contains("Diffuse") && channelKeys.Contains("Glossiness")) return CreateMaterialPBRSpecularGlossiness();
 
                 return CreatePBRMetallicRoughness();
         }
 
-        public static Material CreatePBRMetallicRoughness()
+        internal static Material CreatePBRMetallicRoughness()
         {
             var m = new Material
             {
@@ -28,7 +28,7 @@ namespace glTF2Sharp.Schema2
             return m;
         }
 
-        public static Material CreateMaterialPBRSpecularGlossiness()
+        internal static Material CreateMaterialPBRSpecularGlossiness()
         {
             var m = new Material();
 
@@ -37,7 +37,7 @@ namespace glTF2Sharp.Schema2
             return m;
         }
 
-        public static Material CreateMaterialUnlit()
+        internal static Material CreateMaterialUnlit()
         {
             var m = new Material();
 
@@ -54,13 +54,13 @@ namespace glTF2Sharp.Schema2
 
         public AlphaMode Alpha
         {
-            get => _alphaMode ?? _alphaModeDefault;
-            set => _alphaMode = value == _alphaModeDefault ? (AlphaMode?)null : value;
+            get => _alphaMode.AsValue(_alphaModeDefault);
+            set => _alphaMode = value.AsNullable(_alphaModeDefault);
         }
 
         public Double AlphaCutoff
         {
-            get => _alphaCutoff ?? _alphaCutoffDefault;
+            get => _alphaCutoff.AsValue(_alphaCutoffDefault);
             set => _alphaCutoff = value.AsNullable(_alphaCutoffDefault, _alphaCutoffMinimum, double.MaxValue);
         }
 
@@ -70,10 +70,7 @@ namespace glTF2Sharp.Schema2
             set => _doubleSided = value.AsNullable(_doubleSidedDefault);
         }
 
-        public Boolean Unlit
-        {
-            get => this.GetExtension<MaterialUnlit_KHR>() != null;            
-        }
+        public Boolean Unlit => this.GetExtension<MaterialUnlit_KHR>() != null;
 
         public IEnumerable<MaterialChannelView> Channels
         {
@@ -302,7 +299,7 @@ namespace glTF2Sharp.Schema2
                 value => _specularFactor = new Vector3(value.X,value.Y,value.Z).AsNullable(_specularFactorDefault)
                 );
         }
-    }
+    }    
 
     public partial class ModelRoot
     {

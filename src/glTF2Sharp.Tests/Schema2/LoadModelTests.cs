@@ -104,7 +104,7 @@ namespace glTF2Sharp.Schema2
 
             var scene = model.DefaultScene;
 
-            var pollyNode = scene.FindNode("Polly_Display");            
+            var pollyNode = scene.FindVisualNode("Polly_Display");            
 
             var pollyPrimitive = pollyNode.Mesh.Primitives[0];
 

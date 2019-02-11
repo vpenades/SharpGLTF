@@ -57,7 +57,7 @@ namespace glTF2Sharp.Schema2
 
             var scene = root.UseScene("Empty Scene");
 
-            var node = scene.AddNode("Triangle");
+            var node = scene.AddVisualNode("Triangle");
 
             // assign the mesh we previously created
 
