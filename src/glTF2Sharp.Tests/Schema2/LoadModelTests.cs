@@ -108,9 +108,9 @@ namespace glTF2Sharp.Schema2
 
             var pollyPrimitive = pollyNode.Mesh.Primitives[0];
 
-            var pollyIndices = pollyPrimitive.IndexAccessor.CastToIndicesAccessor();
-            var pollyPositions = pollyPrimitive.VertexAccessors["POSITION"].CastToVector3Accessor();
-            var pollyNormals = pollyPrimitive.VertexAccessors["NORMAL"].CastToVector3Accessor();
+            var pollyIndices = pollyPrimitive.GetIndices();
+            var pollyPositions = pollyPrimitive.GetVertexPositions();
+            var pollyNormals = pollyPrimitive.GetVertexNormals();
 
             for (int i=0; i < pollyIndices.Count; i+=3)
             {

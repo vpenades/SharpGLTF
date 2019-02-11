@@ -8,10 +8,10 @@ using NUnit.Framework;
 namespace glTF2Sharp.Memory
 {
     [TestFixture]
-    public class MemoryAccessorTests
+    public class MemoryArrayTests
     {
         [Test]
-        public void TestFloatingAccesor()
+        public void TestFloatingArray()
         {
             Assert.AreEqual(17, new FloatingAccessor(new Byte[] { 17 }, Schema2.ComponentType.UNSIGNED_BYTE, false)[0]);
             Assert.AreEqual(17, new FloatingAccessor(new Byte[] { 17, 0 }, Schema2.ComponentType.UNSIGNED_SHORT, false)[0]);            
@@ -36,7 +36,7 @@ namespace glTF2Sharp.Memory
         {
             var buffer = new Byte[] { 1, 52, 43, 6, 23, 234 };
 
-            var accessor = new Vector2Accessor(buffer, 0, Schema2.ComponentType.BYTE, true);
+            var accessor = new Vector2Array(buffer, 0, Schema2.ComponentType.BYTE, true);
 
             var result = accessor.ToArray();
 

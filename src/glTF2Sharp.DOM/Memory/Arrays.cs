@@ -6,7 +6,7 @@ using System.Text;
 
 namespace glTF2Sharp.Memory
 {    
-    public interface IAccessor<T> : IReadOnlyCollection<T>
+    public interface IEncodedArray<T> : IReadOnlyCollection<T>
         where T : unmanaged
     {        
         T this[int index] { get; set; }
@@ -21,7 +21,7 @@ namespace glTF2Sharp.Memory
     {
         #region lifecycle        
 
-        public AccessorEnumerator(IAccessor<T> accessor)
+        public AccessorEnumerator(IEncodedArray<T> accessor)
         {
             this._Accessor = accessor;
             this._Count = accessor.Count;
@@ -37,7 +37,7 @@ namespace glTF2Sharp.Memory
 
         #region data
 
-        private readonly IAccessor<T> _Accessor;
+        private readonly IEncodedArray<T> _Accessor;
         private readonly int _Count;
         private int _Index;
 
@@ -65,18 +65,18 @@ namespace glTF2Sharp.Memory
 
     public static class AccessorsUtils
     {
-        public static void Copy<T>(IAccessor<T> src, T[] dst) where T : unmanaged
+        public static void Copy<T>(IEncodedArray<T> src, T[] dst) where T : unmanaged
         {
             Copy<T>(src, new ArraySegment<T>(dst));
         }
 
-        public static void Copy<T>(IAccessor<T> src, ArraySegment<T> dst) where T : unmanaged
+        public static void Copy<T>(IEncodedArray<T> src, ArraySegment<T> dst) where T : unmanaged
         {
             var c = src.Count;
             for (int i = 0; i < c; ++i) dst.Array[dst.Offset + i] = src[i];
         }                
 
-        public static (Single, Single) GetBounds(ScalarAccessor accesor)
+        public static (Single, Single) GetBounds(ScalarArray accesor)
         {
             var min = Single.MaxValue;
             var max = Single.MinValue;
@@ -92,7 +92,7 @@ namespace glTF2Sharp.Memory
             return (min, max);
         }
 
-        public static (Vector2, Vector2) GetBounds(Vector2Accessor accesor)
+        public static (Vector2, Vector2) GetBounds(Vector2Array accesor)
         {
             var min = new Vector2(Single.MaxValue);
             var max = new Vector2(Single.MinValue);
@@ -108,7 +108,7 @@ namespace glTF2Sharp.Memory
             return (min, max);
         }
 
-        public static (Vector3, Vector3) GetBounds(Vector3Accessor accesor)
+        public static (Vector3, Vector3) GetBounds(Vector3Array accesor)
         {
             var min = new Vector3(Single.MaxValue);
             var max = new Vector3(Single.MinValue);
@@ -124,7 +124,7 @@ namespace glTF2Sharp.Memory
             return (min, max);
         }
 
-        public static (Vector4, Vector4) GetBounds(IAccessor<Vector4> accesor)
+        public static (Vector4, Vector4) GetBounds(IEncodedArray<Vector4> accesor)
         {
             var min = new Vector4(Single.MaxValue);
             var max = new Vector4(Single.MinValue);
@@ -145,14 +145,14 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps a collection of Scalar values and exposes it as a collection of Vector4 values
     /// </summary>
-    struct _MapScalarToVector4 : IAccessor<Vector4>
+    struct _MapScalarToVector4 : IEncodedArray<Vector4>
     {
-        public _MapScalarToVector4(ScalarAccessor source)
+        public _MapScalarToVector4(ScalarArray source)
         {
             _Accessor = source;
         }
 
-        private ScalarAccessor _Accessor;
+        private ScalarArray _Accessor;
 
         public int Count => _Accessor.Count;
 
@@ -174,14 +174,14 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps a collection of Vector2 values and exposes it as a collection of Vector4 values
     /// </summary>
-    struct _MapVector2ToVector4 : IAccessor<Vector4>
+    struct _MapVector2ToVector4 : IEncodedArray<Vector4>
     {
-        public _MapVector2ToVector4(Vector2Accessor source)
+        public _MapVector2ToVector4(Vector2Array source)
         {
             _Accessor = source;
         }
 
-        private Vector2Accessor _Accessor;
+        private Vector2Array _Accessor;
 
         public int Count => _Accessor.Count;
 
@@ -203,14 +203,14 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps a collection of Vector3 values and exposes it as a collection of Vector4 values
     /// </summary>
-    struct _MapVector3ToVector4 : IAccessor<Vector4>
+    struct _MapVector3ToVector4 : IEncodedArray<Vector4>
     {
-        public _MapVector3ToVector4(Vector3Accessor source)
+        public _MapVector3ToVector4(Vector3Array source)
         {
             _Accessor = source;
         }
 
-        private Vector3Accessor _Accessor;
+        private Vector3Array _Accessor;
 
         public int Count => _Accessor.Count;
 
@@ -232,14 +232,14 @@ namespace glTF2Sharp.Memory
     /// <summary>
     /// Wraps a collection of Quaternion values and exposes it as a collection of Vector4 values
     /// </summary>
-    struct _MapQuaternionToVector4 : IAccessor<Vector4>
+    struct _MapQuaternionToVector4 : IEncodedArray<Vector4>
     {
-        public _MapQuaternionToVector4(QuaternionAccessor source)
+        public _MapQuaternionToVector4(QuaternionArray source)
         {
             _Accessor = source;
         }
 
-        private QuaternionAccessor _Accessor;
+        private QuaternionArray _Accessor;
 
         public int Count => _Accessor.Count;
 

@@ -190,14 +190,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Single Scalar values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Scalar Accessor {Count}")]
-    public struct ScalarAccessor : IAccessor<Single>
+    public struct ScalarArray : IEncodedArray<Single>
     {
         #region constructors
 
-        public ScalarAccessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data), byteStride, encoding, normalized) { }
 
-        public ScalarAccessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 1, byteStride);
@@ -237,7 +237,7 @@ namespace glTF2Sharp.Memory
 
         public (Single, Single) GetBounds() { return AccessorsUtils.GetBounds(this); }
 
-        public IAccessor<Vector4> AsVector4() { return new _MapScalarToVector4(this); }        
+        public IEncodedArray<Vector4> AsVector4() { return new _MapScalarToVector4(this); }        
 
         #endregion
     }
@@ -246,14 +246,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Vector2 values
     /// </summary>    
     [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
-    public struct Vector2Accessor : IAccessor<Vector2>
+    public struct Vector2Array : IEncodedArray<Vector2>
     {
         #region constructors
 
-        public Vector2Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data),byteStride,encoding,normalized) { }
         
-        public Vector2Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 2, byteStride);
@@ -302,7 +302,7 @@ namespace glTF2Sharp.Memory
 
         public (Vector2, Vector2) GetBounds() { return AccessorsUtils.GetBounds(this); }
 
-        public IAccessor<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }        
+        public IEncodedArray<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }        
 
         #endregion
     }
@@ -311,14 +311,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Vector3 values
     /// </summary>    
     [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
-    public struct Vector3Accessor: IAccessor<Vector3>
+    public struct Vector3Array: IEncodedArray<Vector3>
     {
         #region constructors
 
-        public Vector3Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data), byteStride, encoding, normalized) { }
 
-        public Vector3Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 3, byteStride);
@@ -369,7 +369,7 @@ namespace glTF2Sharp.Memory
 
         public (Vector3, Vector3) GetBounds() { return AccessorsUtils.GetBounds(this); }
 
-        public IAccessor<Vector4> AsVector4() { return new _MapVector3ToVector4(this); }
+        public IEncodedArray<Vector4> AsVector4() { return new _MapVector3ToVector4(this); }
 
         #endregion
     }
@@ -378,14 +378,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Vector4 values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
-    public struct Vector4Accessor: IAccessor<Vector4>
+    public struct Vector4Array: IEncodedArray<Vector4>
     {
         #region constructors
 
-        public Vector4Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data), byteStride, encoding, normalized) { }
 
-        public Vector4Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
@@ -437,7 +437,7 @@ namespace glTF2Sharp.Memory
 
         public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
 
-        public IAccessor<Vector4> AsVector4() { return this; }
+        public IEncodedArray<Vector4> AsVector4() { return this; }
 
         #endregion
     }
@@ -446,14 +446,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Quaternion values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Quaternion Accessor {Count}")]
-    public struct QuaternionAccessor : IAccessor<Quaternion>
+    public struct QuaternionArray : IEncodedArray<Quaternion>
     {
         #region constructors
 
-        public QuaternionAccessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data), byteStride, encoding, normalized) { }
 
-        public QuaternionAccessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
@@ -505,7 +505,7 @@ namespace glTF2Sharp.Memory
 
         public (Quaternion, Quaternion) GetBounds() { throw new NotImplementedException(); }
 
-        public IAccessor<Vector4> AsVector4() { return new _MapQuaternionToVector4(this); }
+        public IEncodedArray<Vector4> AsVector4() { return new _MapQuaternionToVector4(this); }
 
         #endregion
     }
@@ -514,14 +514,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Matrix4x4 values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("MAtrix4x4 Accessor {Count}")]
-    public struct Matrix4x4Accessor : IAccessor<Matrix4x4>
+    public struct Matrix4x4Array : IEncodedArray<Matrix4x4>
     {
         #region constructors
 
-        public Matrix4x4Accessor(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
             : this(new BYTES(data), byteStride, encoding, normalized) { }
 
-        public Matrix4x4Accessor(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(encoding.ByteLength() * 16, byteStride);

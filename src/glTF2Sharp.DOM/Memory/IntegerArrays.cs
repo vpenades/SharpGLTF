@@ -14,14 +14,14 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of UInt32 indices
     /// </summary
     [System.Diagnostics.DebuggerDisplay("Integer Accessor {Count}")]
-    public struct IntegerAccessor : IAccessor<UInt32>
+    public struct IntegerArray : IEncodedArray<UInt32>
     {
         #region constructors
 
-        public IntegerAccessor(Byte[] data, ENCODING encoding)
+        public IntegerArray(Byte[] data, ENCODING encoding)
             : this(new BYTES(data), encoding) { }
 
-        public IntegerAccessor(BYTES data, ENCODING encoding)
+        public IntegerArray(BYTES data, ENCODING encoding)
         {
             _Data = data;
             _ByteStride = encoding.ByteLength();

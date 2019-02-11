@@ -88,12 +88,12 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.Matrix4x4Accessor CastToMatrix4x4Accessor()
+        public Memory.Matrix4x4Array CastToMatrix4x4Accessor()
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.MAT4, nameof(Dimensions));
 
-            return SourceBufferView.CreateMatrix4x4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateMatrix4x4Array(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
         #endregion
@@ -120,11 +120,11 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.IntegerAccessor CastToIndicesAccessor()
+        public Memory.IntegerArray CastToIndicesAccessor()
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
-            return SourceBufferView.CreateIndicesAccessor(this.ByteOffset, this.Encoding.ToIndex());
+            return SourceBufferView.CreateIndicesArray(this.ByteOffset, this.Encoding.ToIndex());
         }
         
         #endregion
@@ -151,40 +151,40 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.IAccessor<Single> CastToScalarAccessor(bool useSparse=true)
+        public Memory.IEncodedArray<Single> AsScalarArray(bool useSparse=true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
 
-            if (this._sparse != null && useSparse) return this._sparse.GetScalarAccesor(this);
+            if (this._sparse != null && useSparse) return this._sparse.GetScalarArray(this);
 
-            return SourceBufferView.CreateScalarAccessor(this.ByteOffset, this.Encoding, this.Normalized);            
+            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Encoding, this.Normalized);            
         }
 
-        public Memory.IAccessor<Vector2> CastToVector2Accessor(bool useSparse = true)
+        public Memory.IEncodedArray<Vector2> AsVector2Array(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC2, nameof(Dimensions));
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector2Accesor(this);
+            if (this._sparse != null && useSparse) return this._sparse.GetVector2Array(this);
 
-            return SourceBufferView.CreateVector2Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector2Array(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
-        public Memory.IAccessor<Vector3> CastToVector3Accessor(bool useSparse = true)
+        public Memory.IEncodedArray<Vector3> AsVector3Array(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC3, nameof(Dimensions));
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector3Accesor(this);
+            if (this._sparse != null && useSparse) return this._sparse.GetVector3Array(this);
 
-            return SourceBufferView.CreateVector3Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector3Array(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
-        public Memory.IAccessor<Vector4> CastToVector4Accessor(bool useSparse = true)
+        public Memory.IEncodedArray<Vector4> AsVector4Array(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.VEC4, nameof(Dimensions));
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector4Accesor(this);
+            if (this._sparse != null && useSparse) return this._sparse.GetVector4Array(this);
 
-            return SourceBufferView.CreateVector4Accessor(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector4Array(this.ByteOffset, this.Encoding, this.Normalized);
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)
@@ -213,7 +213,7 @@ namespace glTF2Sharp.Schema2
 
             if (count == 1)
             {
-                var minmax = this.CastToScalarAccessor().GetBounds();
+                var minmax = this.AsScalarArray().GetBounds();
 
                 this._min[0] = minmax.Item1;
                 this._max[0] = minmax.Item2;
@@ -221,7 +221,7 @@ namespace glTF2Sharp.Schema2
 
             if (count == 2)
             {
-                var minmax = this.CastToVector2Accessor().GetBounds();
+                var minmax = this.AsVector2Array().GetBounds();
 
                 this._min[0] = minmax.Item1.X;
                 this._max[0] = minmax.Item2.X;
@@ -232,7 +232,7 @@ namespace glTF2Sharp.Schema2
 
             if (count == 3)
             {
-                var minmax = this.CastToVector3Accessor().GetBounds();
+                var minmax = this.AsVector3Array().GetBounds();
 
                 this._min[0] = minmax.Item1.X;
                 this._max[0] = minmax.Item2.X;
@@ -246,7 +246,7 @@ namespace glTF2Sharp.Schema2
 
             if (count == 4)
             {
-                var minmax = this.CastToVector4Accessor().GetBounds();
+                var minmax = this.AsVector4Array().GetBounds();
 
                 this._min[0] = minmax.Item1.X;
                 this._max[0] = minmax.Item2.X;

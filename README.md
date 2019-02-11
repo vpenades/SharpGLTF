@@ -47,3 +47,6 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [ ] [EXT_texture_webp](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_webp)
 - [ ] [ADOBE_materials_thin_transparency](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/ADOBE_materials_thin_transparency)
 
+#### Alternative glTF2 c# libraries
+- [Khronos Group glTF-CSharp-Loader](https://github.com/KhronosGroup/glTF-CSharp-Loader)
+- [Khronos Group UnityGLTF](https://github.com/KhronosGroup/UnityGLTF)

@@ -11,12 +11,12 @@ namespace glTF2Sharp.Memory
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
-    public struct SparseAccessor<T> : IAccessor<T>
+    public struct SparseArray<T> : IEncodedArray<T>
         where T : unmanaged
     {
         #region lifecycle
 
-        public SparseAccessor(IAccessor<T> bottom, IAccessor<T> top, IntegerAccessor topMapping)
+        public SparseArray(IEncodedArray<T> bottom, IEncodedArray<T> top, IntegerArray topMapping)
         {
             _BottomItems = bottom;
             _TopItems = top;
@@ -34,10 +34,10 @@ namespace glTF2Sharp.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IAccessor<T> _BottomItems;
+        private readonly IEncodedArray<T> _BottomItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IAccessor<T> _TopItems;
+        private readonly IEncodedArray<T> _TopItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Dictionary<int, int> _Mapping;

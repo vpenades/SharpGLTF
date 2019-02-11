@@ -13,6 +13,15 @@ namespace glTF2Sharp.Schema2
     [System.Diagnostics.DebuggerDisplay("MeshPrimitive[{LogicalIndex}] {_mode} {_DebuggerDisplay_TryIdentifyContent()}")]
     public partial class MeshPrimitive : IChildOf<Mesh>
     {
+        #region debug
+
+        private String _DebuggerDisplay_TryIdentifyContent()
+        {
+            return String.Join(" ", VertexAccessors.Keys);
+        }
+
+        #endregion
+
         #region lifecycle
 
         internal MeshPrimitive()
@@ -78,6 +87,42 @@ namespace glTF2Sharp.Schema2
 
         #region API
 
+        public IEnumerable<BufferView> GetBufferViews(bool includeIndices, bool includeVertices, bool includeMorphs)
+        {
+            var accessors = new List<Accessor>();
+
+            var attributes = this._attributes.Keys.ToArray();
+
+            if (includeIndices)
+            {
+                if (IndexAccessor != null) accessors.Add(IndexAccessor);
+            }
+
+            if (includeVertices)
+            {
+                accessors.AddRange(attributes.Select(k => VertexAccessors[k]));
+            }
+
+            if (includeMorphs)
+            {
+                for (int i = 0; i < MorpthTargets; ++i)
+                {
+                    foreach (var key in attributes)
+                    {
+                        var morpthAccessors = GetMorphTargetAccessors(i);
+                        if (morpthAccessors.TryGetValue(key, out Accessor accessor)) accessors.Add(accessor);
+                    }
+                }
+            }
+
+            var indices = accessors
+                .Select(item => item._LogicalBufferViewIndex)
+                .Where(item => item >= 0)
+                .Distinct();
+
+            return indices.Select(idx => this.LogicalParent.LogicalParent.LogicalBufferViews[idx]);
+        }
+
         public Accessor GetVertexAccessor(string attributeKey)
         {
             Guard.NotNullOrEmpty(attributeKey, nameof(attributeKey));
@@ -125,43 +170,7 @@ namespace glTF2Sharp.Schema2
             {
                 target[kvp.Key] = kvp.Value.LogicalIndex;
             }
-        }
-
-        public IEnumerable<BufferView> GetBufferViews(bool includeIndices, bool includeVertices, bool includeMorphs)
-        {            
-            var accessors = new List<Accessor>();
-
-            var attributes = this._attributes.Keys.ToArray();
-
-            if (includeIndices)
-            {                
-                if (IndexAccessor != null) accessors.Add(IndexAccessor);
-            }
-
-            if (includeVertices)
-            {
-                accessors.AddRange(attributes.Select(k => VertexAccessors[k]));
-            }
-
-            if (includeMorphs)
-            {
-                for (int i = 0; i < MorpthTargets; ++i)
-                {
-                    foreach (var key in attributes)
-                    {
-                        var morpthAccessors = GetMorphTargetAccessors(i);
-                        if (morpthAccessors.TryGetValue(key, out Accessor accessor)) accessors.Add(accessor);
-                    }
-                }
-            }
-
-            var indices = accessors
-                .Select(item => item._LogicalBufferViewIndex)
-                .Where(item => item >= 0)
-                .Distinct();
-
-            return indices.Select(idx => this.LogicalParent.LogicalParent.LogicalBufferViews[idx]);            
-        }
+        }        
 
         public IReadOnlyList<KeyValuePair<String, Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
         {
@@ -174,17 +183,19 @@ namespace glTF2Sharp.Schema2
                 .ToArray();
         }
 
-        private Accessor _GetAccessor(IReadOnlyDictionary<string, int> attributes, string attribute)
-        {
-            if (!attributes.TryGetValue(attribute, out int idx)) return null;
+        public Memory.IEncodedArray<UInt32> GetIndices() => IndexAccessor.CastToIndicesAccessor();
 
-            return this.LogicalParent.LogicalParent.LogicalAccessors[idx];
-        }
+        public Memory.IEncodedArray<Single> GetScalarArray(string attributeKey) => GetVertexAccessor(attributeKey).AsScalarArray();
 
-        private String _DebuggerDisplay_TryIdentifyContent()
-        {
-            return String.Join(" ", VertexAccessors.Keys);
-        }
+        public Memory.IEncodedArray<Vector2> GetVector2Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector2Array();
+
+        public Memory.IEncodedArray<Vector3> GetVector3Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector3Array();
+
+        public Memory.IEncodedArray<Vector4> GetVector4Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector4Array();
+
+        public Memory.IEncodedArray<Vector3> GetVertexPositions() => GetVector3Array("POSITION");
+
+        public Memory.IEncodedArray<Vector3> GetVertexNormals() => GetVector3Array("NORMAL");
 
         #endregion
 

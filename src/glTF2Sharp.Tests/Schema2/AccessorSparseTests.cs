@@ -22,8 +22,8 @@ namespace glTF2Sharp.Schema2
 
             var accessor = primitive.GetVertexAccessor("POSITION");
 
-            var basePositions = accessor.CastToVector3Accessor(false);
-            var goodPositions = accessor.CastToVector3Accessor(true);
+            var basePositions = accessor.AsVector3Array(false);
+            var goodPositions = accessor.AsVector3Array(true);
         }
     }
 }

@@ -102,55 +102,41 @@ namespace glTF2Sharp.Schema2
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
         }
 
-        public Memory.IntegerAccessor CreateIndicesAccessor(int byteOffset, IndexType encoding)
+        public Memory.IntegerArray CreateIndicesArray(int byteOffset, IndexType encoding)
         {
             Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
 
-            return new Memory.IntegerAccessor(this.Data.Slice(byteOffset), encoding);
+            return new Memory.IntegerArray(this.Data.Slice(byteOffset), encoding);
+        }        
+
+        public Memory.ScalarArray CreateScalarArray(int byteOffset, ENCODING encoding, Boolean normalized)
+        {
+            return new Memory.ScalarArray(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);            
         }
 
-        public Memory.IAccessor<Vector4> CreateVertexAccessor(int byteOffset, ElementType dimensions, ENCODING encoding, Boolean normalized)
+        public Memory.Vector2Array CreateVector2Array(int byteOffset, ENCODING encoding, Boolean normalized)
         {
-            var srcData = this.Data.Slice(byteOffset);
-
-            switch (dimensions)
-            {
-                case ElementType.SCALAR: return new Memory.ScalarAccessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
-                case ElementType.VEC2: return new Memory.Vector2Accessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
-                case ElementType.VEC3: return new Memory.Vector3Accessor(srcData, this.ByteStride, encoding, normalized).AsVector4();
-                case ElementType.VEC4: return new Memory.Vector4Accessor(srcData, this.ByteStride, encoding, normalized);
-                default: throw new NotImplementedException();
-            }            
+            return new Memory.Vector2Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.ScalarAccessor CreateScalarAccessor(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Vector3Array CreateVector3Array(int byteOffset, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.ScalarAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);            
+            return new Memory.Vector3Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector2Accessor CreateVector2Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Vector4Array CreateVector4Array(int byteOffset, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector2Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            return new Memory.Vector4Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector3Accessor CreateVector3Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.QuaternionArray CreateQuaternionArray(int byteOffset, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector3Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            return new Memory.QuaternionArray(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector4Accessor CreateVector4Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Matrix4x4Array CreateMatrix4x4Array(int byteOffset, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.QuaternionAccessor CreateQuaternionAccessor(int byteOffset, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.QuaternionAccessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.Matrix4x4Accessor CreateMatrix4x4Accessor(int byteOffset, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.Matrix4x4Accessor(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            return new Memory.Matrix4x4Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
         }
 
         /// <summary>
