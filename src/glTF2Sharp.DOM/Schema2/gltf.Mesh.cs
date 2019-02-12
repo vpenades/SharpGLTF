@@ -29,7 +29,13 @@ namespace glTF2Sharp.Schema2
 
         public IReadOnlyList<MeshPrimitive> Primitives => _primitives;
 
-        public IReadOnlyList<float> MorphWeights => _weights.Select(item => (float)item).ToArray();
+        public IReadOnlyList<Single> MorphWeights => _weights.Select(item => (Single)item).ToArray();
+
+        public BoundingBox3? LocalBounds3 => BoundingBox3.UnionOf(Primitives.Select(item => item.LocalBounds3));
+
+        #endregion
+
+        #region API        
 
         public MeshPrimitive CreatePrimitive()
         {
@@ -38,13 +44,7 @@ namespace glTF2Sharp.Schema2
             _primitives.Add(mp);
 
             return mp;
-        }        
-
-        public BoundingBox3? LocalBounds3 => BoundingBox3.UnionOf(Primitives.Select(item => item.LocalBounds3));
-
-        #endregion
-
-        #region API        
+        }
 
         public override IEnumerable<Exception> Validate()
         {

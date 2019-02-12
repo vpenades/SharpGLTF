@@ -199,8 +199,13 @@ namespace glTF2Sharp.Memory
 
         public ScalarArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 1;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 1, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -213,6 +218,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Single[] _DebugItems => this.ToArray();
 
@@ -221,7 +229,7 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        public int Count => _ItemCount;
         
         public Single this[int index]
         {
@@ -229,13 +237,13 @@ namespace glTF2Sharp.Memory
             set => _Accesor[index * _ByteStride, 0] = value;
         }                
 
-        public void CopyTo(ArraySegment<Single> dst) { AccessorsUtils.Copy<Single>(this, dst); }        
+        public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }        
 
-        public IEnumerator<Single> GetEnumerator() { return new AccessorEnumerator<Single>(this); }
+        public IEnumerator<Single> GetEnumerator() { return new EncodedArrayEnumerator<Single>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Single>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Single>(this); }
 
-        public (Single, Single) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Single, Single) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
         public IEncodedArray<Vector4> AsVector4() { return new _MapScalarToVector4(this); }        
 
@@ -255,8 +263,13 @@ namespace glTF2Sharp.Memory
         
         public Vector2Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 2;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 2, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -269,6 +282,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector2[] _DebugItems => this.ToArray();
 
@@ -276,7 +292,8 @@ namespace glTF2Sharp.Memory
 
         #region API
 
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _ItemCount;
 
         public Vector2 this[int index]
         {
@@ -294,13 +311,13 @@ namespace glTF2Sharp.Memory
             }
         }        
 
-        public void CopyTo(ArraySegment<Vector2> dst) { AccessorsUtils.Copy<Vector2>(this, dst); }        
+        public void CopyTo(ArraySegment<Vector2> dst) { EncodedArrayUtils.Copy<Vector2>(this, dst); }        
 
-        public IEnumerator<Vector2> GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
+        public IEnumerator<Vector2> GetEnumerator() { return new EncodedArrayEnumerator<Vector2>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector2>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector2>(this); }
 
-        public (Vector2, Vector2) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector2, Vector2) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
         public IEncodedArray<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }        
 
@@ -320,8 +337,13 @@ namespace glTF2Sharp.Memory
 
         public Vector3Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 3;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 3, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+            
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -334,6 +356,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector3[] _DebugItems => this.ToArray();
 
@@ -342,7 +367,7 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        public int Count => _ItemCount;
 
         public Vector3 this[int index]
         {
@@ -361,13 +386,13 @@ namespace glTF2Sharp.Memory
             }
         }        
 
-        public void CopyTo(ArraySegment<Vector3> dst) { AccessorsUtils.Copy<Vector3>(this, dst); }        
+        public void CopyTo(ArraySegment<Vector3> dst) { EncodedArrayUtils.Copy<Vector3>(this, dst); }        
 
-        public IEnumerator<Vector3> GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
+        public IEnumerator<Vector3> GetEnumerator() { return new EncodedArrayEnumerator<Vector3>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector3>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector3>(this); }
 
-        public (Vector3, Vector3) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector3, Vector3) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
         public IEncodedArray<Vector4> AsVector4() { return new _MapVector3ToVector4(this); }
 
@@ -387,8 +412,13 @@ namespace glTF2Sharp.Memory
 
         public Vector4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 4;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -401,6 +431,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector4[] _DebugItems => this.ToArray();
 
@@ -409,7 +442,7 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        public int Count => _ItemCount;
 
         public Vector4 this[int index]
         {
@@ -429,13 +462,13 @@ namespace glTF2Sharp.Memory
             }
         }        
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy<Vector4>(this, dst); }
+        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy<Vector4>(this, dst); }
 
-        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
         public IEncodedArray<Vector4> AsVector4() { return this; }
 
@@ -455,8 +488,13 @@ namespace glTF2Sharp.Memory
 
         public QuaternionArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 4;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 4, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -469,6 +507,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Quaternion[] _DebugItems => this.ToArray();
 
@@ -477,7 +518,7 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        public int Count => _ItemCount;
 
         public Quaternion this[int index]
         {
@@ -497,11 +538,11 @@ namespace glTF2Sharp.Memory
             }
         }        
 
-        public void CopyTo(ArraySegment<Quaternion> dst) { AccessorsUtils.Copy<Quaternion>(this, dst); }        
+        public void CopyTo(ArraySegment<Quaternion> dst) { EncodedArrayUtils.Copy<Quaternion>(this, dst); }        
 
-        public IEnumerator<Quaternion> GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
+        public IEnumerator<Quaternion> GetEnumerator() { return new EncodedArrayEnumerator<Quaternion>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Quaternion>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Quaternion>(this); }
 
         public (Quaternion, Quaternion) GetBounds() { throw new NotImplementedException(); }
 
@@ -523,8 +564,13 @@ namespace glTF2Sharp.Memory
 
         public Matrix4x4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            var len = encoding.ByteLength() * 16;
+
             _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(encoding.ByteLength() * 16, byteStride);
+            _ByteStride = Math.Max(len, byteStride);
+
+            _ItemCount = _Accesor.ByteLength / _ByteStride;
+            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
 
         #endregion
@@ -537,6 +583,9 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _ByteStride;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _ItemCount;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Matrix4x4[] _DebugItems => this.ToArray();
 
@@ -545,7 +594,7 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.ByteLength / _ByteStride;
+        public int Count => _ItemCount;
 
         public Matrix4x4 this[int index]
         {
@@ -583,11 +632,11 @@ namespace glTF2Sharp.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Matrix4x4> dst) { AccessorsUtils.Copy<Matrix4x4>(this, dst); }
+        public void CopyTo(ArraySegment<Matrix4x4> dst) { EncodedArrayUtils.Copy<Matrix4x4>(this, dst); }
 
-        public IEnumerator<Matrix4x4> GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
+        public IEnumerator<Matrix4x4> GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Matrix4x4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
 
         public (Matrix4x4, Matrix4x4) GetBounds() { throw new NotImplementedException(); }
 

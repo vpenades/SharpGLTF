@@ -106,11 +106,11 @@ namespace glTF2Sharp.Memory
             set => _Setter(index, value);
         }        
 
-        public void CopyTo(ArraySegment<UInt32> dst) { AccessorsUtils.Copy<UInt32>(this, dst); }        
+        public void CopyTo(ArraySegment<UInt32> dst) { EncodedArrayUtils.Copy<UInt32>(this, dst); }        
 
-        public IEnumerator<UInt32> GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
+        public IEnumerator<UInt32> GetEnumerator() { return new EncodedArrayEnumerator<UInt32>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<UInt32>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<UInt32>(this); }
 
         public (UInt32, UInt32) GetBounds() { throw new NotImplementedException(); }
 

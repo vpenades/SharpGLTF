@@ -61,16 +61,16 @@ namespace glTF2Sharp.Memory
             }
         }        
 
-        public void CopyTo(ArraySegment<T> dst) { AccessorsUtils.Copy(this, dst); }
+        public void CopyTo(ArraySegment<T> dst) { EncodedArrayUtils.Copy(this, dst); }
 
         public (T, T) GetBounds()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerator<T> GetEnumerator() { return new AccessorEnumerator<T>(this); }
+        public IEnumerator<T> GetEnumerator() { return new EncodedArrayEnumerator<T>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<T>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<T>(this); }
 
         #endregion
     }

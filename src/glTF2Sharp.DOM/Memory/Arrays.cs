@@ -16,12 +16,12 @@ namespace glTF2Sharp.Memory
         (T, T) GetBounds();
     }
 
-    struct AccessorEnumerator<T> : IEnumerator<T>
+    struct EncodedArrayEnumerator<T> : IEnumerator<T>
         where T: unmanaged
     {
         #region lifecycle        
 
-        public AccessorEnumerator(IEncodedArray<T> accessor)
+        public EncodedArrayEnumerator(IEncodedArray<T> accessor)
         {
             this._Accessor = accessor;
             this._Count = accessor.Count;
@@ -63,8 +63,17 @@ namespace glTF2Sharp.Memory
         #endregion
     }
 
-    public static class AccessorsUtils
+    public static class EncodedArrayUtils
     {
+        public static void CopyTo<T>(T[] src, IEncodedArray<T> dst)
+            where T: unmanaged
+        {
+            for(int i=0; i < src.Length; ++i)
+            {
+                dst[i] = src[i];
+            }
+        }
+
         public static void Copy<T>(IEncodedArray<T> src, T[] dst) where T : unmanaged
         {
             Copy<T>(src, new ArraySegment<T>(dst));
@@ -162,13 +171,13 @@ namespace glTF2Sharp.Memory
             set => _Accessor[index] = value.X;
         }        
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy(this, dst); }
 
-        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
     }
 
     /// <summary>
@@ -191,13 +200,13 @@ namespace glTF2Sharp.Memory
             set => _Accessor[index] = new Vector2(value.X, value.Y);
         }
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy(this, dst); }
 
-        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
     }
 
     /// <summary>
@@ -220,13 +229,13 @@ namespace glTF2Sharp.Memory
             set => _Accessor[index] = new Vector3(value.X, value.Y, value.Z);
         }
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy(this, dst); }
 
-        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
     }
 
     /// <summary>
@@ -249,12 +258,12 @@ namespace glTF2Sharp.Memory
             set => _Accessor[index] = new Quaternion(value.X, value.Y, value.Z, value.W);
         }
 
-        public void CopyTo(ArraySegment<Vector4> dst) { AccessorsUtils.Copy(this, dst); }
+        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy(this, dst); }
 
-        public IEnumerator<Vector4> GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        IEnumerator IEnumerable.GetEnumerator() { return new AccessorEnumerator<Vector4>(this); }
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return AccessorsUtils.GetBounds(this); }
+        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
     }
 }
