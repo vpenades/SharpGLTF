@@ -10,6 +10,16 @@ namespace glTF2Sharp.Schema2
     [TestFixture]
     public class AccessorSparseTests
     {
+        #region setup
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            TestFiles.CheckoutDataDirectories();
+        }
+
+        #endregion
+
         [Test]
         public void LoadSparseModels()
         {
