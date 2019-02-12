@@ -48,7 +48,7 @@ namespace MeshBuffers
         public void Add(Vertex vertex)
         {
             if (!VertexDeclaration.AreEqual(vertex._Declaration, this._Declaration)) throw new ArgumentException(nameof(vertex));
-            if (vertex._Data.Count == _Stride) throw new ArgumentException(nameof(vertex));
+            if (vertex._Data.Count != _Stride) throw new ArgumentException(nameof(vertex));
             _Data.AddRange(vertex._Data);
         }
 
@@ -80,6 +80,85 @@ namespace MeshBuffers
         IEnumerator IEnumerable.GetEnumerator()
         {
             for (int i = 0; i < Count; ++i) yield return this[i];
+        }
+
+        #endregion
+
+        #region extra API
+
+        public Single[] GetScalarColumn(string attribute)
+        {
+            var offset = _Declaration.GetOffset(attribute);
+            if (offset < 0) throw new ArgumentException(nameof(attribute));
+
+            var dst = new Single[this.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                dst[i] = _Data[i * _Stride + offset];
+            }
+
+            return dst;
+        }
+
+        public Vector2[] GetVector2Column(string attribute)
+        {
+            var offset = _Declaration.GetOffset(attribute);
+            if (offset < 0) throw new ArgumentException(nameof(attribute));
+
+            var dst = new Vector2[this.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                dst[i] = new Vector2
+                    (
+                    _Data[i * _Stride + offset + 0],
+                    _Data[i * _Stride + offset + 1]                    
+                    );
+            }
+
+            return dst;
+        }
+
+        public Vector3[] GetVector3Column(string attribute)
+        {
+            var offset = _Declaration.GetOffset(attribute);
+            if (offset < 0) throw new ArgumentException(nameof(attribute));
+
+            var dst = new Vector3[this.Count];
+
+            for(int i=0; i < dst.Length; ++i)
+            {
+                dst[i] = new Vector3
+                    (
+                    _Data[i * _Stride + offset + 0],
+                    _Data[i * _Stride + offset + 1],
+                    _Data[i * _Stride + offset + 2]
+                    );
+            }
+
+            return dst;
+        }
+
+        public Vector4[] GetVector4Column(string attribute)
+        {
+            var offset = _Declaration.GetOffset(attribute);
+            if (offset < 0) throw new ArgumentException(nameof(attribute));
+
+            var dst = new Vector4[this.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                dst[i] = new Vector4
+                    (
+                    _Data[i * _Stride + offset + 0],
+                    _Data[i * _Stride + offset + 1],
+                    _Data[i * _Stride + offset + 2],
+                    _Data[i * _Stride + offset + 3]
+                    );
+            }
+
+            return dst;
         }
 
         #endregion

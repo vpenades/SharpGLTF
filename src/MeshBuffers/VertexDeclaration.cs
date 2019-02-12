@@ -38,15 +38,9 @@ namespace MeshBuffers
 
             _HashCode = _Elements.Select(item => item.GetHashCode()).Aggregate((a, b) => (a * 17) ^ b);
 
-            _PositionV3 = _Offset("POSITION");
-            _NormalV3 = _Offset("NORMAL");
-        }
-
-        private int _Offset(string attribute)
-        {
-            var element = _Elements.FirstOrDefault(item => item._Attribute == attribute);
-            return element._Attribute == null ? -1 : element._Offset;
-        }
+            _PositionV3 = GetOffset("POSITION");
+            _NormalV3 = GetOffset("NORMAL");
+        }        
 
         public VertexDeclaration WithSingle(string attribute)
         {
@@ -99,9 +93,27 @@ namespace MeshBuffers
 
         #endregion
 
-        #region API
+        #region properties
 
         public int Stride => _Stride;
+
+        public IEnumerable<string> Attributes => _Elements.Select(item => item._Attribute);
+
+        #endregion
+
+        #region API
+
+        public int GetOffset(string attribute)
+        {
+            var idx = Array.FindIndex(_Elements, item => item._Attribute == attribute);
+            return idx < 0 ? -1 : _Elements[idx]._Offset;
+        }
+
+        public int GetDimensions(string attribute)
+        {
+            var idx = Array.FindIndex(_Elements, item => item._Attribute == attribute);
+            return idx < 0 ? -1 : _Elements[idx]._Dimensions;
+        }
 
         public Vertex CreateVertex() { return new Vertex(this); }
 
