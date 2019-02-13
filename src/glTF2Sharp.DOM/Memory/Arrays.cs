@@ -13,6 +13,8 @@ namespace glTF2Sharp.Memory
 
         void CopyTo(ArraySegment<T> dst);
 
+        // void CopyTo(IEncodedArray<T> dst);
+
         (T, T) GetBounds();
     }
 
@@ -65,12 +67,21 @@ namespace glTF2Sharp.Memory
 
     public static class EncodedArrayUtils
     {
-        public static void CopyTo<T>(T[] src, IEncodedArray<T> dst)
+        public static void CopyTo<T>(IEncodedArray<T> src, IEncodedArray<T> dst, int dstOffset = 0)
+            where T : unmanaged
+        {
+            for (int i = 0; i < src.Count; ++i)
+            {
+                dst[i + dstOffset] = src[i];
+            }
+        }
+
+        public static void CopyTo<T>(T[] src, IEncodedArray<T> dst, int dstOffset = 0)
             where T: unmanaged
         {
             for(int i=0; i < src.Length; ++i)
             {
-                dst[i] = src[i];
+                dst[i+ dstOffset] = src[i];
             }
         }
 

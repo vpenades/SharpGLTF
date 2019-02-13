@@ -147,6 +147,19 @@ namespace glTF2Sharp.Schema2
             }
         }        
 
+        public void SetVertexAccessors(BufferView buffer, int byteOffset, int vertexCount, IEnumerable<Geometry.VertexElement> elements)
+        {
+            int count = 0;
+            foreach(var e in elements)
+            {
+                var accessor = this.LogicalParent.LogicalParent.CreateAccessor(e.Attribute);
+                accessor.SetVertexData(buffer, byteOffset + count, e.Dimensions, e.Encoding, e.Normalized, vertexCount);
+                count += e.ByteSize;
+
+                SetVertexAccessor(e.Attribute, accessor);
+            }            
+        }
+
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
             return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);

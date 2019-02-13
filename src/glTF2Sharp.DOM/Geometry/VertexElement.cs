@@ -8,6 +8,9 @@ namespace glTF2Sharp.Geometry
 {
     using Schema2;    
 
+    /// <summary>
+    /// Defines a vertex attribute, dimensions and encoding.
+    /// </summary>
     public struct VertexElement
     {
         #region lifecycle
@@ -67,6 +70,12 @@ namespace glTF2Sharp.Geometry
             return elements.Sum(item => item.ByteSize);
         }
 
+        public static int FindDimensions(VertexElement[] elements, string attribute)
+        {
+            var idx = Array.FindIndex(elements, item => item.Attribute == attribute);
+            return idx < 0 ? 0 : elements[idx].Dimensions.DimCount();
+        }
+
         public static int GetBufferByteSize(int count, params VertexElement[] elements)
         {
             var stride = GetVertexByteSize(elements);
@@ -75,33 +84,33 @@ namespace glTF2Sharp.Geometry
 
         public static Memory.IEncodedArray<Single> GetScalarColumn(Byte[] data, string attribute, params VertexElement[] elements)
         {
-            var column = _GetColumn(data, attribute, elements);
+            var column = _GetColumn(data, elements, attribute, 0, int.MaxValue);
             if (column.Item3.Dimensions.DimCount() != 1) throw new ArgumentException(nameof(elements));
             return new Memory.ScalarArray(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
         }
 
         public static Memory.IEncodedArray<Vector2> GetVector2Column(Byte[] data, string attribute, params VertexElement[] elements)
         {
-            var column = _GetColumn(data, attribute, elements);
+            var column = _GetColumn(data, elements, attribute, 0, int.MaxValue);
             if (column.Item3.Dimensions.DimCount() != 2) throw new ArgumentException(nameof(elements));
             return new Memory.Vector2Array(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
         }
 
         public static Memory.IEncodedArray<Vector3> GetVector3Column(Byte[] data, string attribute, params VertexElement[] elements)
         {
-            var column = _GetColumn(data, attribute, elements);
+            var column = _GetColumn(data, elements, attribute, 0, int.MaxValue);
             if (column.Item3.Dimensions.DimCount() != 3) throw new ArgumentException(nameof(elements));
             return new Memory.Vector3Array(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
         }
 
         public static Memory.IEncodedArray<Vector4> GetVector4Column(Byte[] data, string attribute, params VertexElement[] elements)
         {
-            var column = _GetColumn(data, attribute, elements);
+            var column = _GetColumn(data, elements, attribute, 0, int.MaxValue);
             if (column.Item3.Dimensions.DimCount() != 4) throw new ArgumentException(nameof(elements));
             return new Memory.Vector4Array(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
         }
 
-        private static (ArraySegment<Byte>, int, VertexElement) _GetColumn(Byte[] data, string attribute, params VertexElement[] elements)
+        internal static (ArraySegment<Byte>, int, VertexElement) _GetColumn(Byte[] data, VertexElement[] elements, string attribute, int rowStart, int rowCount)
         {
             var index = Array.FindIndex(elements, item => item.Attribute == attribute);
             if (index < 0) throw new ArgumentException(nameof(attribute));
@@ -109,9 +118,12 @@ namespace glTF2Sharp.Geometry
             var element = elements[index];
 
             var byteStride = GetVertexByteSize(elements);
-            var byteOffset = elements.Take(index).Sum(item => item.ByteSize);
+            var byteOffset = elements.Take(index).Sum(item => item.ByteSize) + rowStart * byteStride;
+            var byteLength = data.Length - byteOffset;
 
-            var source = new ArraySegment<Byte>(data, byteOffset, data.Length - byteOffset);
+            if (rowCount < int.MaxValue) byteLength = rowCount * byteStride;
+
+            var source = new ArraySegment<Byte>(data, byteOffset, byteLength);
 
             return (source, byteStride, element);
         }
