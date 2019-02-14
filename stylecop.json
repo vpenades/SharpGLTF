@@ -9,8 +9,7 @@
     },
     "documentationRules": {
       "xmlHeader": false,
-      "documentInternalElements": false,
-      "copyrightText": "Copyright (c) Six Labors and contributors.\nLicensed under the Apache License, Version 2.0."
+      "documentInternalElements": false      
     }
   }
 }
