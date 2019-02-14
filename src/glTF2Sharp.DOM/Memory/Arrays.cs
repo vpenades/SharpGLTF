@@ -5,10 +5,10 @@ using System.Numerics;
 using System.Text;
 
 namespace glTF2Sharp.Memory
-{    
+{
     public interface IEncodedArray<T> : IReadOnlyCollection<T>
         where T : unmanaged
-    {        
+    {
         T this[int index] { get; set; }
 
         void CopyTo(ArraySegment<T> dst);
@@ -19,20 +19,19 @@ namespace glTF2Sharp.Memory
     }
 
     struct EncodedArrayEnumerator<T> : IEnumerator<T>
-        where T: unmanaged
+        where T : unmanaged
     {
-        #region lifecycle        
+        #region lifecycle
 
         public EncodedArrayEnumerator(IEncodedArray<T> accessor)
         {
             this._Accessor = accessor;
             this._Count = accessor.Count;
-            this._Index = -1;            
+            this._Index = -1;
         }
 
         public void Dispose()
         {
-
         }
 
         #endregion
@@ -49,7 +48,7 @@ namespace glTF2Sharp.Memory
 
         public T Current => _Accessor[_Index];
 
-        object IEnumerator.Current => _Accessor[_Index];        
+        object IEnumerator.Current => _Accessor[_Index];
 
         public bool MoveNext()
         {
@@ -77,24 +76,26 @@ namespace glTF2Sharp.Memory
         }
 
         public static void CopyTo<T>(T[] src, IEncodedArray<T> dst, int dstOffset = 0)
-            where T: unmanaged
+            where T : unmanaged
         {
-            for(int i=0; i < src.Length; ++i)
+            for (int i = 0; i < src.Length; ++i)
             {
-                dst[i+ dstOffset] = src[i];
+                dst[i + dstOffset] = src[i];
             }
         }
 
-        public static void Copy<T>(IEncodedArray<T> src, T[] dst) where T : unmanaged
+        public static void Copy<T>(IEncodedArray<T> src, T[] dst)
+            where T : unmanaged
         {
             Copy<T>(src, new ArraySegment<T>(dst));
         }
 
-        public static void Copy<T>(IEncodedArray<T> src, ArraySegment<T> dst) where T : unmanaged
+        public static void Copy<T>(IEncodedArray<T> src, ArraySegment<T> dst)
+            where T : unmanaged
         {
             var c = src.Count;
             for (int i = 0; i < c; ++i) dst.Array[dst.Offset + i] = src[i];
-        }                
+        }
 
         public static (Single, Single) GetBounds(ScalarArray accesor)
         {
@@ -161,7 +162,6 @@ namespace glTF2Sharp.Memory
         }
     }
 
-
     /// <summary>
     /// Wraps a collection of Scalar values and exposes it as a collection of Vector4 values
     /// </summary>
@@ -180,7 +180,7 @@ namespace glTF2Sharp.Memory
         {
             get => new Vector4(_Accessor[index], 0, 0, 0);
             set => _Accessor[index] = value.X;
-        }        
+        }
 
         public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy(this, dst); }
 

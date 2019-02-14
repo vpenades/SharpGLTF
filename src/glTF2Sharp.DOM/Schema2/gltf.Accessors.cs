@@ -35,7 +35,7 @@ namespace glTF2Sharp.Schema2
         #region properties
 
         public int LogicalIndex                 => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
-        
+
         internal int _LogicalBufferViewIndex    => this._bufferView.AsValue(-1);
 
         public BufferView SourceBufferView      => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
@@ -52,7 +52,7 @@ namespace glTF2Sharp.Schema2
 
         public Boolean IsSparse                 => this._sparse != null;
 
-        public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();        
+        public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
         public BoundingBox3? LocalBounds3
         {
@@ -83,7 +83,7 @@ namespace glTF2Sharp.Schema2
 
             this._type = dimensions;
             this._componentType = encoding;
-            this._normalized = normalized.AsNullable(false);            
+            this._normalized = normalized.AsNullable(false);
 
             _UpdateBounds();
         }
@@ -102,8 +102,8 @@ namespace glTF2Sharp.Schema2
 
         public void SetIndexData(BufferView buffer, int byteOffset, IndexType encoding, int count)
         {
-            Guard.NotNull(buffer,nameof(buffer));
-            Guard.MustShareLogicalParent(this, buffer,nameof(buffer));
+            Guard.NotNull(buffer, nameof(buffer));
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
 
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, 0, nameof(byteOffset));
@@ -114,8 +114,8 @@ namespace glTF2Sharp.Schema2
             this._count = count;
 
             this._type = ElementType.SCALAR;
-            this._componentType = encoding.ToComponent();            
-            this._normalized = null;            
+            this._componentType = encoding.ToComponent();
+            this._normalized = null;
 
             _UpdateBounds();
         }
@@ -126,14 +126,14 @@ namespace glTF2Sharp.Schema2
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
             return SourceBufferView.CreateIndicesArray(this.ByteOffset, this.Encoding.ToIndex());
         }
-        
+
         #endregion
 
         #region Vertex Buffer API
 
         public void SetVertexData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
         {
-            Guard.NotNull(buffer,nameof(buffer));
+            Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ARRAY_BUFFER, nameof(buffer));
 
@@ -151,13 +151,13 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.IEncodedArray<Single> AsScalarArray(bool useSparse=true)
+        public Memory.IEncodedArray<Single> AsScalarArray(bool useSparse = true)
         {
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
 
             if (this._sparse != null && useSparse) return this._sparse.GetScalarArray(this);
 
-            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Count, this.Encoding, this.Normalized);            
+            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
         }
 
         public Memory.IEncodedArray<Vector2> AsVector2Array(bool useSparse = true)
@@ -195,7 +195,7 @@ namespace glTF2Sharp.Schema2
             var byteStride = Math.Max(byteSize, SourceBufferView.ByteStride);
             var byteOffset = vertexIdx * byteStride;
 
-            return SourceBufferView.Data.GetSegment(this.ByteOffset + vertexIdx * byteStride, byteSize);
+            return SourceBufferView.Data.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
         }
 
         internal void _UpdateBounds()
@@ -303,7 +303,7 @@ namespace glTF2Sharp.Schema2
         }
 
         #endregion
-    }   
+    }
 
     public partial class ModelRoot
     {

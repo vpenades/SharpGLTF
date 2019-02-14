@@ -123,7 +123,7 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region data        
+        #region data
 
         // this is the actual compressed image in PNG or JPEG, -NOT- the pixels data.
         private Byte[] _ExternalImageContent;
@@ -325,7 +325,8 @@ namespace glTF2Sharp.Schema2
             return tex;
         }
 
-        internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet) where T : TextureInfo, new()
+        internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet)
+            where T : TextureInfo, new()
         {
             var tex = UseLogicalTexture(image, sampler);
             if (tex == null) return null;

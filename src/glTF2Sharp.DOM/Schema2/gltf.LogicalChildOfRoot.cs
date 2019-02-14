@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace glTF2Sharp.Schema2
 {
-    using Collections;    
+    using Collections;
 
     /// <summary>
     /// All gltf elements stored in ModelRoot must inherit from this class.
@@ -27,7 +27,7 @@ namespace glTF2Sharp.Schema2
 
         void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }
 
-        #endregion        
+        #endregion
 
         #region validation
 

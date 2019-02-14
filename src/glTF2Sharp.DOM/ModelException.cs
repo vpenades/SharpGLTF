@@ -7,16 +7,21 @@ namespace glTF2Sharp
 {
     using IO;
 
+    /// <summary>
+    /// Represents an exception produced by the serialization or validation of a gltf model
+    /// </summary>
     public class ModelException : Exception
     {
         #region lifecycle
 
-        internal ModelException(JsonSerializable target, String message) : base(_CreateBaseMessage(target, message))
+        internal ModelException(JsonSerializable target, String message)
+            : base(_CreateBaseMessage(target, message))
         {
             _Target = target;
         }
 
-        internal ModelException(JsonSerializable target, String message, Action fix, String fixDesc) : base(message)
+        internal ModelException(JsonSerializable target, String message, Action fix, String fixDesc)
+            : base(message)
         {
             _Target = target;
             _ProposedFix = fix;
@@ -58,18 +63,21 @@ namespace glTF2Sharp
         #endregion
     }
 
-    public class ExtensionException : ModelException
+    /// <summary>
+    /// Represents an exception produced when a required extension is missing
+    /// </summary>
+    public class UnsupportedExtensionException : ModelException
     {
         #region lifecycle
 
-        internal ExtensionException(JsonSerializable target, String message) : base(target, message)
+        internal UnsupportedExtensionException(JsonSerializable target, String message)
+            : base(target, message)
         {
-
         }
 
-        internal ExtensionException(JsonSerializable target, String message, Action fix, String fixDesc) : base(target, message, fix, fixDesc)
+        internal UnsupportedExtensionException(JsonSerializable target, String message, Action fix, String fixDesc)
+            : base(target, message, fix, fixDesc)
         {
-
         }
 
         #endregion

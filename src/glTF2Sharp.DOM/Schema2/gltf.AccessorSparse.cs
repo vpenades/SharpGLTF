@@ -27,14 +27,14 @@ namespace glTF2Sharp.Schema2
         {
             Guard.NotNull(indices, nameof(indices));
             Guard.NotNull(values, nameof(values));
-            Guard.MustBeGreaterThanOrEqualTo(count, _countMinimum,nameof(count));
+            Guard.MustBeGreaterThanOrEqualTo(count, _countMinimum, nameof(count));
 
             this._count = count;
             this._indices = new AccessorSparseIndices(indices, indicesOffset, indicesEncoding);
             this._values = new AccessorSparseValues(values, valuesOffset);
         }
 
-        public int Count => _count; // what is this!?? TODO: check with specs        
+        public int Count => _count; // what is this!?? TODO: check with specs
 
         public Memory.SparseArray<Single> GetScalarArray(Accessor baseAccessor)
         {
@@ -79,7 +79,7 @@ namespace glTF2Sharp.Schema2
 
         internal AccessorSparseIndices(BufferView bv, int byteOffset, IndexType encoding)
         {
-            Guard.NotNull(bv,nameof(bv));
+            Guard.NotNull(bv, nameof(bv));
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
 
             this._bufferView = bv.LogicalIndex;
@@ -91,7 +91,7 @@ namespace glTF2Sharp.Schema2
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
             return srcBuffer.CreateIndicesArray(this._byteOffset ?? 0, this._componentType);
-        }        
+        }
     }
 
     public partial class AccessorSparseValues
@@ -104,7 +104,7 @@ namespace glTF2Sharp.Schema2
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
 
             this._bufferView = bv.LogicalIndex;
-            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);            
+            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);
         }
 
         public Memory.ScalarArray GetScalarArray(ROOT root, int count, ComponentType encoding, Boolean normalized)

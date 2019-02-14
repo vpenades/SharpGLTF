@@ -94,8 +94,8 @@ namespace glTF2Sharp.Schema2
                     this,
                     "Normal",
                     _GetNormalTexture,
-                    () => _GetNormalTexture(false) == null ? Vector4.Zero : new Vector4((float)(_GetNormalTexture(false).Scale)),
-                    value => _GetNormalTexture(true).Scale = ((double)value.X)
+                    () => _GetNormalTexture(false) == null ? Vector4.Zero : new Vector4((float)_GetNormalTexture(false).Scale),
+                    value => _GetNormalTexture(true).Scale = (double)value.X
                     );
 
                 yield return new MaterialChannelView
@@ -103,8 +103,8 @@ namespace glTF2Sharp.Schema2
                     this,
                     "Occlusion",
                     _GetOcclusionTexture,
-                    () => _GetOcclusionTexture(false) == null ? Vector4.Zero : new Vector4((float)(_GetOcclusionTexture(false).Strength)),
-                    value => _GetOcclusionTexture(true).Strength = ((double)value.X)
+                    () => _GetOcclusionTexture(false) == null ? Vector4.Zero : new Vector4((float)_GetOcclusionTexture(false).Strength),
+                    value => _GetOcclusionTexture(true).Strength = (double)value.X
                     );
 
                 yield return new MaterialChannelView
@@ -146,16 +146,16 @@ namespace glTF2Sharp.Schema2
     [System.Diagnostics.DebuggerDisplay("Channel {_Semantic}")]
     public struct MaterialChannelView
     {
-        #region lifecycle        
+        #region lifecycle
 
-        internal MaterialChannelView(Material m, string semantic, Func<Boolean,TextureInfo> texInfo, Func<Vector4> fg, Action<Vector4> fs)
+        internal MaterialChannelView(Material m, string semantic, Func<Boolean, TextureInfo> texInfo, Func<Vector4> fg, Action<Vector4> fs)
         {
             _Semantic = semantic;
             _Material = m;
             _TextureInfoGetter = texInfo;
             _FactorGetter = fg;
             _FactorSetter = fs;
-        }        
+        }
 
         #endregion
 
@@ -241,7 +241,7 @@ namespace glTF2Sharp.Schema2
                 material,
                 "Metallic",
                 _GetMetallicTexture,
-                () => new Vector4( (float) (_metallicFactor ?? _metallicFactorDefault)),
+                () => new Vector4((float)(_metallicFactor ?? _metallicFactorDefault)),
                 value => _metallicFactor = ((double)value.X).AsNullable(_metallicFactorDefault, _metallicFactorMaximum, _metallicFactorMaximum)
                 );
 
@@ -296,10 +296,10 @@ namespace glTF2Sharp.Schema2
                 "Specular",
                 null,
                 () => { var rgb = _specularFactor.AsValue(_specularFactorDefault); return new Vector4(rgb, 1); },
-                value => _specularFactor = new Vector3(value.X,value.Y,value.Z).AsNullable(_specularFactorDefault)
+                value => _specularFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_specularFactorDefault)
                 );
         }
-    }    
+    }
 
     public partial class ModelRoot
     {

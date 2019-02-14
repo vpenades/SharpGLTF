@@ -93,7 +93,7 @@ namespace glTF2Sharp.Schema2
 
                 var invXform = j.Value;
 
-                if (invXform.M44 != 1) exx.Add(new ModelException(this, $"Joint {i} has invalid inverse matrix"));                
+                if (invXform.M44 != 1) exx.Add(new ModelException(this, $"Joint {i} has invalid inverse matrix"));
             }*/
 
             return exx;
@@ -126,7 +126,7 @@ namespace glTF2Sharp.Schema2
 
             var indexer = new Runtime.Encoding.Matrix4x4Indexer(data, 16 * 4, 0, Runtime.Encoding.PackedType.F32);
 
-            for(int i=0; i < joints.Length; ++i) { indexer[i] = joints[i].Value; }            
+            for(int i=0; i < joints.Length; ++i) { indexer[i] = joints[i].Value; }
 
             var accessor = LogicalParent._CreateDataAccessor(data, Runtime.Encoding.DimensionType.Matrix4x4, joints.Length);
             this._inverseBindMatrices = accessor.LogicalIndex;

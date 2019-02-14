@@ -49,5 +49,5 @@ namespace glTF2Sharp.Debug
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
-    }    
+    }
 }

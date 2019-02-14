@@ -310,8 +310,21 @@ namespace glTF2Sharp.CodeGen
             sb.AppendLine("//      This file has been programatically generated; DON´T EDIT!");
             sb.AppendLine("//------------------------------------------------------------------------------------------------");
 
-            sb.AppendLine();
-            sb.AppendLine();
+            sb.AppendLine();            
+            
+            sb.AppendLine("#pragma warning disable SA1001");
+            sb.AppendLine("#pragma warning disable SA1027");
+            sb.AppendLine("#pragma warning disable SA1028");
+            sb.AppendLine("#pragma warning disable SA1121");
+            sb.AppendLine("#pragma warning disable SA1205");
+            sb.AppendLine("#pragma warning disable SA1309");
+            sb.AppendLine("#pragma warning disable SA1402");
+            sb.AppendLine("#pragma warning disable SA1505");
+            sb.AppendLine("#pragma warning disable SA1507");
+            sb.AppendLine("#pragma warning disable SA1508");
+            sb.AppendLine("#pragma warning disable SA1652");
+
+            sb.AppendLine();           
 
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
@@ -500,7 +513,7 @@ namespace glTF2Sharp.CodeGen
                 {
                     // emit serializer
                     var smethod = etype.UseIntegers ? "SerializePropertyEnumValue" : "SerializePropertyEnumSymbol";
-                    smethod = $"{smethod}<{trname}>(writer,\"{f.PersistentName}\",{frname}";
+                    smethod = $"{smethod}<{trname}>(writer, \"{f.PersistentName}\", {frname}";
                     if (f.DefaultValue != null) smethod += $", {frname}Default";
                     smethod += ");";
                     this.AddFieldSerializerCase(smethod);
@@ -523,19 +536,19 @@ namespace glTF2Sharp.CodeGen
 
             if (f.FieldType is ClassType ctype)
             {
-                return $"SerializePropertyObject(writer,\"{pname}\",{fname});";
+                return $"SerializePropertyObject(writer, \"{pname}\", {fname});";
             }
 
             if (f.FieldType is ArrayType atype)
             {
-                if (f.MinItems > 0) return $"SerializeProperty(writer,\"{pname}\",{fname},{fname}MinItems);";
+                if (f.MinItems > 0) return $"SerializeProperty(writer, \"{pname}\", {fname}, {fname}MinItems);";
 
                 return $"SerializeProperty(writer,\"{pname}\",{fname});";
             }
 
-            if (f.DefaultValue != null) return $"SerializeProperty(writer,\"{pname}\",{fname},{fname}Default);";
+            if (f.DefaultValue != null) return $"SerializeProperty(writer, \"{pname}\", {fname}, {fname}Default);";
 
-            return $"SerializeProperty(writer,\"{pname}\",{fname});";
+            return $"SerializeProperty(writer, \"{pname}\", {fname});";
         }
 
         private string _GetJSonDeserializerMethod(FieldInfo f)
@@ -545,12 +558,12 @@ namespace glTF2Sharp.CodeGen
             if (f.FieldType is ArrayType atype)
             {
                 var titem = _Emitter._GetRuntimeName(atype.ItemType);
-                return $"DeserializeList<{titem}>(reader,{fname});";
+                return $"DeserializeList<{titem}>(reader, {fname});";
             }
             else if (f.FieldType is DictionaryType dtype)
             {
                 var titem = _Emitter._GetRuntimeName(dtype.ValueType);
-                return $"DeserializeDictionary<{titem}>(reader,{fname});";
+                return $"DeserializeDictionary<{titem}>(reader, {fname});";
             }
 
             return $"{fname} = DeserializeValue<{_Emitter._GetRuntimeName(f.FieldType)}>(reader);";
@@ -588,7 +601,7 @@ namespace glTF2Sharp.CodeGen
             yield return "{".Indent(2);
 
             foreach (var l in _DeserializerSwitchBody.Indent(3)) yield return l;
-            if (HasBaseClass) yield return "default: base.DeserializeProperty(reader,property); break;".Indent(3);
+            if (HasBaseClass) yield return "default: base.DeserializeProperty(reader, property); break;".Indent(3);
             else yield return "default: throw new NotImplementedException();".Indent(3);
 
             yield return "}".Indent(2);

@@ -11,18 +11,23 @@ namespace glTF2Sharp.Schema2
     public abstract class glTFProperty : JsonSerializable
     {
         #region data
-        
+
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
         private Object _extras;
 
         #endregion
-        
-        #region API        
 
-        public T GetExtension<T>() where T : JsonSerializable { return _extensions.OfType<T>().FirstOrDefault(); }
+        #region API
 
-        public void SetExtension<T>(T value) where T : JsonSerializable
+        public T GetExtension<T>()
+            where T : JsonSerializable
+        {
+            return _extensions.OfType<T>().FirstOrDefault();
+        }
+
+        public void SetExtension<T>(T value)
+            where T : JsonSerializable
         {
             var idx = _extensions.IndexOf(item => item.GetType() == typeof(T));
 
@@ -39,6 +44,7 @@ namespace glTF2Sharp.Schema2
         protected override void SerializeProperties(JsonWriter writer)
         {
             SerializeProperty(writer, "extensions", _extensions);
+
             // SerializeProperty(writer, "extras", _extras);
         }
 
@@ -48,6 +54,7 @@ namespace glTF2Sharp.Schema2
             {
                 case "extras": reader.Skip(); break;
                 case "extensions": _DeserializeExtensions(reader, _extensions); break;
+
                 // case "extras": _extras = DeserializeValue<Object>(reader); break;
 
                 default: reader.Skip(); break;
@@ -82,7 +89,10 @@ namespace glTF2Sharp.Schema2
 
                 var val = ExtensionsFactory.Create(key);
 
-                if (val == null) reader.Skip();
+                if (val == null)
+                {
+                    reader.Skip();
+                }
                 else
                 {
                     val.DeserializeObject(reader);

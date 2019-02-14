@@ -142,7 +142,7 @@ namespace glTF2Sharp.Schema2
 
                 return ModelRoot.Load(filePath);
             }
-            catch(ExtensionException eex)            
+            catch(UnsupportedExtensionException eex)            
             {
                 TestContext.WriteLine($"{filePath} ERROR: {eex.Message}");
 

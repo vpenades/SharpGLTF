@@ -56,14 +56,14 @@ namespace glTF2Sharp
 
         public static Matrix4x4 LocalToWorld(Matrix4x4 parentWorld, Matrix4x4 childLocal)
         {
-            return childLocal * parentWorld;            
+            return childLocal * parentWorld;
         }
 
         public static Matrix4x4 WorldToLocal(Matrix4x4 parentWorld, Matrix4x4 childWorld)
         {
             Matrix4x4.Invert(parentWorld, out Matrix4x4 invWorld);
 
-            return childWorld * invWorld;            
+            return childWorld * invWorld;
         }
 
         public static Matrix4x4 CreateFromRows(Vector4 x, Vector4 y, Vector4 z, Vector4 w)

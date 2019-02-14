@@ -24,6 +24,11 @@ namespace glTF2Sharp
             return !(float.IsNaN(value) | float.IsInfinity(value));
         }
 
+        internal static bool _IsReal(this Vector2 v)
+        {
+            return v.X._IsReal() & v.Y._IsReal();
+        }
+
         internal static bool _IsReal(this Vector3 v)
         {
             return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal();
@@ -42,7 +47,7 @@ namespace glTF2Sharp
         internal static Quaternion AsQuaternion(this Vector4 v)
         {
             return new Quaternion(v.X, v.Y, v.Z, v.W);
-        }        
+        }
 
         #endregion
 
@@ -57,7 +62,7 @@ namespace glTF2Sharp
             return Convert.FromBase64String(content);
         }
 
-        #endregion                
+        #endregion
 
         #region linq
 
@@ -121,7 +126,8 @@ namespace glTF2Sharp
             return -1;
         }
 
-        internal static int IndexOfReference<T>(this IReadOnlyList<T> collection, T value) where T : class
+        internal static int IndexOfReference<T>(this IReadOnlyList<T> collection, T value)
+            where T : class
         {
             var l = collection.Count;
 
@@ -133,7 +139,8 @@ namespace glTF2Sharp
             return -1;
         }
 
-        internal static int IndexOf<T>(this IReadOnlyList<T> collection, T[] subset) where T : IEquatable<T>
+        internal static int IndexOf<T>(this IReadOnlyList<T> collection, T[] subset)
+            where T : IEquatable<T>
         {
             var l = collection.Count - subset.Length;
 
@@ -151,11 +158,6 @@ namespace glTF2Sharp
             }
 
             return -1;
-        }
-
-        internal static ArraySegment<T> GetSegment<T>(this ArraySegment<T> array, int offset, int count)
-        {
-            return new ArraySegment<T>(array.Array, array.Offset + offset, count);
         }
 
         internal static void CopyTo<T>(this T[] src, int srcOffset, IList<T> dst, int dstOffset, int count)
@@ -179,17 +181,20 @@ namespace glTF2Sharp
             }
         }
 
-        internal static T AsValue<T>(this T? value, T defval) where T : struct
+        internal static T AsValue<T>(this T? value, T defval)
+            where T : struct
         {
             return value ?? defval;
         }
 
-        internal static T? AsNullable<T>(this T value, T defval) where T : struct
+        internal static T? AsNullable<T>(this T value, T defval)
+            where T : struct
         {
             return value.Equals(defval) ? (T?)null : value;
         }
 
-        internal static T? AsNullable<T>(this T value, T defval, T minval, T maxval) where T : struct, IEquatable<T>, IComparable<T>
+        internal static T? AsNullable<T>(this T value, T defval, T minval, T maxval)
+            where T : struct, IEquatable<T>, IComparable<T>
         {
             if (value.Equals(defval)) return null;
 
@@ -212,7 +217,7 @@ namespace glTF2Sharp
         internal static String AsName(this string name)
         {
             return string.IsNullOrWhiteSpace(name) ? null : name;
-        }        
+        }
 
         #endregion
 
@@ -268,7 +273,7 @@ namespace glTF2Sharp
 
                 default: throw new NotImplementedException();
             }
-        }           
+        }
 
         public static int DimCount(this ElementType dimension)
         {

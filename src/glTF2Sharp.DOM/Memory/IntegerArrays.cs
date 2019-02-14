@@ -5,7 +5,7 @@ using System.Collections;
 using System.Linq;
 
 namespace glTF2Sharp.Memory
-{    
+{
     using BYTES = ArraySegment<Byte>;
 
     using ENCODING = Schema2.IndexType;
@@ -50,8 +50,9 @@ namespace glTF2Sharp.Memory
                         this._Getter = this._GetValue<UInt32>;
                         break;
                     }
+
                 default: throw new ArgumentException(nameof(encoding));
-            }            
+            }
         }
 
         private UInt32 _GetValueU8(int index) { return _GetValue<Byte>(index); }
@@ -60,12 +61,14 @@ namespace glTF2Sharp.Memory
         private UInt32 _GetValueU16(int index) { return _GetValue<UInt16>(index); }
         private void _SetValueU16(int index, UInt32 value) { _SetValue<UInt16>(index, (UInt16)value); }
 
-        private T _GetValue<T>(int index) where T : unmanaged
+        private T _GetValue<T>(int index)
+            where T : unmanaged
         {
             return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index];
         }
 
-        private void _SetValue<T>(int index, T value) where T : unmanaged
+        private void _SetValue<T>(int index, T value)
+            where T : unmanaged
         {
             System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index] = value;
         }
@@ -104,9 +107,9 @@ namespace glTF2Sharp.Memory
         {
             get => _Getter(index);
             set => _Setter(index, value);
-        }        
+        }
 
-        public void CopyTo(ArraySegment<UInt32> dst) { EncodedArrayUtils.Copy<UInt32>(this, dst); }        
+        public void CopyTo(ArraySegment<UInt32> dst) { EncodedArrayUtils.Copy<UInt32>(this, dst); }
 
         public IEnumerator<UInt32> GetEnumerator() { return new EncodedArrayEnumerator<UInt32>(this); }
 

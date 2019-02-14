@@ -32,9 +32,9 @@ namespace glTF2Sharp.Schema2
 
         public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
 
-        public Node VisualParent => this.LogicalParent._GetVisualParentNode(this);        
+        public Node VisualParent => this.LogicalParent._GetVisualParentNode(this);
 
-        public IEnumerable<Node> VisualChildren => GetVisualChildren(0);        
+        public IEnumerable<Node> VisualChildren => GetVisualChildren(0);
 
         public Boolean IsSkinJoint => Skin.GetSkinsUsing(this).Any();
 
@@ -132,7 +132,7 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region API        
+        #region API
 
         internal bool _ContainsVisualNode(Node node, bool recursive)
         {
@@ -153,7 +153,7 @@ namespace glTF2Sharp.Schema2
             // a class declared in the extension... but then, it makes edition horribly complicated.
             // maybe it's better to have a non serializable _LodLevel that is applied when serializing.
 
-            var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);            
+            var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);
 
             return allChildren;
         }
@@ -167,7 +167,7 @@ namespace glTF2Sharp.Schema2
 
         public void AddNode(Node node)
         {
-            Guard.NotNull(node,nameof(node));
+            Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             var idx = this.LogicalParent._UseLogicaNode(node);
@@ -193,7 +193,7 @@ namespace glTF2Sharp.Schema2
 
                 foreach (var ccc in cc) yield return ccc;
             }
-        }        
+        }
 
         public static IEnumerable<Node> GetNodesUsingMesh(Mesh mesh)
         {
@@ -247,7 +247,7 @@ namespace glTF2Sharp.Schema2
             }
 
             // check Transforms (out or range, NaN, etc)
-            
+
             // check morph weights
         }
 
@@ -282,7 +282,7 @@ namespace glTF2Sharp.Schema2
 
         internal bool _ContainsVisualNode(Node node, bool recursive)
         {
-            Guard.NotNull(node,nameof(node));
+            Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             if (_nodes.Contains(node.LogicalIndex)) return true;
@@ -324,7 +324,7 @@ namespace glTF2Sharp.Schema2
         }
 
         // TODO: AddVisualChild must return a "NodeBuilder"
-        // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_nodes); }        
+        // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_nodes); }
 
         #endregion
     }

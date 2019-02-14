@@ -23,7 +23,7 @@ namespace glTF2Sharp.Schema2
             set => this._type = value;
         }
 
-        #endregion        
+        #endregion
     }
 
     public partial class ModelRoot

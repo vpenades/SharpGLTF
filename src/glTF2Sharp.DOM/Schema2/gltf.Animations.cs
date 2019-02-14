@@ -56,7 +56,7 @@ namespace glTF2Sharp.Schema2
         public AnimationSampler CreateSampler(IReadOnlyList<Single> input, IReadOnlyList<System.Numerics.Vector3> output, AnimationInterpolationMode interpolation)
         {
             var inputData = input.ToArray().ToByteArray();
-            var outputData = output.ToArray().ToByteArray();            
+            var outputData = output.ToArray().ToByteArray();
 
             var inputAccessor = LogicalParent._CreateDataAccessor(inputData, Runtime.Encoding.DimensionType.Scalar, input.Count);
             var outputAccesor = LogicalParent._CreateDataAccessor(outputData, Runtime.Encoding.DimensionType.Vector3, output.Count);
@@ -102,6 +102,7 @@ namespace glTF2Sharp.Schema2
         #region data
 
         internal int? _NodeId => this._node;
+
         internal PathType _NodePath => this._path;
 
         #endregion
@@ -203,9 +204,6 @@ namespace glTF2Sharp.Schema2
             _animations.Add(anim);
 
             return anim;
-        }        
+        }
     }
 }
-
-
-

@@ -28,7 +28,7 @@ namespace glTF2Sharp.Schema2
         {
             _attributes = new Dictionary<string, int>();
             _targets = new List<Dictionary<string, int>>();
-        }        
+        }
 
         #endregion
 
@@ -74,10 +74,13 @@ namespace glTF2Sharp.Schema2
 
             set
             {
-                if (value == null) this._indices = null;
+                if (value == null)
+                {
+                    this._indices = null;
+                }
                 else
                 {
-                    Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, value,nameof(value));
+                    Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, value, nameof(value));
                     this._indices = value.LogicalIndex;
                 }
             }
@@ -139,25 +142,25 @@ namespace glTF2Sharp.Schema2
             if (accessor != null)
             {
                 Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, accessor, nameof(accessor));
-                _attributes[attributeKey] = accessor.LogicalIndex;                
+                _attributes[attributeKey] = accessor.LogicalIndex;
             }
             else
             {
                 _attributes.Remove(attributeKey);
             }
-        }        
+        }
 
         public void SetVertexAccessors(BufferView buffer, int byteOffset, int vertexCount, IEnumerable<Geometry.VertexElement> elements)
         {
             int count = 0;
-            foreach(var e in elements)
+            foreach (var e in elements)
             {
                 var accessor = this.LogicalParent.LogicalParent.CreateAccessor(e.Attribute);
                 accessor.SetVertexData(buffer, byteOffset + count, e.Dimensions, e.Encoding, e.Normalized, vertexCount);
                 count += e.ByteSize;
 
                 SetVertexAccessor(e.Attribute, accessor);
-            }            
+            }
         }
 
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
@@ -183,7 +186,7 @@ namespace glTF2Sharp.Schema2
             {
                 target[kvp.Key] = kvp.Value.LogicalIndex;
             }
-        }        
+        }
 
         public IReadOnlyList<KeyValuePair<String, Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
         {

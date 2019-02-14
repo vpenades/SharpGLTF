@@ -159,6 +159,7 @@ namespace glTF2Sharp.Collections
         public int Use(T item)
         {
             Guard.NotNull(item, nameof(item));
+
             // in this case we delay the LogicalParent==null check to the "Add" method below
 
             var idx = this.IndexOf(item);

@@ -4,7 +4,6 @@ using System.Text;
 using System.Linq;
 using System.Numerics;
 
-
 namespace glTF2Sharp.Geometry
 {
     using SCALARARRAY = Memory.IEncodedArray<Single>;
@@ -93,17 +92,16 @@ namespace glTF2Sharp.Geometry
             }
         }
 
-        public void CopyTo(IReadOnlyDictionary<string,Schema2.Accessor> vertexAccessors)
+        public void CopyTo(IReadOnlyDictionary<string, Schema2.Accessor> vertexAccessors)
         {
-            foreach(var key in vertexAccessors.Keys)
+            foreach (var key in vertexAccessors.Keys)
             {
                 var dim = GetDimensions(key);
                 if (dim == 1) Memory.EncodedArrayUtils.CopyTo(this.GetScalarColumn(key), vertexAccessors[key].AsScalarArray());
                 if (dim == 2) Memory.EncodedArrayUtils.CopyTo(this.GetVector2Column(key), vertexAccessors[key].AsVector2Array());
                 if (dim == 3) Memory.EncodedArrayUtils.CopyTo(this.GetVector3Column(key), vertexAccessors[key].AsVector3Array());
                 if (dim == 4) Memory.EncodedArrayUtils.CopyTo(this.GetVector4Column(key), vertexAccessors[key].AsVector4Array());
-            }           
-            
+            }
         }
 
         #endregion
@@ -120,11 +118,11 @@ namespace glTF2Sharp.Geometry
             return dstBuffer;
         }
 
-        #endregion 
+        #endregion
     }
 
     /// <summary>
-    /// Represents a fixed collection of vertices with a specific vertex attributes definition. 
+    /// Represents a fixed collection of vertices with a specific vertex attributes definition.
     /// </summary>
     public class VertexArray : VertexBuffer
     {
@@ -166,7 +164,7 @@ namespace glTF2Sharp.Geometry
 
         public int ByteStride => _ByteStride;
 
-        public Byte[] Data => _Buffer;        
+        public Byte[] Data => _Buffer;
 
         #endregion
 
@@ -176,7 +174,7 @@ namespace glTF2Sharp.Geometry
 
         public override SCALARARRAY GetScalarColumn(String attribute, int rowStart = 0, int rowCount = int.MaxValue)
         {
-            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));            
+            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));
 
             var column = VertexElement._GetColumn(_Buffer, _Elements, attribute, rowStart, rowCount);
             if (column.Item3.Dimensions.DimCount() != 1) throw new ArgumentException(nameof(attribute));
@@ -185,7 +183,7 @@ namespace glTF2Sharp.Geometry
 
         public override VECTOR2ARRAY GetVector2Column(String attribute, int rowStart = 0, int rowCount = int.MaxValue)
         {
-            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));            
+            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));
 
             var column = VertexElement._GetColumn(_Buffer, _Elements, attribute, rowStart, rowCount);
             if (column.Item3.Dimensions.DimCount() != 2) throw new ArgumentException(nameof(attribute));
@@ -194,7 +192,7 @@ namespace glTF2Sharp.Geometry
 
         public override VECTOR3ARRAY GetVector3Column(String attribute, int rowStart = 0, int rowCount = int.MaxValue)
         {
-            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));            
+            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));
 
             var column = VertexElement._GetColumn(_Buffer, _Elements, attribute, rowStart, rowCount);
             if (column.Item3.Dimensions.DimCount() != 3) throw new ArgumentException(nameof(attribute));
@@ -203,14 +201,14 @@ namespace glTF2Sharp.Geometry
 
         public override VECTOR4ARRAY GetVector4Column(String attribute, int rowStart = 0, int rowCount = int.MaxValue)
         {
-            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));            
+            Guard.MustBeBetweenOrEqualTo(rowStart, 0, Count - rowCount, nameof(rowStart));
 
             var column = VertexElement._GetColumn(_Buffer, _Elements, attribute, rowStart, rowCount);
             if (column.Item3.Dimensions.DimCount() != 4) throw new ArgumentException(nameof(attribute));
             return new Memory.Vector4Array(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
-        }                
-        
-        #endregion              
+        }
+
+        #endregion
     }
 
     /// <summary>

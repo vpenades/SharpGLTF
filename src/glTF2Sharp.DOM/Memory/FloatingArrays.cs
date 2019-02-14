@@ -6,7 +6,7 @@ using System.Collections;
 using System.Linq;
 
 namespace glTF2Sharp.Memory
-{    
+{
     using BYTES = ArraySegment<Byte>;
 
     using ENCODING = Schema2.ComponentType;
@@ -19,7 +19,7 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public FloatingAccessor(Byte[] data, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), encoding, normalized) { }        
+            : this(new BYTES(data), encoding, normalized) { }
 
         public FloatingAccessor(BYTES data, ENCODING encoding, Boolean normalized)
         {
@@ -65,6 +65,7 @@ namespace glTF2Sharp.Memory
                                 this._Getter = this._GetNormalizedU16;
                                 break;
                             }
+
                         default: throw new ArgumentException(nameof(encoding));
                     }
                 }
@@ -113,7 +114,7 @@ namespace glTF2Sharp.Memory
                         default: throw new ArgumentException(nameof(encoding));
                     }
                 }
-            }            
+            }
         }
 
         private Single _GetValueU8(int byteOffset, int index) { return _GetValue<Byte>(byteOffset, index); }
@@ -143,12 +144,14 @@ namespace glTF2Sharp.Memory
         private Single _GetNormalizedS16(int byteOffset, int index) { return Math.Max(_GetValueS16(byteOffset, index) / 32767.0f, -1); }
         private void _SetNormalizedS16(int byteOffset, int index, Single value) { _SetValueS16(byteOffset, index, (Single)Math.Round(value * 32767.0f)); }
 
-        private T _GetValue<T>(int byteOffset, int index) where T : unmanaged
+        private T _GetValue<T>(int byteOffset, int index)
+            where T : unmanaged
         {
             return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.AsSpan(byteOffset))[index];
         }
 
-        private void _SetValue<T>(int byteOffset, int index, T value) where T : unmanaged
+        private void _SetValue<T>(int byteOffset, int index, T value)
+            where T : unmanaged
         {
             System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.AsSpan(byteOffset))[index] = value;
         }
@@ -181,7 +184,7 @@ namespace glTF2Sharp.Memory
         {
             get => _Getter(byteOffset, index);
             set => _Setter(byteOffset, index, value);
-        }        
+        }
 
         #endregion
     }
@@ -230,14 +233,14 @@ namespace glTF2Sharp.Memory
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _ItemCount;
-        
+
         public Single this[int index]
         {
             get => _Accesor[index * _ByteStride, 0];
             set => _Accesor[index * _ByteStride, 0] = value;
-        }                
+        }
 
-        public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }        
+        public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }
 
         public IEnumerator<Single> GetEnumerator() { return new EncodedArrayEnumerator<Single>(this); }
 
@@ -245,22 +248,22 @@ namespace glTF2Sharp.Memory
 
         public (Single, Single) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapScalarToVector4(this); }        
+        public IEncodedArray<Vector4> AsVector4() { return new _MapScalarToVector4(this); }
 
         #endregion
     }
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Vector2 values
-    /// </summary>    
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
     public struct Vector2Array : IEncodedArray<Vector2>
     {
         #region constructors
 
         public Vector2Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data),byteStride,encoding,normalized) { }
-        
+            : this(new BYTES(data), byteStride, encoding, normalized) { }
+
         public Vector2Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
         {
             var len = encoding.ByteLength() * 2;
@@ -309,9 +312,9 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
             }
-        }        
+        }
 
-        public void CopyTo(ArraySegment<Vector2> dst) { EncodedArrayUtils.Copy<Vector2>(this, dst); }        
+        public void CopyTo(ArraySegment<Vector2> dst) { EncodedArrayUtils.Copy<Vector2>(this, dst); }
 
         public IEnumerator<Vector2> GetEnumerator() { return new EncodedArrayEnumerator<Vector2>(this); }
 
@@ -319,16 +322,16 @@ namespace glTF2Sharp.Memory
 
         public (Vector2, Vector2) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }        
+        public IEncodedArray<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }
 
         #endregion
     }
 
     /// <summary>
     /// Wraps an encoded byte array and exposes it as a collection of Vector3 values
-    /// </summary>    
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
-    public struct Vector3Array: IEncodedArray<Vector3>
+    public struct Vector3Array : IEncodedArray<Vector3>
     {
         #region constructors
 
@@ -341,7 +344,7 @@ namespace glTF2Sharp.Memory
 
             _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
-            
+
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
         }
@@ -384,9 +387,9 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 1] = value.Y;
                 _Accesor[index, 2] = value.Z;
             }
-        }        
+        }
 
-        public void CopyTo(ArraySegment<Vector3> dst) { EncodedArrayUtils.Copy<Vector3>(this, dst); }        
+        public void CopyTo(ArraySegment<Vector3> dst) { EncodedArrayUtils.Copy<Vector3>(this, dst); }
 
         public IEnumerator<Vector3> GetEnumerator() { return new EncodedArrayEnumerator<Vector3>(this); }
 
@@ -403,7 +406,7 @@ namespace glTF2Sharp.Memory
     /// Wraps an encoded byte array and exposes it as a collection of Vector4 values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
-    public struct Vector4Array: IEncodedArray<Vector4>
+    public struct Vector4Array : IEncodedArray<Vector4>
     {
         #region constructors
 
@@ -460,7 +463,7 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 2] = value.Z;
                 _Accesor[index, 3] = value.W;
             }
-        }        
+        }
 
         public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy<Vector4>(this, dst); }
 
@@ -536,9 +539,9 @@ namespace glTF2Sharp.Memory
                 _Accesor[index, 2] = value.Z;
                 _Accesor[index, 3] = value.W;
             }
-        }        
+        }
 
-        public void CopyTo(ArraySegment<Quaternion> dst) { EncodedArrayUtils.Copy<Quaternion>(this, dst); }        
+        public void CopyTo(ArraySegment<Quaternion> dst) { EncodedArrayUtils.Copy<Quaternion>(this, dst); }
 
         public IEnumerator<Quaternion> GetEnumerator() { return new EncodedArrayEnumerator<Quaternion>(this); }
 

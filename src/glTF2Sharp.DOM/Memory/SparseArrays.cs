@@ -59,7 +59,7 @@ namespace glTF2Sharp.Memory
             {
                 if (_Mapping.TryGetValue(index, out int topIndex)) _TopItems[topIndex] = value;
             }
-        }        
+        }
 
         public void CopyTo(ArraySegment<T> dst) { EncodedArrayUtils.Copy(this, dst); }
 

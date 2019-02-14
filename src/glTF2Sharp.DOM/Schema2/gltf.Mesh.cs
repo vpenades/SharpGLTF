@@ -21,7 +21,7 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region properties        
+        #region properties
 
         public int LogicalIndex => this.LogicalParent.LogicalMeshes.IndexOfReference(this);
 
@@ -35,7 +35,7 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region API        
+        #region API
 
         public MeshPrimitive CreatePrimitive()
         {

@@ -107,7 +107,8 @@ namespace glTF2Sharp.IO
             _Serialize(writer, value.Value);
         }
 
-        protected static void SerializePropertyEnumValue<T>(JsonWriter writer, string name, T? value, T? defval = null) where T : struct
+        protected static void SerializePropertyEnumValue<T>(JsonWriter writer, string name, T? value, T? defval = null)
+            where T : struct
         {
             if (!typeof(T).IsEnum) throw new ArgumentException(nameof(value));
 
@@ -117,7 +118,8 @@ namespace glTF2Sharp.IO
             SerializeProperty(writer, name, (int)(Object)value);
         }
 
-        protected static void SerializePropertyEnumSymbol<T>(JsonWriter writer, string name, T? value, T? defval = null) where T : struct
+        protected static void SerializePropertyEnumSymbol<T>(JsonWriter writer, string name, T? value, T? defval = null)
+            where T : struct
         {
             if (!typeof(T).IsEnum) throw new ArgumentException(nameof(value));
 
@@ -127,7 +129,8 @@ namespace glTF2Sharp.IO
             SerializeProperty(writer, name, Enum.GetName(typeof(T), value));
         }
 
-        protected static void SerializePropertyObject<T>(JsonWriter writer, string name, T value) where T : JsonSerializable
+        protected static void SerializePropertyObject<T>(JsonWriter writer, string name, T value)
+            where T : JsonSerializable
         {
             if (value == null) return;
             writer.WritePropertyName(name);
@@ -146,6 +149,7 @@ namespace glTF2Sharp.IO
             {
                 _Serialize(writer, item);
             }
+
             writer.WriteEndArray();
         }
 
@@ -163,6 +167,7 @@ namespace glTF2Sharp.IO
                 writer.WritePropertyName(item.Key);
                 _Serialize(writer, item.Value);
             }
+
             writer.WriteEndObject();
         }
 
@@ -223,7 +228,10 @@ namespace glTF2Sharp.IO
                     var curProp = reader.Value.ToString();
                     DeserializeProperty(reader, curProp);
                 }
-                else throw new NotImplementedException(); // skip
+                else
+                {
+                    throw new NotImplementedException(); // skip
+                }
             }
         }
 

@@ -47,7 +47,7 @@ namespace glTF2Sharp.Schema2
             this._target = target;
         }
 
-        #endregion        
+        #endregion
 
         #region properties
 
@@ -104,16 +104,16 @@ namespace glTF2Sharp.Schema2
 
         public Memory.IntegerArray CreateIndicesArray(int byteOffset, IndexType encoding)
         {
-            Guard.IsTrue(this.ByteStride == 0,null, "bytestride must be zero");
+            Guard.IsTrue(this.ByteStride == 0, null, "bytestride must be zero");
 
             return new Memory.IntegerArray(this.Data.Slice(byteOffset), encoding);
-        }        
+        }
 
         public Memory.ScalarArray CreateScalarArray(int byteOffset, int count, ENCODING encoding, Boolean normalized)
         {
             var data = this.Data.Slice(byteOffset, count * this.ByteStride);
 
-            return new Memory.ScalarArray(data, this.ByteStride, encoding, normalized);            
+            return new Memory.ScalarArray(data, this.ByteStride, encoding, normalized);
         }
 
         public Memory.Vector2Array CreateVector2Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
@@ -191,7 +191,7 @@ namespace glTF2Sharp.Schema2
             var buffer = CreateBuffer(data);
 
             return CreateBufferView(buffer, data.Length, null, byteStride, BufferMode.ARRAY_BUFFER);
-        }        
+        }
     }
 
     /// <summary>
@@ -200,7 +200,7 @@ namespace glTF2Sharp.Schema2
     sealed class _StaticBufferBuilder
     {
         #region lifecycle
-        
+
         public _StaticBufferBuilder(int bufferIndex)
         {
             _BufferIndex = bufferIndex;

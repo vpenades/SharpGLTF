@@ -5,6 +5,7 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
+		glTF2Sharp.ruleset = glTF2Sharp.ruleset
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -20,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "glTF2Sharp.Tests", "src\glT
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{D7D51F42-D08C-4DDA-88DA-AF008F10B644}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshBuffers", "src\MeshBuffers\MeshBuffers.csproj", "{1C93D96E-19DD-443B-8818-AAB14FEDA35D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MeshBuffers", "src\MeshBuffers\MeshBuffers.csproj", "{1C93D96E-19DD-443B-8818-AAB14FEDA35D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

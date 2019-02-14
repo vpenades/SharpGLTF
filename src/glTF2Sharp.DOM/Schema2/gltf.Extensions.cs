@@ -14,7 +14,7 @@ namespace glTF2Sharp.Schema2
         {
             RegisterExtension("KHR_materials_pbrSpecularGlossiness", () => new MaterialPBRSpecularGlossiness_KHR());
             RegisterExtension("KHR_materials_unlit", () => new MaterialUnlit_KHR());
-        }        
+        }
 
         #endregion
 

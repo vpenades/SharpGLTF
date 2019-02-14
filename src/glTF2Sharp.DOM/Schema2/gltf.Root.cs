@@ -36,7 +36,7 @@ namespace glTF2Sharp.Schema2
             _samplers = new ChildrenCollection<Sampler, ModelRoot>(this);
             _scenes = new ChildrenCollection<Scene, ModelRoot>(this);
             _skins = new ChildrenCollection<Skin, ModelRoot>(this);
-            _textures = new ChildrenCollection<Texture, ModelRoot>(this);            
+            _textures = new ChildrenCollection<Texture, ModelRoot>(this);
         }
 
         #endregion
@@ -64,7 +64,7 @@ namespace glTF2Sharp.Schema2
 
         public IReadOnlyList<Mesh>          LogicalMeshes       => _meshes;
         public IReadOnlyList<Skin>          LogicalSkins        => _skins;
-        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;        
+        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;
 
         public IReadOnlyList<Node>          LogicalNodes        => _nodes;
         public IReadOnlyList<Scene>         LogicalScenes       => _scenes;
@@ -95,7 +95,7 @@ namespace glTF2Sharp.Schema2
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                exx.Add(new ExtensionException(this, $"Incompatible Extension found: {iex}")); // fix: attempt to remove given extension
+                exx.Add(new UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
             }
 
             if (exx.Count > 0) return exx;

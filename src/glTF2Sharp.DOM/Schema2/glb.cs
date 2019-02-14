@@ -53,7 +53,8 @@ namespace glTF2Sharp.Schema2
 
                 var chunks = new Dictionary<uint, Byte[]>();
 
-                while (true) // keep reading until EndOfFile exception
+                // keep reading until EndOfFile exception
+                while (true)
                 {
                     if (binaryReader.PeekChar() < 0) break;
 

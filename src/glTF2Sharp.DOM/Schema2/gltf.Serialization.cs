@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+
+using Newtonsoft.Json;
 
 namespace glTF2Sharp.Schema2
 {
@@ -17,7 +18,6 @@ namespace glTF2Sharp.Schema2
     {
         public ReadSettings()
         {
-
         }
 
         internal ReadSettings(string filePath)
@@ -64,7 +64,7 @@ namespace glTF2Sharp.Schema2
             BinaryMode = true;
             EmbedImages = true;
 
-            this.FileWriter = (fn, d) => memory.Write(d,0,d.Length);
+            this.FileWriter = (fn, d) => memory.Write(d, 0, d.Length);
         }
 
         #endregion
@@ -131,7 +131,7 @@ namespace glTF2Sharp.Schema2
             using (var streamReader = new StreamReader(stream))
             {
                 content = streamReader.ReadToEnd();
-            }            
+            }
 
             return Parse(content, settings);
         }
@@ -151,7 +151,7 @@ namespace glTF2Sharp.Schema2
             }
 
             return Parse(dom, settings);
-        }        
+        }
 
         public static ROOT Parse(String jsonContent, ReadSettings settings)
         {
@@ -189,7 +189,7 @@ namespace glTF2Sharp.Schema2
 
                 return root;
             }
-        }        
+        }
 
         #endregion
 
@@ -202,7 +202,7 @@ namespace glTF2Sharp.Schema2
 
         public void SaveGLB(string filePath)
         {
-            Guard.FilePathMustBeValid(filePath,nameof(filePath));
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
             var settings = new WriteSettings(filePath)
             {
@@ -213,7 +213,7 @@ namespace glTF2Sharp.Schema2
             var name = Path.GetFileNameWithoutExtension(filePath);
 
             Write(name, settings);
-        }        
+        }
 
         public void SaveGLTF(string filePath, Formatting fmt = Formatting.None)
         {
@@ -227,8 +227,8 @@ namespace glTF2Sharp.Schema2
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
-            Write(name, settings);            
-        }        
+            Write(name, settings);
+        }
 
         public void Write(string name, WriteSettings settings)
         {
@@ -280,7 +280,7 @@ namespace glTF2Sharp.Schema2
 
                     settings.FileWriter($"{name}.gltf", m.ToArray());
                 }
-            }            
+            }
 
             foreach (var b in this._buffers) b._ClearAfterWrite();
             foreach (var i in this._images) i._ClearAfterWrite();
@@ -309,14 +309,14 @@ namespace glTF2Sharp.Schema2
         {
             using (var m = new MemoryStream())
             {
-                var settings = new WriteSettings(m);                
+                var settings = new WriteSettings(m);
 
                 Write("model", settings);
 
                 return m.ToArray();
-            }                        
+            }
         }
 
-        #endregion        
+        #endregion
     }
 }

@@ -106,7 +106,7 @@ namespace glTF2Sharp
 
         public Vector3 Center => (Min + Max) * 0.5f;
 
-        public Vector3 Size => IsEmpty ? Vector3.Zero : Max - Min;        
+        public Vector3 Size => IsEmpty ? Vector3.Zero : Max - Min;
 
         public bool IsEmpty => (Min.X > Max.X) | (Min.Y > Max.Y) | (Min.Z > Max.Z);
 

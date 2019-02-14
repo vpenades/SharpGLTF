@@ -21,7 +21,8 @@ namespace glTF2Sharp.IO
             return Convert.ChangeType(reader.Value, vtype, System.Globalization.CultureInfo.InvariantCulture);
         }
 
-        public static T GetValueAs<T>(this JsonReader reader) where T : struct
+        public static T GetValueAs<T>(this JsonReader reader)
+            where T : struct
         {
             return (T)reader.GetValueAs(typeof(T));
         }

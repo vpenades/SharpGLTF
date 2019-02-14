@@ -6,7 +6,7 @@ using System.Numerics;
 
 namespace glTF2Sharp.Geometry
 {
-    using Schema2;    
+    using Schema2;
 
     /// <summary>
     /// Defines a vertex attribute, dimensions and encoding.
@@ -110,7 +110,7 @@ namespace glTF2Sharp.Geometry
             return new Memory.Vector4Array(column.Item1, column.Item2, column.Item3.Encoding, column.Item3.Normalized);
         }
 
-        internal static (ArraySegment<Byte>, int, VertexElement) _GetColumn(Byte[] data, VertexElement[] elements, string attribute, int rowStart, int rowCount)
+        internal static(ArraySegment<Byte>, int, VertexElement) _GetColumn(Byte[] data, VertexElement[] elements, string attribute, int rowStart, int rowCount)
         {
             var index = Array.FindIndex(elements, item => item.Attribute == attribute);
             if (index < 0) throw new ArgumentException(nameof(attribute));
@@ -118,7 +118,7 @@ namespace glTF2Sharp.Geometry
             var element = elements[index];
 
             var byteStride = GetVertexByteSize(elements);
-            var byteOffset = elements.Take(index).Sum(item => item.ByteSize) + rowStart * byteStride;
+            var byteOffset = elements.Take(index).Sum(item => item.ByteSize) + (rowStart * byteStride);
             var byteLength = data.Length - byteOffset;
 
             if (rowCount < int.MaxValue) byteLength = rowCount * byteStride;
