@@ -55,8 +55,13 @@ namespace glTF2Sharp.Geometry
             var mdlmesh = mdl.CreateMesh();
             var mdlprim = mdlmesh.CreatePrimitive();
             mdlprim.SetVertexAccessors(mdlbv, vbs.ByteOffset, vbs.Count, vbs.Attributes);
-            Memory.EncodedArrayUtils.CopyTo(vbs.GetVector3Column("POSITION"), mdlprim.VertexAccessors["POSITION"].AsVector3Array());
-            Memory.EncodedArrayUtils.CopyTo(vbs.GetVector3Column("NORMAL"), mdlprim.VertexAccessors["NORMAL"].AsVector3Array());
+            vbs.CopyTo(mdlprim.VertexAccessors);
+
+            var mdlprim_pos = mdlprim.VertexAccessors["POSITION"].AsVector3Array();
+            var mdlprim_nrm = mdlprim.VertexAccessors["NORMAL"].AsVector3Array();
+
+            CollectionAssert.AreEqual(positions.Skip(1).Take(2), mdlprim_pos);
+            CollectionAssert.AreEqual(normals.Skip(1).Take(2), mdlprim_nrm);
 
             mdl.AttachToCurrentTest("result.glb");
             mdl.AttachToCurrentTest("result.gltf");

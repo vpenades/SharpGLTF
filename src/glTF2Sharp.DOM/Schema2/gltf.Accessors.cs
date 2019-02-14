@@ -157,7 +157,7 @@ namespace glTF2Sharp.Schema2
 
             if (this._sparse != null && useSparse) return this._sparse.GetScalarArray(this);
 
-            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Encoding, this.Normalized);            
+            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Count, this.Encoding, this.Normalized);            
         }
 
         public Memory.IEncodedArray<Vector2> AsVector2Array(bool useSparse = true)
@@ -166,7 +166,7 @@ namespace glTF2Sharp.Schema2
 
             if (this._sparse != null && useSparse) return this._sparse.GetVector2Array(this);
 
-            return SourceBufferView.CreateVector2Array(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector2Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
         }
 
         public Memory.IEncodedArray<Vector3> AsVector3Array(bool useSparse = true)
@@ -175,7 +175,7 @@ namespace glTF2Sharp.Schema2
 
             if (this._sparse != null && useSparse) return this._sparse.GetVector3Array(this);
 
-            return SourceBufferView.CreateVector3Array(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector3Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
         }
 
         public Memory.IEncodedArray<Vector4> AsVector4Array(bool useSparse = true)
@@ -184,7 +184,7 @@ namespace glTF2Sharp.Schema2
 
             if (this._sparse != null && useSparse) return this._sparse.GetVector4Array(this);
 
-            return SourceBufferView.CreateVector4Array(this.ByteOffset, this.Encoding, this.Normalized);
+            return SourceBufferView.CreateVector4Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)

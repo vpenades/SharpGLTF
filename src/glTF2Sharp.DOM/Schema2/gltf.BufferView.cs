@@ -109,24 +109,32 @@ namespace glTF2Sharp.Schema2
             return new Memory.IntegerArray(this.Data.Slice(byteOffset), encoding);
         }        
 
-        public Memory.ScalarArray CreateScalarArray(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.ScalarArray CreateScalarArray(int byteOffset, int count, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.ScalarArray(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);            
+            var data = this.Data.Slice(byteOffset, count * this.ByteStride);
+
+            return new Memory.ScalarArray(data, this.ByteStride, encoding, normalized);            
         }
 
-        public Memory.Vector2Array CreateVector2Array(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Vector2Array CreateVector2Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector2Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            var data = this.Data.Slice(byteOffset, count * this.ByteStride);
+
+            return new Memory.Vector2Array(data, this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector3Array CreateVector3Array(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Vector3Array CreateVector3Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector3Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            var data = this.Data.Slice(byteOffset, count * this.ByteStride);
+
+            return new Memory.Vector3Array(data, this.ByteStride, encoding, normalized);
         }
 
-        public Memory.Vector4Array CreateVector4Array(int byteOffset, ENCODING encoding, Boolean normalized)
+        public Memory.Vector4Array CreateVector4Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
         {
-            return new Memory.Vector4Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
+            var data = this.Data.Slice(byteOffset, count * this.ByteStride);
+
+            return new Memory.Vector4Array(data, this.ByteStride, encoding, normalized);
         }
 
         public Memory.QuaternionArray CreateQuaternionArray(int byteOffset, ENCODING encoding, Boolean normalized)

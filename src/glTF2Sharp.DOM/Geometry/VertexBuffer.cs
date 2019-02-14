@@ -93,6 +93,19 @@ namespace glTF2Sharp.Geometry
             }
         }
 
+        public void CopyTo(IReadOnlyDictionary<string,Schema2.Accessor> vertexAccessors)
+        {
+            foreach(var key in vertexAccessors.Keys)
+            {
+                var dim = GetDimensions(key);
+                if (dim == 1) Memory.EncodedArrayUtils.CopyTo(this.GetScalarColumn(key), vertexAccessors[key].AsScalarArray());
+                if (dim == 2) Memory.EncodedArrayUtils.CopyTo(this.GetVector2Column(key), vertexAccessors[key].AsVector2Array());
+                if (dim == 3) Memory.EncodedArrayUtils.CopyTo(this.GetVector3Column(key), vertexAccessors[key].AsVector3Array());
+                if (dim == 4) Memory.EncodedArrayUtils.CopyTo(this.GetVector4Column(key), vertexAccessors[key].AsVector4Array());
+            }           
+            
+        }
+
         #endregion
 
         #region static API
