@@ -4,147 +4,76 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp.SchemaReflection
 {
-    // this is a mechanism to define serializable types, pretty much like Type and TypeInfo,
-    // but the types can be defined as "Virtual Types" because they don't actually exist.
-    // .
-    // this is useful to emit source code from schemas, since the types to emit don't exist prior emission.
-    // .
-    // Alternatives:
-    // 1. Type and TypeInfo inherit from MemberInfo and IReflect ... but in the end, you must implement a lot of code
-    // 2. Roslyn has a mechanism to define types, but it's missing the "emit serialization" part.
-
-
-
-    // In here we define a schema intended only for serialization
-    
-
-    public abstract class SchemaType
+    /// <summary>
+    /// Base class for all schema Types
+    /// </summary>
+    public abstract partial class SchemaType
     {
+        #region constructor
+
         protected SchemaType(Context ctx) { _Owner = ctx; }
 
-        internal readonly Context _Owner;
+        #endregion
 
-        protected Context Owner => _Owner;
+        #region data
 
+        /// <summary>
+        /// context where this type is stored
+        /// </summary>
+        private readonly Context _Owner;        
+
+        /// <summary>
+        /// identifier used for serialization and deserialization
+        /// </summary>
         public abstract string PersistentName { get; }
 
-        public sealed class Context
-        {
-            #region data
+        #endregion
 
-            private readonly Dictionary<string, SchemaType> _Types = new Dictionary<string, SchemaType>();
+        #region properties
 
-            private TypeInfo _RefType;
+        public Context Owner => _Owner;
 
-            #endregion
-
-            #region properties
-
-            public IEnumerable<EnumType> Enumerations => _Types.Values.OfType<EnumType>();
-
-            public IEnumerable<ClassType> Classes => _Types.Values.OfType<ClassType>();
-
-            #endregion
-
-            #region API
-
-            private SchemaType _UseOrCreate(SchemaType item)
-            {
-                if (_Types.TryGetValue(item.PersistentName, out SchemaType value)) return value;
-
-                _Types[item.PersistentName] = item;
-
-                return item;
-            }
-
-            public ObjectType UseAnyType()
-            {
-                var item = new ObjectType(this);
-                return (ObjectType)_UseOrCreate(item);
-            }
-
-            public StringType UseString()
-            {
-                var item = new StringType(this);
-                return (StringType)_UseOrCreate(item);
-            }
-
-            public BlittableType UseBlittable(TypeInfo t, bool isNullable = false)
-            {
-                if (t == null || !t.IsValueType) throw new ArgumentException(nameof(t));
-
-                var item = new BlittableType(this, t, isNullable);
-                return (BlittableType)_UseOrCreate(item);
-            }
-
-            public EnumType UseEnum(string name, bool isNullable = false)
-            {
-                var item = new EnumType(this, name, isNullable);
-                return (EnumType)_UseOrCreate(item);
-            }
-
-            public EnumType GetEnum(string name)
-            {
-                return _Types.TryGetValue(name, out SchemaType etype) ? etype as EnumType : null;
-            }            
-
-            public ArrayType UseArray(SchemaType elementType)
-            {
-                var item = new ArrayType(this,elementType);
-                return (ArrayType)_UseOrCreate(item);                
-            }            
-
-            public DictionaryType UseDictionary(SchemaType key, SchemaType val)
-            {
-                var item = new DictionaryType(this, key,val);
-                return (DictionaryType)_UseOrCreate(item);
-            }
-
-            public ClassType UseClass(string name)
-            {
-                var item = new ClassType(this, name);
-                return (ClassType)_UseOrCreate(item);
-            }
-
-            public void Remove(SchemaType type) { _Types.Remove(type.PersistentName); }
-
-            public void Remove(string persistentName)
-            {
-                _Types.Remove(persistentName);
-            }
-
-            #endregion
-        }        
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class StringType : SchemaType
     {
-        // https://en.wikipedia.org/wiki/Blittable_types        
+        #region constructor
 
         internal StringType(Context ctx) : base(ctx) { }
 
-        public override string PersistentName => typeof(String).Name;        
+        #endregion
+
+        #region properties
+
+        public override string PersistentName => typeof(String).Name;
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class ObjectType : SchemaType
     {
-        // https://en.wikipedia.org/wiki/Blittable_types        
+        #region constructor
 
         internal ObjectType(Context ctx) : base(ctx) { }
 
+        #endregion
+
+        #region properties
+
         public override string PersistentName => typeof(Object).Name;
 
-        
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
-    public sealed class BlittableType : SchemaType // blittable
+    public sealed class BlittableType : SchemaType
     {
-        // https://en.wikipedia.org/wiki/Blittable_types        
+        #region constructor        
 
         internal BlittableType(Context ctx, TypeInfo t, bool isNullable) : base(ctx)
         {
@@ -152,34 +81,55 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
             _Type = t;
             _IsNullable = isNullable;
-        }        
+        }
+
+        #endregion
+
+        #region data
+
+        // https://en.wikipedia.org/wiki/Blittable_types
 
         private readonly TypeInfo _Type;
         private readonly Boolean _IsNullable;
+
+        #endregion
+
+        #region properties
 
         public TypeInfo DataType => _Type;
 
         public bool IsNullable => _IsNullable;
 
-        public override string PersistentName => _IsNullable ? $"{_Type.Name}?" : _Type.Name;        
-    }
+        public override string PersistentName => _IsNullable ? $"{_Type.Name}?" : _Type.Name;
 
-    
+        #endregion
+    }    
 
     [System.Diagnostics.DebuggerDisplay("enum {PersistentName}")]
     public sealed class EnumType : SchemaType
     {
+        #region constructor
+
         internal EnumType(Context ctx, string name, bool isNullable) : base(ctx)
         {
             _PersistentName = name;
             _IsNullable = isNullable;
         }
 
+        #endregion
+
+        #region data
+
         private readonly String _PersistentName;
         private readonly Boolean _IsNullable;
 
         private bool _UseIntegers;
+
         private readonly Dictionary<string, int> _Values = new Dictionary<string, int>();
+
+        #endregion
+
+        #region properties
 
         public bool IsNullable => _IsNullable;
 
@@ -191,22 +141,40 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
         public IEnumerable<KeyValuePair<string, int>> Values => _Values;
 
-        public void SetValue(string key, int val) { _Values[key] = val; }        
+        #endregion
+
+        #region API
+
+        public void SetValue(string key, int val) { _Values[key] = val; }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class ArrayType : SchemaType
     {
+        #region constructor
+
         internal ArrayType(Context ctx, SchemaType element) : base(ctx)
         {
             _ItemType = element;
         }
 
+        #endregion
+
+        #region data
+
         private readonly SchemaType _ItemType;
 
         public SchemaType ItemType => _ItemType;
 
-        public override string PersistentName => $"{_ItemType.PersistentName}[]";        
+        #endregion
+
+        #region properties
+
+        public override string PersistentName => $"{_ItemType.PersistentName}[]";
+
+        #endregion
     }    
 
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
@@ -291,7 +259,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
         public FieldInfo SetDataType(Type type, bool isNullable)
         {
-            _FieldType = _Owner._Owner.UseBlittable(type.GetTypeInfo(), isNullable);
+            _FieldType = DeclaringClass.Owner.UseBlittable(type.GetTypeInfo(), isNullable);
             return this;
         }
 
@@ -330,10 +298,16 @@ namespace Epsylon.glTF2Toolkit.CodeGen
     [System.Diagnostics.DebuggerDisplay("class {PersistentName} : {BaseClass.PersistentName}")]
     public sealed class ClassType : SchemaType
     {
+        #region constructor
+
         internal ClassType(Context ctx, string name) : base(ctx)
         {
             _PersistentName = name;            
         }
+
+        #endregion
+
+        #region data
 
         private readonly String _PersistentName;        
 
@@ -347,6 +321,10 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
         public IEnumerable<FieldInfo> Fields => _Fields;
 
+        #endregion
+
+        #region API
+
         public FieldInfo UseField(string name)
         {
             var f = new FieldInfo(this, name);
@@ -354,23 +332,35 @@ namespace Epsylon.glTF2Toolkit.CodeGen
             _Fields.Add(f);
 
             return _Fields.FirstOrDefault(item => item.PersistentName == name);
-        }        
+        }
+
+        #endregion
     }
 
-    
+    /// <summary>
+    /// not used
+    /// </summary>
     public sealed class ReferenceType : SchemaType
     {
+        #region constructor
+
         internal ReferenceType(Context ctx, SchemaType refType) : base(ctx)
         {
             _ReferencedType = refType;
         }
+
+        #endregion
+
+        #region data
 
         // In code it has the representation List<Node>();
         // In serialization, it has the representation List<int>();
 
         private readonly SchemaType _ReferencedType;
 
-        public override string PersistentName => throw new NotImplementedException();        
+        public override string PersistentName => throw new NotImplementedException();
+
+        #endregion
     }
 
         

@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp
 {
+    /// <summary>
+    /// Utility class to download the gltf2 schema from github
+    /// </summary>
     static class SchemaDownload
     {
         public static void Syncronize(string remoteUrl, string localDirectory)

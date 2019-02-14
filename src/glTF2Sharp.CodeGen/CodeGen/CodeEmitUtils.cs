@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp.CodeGen
 {
+    /// <summary>
+    /// Text processing extensions to facilitate source code emission.
+    /// </summary>
     static class CodeEmitUtils
     {
         public static string Indent(this string text, int indent)

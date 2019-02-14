@@ -6,11 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using NJsonSchema.References;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp
 {
-    // https://github.com/RSuter/NJsonSchema
-    // https://github.com/RSuter/NJsonSchema/issues/378
-    // https://github.com/RSuter/NJsonSchema/issues/377        
+    using CodeGen;
+    using SchemaReflection;    
 
     class Program
     {
@@ -237,7 +236,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
             var ctypes = new NJsonSchema.CodeGeneration.CSharp.CSharpTypeResolver(settings);
             ctypes.Resolve(schema, false, null);
 
-            return PersistentSchema.Generate(ctypes);
+            return SchemaTypesReader.Generate(ctypes);
         }
 
         static NJsonSchema.JsonSchema4 LoadSchema(string filePath)
@@ -278,10 +277,5 @@ namespace Epsylon.glTF2Toolkit.CodeGen
         }
 
         #endregion
-    }
-
-
-
-
-    
+    }    
 }

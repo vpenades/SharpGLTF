@@ -4,23 +4,38 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp.SchemaReflection
 {
-    static class PersistentSchema
+    /// <summary>
+    /// Utility class that reads a json schema and creates a <see cref="SchemaType.Context"/>
+    /// Which is a collection of Schema Types resembling <see cref="System.Type"/>
+    /// </summary>
+    static class SchemaTypesReader
     {
+        // issues related to gltf2 schema parsing:
+        // https://github.com/RSuter/NJsonSchema
+        // https://github.com/RSuter/NJsonSchema/issues/378
+        // https://github.com/RSuter/NJsonSchema/issues/377
+
+        #region API
+
         public static SchemaType.Context Generate(NJsonSchema.CodeGeneration.CSharp.CSharpTypeResolver types)
         {
             var context = new SchemaType.Context();
 
             foreach(var t in types.Types.Keys)
             {
-                context.UseType(t);
+                context._UseType(t);
             }
 
             return context;
         }
 
-        public static SchemaType UseType(this SchemaType.Context ctx, NJsonSchema.JsonSchema4 schema, bool isRequired = true)
+        #endregion
+
+        #region core
+
+        private static SchemaType _UseType(this SchemaType.Context ctx, NJsonSchema.JsonSchema4 schema, bool isRequired = true)
         {
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
             if (schema == null) throw new ArgumentNullException(nameof(schema));
@@ -50,11 +65,11 @@ namespace Epsylon.glTF2Toolkit.CodeGen
                 throw new NotImplementedException();
             }            
 
-            if (schema.HasReference) return ctx.UseType(schema.ActualTypeSchema, isRequired); // we could have our own ref
+            if (schema.HasReference) return ctx._UseType(schema.ActualTypeSchema, isRequired); // we could have our own ref
 
             if (schema.IsArray)
             {
-                return ctx.UseArray(ctx.UseType(schema.Item.ActualSchema));
+                return ctx.UseArray(ctx._UseType(schema.Item.ActualSchema));
             }
 
             if (_IsEnumeration(schema))
@@ -99,7 +114,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
             if (_IsDictionary(schema))
             {
                 var key = ctx.UseString();
-                var val = ctx.UseType(_GetDictionaryValue(schema));
+                var val = ctx._UseType(_GetDictionaryValue(schema));
 
                 return ctx.UseDictionary(key, val);
             }
@@ -110,7 +125,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
                 // process base class                
 
-                if (schema.InheritedSchema != null) classDecl.BaseClass = ctx.UseType(schema.InheritedSchema) as ClassType;
+                if (schema.InheritedSchema != null) classDecl.BaseClass = ctx._UseType(schema.InheritedSchema) as ClassType;
 
                 // filter declared properties
 
@@ -132,7 +147,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
                 foreach(var p in props)
                 {
                     var field = classDecl.UseField(p.Name);
-                    field.FieldType = ctx.UseType(p, required.Contains(p.Name));
+                    field.FieldType = ctx._UseType(p, required.Contains(p.Name));
 
                     field.MinimumValue = p.Minimum;
                     field.MaximumValue = p.Maximum;
@@ -232,5 +247,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
                 .Concat(_GetProperyNames(schema.InheritedSchema))
                 .ToArray();
         }
+
+        #endregion
     }
 }

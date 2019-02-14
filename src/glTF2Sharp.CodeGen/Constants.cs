@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp
 {
     static class Constants
     {

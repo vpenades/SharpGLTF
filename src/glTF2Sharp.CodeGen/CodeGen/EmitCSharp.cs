@@ -6,8 +6,14 @@ using System.Text;
 
 using static System.FormattableString;
 
-namespace Epsylon.glTF2Toolkit.CodeGen
+namespace glTF2Sharp.CodeGen
 {
+    using SchemaReflection;
+
+    /// <summary>
+    /// Takes a <see cref="SchemaReflection.SchemaType.Context"/> and emits
+    /// all its enums and classes as c# source code
+    /// </summary>
     class CSharpEmitter
     {
         #region runtime names
@@ -173,11 +179,10 @@ namespace Epsylon.glTF2Toolkit.CodeGen
                 DeclareEnum(etype);
             }
         }
-        
 
-           
+        internal string _GetRuntimeName(SchemaType type) { return _GetRuntimeName(type, null); }
 
-        private string _GetRuntimeName(SchemaType type, _RuntimeField extra = null)
+        private string _GetRuntimeName(SchemaType type, _RuntimeField extra)
         {
             if (type is ObjectType anyType) return typeof(Object).Name;
             if (type is StringType strType) return typeof(String).Name;            
@@ -382,32 +387,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
                 HasBaseClass = type.BaseClass != null
             };
 
-            foreach (var f in type.Fields)
-            {
-                var trname = _GetRuntimeName(f.FieldType);
-                var frname = GetFieldRuntimeName(f);
-
-                xclass.AddFields(_GetClassField(f));
-
-                if (f.FieldType is EnumType etype)
-                {
-                    // emit serializer
-                    var smethod = etype.UseIntegers ? "SerializePropertyEnumValue" : "SerializePropertyEnumSymbol";
-                    smethod = $"{smethod}<{trname}>(writer,\"{f.PersistentName}\",{frname}";
-                    if (f.DefaultValue != null) smethod += $", {frname}Default";
-                    smethod += ");";
-                    xclass.AddFieldSerializerCase(smethod);
-
-                    // emit deserializer
-                    xclass.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializeValue<{_GetRuntimeName(etype)}>(reader);");
-
-                    continue;
-                }
-
-
-                xclass.AddFieldSerializerCase(_GetJSonSerializerMethod(f));
-                xclass.AddFieldDeserializerCase(f.PersistentName, _GetJSonDeserializerMethod(f));
-            }
+            xclass.AddFields(type);            
 
             return String.Join("\r\n",xclass.EmitCode().Indent(1));            
         }
@@ -422,7 +402,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
             return classDecl;
         }
 
-        private IEnumerable<string> _GetClassField(FieldInfo f)
+        internal IEnumerable<string> _GetClassField(FieldInfo f)
         {            
             var tdecl = _GetRuntimeName(f.FieldType, _UseField(f));
             var fname = GetFieldRuntimeName(f);
@@ -470,18 +450,80 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
             yield return string.IsNullOrEmpty(defval) ? $"private {tdecl} {fname};" : $"private {tdecl} {fname} = {defval};";
 
-            yield return string.Empty;                
-            
+            yield return string.Empty;
+        }            
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Utility class to emit a <see cref="SchemaReflection.ClassType"/>
+    /// as c# source code
+    /// </summary>
+    class CSharpClassEmitter
+    {
+        #region constructor
+
+        public CSharpClassEmitter(CSharpEmitter emitter)
+        {
+            _Emitter = emitter;            
         }
-        
+
+        #endregion
+
+        #region data
+
+        private readonly CSharpEmitter _Emitter;
+
+        private readonly List<string> _Fields = new List<string>();
+        private readonly List<string> _SerializerBody = new List<string>();
+        private readonly List<string> _DeserializerSwitchBody = new List<string>();
+
+        public string ClassDeclaration { get; set; }
+
+        public bool HasBaseClass { get; set; }
+
+        #endregion
+
+        #region API
+
+        public void AddFields(ClassType type)
+        {
+            foreach (var f in type.Fields)
+            {
+                var trname = _Emitter._GetRuntimeName(f.FieldType);
+                var frname = _Emitter.GetFieldRuntimeName(f);
+
+                _Fields.AddRange(_Emitter._GetClassField(f));
+
+                if (f.FieldType is EnumType etype)
+                {
+                    // emit serializer
+                    var smethod = etype.UseIntegers ? "SerializePropertyEnumValue" : "SerializePropertyEnumSymbol";
+                    smethod = $"{smethod}<{trname}>(writer,\"{f.PersistentName}\",{frname}";
+                    if (f.DefaultValue != null) smethod += $", {frname}Default";
+                    smethod += ");";
+                    this.AddFieldSerializerCase(smethod);
+
+                    // emit deserializer
+                    this.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializeValue<{_Emitter._GetRuntimeName(etype)}>(reader);");
+
+                    continue;
+                }
+
+                this.AddFieldSerializerCase(_GetJSonSerializerMethod(f));
+                this.AddFieldDeserializerCase(f.PersistentName, _GetJSonDeserializerMethod(f));
+            }
+        }
+
         private string _GetJSonSerializerMethod(FieldInfo f)
         {
             var pname = f.PersistentName;
-            var fname = GetFieldRuntimeName(f);
+            var fname = _Emitter.GetFieldRuntimeName(f);
 
             if (f.FieldType is ClassType ctype)
             {
-                return $"SerializePropertyObject(writer,\"{pname}\",{fname});";                
+                return $"SerializePropertyObject(writer,\"{pname}\",{fname});";
             }
 
             if (f.FieldType is ArrayType atype)
@@ -498,43 +540,21 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
         private string _GetJSonDeserializerMethod(FieldInfo f)
         {
-            var fname = GetFieldRuntimeName(f);
+            var fname = _Emitter.GetFieldRuntimeName(f);
 
             if (f.FieldType is ArrayType atype)
             {
-                var titem = _GetRuntimeName(atype.ItemType);
+                var titem = _Emitter._GetRuntimeName(atype.ItemType);
                 return $"DeserializeList<{titem}>(reader,{fname});";
             }
             else if (f.FieldType is DictionaryType dtype)
             {
-                var titem = _GetRuntimeName(dtype.ValueType);
+                var titem = _Emitter._GetRuntimeName(dtype.ValueType);
                 return $"DeserializeDictionary<{titem}>(reader,{fname});";
-            }            
+            }
 
-            return $"{fname} = DeserializeValue<{_GetRuntimeName(f.FieldType)}>(reader);";            
+            return $"{fname} = DeserializeValue<{_Emitter._GetRuntimeName(f.FieldType)}>(reader);";
         }        
-
-        #endregion
-    }
-
-    class CSharpClassEmitter
-    {
-        public CSharpClassEmitter(CSharpEmitter emitter)
-        {
-            _Emitter = emitter;            
-        }
-
-        private readonly CSharpEmitter _Emitter;
-
-        private readonly List<string> _Fields = new List<string>();
-        private readonly List<string> _SerializerBody = new List<string>();
-        private readonly List<string> _DeserializerSwitchBody = new List<string>();
-
-        public string ClassDeclaration { get; set; }
-
-        public bool HasBaseClass { get; set; }
-
-        public void AddFields(IEnumerable<string> lines) { _Fields.AddRange(lines); }
 
         public void AddFieldSerializerCase(string line) { _SerializerBody.Add(line); }
 
@@ -578,5 +598,7 @@ namespace Epsylon.glTF2Toolkit.CodeGen
 
             yield return "}";
         }
+
+        #endregion
     }
 }
