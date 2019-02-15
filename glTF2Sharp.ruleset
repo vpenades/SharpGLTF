@@ -1,8 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="ImageSharp" ToolsVersion="15.0">
-
-  <exclude-pattern>.*/Generated/*.cs</exclude-pattern>
-
+<RuleSet Name="glTF2Sharp" ToolsVersion="15.0">
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="AD0001" Action="None" />
     <Rule Id="SA1008" Action="None" />
