@@ -124,7 +124,7 @@ namespace glTF2Sharp.Schema2
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
-            return SourceBufferView.CreateIndicesArray(this.ByteOffset, this.Encoding.ToIndex());
+            return SourceBufferView.CreateIndicesArray(this.ByteOffset, this._count, this.Encoding.ToIndex());
         }
 
         #endregion

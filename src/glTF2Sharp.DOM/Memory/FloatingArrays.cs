@@ -117,6 +117,10 @@ namespace glTF2Sharp.Memory
             }
         }
 
+        #endregion
+
+        #region encoding / decoding
+
         private Single _GetValueU8(int byteOffset, int index) { return _GetValue<Byte>(byteOffset, index); }
         private void _SetValueU8(int byteOffset, int index, Single value) { _SetValue<Byte>(byteOffset, index, (Byte)value); }
 
@@ -198,17 +202,25 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public ScalarArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public ScalarArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public ScalarArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 1;
 
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
+
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
         }
 
         #endregion
@@ -262,17 +274,25 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public Vector2Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector2Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Vector2Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 2;
 
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
+
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
         }
 
         #endregion
@@ -336,17 +356,26 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public Vector3Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector3Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Vector3Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 3;
 
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
+
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
+
         }
 
         #endregion
@@ -411,17 +440,25 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public Vector4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Vector4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 4;
 
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
+
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
         }
 
         #endregion
@@ -487,10 +524,15 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public QuaternionArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public QuaternionArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public QuaternionArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 4;
 
             _Accesor = new FloatingAccessor(data, encoding, normalized);
@@ -498,6 +540,8 @@ namespace glTF2Sharp.Memory
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
         }
 
         #endregion
@@ -563,17 +607,25 @@ namespace glTF2Sharp.Memory
         #region constructors
 
         public Matrix4x4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), byteStride, encoding, normalized) { }
+            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Matrix4x4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix4x4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
+            data = data.Slice(byteOffset);
+
             var len = encoding.ByteLength() * 16;
 
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
             _ByteStride = Math.Max(len, byteStride);
+
+            _Accesor = new FloatingAccessor(data, encoding, normalized);
 
             _ItemCount = _Accesor.ByteLength / _ByteStride;
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
+
+            _ItemCount = Math.Min(_ItemCount, count);
         }
 
         #endregion

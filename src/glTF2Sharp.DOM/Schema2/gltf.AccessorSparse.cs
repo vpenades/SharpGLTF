@@ -40,7 +40,7 @@ namespace glTF2Sharp.Schema2
         {
             var bot = baseAccessor.AsScalarArray(false);
             var top = this._values.GetScalarArray(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent);
+            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
 
             return new Memory.SparseArray<Single>(bot, top, idx);
         }
@@ -49,7 +49,7 @@ namespace glTF2Sharp.Schema2
         {
             var bot = baseAccessor.AsVector2Array(false);
             var top = this._values.GetVector2Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent);
+            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
 
             return new Memory.SparseArray<Vector2>(bot, top, idx);
         }
@@ -58,7 +58,7 @@ namespace glTF2Sharp.Schema2
         {
             var bot = baseAccessor.AsVector3Array(false);
             var top = this._values.GetVector3Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent);
+            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
 
             return new Memory.SparseArray<Vector3>(bot, top, idx);
         }
@@ -67,7 +67,7 @@ namespace glTF2Sharp.Schema2
         {
             var bot = baseAccessor.AsVector4Array(false);
             var top = this._values.GetVector4Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent);
+            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
 
             return new Memory.SparseArray<Vector4>(bot, top, idx);
         }
@@ -87,10 +87,10 @@ namespace glTF2Sharp.Schema2
             this._componentType = encoding;
         }
 
-        public Memory.IntegerArray GetIndicesArray(ROOT root)
+        public Memory.IntegerArray GetIndicesArray(ROOT root, int count)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateIndicesArray(this._byteOffset ?? 0, this._componentType);
+            return srcBuffer.CreateIndicesArray(this._byteOffset ?? 0, count, this._componentType);
         }
     }
 
