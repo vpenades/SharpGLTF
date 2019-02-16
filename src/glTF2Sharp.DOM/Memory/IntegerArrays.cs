@@ -31,7 +31,7 @@ namespace glTF2Sharp.Memory
             this._Setter = null;
             this._Getter = null;
 
-            if (this.Count < count) _Data = _Data.Slice(0, count * _ByteStride);
+            if (count < this.Count) _Data = _Data.Slice(0, count * _ByteStride);
 
             switch (encoding)
             {
