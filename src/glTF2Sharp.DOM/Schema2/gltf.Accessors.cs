@@ -67,6 +67,17 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
+        #region API
+
+        internal Memory.AttributeAccessor _GetMemoryAccessor()
+        {
+            var view = SourceBufferView;
+            var info = new Memory.AttributeInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            return new Memory.AttributeAccessor(info, view.Data);
+        }
+
+        #endregion
+
         #region Data Buffer API
 
         internal void SetData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
@@ -90,10 +101,7 @@ namespace glTF2Sharp.Schema2
 
         public Memory.Matrix4x4Array CastToMatrix4x4Accessor()
         {
-            Guard.IsFalse(this.IsSparse, nameof(IsSparse));
-            Guard.IsTrue(this.Dimensions == ElementType.MAT4, nameof(Dimensions));
-
-            return SourceBufferView.CreateMatrix4x4Array(this.ByteOffset, this.Encoding, this.Normalized);
+            return _GetMemoryAccessor().AsMatrix4x4Array();
         }
 
         #endregion
@@ -151,40 +159,44 @@ namespace glTF2Sharp.Schema2
             _UpdateBounds();
         }
 
-        public Memory.IEncodedArray<Single> AsScalarArray(bool useSparse = true)
+        public Memory.IEncodedArray<Single> AsScalarArray()
         {
-            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
+            var memory = _GetMemoryAccessor();
 
-            if (this._sparse != null && useSparse) return this._sparse.GetScalarArray(this);
+            if (this._sparse == null) return memory.AsScalarArray();
 
-            return SourceBufferView.CreateScalarArray(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
+            var sparseKV = this._sparse._CreateMemoryAccessors(this);
+            return Memory.AttributeAccessor.CreateScalarSparseArray(memory, sparseKV.Item1, sparseKV.Item2);
         }
 
-        public Memory.IEncodedArray<Vector2> AsVector2Array(bool useSparse = true)
+        public Memory.IEncodedArray<Vector2> AsVector2Array()
         {
-            Guard.IsTrue(this.Dimensions == ElementType.VEC2, nameof(Dimensions));
+            var memory = _GetMemoryAccessor();
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector2Array(this);
+            if (this._sparse == null) return memory.AsVector2Array();
 
-            return SourceBufferView.CreateVector2Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
+            var sparseKV = this._sparse._CreateMemoryAccessors(this);
+            return Memory.AttributeAccessor.CreateVector2SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
         }
 
-        public Memory.IEncodedArray<Vector3> AsVector3Array(bool useSparse = true)
+        public Memory.IEncodedArray<Vector3> AsVector3Array()
         {
-            Guard.IsTrue(this.Dimensions == ElementType.VEC3, nameof(Dimensions));
+            var memory = _GetMemoryAccessor();
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector3Array(this);
+            if (this._sparse == null) return memory.AsVector3Array();
 
-            return SourceBufferView.CreateVector3Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
+            var sparseKV = this._sparse._CreateMemoryAccessors(this);
+            return Memory.AttributeAccessor.CreateVector3SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
         }
 
-        public Memory.IEncodedArray<Vector4> AsVector4Array(bool useSparse = true)
+        public Memory.IEncodedArray<Vector4> AsVector4Array()
         {
-            Guard.IsTrue(this.Dimensions == ElementType.VEC4, nameof(Dimensions));
+            var memory = _GetMemoryAccessor();
 
-            if (this._sparse != null && useSparse) return this._sparse.GetVector4Array(this);
+            if (this._sparse == null) return memory.AsVector4Array();
 
-            return SourceBufferView.CreateVector4Array(this.ByteOffset, this.Count, this.Encoding, this.Normalized);
+            var sparseKV = this._sparse._CreateMemoryAccessors(this);
+            return Memory.AttributeAccessor.CreateVector4SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)

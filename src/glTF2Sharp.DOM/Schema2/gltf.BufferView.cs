@@ -109,36 +109,6 @@ namespace glTF2Sharp.Schema2
             return new Memory.IntegerArray(this.Data, byteOffset, count, encoding);
         }
 
-        public Memory.ScalarArray CreateScalarArray(int byteOffset, int count, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.ScalarArray(this.Data, byteOffset, count, this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.Vector2Array CreateVector2Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.Vector2Array(this.Data, byteOffset, count, this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.Vector3Array CreateVector3Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.Vector3Array(this.Data, byteOffset, count, this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.Vector4Array CreateVector4Array(int byteOffset, int count, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.Vector4Array(this.Data, byteOffset, count, this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.QuaternionArray CreateQuaternionArray(int byteOffset, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.QuaternionArray(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
-        }
-
-        public Memory.Matrix4x4Array CreateMatrix4x4Array(int byteOffset, ENCODING encoding, Boolean normalized)
-        {
-            return new Memory.Matrix4x4Array(this.Data.Slice(byteOffset), this.ByteStride, encoding, normalized);
-        }
-
         /// <summary>
         /// Checks if all the accessors use this buffer in interleaved arrangement
         /// </summary>

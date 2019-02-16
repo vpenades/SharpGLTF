@@ -34,42 +34,14 @@ namespace glTF2Sharp.Schema2
             this._values = new AccessorSparseValues(values, valuesOffset);
         }
 
-        public int Count => _count; // what is this!?? TODO: check with specs
+        public int Count => _count;
 
-        public Memory.SparseArray<Single> GetScalarArray(Accessor baseAccessor)
+        internal (Memory.IntegerArray, Memory.AttributeAccessor) _CreateMemoryAccessors(Accessor baseAccessor)
         {
-            var bot = baseAccessor.AsScalarArray(false);
-            var top = this._values.GetScalarArray(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
+            var key = this._indices._GetIndicesArray(baseAccessor.LogicalParent, _count);
+            var val = this._values._GetMemoryAccessor(baseAccessor.LogicalParent, _count, baseAccessor);
 
-            return new Memory.SparseArray<Single>(bot, top, idx);
-        }
-
-        public Memory.SparseArray<Vector2> GetVector2Array(Accessor baseAccessor)
-        {
-            var bot = baseAccessor.AsVector2Array(false);
-            var top = this._values.GetVector2Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
-
-            return new Memory.SparseArray<Vector2>(bot, top, idx);
-        }
-
-        public Memory.SparseArray<Vector3> GetVector3Array(Accessor baseAccessor)
-        {
-            var bot = baseAccessor.AsVector3Array(false);
-            var top = this._values.GetVector3Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
-
-            return new Memory.SparseArray<Vector3>(bot, top, idx);
-        }
-
-        public Memory.SparseArray<Vector4> GetVector4Array(Accessor baseAccessor)
-        {
-            var bot = baseAccessor.AsVector4Array(false);
-            var top = this._values.GetVector4Array(baseAccessor.LogicalParent, _count, baseAccessor.Encoding, baseAccessor.Normalized);
-            var idx = this._indices.GetIndicesArray(baseAccessor.LogicalParent, _count);
-
-            return new Memory.SparseArray<Vector4>(bot, top, idx);
+            return (key, val);
         }
     }
 
@@ -87,7 +59,7 @@ namespace glTF2Sharp.Schema2
             this._componentType = encoding;
         }
 
-        public Memory.IntegerArray GetIndicesArray(ROOT root, int count)
+        internal Memory.IntegerArray _GetIndicesArray(ROOT root, int count)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
             return srcBuffer.CreateIndicesArray(this._byteOffset ?? 0, count, this._componentType);
@@ -107,28 +79,11 @@ namespace glTF2Sharp.Schema2
             this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);
         }
 
-        public Memory.ScalarArray GetScalarArray(ROOT root, int count, ComponentType encoding, Boolean normalized)
+        internal Memory.AttributeAccessor _GetMemoryAccessor(ROOT root, int count, Accessor baseAccessor)
         {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateScalarArray(this._byteOffset ?? 0, count, encoding, normalized);
-        }
-
-        public Memory.Vector2Array GetVector2Array(ROOT root, int count, ComponentType encoding, Boolean normalized)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateVector2Array(this._byteOffset ?? 0, count, encoding, normalized);
-        }
-
-        public Memory.Vector3Array GetVector3Array(ROOT root, int count, ComponentType encoding, Boolean normalized)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateVector3Array(this._byteOffset ?? 0, count, encoding, normalized);
-        }
-
-        public Memory.Vector4Array GetVector4Array(ROOT root, int count, ComponentType encoding, Boolean normalized)
-        {
-            var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateVector4Array(this._byteOffset ?? 0, count, encoding, normalized);
+            var view = root.LogicalBufferViews[this._bufferView];
+            var info = new Memory.AttributeInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
+            return new Memory.AttributeAccessor(info, view.Data);
         }
     }
 }

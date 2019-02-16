@@ -12,20 +12,28 @@ namespace glTF2Sharp.Memory
     using ENCODING = Schema2.ComponentType;
 
     /// <summary>
-    /// Helper structure to access any Byte array as an array of floating Singles/>
+    /// Wraps a <see cref="ArraySegment{Byte}"/> containing encoded floating point values
     /// </summary>
     struct FloatingAccessor
     {
         #region constructors
 
-        public FloatingAccessor(Byte[] data, ENCODING encoding, Boolean normalized)
-            : this(new BYTES(data), encoding, normalized) { }
-
-        public FloatingAccessor(BYTES data, ENCODING encoding, Boolean normalized)
+        public FloatingAccessor(BYTES data, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
         {
-            this._Data = data;
+            this._Data = data.Slice(byteOffset);
+            this._ItemCount = 0;
             this._Getter = null;
             this._Setter = null;
+
+            var len = encoding.ByteLength();
+
+            this._ByteStride = Math.Max(byteStride, len * dimensions);
+            this._ValueStride = len;
+
+            _ItemCount = _Data.Count / _ByteStride;
+            if ((_Data.Count % _ByteStride) >= len * dimensions) ++_ItemCount;
+
+            _ItemCount = Math.Min(itemsCount, _ItemCount);
 
             if (encoding == ENCODING.FLOAT)
             {
@@ -121,54 +129,60 @@ namespace glTF2Sharp.Memory
 
         #region encoding / decoding
 
-        private Single _GetValueU8(int byteOffset, int index) { return _GetValue<Byte>(byteOffset, index); }
-        private void _SetValueU8(int byteOffset, int index, Single value) { _SetValue<Byte>(byteOffset, index, (Byte)value); }
+        private Single _GetValueU8(int byteOffset) { return _GetValue<Byte>(byteOffset); }
+        private void _SetValueU8(int byteOffset, Single value) { _SetValue<Byte>(byteOffset, (Byte)value); }
 
-        private Single _GetValueS8(int byteOffset, int index) { return _GetValue<SByte>(byteOffset, index); }
-        private void _SetValueS8(int byteOffset, int index, Single value) { _SetValue<SByte>(byteOffset, index, (SByte)value); }
+        private Single _GetValueS8(int byteOffset) { return _GetValue<SByte>(byteOffset); }
+        private void _SetValueS8(int byteOffset, Single value) { _SetValue<SByte>(byteOffset, (SByte)value); }
 
-        private Single _GetValueU16(int byteOffset, int index) { return _GetValue<UInt16>(byteOffset, index); }
-        private void _SetValueU16(int byteOffset, int index, Single value) { _SetValue<UInt16>(byteOffset, index, (UInt16)value); }
+        private Single _GetValueU16(int byteOffset) { return _GetValue<UInt16>(byteOffset); }
+        private void _SetValueU16(int byteOffset, Single value) { _SetValue<UInt16>(byteOffset, (UInt16)value); }
 
-        private Single _GetValueS16(int byteOffset, int index) { return _GetValue<Int16>(byteOffset, index); }
-        private void _SetValueS16(int byteOffset, int index, Single value) { _SetValue<Int16>(byteOffset, index, (Int16)value); }
+        private Single _GetValueS16(int byteOffset) { return _GetValue<Int16>(byteOffset); }
+        private void _SetValueS16(int byteOffset, Single value) { _SetValue<Int16>(byteOffset, (Int16)value); }
 
-        private Single _GetValueU32(int byteOffset, int index) { return _GetValue<UInt32>(byteOffset, index); }
-        private void _SetValueU32(int byteOffset, int index, Single value) { _SetValue<UInt32>(byteOffset, index, (UInt32)value); }
+        private Single _GetValueU32(int byteOffset) { return _GetValue<UInt32>(byteOffset); }
+        private void _SetValueU32(int byteOffset, Single value) { _SetValue<UInt32>(byteOffset, (UInt32)value); }
 
-        private Single _GetNormalizedU8(int byteOffset, int index) { return _GetValueU8(byteOffset, index) / 255.0f; }
-        private void _SetNormalizedU8(int byteOffset, int index, Single value) { _SetValueU8(byteOffset, index, value * 255.0f); }
+        private Single _GetNormalizedU8(int byteOffset) { return _GetValueU8(byteOffset) / 255.0f; }
+        private void _SetNormalizedU8(int byteOffset, Single value) { _SetValueU8(byteOffset, value * 255.0f); }
 
-        private Single _GetNormalizedS8(int byteOffset, int index) { return Math.Max(_GetValueS8(byteOffset, index) / 127.0f, -1); }
-        private void _SetNormalizedS8(int byteOffset, int index, Single value) { _SetValueS8(byteOffset, index, (Single)Math.Round(value * 127.0f)); }
+        private Single _GetNormalizedS8(int byteOffset) { return Math.Max(_GetValueS8(byteOffset) / 127.0f, -1); }
+        private void _SetNormalizedS8(int byteOffset, Single value) { _SetValueS8(byteOffset, (Single)Math.Round(value * 127.0f)); }
 
-        private Single _GetNormalizedU16(int byteOffset, int index) { return _GetValueU16(byteOffset, index) / 65535.0f; }
-        private void _SetNormalizedU16(int byteOffset, int index, Single value) { _SetValueU16(byteOffset, index, value * 65535.0f); }
+        private Single _GetNormalizedU16(int byteOffset) { return _GetValueU16(byteOffset) / 65535.0f; }
+        private void _SetNormalizedU16(int byteOffset, Single value) { _SetValueU16(byteOffset, value * 65535.0f); }
 
-        private Single _GetNormalizedS16(int byteOffset, int index) { return Math.Max(_GetValueS16(byteOffset, index) / 32767.0f, -1); }
-        private void _SetNormalizedS16(int byteOffset, int index, Single value) { _SetValueS16(byteOffset, index, (Single)Math.Round(value * 32767.0f)); }
+        private Single _GetNormalizedS16(int byteOffset) { return Math.Max(_GetValueS16(byteOffset) / 32767.0f, -1); }
+        private void _SetNormalizedS16(int byteOffset, Single value) { _SetValueS16(byteOffset, (Single)Math.Round(value * 32767.0f)); }
 
-        private T _GetValue<T>(int byteOffset, int index)
+        private T _GetValue<T>(int byteOffset)
             where T : unmanaged
         {
-            return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.AsSpan(byteOffset))[index];
+            return System.Runtime.InteropServices.MemoryMarshal.Read<T>(_Data.AsSpan(byteOffset));
         }
 
-        private void _SetValue<T>(int byteOffset, int index, T value)
+        private void _SetValue<T>(int byteOffset, T value)
             where T : unmanaged
         {
-            System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.AsSpan(byteOffset))[index] = value;
+            System.Runtime.InteropServices.MemoryMarshal.Write<T>(_Data.AsSpan(byteOffset), ref value);
         }
 
         #endregion
 
         #region data
 
-        delegate Single _GetterCallback(int byteOffset, int index);
+        delegate Single _GetterCallback(int byteOffset);
 
-        delegate void _SetterCallback(int byteOffset, int index, Single value);
+        delegate void _SetterCallback(int byteOffset, Single value);
 
         private readonly BYTES _Data;
+
+        private readonly int _ByteStride;
+        private readonly int _ValueStride;
+
+        private readonly int _ItemCount;
+
         private readonly _GetterCallback _Getter;
         private readonly _SetterCallback _Setter;
 
@@ -178,16 +192,18 @@ namespace glTF2Sharp.Memory
 
         public int ByteLength => _Data.Count;
 
+        public int Count => _ItemCount;
+
         public Single this[int index]
         {
-            get => _Getter(0, index);
-            set => _Setter(0, index, value);
+            get => _Getter(index * _ByteStride);
+            set => _Setter(index * _ByteStride, value);
         }
 
-        public Single this[int byteOffset, int index]
+        public Single this[int rowIndex, int subIndex]
         {
-            get => _Getter(byteOffset, index);
-            set => _Setter(byteOffset, index, value);
+            get => _Getter((rowIndex * _ByteStride) + (subIndex * _ValueStride));
+            set => _Setter((rowIndex * _ByteStride) + (subIndex * _ValueStride), value);
         }
 
         #endregion
@@ -209,18 +225,7 @@ namespace glTF2Sharp.Memory
 
         public ScalarArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 1;
-
-            _ByteStride = Math.Max(len, byteStride);
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 1, encoding, normalized);
         }
 
         #endregion
@@ -230,12 +235,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Single[] _DebugItems => this.ToArray();
 
@@ -244,12 +243,12 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Single this[int index]
         {
-            get => _Accesor[index * _ByteStride, 0];
-            set => _Accesor[index * _ByteStride, 0] = value;
+            get => _Accesor[index, 0];
+            set => _Accesor[index, 0] = value;
         }
 
         public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }
@@ -281,18 +280,7 @@ namespace glTF2Sharp.Memory
 
         public Vector2Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 2;
-
-            _ByteStride = Math.Max(len, byteStride);
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 2, encoding, normalized);
         }
 
         #endregion
@@ -302,12 +290,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector2[] _DebugItems => this.ToArray();
 
@@ -316,19 +298,17 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Vector2 this[int index]
         {
             get
             {
-                index *= _ByteStride;
                 return new Vector2(_Accesor[index, 0], _Accesor[index, 1]);
             }
 
             set
             {
-                index *= _ByteStride;
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
             }
@@ -363,18 +343,7 @@ namespace glTF2Sharp.Memory
 
         public Vector3Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 3;
-
-            _ByteStride = Math.Max(len, byteStride);
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 3, encoding, normalized);
         }
 
         #endregion
@@ -384,12 +353,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector3[] _DebugItems => this.ToArray();
 
@@ -398,19 +361,17 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Vector3 this[int index]
         {
             get
             {
-                index *= _ByteStride;
                 return new Vector3(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2]);
             }
 
             set
             {
-                index *= _ByteStride;
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
                 _Accesor[index, 2] = value.Z;
@@ -446,18 +407,7 @@ namespace glTF2Sharp.Memory
 
         public Vector4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 4;
-
-            _ByteStride = Math.Max(len, byteStride);
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -467,12 +417,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector4[] _DebugItems => this.ToArray();
 
@@ -481,19 +425,17 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Vector4 this[int index]
         {
             get
             {
-                index *= _ByteStride;
                 return new Vector4(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
 
             set
             {
-                index *= _ByteStride;
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
                 _Accesor[index, 2] = value.Z;
@@ -530,17 +472,7 @@ namespace glTF2Sharp.Memory
 
         public QuaternionArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 4;
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-            _ByteStride = Math.Max(len, byteStride);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -550,12 +482,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Quaternion[] _DebugItems => this.ToArray();
 
@@ -564,19 +490,17 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Quaternion this[int index]
         {
             get
             {
-                index *= _ByteStride;
                 return new Quaternion(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
             }
 
             set
             {
-                index *= _ByteStride;
                 _Accesor[index, 0] = value.X;
                 _Accesor[index, 1] = value.Y;
                 _Accesor[index, 2] = value.Z;
@@ -613,18 +537,7 @@ namespace glTF2Sharp.Memory
 
         public Matrix4x4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            data = data.Slice(byteOffset);
-
-            var len = encoding.ByteLength() * 16;
-
-            _ByteStride = Math.Max(len, byteStride);
-
-            _Accesor = new FloatingAccessor(data, encoding, normalized);
-
-            _ItemCount = _Accesor.ByteLength / _ByteStride;
-            if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
-
-            _ItemCount = Math.Min(_ItemCount, count);
+            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 16, encoding, normalized);
         }
 
         #endregion
@@ -634,12 +547,6 @@ namespace glTF2Sharp.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private FloatingAccessor _Accesor;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ByteStride;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly int _ItemCount;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Matrix4x4[] _DebugItems => this.ToArray();
 
@@ -648,13 +555,12 @@ namespace glTF2Sharp.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _ItemCount;
+        public int Count => _Accesor.Count;
 
         public Matrix4x4 this[int index]
         {
             get
             {
-                index *= _ByteStride;
                 return new Matrix4x4
                     (
                     _Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3],
@@ -666,7 +572,6 @@ namespace glTF2Sharp.Memory
 
             set
             {
-                index *= _ByteStride;
                 _Accesor[index, 0] = value.M11;
                 _Accesor[index, 1] = value.M12;
                 _Accesor[index, 2] = value.M13;
