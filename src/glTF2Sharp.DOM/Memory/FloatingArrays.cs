@@ -375,7 +375,6 @@ namespace glTF2Sharp.Memory
             if ((_Accesor.ByteLength % _ByteStride) >= len) ++_ItemCount;
 
             _ItemCount = Math.Min(_ItemCount, count);
-
         }
 
         #endregion
