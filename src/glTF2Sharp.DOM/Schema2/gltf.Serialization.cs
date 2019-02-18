@@ -247,7 +247,7 @@ namespace glTF2Sharp.Schema2
                 for (int i = 0; i < this._buffers.Count; ++i)
                 {
                     var buffer = this._buffers[i];
-                    var bname = $"{name}.{i}.bin";
+                    var bname = this._buffers.Count != 1 ? $"{name}.{i}.bin" : $"{name}.bin";
                     buffer._WriteToExternal(bname, settings.FileWriter);
                 }
             }

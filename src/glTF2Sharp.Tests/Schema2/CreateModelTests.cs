@@ -66,7 +66,7 @@ namespace glTF2Sharp.Schema2
             // save
 
             root.AttachToCurrentTest("result.glb");
-            root.AttachToCurrentTest("result.gltf");
+            root.AttachToCurrentTest("result.gltf");            
         }
     }
 }

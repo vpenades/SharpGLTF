@@ -19,25 +19,34 @@ namespace glTF2Sharp
             }
 
             return System.IO.Path.Combine(dir, fxt);
-        }
+        }        
 
-        public static string GetAttachmentPath(this NUnit.Framework.TestContext context, string fileName)
+        public static string GetAttachmentPath(this NUnit.Framework.TestContext context, string fileName, bool ensureDirectoryExists = false)
         {
             if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
             if (System.IO.Path.IsPathRooted(fileName)) throw new ArgumentException(nameof(fileName), "path must be a relative path");
 
-            return System.IO.Path.Combine(context.TestDirectory, $"{context.Test.ID}.{fileName}");
+            var path = System.IO.Path.Combine(context.TestDirectory, "TestResults", $"{context.Test.ID}.{fileName}");
+
+            var dir = System.IO.Path.GetDirectoryName(path);
+
+            System.IO.Directory.CreateDirectory(dir);
+
+            return path;
         }
 
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
         {
-            fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName);
-
-            if (fileName.ToLower().EndsWith(".gltf")) model.SaveGLTF(fileName, Newtonsoft.Json.Formatting.Indented);
+            fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+            
             if (fileName.ToLower().EndsWith(".glb"))
             {
                 model.MergeBuffers();
                 model.SaveGLB(fileName);
+            }
+            else
+            {
+                model.SaveGLTF(fileName, Newtonsoft.Json.Formatting.Indented);
             }
 
             NUnit.Framework.TestContext.AddTestAttachment(fileName);

@@ -181,7 +181,7 @@ namespace glTF2Sharp.Geometry
             return _MemoryAccessor.AsIntegerArray();
         }
 
-        public void AssignTo(Schema2.MeshPrimitive dstPrim)
+        public void AssignToSchema(Schema2.MeshPrimitive dstPrim)
         {
             var dstAccessor = dstPrim.LogicalParent.LogicalParent.CreateAccessor(this.Name);
             dstAccessor.SetIndexData(_MemoryAccessor);
@@ -195,9 +195,10 @@ namespace glTF2Sharp.Geometry
     {
         #region lifecycle
 
-        public MeshPrimitive() { }
+        internal MeshPrimitive(Mesh owner) { _Owner = owner; }
 
-        public MeshPrimitive(Schema2.MeshPrimitive primitive)
+        internal MeshPrimitive(Mesh owner, Schema2.MeshPrimitive primitive)
+            : this(owner)
         {
             _Vertices = primitive.VertexAccessors
                 .Select(kvp => new VertexAccessor(kvp.Key, kvp.Value))
@@ -213,7 +214,7 @@ namespace glTF2Sharp.Geometry
             }
 
             _Indices = primitive.IndexAccessor == null ? null : new IndicesAccessor(primitive.IndexAccessor);
-            _Primitive = primitive.DrawPrimitiveType;
+            _PrimitiveDrawType = primitive.DrawPrimitiveType;
             _MaterialIndex = primitive.Material?.LogicalIndex;
         }
 
@@ -221,11 +222,14 @@ namespace glTF2Sharp.Geometry
 
         #region data
 
+        private readonly Mesh _Owner;
+
         private VertexAccessor[] _Vertices;
         private readonly List<VertexAccessor[]> _MorphAccessors = new List<VertexAccessor[]>();
 
         private IndicesAccessor _Indices;
-        private Schema2.PrimitiveType _Primitive;
+
+        private Schema2.PrimitiveType _PrimitiveDrawType;
 
         private int? _MaterialIndex;
 
@@ -241,17 +245,18 @@ namespace glTF2Sharp.Geometry
 
         #region API
 
-        public void SetVertices(int itemsCount, params string[] attributes)
+        public void AllocateVertices(int itemsCount, params string[] attributes)
         {
             _Vertices = VertexAccessor.CreateAccessors(itemsCount, attributes);
         }
 
-        public void SetIndices(int itemsCount)
+        public void AllocateIndices(int itemsCount, Schema2.PrimitiveType primitiveType)
         {
+            _PrimitiveDrawType = primitiveType;
             _Indices = IndicesAccessor.CreateAccessors(itemsCount);
         }
 
-        public void AssignTo(Schema2.MeshPrimitive dstPrim)
+        public void AssignToSchema(Schema2.MeshPrimitive dstPrim)
         {
             // TODO: clear primitive
 
@@ -260,9 +265,9 @@ namespace glTF2Sharp.Geometry
                 va.AssignTo(dstPrim);
             }
 
-            if (this._Indices != null) this._Indices.AssignTo(dstPrim);
+            if (this._Indices != null) this._Indices.AssignToSchema(dstPrim);
 
-            dstPrim.DrawPrimitiveType = this._Primitive;
+            dstPrim.DrawPrimitiveType = this._PrimitiveDrawType;
         }
 
         #endregion
@@ -272,6 +277,8 @@ namespace glTF2Sharp.Geometry
     class Mesh : NamedObject
     {
         #region lifecycle
+
+        public Mesh() { }
 
         public static Mesh[] Create(IReadOnlyList<Schema2.Mesh> src)
         {
@@ -288,7 +295,7 @@ namespace glTF2Sharp.Geometry
         public Mesh(Schema2.Mesh mesh)
             : base(mesh)
         {
-            _Primitives.AddRange(mesh.Primitives, item => new MeshPrimitive(item));
+            _Primitives.AddRange(mesh.Primitives, item => new MeshPrimitive(this, item));
             _MorpthWeights.AddRange(mesh.MorphWeights);
         }
 
@@ -298,6 +305,32 @@ namespace glTF2Sharp.Geometry
 
         private readonly List<MeshPrimitive> _Primitives = new List<MeshPrimitive>();
         private readonly List<Single> _MorpthWeights = new List<float>();
+
+        #endregion
+
+        #region API
+
+        public MeshPrimitive CreatePrimitive()
+        {
+            var p = new MeshPrimitive(this);
+            _Primitives.Add(p);
+
+            return p;
+        }
+
+        public void AssignToSchema(Schema2.Mesh mesh)
+        {
+            mesh.Name = this.Name;
+
+            foreach (var srcp in this._Primitives)
+            {
+                var dstp = mesh.CreatePrimitive();
+
+                srcp.AssignToSchema(dstp);
+            }
+
+            // todo: set morph targets
+        }
 
         #endregion
     }

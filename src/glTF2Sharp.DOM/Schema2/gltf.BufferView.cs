@@ -20,29 +20,32 @@ namespace glTF2Sharp.Schema2
         internal BufferView(Buffer buffer, int? byteLength, int? byteOffset, int? byteStride, BufferMode? target)
         {
             Guard.NotNull(buffer, nameof(buffer));
+            Guard.NotNull(buffer._Data, nameof(buffer));
             Guard.NotNull(buffer.LogicalParent, nameof(buffer));
-            if (byteLength.HasValue) Guard.MustBeGreaterThan(byteLength.Value, 0, nameof(byteLength));
 
-            if (byteOffset.HasValue) Guard.MustBeGreaterThan(byteOffset.Value, 0, nameof(byteOffset));
+            byteLength = byteLength.AsValue(buffer._Data.Length - byteOffset.AsValue(0));
 
-            if (byteStride.HasValue && target.HasValue)
+            Guard.MustBeGreaterThanOrEqualTo(byteLength.AsValue(0), _byteLengthMinimum, nameof(byteLength));
+            Guard.MustBeGreaterThanOrEqualTo(byteOffset.AsValue(0), _byteOffsetMinimum, nameof(byteOffset));
+
+            if (target == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
-                if (target.Value == BufferMode.ELEMENT_ARRAY_BUFFER)
-                {
-                    Guard.IsTrue(byteStride.Value == 2 || byteStride.Value == 4, nameof(byteStride));
-                }
-                else if (target.Value == BufferMode.ELEMENT_ARRAY_BUFFER)
-                {
-                    Guard.IsTrue((byteStride.Value % 4) == 0, nameof(byteStride));
-                }
+                Guard.IsTrue(byteStride.AsValue(0) == 0, nameof(byteStride));
+            }
+            else if (byteStride.AsValue(0) > 0)
+            {
+                // TODO: clarify under which conditions bytestride needs to be defined or forbidden.
+
+                Guard.IsTrue(byteStride.AsValue(0).IsMultipleOf(4), nameof(byteStride));
+                Guard.MustBeBetweenOrEqualTo(byteStride.AsValue(0), _byteStrideMinimum, _byteStrideMaximum, nameof(byteStride));
             }
 
             this._buffer = buffer.LogicalIndex;
 
             this._byteLength = byteLength.AsValue(buffer._Data.Length);
 
-            this._byteOffset = byteOffset;
-            this._byteStride = byteStride;
+            this._byteOffset = byteOffset.AsValue(0).AsNullable(0);
+            this._byteStride = byteStride.AsValue(0).AsNullable(0);
 
             this._target = target;
         }
