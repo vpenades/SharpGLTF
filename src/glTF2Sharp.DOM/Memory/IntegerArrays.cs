@@ -24,14 +24,14 @@ namespace glTF2Sharp.Memory
         public IntegerArray(BYTES data, ENCODING encoding)
             : this(data, 0, int.MaxValue, encoding) { }
 
-        public IntegerArray(BYTES data, int offset, int count, ENCODING encoding)
+        public IntegerArray(BYTES data, int byteOffset, int itemsCount, ENCODING encoding)
         {
-            _Data = data;
+            _Data = data.Slice(byteOffset);
             _ByteStride = encoding.ByteLength();
             this._Setter = null;
             this._Getter = null;
 
-            if (count < this.Count) _Data = _Data.Slice(0, count * _ByteStride);
+            if (itemsCount < this.Count) _Data = _Data.Slice(0, itemsCount * _ByteStride);
 
             switch (encoding)
             {

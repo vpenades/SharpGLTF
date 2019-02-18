@@ -26,7 +26,7 @@ namespace glTF2Sharp.Schema2
         {
             foreach (var f in TestFiles.GetGeneratedFilePaths())
             {
-                var model = _LoadModel(f);
+                var model = GltfUtils.LoadModel(f);
 
                 Assert.NotNull(model);
             }
@@ -39,7 +39,7 @@ namespace glTF2Sharp.Schema2
         {
             var filePath = TestFiles.GetCompatibilityFilePath(idx);
 
-            var model = _LoadModel(filePath);
+            var model = GltfUtils.LoadModel(filePath);
 
             Assert.NotNull(model);
         }
@@ -74,7 +74,7 @@ namespace glTF2Sharp.Schema2
         {
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
-                var root = _LoadModel(f);
+                var root = GltfUtils.LoadModel(f);
                 Assert.NotNull(root);
 
                 // var fileName = System.IO.Path.GetFileNameWithoutExtension(f);
@@ -88,7 +88,7 @@ namespace glTF2Sharp.Schema2
         {
             foreach (var f in TestFiles.GetFilePathsWithSpecularGlossinessPBR())
             {
-                var root = _LoadModel(f);
+                var root = GltfUtils.LoadModel(f);
                 Assert.NotNull(root);
             }
         }
@@ -100,7 +100,7 @@ namespace glTF2Sharp.Schema2
         [Test(Description ="Example of traversing the visual tree all the way to individual vertices and indices")]
         public void TestLoadPolly()
         {
-            var model = _LoadModel(TestFiles.GetPollyFilePath());            
+            var model = GltfUtils.LoadModel(TestFiles.GetPollyFilePath());            
 
             var scene = model.DefaultScene;
 
@@ -109,8 +109,8 @@ namespace glTF2Sharp.Schema2
             var pollyPrimitive = pollyNode.Mesh.Primitives[0];
 
             var pollyIndices = pollyPrimitive.GetIndices();
-            var pollyPositions = pollyPrimitive.GetVertexPositions();
-            var pollyNormals = pollyPrimitive.GetVertexNormals();
+            var pollyPositions = pollyPrimitive.GetVertices("POSITION").AsVector3Array();
+            var pollyNormals = pollyPrimitive.GetVertices("NORMAL").AsVector3Array();
 
             for (int i=0; i < pollyIndices.Count; i+=3)
             {
@@ -130,26 +130,6 @@ namespace glTF2Sharp.Schema2
             }
         }
 
-        #endregion
-
-        #region model loading
-
-        public static ModelRoot _LoadModel(string filePath)
-        {
-            try
-            {
-                TestContext.Progress.WriteLine($"Loading {filePath.ToShortDisplayPath()}");
-
-                return ModelRoot.Load(filePath);
-            }
-            catch(UnsupportedExtensionException eex)            
-            {
-                TestContext.WriteLine($"{filePath} ERROR: {eex.Message}");
-
-                return null;
-            }
-        }
-
-        #endregion
+        #endregion        
     }
 }

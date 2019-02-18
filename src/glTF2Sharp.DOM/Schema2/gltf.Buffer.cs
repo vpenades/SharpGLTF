@@ -14,27 +14,6 @@ namespace glTF2Sharp.Schema2
 
         internal Buffer() { }
 
-        internal Buffer(int byteCount)
-        {
-            Guard.MustBeGreaterThan(byteCount, 0, nameof(byteCount));
-
-            _Data = new byte[byteCount];
-        }
-
-        internal Buffer(IReadOnlyList<Byte> data)
-        {
-            Guard.NotNullOrEmpty(data, nameof(data));
-
-            _Data = data.ToArray();
-        }
-
-        internal Buffer(ReadOnlySpan<Byte> data)
-        {
-            Guard.IsFalse(data.IsEmpty, nameof(data));
-
-            _Data = data.ToArray();
-        }
-
         #endregion
 
         #region non serializable data
@@ -100,9 +79,38 @@ namespace glTF2Sharp.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a buffer with a given size
+        /// </summary>
+        /// <param name="byteCount">the size of the buffer</param>
+        /// <returns>the buffer</returns>
         public Buffer CreateBuffer(int byteCount)
         {
-            var buffer = new Buffer(byteCount);
+            var buffer = new Buffer();
+            buffer._Data = new byte[byteCount];
+
+            _buffers.Add(buffer);
+
+            return buffer;
+        }
+
+        /// <summary>
+        /// Finds and existing buffer that is already using <paramref name="data"/> , or creates a new one if none is found.
+        /// </summary>
+        /// <param name="data">the byte array to be wrapped as a buffer</param>
+        /// <returns>the buffer</returns>
+        public Buffer UseBuffer(Byte[] data)
+        {
+            Guard.IsFalse(data == null, nameof(data));
+
+            foreach (var b in this.LogicalBuffers)
+            {
+                if (b._Data == data) return b;
+            }
+
+            var buffer = new Buffer();
+            buffer._Data = data;
+
             _buffers.Add(buffer);
 
             return buffer;
@@ -112,12 +120,15 @@ namespace glTF2Sharp.Schema2
         {
             Guard.IsFalse(data.IsEmpty, nameof(data));
 
-            var buffer = new Buffer(data);
+            var buffer = new Buffer();
+            buffer._Data = data.ToArray();
+
             _buffers.Add(buffer);
 
             return buffer;
         }
 
+        [Obsolete("to be removed")]
         public Buffer CreateIndexBuffer(params int[] indices)
         {
             var buffer = CreateBuffer(indices.Length * 4);
@@ -132,6 +143,7 @@ namespace glTF2Sharp.Schema2
             return buffer;
         }
 
+        [Obsolete("to be removed")]
         public Buffer CreateVector3Buffer(params Vector3[] vectors)
         {
             var buffer = CreateBuffer(vectors.Length * 12);

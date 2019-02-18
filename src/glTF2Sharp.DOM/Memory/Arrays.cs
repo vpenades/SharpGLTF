@@ -66,6 +66,15 @@ namespace glTF2Sharp.Memory
 
     public static class EncodedArrayUtils
     {
+        public static void CopyFrom<T>(this IEncodedArray<T> dst, int index, params T[] src)
+            where T : unmanaged
+        {
+            for (int i = 0; i < src.Length; ++i)
+            {
+                dst[index + i] = src[i];
+            }
+        }
+
         public static void CopyTo<T>(IEncodedArray<T> src, IEncodedArray<T> dst, int dstOffset = 0)
             where T : unmanaged
         {

@@ -69,11 +69,20 @@ namespace glTF2Sharp.Schema2
 
         #region API
 
-        internal Memory.AttributeAccessor _GetMemoryAccessor()
+        internal Geometry.MemoryAccessor _GetMemoryAccessor()
         {
             var view = SourceBufferView;
-            var info = new Memory.AttributeInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
-            return new Memory.AttributeAccessor(info, view.Data);
+            var info = new Geometry.MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            return new Geometry.MemoryAccessor(info, view.Data);
+        }
+
+        internal KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>? _GetSparseMemoryAccessor()
+        {
+            return this._sparse == null
+                ?
+                (KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>?)null
+                :
+                this._sparse._CreateMemoryAccessors(this);
         }
 
         #endregion
@@ -108,6 +117,12 @@ namespace glTF2Sharp.Schema2
 
         #region Index Buffer API
 
+        public void SetIndexData(Geometry.MemoryAccessor src)
+        {
+            var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ELEMENT_ARRAY_BUFFER);
+            this.SetIndexData(bv, src.Attribute.ByteOffset, src.Attribute.Encoding.ToIndex(), src.Attribute.ItemsCount);
+        }
+
         public void SetIndexData(BufferView buffer, int byteOffset, IndexType encoding, int count)
         {
             Guard.NotNull(buffer, nameof(buffer));
@@ -139,6 +154,12 @@ namespace glTF2Sharp.Schema2
 
         #region Vertex Buffer API
 
+        public void SetVertexData(Geometry.MemoryAccessor src)
+        {
+            var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ARRAY_BUFFER);
+            this.SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized, src.Attribute.ItemsCount);
+        }
+
         public void SetVertexData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
         {
             Guard.NotNull(buffer, nameof(buffer));
@@ -166,7 +187,7 @@ namespace glTF2Sharp.Schema2
             if (this._sparse == null) return memory.AsScalarArray();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Memory.AttributeAccessor.CreateScalarSparseArray(memory, sparseKV.Item1, sparseKV.Item2);
+            return Geometry.MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public Memory.IEncodedArray<Vector2> AsVector2Array()
@@ -176,7 +197,7 @@ namespace glTF2Sharp.Schema2
             if (this._sparse == null) return memory.AsVector2Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Memory.AttributeAccessor.CreateVector2SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
+            return Geometry.MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public Memory.IEncodedArray<Vector3> AsVector3Array()
@@ -186,7 +207,7 @@ namespace glTF2Sharp.Schema2
             if (this._sparse == null) return memory.AsVector3Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Memory.AttributeAccessor.CreateVector3SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
+            return Geometry.MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public Memory.IEncodedArray<Vector4> AsVector4Array()
@@ -196,7 +217,7 @@ namespace glTF2Sharp.Schema2
             if (this._sparse == null) return memory.AsVector4Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Memory.AttributeAccessor.CreateVector4SparseArray(memory, sparseKV.Item1, sparseKV.Item2);
+            return Geometry.MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)

@@ -189,8 +189,9 @@ namespace glTF2Sharp.Schema2
         {
             if (this._ExternalImageContent == null) return;
 
-            var b = this.LogicalParent.CreateBuffer(this._ExternalImageContent);
-            var bv = this.LogicalParent.CreateBufferView(b, this._ExternalImageContent.Length);
+            var data = new ArraySegment<Byte>(this._ExternalImageContent);
+
+            var bv = this.LogicalParent.UseBufferView(data);
 
             this._uri = null;
             this._bufferView = bv.LogicalIndex;

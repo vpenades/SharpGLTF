@@ -36,12 +36,12 @@ namespace glTF2Sharp.Schema2
 
         public int Count => _count;
 
-        internal (Memory.IntegerArray, Memory.AttributeAccessor) _CreateMemoryAccessors(Accessor baseAccessor)
+        internal KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor> _CreateMemoryAccessors(Accessor baseAccessor)
         {
             var key = this._indices._GetIndicesArray(baseAccessor.LogicalParent, _count);
             var val = this._values._GetMemoryAccessor(baseAccessor.LogicalParent, _count, baseAccessor);
 
-            return (key, val);
+            return new KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>(key, val);
         }
     }
 
@@ -79,11 +79,11 @@ namespace glTF2Sharp.Schema2
             this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault);
         }
 
-        internal Memory.AttributeAccessor _GetMemoryAccessor(ROOT root, int count, Accessor baseAccessor)
+        internal Geometry.MemoryAccessor _GetMemoryAccessor(ROOT root, int count, Accessor baseAccessor)
         {
             var view = root.LogicalBufferViews[this._bufferView];
-            var info = new Memory.AttributeInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
-            return new Memory.AttributeAccessor(info, view.Data);
+            var info = new Geometry.MemoryAccessInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
+            return new Geometry.MemoryAccessor(info, view.Data);
         }
     }
 }

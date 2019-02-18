@@ -57,7 +57,7 @@ namespace glTF2Sharp.Schema2
             set => this._mode = value.AsNullable(_modeDefault);
         }
 
-        public int MorpthTargets => _targets.Count;
+        public int MorpthTargetsCount => _targets.Count;
 
         public BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
 
@@ -108,7 +108,7 @@ namespace glTF2Sharp.Schema2
 
             if (includeMorphs)
             {
-                for (int i = 0; i < MorpthTargets; ++i)
+                for (int i = 0; i < MorpthTargetsCount; ++i)
                 {
                     foreach (var key in attributes)
                     {
@@ -150,19 +150,6 @@ namespace glTF2Sharp.Schema2
             }
         }
 
-        public void SetVertexAccessors(BufferView buffer, int byteOffset, int vertexCount, IEnumerable<Geometry.VertexElement> elements)
-        {
-            int count = 0;
-            foreach (var e in elements)
-            {
-                var accessor = this.LogicalParent.LogicalParent.CreateAccessor(e.Attribute);
-                accessor.SetVertexData(buffer, byteOffset + count, e.Dimensions, e.Encoding, e.Normalized, vertexCount);
-                count += e.ByteSize;
-
-                SetVertexAccessor(e.Attribute, accessor);
-            }
-        }
-
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
             return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
@@ -199,19 +186,9 @@ namespace glTF2Sharp.Schema2
                 .ToArray();
         }
 
-        public Memory.IEncodedArray<UInt32> GetIndices() => IndexAccessor.CastToIndicesAccessor();
+        public Memory.IntegerArray GetIndices() => IndexAccessor.CastToIndicesAccessor();
 
-        public Memory.IEncodedArray<Single> GetScalarArray(string attributeKey) => GetVertexAccessor(attributeKey).AsScalarArray();
-
-        public Memory.IEncodedArray<Vector2> GetVector2Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector2Array();
-
-        public Memory.IEncodedArray<Vector3> GetVector3Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector3Array();
-
-        public Memory.IEncodedArray<Vector4> GetVector4Array(string attributeKey) => GetVertexAccessor(attributeKey).AsVector4Array();
-
-        public Memory.IEncodedArray<Vector3> GetVertexPositions() => GetVector3Array("POSITION");
-
-        public Memory.IEncodedArray<Vector3> GetVertexNormals() => GetVector3Array("NORMAL");
+        public Geometry.MemoryAccessor GetVertices(string attributeKey) => GetVertexAccessor(attributeKey)._GetMemoryAccessor();
 
         #endregion
 

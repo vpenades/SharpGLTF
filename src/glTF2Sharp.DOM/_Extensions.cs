@@ -219,6 +219,14 @@ namespace glTF2Sharp
             return string.IsNullOrWhiteSpace(name) ? null : name;
         }
 
+        internal static void AddRange<Tin,Tout>(this IList<Tout> dst, IEnumerable<Tin> src, Func<Tin,Tout> cvt)
+        {
+            foreach(var item in src)
+            {
+                dst.Add(cvt(item));
+            }
+        }
+
         #endregion
 
         #region vertex & index accessors

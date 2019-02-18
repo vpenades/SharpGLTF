@@ -141,18 +141,22 @@ namespace glTF2Sharp.Schema2
             return bv;
         }
 
-        public BufferView CreateIndexBufferView(ReadOnlySpan<Byte> data)
+        public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? mode = null)
         {
-            var buffer = CreateBuffer(data);
+            var buffer = UseBuffer(data.Array);
 
-            return CreateBufferView(buffer, data.Length, null, null, BufferMode.ELEMENT_ARRAY_BUFFER);
-        }
+            foreach (var bv in this.LogicalBufferViews)
+            {
+                if (bv.Data.Array != data.Array) continue;
+                if (bv.Data.Offset != data.Offset) continue;
+                if (bv.Data.Count != data.Count) continue;
+                if (bv.ByteStride != byteStride) continue;
+                if (bv.DeviceBufferTarget != mode) continue;
 
-        public BufferView CreateVertexBufferView(ReadOnlySpan<Byte> data, int byteStride)
-        {
-            var buffer = CreateBuffer(data);
+                return bv;
+            }
 
-            return CreateBufferView(buffer, data.Length, null, byteStride, BufferMode.ARRAY_BUFFER);
+            return CreateBufferView(buffer, data.Count, data.Offset, byteStride, mode);
         }
     }
 
