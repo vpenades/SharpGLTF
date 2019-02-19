@@ -19,9 +19,9 @@ namespace glTF2Sharp.Geometry
 
             var positions = new[]
             {
-                new Vector3(-10,-10,0),
+                new Vector3(10,-10,0),
                 new Vector3(0,10,0),
-                new Vector3(10,-10,0)                
+                new Vector3(-10,-10,0)                
             };
 
             var normals = new[]
@@ -69,6 +69,8 @@ namespace glTF2Sharp.Geometry
             root.MergeBuffers();
             root.AttachToCurrentTest("Triangle.gltf");
             root.AttachToCurrentTest("Triangle.glb");
+
+            TestContext.CurrentContext.AttachShowDirLink();
         }
     }
 }

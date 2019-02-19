@@ -23,12 +23,16 @@ namespace glTF2Sharp
 
         public static string GetAttachmentPath(this NUnit.Framework.TestContext context, string fileName, bool ensureDirectoryExists = false)
         {
-            if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentNullException(nameof(fileName));
-            if (System.IO.Path.IsPathRooted(fileName)) throw new ArgumentException(nameof(fileName), "path must be a relative path");
+            var path = System.IO.Path.Combine(context.TestDirectory, "TestResults", $"{context.Test.ID}");
+            var dir = path;
 
-            var path = System.IO.Path.Combine(context.TestDirectory, "TestResults", $"{context.Test.ID}.{fileName}");
+            if (!string.IsNullOrWhiteSpace(fileName))
+            {
+                if (System.IO.Path.IsPathRooted(fileName)) throw new ArgumentException(nameof(fileName), "path must be a relative path");
+                path = System.IO.Path.Combine(path, fileName);
 
-            var dir = System.IO.Path.GetDirectoryName(path);
+                dir = System.IO.Path.GetDirectoryName(path);
+            }
 
             System.IO.Directory.CreateDirectory(dir);
 
@@ -77,5 +81,28 @@ namespace glTF2Sharp
                 NUnit.Framework.TestContext.Progress.WriteLine($"{remoteUrl} is {r.Status}");
             }
         }
+
+        public static void AttachShowDirLink(this NUnit.Framework.TestContext context)
+        {
+            context.AttachFileLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
+        }
+        
+        public static void AttachFileLink(this NUnit.Framework.TestContext context, string linkPath, string targetPath)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("[InternetShortcut]");
+            sb.AppendLine("URL=file:///" + targetPath);
+            sb.AppendLine("IconIndex=0");
+            string icon = targetPath.Replace('\\', '/');
+            sb.AppendLine("IconFile=" + icon);
+
+            linkPath = System.IO.Path.ChangeExtension(linkPath, ".url");
+            linkPath = context.GetAttachmentPath(linkPath, true);
+
+            System.IO.File.WriteAllText(linkPath, sb.ToString());
+
+            NUnit.Framework.TestContext.AddTestAttachment(linkPath);
+        }
+        
     }
 }
