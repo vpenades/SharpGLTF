@@ -72,6 +72,9 @@ namespace glTF2Sharp.Schema2
 
         public Boolean Unlit => this.GetExtension<MaterialUnlit_KHR>() != null;
 
+        /// <summary>
+        /// returns a collection of channel views available for this material.
+        /// </summary>
         public IEnumerable<MaterialChannelView> Channels
         {
             get
@@ -122,6 +125,16 @@ namespace glTF2Sharp.Schema2
 
         #region API
 
+        /// <summary>
+        /// Returns an object that allows to read and write information of a given channel of the material.
+        /// </summary>
+        /// <param name="key">the channel key</param>
+        /// <returns>the channel view</returns>
+        public MaterialChannelView GetChannel(string key)
+        {
+            return Channels.FirstOrDefault(item => item.Key == key);
+        }
+
         private MaterialNormalTextureInfo _GetNormalTexture(bool create)
         {
             if (create && _normalTexture == null) _normalTexture = new MaterialNormalTextureInfo();
@@ -143,14 +156,14 @@ namespace glTF2Sharp.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Channel {_Semantic}")]
+    [System.Diagnostics.DebuggerDisplay("Channel {_Key}")]
     public struct MaterialChannelView
     {
         #region lifecycle
 
-        internal MaterialChannelView(Material m, string semantic, Func<Boolean, TextureInfo> texInfo, Func<Vector4> fg, Action<Vector4> fs)
+        internal MaterialChannelView(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Vector4> fg, Action<Vector4> fs)
         {
-            _Semantic = semantic;
+            _Key = key;
             _Material = m;
             _TextureInfoGetter = texInfo;
             _FactorGetter = fg;
@@ -161,7 +174,7 @@ namespace glTF2Sharp.Schema2
 
         #region data
 
-        private readonly String _Semantic;
+        private readonly String _Key;
         private readonly Material _Material;
 
         private readonly Func<Boolean, TextureInfo> _TextureInfoGetter;
@@ -171,9 +184,9 @@ namespace glTF2Sharp.Schema2
 
         #endregion
 
-        #region API
+        #region properties
 
-        public String Semantic => _Semantic;
+        public String Key => _Key;
 
         public Texture Texture => _TextureInfoGetter?.Invoke(false) == null ? null : _Material.LogicalParent.LogicalTextures[_TextureInfoGetter(false)._LogicalTextureIndex];
 
@@ -185,7 +198,29 @@ namespace glTF2Sharp.Schema2
 
         public Vector4 Factor => _FactorGetter();
 
-        public void SetTexture(int texSet, Texture tex, Vector4 val)
+        #endregion
+
+        #region fluent API
+
+        public void SetFactor(Vector4 value) { _FactorSetter?.Invoke(value); }
+
+        public void SetTexture(
+            int texSet,
+            Image texImg,
+            TextureInterpolationMode mag = TextureInterpolationMode.LINEAR,
+            TextureMipMapMode min = TextureMipMapMode.LINEAR_MIPMAP_LINEAR,
+            TextureWrapMode ws = TextureWrapMode.REPEAT,
+            TextureWrapMode wt = TextureWrapMode.REPEAT)
+        {
+            if (texImg == null) return; // in theory, we should completely remove the TextureInfo
+
+            var sampler = _Material.LogicalParent.UseLogicalSampler(mag, min, ws, wt);
+            var texture = _Material.LogicalParent.UseLogicalTexture(texImg, sampler);
+
+            SetTexture(texSet, texture);
+        }
+
+        public void SetTexture(int texSet, Texture tex)
         {
             Guard.NotNull(tex, nameof(tex));
             Guard.MustShareLogicalParent(_Material, tex, nameof(tex));
@@ -194,18 +229,6 @@ namespace glTF2Sharp.Schema2
 
             texInfo.TextureSet = texSet;
             texInfo._LogicalTextureIndex = tex.LogicalIndex;
-
-            _FactorSetter?.Invoke(val);
-        }
-
-        public void SetTexture(int texSet, Image texImg, Vector4 texVal, TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
-        {
-            if (texImg == null) return; // in theory, it should completely remove the TextureInfo
-
-            var sampler = _Material.LogicalParent.UseLogicalSampler(mag, min, ws, wt);
-            var texture = _Material.LogicalParent.UseLogicalTexture(texImg, sampler);
-
-            SetTexture(texSet, texture, texVal);
         }
 
         #endregion

@@ -241,6 +241,12 @@ namespace glTF2Sharp.Geometry
 
         public IndicesAccessor Indices => _Indices;
 
+        public int? MaterialLogicalIndex
+        {
+            get => _MaterialIndex;
+            set => _MaterialIndex = value;
+        }
+
         #endregion
 
         #region API
@@ -268,6 +274,10 @@ namespace glTF2Sharp.Geometry
             if (this._Indices != null) this._Indices.AssignToSchema(dstPrim);
 
             dstPrim.DrawPrimitiveType = this._PrimitiveDrawType;
+
+            var material = _MaterialIndex.HasValue ? dstPrim.LogicalParent.LogicalParent.LogicalMaterials[_MaterialIndex.Value] : null;
+
+            dstPrim.Material = material;
         }
 
         #endregion

@@ -44,7 +44,8 @@ namespace glTF2Sharp.Geometry
             // assign vertices and indices
             srcPrimitive.Vertices[0].SetValues(0, positions);
             srcPrimitive.Vertices[1].SetValues(0, normals);
-            srcPrimitive.Indices.SetValues(0, indices);            
+            srcPrimitive.Indices.SetValues(0, indices);
+            srcPrimitive.MaterialLogicalIndex = 0; // using material with index 0, which will be created later
 
             // check the values we've set match the input data
             CollectionAssert.AreEqual(positions, srcPrimitive.Vertices[0].AsVector3Array());
@@ -53,11 +54,16 @@ namespace glTF2Sharp.Geometry
 
             // Notice that until now, we've been working with objects in the .Geometry namespace.
 
-            // create a new Schema2 scene:
+            // Now we switch to the .Schema2 namespace and we create a new scene:
 
             var root = Schema2.ModelRoot.CreateNew();                        
             var scene = root.UseScene("default");
             var node = scene.AddVisualNode("main scene");
+
+            var material = root.AddLogicalMaterial(typeof(Schema2.MaterialPBRMetallicRoughness));
+            material.DoubleSided = true;
+            material.GetChannel("BaseColor")
+                .SetFactor(new Vector4(1, 0, 0, 1));
 
             node.Mesh = root.CreateMesh();
 
