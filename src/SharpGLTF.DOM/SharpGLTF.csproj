@@ -41,7 +41,8 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
-    <AssemblyName>SharpGLTF</AssemblyName>    
+    <AssemblyName>SharpGLTF</AssemblyName>
+    <PackageIconUrl>https://github.com/vpenades/SharpGLTF/blob/master/build/Icons/glTF2Sharp.png</PackageIconUrl>    
   </PropertyGroup>
 
   <ItemGroup>
