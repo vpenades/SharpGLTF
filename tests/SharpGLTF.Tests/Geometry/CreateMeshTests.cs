@@ -21,7 +21,7 @@ namespace SharpGLTF.Geometry
             {
                 new Vector3(10,-10,0),
                 new Vector3(0,10,0),
-                new Vector3(-10,-10,0)                
+                new Vector3(-10,-10,0)
             };
 
             var normals = new[]
@@ -77,6 +77,6 @@ namespace SharpGLTF.Geometry
             root.AttachToCurrentTest("Triangle.glb");
 
             TestContext.CurrentContext.AttachShowDirLink();
-        }
+        }        
     }
 }

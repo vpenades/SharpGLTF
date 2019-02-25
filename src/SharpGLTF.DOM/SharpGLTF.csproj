@@ -4,16 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>SharpGLTF</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageLicenseUrl>https://raw.githubusercontent.com/vpenades/glTF2Sharp/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/vpenades/glTF2Sharp</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vpenades/glTF2Sharp</RepositoryUrl>
+    <PackageLicenseUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <Authors>Vicente Penades</Authors>
-    <Description>A library for reading and writing glTF 3D models in C#</Description>
+    <Description>SharpGLTF is a c# library for reading and writing glTF2 3D models</Description>
     <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
     <PackageTags>glTF 3D</PackageTags>
     <Version>1.0.0-alpha0001</Version>
     <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>  
 
   <ItemGroup>
@@ -40,6 +41,7 @@
 
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
+    <AssemblyName>SharpGLTF</AssemblyName>    
   </PropertyGroup>
 
   <ItemGroup>
