@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\glTF2Sharp.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>

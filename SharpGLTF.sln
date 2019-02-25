@@ -5,8 +5,8 @@ VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
-		glTF2Sharp.ruleset = glTF2Sharp.ruleset
 		README.md = README.md
+		SharpGLTF.ruleset = SharpGLTF.ruleset
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{072B725F-773F-4751-9616-E9778897C1D2}"
