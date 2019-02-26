@@ -1,17 +1,27 @@
 # SharpGLTF
 
-SharpGLTF is a NetStandard 2.0, C# library designed to parse and create [Khronos Group glTF2](https://github.com/KhronosGroup/glTF) files.
+SharpGLTF is a NetStandard 2.0, C# library designed to parse and create [Khronos Group glTF 2.0](https://github.com/KhronosGroup/glTF) files.
 
-The current status of the library is preview alpha, but, for some cases it is probably fully usable.
+The current status of the library is preview alpha, but, for some use cases it is already usable.
+
+Prerelease Nuget packages available [here.](https://www.nuget.org/packages/SharpGLTF)
 
 ### Features
 
-- [x] glTF2 code API generated from Schema.
-- [x] Reading and writing *.gltf* files.
-- [x] Reading and writing *.glb* files.
+#### Source Code
+- [x] glTF 2.0 code API generated from Schema.
+- [x] Helper classes for encoding / decoding buffers
 - [x] Logical Data Access.
 - [x] Visual Tree Access.
-- [x] Vertex and Index buffer encoding/decoding.
+
+#### Read / Write
+- [x] Reading and writing of *.gltf* files.
+- [x] Reading and writing of *.glb* files.
+- [x] Reading Base64 encoded buffers.
+- [x] Support of merging buffers to write one buffer *.glb* files.
+
+#### ToDo:
+- [ ] Writing Base64 encoded buffers.
 - [ ] Scene Evaluation.
 - [ ] GPU Evaluation.
 - [ ] Mesh Building utilities.
@@ -20,12 +30,6 @@ The current status of the library is preview alpha, but, for some cases it is pr
 - [ ] Skinning utilities
 - [ ] Morphing utilities
 - [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
-
-### TODO
-
-- gltf.Extra field support, right now it is ignored.
-- Matrix2x2 and Matrix3x3 support. This is due to missing types in System.Numerics.Vectors
-- Camera API
 
 ### Supported Extensions
 
