@@ -81,12 +81,24 @@ namespace SharpGLTF.Memory
             return array;
         }
 
-        public static void CopyFrom<T>(this IEncodedArray<T> dst, int index, params T[] src)
+        public static void FillFrom<T>(this IEncodedArray<T> dst, int dstIndex, IEnumerable<T> src)
+            where T : unmanaged
+        {
+            using (var ator = src.GetEnumerator())
+            {
+                while (dstIndex < dst.Count && ator.MoveNext())
+                {
+                    dst[dstIndex++] = ator.Current;
+                }
+            }
+        }
+
+        public static void FillFrom<T>(this IEncodedArray<T> dst, int dstIndex, params T[] src)
             where T : unmanaged
         {
             for (int i = 0; i < src.Length; ++i)
             {
-                dst[index + i] = src[i];
+                dst[dstIndex + i] = src[i];
             }
         }
 

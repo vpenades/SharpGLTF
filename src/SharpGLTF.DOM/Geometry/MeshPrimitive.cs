@@ -74,22 +74,22 @@ namespace SharpGLTF.Geometry
 
         public void SetValues(int startIndex, params Single[] values)
         {
-            Memory.EncodedArrayUtils.CopyFrom(AsScalarArray(), startIndex, values);
+            Memory.EncodedArrayUtils.FillFrom(AsScalarArray(), startIndex, values);
         }
 
         public void SetValues(int startIndex, params Vector2[] values)
         {
-            Memory.EncodedArrayUtils.CopyFrom(AsVector2Array(), startIndex, values);
+            Memory.EncodedArrayUtils.FillFrom(AsVector2Array(), startIndex, values);
         }
 
         public void SetValues(int startIndex, params Vector3[] values)
         {
-            Memory.EncodedArrayUtils.CopyFrom(AsVector3Array(), startIndex, values);
+            Memory.EncodedArrayUtils.FillFrom(AsVector3Array(), startIndex, values);
         }
 
         public void SetValues(int startIndex, params Vector4[] values)
         {
-            Memory.EncodedArrayUtils.CopyFrom(AsVector4Array(), startIndex, values);
+            Memory.EncodedArrayUtils.FillFrom(AsVector4Array(), startIndex, values);
         }
 
         public Memory.IEncodedArray<Single> AsScalarArray()
@@ -173,7 +173,7 @@ namespace SharpGLTF.Geometry
 
         public void SetValues(int startIndex, params UInt32[] values)
         {
-            Memory.EncodedArrayUtils.CopyFrom(AsIntegerArray(), startIndex, values);
+            Memory.EncodedArrayUtils.FillFrom(AsIntegerArray(), startIndex, values);
         }
 
         public Memory.IEncodedArray<UInt32> AsIntegerArray()

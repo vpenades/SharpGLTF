@@ -107,7 +107,7 @@ namespace SharpGLTF.Schema2
             this._componentType = encoding;
             this._normalized = normalized.AsNullable(false);
 
-            _UpdateBounds();
+            UpdateBounds();
         }
 
         public Memory.Matrix4x4Array AsMatrix4x4Array()
@@ -142,7 +142,7 @@ namespace SharpGLTF.Schema2
             this._componentType = encoding.ToComponent();
             this._normalized = null;
 
-            _UpdateBounds();
+            UpdateBounds();
         }
 
         public Memory.IntegerArray AsIndicesArray()
@@ -180,7 +180,7 @@ namespace SharpGLTF.Schema2
             this._componentType = encoding;
             this._normalized = normalized.AsNullable(false);
 
-            _UpdateBounds();
+            UpdateBounds();
         }
 
         public Memory.IEncodedArray<Single> AsScalarArray()
@@ -234,7 +234,7 @@ namespace SharpGLTF.Schema2
             return SourceBufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
         }
 
-        internal void _UpdateBounds()
+        public void UpdateBounds()
         {
             var count = this._type.DimCount();
 
