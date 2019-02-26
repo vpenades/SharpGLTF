@@ -217,10 +217,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public ScalarArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public ScalarArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public ScalarArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
@@ -272,10 +272,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector2Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector2Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector2Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
@@ -335,10 +335,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector3Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector3Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector3Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
@@ -399,10 +399,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Vector4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
@@ -464,10 +464,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public QuaternionArray(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public QuaternionArray(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public QuaternionArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
@@ -529,10 +529,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Matrix4x4Array(Byte[] data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Matrix4x4Array(BYTES data, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Matrix4x4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)

@@ -20,7 +20,7 @@ namespace SharpGLTF
 
                 return ModelRoot.Load(filePath);
             }
-            catch (UnsupportedExtensionException eex)
+            catch (IO.UnsupportedExtensionException eex)
             {
                 TestContext.WriteLine($"{filePath} ERROR: {eex.Message}");
 

@@ -11,7 +11,7 @@ namespace SharpGLTF.Schema2
     using ROOT = ModelRoot;
 
     [System.Diagnostics.DebuggerDisplay("Skin[{LogicalIndex}] {Name}")]
-    public partial class Skin
+    public sealed partial class Skin
     {
         // https://github.com/KhronosGroup/glTF/issues/461
         // https://github.com/KhronosGroup/glTF/issues/100
@@ -53,7 +53,7 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public static IEnumerable<Skin> GetSkinsUsing(Node n)
+        public static IEnumerable<Skin> FindSkinsUsing(Node n)
         {
             var idx = n.LogicalIndex;
 

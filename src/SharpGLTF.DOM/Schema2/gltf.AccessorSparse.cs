@@ -19,7 +19,7 @@ namespace SharpGLTF.Schema2
 
     using ROOT = ModelRoot;
 
-    public partial class AccessorSparse
+    public sealed partial class AccessorSparse
     {
         internal AccessorSparse() { }
 
@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public partial class AccessorSparseIndices
+    public sealed partial class AccessorSparseIndices
     {
         internal AccessorSparseIndices() { }
 
@@ -62,11 +62,11 @@ namespace SharpGLTF.Schema2
         internal Memory.IntegerArray _GetIndicesArray(ROOT root, int count)
         {
             var srcBuffer = root.LogicalBufferViews[this._bufferView];
-            return srcBuffer.CreateIndicesArray(this._byteOffset ?? 0, count, this._componentType);
+            return new Memory.IntegerArray(srcBuffer.Content, this._byteOffset ?? 0, count, this._componentType);
         }
     }
 
-    public partial class AccessorSparseValues
+    public sealed partial class AccessorSparseValues
     {
         internal AccessorSparseValues() { }
 
@@ -83,7 +83,7 @@ namespace SharpGLTF.Schema2
         {
             var view = root.LogicalBufferViews[this._bufferView];
             var info = new Geometry.MemoryAccessInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
-            return new Geometry.MemoryAccessor(info, view.Data);
+            return new Geometry.MemoryAccessor(info, view.Content);
         }
     }
 }

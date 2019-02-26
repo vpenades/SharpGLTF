@@ -8,10 +8,11 @@ namespace SharpGLTF.Schema2
 {
     using Collections;
 
+    using EXCEPTION = IO.ModelException;
     using ROOT = ModelRoot;
 
     [System.Diagnostics.DebuggerDisplay("MeshPrimitive[{LogicalIndex}] {_mode} {_DebuggerDisplay_TryIdentifyContent()}")]
-    public partial class MeshPrimitive : IChildOf<Mesh>
+    public sealed partial class MeshPrimitive : IChildOf<Mesh>
     {
         #region debug
 
@@ -59,7 +60,7 @@ namespace SharpGLTF.Schema2
 
         public int MorpthTargetsCount => _targets.Count;
 
-        public BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
+        public Transforms.BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
 
         public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
 
@@ -203,7 +204,7 @@ namespace SharpGLTF.Schema2
                 switch (DrawPrimitiveType)
                 {
                     case PrimitiveType.TRIANGLES:
-                        if ((IndexAccessor.Count % 3) != 0) exx.Add(new ModelException(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
+                        if ((IndexAccessor.Count % 3) != 0) exx.Add(new EXCEPTION(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
                         break;
                 }
             }

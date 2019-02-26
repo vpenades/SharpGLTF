@@ -3,10 +3,8 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
-namespace SharpGLTF
+namespace SharpGLTF.IO
 {
-    using IO;
-
     /// <summary>
     /// Represents an exception produced by the serialization or validation of a gltf model
     /// </summary>

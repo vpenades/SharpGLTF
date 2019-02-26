@@ -7,11 +7,15 @@ namespace SharpGLTF.Schema2
     using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Model Root")]
-    public partial class ModelRoot
+    public sealed partial class ModelRoot
     {
         #region lifecycle
 
-        public static ModelRoot CreateNew()
+        /// <summary>
+        /// Creates a new, empty model.
+        /// </summary>
+        /// <returns>A new model</returns>
+        public static ModelRoot CreateModel()
         {
             var root = new ModelRoot();
             root._asset = Asset.CreateDefault(string.Empty);
@@ -86,7 +90,7 @@ namespace SharpGLTF.Schema2
 
             // 1st check version number
 
-            if (Asset == null) exx.Add(new ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
+            if (Asset == null) exx.Add(new IO.ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
             else exx.AddRange(Asset.Validate());
 
             if (exx.Count > 0) return exx;
@@ -95,7 +99,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                exx.Add(new UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
+                exx.Add(new IO.UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
             }
 
             if (exx.Count > 0) return exx;

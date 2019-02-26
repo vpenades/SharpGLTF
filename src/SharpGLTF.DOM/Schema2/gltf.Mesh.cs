@@ -9,7 +9,7 @@ namespace SharpGLTF.Schema2
     using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Mesh[{LogicalIndex}] {Name}")]
-    public partial class Mesh
+    public sealed partial class Mesh
     {
         #region lifecycle
 
@@ -31,7 +31,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<Single> MorphWeights => _weights.Select(item => (Single)item).ToArray();
 
-        public BoundingBox3? LocalBounds3 => BoundingBox3.UnionOf(Primitives.Select(item => item.LocalBounds3));
+        public Transforms.BoundingBox3? LocalBounds3 => Transforms.BoundingBox3.UnionOf(Primitives.Select(item => item.LocalBounds3));
 
         #endregion
 
@@ -63,9 +63,11 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
-        public Mesh CreateMesh()
+        public Mesh CreateMesh(string name = null)
         {
             var dstMesh = new Mesh();
+            dstMesh.Name = name;
+
             this._meshes.Add(dstMesh);
 
             return dstMesh;

@@ -7,8 +7,14 @@ using System.Text;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Material[{LogicalIndex}] {Name}")]
-    public partial class Material
+    public sealed partial class Material
     {
+        #region lifecycle
+
+        internal Material() { }
+
+        #endregion
+
         #region properties
 
         public int LogicalIndex => this.LogicalParent.LogicalMaterials.IndexOfReference(this);
@@ -131,8 +137,8 @@ namespace SharpGLTF.Schema2
         {
             if (texImg == null) return; // in theory, we should completely remove the TextureInfo
 
-            var sampler = _Material.LogicalParent.UseLogicalSampler(mag, min, ws, wt);
-            var texture = _Material.LogicalParent.UseLogicalTexture(texImg, sampler);
+            var sampler = _Material.LogicalParent.UseSampler(mag, min, ws, wt);
+            var texture = _Material.LogicalParent.UseTexture(texImg, sampler);
 
             SetTexture(texSet, texture);
         }

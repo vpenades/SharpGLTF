@@ -4,8 +4,10 @@ using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
+    using EXCEPTION = IO.ModelException;
+
     [System.Diagnostics.DebuggerDisplay("{Version} {MinVersion} {Generator} {Copyright}")]
-    public partial class Asset
+    public sealed partial class Asset
     {
         #region lifecycle
 
@@ -42,13 +44,13 @@ namespace SharpGLTF.Schema2
         {
             foreach (var ex in base.Validate()) yield return ex;
 
-            if (string.IsNullOrWhiteSpace(_version)) yield return new ModelException(this, "version number is missing");
+            if (string.IsNullOrWhiteSpace(_version)) yield return new EXCEPTION(this, "version number is missing");
 
             var curVer = this.Version;
             var minVer = this.MinVersion;
 
-            if (curVer < MINVERSION) yield return new ModelException(this, $"invalid version number {this.Version} expected {MINVERSION}");
-            if (curVer > MAXVERSION) yield return new ModelException(this, $"invalid version number {this.Version} expected {MAXVERSION}");
+            if (curVer < MINVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}");
+            if (curVer > MAXVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MAXVERSION}");
         }
 
         #endregion

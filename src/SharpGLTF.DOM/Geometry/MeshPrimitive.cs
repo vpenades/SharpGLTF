@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SharpGLTF.Geometry
 {
-    abstract class NamedObject
+    public abstract class NamedObject
     {
         public NamedObject() { }
 
@@ -20,7 +20,7 @@ namespace SharpGLTF.Geometry
     }
 
     [System.Diagnostics.DebuggerDisplay("{Name}.{_MemoryAccessor.Attribute.Name} {_MemoryAccessor.Attribute.ItemsCount}")]
-    class VertexAccessor : NamedObject
+    public class VertexAccessor : NamedObject
     {
         #region lifecycle
 
@@ -131,7 +131,7 @@ namespace SharpGLTF.Geometry
     }
 
     [System.Diagnostics.DebuggerDisplay("{Name}.{_MemoryAccessor.Attribute.Name} {_MemoryAccessor.Attribute.ItemsCount}")]
-    class IndicesAccessor : NamedObject
+    public class IndicesAccessor : NamedObject
     {
         #region lifecycle
 
@@ -191,7 +191,7 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
-    class MeshPrimitive
+    public class MeshPrimitive
     {
         #region lifecycle
 
@@ -284,7 +284,7 @@ namespace SharpGLTF.Geometry
     }
 
     [System.Diagnostics.DebuggerDisplay("Mesh {Name}")]
-    class Mesh : NamedObject
+    public class Mesh : NamedObject
     {
         #region lifecycle
 

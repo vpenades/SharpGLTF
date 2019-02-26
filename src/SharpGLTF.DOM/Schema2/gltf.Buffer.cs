@@ -8,7 +8,7 @@ using System.Text;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Buffer[{LogicalIndex}] {Name} Bytes:{_Data.Length}")]
-    public partial class Buffer
+    public sealed partial class Buffer
     {
         #region lifecycle
 
@@ -21,13 +21,15 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Immediately after deserialization, binary buffer is loaded/parsed and stored here
         /// </summary>
-        internal Byte[] _Data;
+        internal Byte[] _Content;
 
         #endregion
 
         #region properties
 
         public int LogicalIndex => this.LogicalParent.LogicalBuffers.IndexOfReference(this);
+
+        public Byte[] Content => _Content;
 
         #endregion
 
@@ -38,7 +40,7 @@ namespace SharpGLTF.Schema2
 
         internal void _ResolveUri(AssetReader externalReferenceSolver)
         {
-            _Data = _LoadBinaryBufferUnchecked(_uri, externalReferenceSolver);
+            _Content = _LoadBinaryBufferUnchecked(_uri, externalReferenceSolver);
 
             _uri = null; // When _Data is not empty, clear URI
         }
@@ -57,15 +59,15 @@ namespace SharpGLTF.Schema2
         internal void _WriteToExternal(string uri, AssetWriter writer)
         {
             this._uri = uri;
-            this._byteLength = _Data.Length;
+            this._byteLength = _Content.Length;
 
-            writer(uri, _Data);
+            writer(uri, _Content);
         }
 
         internal void _WriteToInternal()
         {
             this._uri = null;
-            this._byteLength = _Data.Length;
+            this._byteLength = _Content.Length;
         }
 
         internal void _ClearAfterWrite()
@@ -87,7 +89,7 @@ namespace SharpGLTF.Schema2
         public Buffer CreateBuffer(int byteCount)
         {
             var buffer = new Buffer();
-            buffer._Data = new byte[byteCount];
+            buffer._Content = new byte[byteCount];
 
             _buffers.Add(buffer);
 
@@ -105,11 +107,11 @@ namespace SharpGLTF.Schema2
 
             foreach (var b in this.LogicalBuffers)
             {
-                if (b._Data == data) return b;
+                if (b._Content == data) return b;
             }
 
             var buffer = new Buffer();
-            buffer._Data = data;
+            buffer._Content = data;
 
             _buffers.Add(buffer);
 
@@ -121,39 +123,9 @@ namespace SharpGLTF.Schema2
             Guard.IsFalse(data.IsEmpty, nameof(data));
 
             var buffer = new Buffer();
-            buffer._Data = data.ToArray();
+            buffer._Content = data.ToArray();
 
             _buffers.Add(buffer);
-
-            return buffer;
-        }
-
-        [Obsolete("to be removed")]
-        public Buffer CreateIndexBuffer(params int[] indices)
-        {
-            var buffer = CreateBuffer(indices.Length * 4);
-
-            var accessor = new Memory.IntegerArray(buffer._Data, IndexType.UNSIGNED_INT);
-
-            for (int i = 0; i < indices.Length; ++i)
-            {
-                accessor[i] = (UInt32)indices[i];
-            }
-
-            return buffer;
-        }
-
-        [Obsolete("to be removed")]
-        public Buffer CreateVector3Buffer(params Vector3[] vectors)
-        {
-            var buffer = CreateBuffer(vectors.Length * 12);
-
-            var accessor = new Memory.Vector3Array(new ArraySegment<byte>(buffer._Data), 0, ComponentType.FLOAT, false);
-
-            for (int i = 0; i < vectors.Length; ++i)
-            {
-                accessor[i] = vectors[i];
-            }
 
             return buffer;
         }
@@ -169,7 +141,7 @@ namespace SharpGLTF.Schema2
             // retrieve all buffers and merge them into a single, big buffer
 
             var views = _bufferViews
-                .OrderByDescending(item => item.Data.Count)
+                .OrderByDescending(item => item.Content.Count)
                 .ToArray();
 
             if (views.Length <= 1) return; // nothing to do.
@@ -182,7 +154,7 @@ namespace SharpGLTF.Schema2
 
             var b = new Buffer
             {
-                _Data = sbbuilder.ToArray()
+                _Content = sbbuilder.ToArray()
             };
 
             this._buffers.Add(b);

@@ -18,10 +18,10 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public IntegerArray(Byte[] data, ENCODING encoding)
+        public IntegerArray(Byte[] data, ENCODING encoding = ENCODING.UNSIGNED_INT)
             : this(new BYTES(data), encoding) { }
 
-        public IntegerArray(BYTES data, ENCODING encoding)
+        public IntegerArray(BYTES data, ENCODING encoding = ENCODING.UNSIGNED_INT)
             : this(data, 0, int.MaxValue, encoding) { }
 
         public IntegerArray(BYTES data, int byteOffset, int itemsCount, ENCODING encoding)

@@ -98,7 +98,7 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
-        public Material AddLogicalMaterial(string name = null)
+        public Material CreateMaterial(string name = null)
         {
             var mat = new Material();
             mat.Name = name;
@@ -109,7 +109,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    internal partial class MaterialPBRMetallicRoughness
+    internal sealed partial class MaterialPBRMetallicRoughness
     {
         private TextureInfo _GetBaseTexture(bool create)
         {
@@ -154,7 +154,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    internal partial class MaterialPBRSpecularGlossiness_KHR
+    internal sealed partial class MaterialPBRSpecularGlossiness_KHR
     {
 
         private TextureInfo _GetDiffuseTexture(bool create)
@@ -200,7 +200,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    internal partial class MaterialUnlit_KHR
+    internal sealed partial class MaterialUnlit_KHR
     {
     }
 }

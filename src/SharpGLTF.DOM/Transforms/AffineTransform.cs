@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace SharpGLTF
+namespace SharpGLTF.Transforms
 {
     public struct AffineTransform
     {

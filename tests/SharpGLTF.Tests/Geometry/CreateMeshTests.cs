@@ -56,11 +56,11 @@ namespace SharpGLTF.Geometry
 
             // Now we switch to the .Schema2 namespace and we create a new scene:
 
-            var root = Schema2.ModelRoot.CreateNew();                        
+            var root = Schema2.ModelRoot.CreateModel();                        
             var scene = root.UseScene("default");
             var node = scene.AddVisualNode("main scene");
 
-            var material = root.AddLogicalMaterial("DefaultMaterial")
+            var material = root.CreateMaterial("DefaultMaterial")
                 .InitializeDefault(new Vector4(1, 0, 0, 1));
             material.DoubleSided = true;            
 

@@ -133,7 +133,7 @@ namespace SharpGLTF.Schema2
                 content = streamReader.ReadToEnd();
             }
 
-            return Parse(content, settings);
+            return ParseGLTF(content, settings);
         }
 
         public static ROOT ReadGLB(Stream stream, ReadSettings settings)
@@ -150,10 +150,10 @@ namespace SharpGLTF.Schema2
                 settings.FileReader = key => string.IsNullOrEmpty(key) ? chunks[glb.CHUNKBIN] : settings.FileReader?.Invoke(key);
             }
 
-            return Parse(dom, settings);
+            return ParseGLTF(dom, settings);
         }
 
-        public static ROOT Parse(String jsonContent, ReadSettings settings)
+        public static ROOT ParseGLTF(String jsonContent, ReadSettings settings)
         {
             Guard.NotNullOrEmpty(jsonContent, nameof(jsonContent));
             Guard.NotNull(settings, nameof(settings));

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace SharpGLTF
+namespace SharpGLTF.Transforms
 {
     public struct BoundingBox3
     {

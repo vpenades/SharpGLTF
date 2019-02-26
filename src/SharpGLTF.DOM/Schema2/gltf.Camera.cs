@@ -5,7 +5,7 @@ using System.Text;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Camera[{LogicalIndex}] {Name}")]
-    public partial class Camera
+    public sealed partial class Camera
     {
         #region lifecycle
 

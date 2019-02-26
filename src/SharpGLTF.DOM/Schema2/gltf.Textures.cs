@@ -27,7 +27,7 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Normal Texture[{LogicalIndex}] {Name}")]
-    internal partial class MaterialNormalTextureInfo
+    internal sealed partial class MaterialNormalTextureInfo
     {
         #region properties
 
@@ -41,7 +41,7 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Occlusion Texture[{LogicalIndex}] {Name}")]
-    internal partial class MaterialOcclusionTextureInfo
+    internal sealed partial class MaterialOcclusionTextureInfo
     {
         #region properties
 
@@ -55,8 +55,14 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Texture[{LogicalIndex}] {Name}")]
-    public partial class Texture
+    public sealed partial class Texture
     {
+        #region lifecycle
+
+        internal Texture() { }
+
+        #endregion
+
         #region properties
 
         public int LogicalIndex => this.LogicalParent.LogicalTextures.IndexOfReference(this);
@@ -64,26 +70,26 @@ namespace SharpGLTF.Schema2
         public Sampler Sampler
         {
             get => _sampler.HasValue ? LogicalParent.LogicalSamplers[_sampler.Value] : null;
-            set => _sampler = value == null ? null : (int?)LogicalParent._UseLogicalSampler(value);
+            set => _sampler = value == null ? null : (int?)LogicalParent._UseSampler(value);
         }
 
         public Image Source
         {
             get => _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
-            set => _source = value == null ? null : (int?)LogicalParent._UseLogicalImage(value);
+            set => _source = value == null ? null : (int?)LogicalParent._UseImage(value);
         }
 
         #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("Sampler[{LogicalIndex}] {Name}")]
-    public partial class Sampler
+    public sealed partial class Sampler
     {
         #region lifecycle
 
         internal Sampler() { }
 
-        public Sampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        internal Sampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             _magFilter = mag;
             _minFilter = min;
@@ -109,7 +115,7 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
-    public partial class Image
+    public sealed partial class Image
     {
         #region Base64 constants
 
@@ -120,6 +126,12 @@ namespace SharpGLTF.Schema2
 
         const string MIMEPNG = "image/png";
         const string MIMEJPEG = "image/jpeg";
+
+        #endregion
+
+        #region lifecycle
+
+        internal Image() { }
 
         #endregion
 
@@ -167,7 +179,7 @@ namespace SharpGLTF.Schema2
             {
                 var bv = this.LogicalParent.LogicalBufferViews[this._bufferView.Value];
 
-                return bv.Data;
+                return bv.Content;
             }
 
             throw new InvalidOperationException();
@@ -270,21 +282,21 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
-        internal int _UseLogicalImage(Image image)
+        internal int _UseImage(Image image)
         {
             Guard.NotNull(image, nameof(image));
 
             return _images.Use(image);
         }
 
-        internal int _UseLogicalSampler(Sampler sampler)
+        internal int _UseSampler(Sampler sampler)
         {
             Guard.NotNull(sampler, nameof(sampler));
 
             return _samplers.Use(sampler);
         }
 
-        internal Image _AddLogicalImage()
+        internal Image _AddImage()
         {
             var img = new Image();
 
@@ -293,7 +305,7 @@ namespace SharpGLTF.Schema2
             return img;
         }
 
-        public Sampler UseLogicalSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        public Sampler UseSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             foreach (var s in this._samplers)
             {
@@ -307,7 +319,7 @@ namespace SharpGLTF.Schema2
             return ss;
         }
 
-        public Texture UseLogicalTexture(Image image, Sampler sampler)
+        public Texture UseTexture(Image image, Sampler sampler)
         {
             if (image == null) return null;
 
@@ -329,7 +341,7 @@ namespace SharpGLTF.Schema2
         internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet)
             where T : TextureInfo, new()
         {
-            var tex = UseLogicalTexture(image, sampler);
+            var tex = UseTexture(image, sampler);
             if (tex == null) return null;
 
             return new T

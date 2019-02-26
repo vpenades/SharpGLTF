@@ -6,12 +6,14 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using EXCEPTION = IO.ModelException;
+
     using ROOT = ModelRoot;
 
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
     [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{SourceBufferView.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
-    public partial class Accessor
+    public sealed partial class Accessor
     {
         #region debug
 
@@ -54,14 +56,14 @@ namespace SharpGLTF.Schema2
 
         public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
-        public BoundingBox3? LocalBounds3
+        public Transforms.BoundingBox3? LocalBounds3
         {
             get
             {
                 if (this._min.Count != 3) return null;
                 if (this._max.Count != 3) return null;
 
-                return new BoundingBox3(this._min, this._max);
+                return new Transforms.BoundingBox3(this._min, this._max);
             }
         }
 
@@ -73,7 +75,7 @@ namespace SharpGLTF.Schema2
         {
             var view = SourceBufferView;
             var info = new Geometry.MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
-            return new Geometry.MemoryAccessor(info, view.Data);
+            return new Geometry.MemoryAccessor(info, view.Content);
         }
 
         internal KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>? _GetSparseMemoryAccessor()
@@ -147,7 +149,8 @@ namespace SharpGLTF.Schema2
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
-            return SourceBufferView.CreateIndicesArray(this.ByteOffset, this._count, this.Encoding.ToIndex());
+
+            return new Memory.IntegerArray(SourceBufferView.Content, this.ByteOffset, this._count, this.Encoding.ToIndex());
         }
 
         #endregion
@@ -228,7 +231,7 @@ namespace SharpGLTF.Schema2
             var byteStride = Math.Max(byteSize, SourceBufferView.ByteStride);
             var byteOffset = vertexIdx * byteStride;
 
-            return SourceBufferView.Data.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
+            return SourceBufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
         }
 
         internal void _UpdateBounds()
@@ -305,31 +308,31 @@ namespace SharpGLTF.Schema2
         {
             var exxx = base.Validate().ToList();
 
-            if (!_bufferView.HasValue) { exxx.Add(new ModelException(this, $"BufferView index missing")); return exxx; }
-            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) exxx.Add(new ModelException(this, $"BufferView index out of range"));
+            if (!_bufferView.HasValue) { exxx.Add(new EXCEPTION(this, $"BufferView index missing")); return exxx; }
+            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) exxx.Add(new EXCEPTION(this, $"BufferView index out of range"));
 
-            if (_count < 0) exxx.Add(new ModelException(this, $"Count is out of range"));
-            if (_byteOffset < 0) exxx.Add(new ModelException(this, $"ByteOffset is out of range"));
+            if (_count < 0) exxx.Add(new EXCEPTION(this, $"Count is out of range"));
+            if (_byteOffset < 0) exxx.Add(new EXCEPTION(this, $"ByteOffset is out of range"));
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len > 0 && (len & 3) != 0) exxx.Add(new ModelException(this, $"Expected length to be multiple of 4, found {len}"));
+                if (len > 0 && (len & 3) != 0) exxx.Add(new EXCEPTION(this, $"Expected length to be multiple of 4, found {len}"));
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len != 1 && len != 2 && len != 4) exxx.Add(new ModelException(this, $"Expected length to be 1, 2 or 4, found {len}"));
+                if (len != 1 && len != 2 && len != 4) exxx.Add(new EXCEPTION(this, $"Expected length to be 1, 2 or 4, found {len}"));
             }
 
             // validate bounds
 
-            if (_min.Count != _max.Count) { exxx.Add(new ModelException(this, "min and max length mismatch")); return exxx; }
+            if (_min.Count != _max.Count) { exxx.Add(new EXCEPTION(this, "min and max length mismatch")); return exxx; }
 
             for (int i = 0; i < _min.Count; ++i)
             {
-                if (_min[i] > _max[i]) exxx.Add(new ModelException(this, $"min[{i}] is larger than max[{i}]"));
+                if (_min[i] > _max[i]) exxx.Add(new EXCEPTION(this, $"min[{i}] is larger than max[{i}]"));
             }
 
             return exxx;

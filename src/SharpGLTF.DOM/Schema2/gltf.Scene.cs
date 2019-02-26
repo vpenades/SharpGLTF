@@ -6,6 +6,8 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using EXCEPTION = IO.ModelException;
+
     public interface IVisualNodeContainer
     {
         IEnumerable<Node> VisualChildren { get; }
@@ -16,11 +18,11 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
-    public partial class Node : IVisualNodeContainer
+    public sealed partial class Node : IVisualNodeContainer
     {
         #region lifecycle
 
-        public Node()
+        internal Node()
         {
             _children = new List<int>();
             _weights = new List<double>();
@@ -36,7 +38,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<Node> VisualChildren => GetVisualChildren();
 
-        public Boolean IsSkinJoint => Skin.GetSkinsUsing(this).Any();
+        public Boolean IsSkinJoint => Skin.FindSkinsUsing(this).Any();
 
         public Scene VisualScene
         {
@@ -62,7 +64,7 @@ namespace SharpGLTF.Schema2
 
         public Matrix4x4 LocalMatrix
         {
-            get => AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
+            get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
             set
             {
                 if (value == System.Numerics.Matrix4x4.Identity) _matrix = null;
@@ -74,9 +76,9 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public AffineTransform LocalTransform
+        public Transforms.AffineTransform LocalTransform
         {
-            get => new AffineTransform(_matrix, _scale, _rotation, _translation);
+            get => new Transforms.AffineTransform(_matrix, _scale, _rotation, _translation);
             set
             {
                 _matrix = null;
@@ -91,12 +93,12 @@ namespace SharpGLTF.Schema2
             get
             {
                 var vs = VisualParent;
-                return vs == null ? LocalMatrix : AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
+                return vs == null ? LocalMatrix : Transforms.AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
             }
             set
             {
                 var vs = VisualParent;
-                LocalMatrix = vs == null ? value : AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+                LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
             }
         }
 
@@ -128,7 +130,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<float> MorphWeights => _weights == null ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
 
-        public BoundingBox3? WorldBounds3 => BoundingBox3.Create(this);
+        public Transforms.BoundingBox3? WorldBounds3 => Transforms.BoundingBox3.Create(this);
 
         #endregion
 
@@ -224,14 +226,14 @@ namespace SharpGLTF.Schema2
             // check out of range indices
             foreach (var idx in this._children)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new EXCEPTION(this, $"references invalid Node[{idx}]");
             }
 
             // check duplicated indices
-            if (this._children.Distinct().Count() != this._children.Count) yield return new ModelException(this, "has duplicated node references");
+            if (this._children.Distinct().Count() != this._children.Count) yield return new EXCEPTION(this, "has duplicated node references");
 
             // check self references
-            if (this._children.Contains(this.LogicalIndex)) yield return new ModelException(this, "has self references");
+            if (this._children.Contains(this.LogicalIndex)) yield return new EXCEPTION(this, "has self references");
 
             // check circular references
             var p = this;
@@ -241,7 +243,7 @@ namespace SharpGLTF.Schema2
                 if (p == null) break;
                 if (p.LogicalIndex == this.LogicalIndex)
                 {
-                    yield return new ModelException(this, "has a circular reference");
+                    yield return new EXCEPTION(this, "has a circular reference");
                     break;
                 }
             }
@@ -255,11 +257,11 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("Scene[{LogicalIndex}] {Name}")]
-    public partial class Scene : IVisualNodeContainer
+    public sealed partial class Scene : IVisualNodeContainer
     {
         #region lifecycle
 
-        public Scene()
+        internal Scene()
         {
             _nodes = new List<int>();
         }
@@ -274,7 +276,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent.LogicalNodes[idx]);
 
-        public BoundingBox3? WorldBounds3 => BoundingBox3.Create(this);
+        public Transforms.BoundingBox3? WorldBounds3 => Transforms.BoundingBox3.Create(this);
 
         #endregion
 
@@ -316,11 +318,11 @@ namespace SharpGLTF.Schema2
             // check out of range indices
             foreach (var idx in this._nodes)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new ModelException(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new EXCEPTION(this, $"references invalid Node[{idx}]");
             }
 
             // check duplicated indices
-            if (this._nodes.Distinct().Count() != this._nodes.Count) yield return new ModelException(this, "has duplicated node references");
+            if (this._nodes.Distinct().Count() != this._nodes.Count) yield return new EXCEPTION(this, "has duplicated node references");
         }
 
         // TODO: AddVisualChild must return a "NodeBuilder"

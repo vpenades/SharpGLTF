@@ -26,14 +26,11 @@ namespace SharpGLTF.Schema2
         {
             foreach (var f in TestFiles.GetGeneratedFilePaths())
             {
-                TestContext.Progress.WriteLine($"Processing {f.ToShortDisplayPath()}...");
-
                 var model = GltfUtils.LoadModel(f);
 
                 Assert.NotNull(model);
             }
         }
-
         
         [TestCase(0)]        
         [TestCase(6)]
@@ -60,7 +57,7 @@ namespace SharpGLTF.Schema2
                 ModelRoot.Load(filePath);
                 Assert.Fail("Did not throw!");
             }
-            catch(ModelException ex)
+            catch(IO.ModelException ex)
             {
                 TestContext.WriteLine($"{filePath} threw {ex.Message}");
             }
@@ -100,9 +97,15 @@ namespace SharpGLTF.Schema2
         [Test(Description ="Example of traversing the visual tree all the way to individual vertices and indices")]
         public void TestLoadPolly()
         {
-            var model = GltfUtils.LoadModel(TestFiles.GetPollyFilePath());            
+            var path = TestFiles.GetPollyFilePath();
 
-            var scene = model.DefaultScene;
+            var polly = GltfUtils.LoadModel(path);
+
+            Assert.NotNull(polly);
+
+            TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject(System.IO.Path.GetFileName(path), polly);
+
+            var scene = polly.DefaultScene;
 
             var pollyNode = scene.FindVisualNode("Polly_Display");            
 

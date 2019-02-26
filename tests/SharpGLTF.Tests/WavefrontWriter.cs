@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
@@ -7,22 +8,22 @@ using static System.FormattableString;
 
 namespace SharpGLTF
 {
-    /// <summary>
-    /// Tiny wavefront object writer
-    /// </summary>
-    class WavefrontWriter
+
+    class VertexColumn<T> : IReadOnlyList<T>
+        where T:IEquatable<T>
     {
-        #region data
+        private readonly List<T> _Vertices = new List<T>();
+        private readonly Dictionary<T, int> _VertexCache = new Dictionary<T, int>();
 
-        private readonly List<Vector3> _Vertices = new List<Vector3>();
-        private readonly List<(int, int, int)> _Indices = new List<(int, int, int)>();
-        private readonly Dictionary<Vector3, int> _VertexCache = new Dictionary<Vector3, int>();
+        public T this[int index] => _Vertices[index];
 
-        #endregion
+        public int Count => _Vertices.Count;
 
-        #region API
+        public IEnumerator<T> GetEnumerator() { return _Vertices.GetEnumerator(); }
 
-        private int _UseVertex(Vector3 v)
+        IEnumerator IEnumerable.GetEnumerator() { return _Vertices.GetEnumerator(); }
+
+        public int Use(T v)
         {
             if (_VertexCache.TryGetValue(v, out int index)) return index;
 
@@ -33,12 +34,29 @@ namespace SharpGLTF
 
             return index;
         }
+    }
+
+    /// <summary>
+    /// Tiny wavefront object writer
+    /// </summary>
+    class WavefrontWriter
+    {
+        #region data
+
+        private readonly VertexColumn<Vector3> _Positions = new VertexColumn<Vector3>();
+        private readonly VertexColumn<Vector3> _Normals = new VertexColumn<Vector3>();
+
+        private readonly List<(int, int, int)> _Indices = new List<(int, int, int)>();        
+
+        #endregion
+
+        #region API        
 
         public void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
         {
-            var aa = _UseVertex(a);
-            var bb = _UseVertex(b);
-            var cc = _UseVertex(c);
+            var aa = _Positions.Use(a);
+            var bb = _Positions.Use(b);
+            var cc = _Positions.Use(c);
 
             // check for degenerated triangles:
             if (aa == bb) return;
@@ -54,7 +72,7 @@ namespace SharpGLTF
 
             sb.AppendLine();
 
-            foreach (var v in _Vertices)
+            foreach (var v in _Positions)
             {
                 sb.AppendLine(Invariant($"v {v.X} {v.Y} {v.Z}"));
             }

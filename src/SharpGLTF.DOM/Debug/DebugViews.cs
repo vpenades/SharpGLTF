@@ -43,11 +43,11 @@ namespace SharpGLTF.Debug
 
         public int ByteStride => _Value.ByteStride;
 
-        public int ByteLength => _Value.Data.Count;
+        public int ByteLength => _Value.Content.Count;
 
         public Schema2.BufferMode? DeviceBufferTarget => _Value.DeviceBufferTarget;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
-        public Schema2.Accessor[] Accessors => _Value.Accessors.ToArray();
+        public Schema2.Accessor[] Accessors => _Value.FindAccessors().ToArray();
     }
 }

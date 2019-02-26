@@ -137,7 +137,7 @@ namespace SharpGLTF.Schema2
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 
-            var buffer = model.LogicalBuffers.Count > 0 ? model.LogicalBuffers[0]._Data : null;
+            var buffer = model.LogicalBuffers.Count > 0 ? model.LogicalBuffers[0]._Content : null;
             if (buffer != null && buffer.Length == 0) buffer = null;
 
             var binPadding = buffer == null ? 0 : buffer.Length & 3; if (binPadding != 0) binPadding = 4 - binPadding;

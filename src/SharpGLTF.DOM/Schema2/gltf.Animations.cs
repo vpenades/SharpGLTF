@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
     using Collections;
 
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
-    public partial class Animation
+    public sealed partial class Animation
     {
         #region lifecycle
 
@@ -85,7 +85,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public partial class AnimationChannelTarget
+    public sealed partial class AnimationChannelTarget
     {
         #region lifecycle
 
@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public partial class AnimationChannel : IChildOf<Animation>
+    public sealed partial class AnimationChannel : IChildOf<Animation>
     {
         #region lifecycle
 
@@ -160,7 +160,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public partial class AnimationSampler : IChildOf<Animation>
+    public sealed partial class AnimationSampler : IChildOf<Animation>
     {
         #region lifecycle
 
@@ -192,7 +192,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public partial class ModelRoot
+    public sealed partial class ModelRoot
     {
         public Animation CreateAnimation(string name = null)
         {

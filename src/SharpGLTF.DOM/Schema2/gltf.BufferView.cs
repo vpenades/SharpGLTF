@@ -11,7 +11,7 @@ namespace SharpGLTF.Schema2
     using ENCODING = ComponentType;
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugView))]
-    public partial class BufferView
+    public sealed partial class BufferView
     {
         #region lifecycle
 
@@ -20,10 +20,10 @@ namespace SharpGLTF.Schema2
         internal BufferView(Buffer buffer, int? byteLength, int? byteOffset, int? byteStride, BufferMode? target)
         {
             Guard.NotNull(buffer, nameof(buffer));
-            Guard.NotNull(buffer._Data, nameof(buffer));
+            Guard.NotNull(buffer._Content, nameof(buffer));
             Guard.NotNull(buffer.LogicalParent, nameof(buffer));
 
-            byteLength = byteLength.AsValue(buffer._Data.Length - byteOffset.AsValue(0));
+            byteLength = byteLength.AsValue(buffer._Content.Length - byteOffset.AsValue(0));
 
             Guard.MustBeGreaterThanOrEqualTo(byteLength.AsValue(0), _byteLengthMinimum, nameof(byteLength));
             Guard.MustBeGreaterThanOrEqualTo(byteOffset.AsValue(0), _byteOffsetMinimum, nameof(byteOffset));
@@ -42,7 +42,7 @@ namespace SharpGLTF.Schema2
 
             this._buffer = buffer.LogicalIndex;
 
-            this._byteLength = byteLength.AsValue(buffer._Data.Length);
+            this._byteLength = byteLength.AsValue(buffer._Content.Length);
 
             this._byteOffset = byteOffset.AsValue(0).AsNullable(0);
             this._byteStride = byteStride.AsValue(0).AsNullable(0);
@@ -60,24 +60,12 @@ namespace SharpGLTF.Schema2
 
         public int ByteStride                   => this._byteStride.AsValue(0);
 
-        public BYTES Data
+        public BYTES Content
         {
             get
             {
                 var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
-                return new BYTES(buffer._Data, this._byteOffset ?? 0, this._byteLength);
-            }
-        }
-
-        public IEnumerable<Accessor> Accessors
-        {
-            get
-            {
-                var idx = LogicalIndex;
-
-                return this.LogicalParent
-                    .LogicalAccessors
-                    .Where(accessor => accessor._LogicalBufferViewIndex == idx);
+                return new BYTES(buffer._Content, this._byteOffset ?? 0, this._byteLength);
             }
         }
 
@@ -85,10 +73,23 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        /// <summary>
+        /// Finds all the accessors using this BufferView
+        /// </summary>
+        /// <returns>A collection of accessors</returns>
+        public IEnumerable<Accessor> FindAccessors()
+        {
+            var idx = LogicalIndex;
+
+            return this.LogicalParent
+                .LogicalAccessors
+                .Where(accessor => accessor._LogicalBufferViewIndex == idx);
+        }
+
         internal void _ConvertToStaticBuffer(_StaticBufferBuilder targetBuffer)
         {
             // retrieve old buffer
-            var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer]._Data;
+            var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer]._Content;
             var data = new Byte[this._byteLength];
             Array.Copy(srcBuf, this._byteOffset ?? 0, data, 0, this._byteLength);
 
@@ -100,16 +101,12 @@ namespace SharpGLTF.Schema2
 
         private string _DebuggerDisplay_TryIdentifyContent()
         {
-            var accessors = this.Accessors.OrderBy(item => item.ByteOffset).ToArray();
+            var accessors = this
+                .FindAccessors()
+                .OrderBy(item => item.ByteOffset)
+                .ToList();
 
             return String.Join(" ", accessors.Select(item => item._DebuggerDisplay_TryIdentifyContent()));
-        }
-
-        public Memory.IntegerArray CreateIndicesArray(int byteOffset, int count, IndexType encoding)
-        {
-            Guard.IsTrue(this.ByteStride == 0, null, "bytestride must be zero");
-
-            return new Memory.IntegerArray(this.Data, byteOffset, count, encoding);
         }
 
         /// <summary>
@@ -119,7 +116,7 @@ namespace SharpGLTF.Schema2
         /// <returns>true if the buffer is interleaved</returns>
         public bool IsInterleaved(IEnumerable<Accessor> accessors)
         {
-            Guard.NotNullOrEmpty(Accessors, nameof(accessors));
+            Guard.NotNullOrEmpty(accessors, nameof(accessors));
             Guard.IsTrue(accessors.All(item => item.SourceBufferView == this), nameof(accessors));
 
             return accessors
@@ -150,9 +147,9 @@ namespace SharpGLTF.Schema2
 
             foreach (var bv in this.LogicalBufferViews)
             {
-                if (bv.Data.Array != data.Array) continue;
-                if (bv.Data.Offset != data.Offset) continue;
-                if (bv.Data.Count != data.Count) continue;
+                if (bv.Content.Array != data.Array) continue;
+                if (bv.Content.Offset != data.Offset) continue;
+                if (bv.Content.Count != data.Count) continue;
                 if (bv.ByteStride != byteStride) continue;
                 if (bv.DeviceBufferTarget != mode) continue;
 
