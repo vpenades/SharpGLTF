@@ -18,6 +18,12 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
+        #region properties
+
+        public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
+
+        #endregion
+
         #region API
 
         public T GetExtension<T>()
@@ -29,12 +35,25 @@ namespace SharpGLTF.Schema2
         public void SetExtension<T>(T value)
             where T : JsonSerializable
         {
+            Guard.NotNull(value, nameof(value));
+
             var idx = _extensions.IndexOf(item => item.GetType() == typeof(T));
 
-            if (idx < 0) { _extensions.Add(value); return; }
+            if (idx >= 0) { _extensions[idx] = value; return; }
 
-            if (value == null) _extensions.RemoveAt(idx);
-            else _extensions[idx] = value;
+            _extensions.Add(value);
+        }
+
+        public void RemoveExtensions<T>(T value)
+            where T : JsonSerializable
+        {
+            _extensions.RemoveAll(item => item == value);
+        }
+
+        public void RemoveExtensions<T>()
+            where T : JsonSerializable
+        {
+            _extensions.RemoveAll(item => item.GetType() == typeof(T));
         }
 
         #endregion

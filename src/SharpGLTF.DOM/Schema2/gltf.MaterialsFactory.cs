@@ -8,39 +8,47 @@ namespace SharpGLTF.Schema2
 {
     public partial class Material
     {
-        #region lifecycle
-
-        internal static Material CreatePBRMetallicRoughness()
-        {
-            var m = new Material
-            {
-                _pbrMetallicRoughness = new MaterialPBRMetallicRoughness()
-            };
-
-            return m;
-        }
-
-        internal static Material CreatePBRSpecularGlossiness()
-        {
-            var m = new Material();
-
-            m.SetExtension(new MaterialPBRSpecularGlossiness_KHR());
-
-            return m;
-        }
-
-        internal static Material CreateMaterialUnlit()
-        {
-            var m = new Material();
-
-            m.SetExtension(new MaterialUnlit_KHR());
-
-            return m;
-        }
-
-        #endregion
-
         #region API
+
+        public Material InitializeDefault()
+        {
+            return this.InitializePBRMetallicRoughness();
+        }
+
+        public Material InitializeDefault(Vector4 diffuseColor)
+        {
+            this.InitializePBRMetallicRoughness()
+                .GetChannel("BaseColor")
+                .SetFactor(diffuseColor);
+
+            return this;
+        }
+
+        public Material InitializePBRMetallicRoughness()
+        {
+            this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
+            this.RemoveExtensions<MaterialUnlit_KHR>();
+
+            return this;
+        }
+
+        public Material InitializePBRSpecularGlossiness()
+        {
+            this.RemoveExtensions<MaterialUnlit_KHR>();
+            this.SetExtension(new MaterialPBRSpecularGlossiness_KHR());
+
+            return this;
+        }
+
+        public Material InitializeUnlit()
+        {
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
+            this.SetExtension(new MaterialUnlit_KHR());
+
+            return this;
+        }
 
         private IEnumerable<MaterialChannelView> _GetChannels()
         {
@@ -90,49 +98,19 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
-        public Material AddLogicalMaterial()
+        public Material AddLogicalMaterial(string name = null)
         {
             var mat = new Material();
+            mat.Name = name;
 
             _materials.Add(mat);
 
             return mat;
         }
-
-        public Material AddLogicalMaterial(params string[] channelKeys)
-        {
-            var dict = new Dictionary<string, int>
-            {
-                ["Unlit"] = MaterialUnlit_KHR.GetScore(channelKeys),
-                ["PBRMetallicRoughness"] = MaterialPBRMetallicRoughness.GetScore(channelKeys),
-                ["PBRSpecularGlossiness"] = MaterialPBRSpecularGlossiness_KHR.GetScore(channelKeys)
-            };
-
-            var materialType = dict.OrderBy(item => item.Value).Last().Key;
-
-            Material m = null;
-
-            if (materialType == "Unlit") m = Material.CreateMaterialUnlit();
-            if (materialType == "PBRMetallicRoughness") m = Material.CreatePBRMetallicRoughness();
-            if (materialType == "PBRSpecularGlossiness") m = Material.CreatePBRSpecularGlossiness();
-
-            _materials.Add(m);
-
-            return m;
-        }
     }
 
     internal partial class MaterialPBRMetallicRoughness
     {
-        internal static int GetScore(IEnumerable<string> keys)
-        {
-            int score = 0;
-            if (keys.Contains("BaseColor")) ++score;
-            if (keys.Contains("Metallic")) ++score;
-            if (keys.Contains("Roughness")) ++score;
-            return score;
-        }
-
         private TextureInfo _GetBaseTexture(bool create)
         {
             if (create && _baseColorTexture == null) _baseColorTexture = new TextureInfo();
@@ -178,14 +156,6 @@ namespace SharpGLTF.Schema2
 
     internal partial class MaterialPBRSpecularGlossiness_KHR
     {
-        internal static int GetScore(IEnumerable<string> keys)
-        {
-            int score = 0;
-            if (keys.Contains("Diffuse")) ++score;
-            if (keys.Contains("Glossiness")) ++score;
-            if (keys.Contains("Specular")) ++score;
-            return score;
-        }
 
         private TextureInfo _GetDiffuseTexture(bool create)
         {
@@ -232,9 +202,5 @@ namespace SharpGLTF.Schema2
 
     internal partial class MaterialUnlit_KHR
     {
-        internal static int GetScore(IEnumerable<string> keys)
-        {
-            return 1;
-        }
     }
 }

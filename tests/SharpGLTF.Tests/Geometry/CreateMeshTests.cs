@@ -60,10 +60,9 @@ namespace SharpGLTF.Geometry
             var scene = root.UseScene("default");
             var node = scene.AddVisualNode("main scene");
 
-            var material = root.AddLogicalMaterial("Metallic");
-            material.DoubleSided = true;
-            material.GetChannel("BaseColor")
-                .SetFactor(new Vector4(1, 0, 0, 1));
+            var material = root.AddLogicalMaterial("DefaultMaterial")
+                .InitializeDefault(new Vector4(1, 0, 0, 1));
+            material.DoubleSided = true;            
 
             node.Mesh = root.CreateMesh();
 
