@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
             _UpdateBounds();
         }
 
-        public Memory.Matrix4x4Array CastToMatrix4x4Accessor()
+        public Memory.Matrix4x4Array AsMatrix4x4Array()
         {
             return _GetMemoryAccessor().AsMatrix4x4Array();
         }
@@ -143,7 +143,7 @@ namespace SharpGLTF.Schema2
             _UpdateBounds();
         }
 
-        public Memory.IntegerArray CastToIndicesAccessor()
+        public Memory.IntegerArray AsIndicesArray()
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
             Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -66,6 +67,20 @@ namespace SharpGLTF.Memory
 
     public static class EncodedArrayUtils
     {
+        public static IntegerArray IndicesRange(int start, int count)
+        {
+            var data = new Byte[count * 4];
+
+            var array = new IntegerArray(data, Schema2.IndexType.UNSIGNED_INT);
+
+            for (int i = 0; i < count; ++i)
+            {
+                array[i] = (UInt32)(start + i);
+            }
+
+            return array;
+        }
+
         public static void CopyFrom<T>(this IEncodedArray<T> dst, int index, params T[] src)
             where T : unmanaged
         {

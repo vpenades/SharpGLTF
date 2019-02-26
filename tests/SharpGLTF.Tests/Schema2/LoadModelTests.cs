@@ -22,10 +22,12 @@ namespace SharpGLTF.Schema2
         #region testing models of https://github.com/bghgary/glTF-Asset-Generator.git
 
         [Test]
-        public void GeneratedModelsLoadTest()
+        public void TestLoadGeneratedModels()
         {
             foreach (var f in TestFiles.GetGeneratedFilePaths())
             {
+                TestContext.Progress.WriteLine($"Processing {f.ToShortDisplayPath()}...");
+
                 var model = GltfUtils.LoadModel(f);
 
                 Assert.NotNull(model);
@@ -35,7 +37,7 @@ namespace SharpGLTF.Schema2
         
         [TestCase(0)]        
         [TestCase(6)]
-        public void LoadCompatibilityModelTest(int idx)
+        public void TestLoadCompatibleModels(int idx)
         {
             var filePath = TestFiles.GetCompatibilityFilePath(idx);
 
@@ -49,7 +51,7 @@ namespace SharpGLTF.Schema2
         [TestCase(3)]
         [TestCase(4)]
         [TestCase(5)]
-        public void LoadInvalidModelsTest(int idx)
+        public void TestLoadInvalidModels(int idx)
         {
             var filePath = TestFiles.GetCompatibilityFilePath(idx);
 
@@ -70,21 +72,19 @@ namespace SharpGLTF.Schema2
         #region testing models of https://github.com/KhronosGroup/glTF-Sample-Models.git
 
         [Test]
-        public void SampleModelsLoadTest()
+        public void TestLoadSampleModels()
         {
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
                 var root = GltfUtils.LoadModel(f);
                 Assert.NotNull(root);
 
-                // var fileName = System.IO.Path.GetFileNameWithoutExtension(f);
-
-                // root.DefaultScene._DumpWavefrontToTest(f);
+                TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject(System.IO.Path.GetFileName(f), root);
             }
         }
 
         [Test]
-        public void MaterialSpecularGlossinessModelsLoadTest()
+        public void TestLoadSampleModelsWithMaterialSpecularGlossiness()
         {
             foreach (var f in TestFiles.GetFilePathsWithSpecularGlossinessPBR())
             {

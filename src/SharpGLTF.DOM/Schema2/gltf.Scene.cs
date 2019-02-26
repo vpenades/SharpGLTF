@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2
 
         public Node VisualParent => this.LogicalParent._GetVisualParentNode(this);
 
-        public IEnumerable<Node> VisualChildren => GetVisualChildren(0);
+        public IEnumerable<Node> VisualChildren => GetVisualChildren();
 
         public Boolean IsSkinJoint => Skin.GetSkinsUsing(this).Any();
 
@@ -146,7 +146,7 @@ namespace SharpGLTF.Schema2
 
         internal bool _HasVisualChild(int nodeIndex) { return _children.Contains(nodeIndex); }
 
-        public IEnumerable<Node> GetVisualChildren(int lod)
+        public IEnumerable<Node> GetVisualChildren()
         {
             // TODO: handle MSFT_Lod here ?
             // maybe we can have a VisualHierarchyManager abstract class with a default implementation

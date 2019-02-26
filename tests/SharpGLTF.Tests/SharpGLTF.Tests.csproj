@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>glTF2Sharp</RootNamespace>
+    <RootNamespace>SharpGLTF</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
