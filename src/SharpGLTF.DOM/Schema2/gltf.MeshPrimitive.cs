@@ -151,6 +151,11 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public void SetIndexAccessor(Accessor accessor)
+        {
+            _indices = accessor == null ? (int?)null : accessor.LogicalIndex;
+        }
+
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
             return new ReadOnlyLinqDictionary<String, int, Accessor>(_targets[idx], alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);

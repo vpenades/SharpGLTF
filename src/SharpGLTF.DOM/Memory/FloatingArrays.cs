@@ -20,18 +20,17 @@ namespace SharpGLTF.Memory
 
         public FloatingAccessor(BYTES data, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
         {
+            var enclen = encoding.ByteLength();
+
             this._Data = data.Slice(byteOffset);
-            this._ItemCount = 0;
             this._Getter = null;
             this._Setter = null;
+            this._ByteStride = Math.Max(byteStride, enclen * dimensions);
+            this._EncodedLen = enclen;
+            this._ItemCount = this._Data.Count / this._ByteStride;
 
-            var len = encoding.ByteLength();
-
-            this._ByteStride = Math.Max(byteStride, len * dimensions);
-            this._ValueStride = len;
-
-            _ItemCount = _Data.Count / _ByteStride;
-            if ((_Data.Count % _ByteStride) >= len * dimensions) ++_ItemCount;
+            // strided buffers usually have room for an extra item
+            if ((_Data.Count % _ByteStride) >= enclen * dimensions) ++_ItemCount;
 
             _ItemCount = Math.Min(itemsCount, _ItemCount);
 
@@ -39,88 +38,87 @@ namespace SharpGLTF.Memory
             {
                 this._Setter = this._SetValue<Single>;
                 this._Getter = this._GetValue<Single>;
+                return;
+            }
+
+            if (normalized)
+            {
+                switch (encoding)
+                {
+                    case ENCODING.BYTE:
+                        {
+                            this._Setter = this._SetNormalizedS8;
+                            this._Getter = this._GetNormalizedS8;
+                            break;
+                        }
+
+                    case ENCODING.UNSIGNED_BYTE:
+                        {
+                            this._Setter = this._SetNormalizedU8;
+                            this._Getter = this._GetNormalizedU8;
+                            break;
+                        }
+
+                    case ENCODING.SHORT:
+                        {
+                            this._Setter = this._SetNormalizedS16;
+                            this._Getter = this._GetNormalizedS16;
+                            break;
+                        }
+
+                    case ENCODING.UNSIGNED_SHORT:
+                        {
+                            this._Setter = this._SetNormalizedU16;
+                            this._Getter = this._GetNormalizedU16;
+                            break;
+                        }
+
+                    default: throw new ArgumentException(nameof(encoding));
+                }
             }
             else
             {
-                if (normalized)
+                switch (encoding)
                 {
-                    switch (encoding)
-                    {
-                        case ENCODING.BYTE:
-                            {
-                                this._Setter = this._SetNormalizedS8;
-                                this._Getter = this._GetNormalizedS8;
-                                break;
-                            }
-
-                        case ENCODING.UNSIGNED_BYTE:
-                            {
-                                this._Setter = this._SetNormalizedU8;
-                                this._Getter = this._GetNormalizedU8;
-                                break;
-                            }
-
-                        case ENCODING.SHORT:
-                            {
-                                this._Setter = this._SetNormalizedS16;
-                                this._Getter = this._GetNormalizedS16;
-                                break;
-                            }
-
-                        case ENCODING.UNSIGNED_SHORT:
-                            {
-                                this._Setter = this._SetNormalizedU16;
-                                this._Getter = this._GetNormalizedU16;
-                                break;
-                            }
-
-                        default: throw new ArgumentException(nameof(encoding));
-                    }
-                }
-                else
-                {
-                    switch (encoding)
-                    {
-                        case ENCODING.BYTE:
-                            {
-                                this._Setter = this._SetValueS8;
-                                this._Getter = this._GetValueS8;
-                                break;
-                            }
-
-                        case ENCODING.UNSIGNED_BYTE:
-                            {
-                                this._Setter = this._SetValueU8;
-                                this._Getter = this._GetValueU8;
-                                break;
-                            }
-
-                        case ENCODING.SHORT:
-                            {
-                                this._Setter = this._SetValueS16;
-                                this._Getter = this._GetValueS16;
-                                break;
-                            }
-
-                        case ENCODING.UNSIGNED_SHORT:
-                            {
-                                this._Setter = this._SetValueU16;
-                                this._Getter = this._GetValueU16;
-                                break;
-                            }
-
-                        case ENCODING.UNSIGNED_INT:
-                            {
-                                this._Setter = this._SetValueU32;
-                                this._Getter = this._GetValueU32;
-                                break;
-                            }
-
-                        case ENCODING.FLOAT:
+                    case ENCODING.BYTE:
+                        {
+                            this._Setter = this._SetValueS8;
+                            this._Getter = this._GetValueS8;
                             break;
+                        }
 
-                        default: throw new ArgumentException(nameof(encoding));
-                    }
+                    case ENCODING.UNSIGNED_BYTE:
+                        {
+                            this._Setter = this._SetValueU8;
+                            this._Getter = this._GetValueU8;
+                            break;
+                        }
+
+                    case ENCODING.SHORT:
+                        {
+                            this._Setter = this._SetValueS16;
+                            this._Getter = this._GetValueS16;
+                            break;
+                        }
+
+                    case ENCODING.UNSIGNED_SHORT:
+                        {
+                            this._Setter = this._SetValueU16;
+                            this._Getter = this._GetValueU16;
+                            break;
+                        }
+
+                    case ENCODING.UNSIGNED_INT:
+                        {
+                            this._Setter = this._SetValueU32;
+                            this._Getter = this._GetValueU32;
+                            break;
+                        }
+
+                    case ENCODING.FLOAT:
+                        break;
+
+                    default: throw new ArgumentException(nameof(encoding));
                 }
             }
         }
@@ -179,7 +177,7 @@ namespace SharpGLTF.Memory
         private readonly BYTES _Data;
 
         private readonly int _ByteStride;
-        private readonly int _ValueStride;
+        private readonly int _EncodedLen;
 
         private readonly int _ItemCount;
 
@@ -202,8 +200,8 @@ namespace SharpGLTF.Memory
 
         public Single this[int rowIndex, int subIndex]
         {
-            get => _Getter((rowIndex * _ByteStride) + (subIndex * _ValueStride));
-            set => _Setter((rowIndex * _ByteStride) + (subIndex * _ValueStride), value);
+            get => _Getter((rowIndex * _ByteStride) + (subIndex * _EncodedLen));
+            set => _Setter((rowIndex * _ByteStride) + (subIndex * _EncodedLen), value);
         }
 
         #endregion
@@ -217,15 +215,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public ScalarArray(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public ScalarArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public ScalarArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 1, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 1, encoding, normalized);
         }
 
         #endregion
@@ -272,15 +267,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector2Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public Vector2Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector2Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 2, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
         }
 
         #endregion
@@ -335,15 +327,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector3Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public Vector3Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector3Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 3, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 3, encoding, normalized);
         }
 
         #endregion
@@ -399,15 +388,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Vector4Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public Vector4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 4, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -464,15 +450,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public QuaternionArray(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public QuaternionArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public QuaternionArray(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 4, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -529,15 +512,12 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
-        public Matrix4x4Array(Byte[] data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(data), 0, int.MaxValue, byteStride, encoding, normalized) { }
-
         public Matrix4x4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Matrix4x4Array(BYTES data, int byteOffset, int count, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, count, byteStride, 16, encoding, normalized);
+            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 16, encoding, normalized);
         }
 
         #endregion

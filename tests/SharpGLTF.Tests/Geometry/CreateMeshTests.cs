@@ -58,7 +58,7 @@ namespace SharpGLTF.Geometry
 
             var root = Schema2.ModelRoot.CreateModel();                        
             var scene = root.UseScene("default");
-            var node = scene.AddVisualNode("main scene");
+            var node = scene.CreateNode("main scene");
 
             var material = root.CreateMaterial("DefaultMaterial")
                 .InitializeDefault(new Vector4(1, 0, 0, 1));

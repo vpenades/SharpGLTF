@@ -12,9 +12,9 @@ namespace SharpGLTF.Schema2
     {
         IEnumerable<Node> VisualChildren { get; }
 
-        Node AddVisualNode(string name);
+        Node CreateNode(string name);
 
-        Node FindVisualNode(string name);
+        Node FindNode(string name);
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2
 
         public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
 
-        public Node VisualParent => this.LogicalParent._GetVisualParentNode(this);
+        public Node VisualParent => this.LogicalParent._FindVisualParentNode(this);
 
         public IEnumerable<Node> VisualChildren => GetVisualChildren();
 
@@ -160,24 +160,14 @@ namespace SharpGLTF.Schema2
             return allChildren;
         }
 
-        public Node AddVisualNode(string name)
+        public Node CreateNode(string name)
         {
-            var node = this.LogicalParent._AddLogicalNode(this._children);
+            var node = this.LogicalParent._CreateLogicalNode(this._children);
             node.Name = name;
             return node;
         }
 
-        public void AddNode(Node node)
-        {
-            Guard.NotNull(node, nameof(node));
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            var idx = this.LogicalParent._UseLogicaNode(node);
-
-            this._children.Add(idx);
-        }
-
-        public Node FindVisualNode(string name)
+        public Node FindNode(string name)
         {
             return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }
@@ -197,7 +187,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static IEnumerable<Node> GetNodesUsingMesh(Mesh mesh)
+        public static IEnumerable<Node> FindNodesUsingMesh(Mesh mesh)
         {
             if (mesh == null) return Enumerable.Empty<Node>();
 
@@ -205,10 +195,10 @@ namespace SharpGLTF.Schema2
 
             return mesh.LogicalParent
                 .LogicalNodes
-                .Where(item => item._mesh.HasValue && item._mesh.Value == meshIdx);
+                .Where(item => item._mesh.AsValue(int.MinValue) == meshIdx);
         }
 
-        public static IEnumerable<Node> GetNodesUsingSkin(Skin skin)
+        public static IEnumerable<Node> FindNodesUsingSkin(Skin skin)
         {
             if (skin == null) return Enumerable.Empty<Node>();
 
@@ -216,7 +206,7 @@ namespace SharpGLTF.Schema2
 
             return skin.LogicalParent
                 .LogicalNodes
-                .Where(item => item._skin.HasValue && item._skin.Value == meshIdx);
+                .Where(item => item._skin.AsValue(int.MinValue) == meshIdx);
         }
 
         public override IEnumerable<Exception> Validate()
@@ -294,19 +284,12 @@ namespace SharpGLTF.Schema2
             return VisualChildren.Any(item => item._ContainsVisualNode(node, true));
         }
 
-        public Node AddVisualNode(String name)
+        public Node CreateNode(String name)
         {
-            return this.LogicalParent._AddLogicalNode(this._nodes);
+            return this.LogicalParent._CreateLogicalNode(this._nodes);
         }
 
-        public void AddVisualNode(Node node)
-        {
-            var idx = this.LogicalParent._UseLogicaNode(node);
-
-            this._nodes.Add(idx);
-        }
-
-        public Node FindVisualNode(String name)
+        public Node FindNode(String name)
         {
             return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }
@@ -360,7 +343,7 @@ namespace SharpGLTF.Schema2
             return scene;
         }
 
-        internal Node _GetVisualParentNode(Node childNode)
+        internal Node _FindVisualParentNode(Node childNode)
         {
             var childIdx = _nodes.IndexOf(childNode);
             if (childIdx < 0) return null;
@@ -369,21 +352,19 @@ namespace SharpGLTF.Schema2
             return _nodes.FirstOrDefault(item => item._HasVisualChild(childIdx));
         }
 
-        internal Node _AddLogicalNode()
+        internal Node _CreateLogicalNode()
         {
             var n = new Node();
             _nodes.Add(n);
             return n;
         }
 
-        internal Node _AddLogicalNode(IList<int> children)
+        internal Node _CreateLogicalNode(IList<int> children)
         {
-            var n = _AddLogicalNode();
+            var n = _CreateLogicalNode();
             children.Add(n.LogicalIndex);
             return n;
         }
-
-        internal int _UseLogicaNode(Node node) { return _nodes.Use(node); }
 
         internal Boolean _CheckNodeIsJoint(Node n)
         {

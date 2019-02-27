@@ -17,35 +17,35 @@ namespace SharpGLTF.Schema2
 
         internal BufferView() { }
 
-        internal BufferView(Buffer buffer, int? byteLength, int? byteOffset, int? byteStride, BufferMode? target)
+        internal BufferView(Buffer buffer, int byteOffset, int? byteLength, int byteStride, BufferMode? target)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.NotNull(buffer._Content, nameof(buffer));
             Guard.NotNull(buffer.LogicalParent, nameof(buffer));
 
-            byteLength = byteLength.AsValue(buffer._Content.Length - byteOffset.AsValue(0));
+            byteLength = byteLength.AsValue(buffer._Content.Length - byteOffset);
 
             Guard.MustBeGreaterThanOrEqualTo(byteLength.AsValue(0), _byteLengthMinimum, nameof(byteLength));
-            Guard.MustBeGreaterThanOrEqualTo(byteOffset.AsValue(0), _byteOffsetMinimum, nameof(byteOffset));
+            Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
 
             if (target == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
-                Guard.IsTrue(byteStride.AsValue(0) == 0, nameof(byteStride));
+                Guard.IsTrue(byteStride == 0, nameof(byteStride));
             }
-            else if (byteStride.AsValue(0) > 0)
+            else if (byteStride > 0)
             {
                 // TODO: clarify under which conditions bytestride needs to be defined or forbidden.
 
-                Guard.IsTrue(byteStride.AsValue(0).IsMultipleOf(4), nameof(byteStride));
-                Guard.MustBeBetweenOrEqualTo(byteStride.AsValue(0), _byteStrideMinimum, _byteStrideMaximum, nameof(byteStride));
+                Guard.IsTrue(byteStride.IsMultipleOf(4), nameof(byteStride));
+                Guard.MustBeBetweenOrEqualTo(byteStride, _byteStrideMinimum, _byteStrideMaximum, nameof(byteStride));
             }
 
             this._buffer = buffer.LogicalIndex;
 
             this._byteLength = byteLength.AsValue(buffer._Content.Length);
 
-            this._byteOffset = byteOffset.AsValue(0).AsNullable(0);
-            this._byteStride = byteStride.AsValue(0).AsNullable(0);
+            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
+            this._byteStride = byteStride.AsNullable(0, _byteStrideMinimum, _byteStrideMaximum);
 
             this._target = target;
         }
@@ -65,7 +65,7 @@ namespace SharpGLTF.Schema2
             get
             {
                 var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
-                return new BYTES(buffer._Content, this._byteOffset ?? 0, this._byteLength);
+                return new BYTES(buffer._Content, this._byteOffset.AsValue(0), this._byteLength);
             }
         }
 
@@ -129,34 +129,41 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
-        public BufferView CreateBufferView(Buffer buffer, int? byteLength = null, int? byteOffset = null, int? byteStride = null, BufferMode? target = null)
+        public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? target = null)
+        {
+            Guard.NotNull(data.Array, nameof(data));
+            return UseBufferView(data.Array, data.Offset, data.Count, byteStride, target);
+        }
+
+        public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
+        {
+            Guard.NotNull(buffer, nameof(buffer));
+            return UseBufferView(UseBuffer(buffer), byteOffset, byteLength, byteStride, target);
+        }
+
+        public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
-            var bv = new BufferView(buffer, byteLength, byteOffset, byteStride, target);
-
-            this._bufferViews.Add(bv);
-
-            return bv;
-        }
-
-        public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? mode = null)
-        {
-            var buffer = UseBuffer(data.Array);
+            byteLength = byteLength.AsValue(buffer.Content.Length - byteOffset);
 
             foreach (var bv in this.LogicalBufferViews)
             {
-                if (bv.Content.Array != data.Array) continue;
-                if (bv.Content.Offset != data.Offset) continue;
-                if (bv.Content.Count != data.Count) continue;
+                if (bv.Content.Array != buffer.Content) continue;
+                if (bv.Content.Offset != byteOffset) continue;
+                if (bv.Content.Count != byteLength.Value) continue;
                 if (bv.ByteStride != byteStride) continue;
-                if (bv.DeviceBufferTarget != mode) continue;
+                if (bv.DeviceBufferTarget != target) continue;
 
                 return bv;
             }
 
-            return CreateBufferView(buffer, data.Count, data.Offset, byteStride, mode);
+            var newbv = new BufferView(buffer, byteOffset, byteLength, byteStride, target);
+
+            this._bufferViews.Add(newbv);
+
+            return newbv;
         }
     }
 

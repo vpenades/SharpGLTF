@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 
 namespace SharpGLTF
 {
-    using Memory;
-    using System.Linq;
-    using COLOR = UInt32;
+    using COLOR = Vector4;
 
-    class BufferBuilder
+    class SimpleSceneBuilder
     {
         #region data
 
@@ -18,7 +17,14 @@ namespace SharpGLTF
 
         #endregion
 
-        #region API        
+        #region API
+
+        public void AddPolygon(COLOR color, params (float,float,float)[] points)
+        {
+            var vertices = points.Select(item => new Vector3(item.Item1, item.Item2, item.Item3)).ToArray();
+
+            AddPolygon(color, vertices);
+        }
 
         public void AddTriangle(COLOR color, Vector3 a, Vector3 b, Vector3 c)
         {
@@ -54,43 +60,45 @@ namespace SharpGLTF
         {
             var root = Schema2.ModelRoot.CreateModel();
 
-            var node = root.UseScene(0).AddVisualNode("Default");
+            var node = root.UseScene(0).CreateNode("Default");            
 
+            // create vertex buffer
+            const int byteStride = 12 * 2;            
+
+            var vbuffer = root.UseBufferView(new Byte[byteStride * _Positions.Count], byteStride, Schema2.BufferMode.ARRAY_BUFFER);
+
+            var positions = root
+                .CreateAccessor("Positions")
+                .WithVertexData(vbuffer, 0, _Positions);
+
+            var ppp = positions.AsVector3Array();
+
+            var normals = root
+                .CreateAccessor("Normals")
+                .WithVertexData(vbuffer, 12, _CalculateNormals());
+
+            var nnn = normals.AsVector3Array();
+
+            // create mesh
             node.Mesh = root.CreateMesh();
-
-            const int byteStride = 12 * 2;
-
-            var vbuffer = root.CreateBuffer(_Positions.Count * byteStride);
-            var vview = root.CreateBufferView(vbuffer, null, null, byteStride, Schema2.BufferMode.ARRAY_BUFFER);
-
-            var vpositions = root.CreateAccessor("Positions");
-            vpositions.SetVertexData(vview, 0, Schema2.ElementType.VEC3, Schema2.ComponentType.FLOAT, false, _Positions.Count);            
-            vpositions.AsVector3Array().FillFrom(0, _Positions.ToArray());
-            vpositions.UpdateBounds();
-
-            var vnormals = root.CreateAccessor("Normals");
-            vnormals.SetVertexData(vview, 12, Schema2.ElementType.VEC3, Schema2.ComponentType.FLOAT, false, _Positions.Count);            
-            vnormals.AsVector3Array().FillFrom(0, _CalculateNormals());
-            vnormals.UpdateBounds();
 
             foreach (var kvp in _Indices)
             {
-                var color = new Vector4((kvp.Key >> 24) & 255, (kvp.Key >> 16) & 255, (kvp.Key >> 8) & 255, (kvp.Key) & 255) / 255.0f;                
+                // create index buffer
+                var ibuffer = root.UseBufferView(new Byte[4 * kvp.Value.Count], 0, Schema2.BufferMode.ELEMENT_ARRAY_BUFFER);
 
+                var indices = root
+                    .CreateAccessor("Indices")
+                    .WithIndexData(ibuffer, 0, kvp.Value);
+
+                // create mesh primitive
                 var prim = node.Mesh.CreatePrimitive();
-                prim.Material = root.CreateMaterial().InitializeDefault(color);
+                prim.SetVertexAccessor("POSITION", positions);
+                prim.SetVertexAccessor("NORMAL", normals);
+                prim.SetIndexAccessor(indices);
                 prim.DrawPrimitiveType = Schema2.PrimitiveType.TRIANGLES;
-                
-                prim.SetVertexAccessor("POSITION", vpositions);
-                prim.SetVertexAccessor("NORMAL", vnormals);                
-
-                var ibuffer = root.CreateBuffer(kvp.Value.Count * 4);
-                var iview = root.CreateBufferView(ibuffer, null, null, null, Schema2.BufferMode.ELEMENT_ARRAY_BUFFER);
-                var indices = root.CreateAccessor("Indices");
-                indices.AsIndicesArray().FillFrom(0, kvp.Value.Select(item => (uint)item));
-
-                indices.SetIndexData(iview, 0, Schema2.IndexType.UNSIGNED_INT, kvp.Value.Count);
-                prim.IndexAccessor = indices;
+                prim.Material = root.CreateMaterial().InitializeDefault(kvp.Key);
+                prim.Material.DoubleSided = true;
             }
 
             root.MergeBuffers();

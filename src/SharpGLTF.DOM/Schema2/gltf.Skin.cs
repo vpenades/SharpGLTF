@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2
 
         public int LogicalIndex => this.LogicalParent.LogicalSkins.IndexOfReference(this);
 
-        public IEnumerable<Node> VisualParents => Node.GetNodesUsingSkin(this);
+        public IEnumerable<Node> VisualParents => Node.FindNodesUsingSkin(this);
 
         public int JointsCount => _joints.Count;
 

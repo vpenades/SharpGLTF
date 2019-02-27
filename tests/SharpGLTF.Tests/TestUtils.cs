@@ -86,7 +86,12 @@ namespace SharpGLTF
         {
             context.AttachFileLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
         }
-        
+
+        public static void AttachGltfValidatorLink(this NUnit.Framework.TestContext context)
+        {
+            context.AttachUrlLink("🌍 glTF Validator", "http://github.khronos.org/glTF-Validator/");
+        }
+
         public static void AttachFileLink(this NUnit.Framework.TestContext context, string linkPath, string targetPath)
         {
             var sb = new StringBuilder();
@@ -103,6 +108,20 @@ namespace SharpGLTF
 
             NUnit.Framework.TestContext.AddTestAttachment(linkPath);
         }
-        
+
+        public static void AttachUrlLink(this NUnit.Framework.TestContext context, string linkPath, string url)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("[InternetShortcut]");
+            sb.AppendLine("URL=" + url);            
+
+            linkPath = System.IO.Path.ChangeExtension(linkPath, ".url");
+            linkPath = context.GetAttachmentPath(linkPath, true);
+
+            System.IO.File.WriteAllText(linkPath, sb.ToString());
+
+            NUnit.Framework.TestContext.AddTestAttachment(linkPath);
+        }
+
     }
 }

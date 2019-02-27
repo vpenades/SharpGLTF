@@ -82,7 +82,7 @@ namespace SharpGLTF.Schema2
     public partial class ModelRoot
     {
         /// <summary>
-        /// Creates a buffer with a given size
+        /// Creates a buffer with <paramref name="byteCount"/> size.
         /// </summary>
         /// <param name="byteCount">the size of the buffer</param>
         /// <returns>the buffer</returns>
@@ -97,33 +97,21 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Finds and existing buffer that is already using <paramref name="data"/> , or creates a new one if none is found.
+        /// Finds and existing buffer that is already using <paramref name="content"/> , or creates a new one if none is found.
         /// </summary>
-        /// <param name="data">the byte array to be wrapped as a buffer</param>
+        /// <param name="content">the byte array to be wrapped as a buffer</param>
         /// <returns>the buffer</returns>
-        public Buffer UseBuffer(Byte[] data)
+        public Buffer UseBuffer(Byte[] content)
         {
-            Guard.IsFalse(data == null, nameof(data));
+            Guard.IsFalse(content == null, nameof(content));
 
             foreach (var b in this.LogicalBuffers)
             {
-                if (b._Content == data) return b;
+                if (b._Content == content) return b;
             }
 
             var buffer = new Buffer();
-            buffer._Content = data;
-
-            _buffers.Add(buffer);
-
-            return buffer;
-        }
-
-        public Buffer CreateBuffer(ReadOnlySpan<Byte> data)
-        {
-            Guard.IsFalse(data.IsEmpty, nameof(data));
-
-            var buffer = new Buffer();
-            buffer._Content = data.ToArray();
+            buffer._Content = content;
 
             _buffers.Add(buffer);
 

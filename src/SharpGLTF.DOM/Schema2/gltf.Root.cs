@@ -78,7 +78,22 @@ namespace SharpGLTF.Schema2
 
         #region Visual Tree
 
-        public Scene DefaultScene => _scenes.Count == 0 ? null : _scenes[_scene ?? 0];
+        public Scene DefaultScene
+        {
+            get => _scenes.Count == 0 ? null : _scenes[_scene.AsValue(0)];
+            set
+            {
+                if (value == null)
+                {
+                    _scene = null;
+                    return;
+                }
+
+                Guard.MustShareLogicalParent(this, value, nameof(value));
+
+                _scene = value.LogicalIndex;
+            }
+        }
 
         #endregion
 

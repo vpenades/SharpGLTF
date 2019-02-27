@@ -25,7 +25,7 @@ namespace SharpGLTF.Schema2
 
         public int LogicalIndex => this.LogicalParent.LogicalMeshes.IndexOfReference(this);
 
-        public IEnumerable<Node> VisualParents => Node.GetNodesUsingMesh(this);
+        public IEnumerable<Node> VisualParents => Node.FindNodesUsingMesh(this);
 
         public IReadOnlyList<MeshPrimitive> Primitives => _primitives;
 

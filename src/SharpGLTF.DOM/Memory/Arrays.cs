@@ -69,9 +69,7 @@ namespace SharpGLTF.Memory
     {
         public static IntegerArray IndicesRange(int start, int count)
         {
-            var data = new Byte[count * 4];
-
-            var array = new IntegerArray(data, Schema2.IndexType.UNSIGNED_INT);
+            var array = new IntegerArray( new ArraySegment<Byte>(new Byte[count * 4]), Schema2.IndexType.UNSIGNED_INT);
 
             for (int i = 0; i < count; ++i)
             {
@@ -79,6 +77,17 @@ namespace SharpGLTF.Memory
             }
 
             return array;
+        }
+
+        public static void FillFrom(this IEncodedArray<UInt32> dst, int dstIndex, IEnumerable<Int32> src)
+        {
+            using (var ator = src.GetEnumerator())
+            {
+                while (dstIndex < dst.Count && ator.MoveNext())
+                {
+                    dst[dstIndex++] = (UInt32)ator.Current;
+                }
+            }
         }
 
         public static void FillFrom<T>(this IEncodedArray<T> dst, int dstIndex, IEnumerable<T> src)
