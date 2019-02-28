@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharpGLTF.CodeGen
@@ -44,10 +45,24 @@ namespace SharpGLTF.CodeGen
 
             yield return "}";
         }
-
+        
         public static IEnumerable<string> Indent(this IEnumerable<string> lines, int indent)
         {
             foreach (var l in lines) yield return l.Indent(indent);            
+        }
+        
+        public static IEnumerable<string> EmitSummary(this string description, int indent)
+        {
+            if (string.IsNullOrWhiteSpace(description)) yield break;
+
+            var lines = description
+                .Split("  ")
+                .Select(item => item.Trim())
+                .ToList();
+
+            yield return "/// <summary>".Indent(indent);
+            foreach(var l in lines) yield return $"/// {l}";
+            yield return "/// </summary>".Indent(indent);
         }
     }
 }

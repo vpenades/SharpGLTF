@@ -123,6 +123,8 @@ namespace SharpGLTF.SchemaReflection
             {
                 var classDecl = ctx.UseClass(schema.Title);
 
+                classDecl.Description = schema.Description;
+
                 // process base class                
 
                 if (schema.InheritedSchema != null) classDecl.BaseClass = ctx._UseType(schema.InheritedSchema) as ClassType;
@@ -147,6 +149,9 @@ namespace SharpGLTF.SchemaReflection
                 foreach(var p in props)
                 {
                     var field = classDecl.UseField(p.Name);
+
+                    field.Description = p.Description;
+
                     field.FieldType = ctx._UseType(p, required.Contains(p.Name));
 
                     field.MinimumValue = p.Minimum;

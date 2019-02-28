@@ -25,6 +25,9 @@ namespace SharpGLTF.Schema2
 {
 	using Collections;
 
+	/// <summary>
+	/// glTF extension that defines the specular-glossiness material model from Physically-Based Rendering (PBR) methodology.
+	/// </summary>
 	partial class MaterialPBRSpecularGlossiness_KHR : glTFProperty
 	{
 	

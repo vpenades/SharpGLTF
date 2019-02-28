@@ -27,12 +27,10 @@
     </AssemblyAttribute>    
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="Schema2\Generated\*.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </None>
-  </ItemGroup>
-
+  <PropertyGroup>
+    <DocumentationFile>bin\Docs\SharpGLTF.xml</DocumentationFile>
+  </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />    
     <PackageReference Include="System.Memory" Version="4.5.2" />
@@ -43,11 +41,17 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="Schema2\Generated\*.cs">
+      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+    </None>
+  </ItemGroup>
+
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
     <AssemblyName>SharpGLTF</AssemblyName>
     <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>    
-  </PropertyGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
     <AdditionalFiles Include="..\..\stylecop.json" />

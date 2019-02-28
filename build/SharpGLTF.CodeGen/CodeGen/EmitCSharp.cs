@@ -396,6 +396,7 @@ namespace SharpGLTF.CodeGen
         {
             var xclass = new CSharpClassEmitter(this)
             {
+                ClassSummary = type.Description,
                 ClassDeclaration = _GetClassDeclaration(type),
                 HasBaseClass = type.BaseClass != null
             };
@@ -492,6 +493,8 @@ namespace SharpGLTF.CodeGen
         private readonly List<string> _SerializerBody = new List<string>();
         private readonly List<string> _DeserializerSwitchBody = new List<string>();
 
+        public string ClassSummary { get; set; }
+
         public string ClassDeclaration { get; set; }
 
         public bool HasBaseClass { get; set; }
@@ -578,6 +581,8 @@ namespace SharpGLTF.CodeGen
 
         public IEnumerable<string> EmitCode()
         {
+            foreach (var l in ClassSummary.EmitSummary(0)) yield return l;
+            
             yield return ClassDeclaration;
             yield return "{";
 

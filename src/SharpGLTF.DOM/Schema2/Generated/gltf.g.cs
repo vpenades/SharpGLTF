@@ -156,6 +156,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Indices of those attributes that deviate from their initialization value.
+	/// </summary>
 	partial class AccessorSparseIndices : glTFProperty
 	{
 	
@@ -189,6 +192,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Array of size `accessor.sparse.count` times number of components storing the displaced accessor attributes pointed by `accessor.sparse.indices`.
+	/// </summary>
 	partial class AccessorSparseValues : glTFProperty
 	{
 	
@@ -218,6 +224,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Sparse storage of attributes that deviate from their initialization value.
+	/// </summary>
 	partial class AccessorSparse : glTFProperty
 	{
 	
@@ -250,6 +259,11 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A typed view into a bufferView.
+	/// A bufferView contains raw binary data.
+	/// An accessor provides a typed view into a bufferView or a subset of a bufferView similar to how WebGL's `vertexAttribPointer()` defines an attribute in a buffer.
+	/// </summary>
 	partial class Accessor : LogicalChildOfRoot
 	{
 	
@@ -313,6 +327,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// The index of the node and TRS property that an animation channel targets.
+	/// </summary>
 	partial class AnimationChannelTarget : glTFProperty
 	{
 	
@@ -340,6 +357,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Targets an animation's sampler at a node's property.
+	/// </summary>
 	partial class AnimationChannel : glTFProperty
 	{
 	
@@ -367,6 +387,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
+	/// </summary>
 	partial class AnimationSampler : glTFProperty
 	{
 	
@@ -399,6 +422,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A keyframe animation.
+	/// </summary>
 	partial class Animation : LogicalChildOfRoot
 	{
 	
@@ -428,6 +454,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Metadata about the glTF asset.
+	/// </summary>
 	partial class Asset : glTFProperty
 	{
 	
@@ -463,6 +492,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A buffer points to binary geometry, animation, or skins.
+	/// </summary>
 	partial class Buffer : LogicalChildOfRoot
 	{
 	
@@ -491,6 +523,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A view into a buffer generally representing a subset of the buffer.
+	/// </summary>
 	partial class BufferView : LogicalChildOfRoot
 	{
 	
@@ -535,6 +570,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// An orthographic camera containing properties to create an orthographic projection matrix.
+	/// </summary>
 	partial class CameraOrthographic : glTFProperty
 	{
 	
@@ -572,6 +610,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A perspective camera containing properties to create a perspective projection matrix.
+	/// </summary>
 	partial class CameraPerspective : glTFProperty
 	{
 	
@@ -611,6 +652,10 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A camera's projection.
+	/// A node can reference a camera to apply a transform to place the camera in the scene.
+	/// </summary>
 	partial class Camera : LogicalChildOfRoot
 	{
 	
@@ -642,6 +687,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Reference to a texture.
+	/// </summary>
 	partial class TextureInfo : glTFProperty
 	{
 	
@@ -671,6 +719,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
+	/// </summary>
 	partial class MaterialPBRMetallicRoughness : glTFProperty
 	{
 	
@@ -767,6 +818,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// The material appearance of a primitive.
+	/// </summary>
 	partial class Material : LogicalChildOfRoot
 	{
 	
@@ -823,6 +877,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Geometry to be rendered with the given material.
+	/// </summary>
 	partial class MeshPrimitive : glTFProperty
 	{
 	
@@ -864,6 +921,11 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A set of primitives to be rendered.
+	/// A node can contain one mesh.
+	/// A node's transform places the mesh in the scene.
+	/// </summary>
 	partial class Mesh : LogicalChildOfRoot
 	{
 	
@@ -893,6 +955,11 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A node in the node hierarchy.
+	/// When the node contains `skin`, all `mesh.primitives` must contain `JOINTS_0` and `WEIGHTS_0` attributes.
+	/// A node can have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), only TRS properties may be present; `matrix` will not be present.
+	/// </summary>
 	partial class Node : LogicalChildOfRoot
 	{
 	
@@ -950,6 +1017,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Texture sampler properties for filtering and wrapping modes.
+	/// </summary>
 	partial class Sampler : LogicalChildOfRoot
 	{
 	
@@ -987,6 +1057,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// The root nodes of a scene.
+	/// </summary>
 	partial class Scene : LogicalChildOfRoot
 	{
 	
@@ -1011,6 +1084,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Joints and matrices defining a skin.
+	/// </summary>
 	partial class Skin : LogicalChildOfRoot
 	{
 	
@@ -1043,6 +1119,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// A texture and its sampler.
+	/// </summary>
 	partial class Texture : LogicalChildOfRoot
 	{
 	
@@ -1070,6 +1149,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// The root object for a glTF asset.
+	/// </summary>
 	partial class ModelRoot : glTFProperty
 	{
 	
@@ -1172,6 +1254,9 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	/// <summary>
+	/// Image data used to create a texture. Image can be referenced by URI or `bufferView` index. `mimeType` is required in the latter case.
+	/// </summary>
 	partial class Image : LogicalChildOfRoot
 	{
 	

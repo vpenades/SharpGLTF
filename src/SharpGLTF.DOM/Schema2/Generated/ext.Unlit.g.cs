@@ -25,6 +25,9 @@ namespace SharpGLTF.Schema2
 {
 	using Collections;
 
+	/// <summary>
+	/// glTF extension that defines the unlit material model.
+	/// </summary>
 	partial class MaterialUnlit_KHR : glTFProperty
 	{
 	

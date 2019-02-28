@@ -110,7 +110,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Checks if all the accessors use this buffer in interleaved arrangement
+        /// Checks if <paramref name="accessors"/> use this buffer in interleaved arrangement
         /// </summary>
         /// <param name="accessors">A collection of accessors that use this buffer</param>
         /// <returns>true if the buffer is interleaved</returns>
@@ -129,18 +129,43 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// </summary>
+        /// <param name="data">The array range to wrap.</param>
+        /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
+        /// <param name="target">The type hardware device buffer, or null</param>
+        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="data"/></returns>
         public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(data.Array, nameof(data));
             return UseBufferView(data.Array, data.Offset, data.Count, byteStride, target);
         }
 
+        /// <summary>
+        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// </summary>
+        /// <param name="buffer">The array to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first Byte in <paramref name="buffer"/></param>
+        /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
+        /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
+        /// <param name="target">The type hardware device buffer, or null</param>
+        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="buffer"/></returns>
         public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));
             return UseBufferView(UseBuffer(buffer), byteOffset, byteLength, byteStride, target);
         }
 
+        /// <summary>
+        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// </summary>
+        /// <param name="buffer">The buffer to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first Byte in <paramref name="buffer"/></param>
+        /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
+        /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
+        /// <param name="target">The type hardware device buffer, or null</param>
+        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="buffer"/></returns>
         public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));

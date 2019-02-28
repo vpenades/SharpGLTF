@@ -33,6 +33,8 @@ namespace SharpGLTF.SchemaReflection
 
         #region properties
 
+        public String Description { get; set; }
+
         public Context Owner => _Owner;
 
         #endregion
@@ -239,6 +241,8 @@ namespace SharpGLTF.SchemaReflection
         #region properties
 
         public ClassType DeclaringClass => _Owner;
+
+        public String Description { get; set; }
 
         public string PersistentName => _PersistentName;                
 
