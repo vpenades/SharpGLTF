@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using static System.FormattableString;
+
 namespace SharpGLTF
 {
     /// <summary>
@@ -61,12 +63,12 @@ namespace SharpGLTF
                 if (f.IsStatic)
                 {
                     var v = f.GetValue(null);
-                    if (v != null) name += "=" + v.ToString();
+                    if (v != null) name += Invariant($"= {v}");
                 }
                 else if (instance != null)
                 {
                     var v = f.GetValue(instance);
-                    if (v != null) name += "=" + v.ToString();
+                    if (v != null) name += Invariant($"= {v}");
                 }
 
                 yield return name;

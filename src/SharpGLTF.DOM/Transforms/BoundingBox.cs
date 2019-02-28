@@ -127,11 +127,5 @@ namespace SharpGLTF.Transforms
         }
 
         #endregion
-
-        #region API
-
-        public override string ToString() { return $"{Min} {Max}"; }
-
-        #endregion
     }
 }
