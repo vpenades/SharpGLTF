@@ -6,6 +6,12 @@ The current status of the library is preview alpha, but, for some use cases it i
 
 Prerelease Nuget packages available [here.](https://www.nuget.org/packages/SharpGLTF)
 
+### Examples
+
+- [Load and save glTF and GLB files.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/LoadAndSave/LoadModelTests.cs#L100)
+- [Create a simple triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L25)
+- [Create a textured triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L76)
+
 ### Features
 
 #### Source Code
