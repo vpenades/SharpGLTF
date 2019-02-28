@@ -56,24 +56,23 @@ namespace SharpGLTF.Geometry
 
             // Now we switch to the .Schema2 namespace and we create a new scene:
 
-            var root = Schema2.ModelRoot.CreateModel();                        
-            var scene = root.UseScene("default");
-            var node = scene.CreateNode("main scene");
+            var model = Schema2.ModelRoot.CreateModel();                        
+            var scene = model.UseScene("default");
+            var rnode = scene.CreateNode("main scene");
 
-            var material = root.CreateMaterial("DefaultMaterial")
+            var material = model.CreateMaterial("DefaultMaterial")
                 .WithDefault(new Vector4(1, 0, 0, 1));
             material.DoubleSided = true;            
 
-            node.Mesh = root.CreateMesh();
+            rnode.Mesh = model.CreateMesh();
 
             // this assigns the mesh we've created before to this schema mesh.
             // Notice that the schema buffers being created will be using the
             // memory allocated by (#1) and (#2)
-            srcMesh.AssignToSchema(node.Mesh);
-
-            root.MergeBuffers();
-            root.AttachToCurrentTest("Triangle.gltf");
-            root.AttachToCurrentTest("Triangle.glb");
+            srcMesh.AssignToSchema(rnode.Mesh);
+                        
+            model.AttachToCurrentTest("Triangle.gltf");
+            model.AttachToCurrentTest("Triangle.glb");
 
             TestContext.CurrentContext.AttachShowDirLink();
         }        

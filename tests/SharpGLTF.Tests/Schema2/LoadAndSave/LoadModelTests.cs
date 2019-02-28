@@ -75,10 +75,10 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
-                var root = GltfUtils.LoadModel(f);
-                Assert.NotNull(root);
+                var model = GltfUtils.LoadModel(f);
+                Assert.NotNull(model);
 
-                TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject(System.IO.Path.GetFileName(f), root);
+                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
             }
         }
 
@@ -102,18 +102,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
             
             // load Polly model
-            var polly = GltfUtils.LoadModel( TestFiles.GetPollyFilePath() );
+            var model = GltfUtils.LoadModel( TestFiles.GetPollyFilePath() );
 
-            Assert.NotNull(polly);            
+            Assert.NotNull(model);            
 
-            // Save as GLB, and also evaluate all triangles and save as Wavefront OBJ
-            polly.MergeBuffers();
-            polly.AttachToCurrentTest("polly_out.glb");
-            TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject("polly_out.obj", polly);
+            // Save as GLB, and also evaluate all triangles and save as Wavefront OBJ            
+            model.AttachToCurrentTest("polly_out.glb");
+            model.AttachToCurrentTest("polly_out.obj");
 
             // hierarchically browse some elements of the model:
 
-            var scene = polly.DefaultScene;
+            var scene = model.DefaultScene;
 
             var pollyNode = scene.FindNode("Polly_Display");            
 

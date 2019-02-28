@@ -41,18 +41,27 @@ namespace SharpGLTF
 
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
         {
+            // find the output path for the current test
             fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName, true);
             
             if (fileName.ToLower().EndsWith(".glb"))
             {
+                // ensure the model has just one buffer
                 model.MergeBuffers();
                 model.SaveGLB(fileName);
             }
-            else
+            else if (fileName.ToLower().EndsWith(".gltf"))
             {
                 model.SaveGLTF(fileName, Newtonsoft.Json.Formatting.Indented);
             }
+            else if (fileName.ToLower().EndsWith(".obj"))
+            {
+                // evaluate all triangles of the model
+                var wavefront = Schema2.ModelDumpUtils.ToWavefrontWriter(model).ToString();
+                System.IO.File.WriteAllText(fileName, wavefront);                
+            }
 
+            // Attach the saved file to the current test
             NUnit.Framework.TestContext.AddTestAttachment(fileName);
         }
 

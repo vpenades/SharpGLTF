@@ -60,14 +60,12 @@ namespace SharpGLTF.Schema2.Authoring
                 .CreateAccessor()
                 .WithIndexData(indicesView, 0, 3, IndexType.UNSIGNED_INT);
             
-            // create mehh primitive
+            // create mesh primitive
             var primitive = rmesh.CreatePrimitive();
             primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;
             primitive.SetVertexAccessor("POSITION", positionsAccessor);
             primitive.IndexAccessor = indicesAccessor;
-
-            // save result
-            model.MergeBuffers();
+            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }
@@ -134,9 +132,7 @@ namespace SharpGLTF.Schema2.Authoring
             primitive.Material
                 .FindChannel("BaseColor")
                 .SetTexture(0, model.CreateImage().WithExternalFile(imagePath) );
-
-            // save result            
-            model.MergeBuffers();
+            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");            
         }
@@ -166,10 +162,9 @@ namespace SharpGLTF.Schema2.Authoring
 
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
-
-            model.MergeBuffers();
+            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
-        }       
+        }
     }
 }

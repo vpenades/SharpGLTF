@@ -11,19 +11,6 @@ namespace SharpGLTF.Schema2
     /// </summary>
     static class ModelDumpUtils
     {
-        public static void AttachToCurrentTestAsWavefrontObject(this NUnit.Framework.TestContext context, string fileName, ModelRoot model)
-        {
-            fileName = System.IO.Path.ChangeExtension(fileName, ".obj");
-
-            fileName = context.GetAttachmentPath(fileName, true);
-
-            var wavefront = model.ToWavefrontWriter().ToString();
-
-            System.IO.File.WriteAllText(fileName, wavefront);
-
-            NUnit.Framework.TestContext.AddTestAttachment(fileName);
-        }
-
         public static WavefrontWriter ToWavefrontWriter(this ModelRoot model)
         {
             var writer = new WavefrontWriter();
