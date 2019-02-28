@@ -65,18 +65,29 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Texture"/> at <see cref="ModelRoot.LogicalTextures"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalTextures.IndexOfReference(this);
 
         public Sampler Sampler
         {
             get => _sampler.HasValue ? LogicalParent.LogicalSamplers[_sampler.Value] : null;
-            set => _sampler = value == null ? null : (int?)LogicalParent._UseSampler(value);
+            set
+            {
+                if (value != null) Guard.MustShareLogicalParent(this, value, nameof(value));
+                _sampler = value?.LogicalIndex;
+            }
         }
 
         public Image Source
         {
             get => _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
-            set => _source = value == null ? null : (int?)LogicalParent._UseImage(value);
+            set
+            {
+                if (value != null) Guard.MustShareLogicalParent(this, value, nameof(value));
+                _source = value?.LogicalIndex;
+            }
         }
 
         #endregion
@@ -101,6 +112,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Sampler"/> at <see cref="ModelRoot.LogicalSamplers"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalSamplers.IndexOfReference(this);
 
         public TextureInterpolationMode MagFilter => _magFilter ?? TextureInterpolationMode.LINEAR;
@@ -114,197 +128,17 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
-    public sealed partial class Image
-    {
-        #region Base64 constants
-
-        const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream;base64,";
-        const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
-        const string EMBEDDEDJPEGBUFFER = "data:image/jpeg;base64,";
-        const string EMBEDDEDPNGBUFFER = "data:image/png;base64,";
-
-        const string MIMEPNG = "image/png";
-        const string MIMEJPEG = "image/jpeg";
-
-        #endregion
-
-        #region lifecycle
-
-        internal Image() { }
-
-        #endregion
-
-        #region data
-
-        // this is the actual compressed image in PNG or JPEG, -NOT- the pixels data.
-        private Byte[] _ExternalImageContent;
-
-        #endregion
-
-        #region properties
-
-        public int LogicalIndex => this.LogicalParent.LogicalImages.IndexOfReference(this);
-
-        public bool IsPng => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("png");
-        public bool IsJpeg => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("jpg") | _mimeType.Contains("jpeg");
-
-        #endregion
-
-        #region API
-
-        private static bool _IsPng(IReadOnlyList<Byte> data)
-        {
-            if (data[0] != 0x89) return false;
-            if (data[1] != 0x50) return false;
-            if (data[2] != 0x4e) return false;
-            if (data[3] != 0x47) return false;
-
-            return true;
-        }
-
-        private static bool _IsJpeg(IReadOnlyList<Byte> data)
-        {
-            if (data[0] != 0xff) return false;
-            if (data[1] != 0xd8) return false;
-
-            return true;
-        }
-
-        public ArraySegment<Byte> GetImageContent()
-        {
-            if (_ExternalImageContent != null) return new ArraySegment<byte>(_ExternalImageContent);
-
-            if (this._bufferView.HasValue)
-            {
-                var bv = this.LogicalParent.LogicalBufferViews[this._bufferView.Value];
-
-                return bv.Content;
-            }
-
-            throw new InvalidOperationException();
-        }
-
-        public Image SetExternalContent(Byte[] data)
-        {
-            if (_IsPng(data)) _mimeType = MIMEPNG; // these strings might be wrong
-            if (_IsJpeg(data)) _mimeType = MIMEJPEG; // these strings might be wrong
-
-            this._uri = null;
-            this._bufferView = null;
-            this._ExternalImageContent = data;
-
-            return this;
-        }
-
-        public void UseBufferViewContainer()
-        {
-            if (this._ExternalImageContent == null) return;
-
-            var data = new ArraySegment<Byte>(this._ExternalImageContent);
-
-            var bv = this.LogicalParent.UseBufferView(data);
-
-            this._uri = null;
-            this._bufferView = bv.LogicalIndex;
-
-            this._ExternalImageContent = null;
-        }
-
-        #endregion
-
-        #region binary read
-
-        internal void _ResolveUri(AssetReader externalReferenceSolver)
-        {
-            if (!String.IsNullOrWhiteSpace(_uri))
-            {
-                _ExternalImageContent = _LoadImageUnchecked(_uri, externalReferenceSolver);
-            }
-
-            _uri = null; // When _Data is not empty, clear URI
-        }
-
-        private static Byte[] _LoadImageUnchecked(string uri, AssetReader externalReferenceSolver)
-        {
-            return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? uri._TryParseBase64Unchecked(EMBEDDEDJPEGBUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDEDPNGBUFFER)
-                ?? externalReferenceSolver?.Invoke(uri);
-        }
-
-        #endregion
-
-        #region binary write
-
-        internal void _EmbedAssets()
-        {
-            if (_ExternalImageContent != null)
-            {
-                var mimeContent = Convert.ToBase64String(_ExternalImageContent, Base64FormattingOptions.None);
-
-                if (_IsPng(_ExternalImageContent))
-                {
-                    _mimeType = MIMEPNG;
-                    _uri = EMBEDDEDPNGBUFFER + mimeContent;
-                    return;
-                }
-
-                if (_IsJpeg(_ExternalImageContent))
-                {
-                    _mimeType = MIMEJPEG;
-                    _uri = EMBEDDEDJPEGBUFFER + mimeContent;
-                    return;
-                }
-
-                throw new NotImplementedException();
-            }
-        }
-
-        internal void _WriteExternalAssets(string uri, AssetWriter writer)
-        {
-            if (_ExternalImageContent != null)
-            {
-                if (this._mimeType.Contains("png")) uri += ".png";
-                if (this._mimeType.Contains("jpg")) uri += ".jpg";
-                if (this._mimeType.Contains("jpeg")) uri += ".jpg";
-
-                this._uri = uri;
-                writer(uri, _ExternalImageContent);
-            }
-        }
-
-        internal void _ClearAfterWrite() { this._uri = null; }
-
-        #endregion
-    }
-
     public partial class ModelRoot
     {
-        internal int _UseImage(Image image)
-        {
-            Guard.NotNull(image, nameof(image));
-
-            return _images.Use(image);
-        }
-
-        internal int _UseSampler(Sampler sampler)
-        {
-            Guard.NotNull(sampler, nameof(sampler));
-
-            return _samplers.Use(sampler);
-        }
-
-        internal Image _AddImage()
-        {
-            var img = new Image();
-
-            _images.Add(img);
-
-            return img;
-        }
-
+        /// <summary>
+        /// Creates or reuses a <see cref="Sampler"/> instance
+        /// at <see cref="ModelRoot.LogicalSamplers"/>.
+        /// </summary>
+        /// <param name="mag">A value of <see cref="TextureInterpolationMode"/>.</param>
+        /// <param name="min">A value of <see cref="TextureMipMapMode"/>.</param>
+        /// <param name="ws">The <see cref="TextureWrapMode"/> in the S axis.</param>
+        /// <param name="wt">The <see cref="TextureWrapMode"/> in the T axis.</param>
+        /// <returns>A <see cref="Sampler"/> instance.</returns>
         public Sampler UseSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             foreach (var s in this._samplers)
@@ -319,6 +153,13 @@ namespace SharpGLTF.Schema2
             return ss;
         }
 
+        /// <summary>
+        /// Creates or reuses a <see cref="Texture"/> instance
+        /// at <see cref="ModelRoot.LogicalTextures"/>.
+        /// </summary>
+        /// <param name="image">The source <see cref="Image"/>.</param>
+        /// <param name="sampler">The source <see cref="Sampler"/>.</param>
+        /// <returns>A <see cref="Texture"/> instance.</returns>
         public Texture UseTexture(Image image, Sampler sampler)
         {
             if (image == null) return null;
@@ -338,7 +179,7 @@ namespace SharpGLTF.Schema2
             return tex;
         }
 
-        internal T UseTextureInfo<T>(Image image, Sampler sampler, int textureSet)
+        internal T _UseTextureInfo<T>(Image image, Sampler sampler, int textureSet)
             where T : TextureInfo, new()
         {
             var tex = UseTexture(image, sampler);

@@ -35,12 +35,21 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="MeshPrimitive"/> at <see cref="Mesh.Primitives"/>.
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.Primitives.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets the <see cref="Mesh"/> instance that owns this <see cref="MeshPrimitive"/> instance.
+        /// </summary>
         public Mesh LogicalParent { get; private set; }
 
         void IChildOf<Mesh>._SetLogicalParent(Mesh parent) { LogicalParent = parent; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Material"/> instance, or null.
+        /// </summary>
         public Material Material
         {
             get => this._material.HasValue ? LogicalParent.LogicalParent.LogicalMaterials[this._material.Value] : null;
@@ -58,34 +67,13 @@ namespace SharpGLTF.Schema2
             set => this._mode = value.AsNullable(_modeDefault);
         }
 
-        public int MorpthTargetsCount => _targets.Count;
+        public int MorphTargetsCount => _targets.Count;
 
         public Transforms.BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
 
         public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
 
-        public Accessor IndexAccessor
-        {
-            get
-            {
-                if (!this._indices.HasValue) return null;
-
-                return this.LogicalParent.LogicalParent.LogicalAccessors[this._indices.Value];
-            }
-
-            set
-            {
-                if (value == null)
-                {
-                    this._indices = null;
-                }
-                else
-                {
-                    Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, value, nameof(value));
-                    this._indices = value.LogicalIndex;
-                }
-            }
-        }
+        public Accessor IndexAccessor { get => GetIndexAccessor(); set => SetIndexAccessor(value); }
 
         #endregion
 
@@ -109,7 +97,7 @@ namespace SharpGLTF.Schema2
 
             if (includeMorphs)
             {
-                for (int i = 0; i < MorpthTargetsCount; ++i)
+                for (int i = 0; i < MorphTargetsCount; ++i)
                 {
                     foreach (var key in attributes)
                     {
@@ -151,9 +139,20 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public Accessor GetIndexAccessor()
+        {
+            if (!this._indices.HasValue) return null;
+
+            return this.LogicalParent.LogicalParent.LogicalAccessors[this._indices.Value];
+        }
+
         public void SetIndexAccessor(Accessor accessor)
         {
-            _indices = accessor == null ? (int?)null : accessor.LogicalIndex;
+            if (accessor == null) { this._indices = null; return; }
+
+            Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, accessor, nameof(accessor));
+
+            this._indices = accessor.LogicalIndex;
         }
 
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)

@@ -36,6 +36,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Accessor"/> at <see cref="ModelRoot.LogicalAccessors"/>
+        /// </summary>
         public int LogicalIndex                 => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
 
         internal int _LogicalBufferViewIndex    => this._bufferView.AsValue(-1);
@@ -91,23 +94,24 @@ namespace SharpGLTF.Schema2
 
         #region Data Buffer API
 
-        internal void SetData(BufferView buffer, int byteOffset, ElementType dimensions, ComponentType encoding, Boolean normalized, int count)
+        public Accessor WithData(BufferView buffer, int byteOffset, int itemCount, ElementType dimensions, ComponentType encoding, Boolean normalized)
         {
-            Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
-            Guard.MustBeGreaterThanOrEqualTo(byteOffset, 0, nameof(byteOffset));
-            Guard.MustBeGreaterThan(count, 0, nameof(count));
+            Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
+            Guard.MustBeGreaterThanOrEqualTo(itemCount, _countMinimum, nameof(itemCount));
 
             this._bufferView = buffer.LogicalIndex;
-            this._byteOffset = byteOffset;
-            this._count = count;
+            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
+            this._count = itemCount;
 
             this._type = dimensions;
             this._componentType = encoding;
-            this._normalized = normalized.AsNullable(false);
+            this._normalized = normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
+
+            return this;
         }
 
         public Memory.Matrix4x4Array AsMatrix4x4Array()
@@ -122,13 +126,13 @@ namespace SharpGLTF.Schema2
         public Accessor WithIndexData(Geometry.MemoryAccessor src)
         {
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ELEMENT_ARRAY_BUFFER);
-            this.WithIndexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Encoding.ToIndex());
-
-            return this;
+            return this.WithIndexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Encoding.ToIndex());
         }
 
         public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<Int32> items, IndexType encoding = IndexType.UNSIGNED_INT)
         {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+
             var array = new Memory.IntegerArray(buffer.Content, byteOffset, items.Count, encoding);
             Memory.EncodedArrayUtils.FillFrom(array, 0, items);
             return WithIndexData(buffer, byteOffset, items.Count, encoding);
@@ -136,6 +140,8 @@ namespace SharpGLTF.Schema2
 
         public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<UInt32> items, IndexType encoding = IndexType.UNSIGNED_INT)
         {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+
             var array = new Memory.IntegerArray(buffer.Content, byteOffset, items.Count, encoding);
             Memory.EncodedArrayUtils.FillFrom(array, 0, items);
             return WithIndexData(buffer, byteOffset, items.Count, encoding);
@@ -145,22 +151,10 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
 
-            Guard.MustBeGreaterThanOrEqualTo(byteOffset, 0, nameof(byteOffset));
-            Guard.MustBeGreaterThan(itemCount, 0, nameof(itemCount));
-
-            this._bufferView = buffer.LogicalIndex;
-            this._byteOffset = byteOffset;
-            this._count = itemCount;
-
-            this._type = ElementType.SCALAR;
-            this._componentType = encoding.ToComponent();
-            this._normalized = null;
-
-            UpdateBounds();
-
-            return this;
+            return WithData(buffer, byteOffset, itemCount, ElementType.SCALAR, encoding.ToComponent(), false);
         }
 
         public Memory.IntegerArray AsIndicesArray()
@@ -178,38 +172,48 @@ namespace SharpGLTF.Schema2
         public Accessor WithVertexData(Geometry.MemoryAccessor src)
         {
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ARRAY_BUFFER);
-            this.WithVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
+            return this.WithVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
+        }
 
-            return this;
+        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector2> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(ElementType.VEC2.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
+            var array = new Memory.Vector2Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
+            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
+            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC2, encoding, normalized);
         }
 
         public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector3> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(ElementType.VEC3.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
             var array = new Memory.Vector3Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
             Memory.EncodedArrayUtils.FillFrom(array, 0, items);
             return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC3, encoding, normalized);
+        }
+
+        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector4> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
+            var array = new Memory.Vector4Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
+            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
+            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC4, encoding, normalized);
         }
 
         public Accessor WithVertexData(BufferView buffer, int byteOffset, int itemCount, ElementType dimensions = ElementType.VEC3, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(dimensions.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ARRAY_BUFFER, nameof(buffer));
 
-            Guard.MustBeGreaterThanOrEqualTo(byteOffset, 0, nameof(byteOffset));
-            Guard.MustBeGreaterThan(itemCount, 0, nameof(itemCount));
-
-            this._bufferView = buffer.LogicalIndex;
-            this._byteOffset = byteOffset;
-            this._count = itemCount;
-
-            this._type = dimensions;
-            this._componentType = encoding;
-            this._normalized = normalized.AsNullable(false);
-
-            UpdateBounds();
-
-            return this;
+            return WithData(buffer, byteOffset, itemCount, dimensions, encoding, normalized);
         }
 
         public Memory.IEncodedArray<Single> AsScalarArray()
@@ -372,6 +376,12 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a new <see cref="Accessor"/> instance
+        /// and adds it to <see cref="ModelRoot.LogicalAccessors"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Accessor"/> instance.</returns>
         public Accessor CreateAccessor(string name = null)
         {
             var accessor = new Accessor

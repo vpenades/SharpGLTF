@@ -196,7 +196,7 @@ namespace SharpGLTF.Schema2
         #region Write API
 
         // TODO: usually when we save the gltf file, we need to amend/fix several features,
-        // which goes against good practices of not modyfing any file when it is being saved.
+        // which goes against good practices of not modifying any file when it is being saved.
         // a possible solution would be to do a shallow copy of RootObject and update Buffers, BufferViews, etc
         // an issue that complicates things is that it requires to copy the extensions of root, buffers, etc
 
@@ -247,7 +247,7 @@ namespace SharpGLTF.Schema2
                 for (int i = 0; i < this._buffers.Count; ++i)
                 {
                     var buffer = this._buffers[i];
-                    var bname = this._buffers.Count != 1 ? $"{name}.{i}.bin" : $"{name}.bin";
+                    var bname = this._buffers.Count != 1 ? $"{name}_{i}.bin" : $"{name}.bin";
                     buffer._WriteToExternal(bname, settings.FileWriter);
                 }
             }
@@ -255,7 +255,7 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < this._images.Count; ++i)
             {
                 var image = this._images[i];
-                var iname = $"{name}.{i}";
+                var iname = this._buffers.Count != 1 ? $"{name}_{i}" : $"{name}";
                 if (settings.EmbedImages) image._EmbedAssets();
                 else image._WriteExternalAssets(iname, settings.FileWriter);
             }

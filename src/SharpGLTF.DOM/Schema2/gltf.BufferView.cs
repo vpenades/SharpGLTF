@@ -54,6 +54,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="BufferView"/> at <see cref="ModelRoot.LogicalBufferViews"/>
+        /// </summary>
         public int LogicalIndex                 => this.LogicalParent.LogicalBufferViews.IndexOfReference(this);
 
         public BufferMode? DeviceBufferTarget   => this._target;
@@ -130,12 +133,13 @@ namespace SharpGLTF.Schema2
     public partial class ModelRoot
     {
         /// <summary>
-        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// Creates or reuses a <see cref="BufferView"/> instance
+        /// at <see cref="ModelRoot.LogicalBufferViews"/>.
         /// </summary>
         /// <param name="data">The array range to wrap.</param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
-        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="data"/></returns>
+        /// <returns>A <see cref="BufferView"/> instance.</returns>
         public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(data.Array, nameof(data));
@@ -143,14 +147,15 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// Creates or reuses a <see cref="BufferView"/> instance
+        /// at <see cref="ModelRoot.LogicalBufferViews"/>.
         /// </summary>
         /// <param name="buffer">The array to wrap.</param>
         /// <param name="byteOffset">The zero-based index of the first Byte in <paramref name="buffer"/></param>
         /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
-        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="buffer"/></returns>
+        /// <returns>A <see cref="BufferView"/> instance.</returns>
         public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));
@@ -158,14 +163,15 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates or reuses a <see cref="BufferView"/> matching the input parameters.
+        /// Creates or reuses a <see cref="BufferView"/> instance
+        /// at <see cref="ModelRoot.LogicalBufferViews"/>.
         /// </summary>
         /// <param name="buffer">The buffer to wrap.</param>
         /// <param name="byteOffset">The zero-based index of the first Byte in <paramref name="buffer"/></param>
         /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
-        /// <returns>A <see cref="BufferView"/> wrapping <paramref name="buffer"/></returns>
+        /// <returns>A <see cref="BufferView"/> instance.</returns>
         public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));

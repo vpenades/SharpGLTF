@@ -12,9 +12,9 @@ namespace SharpGLTF.Schema2
         #region lifecycle
 
         /// <summary>
-        /// Creates a new, empty model.
+        /// Creates a new <see cref = "ModelRoot" /> instance.
         /// </summary>
-        /// <returns>A new model</returns>
+        /// <returns>A <see cref="ModelRoot"/> instance.</returns>
         public static ModelRoot CreateModel()
         {
             var root = new ModelRoot();

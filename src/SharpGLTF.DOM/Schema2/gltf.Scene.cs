@@ -32,13 +32,12 @@ namespace SharpGLTF.Schema2
 
         #region properties - hierarchy
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Node"/> at <see cref="ModelRoot.LogicalNodes"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
 
         public Node VisualParent => this.LogicalParent._FindVisualParentNode(this);
-
-        public IEnumerable<Node> VisualChildren => GetVisualChildren();
-
-        public Boolean IsSkinJoint => Skin.FindSkinsUsing(this).Any();
 
         public Scene VisualScene
         {
@@ -49,6 +48,10 @@ namespace SharpGLTF.Schema2
                 return LogicalParent.LogicalScenes.FirstOrDefault(item => item._ContainsVisualNode(rootNode, false));
             }
         }
+
+        public IEnumerable<Node> VisualChildren => GetVisualChildren();
+
+        public Boolean IsSkinJoint => Skin.FindSkinsUsing(this).Any();
 
         #endregion
 
@@ -160,6 +163,13 @@ namespace SharpGLTF.Schema2
             return allChildren;
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Node"/> instance,
+        /// adds it to <see cref="ModelRoot.LogicalNodes"/>
+        /// and references it in the current <see cref="Node"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Node"/> instance.</returns>
         public Node CreateNode(string name)
         {
             var node = this.LogicalParent._CreateLogicalNode(this._children);
@@ -260,6 +270,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Scene"/> at <see cref="ModelRoot.LogicalScenes"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalScenes.IndexOfReference(this);
 
         internal IReadOnlyList<int> _VisualChildrenIndices => _nodes;
@@ -284,6 +297,13 @@ namespace SharpGLTF.Schema2
             return VisualChildren.Any(item => item._ContainsVisualNode(node, true));
         }
 
+        /// <summary>
+        /// Creates a new <see cref="Node"/> instance,
+        /// adds it to <see cref="ModelRoot.LogicalNodes"/>
+        /// and references it in the current <see cref="Scene"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Node"/> instance.</returns>
         public Node CreateNode(String name)
         {
             return this.LogicalParent._CreateLogicalNode(this._nodes);
@@ -316,6 +336,12 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates or reuses a <see cref="Scene"/> instance
+        /// at <see cref="ModelRoot.LogicalScenes"/>.
+        /// </summary>
+        /// <param name="index">The zero-based index of the <see cref="Scene"/> in <see cref="ModelRoot.LogicalScenes"/>.</param>
+        /// <returns>A <see cref="Scene"/> instance.</returns>
         public Scene UseScene(int index)
         {
             Guard.MustBeGreaterThanOrEqualTo(index, 0, nameof(index));
@@ -328,6 +354,12 @@ namespace SharpGLTF.Schema2
             return _scenes[index];
         }
 
+        /// <summary>
+        /// Creates or reuses a <see cref="Scene"/> instance
+        /// at <see cref="ModelRoot.LogicalScenes"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Scene"/> instance.</returns>
         public Scene UseScene(string name)
         {
             var scene = _scenes.FirstOrDefault(item => item.Name == name);

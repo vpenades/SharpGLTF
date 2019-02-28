@@ -27,6 +27,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Buffer"/> at <see cref="ModelRoot.LogicalBuffers"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalBuffers.IndexOfReference(this);
 
         public Byte[] Content => _Content;
@@ -82,10 +85,11 @@ namespace SharpGLTF.Schema2
     public partial class ModelRoot
     {
         /// <summary>
-        /// Creates a buffer with <paramref name="byteCount"/> size.
+        /// Creates a new <see cref="Buffer"/> instance
+        /// and adds it to <see cref="ModelRoot.LogicalBuffers"/>.
         /// </summary>
-        /// <param name="byteCount">the size of the buffer</param>
-        /// <returns>the buffer</returns>
+        /// <param name="byteCount">the size of the buffer, in bytes.</param>
+        /// <returns>A <see cref="Buffer"/> instance.</returns>
         public Buffer CreateBuffer(int byteCount)
         {
             var buffer = new Buffer();
@@ -97,10 +101,11 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Finds and existing buffer that is already using <paramref name="content"/> , or creates a new one if none is found.
+        /// Creates or reuses a <see cref="Buffer"/> instance
+        /// at <see cref="ModelRoot.LogicalBuffers"/>.
         /// </summary>
         /// <param name="content">the byte array to be wrapped as a buffer</param>
-        /// <returns>the buffer</returns>
+        /// <returns>A <see cref="Buffer"/> instance.</returns>
         public Buffer UseBuffer(Byte[] content)
         {
             Guard.IsFalse(content == null, nameof(content));
@@ -119,7 +124,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Merges all the Buffer objects into a single, big one.
+        /// Merges all the <see cref="ModelRoot.LogicalBuffers"/> instances into a single, big one.
         /// </summary>
         /// <remarks>
         /// When merging the buffers, it also adjusts the BufferView offsets so the data they point to remains the same.

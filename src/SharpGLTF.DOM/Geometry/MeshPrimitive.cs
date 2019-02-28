@@ -204,7 +204,7 @@ namespace SharpGLTF.Geometry
                 .Select(kvp => new VertexAccessor(kvp.Key, kvp.Value))
                 .ToArray();
 
-            for (int i = 0; i < primitive.MorpthTargetsCount; ++i)
+            for (int i = 0; i < primitive.MorphTargetsCount; ++i)
             {
                 var accessors = primitive.GetMorphTargetAccessors(i)
                     .Select(kvp => new VertexAccessor(kvp.Key, kvp.Value))

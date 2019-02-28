@@ -21,7 +21,7 @@ namespace SharpGLTF.Schema2
         #endregion
 
         [Test]
-        public void LoadSparseModels()
+        public void TestLoadSparseModel()
         {
             var path = TestFiles.GetSampleFilePaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
             

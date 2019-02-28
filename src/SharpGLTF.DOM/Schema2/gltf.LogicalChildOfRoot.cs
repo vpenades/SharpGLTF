@@ -23,6 +23,9 @@ namespace SharpGLTF.Schema2
 
         #region IChildOf<ROOT>
 
+        /// <summary>
+        /// Gets the <see cref="ModelRoot"/> instance that owns this object.
+        /// </summary>
         public ModelRoot LogicalParent { get; private set; }
 
         void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }

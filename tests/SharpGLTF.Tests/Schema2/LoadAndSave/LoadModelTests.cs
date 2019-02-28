@@ -4,7 +4,7 @@ using System.Text;
 
 using NUnit.Framework;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.LoadAndSave
 {
     [TestFixture]
     public class LoadModelTests
@@ -71,6 +71,8 @@ namespace SharpGLTF.Schema2
         [Test]
         public void TestLoadSampleModels()
         {
+            TestContext.CurrentContext.AttachShowDirLink();
+
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
                 var root = GltfUtils.LoadModel(f);
@@ -92,18 +94,24 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region test polly model
+        #region testing polly model
 
         [Test(Description ="Example of traversing the visual tree all the way to individual vertices and indices")]
         public void TestLoadPolly()
         {
-            var path = TestFiles.GetPollyFilePath();
+            TestContext.CurrentContext.AttachShowDirLink();
+            
+            // load Polly model
+            var polly = GltfUtils.LoadModel( TestFiles.GetPollyFilePath() );
 
-            var polly = GltfUtils.LoadModel(path);
+            Assert.NotNull(polly);            
 
-            Assert.NotNull(polly);
+            // Save as GLB, and also evaluate all triangles and save as Wavefront OBJ
+            polly.MergeBuffers();
+            polly.AttachToCurrentTest("polly_out.glb");
+            TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject("polly_out.obj", polly);
 
-            TestContext.CurrentContext.AttachToCurrentTestAsWavefrontObject(System.IO.Path.GetFileName(path), polly);
+            // hierarchically browse some elements of the model:
 
             var scene = polly.DefaultScene;
 

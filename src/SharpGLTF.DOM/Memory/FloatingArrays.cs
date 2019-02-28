@@ -12,17 +12,17 @@ namespace SharpGLTF.Memory
     using ENCODING = Schema2.ComponentType;
 
     /// <summary>
-    /// Wraps a <see cref="ArraySegment{Byte}"/> containing encoded floating point values
+    /// Wraps a <see cref="ArraySegment{Byte}"/> containing encoded <see cref="Single"/> values
     /// </summary>
     struct FloatingAccessor
     {
         #region constructors
 
-        public FloatingAccessor(BYTES data, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
+        public FloatingAccessor(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
         {
             var enclen = encoding.ByteLength();
 
-            this._Data = data.Slice(byteOffset);
+            this._Data = source.Slice(byteOffset);
             this._Getter = null;
             this._Setter = null;
             this._ByteStride = Math.Max(byteStride, enclen * dimensions);
@@ -208,19 +208,41 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Single Scalar values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Single"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Scalar Accessor {Count}")]
     public struct ScalarArray : IEncodedArray<Single>
     {
         #region constructors
 
-        public ScalarArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public ScalarArray(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public ScalarArray(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Single"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public ScalarArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 1, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 1, encoding, normalized);
         }
 
         #endregion
@@ -260,19 +282,19 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Vector2 values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector2"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
     public struct Vector2Array : IEncodedArray<Vector2>
     {
         #region constructors
 
-        public Vector2Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        public Vector2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector2Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
         }
 
         #endregion
@@ -320,19 +342,41 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Vector3 values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector3"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
     public struct Vector3Array : IEncodedArray<Vector3>
     {
         #region constructors
 
-        public Vector3Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector3Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector3Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Vector3"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector3Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 3, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 3, encoding, normalized);
         }
 
         #endregion
@@ -381,19 +425,19 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Vector4 values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
     public struct Vector4Array : IEncodedArray<Vector4>
     {
         #region constructors
 
-        public Vector4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        public Vector4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector4Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -443,19 +487,19 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Quaternion values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Quaternion"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Quaternion Accessor {Count}")]
     public struct QuaternionArray : IEncodedArray<Quaternion>
     {
         #region constructors
 
-        public QuaternionArray(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        public QuaternionArray(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public QuaternionArray(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public QuaternionArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -505,19 +549,19 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of Matrix4x4 values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Matrix4x4"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("MAtrix4x4 Accessor {Count}")]
     public struct Matrix4x4Array : IEncodedArray<Matrix4x4>
     {
         #region constructors
 
-        public Matrix4x4Array(BYTES data, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(data, 0, int.MaxValue, byteStride, encoding, normalized) { }
+        public Matrix4x4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Matrix4x4Array(BYTES data, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Matrix4x4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(data, byteOffset, itemsCount, byteStride, 16, encoding, normalized);
+            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 16, encoding, normalized);
         }
 
         #endregion

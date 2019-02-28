@@ -17,30 +17,45 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Material"/> at <see cref="ModelRoot.LogicalMaterials"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalMaterials.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets or sets the <see cref="AlphaMode"/> of this <see cref="Material"/> instance.
+        /// </summary>
         public AlphaMode Alpha
         {
             get => _alphaMode.AsValue(_alphaModeDefault);
             set => _alphaMode = value.AsNullable(_alphaModeDefault);
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="AlphaCutoff"/> of this <see cref="Material"/> instance.
+        /// </summary>
         public Double AlphaCutoff
         {
             get => _alphaCutoff.AsValue(_alphaCutoffDefault);
             set => _alphaCutoff = value.AsNullable(_alphaCutoffDefault, _alphaCutoffMinimum, double.MaxValue);
         }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether this <see cref="Material"/> will render as Double Sided.
+        /// </summary>
         public Boolean DoubleSided
         {
             get => _doubleSided.AsValue(_doubleSidedDefault);
             set => _doubleSided = value.AsNullable(_doubleSidedDefault);
         }
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Material"/> instance has Unlit extension.
+        /// </summary>
         public Boolean Unlit => this.GetExtension<MaterialUnlit_KHR>() != null;
 
         /// <summary>
-        /// Gets a collection of channel views available for this material.
+        /// Gets a collection of <see cref="MaterialChannelView"/> elements available in this <see cref="Material"/> instance.
         /// </summary>
         public IEnumerable<MaterialChannelView> Channels => _GetChannels();
 
@@ -49,11 +64,11 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Returns an object that allows to read and write information of a given channel of the material.
+        /// Finds an instance of <see cref="MaterialChannelView"/>
         /// </summary>
         /// <param name="key">the channel key</param>
-        /// <returns>the channel view</returns>
-        public MaterialChannelView GetChannel(string key)
+        /// <returns>A <see cref="MaterialChannelView"/> instance, or null if <paramref name="key"/> does not exist.</returns>
+        public MaterialChannelView FindChannel(string key)
         {
             return Channels.FirstOrDefault(item => item.Key == key);
         }

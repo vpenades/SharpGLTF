@@ -11,19 +11,41 @@ namespace SharpGLTF.Memory
     using ENCODING = Schema2.IndexType;
 
     /// <summary>
-    /// Wraps an encoded byte array and exposes it as a collection of UInt32 indices
-    /// </summary
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="UInt32"/> values
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Integer Accessor {Count}")]
     public struct IntegerArray : IEncodedArray<UInt32>
     {
         #region constructors
 
-        public IntegerArray(BYTES data, ENCODING encoding = ENCODING.UNSIGNED_INT)
-            : this(data, 0, int.MaxValue, encoding) { }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="UInt32"/> items in <paramref name="source"/>.</param>
+        /// <param name="encoding">Byte encoding.</param>
+        public IntegerArray(Byte[] source, int byteOffset, int itemsCount, ENCODING encoding)
+            : this(new BYTES(source), byteOffset, itemsCount, encoding) { }
 
-        public IntegerArray(BYTES data, int byteOffset, int itemsCount, ENCODING encoding)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="encoding">Byte encoding.</param>
+        public IntegerArray(BYTES source, ENCODING encoding = ENCODING.UNSIGNED_INT)
+            : this(source, 0, int.MaxValue, encoding) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="UInt32"/> items in <paramref name="source"/>.</param>
+        /// <param name="encoding">Byte encoding.</param>
+        public IntegerArray(BYTES source, int byteOffset, int itemsCount, ENCODING encoding)
         {
-            _Data = data.Slice(byteOffset);
+            _Data = source.Slice(byteOffset);
             _ByteStride = encoding.ByteLength();
             this._Setter = null;
             this._Getter = null;
@@ -79,9 +101,9 @@ namespace SharpGLTF.Memory
 
         #region data
 
-        delegate UInt32 _GetterCallback(int index);
+        private delegate UInt32 _GetterCallback(int index);
 
-        delegate void _SetterCallback(int index, UInt32 value);
+        private delegate void _SetterCallback(int index, UInt32 value);
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly BYTES _Data;
@@ -102,6 +124,9 @@ namespace SharpGLTF.Memory
 
         #region API
 
+        /// <summary>
+        /// Gets the number of elements in the range delimited by the <see cref="IntegerArray"/>
+        /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Data.Count / _ByteStride;
 

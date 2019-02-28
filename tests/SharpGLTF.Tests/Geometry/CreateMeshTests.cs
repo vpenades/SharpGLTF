@@ -61,7 +61,7 @@ namespace SharpGLTF.Geometry
             var node = scene.CreateNode("main scene");
 
             var material = root.CreateMaterial("DefaultMaterial")
-                .InitializeDefault(new Vector4(1, 0, 0, 1));
+                .WithDefault(new Vector4(1, 0, 0, 1));
             material.DoubleSided = true;            
 
             node.Mesh = root.CreateMesh();

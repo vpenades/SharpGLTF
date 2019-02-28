@@ -23,6 +23,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Mesh"/> at <see cref="ModelRoot.LogicalMeshes"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalMeshes.IndexOfReference(this);
 
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingMesh(this);
@@ -37,6 +40,11 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        /// <summary>
+        /// Creates a new <see cref="MeshPrimitive"/> instance
+        /// and adds it to the current <see cref="Mesh"/>.
+        /// </summary>
+        /// <returns>A <see cref="MeshPrimitive"/> instance.</returns>
         public MeshPrimitive CreatePrimitive()
         {
             var mp = new MeshPrimitive();
@@ -63,14 +71,20 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a new <see cref="Mesh"/> instance
+        /// and adds it to <see cref="ModelRoot.LogicalMeshes"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Mesh"/> instance.</returns>
         public Mesh CreateMesh(string name = null)
         {
-            var dstMesh = new Mesh();
-            dstMesh.Name = name;
+            var mesh = new Mesh();
+            mesh.Name = name;
 
-            this._meshes.Add(dstMesh);
+            this._meshes.Add(mesh);
 
-            return dstMesh;
+            return mesh;
         }
     }
 }

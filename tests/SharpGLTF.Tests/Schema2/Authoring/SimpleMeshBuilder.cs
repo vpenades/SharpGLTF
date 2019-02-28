@@ -4,29 +4,35 @@ using System.Numerics;
 using System.Text;
 using System.Linq;
 
-namespace SharpGLTF
+namespace SharpGLTF.Schema2.Authoring
 {
-    using COLOR = Vector4;
-
-    class SimpleSceneBuilder
+    class SimpleSceneBuilder<TMaterial>
     {
         #region data
 
         private readonly VertexColumn<Vector3> _Positions = new VertexColumn<Vector3>();        
-        private readonly Dictionary<COLOR, List<int>> _Indices = new Dictionary<COLOR, List<int>>();        
+        private readonly Dictionary<TMaterial, List<int>> _Indices = new Dictionary<TMaterial, List<int>>();        
 
         #endregion
 
         #region API
 
-        public void AddPolygon(COLOR color, params (float,float,float)[] points)
+        public void AddPolygon(TMaterial material, params (float,float,float)[] points)
         {
             var vertices = points.Select(item => new Vector3(item.Item1, item.Item2, item.Item3)).ToArray();
 
-            AddPolygon(color, vertices);
+            AddPolygon(material, vertices);
         }
 
-        public void AddTriangle(COLOR color, Vector3 a, Vector3 b, Vector3 c)
+        public void AddPolygon(TMaterial material, params Vector3[] points)
+        {
+            for (int i = 2; i < points.Length; ++i)
+            {
+                AddTriangle(material, points[0], points[i - 1], points[i]);
+            }
+        }
+
+        public void AddTriangle(TMaterial material, Vector3 a, Vector3 b, Vector3 c)
         {
             var aa = _Positions.Use(a);
             var bb = _Positions.Use(b);
@@ -37,33 +43,29 @@ namespace SharpGLTF
             if (aa == cc) return;
             if (bb == cc) return;
 
-            if (!_Indices.TryGetValue(color, out List<int> indices))
+            if (!_Indices.TryGetValue(material, out List<int> indices))
             {
                 indices = new List<int>();
-                _Indices[color] = indices;
+                _Indices[material] = indices;
             }
 
             indices.Add(aa);
             indices.Add(bb);
             indices.Add(cc);
+        }             
+
+        public void CopyToNode(Node dstNode, Func<TMaterial, Material> materialEvaluator)
+        {
+            dstNode.Mesh = dstNode.LogicalParent.CreateMesh();
+            CopyToMesh(dstNode.Mesh, materialEvaluator);
         }
 
-        public void AddPolygon(COLOR color, params Vector3[] points)
+        public void CopyToMesh(Mesh dstMesh, Func<TMaterial,Material> materialEvaluator)
         {
-            for(int i=2; i < points.Length; ++i)
-            {
-                AddTriangle(color, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public Schema2.ModelRoot ToModel()
-        {
-            var root = Schema2.ModelRoot.CreateModel();
-
-            var node = root.UseScene(0).CreateNode("Default");            
+            var root = dstMesh.LogicalParent;            
 
             // create vertex buffer
-            const int byteStride = 12 * 2;            
+            const int byteStride = 12 * 2;
 
             var vbuffer = root.UseBufferView(new Byte[byteStride * _Positions.Count], byteStride, Schema2.BufferMode.ARRAY_BUFFER);
 
@@ -77,10 +79,7 @@ namespace SharpGLTF
                 .CreateAccessor("Normals")
                 .WithVertexData(vbuffer, 12, _CalculateNormals());
 
-            var nnn = normals.AsVector3Array();
-
-            // create mesh
-            node.Mesh = root.CreateMesh();
+            var nnn = normals.AsVector3Array();            
 
             foreach (var kvp in _Indices)
             {
@@ -92,18 +91,16 @@ namespace SharpGLTF
                     .WithIndexData(ibuffer, 0, kvp.Value);
 
                 // create mesh primitive
-                var prim = node.Mesh.CreatePrimitive();
+                var prim = dstMesh.CreatePrimitive();
                 prim.SetVertexAccessor("POSITION", positions);
                 prim.SetVertexAccessor("NORMAL", normals);
                 prim.SetIndexAccessor(indices);
-                prim.DrawPrimitiveType = Schema2.PrimitiveType.TRIANGLES;
-                prim.Material = root.CreateMaterial().InitializeDefault(kvp.Key);
-                prim.Material.DoubleSided = true;
+                prim.DrawPrimitiveType = PrimitiveType.TRIANGLES;
+
+                prim.Material = materialEvaluator(kvp.Key);
             }
 
-            root.MergeBuffers();
-
-            return root;
+            root.MergeBuffers();            
         }
 
         private Vector3[] _CalculateNormals()

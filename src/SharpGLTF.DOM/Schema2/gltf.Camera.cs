@@ -15,6 +15,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Camera"/> at <see cref="ModelRoot.LogicalCameras"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalCameras.IndexOfReference(this);
 
         public CameraType Type
@@ -28,6 +31,12 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a new <see cref="Camera"/> instance
+        /// and adds it to <see cref="ModelRoot.LogicalCameras"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Camera"/> instance.</returns>
         public Camera CreateCamera(string name = null)
         {
             var camera = new Camera

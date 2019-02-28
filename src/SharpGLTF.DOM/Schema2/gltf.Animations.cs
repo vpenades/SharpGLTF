@@ -22,6 +22,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Animation"/> at <see cref="ModelRoot.LogicalAnimations"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalAnimations.IndexOfReference(this);
 
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
@@ -194,6 +197,11 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a new <see cref="Animation"/> instance and adds it to <see cref="ModelRoot.LogicalAnimations"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Animation"/> instance.</returns>
         public Animation CreateAnimation(string name = null)
         {
             var anim = new Animation

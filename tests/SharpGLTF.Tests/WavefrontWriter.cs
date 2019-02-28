@@ -12,8 +12,14 @@ namespace SharpGLTF
     class VertexColumn<T> : IReadOnlyList<T>
         where T:IEquatable<T>
     {
+        #region data
+
         private readonly List<T> _Vertices = new List<T>();
         private readonly Dictionary<T, int> _VertexCache = new Dictionary<T, int>();
+
+        #endregion
+
+        #region API
 
         public T this[int index] => _Vertices[index];
 
@@ -34,6 +40,8 @@ namespace SharpGLTF
 
             return index;
         }
+
+        #endregion
     }
 
     /// <summary>

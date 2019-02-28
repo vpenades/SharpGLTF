@@ -10,21 +10,21 @@ namespace SharpGLTF.Schema2
     {
         #region API
 
-        public Material InitializeDefault()
+        public Material WithDefault(Vector4 diffuseColor)
         {
-            return this.InitializePBRMetallicRoughness();
-        }
-
-        public Material InitializeDefault(Vector4 diffuseColor)
-        {
-            this.InitializePBRMetallicRoughness()
-                .GetChannel("BaseColor")
+            this.WithPBRMetallicRoughness()
+                .FindChannel("BaseColor")
                 .SetFactor(diffuseColor);
 
             return this;
         }
 
-        public Material InitializePBRMetallicRoughness()
+        public Material WithDefault()
+        {
+            return this.WithPBRMetallicRoughness();
+        }
+
+        public Material WithPBRMetallicRoughness()
         {
             this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Material InitializePBRSpecularGlossiness()
+        public Material WithPBRSpecularGlossiness()
         {
             this.RemoveExtensions<MaterialUnlit_KHR>();
             this.SetExtension(new MaterialPBRSpecularGlossiness_KHR());
@@ -42,7 +42,7 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Material InitializeUnlit()
+        public Material WithUnlit()
         {
             this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
             this.SetExtension(new MaterialUnlit_KHR());
@@ -98,6 +98,11 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        /// <summary>
+        /// Creates a new <see cref="Material"/> instance and adds it to <see cref="ModelRoot.LogicalMaterials"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Material"/> instance.</returns>
         public Material CreateMaterial(string name = null)
         {
             var mat = new Material();

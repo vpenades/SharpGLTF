@@ -32,6 +32,9 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="Skin"/> at <see cref="ModelRoot.LogicalSkins"/>
+        /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalSkins.IndexOfReference(this);
 
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingSkin(this);
@@ -139,5 +142,24 @@ namespace SharpGLTF.Schema2
         }*/
 
         #endregion
+    }
+
+    public partial class ModelRoot
+    {
+        /// <summary>
+        /// Creates a new <see cref="Skin"/> instance
+        /// and adds it to <see cref="ModelRoot.LogicalSkins"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Skin"/> instance.</returns>
+        public Skin CreateSkin(string name = null)
+        {
+            var skin = new Skin();
+            skin.Name = name;
+
+            this._skins.Add(skin);
+
+            return skin;
+        }
     }
 }
