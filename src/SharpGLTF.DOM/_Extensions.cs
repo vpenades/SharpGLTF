@@ -219,9 +219,9 @@ namespace SharpGLTF
             return string.IsNullOrWhiteSpace(name) ? null : name;
         }
 
-        internal static void AddRange<Tin,Tout>(this IList<Tout> dst, IEnumerable<Tin> src, Func<Tin,Tout> cvt)
+        internal static void AddRange<Tin, Tout>(this IList<Tout> dst, IEnumerable<Tin> src, Func<Tin, Tout> cvt)
         {
-            foreach(var item in src)
+            foreach (var item in src)
             {
                 dst.Add(cvt(item));
             }

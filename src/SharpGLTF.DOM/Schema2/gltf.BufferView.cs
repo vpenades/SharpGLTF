@@ -20,10 +20,10 @@ namespace SharpGLTF.Schema2
         internal BufferView(Buffer buffer, int byteOffset, int? byteLength, int byteStride, BufferMode? target)
         {
             Guard.NotNull(buffer, nameof(buffer));
-            Guard.NotNull(buffer._Content, nameof(buffer));
+            Guard.NotNull(buffer.Content, nameof(buffer));
             Guard.NotNull(buffer.LogicalParent, nameof(buffer));
 
-            byteLength = byteLength.AsValue(buffer._Content.Length - byteOffset);
+            byteLength = byteLength.AsValue(buffer.Content.Length - byteOffset);
 
             Guard.MustBeGreaterThanOrEqualTo(byteLength.AsValue(0), _byteLengthMinimum, nameof(byteLength));
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
@@ -42,7 +42,7 @@ namespace SharpGLTF.Schema2
 
             this._buffer = buffer.LogicalIndex;
 
-            this._byteLength = byteLength.AsValue(buffer._Content.Length);
+            this._byteLength = byteLength.AsValue(buffer.Content.Length);
 
             this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
             this._byteStride = byteStride.AsNullable(0, _byteStrideMinimum, _byteStrideMaximum);
@@ -68,7 +68,7 @@ namespace SharpGLTF.Schema2
             get
             {
                 var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
-                return new BYTES(buffer._Content, this._byteOffset.AsValue(0), this._byteLength);
+                return new BYTES(buffer.Content, this._byteOffset.AsValue(0), this._byteLength);
             }
         }
 
@@ -92,7 +92,7 @@ namespace SharpGLTF.Schema2
         internal void _ConvertToStaticBuffer(_StaticBufferBuilder targetBuffer)
         {
             // retrieve old buffer
-            var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer]._Content;
+            var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer].Content;
             var data = new Byte[this._byteLength];
             Array.Copy(srcBuf, this._byteOffset ?? 0, data, 0, this._byteLength);
 

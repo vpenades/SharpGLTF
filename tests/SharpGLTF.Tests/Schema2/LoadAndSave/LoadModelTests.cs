@@ -22,13 +22,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
         #region testing models of https://github.com/bghgary/glTF-Asset-Generator.git
 
         [Test]
-        public void TestLoadGeneratedModels()
+        public void TestLoadReferenceModels()
         {
+            TestContext.CurrentContext.AttachShowDirLink();
+
             foreach (var f in TestFiles.GetGeneratedFilePaths())
             {
                 var model = GltfUtils.LoadModel(f);
 
                 Assert.NotNull(model);
+
+                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
             }
         }
         
@@ -68,13 +72,19 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         #region testing models of https://github.com/KhronosGroup/glTF-Sample-Models.git
 
-        [Test]
-        public void TestLoadSampleModels()
+        [TestCase("\\glTF\\")]
+        // [TestCase("\\glTF-Draco\\")] // Not supported
+        [TestCase("\\glTF-Binary\\")]
+        [TestCase("\\glTF-Embedded\\")]
+        [TestCase("\\glTF-pbrSpecularGlossiness\\")]
+        public void TestLoadSampleModels(string section)
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
+                if (!f.Contains(section)) continue;
+
                 var model = GltfUtils.LoadModel(f);
                 Assert.NotNull(model);
 

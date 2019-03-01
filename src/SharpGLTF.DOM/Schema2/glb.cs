@@ -124,11 +124,10 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Writes a <code>Schema.Gltf</code> model to a writable binary writer
+        /// Writes a <see cref="ROOT"/> instance into a <see cref="BinaryWriter"/>.
         /// </summary>
-        /// <param name="model"><code>Schema.Gltf</code> model</param>
-        /// <param name="buffer">Binary buffer to embed in the file, or null</param>
-        /// <param name="binaryWriter">Binary Writer</param>
+        /// <param name="binaryWriter">The destination <see cref="BinaryWriter"/> stream.</param>
+        /// <param name="model">The source <see cref="ROOT"/> instance.</param>
         public static void WriteBinaryModel(this BinaryWriter binaryWriter, ROOT model)
         {
             var ex = IsBinaryCompatible(model); if (ex != null) throw ex;
@@ -137,7 +136,7 @@ namespace SharpGLTF.Schema2
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 
-            var buffer = model.LogicalBuffers.Count > 0 ? model.LogicalBuffers[0]._Content : null;
+            var buffer = model.LogicalBuffers.Count > 0 ? model.LogicalBuffers[0].Content : null;
             if (buffer != null && buffer.Length == 0) buffer = null;
 
             var binPadding = buffer == null ? 0 : buffer.Length & 3; if (binPadding != 0) binPadding = 4 - binPadding;

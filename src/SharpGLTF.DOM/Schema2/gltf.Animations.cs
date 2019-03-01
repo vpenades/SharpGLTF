@@ -180,13 +180,23 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the <see cref="Animation"/> instance that owns this <see cref="AnimationSampler"/> instance.
+        /// </summary>
         public Animation LogicalParent { get; private set; }
 
+        /// <summary>
+        /// Gets the zero-based index of this <see cref="AnimationSampler"/> at <see cref="Animation._samplers"/>.
+        /// </summary>
         public int LogicalIndex => LogicalParent._Samplers.IndexOfReference(this);
 
         void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }
 
-        public AnimationInterpolationMode Mode => _interpolation ?? _interpolationDefault;
+        public AnimationInterpolationMode Mode
+        {
+            get => _interpolation.AsValue(_interpolationDefault);
+            set => _interpolation = value.AsNullable(_interpolationDefault);
+        }
 
         public Accessor Input => this.LogicalParent.LogicalParent.LogicalAccessors[this._input];
 

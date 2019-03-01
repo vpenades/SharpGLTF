@@ -65,7 +65,9 @@ namespace SharpGLTF.Schema2.Authoring
             primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;
             primitive.SetVertexAccessor("POSITION", positionsAccessor);
             primitive.IndexAccessor = indicesAccessor;
-            
+            primitive.Material = model.CreateMaterial("Default").WithDefault(new Vector4(0, 1, 0, 1));
+            primitive.Material.DoubleSided = true;
+
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }

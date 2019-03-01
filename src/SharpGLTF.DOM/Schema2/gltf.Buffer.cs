@@ -14,6 +14,11 @@ namespace SharpGLTF.Schema2
 
         internal Buffer() { }
 
+        internal Buffer(Byte[] content)
+        {
+            _Content = content;
+        }
+
         #endregion
 
         #region non serializable data
@@ -21,7 +26,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Immediately after deserialization, binary buffer is loaded/parsed and stored here
         /// </summary>
-        internal Byte[] _Content;
+        private Byte[] _Content;
 
         #endregion
 
@@ -92,8 +97,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Buffer"/> instance.</returns>
         public Buffer CreateBuffer(int byteCount)
         {
-            var buffer = new Buffer();
-            buffer._Content = new byte[byteCount];
+            var buffer = new Buffer(new byte[byteCount]);
 
             _buffers.Add(buffer);
 
@@ -112,11 +116,10 @@ namespace SharpGLTF.Schema2
 
             foreach (var b in this.LogicalBuffers)
             {
-                if (b._Content == content) return b;
+                if (b.Content == content) return b;
             }
 
-            var buffer = new Buffer();
-            buffer._Content = content;
+            var buffer = new Buffer(content);
 
             _buffers.Add(buffer);
 
@@ -145,10 +148,7 @@ namespace SharpGLTF.Schema2
 
             this._buffers.Clear();
 
-            var b = new Buffer
-            {
-                _Content = sbbuilder.ToArray()
-            };
+            var b = new Buffer(sbbuilder.ToArray());
 
             this._buffers.Add(b);
         }

@@ -27,7 +27,16 @@ namespace SharpGLTF.Schema2
 
         #region data
 
-        // this is the actual compressed image in PNG or JPEG, -NOT- the pixels data.
+        /// <summary>
+        /// this is the not a raw bitmap, but tha actual compressed image in PNG or JPEG.
+        /// </summary>
+        /// <remarks>
+        /// When a model is loaded, the image file is loaded into memory and assigned to this
+        /// field, and the <see cref="Image._uri"/> is nullified.
+        /// When writing a gltf file with external images, the <see cref="Image._uri"/> is
+        /// briefly reassigned so the JSON can be serialized correctly.
+        /// After serialization <see cref="Image._uri"/> is set back to null.
+        /// </remarks>
         private Byte[] _ExternalImageContent;
 
         #endregion
@@ -100,13 +109,12 @@ namespace SharpGLTF.Schema2
         {
             if (this._ExternalImageContent == null) return;
 
-            var data = new ArraySegment<Byte>(this._ExternalImageContent);
-
-            var bv = this.LogicalParent.UseBufferView(data);
+            // transfer the external image content to a buffer.
+            this._bufferView = this.LogicalParent
+                .UseBufferView(this._ExternalImageContent)
+                .LogicalIndex;
 
             this._uri = null;
-            this._bufferView = bv.LogicalIndex;
-
             this._ExternalImageContent = null;
         }
 

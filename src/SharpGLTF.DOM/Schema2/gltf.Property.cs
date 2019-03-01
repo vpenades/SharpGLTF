@@ -60,6 +60,10 @@ namespace SharpGLTF.Schema2
 
         #region serialization API
 
+        /// <summary>
+        /// Writes the properties of the current instance to a <see cref="JsonWriter"/>.
+        /// </summary>
+        /// <param name="writer">The target writer.</param>
         protected override void SerializeProperties(JsonWriter writer)
         {
             SerializeProperty(writer, "extensions", _extensions);
@@ -67,6 +71,11 @@ namespace SharpGLTF.Schema2
             // SerializeProperty(writer, "extras", _extras);
         }
 
+        /// <summary>
+        /// Reads the properties of the current instance from a <see cref="JsonReader"/>.
+        /// </summary>
+        /// <param name="reader">The source reader.</param>
+        /// <param name="property">The name of the property.</param>
         protected override void DeserializeProperty(JsonReader reader, string property)
         {
             switch (property)

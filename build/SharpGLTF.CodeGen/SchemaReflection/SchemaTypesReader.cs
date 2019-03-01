@@ -38,9 +38,7 @@ namespace SharpGLTF.SchemaReflection
         private static SchemaType _UseType(this SchemaType.Context ctx, NJsonSchema.JsonSchema4 schema, bool isRequired = true)
         {
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
-            if (schema == null) throw new ArgumentNullException(nameof(schema));
-
-            
+            if (schema == null) throw new ArgumentNullException(nameof(schema));            
 
             if (schema is NJsonSchema.JsonProperty prop)
             {
@@ -48,7 +46,6 @@ namespace SharpGLTF.SchemaReflection
 
                 isRequired &= prop.IsRequired;                
             }
-
 
             if (_IsStringType(schema))
             {
@@ -74,8 +71,6 @@ namespace SharpGLTF.SchemaReflection
 
             if (_IsEnumeration(schema))
             {
-                
-
                 if (schema is NJsonSchema.JsonProperty property)
                 {
                     bool isNullable = !isRequired;
@@ -100,6 +95,8 @@ namespace SharpGLTF.SchemaReflection
                     var name = string.Join("-", dict.Keys.OrderBy(item => item));                    
 
                     var etype = ctx.UseEnum(name, isNullable);
+
+                    etype.Description = schema.Description;
 
                     foreach (var kvp in dict) etype.SetValue(kvp.Key, (int)kvp.Value);
 

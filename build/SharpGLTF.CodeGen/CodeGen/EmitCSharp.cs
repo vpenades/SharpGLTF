@@ -365,6 +365,8 @@ namespace SharpGLTF.CodeGen
         {
             var sb = new StringBuilder();
 
+            foreach (var l in type.Description.EmitSummary(0)) sb.EmitLine(1, l);
+
             sb.EmitLine(1, $"public enum {_GetRuntimeName(type)}");
             sb.EmitLine(1, "{");
 
@@ -592,6 +594,7 @@ namespace SharpGLTF.CodeGen
 
             yield return string.Empty;
 
+            yield return "/// <inheritdoc />".Indent(1);
             yield return "protected override void SerializeProperties(JsonWriter writer)".Indent(1);
             yield return "{".Indent(1);
             if (HasBaseClass) yield return "base.SerializeProperties(writer);".Indent(2);
@@ -600,6 +603,7 @@ namespace SharpGLTF.CodeGen
 
             yield return string.Empty;
 
+            yield return "/// <inheritdoc />".Indent(1);
             yield return "protected override void DeserializeProperty(JsonReader reader, string property)".Indent(1);
             yield return "{".Indent(1);
             yield return "switch (property)".Indent(2);
