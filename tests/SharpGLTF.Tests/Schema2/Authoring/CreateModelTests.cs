@@ -140,7 +140,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a simple scene using a mesh builder helper class")]
-        public void CreateMeshBuilderScene()
+        public void CreateSimpleMeshBuilderScene()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -165,6 +165,52 @@ namespace SharpGLTF.Schema2.Authoring
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
             
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
+
+
+        struct myVertex
+        {
+            public myVertex(float px, float py, float pz, float nx, float ny, float nz)
+            {
+                Position = new Vector3(px, py, pz);
+                Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
+            }
+
+            public Vector3 Position;
+            public Vector3 Normal;
+        }
+
+        [Test(Description = "Creates an interleaved scene using a mesh builder helper class")]
+        public void CreateInterleavedMeshBuilderScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var meshBuilder = new InterleavedMeshBuilder<myVertex, Vector4>();
+
+            var v1 = new myVertex(-10, 10, 0, -10, 10, 15);
+            var v2 = new myVertex( 10, 10, 0, 10, 10, 15);
+            var v3 = new myVertex( 10,-10, 0, 10, -10, 15);
+            var v4 = new myVertex(-10,-10, 0, -10, -10, 15);            
+            meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
+
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");
+            var rnode = scene.CreateNode("RootNode");
+
+            // setup a lambda function that creates a material for a given color
+            Material createMaterialForColor(Vector4 color)
+            {
+                var material = model.CreateMaterial().WithDefault(color);
+                material.DoubleSided = true;
+                return material;
+            };
+
+            // fill our node with the mesh
+            meshBuilder.CopyToNode(rnode, createMaterialForColor);
+
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }

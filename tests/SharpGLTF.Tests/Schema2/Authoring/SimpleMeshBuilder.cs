@@ -58,7 +58,7 @@ namespace SharpGLTF.Schema2.Authoring
         {
             dstNode.Mesh = dstNode.LogicalParent.CreateMesh();
             CopyToMesh(dstNode.Mesh, materialEvaluator);
-        }
+        }        
 
         public void CopyToMesh(Mesh dstMesh, Func<TMaterial,Material> materialEvaluator)
         {
@@ -67,24 +67,20 @@ namespace SharpGLTF.Schema2.Authoring
             // create vertex buffer
             const int byteStride = 12 * 2;
 
-            var vbuffer = root.UseBufferView(new Byte[byteStride * _Positions.Count], byteStride, Schema2.BufferMode.ARRAY_BUFFER);
+            var vbuffer = root.UseBufferView(new Byte[byteStride * _Positions.Count], byteStride, BufferMode.ARRAY_BUFFER);
 
             var positions = root
                 .CreateAccessor("Positions")
                 .WithVertexData(vbuffer, 0, _Positions);
 
-            var ppp = positions.AsVector3Array();
-
             var normals = root
                 .CreateAccessor("Normals")
-                .WithVertexData(vbuffer, 12, _CalculateNormals());
-
-            var nnn = normals.AsVector3Array();            
+                .WithVertexData(vbuffer, 12, _CalculateNormals());            
 
             foreach (var kvp in _Indices)
             {
                 // create index buffer
-                var ibuffer = root.UseBufferView(new Byte[4 * kvp.Value.Count], 0, Schema2.BufferMode.ELEMENT_ARRAY_BUFFER);
+                var ibuffer = root.UseBufferView(new Byte[4 * kvp.Value.Count], 0, BufferMode.ELEMENT_ARRAY_BUFFER);
 
                 var indices = root
                     .CreateAccessor("Indices")

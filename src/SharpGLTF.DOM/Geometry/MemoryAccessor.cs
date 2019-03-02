@@ -110,6 +110,35 @@ namespace SharpGLTF.Geometry
             }
         }
 
+        public static int SetInterleavedInfo(MemoryAccessInfo[] attributes, int byteOffset, int itemsCount)
+        {
+            var byteStride = 0;
+
+            for (int i = 0; i < attributes.Length; ++i)
+            {
+                var a = attributes[i];
+
+                a.ByteOffset = byteOffset;
+                a.ItemsCount = itemsCount;
+
+                var attributeStride = a.ByteLength;
+
+                byteStride += attributeStride;
+                byteOffset += attributeStride;
+
+                attributes[i] = a;
+            }
+
+            for (int i = 0; i < attributes.Length; ++i)
+            {
+                var a = attributes[i];
+                a.ByteStride = byteStride;
+                attributes[i] = a;
+            }
+
+            return byteStride;
+        }
+
         #endregion
     }
 

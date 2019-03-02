@@ -10,7 +10,7 @@ namespace SharpGLTF
 {
 
     class VertexColumn<T> : IReadOnlyList<T>
-        where T:IEquatable<T>
+        where T:struct
     {
         #region data
 
