@@ -6,13 +6,14 @@ using System.Linq;
 namespace SharpGLTF.Schema2
 {
     using Collections;
+    using System.Numerics;
 
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public sealed partial class Animation
     {
         #region lifecycle
 
-        public Animation()
+        internal Animation()
         {
             _channels = new ChildrenCollection<AnimationChannel, Animation>(this);
             _samplers = new ChildrenCollection<AnimationSampler, Animation>(this);
@@ -29,14 +30,53 @@ namespace SharpGLTF.Schema2
 
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
 
+        /// <summary>
+        /// Gets the list of <see cref="AnimationChannel"/> instances.
+        /// </summary>
         public IReadOnlyList<AnimationChannel> Channels => _channels;
 
         #endregion
 
         #region API
 
+        public Accessor CreateInputAccessor(IReadOnlyList<Single> input)
+        {
+            var buffer = LogicalParent.UseBufferView(new Byte[input.Count * 4]);
+            var accessor = LogicalParent.CreateAccessor("Animation.Input")
+                .WithData(buffer, 0, input.Count, ElementType.SCALAR, ComponentType.FLOAT, false);
+
+            Memory.EncodedArrayUtils.FillFrom(accessor.AsScalarArray(), 0, input);
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        public Accessor CreateOutputAccessor(IReadOnlyList<Vector3> output)
+        {
+            var buffer = LogicalParent.UseBufferView(new Byte[output.Count * 4 * 3]);
+            var accessor = LogicalParent.CreateAccessor("Animation.Output")
+                .WithData(buffer, 0, output.Count, ElementType.VEC3, ComponentType.FLOAT, false);
+
+            Memory.EncodedArrayUtils.FillFrom(accessor.AsVector3Array(), 0, output);
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="AnimationSampler"/> instance and adds it to this <see cref="Animation"/>.
+        /// </summary>
+        /// <param name="input">An <see cref="Accessor"/> containing input (TIME) values.</param>
+        /// <param name="output">An <see cref="Accessor"/> containing output (TRS) values.</param>
+        /// <param name="interpolation">how the output values are interpolated.</param>
+        /// <returns>An <see cref="AnimationSampler"/> instance.</returns>
         public AnimationSampler CreateSampler(Accessor input, Accessor output, AnimationInterpolationMode interpolation)
         {
+            Guard.MustShareLogicalParent(this, input, nameof(input));
+            Guard.MustShareLogicalParent(this, output, nameof(output));
+
             var sampler = new AnimationSampler(input, output, interpolation);
 
             _samplers.Add(sampler);
@@ -44,57 +84,29 @@ namespace SharpGLTF.Schema2
             return sampler;
         }
 
-        /*
-        public AnimationSampler CreateSampler(IReadOnlyList<Single> input, IReadOnlyList<Single> output, AnimationInterpolationMode interpolation)
+        public AnimationChannel CreateChannel(Node node, PathType path, AnimationSampler sampler)
         {
-            var inputData = input.ToArray().ToByteArray();
-            var outputData = output.ToArray().ToByteArray();
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+            Guard.NotNull(sampler, nameof(sampler));
+            Guard.IsTrue(Object.ReferenceEquals(this, sampler.LogicalParent), nameof(sampler));
 
-            var inputAccessor = LogicalParent._CreateDataAccessor(inputData, Runtime.Encoding.DimensionType.Scalar, input.Count);
-            var outputAccesor = LogicalParent._CreateDataAccessor(outputData, Runtime.Encoding.DimensionType.Scalar, output.Count);
-
-            return CreateSampler(inputAccessor, outputAccesor, interpolation);
-        }
-
-        public AnimationSampler CreateSampler(IReadOnlyList<Single> input, IReadOnlyList<System.Numerics.Vector3> output, AnimationInterpolationMode interpolation)
-        {
-            var inputData = input.ToArray().ToByteArray();
-            var outputData = output.ToArray().ToByteArray();
-
-            var inputAccessor = LogicalParent._CreateDataAccessor(inputData, Runtime.Encoding.DimensionType.Scalar, input.Count);
-            var outputAccesor = LogicalParent._CreateDataAccessor(outputData, Runtime.Encoding.DimensionType.Vector3, output.Count);
-
-            return CreateSampler(inputAccessor, outputAccesor, interpolation);
-        }
-
-        public AnimationSampler CreateSampler(IReadOnlyList<Single> input, IReadOnlyList<System.Numerics.Quaternion> output, AnimationInterpolationMode interpolation)
-        {
-            var inputData = input.ToArray().ToByteArray();
-            var outputData = output.ToArray().ToByteArray();
-
-            var inputAccessor = LogicalParent._CreateDataAccessor(inputData, Runtime.Encoding.DimensionType.Scalar, input.Count);
-            var outputAccesor = LogicalParent._CreateDataAccessor(outputData, Runtime.Encoding.DimensionType.Vector4, output.Count);
-
-            return CreateSampler(inputAccessor, outputAccesor, interpolation);
-        }*/
-
-        public void AddChannel(Node node, PathType path, AnimationSampler sampler)
-        {
             var channel = new AnimationChannel(node, path, sampler);
 
             _channels.Add(channel);
+
+            return channel;
         }
 
         #endregion
     }
 
-    public sealed partial class AnimationChannelTarget
+    sealed partial class AnimationChannelTarget
     {
         #region lifecycle
 
-        public AnimationChannelTarget() { }
+        internal AnimationChannelTarget() { }
 
-        public AnimationChannelTarget(Node targetNode, PathType targetPath)
+        internal AnimationChannelTarget(Node targetNode, PathType targetPath)
         {
             _node = targetNode.LogicalIndex;
             _path = targetPath;
@@ -115,9 +127,9 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public AnimationChannel() { }
+        internal AnimationChannel() { }
 
-        public AnimationChannel(Node targetNode, PathType targetPath, AnimationSampler sampler)
+        internal AnimationChannel(Node targetNode, PathType targetPath, AnimationSampler sampler)
         {
             _target = new AnimationChannelTarget(targetNode, targetPath);
             _sampler = sampler.LogicalIndex;
@@ -127,10 +139,16 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Gets the <see cref="Animation"/> instance that owns this object.
+        /// </summary>
         public Animation LogicalParent { get; private set; }
 
         void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }
 
+        /// <summary>
+        /// Gets the <see cref="AnimationSampler"/> instance used by this <see cref="AnimationChannel"/>.
+        /// </summary>
         public AnimationSampler Sampler => this.LogicalParent._Samplers[this._sampler];
 
         public Node TargetNode
@@ -145,7 +163,7 @@ namespace SharpGLTF.Schema2
 
         public PathType TargetNodePath => this._target?._NodePath ?? PathType.translation;
 
-        public int OutputStride
+        public int OutputByteStride
         {
             get
             {
@@ -167,11 +185,11 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public AnimationSampler() { }
+        internal AnimationSampler() { }
 
-        public AnimationSampler(Accessor input, Accessor output, AnimationInterpolationMode interpolation)
+        internal AnimationSampler(Accessor input, Accessor output, AnimationInterpolationMode interpolation)
         {
-            _interpolation = interpolation;
+            _interpolation = interpolation.AsNullable(_interpolationDefault);
             _input = input.LogicalIndex;
             _output = output.LogicalIndex;
         }

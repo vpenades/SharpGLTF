@@ -214,5 +214,50 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }
+
+        [Test(Description = "Creates an animated scene using a mesh builder helper class")]
+        public void CreateAnimatedMeshBuilderScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var meshBuilder = new InterleavedMeshBuilder<myVertex, Vector4>();
+
+            var v1 = new myVertex(-10, 10, 0, -10, 10, 15);
+            var v2 = new myVertex(10, 10, 0, 10, 10, 15);
+            var v3 = new myVertex(10, -10, 0, 10, -10, 15);
+            var v4 = new myVertex(-10, -10, 0, -10, -10, 15);
+            meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
+
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");
+            var rnode = scene.CreateNode("RootNode");
+            rnode.LocalTransform = new Transforms.AffineTransform(null, null, null, Vector3.Zero);
+
+            // setup a lambda function that creates a material for a given color
+            Material createMaterialForColor(Vector4 color)
+            {
+                var material = model.CreateMaterial().WithDefault(color);
+                material.DoubleSided = true;
+                return material;
+            };
+
+            // fill our node with the mesh
+            meshBuilder.CopyToNode(rnode, createMaterialForColor);
+
+            var animation = model.CreateAnimation("Animation");
+            var asampler = animation.CreateSampler
+                (
+                animation.CreateInputAccessor( new float[] { 1, 2, 3, 4 } ),
+                animation.CreateOutputAccessor( new[] { new Vector3(0, 0, 0), new Vector3(50, 0, 0), new Vector3(0, 50, 0), new Vector3(0, 0, 0) } ),
+                AnimationInterpolationMode.LINEAR
+                );
+
+            animation.CreateChannel(rnode, PathType.translation, asampler);
+            
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
     }
 }

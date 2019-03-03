@@ -175,6 +175,16 @@ namespace SharpGLTF.Schema2
             return this.WithVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
         }
 
+        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Single> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(ElementType.SCALAR.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
+            var array = new Memory.ScalarArray(buffer.Content.Slice(byteOffset), buffer.ByteStride);
+            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
+            return WithVertexData(buffer, byteOffset, items.Count, ElementType.SCALAR, encoding, normalized);
+        }
+
         public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector2> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -201,6 +211,16 @@ namespace SharpGLTF.Schema2
             Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
             var array = new Memory.Vector4Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
+            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
+            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC4, encoding, normalized);
+        }
+
+        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Quaternion> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        {
+            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+
+            var array = new Memory.QuaternionArray(buffer.Content.Slice(byteOffset), buffer.ByteStride);
             Memory.EncodedArrayUtils.FillFrom(array, 0, items);
             return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC4, encoding, normalized);
         }
