@@ -332,7 +332,7 @@ namespace SharpGLTF.Schema2
             var keys = new Single[sorted.Count];
             var vals = new TValue[sorted.Count];
 
-            for (int i=0; i < keys.Length; ++i)
+            for (int i = 0; i < keys.Length; ++i)
             {
                 keys[i] = sorted[i].Key;
                 vals[i] = sorted[i].Value;

@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
         public Node WithLocalRotation(Quaternion rotation)
         {
             var xform = this.LocalTransform;
-            xform.Rotation = rotation;
+            xform.Rotation = rotation.Sanitized();
             this.LocalTransform = xform;
 
             return this;
@@ -111,7 +111,7 @@ namespace SharpGLTF.Schema2
             {
                 _matrix = null;
                 _scale = value.Scale;
-                _rotation = value.Rotation;
+                _rotation = value.Rotation.Sanitized();
                 _translation = value.Translation;
             }
         }

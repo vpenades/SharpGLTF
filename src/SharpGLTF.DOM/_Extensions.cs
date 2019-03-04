@@ -49,6 +49,18 @@ namespace SharpGLTF
             return new Quaternion(v.X, v.Y, v.Z, v.W);
         }
 
+        internal static Boolean IsNormalized(this Quaternion q)
+        {
+            // As per: https://github.com/KhronosGroup/glTF-Validator/issues/33 , quaternions need to be normalized.
+
+            return Math.Abs(1.0 - q.Length()) > 0.000005;
+        }
+
+        internal static Quaternion Sanitized(this Quaternion q)
+        {
+            return q.IsNormalized() ? q : Quaternion.Normalize(q);
+        }
+
         #endregion
 
         #region base64
