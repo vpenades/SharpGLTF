@@ -57,13 +57,32 @@ namespace SharpGLTF.Schema2
 
         #region properties - transform
 
-        internal Matrix4x4? RawMatrix { get => _matrix; set => _matrix = value; }
+        public Node WithLocalTranslation(Vector3 translation)
+        {
+            var xform = this.LocalTransform;
+            xform.Translation = translation;
+            this.LocalTransform = xform;
 
-        internal Quaternion? RawRotation { get => _rotation; set => _rotation = value; }
+            return this;
+        }
 
-        internal Vector3? RawTranslation { get => _translation; set => _translation = value; }
+        public Node WithLocalRotation(Quaternion rotation)
+        {
+            var xform = this.LocalTransform;
+            xform.Rotation = rotation;
+            this.LocalTransform = xform;
 
-        internal Vector3? RawScale  { get => _scale; set => _scale = value; }
+            return this;
+        }
+
+        public Node WithLocalScale(Vector3 scale)
+        {
+            var xform = this.LocalTransform;
+            xform.Scale = scale;
+            this.LocalTransform = xform;
+
+            return this;
+        }
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.

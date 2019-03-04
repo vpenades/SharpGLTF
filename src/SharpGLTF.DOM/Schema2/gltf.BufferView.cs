@@ -10,7 +10,7 @@ namespace SharpGLTF.Schema2
 
     using ENCODING = ComponentType;
 
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugView))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugProxy))]
     public sealed partial class BufferView
     {
         #region lifecycle

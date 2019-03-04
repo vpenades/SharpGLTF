@@ -225,6 +225,13 @@ namespace SharpGLTF.Geometry
             return new Vector4Array(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
         }
 
+        public QuaternionArray AsQuaternionArray()
+        {
+            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
+            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.VEC4, nameof(Attribute));
+            return new QuaternionArray(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+        }
+
         public Matrix4x4Array AsMatrix4x4Array()
         {
             Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));

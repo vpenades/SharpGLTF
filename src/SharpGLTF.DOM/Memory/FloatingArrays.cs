@@ -240,9 +240,9 @@ namespace SharpGLTF.Memory
         /// </param>
         /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
         /// <param name="normalized">True if values are normalized.</param>
-        public ScalarArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public ScalarArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 1, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 1, encoding, normalized);
         }
 
         #endregion
@@ -250,7 +250,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Single[] _DebugItems => this.ToArray();
@@ -260,12 +260,12 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Single this[int index]
         {
-            get => _Accesor[index, 0];
-            set => _Accesor[index, 0] = value;
+            get => _Accessor[index, 0];
+            set => _Accessor[index, 0] = value;
         }
 
         public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }
@@ -292,9 +292,9 @@ namespace SharpGLTF.Memory
         public Vector2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
         }
 
         #endregion
@@ -302,7 +302,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector2[] _DebugItems => this.ToArray();
@@ -312,19 +312,19 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Vector2 this[int index]
         {
             get
             {
-                return new Vector2(_Accesor[index, 0], _Accesor[index, 1]);
+                return new Vector2(_Accessor[index, 0], _Accessor[index, 1]);
             }
 
             set
             {
-                _Accesor[index, 0] = value.X;
-                _Accesor[index, 1] = value.Y;
+                _Accessor[index, 0] = value.X;
+                _Accessor[index, 1] = value.Y;
             }
         }
 
@@ -374,9 +374,9 @@ namespace SharpGLTF.Memory
         /// </param>
         /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
         /// <param name="normalized">True if values are normalized.</param>
-        public Vector3Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector3Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 3, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 3, encoding, normalized);
         }
 
         #endregion
@@ -384,7 +384,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector3[] _DebugItems => this.ToArray();
@@ -394,20 +394,20 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Vector3 this[int index]
         {
             get
             {
-                return new Vector3(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2]);
+                return new Vector3(_Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2]);
             }
 
             set
             {
-                _Accesor[index, 0] = value.X;
-                _Accesor[index, 1] = value.Y;
-                _Accesor[index, 2] = value.Z;
+                _Accessor[index, 0] = value.X;
+                _Accessor[index, 1] = value.Y;
+                _Accessor[index, 2] = value.Z;
             }
         }
 
@@ -435,9 +435,9 @@ namespace SharpGLTF.Memory
         public Vector4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
-        public Vector4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        public Vector4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -445,7 +445,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector4[] _DebugItems => this.ToArray();
@@ -455,21 +455,21 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Vector4 this[int index]
         {
             get
             {
-                return new Vector4(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
+                return new Vector4(_Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], _Accessor[index, 3]);
             }
 
             set
             {
-                _Accesor[index, 0] = value.X;
-                _Accesor[index, 1] = value.Y;
-                _Accesor[index, 2] = value.Z;
-                _Accesor[index, 3] = value.W;
+                _Accessor[index, 0] = value.X;
+                _Accessor[index, 1] = value.Y;
+                _Accessor[index, 2] = value.Z;
+                _Accessor[index, 3] = value.W;
             }
         }
 
@@ -499,7 +499,7 @@ namespace SharpGLTF.Memory
 
         public QuaternionArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
         }
 
         #endregion
@@ -507,7 +507,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Quaternion[] _DebugItems => this.ToArray();
@@ -517,21 +517,21 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Quaternion this[int index]
         {
             get
             {
-                return new Quaternion(_Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3]);
+                return new Quaternion(_Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], _Accessor[index, 3]);
             }
 
             set
             {
-                _Accesor[index, 0] = value.X;
-                _Accesor[index, 1] = value.Y;
-                _Accesor[index, 2] = value.Z;
-                _Accesor[index, 3] = value.W;
+                _Accessor[index, 0] = value.X;
+                _Accessor[index, 1] = value.Y;
+                _Accessor[index, 2] = value.Z;
+                _Accessor[index, 3] = value.W;
             }
         }
 
@@ -561,7 +561,7 @@ namespace SharpGLTF.Memory
 
         public Matrix4x4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
-            _Accesor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 16, encoding, normalized);
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 16, encoding, normalized);
         }
 
         #endregion
@@ -569,7 +569,7 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accesor;
+        private FloatingAccessor _Accessor;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Matrix4x4[] _DebugItems => this.ToArray();
@@ -579,7 +579,7 @@ namespace SharpGLTF.Memory
         #region API
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Accesor.Count;
+        public int Count => _Accessor.Count;
 
         public Matrix4x4 this[int index]
         {
@@ -587,31 +587,31 @@ namespace SharpGLTF.Memory
             {
                 return new Matrix4x4
                     (
-                    _Accesor[index, 0], _Accesor[index, 1], _Accesor[index, 2], _Accesor[index, 3],
-                    _Accesor[index, 4], _Accesor[index, 5], _Accesor[index, 6], _Accesor[index, 7],
-                    _Accesor[index, 8], _Accesor[index, 9], _Accesor[index, 10], _Accesor[index, 11],
-                    _Accesor[index, 12], _Accesor[index, 13], _Accesor[index, 14], _Accesor[index, 15]
+                    _Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], _Accessor[index, 3],
+                    _Accessor[index, 4], _Accessor[index, 5], _Accessor[index, 6], _Accessor[index, 7],
+                    _Accessor[index, 8], _Accessor[index, 9], _Accessor[index, 10], _Accessor[index, 11],
+                    _Accessor[index, 12], _Accessor[index, 13], _Accessor[index, 14], _Accessor[index, 15]
                     );
             }
 
             set
             {
-                _Accesor[index, 0] = value.M11;
-                _Accesor[index, 1] = value.M12;
-                _Accesor[index, 2] = value.M13;
-                _Accesor[index, 3] = value.M14;
-                _Accesor[index, 4] = value.M21;
-                _Accesor[index, 5] = value.M22;
-                _Accesor[index, 6] = value.M23;
-                _Accesor[index, 7] = value.M24;
-                _Accesor[index, 8] = value.M31;
-                _Accesor[index, 9] = value.M32;
-                _Accesor[index, 10] = value.M33;
-                _Accesor[index, 11] = value.M34;
-                _Accesor[index, 12] = value.M41;
-                _Accesor[index, 13] = value.M42;
-                _Accesor[index, 14] = value.M43;
-                _Accesor[index, 15] = value.M44;
+                _Accessor[index, 0] = value.M11;
+                _Accessor[index, 1] = value.M12;
+                _Accessor[index, 2] = value.M13;
+                _Accessor[index, 3] = value.M14;
+                _Accessor[index, 4] = value.M21;
+                _Accessor[index, 5] = value.M22;
+                _Accessor[index, 6] = value.M23;
+                _Accessor[index, 7] = value.M24;
+                _Accessor[index, 8] = value.M31;
+                _Accessor[index, 9] = value.M32;
+                _Accessor[index, 10] = value.M33;
+                _Accessor[index, 11] = value.M34;
+                _Accessor[index, 12] = value.M41;
+                _Accessor[index, 13] = value.M42;
+                _Accessor[index, 14] = value.M43;
+                _Accessor[index, 15] = value.M44;
             }
         }
 
@@ -622,6 +622,70 @@ namespace SharpGLTF.Memory
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
 
         public (Matrix4x4, Matrix4x4) GetBounds() { throw new NotImplementedException(); }
+
+        #endregion
+    }
+
+    public struct MultiArray : IEncodedArray<Single[]>
+    {
+        #region constructors
+
+        public MultiArray(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
+        {
+            _Dimensions = dimensions;
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, dimensions, encoding, normalized);
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _Dimensions;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private FloatingAccessor _Accessor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Single[][] _DebugItems => this.ToArray();
+
+        #endregion
+
+        #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _Accessor.Count;
+
+        public Single[] this[int index]
+        {
+            get
+            {
+                var val = new Single[_Dimensions];
+
+                for (int i = 0; i < val.Length; ++i) val[i] = _Accessor[index, i];
+
+                return val;
+            }
+
+            set
+            {
+                Guard.NotNull(value, nameof(value));
+                Guard.IsTrue(value.Length == _Dimensions, nameof(value));
+
+                for (int i = 0; i < _Dimensions; ++i)
+                {
+                    _Accessor[index, i] = value[i];
+                }
+            }
+        }
+
+        public void CopyTo(ArraySegment<Single[]> dst) { EncodedArrayUtils.Copy<Single[]>(this, dst); }
+
+        public IEnumerator<Single[]> GetEnumerator() { return new EncodedArrayEnumerator<Single[]>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Single[]>(this); }
+
+        public (Single[], Single[]) GetBounds() { throw new NotImplementedException(); }
 
         #endregion
     }

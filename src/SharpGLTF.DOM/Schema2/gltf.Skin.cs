@@ -139,8 +139,26 @@ namespace SharpGLTF.Schema2
             return true;
         }
 
+        public void BindJoints(params Node[] joints)
+        {
+            var pairs = new KeyValuePair<Node, Matrix4x4>[joints.Length];
+
+            for (int i = 0; i < pairs.Length; ++i)
+            {
+                var xform = joints[i].WorldMatrix;
+
+                Matrix4x4.Invert(xform, out Matrix4x4 ixform);
+
+                pairs[i] = new KeyValuePair<Node, Matrix4x4>(joints[i], ixform);
+            }
+
+            BindJoints(pairs);
+        }
+
         public void BindJoints(KeyValuePair<Node, Matrix4x4>[] joints)
         {
+            foreach (var j in joints) Guard.MustShareLogicalParent(this, j.Key, nameof(joints));
+
             // inverse bind matrices accessor
 
             var data = new Byte[joints.Length * 16 * 4];

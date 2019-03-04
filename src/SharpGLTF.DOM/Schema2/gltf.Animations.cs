@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
     using Collections;
-    using System.Numerics;
 
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public sealed partial class Animation
@@ -30,71 +30,119 @@ namespace SharpGLTF.Schema2
 
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
 
-        /// <summary>
-        /// Gets the list of <see cref="AnimationChannel"/> instances.
-        /// </summary>
-        public IReadOnlyList<AnimationChannel> Channels => _channels;
+        internal IReadOnlyList<AnimationChannel> _Channels => _channels;
 
         #endregion
 
         #region API
 
-        public Accessor CreateInputAccessor(IReadOnlyList<Single> input)
+        private AnimationSampler _CreateSampler(AnimationInterpolationMode interpolation)
         {
-            var buffer = LogicalParent.UseBufferView(new Byte[input.Count * 4]);
-            var accessor = LogicalParent.CreateAccessor("Animation.Input")
-                .WithData(buffer, 0, input.Count, ElementType.SCALAR, ComponentType.FLOAT, false);
-
-            Memory.EncodedArrayUtils.FillFrom(accessor.AsScalarArray(), 0, input);
-
-            accessor.UpdateBounds();
-
-            return accessor;
-        }
-
-        public Accessor CreateOutputAccessor(IReadOnlyList<Vector3> output)
-        {
-            var buffer = LogicalParent.UseBufferView(new Byte[output.Count * 4 * 3]);
-            var accessor = LogicalParent.CreateAccessor("Animation.Output")
-                .WithData(buffer, 0, output.Count, ElementType.VEC3, ComponentType.FLOAT, false);
-
-            Memory.EncodedArrayUtils.FillFrom(accessor.AsVector3Array(), 0, output);
-
-            accessor.UpdateBounds();
-
-            return accessor;
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="AnimationSampler"/> instance and adds it to this <see cref="Animation"/>.
-        /// </summary>
-        /// <param name="input">An <see cref="Accessor"/> containing input (TIME) values.</param>
-        /// <param name="output">An <see cref="Accessor"/> containing output (TRS) values.</param>
-        /// <param name="interpolation">how the output values are interpolated.</param>
-        /// <returns>An <see cref="AnimationSampler"/> instance.</returns>
-        public AnimationSampler CreateSampler(Accessor input, Accessor output, AnimationInterpolationMode interpolation)
-        {
-            Guard.MustShareLogicalParent(this, input, nameof(input));
-            Guard.MustShareLogicalParent(this, output, nameof(output));
-
-            var sampler = new AnimationSampler(input, output, interpolation);
+            var sampler = new AnimationSampler(interpolation);
 
             _samplers.Add(sampler);
 
             return sampler;
         }
 
-        public AnimationChannel CreateChannel(Node node, PathType path, AnimationSampler sampler)
+        /// <remarks>
+        /// There can only be one <see cref="AnimationChannel"/> for every node and path
+        /// </remarks>
+        private AnimationChannel _UseChannel(Node node, PathType path)
         {
             Guard.MustShareLogicalParent(this, node, nameof(node));
-            Guard.NotNull(sampler, nameof(sampler));
-            Guard.IsTrue(Object.ReferenceEquals(this, sampler.LogicalParent), nameof(sampler));
 
-            var channel = new AnimationChannel(node, path, sampler);
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == path);
+            if (channel != null) return channel;
+
+            channel = new AnimationChannel(node, path);
 
             _channels.Add(channel);
 
             return channel;
+        }
+
+        public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
+        {
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
+                .WithVector3Keys(keyframes);
+
+            this._UseChannel(node, PathType.scale)
+                .WithSampler(sampler);
+        }
+
+        public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
+        {
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
+                .WithVector3Keys(keyframes);
+
+            this._UseChannel(node, PathType.scale)
+                .WithSampler(sampler);
+        }
+
+        public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, Quaternion> keyframes, bool linear = true)
+        {
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
+                .WithQuaternionKeys(keyframes);
+
+            this._UseChannel(node, PathType.rotation)
+                .WithSampler(sampler);
+        }
+
+        public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
+        {
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
+                .WithQuaternionKeys(keyframes);
+
+            this._UseChannel(node, PathType.rotation)
+                .WithSampler(sampler);
+        }
+
+        public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
+        {
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
+                .WithVector3Keys(keyframes);
+
+            this._UseChannel(node, PathType.translation)
+                .WithSampler(sampler);
+        }
+
+        public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
+        {
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
+                .WithVector3Keys(keyframes);
+
+            this._UseChannel(node, PathType.translation)
+                .WithSampler(sampler);
+        }
+
+        public void CreateMorphChannel(Node node, AnimationInterpolationMode mode, IReadOnlyDictionary<Single, Single[]> keyframes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyDictionary<Single, Vector3> FindScaleChannel(Node node)
+        {
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.scale);
+            if (channel == null) return null;
+
+            return channel.Sampler.AsVector3KeyFrames();
+        }
+
+        public IReadOnlyDictionary<Single, Quaternion> FindRotationChannel(Node node)
+        {
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.rotation);
+            if (channel == null) return null;
+
+            return channel.Sampler.AsQuaternionKeyFrames();
+        }
+
+        public IReadOnlyDictionary<Single, Vector3> FindTranslationChannel(Node node)
+        {
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.translation);
+            if (channel == null) return null;
+
+            return channel.Sampler.AsVector3KeyFrames();
         }
 
         #endregion
@@ -123,16 +171,26 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public sealed partial class AnimationChannel : IChildOf<Animation>
+    sealed partial class AnimationChannel : IChildOf<Animation>
     {
         #region lifecycle
 
         internal AnimationChannel() { }
 
-        internal AnimationChannel(Node targetNode, PathType targetPath, AnimationSampler sampler)
+        internal AnimationChannel(Node targetNode, PathType targetPath)
         {
             _target = new AnimationChannelTarget(targetNode, targetPath);
+            _sampler = -1;
+        }
+
+        internal AnimationChannel WithSampler(AnimationSampler sampler)
+        {
+            Guard.NotNull(sampler, nameof(sampler));
+            Guard.IsTrue(this.LogicalParent == sampler.LogicalParent, nameof(sampler));
+
             _sampler = sampler.LogicalIndex;
+
+            return this;
         }
 
         #endregion
@@ -181,17 +239,15 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public sealed partial class AnimationSampler : IChildOf<Animation>
+    sealed partial class AnimationSampler : IChildOf<Animation>
     {
         #region lifecycle
 
         internal AnimationSampler() { }
 
-        internal AnimationSampler(Accessor input, Accessor output, AnimationInterpolationMode interpolation)
+        internal AnimationSampler(AnimationInterpolationMode interpolation)
         {
             _interpolation = interpolation.AsNullable(_interpolationDefault);
-            _input = input.LogicalIndex;
-            _output = output.LogicalIndex;
         }
 
         #endregion
@@ -210,7 +266,7 @@ namespace SharpGLTF.Schema2
 
         void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }
 
-        public AnimationInterpolationMode Mode
+        public AnimationInterpolationMode InterpolationMode
         {
             get => _interpolation.AsValue(_interpolationDefault);
             set => _interpolation = value.AsNullable(_interpolationDefault);
@@ -219,6 +275,151 @@ namespace SharpGLTF.Schema2
         public Accessor Input => this.LogicalParent.LogicalParent.LogicalAccessors[this._input];
 
         public Accessor Output => this.LogicalParent.LogicalParent.LogicalAccessors[this._output];
+
+        #endregion
+
+        #region API
+
+        private Accessor _CreateInputAccessor(IReadOnlyList<Single> input)
+        {
+            var root = LogicalParent.LogicalParent;
+
+            var buffer = root.UseBufferView(new Byte[input.Count * 4]);
+            var accessor = root.CreateAccessor("Animation.Input")
+                .WithData(buffer, 0, input.Count, ElementType.SCALAR, ComponentType.FLOAT, false);
+
+            Memory.EncodedArrayUtils.FillFrom(accessor.AsScalarArray(), 0, input);
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        private Accessor _CreateOutputAccessor(IReadOnlyList<Vector3> output)
+        {
+            var root = LogicalParent.LogicalParent;
+
+            var buffer = root.UseBufferView(new Byte[output.Count * 4 * 3]);
+            var accessor = root.CreateAccessor("Animation.Output")
+                .WithData(buffer, 0, output.Count, ElementType.VEC3, ComponentType.FLOAT, false);
+
+            Memory.EncodedArrayUtils.FillFrom(accessor.AsVector3Array(), 0, output);
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        private Accessor _CreateOutputAccessor(IReadOnlyList<Quaternion> output)
+        {
+            var root = LogicalParent.LogicalParent;
+
+            var buffer = root.UseBufferView(new Byte[output.Count * 4 * 4]);
+            var accessor = root.CreateAccessor("Animation.Output")
+                .WithData(buffer, 0, output.Count, ElementType.VEC4, ComponentType.FLOAT, false);
+
+            Memory.EncodedArrayUtils.FillFrom(accessor.AsQuaternionArray(), 0, output);
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
+        {
+            var sorted = keyframes.OrderBy(item => item.Key).ToList();
+
+            var keys = new Single[sorted.Count];
+            var vals = new TValue[sorted.Count];
+
+            for (int i=0; i < keys.Length; ++i)
+            {
+                keys[i] = sorted[i].Key;
+                vals[i] = sorted[i].Value;
+            }
+
+            return (keys, vals);
+        }
+
+        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue,TValue,TValue)> keyframes)
+        {
+            var sorted = keyframes.OrderBy(item => item.Key).ToList();
+
+            var keys = new Single[sorted.Count];
+            var vals = new TValue[sorted.Count * 3];
+
+            for (int i = 0; i < keys.Length; ++i)
+            {
+                keys[i] = sorted[i].Key;
+                vals[(i * 3) + 0] = sorted[i].Value.Item1;
+                vals[(i * 3) + 1] = sorted[i].Value.Item2;
+                vals[(i * 3) + 2] = sorted[i].Value.Item3;
+            }
+
+            return (keys, vals);
+        }
+
+        public AnimationSampler WithVector3Keys(IReadOnlyDictionary<Single, Vector3> keyframes)
+        {
+            var kv = _Split(keyframes);
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+
+            return this;
+        }
+
+        public AnimationSampler WithVector3Keys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
+        {
+            var kv = _Split(keyframes);
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+
+            return this;
+        }
+
+        public AnimationSampler WithQuaternionKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
+        {
+            var kv = _Split(keyframes);
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+
+            return this;
+        }
+
+        public AnimationSampler WithQuaternionKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
+        {
+            var kv = _Split(keyframes);
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+
+            return this;
+        }
+
+        public IReadOnlyDictionary<Single, Vector3> AsVector3KeyFrames()
+        {
+            if (this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) throw new ArgumentException();
+
+            var dict = new Dictionary<Single, Vector3>();
+
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsVector3Array();
+
+            return keys
+                .Zip(frames, (key, val) => (key, val))
+                .ToDictionary(item => item.key, item => item.val);
+        }
+
+        public IReadOnlyDictionary<Single, Quaternion> AsQuaternionKeyFrames()
+        {
+            var dict = new Dictionary<Single, Quaternion>();
+
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsQuaternionArray();
+
+            return keys
+                .Zip(frames, (key, val) => (key, val))
+                .ToDictionary(item => item.key, item => item.val);
+        }
 
         #endregion
     }

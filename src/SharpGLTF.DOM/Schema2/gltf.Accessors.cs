@@ -6,6 +6,8 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using Memory;
+
     using EXCEPTION = IO.ModelException;
 
     using ROOT = ModelRoot;
@@ -13,6 +15,7 @@ namespace SharpGLTF.Schema2
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
     [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{SourceBufferView.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._AccessorDebugProxy))]
     public sealed partial class Accessor
     {
         #region debug
@@ -133,18 +136,26 @@ namespace SharpGLTF.Schema2
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
-            var array = new Memory.IntegerArray(buffer.Content, byteOffset, items.Count, encoding);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithIndexData(buffer, byteOffset, items.Count, encoding);
+            WithIndexData(buffer, byteOffset, items.Count, encoding)
+                .AsIndicesArray()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
         public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<UInt32> items, IndexType encoding = IndexType.UNSIGNED_INT)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
-            var array = new Memory.IntegerArray(buffer.Content, byteOffset, items.Count, encoding);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithIndexData(buffer, byteOffset, items.Count, encoding);
+            WithIndexData(buffer, byteOffset, items.Count, encoding)
+                .AsIndicesArray()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
         public Accessor WithIndexData(BufferView buffer, int byteOffset, int itemCount, IndexType encoding)
@@ -175,57 +186,77 @@ namespace SharpGLTF.Schema2
             return this.WithVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Single> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Single> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(ElementType.SCALAR.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            var array = new Memory.ScalarArray(buffer.Content.Slice(byteOffset), buffer.ByteStride);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithVertexData(buffer, byteOffset, items.Count, ElementType.SCALAR, encoding, normalized);
+            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.SCALAR, encoding, normalized)
+                .AsScalarArray()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector2> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector2> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(ElementType.VEC2.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            var array = new Memory.Vector2Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC2, encoding, normalized);
+            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC2, encoding, normalized)
+                .AsVector2Array()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector3> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector3> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(ElementType.VEC3.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            var array = new Memory.Vector3Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC3, encoding, normalized);
+            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC3, encoding, normalized)
+                .AsVector3Array()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Vector4> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector4> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            var array = new Memory.Vector4Array(buffer.Content.Slice(byteOffset), buffer.ByteStride);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC4, encoding, normalized);
+            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC4, encoding, normalized)
+                .AsVector4Array()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, IReadOnlyList<Quaternion> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Quaternion> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            var array = new Memory.QuaternionArray(buffer.Content.Slice(byteOffset), buffer.ByteStride);
-            Memory.EncodedArrayUtils.FillFrom(array, 0, items);
-            return WithVertexData(buffer, byteOffset, items.Count, ElementType.VEC4, encoding, normalized);
+            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC4, encoding, normalized)
+                .AsQuaternionArray()
+                .FillFrom(0, items);
+
+            this.UpdateBounds();
+
+            return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int byteOffset, int itemCount, ElementType dimensions = ElementType.VEC3, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, int itemCount, ElementType dimensions = ElementType.VEC3, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -233,10 +264,10 @@ namespace SharpGLTF.Schema2
 
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ARRAY_BUFFER, nameof(buffer));
 
-            return WithData(buffer, byteOffset, itemCount, dimensions, encoding, normalized);
+            return WithData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
         }
 
-        public Memory.IEncodedArray<Single> AsScalarArray()
+        public IEncodedArray<float> AsScalarArray()
         {
             var memory = _GetMemoryAccessor();
 
@@ -246,7 +277,7 @@ namespace SharpGLTF.Schema2
             return Geometry.MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public Memory.IEncodedArray<Vector2> AsVector2Array()
+        public IEncodedArray<Vector2> AsVector2Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -256,7 +287,7 @@ namespace SharpGLTF.Schema2
             return Geometry.MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public Memory.IEncodedArray<Vector3> AsVector3Array()
+        public IEncodedArray<Vector3> AsVector3Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -266,7 +297,7 @@ namespace SharpGLTF.Schema2
             return Geometry.MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public Memory.IEncodedArray<Vector4> AsVector4Array()
+        public IEncodedArray<Vector4> AsVector4Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -274,6 +305,15 @@ namespace SharpGLTF.Schema2
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
             return Geometry.MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
+        }
+
+        public IEncodedArray<Quaternion> AsQuaternionArray()
+        {
+            var memory = _GetMemoryAccessor();
+
+            if (this._sparse == null) return memory.AsQuaternionArray();
+
+            throw new NotImplementedException();
         }
 
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)

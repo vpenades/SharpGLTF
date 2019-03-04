@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 using NUnit.Framework;
@@ -46,6 +47,42 @@ namespace SharpGLTF.Memory
             var result = accessor.ToArray();
 
             Assert.AreEqual(3, result.Length);
+        }
+
+        [Test]
+        public void FillEncoded1()
+        {
+            var v1 = new Vector4(0.1f, 0.2f, 0.6f, 0.8f);
+            var v2 = new Vector4(1, 2, 3, 4);
+
+            var bytes = new Byte[256];
+
+            var v4n = new Vector4Array(bytes.Slice(0), 0, Schema2.ComponentType.UNSIGNED_BYTE, true);
+            v4n[1] = v1;
+            VectorAssert.AreEqual(v4n[1], v1, 0.1f);
+
+            var v4u = new Vector4Array(bytes.Slice(0), 0, Schema2.ComponentType.UNSIGNED_BYTE, false);
+            v4u[1] = v2;
+            VectorAssert.AreEqual(v4u[1], v2);
+        }
+
+        [Test]
+        public void FillEncoded2()
+        {
+            var v1 = new Vector4(0.1f, 0.2f, 0.6f, 0.8f);
+            var v2 = new Vector4(1, 2, 3, 4);
+
+            var bytes = new Byte[256];
+
+            var v4n = new Vector4Array(bytes.Slice(0), 0, 5, 8, Schema2.ComponentType.UNSIGNED_BYTE, true);
+            var v4u = new Vector4Array(bytes.Slice(0), 4, 5, 8, Schema2.ComponentType.UNSIGNED_BYTE, false);
+
+            v4n[1] = v1;
+            VectorAssert.AreEqual(v4n[1], v1, 0.1f);
+
+            
+            v4u[1] = v2;
+            VectorAssert.AreEqual(v4u[1], v2);
         }
     }
 }

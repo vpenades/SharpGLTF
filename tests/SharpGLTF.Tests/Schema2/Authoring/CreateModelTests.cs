@@ -170,9 +170,9 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
 
-        struct myVertex
+        struct mySimpleVertex
         {
-            public myVertex(float px, float py, float pz, float nx, float ny, float nz)
+            public mySimpleVertex(float px, float py, float pz, float nx, float ny, float nz)
             {
                 Position = new Vector3(px, py, pz);
                 Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
@@ -188,12 +188,12 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new InterleavedMeshBuilder<myVertex, Vector4>();
+            var meshBuilder = new InterleavedMeshBuilder<mySimpleVertex, Vector4>();
 
-            var v1 = new myVertex(-10, 10, 0, -10, 10, 15);
-            var v2 = new myVertex( 10, 10, 0, 10, 10, 15);
-            var v3 = new myVertex( 10,-10, 0, 10, -10, 15);
-            var v4 = new myVertex(-10,-10, 0, -10, -10, 15);            
+            var v1 = new mySimpleVertex(-10, 10, 0, -10, 10, 15);
+            var v2 = new mySimpleVertex( 10, 10, 0, 10, 10, 15);
+            var v3 = new mySimpleVertex( 10,-10, 0, 10, -10, 15);
+            var v4 = new mySimpleVertex(-10,-10, 0, -10, -10, 15);            
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
@@ -221,12 +221,12 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new InterleavedMeshBuilder<myVertex, Vector4>();
+            var meshBuilder = new InterleavedMeshBuilder<mySimpleVertex, Vector4>();
 
-            var v1 = new myVertex(-10, 10, 0, -10, 10, 15);
-            var v2 = new myVertex(10, 10, 0, 10, 10, 15);
-            var v3 = new myVertex(10, -10, 0, 10, -10, 15);
-            var v4 = new myVertex(-10, -10, 0, -10, -10, 15);
+            var v1 = new mySimpleVertex(-10, 10, 0, -10, 10, 15);
+            var v2 = new mySimpleVertex(10, 10, 0, 10, 10, 15);
+            var v3 = new mySimpleVertex(10, -10, 0, 10, -10, 15);
+            var v4 = new mySimpleVertex(-10, -10, 0, -10, -10, 15);
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
@@ -245,16 +245,116 @@ namespace SharpGLTF.Schema2.Authoring
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
 
-            var animation = model.CreateAnimation("Animation");
-            var asampler = animation.CreateSampler
-                (
-                animation.CreateInputAccessor( new float[] { 1, 2, 3, 4 } ),
-                animation.CreateOutputAccessor( new[] { new Vector3(0, 0, 0), new Vector3(50, 0, 0), new Vector3(0, 50, 0), new Vector3(0, 0, 0) } ),
-                AnimationInterpolationMode.LINEAR
-                );
+            // create animation sequence with 4 frames
+            var keyframes = new Dictionary<Single, Vector3>()
+            {
+                [1] = new Vector3(0, 0, 0),
+                [2] = new Vector3(50, 0, 0),
+                [3] = new Vector3(0, 50, 0),
+                [4] = new Vector3(0, 0, 0),
+            };
 
-            animation.CreateChannel(rnode, PathType.translation, asampler);
+            var animation = model.CreateAnimation("Animation");
+            animation.CreateTranslationChannel(rnode, keyframes);
             
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
+
+        struct mySkinnedVertex
+        {
+            public mySkinnedVertex(float px, float py, float pz, int jointIndex)
+            {
+                Position = new Vector3(px, py, pz);
+                Joints_0 = new Vector4(jointIndex);
+                Weights_0 = Vector4.UnitX;
+            }
+
+            public mySkinnedVertex(float px, float py, float pz, int jointIndex1, int jointIndex2)
+            {
+                Position = new Vector3(px, py, pz);
+                Joints_0 = new Vector4(jointIndex1, jointIndex2,0,0);
+                Weights_0 = new Vector4(0.5f, 0.5f, 0, 0);
+            }
+
+            public Vector3 Position;            
+            public Vector4 Joints_0;
+            public Vector4 Weights_0;
+        }
+
+        [Test(Description = "Creates a skinned animated scene using a mesh builder helper class")]
+        public void CreateSkinnedAnimatedMeshBuilderScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            // create base model
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");
+            var snode = scene.CreateNode("RootNode");
+
+            // create the three joints that will affect the mesh
+            var skelet = scene.CreateNode("Skeleton");
+            var jnode1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
+            var jnode2 = jnode1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));
+            var jnode3 = jnode2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
+
+            // setup skin
+            snode.Skin = model.CreateSkin();
+            snode.Skin.Skeleton = skelet;
+            snode.Skin.BindJoints(jnode1, jnode2, jnode3);
+
+            // create the mesh
+            var meshBuilder = new InterleavedMeshBuilder<mySkinnedVertex, Vector4>();
+
+            var v1 = new mySkinnedVertex(-10, 0, +10, 0);
+            var v2 = new mySkinnedVertex(+10, 0, +10, 0);
+            var v3 = new mySkinnedVertex(+10, 0, -10, 0);
+            var v4 = new mySkinnedVertex(-10, 0, -10, 0);
+
+            var v5 = new mySkinnedVertex(-10, 40, +10, 0, 1);
+            var v6 = new mySkinnedVertex(+10, 40, +10, 0, 1);
+            var v7 = new mySkinnedVertex(+10, 40, -10, 0, 1);
+            var v8 = new mySkinnedVertex(-10, 40, -10, 0, 1);
+
+            var v9  = new mySkinnedVertex(-5, 80, +5, 2);
+            var v10 = new mySkinnedVertex(+5, 80, +5, 2);
+            var v11 = new mySkinnedVertex(+5, 80, -5, 2);
+            var v12 = new mySkinnedVertex(-5, 80, -5, 2);
+
+            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v1, v2, v6, v5);
+            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v2, v3, v7, v6);
+            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v3, v4, v8, v7);
+            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v4, v1, v5, v8);
+
+            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v5, v6, v10, v9);
+            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v6, v7, v11, v10);
+            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v7, v8, v12, v11);
+            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v8, v5, v9, v12);
+
+            // setup a lambda function that creates a material for a given color
+            Material createMaterialForColor(Vector4 color)
+            {
+                var material = model.CreateMaterial().WithDefault(color);
+                material.DoubleSided = true;
+                return material;
+            };
+
+            // fill our node with the mesh
+            meshBuilder.CopyToNode(snode, createMaterialForColor);
+
+            // create animation sequence with 4 frames
+            var keyframes = new Dictionary<Single, Quaternion>
+            {
+                [1] = Quaternion.Identity,
+                [2] = Quaternion.CreateFromYawPitchRoll(0, 1, 0),
+                [3] = Quaternion.CreateFromYawPitchRoll(0, 0, 1),
+                [4] = Quaternion.Identity,
+            };
+
+            model.CreateAnimation("Animation")
+                .CreateRotationChannel(jnode2, keyframes);
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");

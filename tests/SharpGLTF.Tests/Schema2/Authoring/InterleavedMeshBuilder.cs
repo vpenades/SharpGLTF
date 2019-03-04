@@ -182,6 +182,5 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         #endregion
-
-    }
+    }    
 }

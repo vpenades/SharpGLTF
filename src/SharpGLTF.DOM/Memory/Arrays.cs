@@ -8,7 +8,6 @@ using System.Text;
 namespace SharpGLTF.Memory
 {
     public interface IEncodedArray<T> : IReadOnlyCollection<T>
-        where T : unmanaged
     {
         T this[int index] { get; set; }
 
@@ -20,7 +19,6 @@ namespace SharpGLTF.Memory
     }
 
     struct EncodedArrayEnumerator<T> : IEnumerator<T>
-        where T : unmanaged
     {
         #region lifecycle
 
@@ -91,7 +89,6 @@ namespace SharpGLTF.Memory
         }
 
         public static void FillFrom<T>(this IEncodedArray<T> dst, int dstIndex, IEnumerable<T> src)
-            where T : unmanaged
         {
             using (var ator = src.GetEnumerator())
             {
@@ -112,7 +109,6 @@ namespace SharpGLTF.Memory
         }
 
         public static void CopyTo<T>(IEncodedArray<T> src, IEncodedArray<T> dst, int dstOffset = 0)
-            where T : unmanaged
         {
             for (int i = 0; i < src.Count; ++i)
             {
@@ -121,7 +117,6 @@ namespace SharpGLTF.Memory
         }
 
         public static void CopyTo<T>(T[] src, IEncodedArray<T> dst, int dstOffset = 0)
-            where T : unmanaged
         {
             for (int i = 0; i < src.Length; ++i)
             {
@@ -130,13 +125,11 @@ namespace SharpGLTF.Memory
         }
 
         public static void Copy<T>(IEncodedArray<T> src, T[] dst)
-            where T : unmanaged
         {
             Copy<T>(src, new ArraySegment<T>(dst));
         }
 
         public static void Copy<T>(IEncodedArray<T> src, ArraySegment<T> dst)
-            where T : unmanaged
         {
             var c = src.Count;
             for (int i = 0; i < c; ++i) dst.Array[dst.Offset + i] = src[i];
