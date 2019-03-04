@@ -37,11 +37,19 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalSkins.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets a collection of <see cref="Node"/> instances using this <see cref="Skin"/>.
+        /// </summary>
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingSkin(this);
 
+        /// <summary>
+        /// Gets the number of joints
+        /// </summary>
         public int JointsCount => _joints.Count;
 
-        // Skeleton property points to the node that is the root of a joints hierarchy.
+        /// <summary>
+        /// Gets or sets the Skeleton <see cref="Node"/>, which represents the root of a joints hierarchy.
+        /// </summary>
         public Node Skeleton
         {
             get => this._skeleton.HasValue ? this.LogicalParent.LogicalNodes[this._skeleton.Value] : null;
@@ -56,14 +64,19 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public static IEnumerable<Skin> FindSkinsUsing(Node n)
+        /// <summary>
+        /// Finds all the skins that are using the given <see cref="Node"/> as a joint.
+        /// </summary>
+        /// <param name="jointNode">A <see cref="Node"/> joint.</param>
+        /// <returns>A collection of <see cref="Skin"/> instances.</returns>
+        public static IEnumerable<Skin> FindSkinsUsingJoint(Node jointNode)
         {
-            var idx = n.LogicalIndex;
+            var idx = jointNode.LogicalIndex;
 
-            return n.LogicalParent.LogicalSkins.Where(s => s._ContainsNode(idx));
+            return jointNode.LogicalParent.LogicalSkins.Where(s => s._ContainsJoint(idx));
         }
 
-        internal bool _ContainsNode(int nodeIdx) { return _joints.Contains(nodeIdx); }
+        internal bool _ContainsJoint(int nodeIdx) { return _joints.Contains(nodeIdx); }
 
         public Accessor GetInverseBindMatricesAccessor()
         {
@@ -102,6 +115,12 @@ namespace SharpGLTF.Schema2
             return exx;
         }
 
+        /// <summary>
+        /// Returns true if this <see cref="Skin"/> matches the input values.
+        /// </summary>
+        /// <param name="skeleton"></param>
+        /// <param name="joints"></param>
+        /// <returns></returns>
         public bool IsMatch(Node skeleton, KeyValuePair<Node, Matrix4x4>[] joints)
         {
             if (!ReferenceEquals(skeleton, this.Skeleton)) return false;
@@ -120,26 +139,26 @@ namespace SharpGLTF.Schema2
             return true;
         }
 
-        /*
         public void BindJoints(KeyValuePair<Node, Matrix4x4>[] joints)
         {
             // inverse bind matrices accessor
 
             var data = new Byte[joints.Length * 16 * 4];
 
-            var indexer = new Runtime.Encoding.Matrix4x4Indexer(data, 16 * 4, 0, Runtime.Encoding.PackedType.F32);
+            var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, ComponentType.FLOAT, false);
+            Memory.EncodedArrayUtils.FillFrom(matrices, 0, joints.Select(item => item.Value));
 
-            for(int i=0; i < joints.Length; ++i) { indexer[i] = joints[i].Value; }
+            var accessor = LogicalParent
+                .CreateAccessor("Bind Matrices")
+                .WithData( LogicalParent.UseBufferView(data), 0, joints.Length, ElementType.MAT4, ComponentType.FLOAT, false);
 
-            var accessor = LogicalParent._CreateDataAccessor(data, Runtime.Encoding.DimensionType.Matrix4x4, joints.Length);
             this._inverseBindMatrices = accessor.LogicalIndex;
 
             // joints
 
             _joints.Clear();
             _joints.AddRange(joints.Select(item => item.Key.LogicalIndex));
-
-        }*/
+        }
 
         #endregion
     }

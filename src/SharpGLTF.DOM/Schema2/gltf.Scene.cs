@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<Node> VisualChildren => GetVisualChildren();
 
-        public Boolean IsSkinJoint => Skin.FindSkinsUsing(this).Any();
+        public Boolean IsSkinJoint => Skin.FindSkinsUsingJoint(this).Any();
 
         #endregion
 
@@ -65,12 +65,15 @@ namespace SharpGLTF.Schema2
 
         internal Vector3? RawScale  { get => _scale; set => _scale = value; }
 
+        /// <summary>
+        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// </summary>
         public Matrix4x4 LocalMatrix
         {
             get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
             set
             {
-                if (value == System.Numerics.Matrix4x4.Identity) _matrix = null;
+                if (value == Matrix4x4.Identity) _matrix = null;
                 else _matrix = value;
 
                 _scale = null;
@@ -79,6 +82,9 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
+        /// </summary>
         public Transforms.AffineTransform LocalTransform
         {
             get => new Transforms.AffineTransform(_matrix, _scale, _rotation, _translation);
@@ -91,6 +97,9 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// </summary>
         public Matrix4x4 WorldMatrix
         {
             get
@@ -109,6 +118,9 @@ namespace SharpGLTF.Schema2
 
         #region properties - content
 
+        /// <summary>
+        /// Gets or sets the <see cref="Mesh"/> of this <see cref="Node"/>.
+        /// </summary>
         public Mesh Mesh
         {
             get => this._mesh.HasValue ? this.LogicalParent.LogicalMeshes[this._mesh.Value] : null;
@@ -120,6 +132,9 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="Skin"/> of this <see cref="Node"/>.
+        /// </summary>
         public Skin Skin
         {
             get => this._skin.HasValue ? this.LogicalParent.LogicalSkins[this._skin.Value] : null;
@@ -131,7 +146,18 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public IReadOnlyList<float> MorphWeights => _weights == null ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
+        /// <summary>
+        /// Gets or sets the Morph Weights of this <see cref="Node"/>.
+        /// </summary>
+        public IReadOnlyList<Single> MorphWeights
+        {
+            get => _weights == null ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
+            set
+            {
+                _weights.Clear();
+                _weights.AddRange(value.Select(item => (Double)item));
+            }
+        }
 
         public Transforms.BoundingBox3? WorldBounds3 => Transforms.BoundingBox3.Create(this);
 
@@ -177,14 +203,21 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        /// <summary>
+        /// Finds a node with the given <paramref name="name"/>
+        /// </summary>
+        /// <param name="name">A name.</param>
+        /// <returns>A <see cref="Node"/> instance.</returns>
         public Node FindNode(string name)
         {
             return this.VisualChildren.FirstOrDefault(item => item.Name == name);
         }
 
-        // TODO: AddVisualChild must return a "NodeBuilder"
-        // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_children); }
-
+        /// <summary>
+        /// Returns all the nodes of a visual hierarchy as a flattened list.
+        /// </summary>
+        /// <param name="container">A <see cref="Scene"/> instance or a <see cref="Node"/> instance.</param>
+        /// <returns>A collection of <see cref="Node"/> instances.</returns>
         public static IEnumerable<Node> Flatten(IVisualNodeContainer container)
         {
             if (container is Node n) yield return n;
@@ -197,6 +230,11 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="Node"/> instances using <paramref name="mesh"/>.
+        /// </summary>
+        /// <param name="mesh">A <see cref="Mesh"/> instance.</param>
+        /// <returns>A collection of <see cref="Node"/> instances.</returns>
         public static IEnumerable<Node> FindNodesUsingMesh(Mesh mesh)
         {
             if (mesh == null) return Enumerable.Empty<Node>();
@@ -208,6 +246,11 @@ namespace SharpGLTF.Schema2
                 .Where(item => item._mesh.AsValue(int.MinValue) == meshIdx);
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="Node"/> instances using <paramref name="skin"/>.
+        /// </summary>
+        /// <param name="skin">A <see cref="Skin"/> instance.</param>
+        /// <returns>A collection of <see cref="Node"/> instances.</returns>
         public static IEnumerable<Node> FindNodesUsingSkin(Skin skin)
         {
             if (skin == null) return Enumerable.Empty<Node>();
@@ -401,7 +444,7 @@ namespace SharpGLTF.Schema2
         internal Boolean _CheckNodeIsJoint(Node n)
         {
             var idx = n.LogicalIndex;
-            return _skins.Any(s => s._ContainsNode(idx));
+            return _skins.Any(s => s._ContainsJoint(idx));
         }
     }
 }

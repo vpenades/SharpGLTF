@@ -66,6 +66,11 @@ namespace SharpGLTF
 
         #region linq
 
+        internal static ArraySegment<T> Slice<T>(this T[] array, int offset)
+        {
+            return new ArraySegment<T>(array, offset, array.Length - offset);
+        }
+
         internal static ArraySegment<T> Slice<T>(this ArraySegment<T> array, int offset)
         {
             return new ArraySegment<T>(array.Array, array.Offset + offset, array.Count - offset);
