@@ -207,7 +207,8 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings(filePath)
             {
                 JSonFormatting = Formatting.None,
-                BinaryMode = true
+                BinaryMode = true,
+                EmbedImages = true
             };
 
             var name = Path.GetFileNameWithoutExtension(filePath);
@@ -255,7 +256,7 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < this._images.Count; ++i)
             {
                 var image = this._images[i];
-                var iname = this._buffers.Count != 1 ? $"{name}_{i}" : $"{name}";
+                var iname = this._images.Count != 1 ? $"{name}_{i}" : $"{name}";
                 if (settings.EmbedImages) image._EmbedAssets();
                 else image._WriteExternalAssets(iname, settings.FileWriter);
             }
