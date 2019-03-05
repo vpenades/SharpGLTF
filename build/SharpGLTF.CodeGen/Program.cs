@@ -35,18 +35,23 @@ namespace SharpGLTF
 
         private static void _ProcessMainSchema()
         {
+            // load and process schema
             var ctx1 = LoadSchemaContext(Constants.MainSchemaFile);
 
-            ctx1.Remove(ctx1.Classes.FirstOrDefault(item => item.PersistentName == "glTF Property"));
+            // we remove "glTF Property" because it is hand coded.
+            ctx1.Remove(ctx1.Classes.FirstOrDefault(item => item.PersistentName == "glTF Property"));            
 
             // mimeType "anyof" is basically the string to use.
             ctx1.Remove(ctx1.Enumerations.FirstOrDefault(item => item.PersistentName == "image/jpeg-image/png"));
+
+            // replace Image.mimeType type from an Enum to String, so we can serialize it with more formats if required
             ctx1.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "Image")
                 .UseField("mimeType")
                 .FieldType = ctx1.UseString();
 
+            // replace Node.Matrix, Node.Rotation, Node.Scale and Node.Translation with System.Numerics.Vectors types
             var node = ctx1.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "Node");
@@ -56,6 +61,7 @@ namespace SharpGLTF
             node.UseField("scale").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
             node.UseField("translation").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
 
+            // replace Material.emissiveFactor with System.Numerics.Vectors types
             ctx1.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "Material")
@@ -64,6 +70,7 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector3.Zero")
                 .SetItemsRange(0);
 
+            // replace Material.baseColorFactor with System.Numerics.Vectors types
             ctx1.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "Material PBR Metallic Roughness")

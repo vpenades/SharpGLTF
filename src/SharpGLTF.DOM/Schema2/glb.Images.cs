@@ -37,7 +37,7 @@ namespace SharpGLTF.Schema2
         /// briefly reassigned so the JSON can be serialized correctly.
         /// After serialization <see cref="Image._uri"/> is set back to null.
         /// </remarks>
-        private Byte[] _ExternalImageContent;
+        private Byte[] _SatelliteImageContent;
 
         #endregion
 
@@ -48,7 +48,19 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalImages.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets a value indicating whether the contained image is stored in a satellite file when loaded or saved.
+        /// </summary>
+        public bool IsSatelliteFile => _SatelliteImageContent != null;
+
+        /// <summary>
+        /// Gets a value indicating whether the contained image is a PNG image.
+        /// </summary>
         public bool IsPng => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("png");
+
+        /// <summary>
+        /// Gets a value indicating whether the contained image is a JPEG image.
+        /// </summary>
         public bool IsJpeg => string.IsNullOrWhiteSpace(_mimeType) ? false : _mimeType.Contains("jpg") | _mimeType.Contains("jpeg");
 
         #endregion
@@ -73,10 +85,16 @@ namespace SharpGLTF.Schema2
             return true;
         }
 
+        /// <summary>
+        /// Retrieves the image file as a block of bytes.
+        /// </summary>
+        /// <returns>A <see cref="ArraySegment{Byte}"/> block containing the image file.</returns>
         public ArraySegment<Byte> GetImageContent()
         {
-            if (_ExternalImageContent != null) return new ArraySegment<byte>(_ExternalImageContent);
+            // the image is stored locally in a temporary buffer
+            if (_SatelliteImageContent != null) return new ArraySegment<byte>(_SatelliteImageContent);
 
+            /// the image is stored in a <see cref="BufferView"/>
             if (this._bufferView.HasValue)
             {
                 var bv = this.LogicalParent.LogicalBufferViews[this._bufferView.Value];
@@ -84,38 +102,62 @@ namespace SharpGLTF.Schema2
                 return bv.Content;
             }
 
+            // TODO: if external images have not been loaded into _ExternalImageContent
+            // and ModelRoot was loaded from file and stored the load path, use the _uri
+            // to load the model.
+
             throw new InvalidOperationException();
         }
 
-        public Image WithExternalFile(string filePath)
+        /// <summary>
+        /// Initializes this <see cref="Image"/> with an image loaded from a file.
+        /// </summary>
+        /// <param name="filePath">A valid path to an image file.</param>
+        /// <returns>This <see cref="Image"/> instance.</returns>
+        public Image WithSatelliteFile(string filePath)
         {
             var content = System.IO.File.ReadAllBytes(filePath);
-            return WithExternalContent(content);
+            return WithSatelliteContent(content);
         }
 
-        public Image WithExternalContent(Byte[] content)
+        /// <summary>
+        /// Initializes this <see cref="Image"/> with an image stored in a <see cref="Byte"/> array.
+        /// </summary>
+        /// <param name="content">A <see cref="Byte"/> array containing a PNG or JPEG image.</param>
+        /// <returns>This <see cref="Image"/> instance.</returns>
+        public Image WithSatelliteContent(Byte[] content)
         {
-            if (_IsPng(content)) _mimeType = MIMEPNG; // these strings might be wrong
-            if (_IsJpeg(content)) _mimeType = MIMEJPEG; // these strings might be wrong
+            Guard.NotNull(content, nameof(content));
+
+            string imageType = null;
+
+            if (_IsPng(content)) imageType = MIMEPNG; // these strings might be wrong
+            if (_IsJpeg(content)) imageType = MIMEJPEG; // these strings might be wrong
+
+            this._mimeType = imageType ?? throw new ArgumentException($"{nameof(content)} must be a PNG or JPG image", nameof(content));
 
             this._uri = null;
             this._bufferView = null;
-            this._ExternalImageContent = content;
+            this._SatelliteImageContent = content;
 
             return this;
         }
 
-        public void UseBufferViewContainer()
+        /// <summary>
+        /// If the image is stored externaly as an image file,
+        /// it creates a new BufferView and stores the image in the BufferView.
+        /// </summary>
+        public void TransferToInternalBuffer()
         {
-            if (this._ExternalImageContent == null) return;
+            if (this._SatelliteImageContent == null) return;
 
             // transfer the external image content to a buffer.
             this._bufferView = this.LogicalParent
-                .UseBufferView(this._ExternalImageContent)
+                .UseBufferView(this._SatelliteImageContent)
                 .LogicalIndex;
 
             this._uri = null;
-            this._ExternalImageContent = null;
+            this._SatelliteImageContent = null;
         }
 
         #endregion
@@ -126,13 +168,12 @@ namespace SharpGLTF.Schema2
         {
             if (!String.IsNullOrWhiteSpace(_uri))
             {
-                _ExternalImageContent = _LoadImageUnchecked(_uri, externalReferenceSolver);
+                _SatelliteImageContent = _LoadImageUnchecked(externalReferenceSolver, _uri);
+                _uri = null;
             }
-
-            _uri = null; // When _Data is not empty, clear URI
         }
 
-        private static Byte[] _LoadImageUnchecked(string uri, AssetReader externalReferenceSolver)
+        private static Byte[] _LoadImageUnchecked(AssetReader externalReferenceSolver, string uri)
         {
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
@@ -145,20 +186,23 @@ namespace SharpGLTF.Schema2
 
         #region binary write
 
-        internal void _EmbedAssets()
+        /// <summary>
+        /// Called internally by the serializer when the buffer content is to be written internally.
+        /// </summary>
+        internal void _WriteToInternal()
         {
-            if (_ExternalImageContent != null)
+            if (_SatelliteImageContent != null)
             {
-                var mimeContent = Convert.ToBase64String(_ExternalImageContent, Base64FormattingOptions.None);
+                var mimeContent = Convert.ToBase64String(_SatelliteImageContent, Base64FormattingOptions.None);
 
-                if (_IsPng(_ExternalImageContent))
+                if (_IsPng(_SatelliteImageContent))
                 {
                     _mimeType = MIMEPNG;
                     _uri = EMBEDDEDPNGBUFFER + mimeContent;
                     return;
                 }
 
-                if (_IsJpeg(_ExternalImageContent))
+                if (_IsJpeg(_SatelliteImageContent))
                 {
                     _mimeType = MIMEJPEG;
                     _uri = EMBEDDEDJPEGBUFFER + mimeContent;
@@ -169,19 +213,29 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void _WriteExternalAssets(string uri, AssetWriter writer)
+        /// <summary>
+        /// Called internally by the serializer when the image content is to be written as an external file
+        /// </summary>
+        /// <param name="writer">The satellite asset writer</param>
+        /// <param name="satelliteUri">A local satellite URI</param>
+        internal void _WriteToSatellite(AssetWriter writer, string satelliteUri)
         {
-            if (_ExternalImageContent != null)
+            if (_SatelliteImageContent != null)
             {
-                if (this._mimeType.Contains("png")) uri += ".png";
-                if (this._mimeType.Contains("jpg")) uri += ".jpg";
-                if (this._mimeType.Contains("jpeg")) uri += ".jpg";
+                if (this._mimeType.Contains("png")) satelliteUri += ".png";
+                if (this._mimeType.Contains("jpg")) satelliteUri += ".jpg";
+                if (this._mimeType.Contains("jpeg")) satelliteUri += ".jpg";
 
-                this._uri = uri;
-                writer(uri, _ExternalImageContent);
+                this._uri = satelliteUri;
+                writer(satelliteUri, _SatelliteImageContent);
             }
         }
 
+        /// <summary>
+        /// Called by the serializer immediatelly after
+        /// calling <see cref="_WriteToSatellite(AssetWriter, string)"/>
+        /// or <see cref="_WriteToInternal"/>
+        /// </summary>
         internal void _ClearAfterWrite() { this._uri = null; }
 
         #endregion

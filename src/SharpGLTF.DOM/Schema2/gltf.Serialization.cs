@@ -308,7 +308,7 @@ namespace SharpGLTF.Schema2
                 {
                     var buffer = this._buffers[i];
                     var bname = this._buffers.Count != 1 ? $"{baseName}_{i}.bin" : $"{baseName}.bin";
-                    buffer._WriteToExternal(bname, settings.FileWriter);
+                    buffer._WriteToSatellite(settings.FileWriter, bname);
                 }
             }
 
@@ -316,8 +316,8 @@ namespace SharpGLTF.Schema2
             {
                 var image = this._images[i];
                 var iname = this._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
-                if (settings.EmbedImages) image._EmbedAssets();
-                else image._WriteExternalAssets(iname, settings.FileWriter);
+                if (settings.EmbedImages) image._WriteToInternal();
+                else image._WriteToSatellite(settings.FileWriter, iname);
             }
 
             using (var m = new MemoryStream())

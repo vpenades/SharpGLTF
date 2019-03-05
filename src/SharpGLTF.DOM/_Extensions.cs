@@ -19,6 +19,13 @@ namespace SharpGLTF
             return (value % mult) == 0;
         }
 
+        internal static int PaddingSize(this int size, int mult)
+        {
+            var rest = size % mult;
+
+            return rest == 0 ? 0 : mult - rest;
+        }
+
         internal static bool _IsReal(this float value)
         {
             return !(float.IsNaN(value) | float.IsInfinity(value));
@@ -328,6 +335,21 @@ namespace SharpGLTF
                 case 16: return ElementType.MAT4;
                 default: throw new NotImplementedException();
             }
+        }
+
+        #endregion
+
+        #region serialization
+
+        public static Byte[] GetPaddedContent(this Byte[] content)
+        {
+            if (content == null) return null;
+
+            if (content.Length.IsMultipleOf(4)) return content;
+
+            var paddedContent = new Byte[content.Length + content.Length.PaddingSize(4)];
+            content.CopyTo(paddedContent, 0);
+            return paddedContent;
         }
 
         #endregion

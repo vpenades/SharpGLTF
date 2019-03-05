@@ -46,42 +46,68 @@ namespace SharpGLTF.Schema2
         const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream;base64,";
         const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
 
-        internal void _ResolveUri(AssetReader externalReferenceSolver)
+        internal void _ResolveUri(AssetReader satelliteReferenceSolver)
         {
-            _Content = _LoadBinaryBufferUnchecked(_uri, externalReferenceSolver);
+            _Content = _LoadBinaryBufferUnchecked(_uri, satelliteReferenceSolver);
 
             _uri = null; // When _Data is not empty, clear URI
         }
 
-        private static Byte[] _LoadBinaryBufferUnchecked(string uri, AssetReader externalReferenceSolver)
+        private static Byte[] _LoadBinaryBufferUnchecked(string uri, AssetReader satelliteReferenceSolver)
         {
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? externalReferenceSolver?.Invoke(uri);
+                ?? satelliteReferenceSolver?.Invoke(uri);
         }
 
         #endregion
 
         #region binary write
 
-        internal void _WriteToExternal(string uri, AssetWriter writer)
+        /// <summary>
+        /// Called internally by the serializer when the buffer content is to be written as an external file
+        /// </summary>
+        /// <param name="writer">The satellite asset writer</param>
+        /// <param name="satelliteUri">A local satellite URI</param>
+        internal void _WriteToSatellite(AssetWriter writer, string satelliteUri)
         {
-            this._uri = uri;
+            this._uri = satelliteUri;
             this._byteLength = _Content.Length;
 
-            writer(uri, _Content);
+            writer(satelliteUri, _Content.GetPaddedContent());
         }
 
+        /// <summary>
+        /// Called internally by the serializer when the buffer content is to be written internally.
+        /// </summary>
         internal void _WriteToInternal()
         {
             this._uri = null;
             this._byteLength = _Content.Length;
         }
 
+        /// <summary>
+        /// Called by the serializer immediatelly after
+        /// calling <see cref="_WriteToSatellite(AssetWriter, string)"/>
+        /// or <see cref="_WriteToInternal"/>
+        /// </summary>
         internal void _ClearAfterWrite()
         {
             this._uri = null;
             this._byteLength = 0;
+        }
+
+        #endregion
+
+        #region API
+
+        internal void _IsolateMemory()
+        {
+            if (_Content == null) return;
+
+            var content = new Byte[_Content.Length];
+            _Content.CopyTo(content, 0);
+            _Content = content;
         }
 
         #endregion
@@ -151,6 +177,25 @@ namespace SharpGLTF.Schema2
             var b = new Buffer(sbbuilder.ToArray());
 
             this._buffers.Add(b);
+        }
+
+        /// <summary>
+        /// Refreshes all internal memory buffers.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="Buffer"/> instances can be created using external <see cref="Byte"/> arrays, which
+        /// can potentially be shared with other instances. Editing these arrays directly can lead to data
+        /// corruption.
+        /// This method refreshes all internal memory buffers, by copying the data into newly allocated
+        /// buffers. This ensures that at this point, all memory buffers are not shared and of exclusive
+        /// use of this <see cref="ModelRoot"/> instance.
+        /// </remarks>
+        public void IsolateMemory()
+        {
+            foreach (var b in this.LogicalBuffers)
+            {
+                b._IsolateMemory();
+            }
         }
     }
 }
