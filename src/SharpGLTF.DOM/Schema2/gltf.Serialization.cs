@@ -270,6 +270,9 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="filePath">A valid file path to write to.</param>
         /// <param name="fmt">The formatting of the JSON document.</param>
+        /// <remarks>
+        /// Satellite files like buffers and images are also saved with the file name formatted as "FILE_{Index}.EXT".
+        /// </remarks>
         public void SaveGLTF(string filePath, Formatting fmt = Formatting.None)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
@@ -290,6 +293,9 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="settings">A <see cref="WriteSettings"/> to use to write the files.</param>
         /// <param name="baseName">The base name to use for asset files.</param>
+        /// <remarks>
+        /// Satellite files like buffers and images are also written with the file name formatted as "FILE_{Index}.EXT".
+        /// </remarks>
         public void Write(WriteSettings settings, string baseName)
         {
             if (settings.BinaryMode)
@@ -384,6 +390,9 @@ namespace SharpGLTF.Schema2
             using (var m = new MemoryStream())
             {
                 var settings = new WriteSettings(m);
+
+                // ensure that images are embedded.
+                settings.EmbedImages = true;
 
                 Write(settings, "model");
 
