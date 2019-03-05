@@ -8,12 +8,25 @@ using Newtonsoft.Json;
 
 namespace SharpGLTF.Schema2
 {
-    using ROOT = ModelRoot;
+    using MODEL = ModelRoot;
 
+    /// <summary>
+    /// Callback used for loading associated files of current model.
+    /// </summary>
+    /// <param name="assetName">the asset relative path.</param>
+    /// <returns>The file contents as a <see cref="byte"/> array.</returns>
     public delegate Byte[] AssetReader(String assetName);
 
+    /// <summary>
+    /// Callback used for saving associated files of the current model.
+    /// </summary>
+    /// <param name="assetName">The asset relative path.</param>
+    /// <param name="assetData">The file contents as a <see cref="byte"/> array.</param>
     public delegate void AssetWriter(String assetName, Byte[] assetData);
 
+    /// <summary>
+    /// Configuration settings for reading model files.
+    /// </summary>
     public class ReadSettings
     {
         public ReadSettings()
@@ -32,6 +45,9 @@ namespace SharpGLTF.Schema2
         public AssetReader FileReader { get; set; }
     }
 
+    /// <summary>
+    /// Configuration settings for writing model files.
+    /// </summary>
     public class WriteSettings
     {
         #region lifecycle
@@ -86,7 +102,12 @@ namespace SharpGLTF.Schema2
     {
         #region Read API
 
-        public static ROOT Load(string filePath)
+        /// <summary>
+        /// Reads a <see cref="MODEL"/> instance from a path pointing to a GLB or a GLTF file
+        /// </summary>
+        /// <param name="filePath">A valid file path.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL Load(string filePath)
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
@@ -98,7 +119,12 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static ROOT ParseGLB(Byte[] glb)
+        /// <summary>
+        /// Parses a <see cref="MODEL"/> instance from a <see cref="byte"/> array representing a GLB file
+        /// </summary>
+        /// <param name="glb">A <see cref="byte"/> array representing a GLB file</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL ParseGLB(Byte[] glb)
         {
             Guard.NotNull(glb, nameof(glb));
 
@@ -109,11 +135,12 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Reads a <code>Schema.Gltf</code> model from a stream
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLB or a GLTF file.
         /// </summary>
-        /// <param name="stream">Readable stream to a gltf/glb model</param>
-        /// <returns><code>Schema.Gltf</code> model</returns>
-        public static ROOT Read(Stream stream, ReadSettings settings)
+        /// <param name="stream">A <see cref="Stream"/> to read from.</param>
+        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL Read(Stream stream, ReadSettings settings)
         {
             bool binaryFile = glb._Identify(stream);
 
@@ -121,7 +148,13 @@ namespace SharpGLTF.Schema2
             else            return ReadGLTF(stream, settings);
         }
 
-        public static ROOT ReadGLTF(Stream stream, ReadSettings settings)
+        /// <summary>
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLTF file.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> to read from.</param>
+        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL ReadGLTF(Stream stream, ReadSettings settings)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.NotNull(settings, nameof(settings));
@@ -136,7 +169,13 @@ namespace SharpGLTF.Schema2
             return ParseGLTF(content, settings);
         }
 
-        public static ROOT ReadGLB(Stream stream, ReadSettings settings)
+        /// <summary>
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLB file.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> to read from.</param>
+        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL ReadGLB(Stream stream, ReadSettings settings)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.NotNull(settings, nameof(settings));
@@ -153,7 +192,13 @@ namespace SharpGLTF.Schema2
             return ParseGLTF(dom, settings);
         }
 
-        public static ROOT ParseGLTF(String jsonContent, ReadSettings settings)
+        /// <summary>
+        /// Parses a <see cref="MODEL"/> instance from a <see cref="String"/> JSON content representing a GLTF file.
+        /// </summary>
+        /// <param name="jsonContent">A <see cref="String"/> JSON content representing a GLTF file.</param>
+        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL ParseGLTF(String jsonContent, ReadSettings settings)
         {
             Guard.NotNullOrEmpty(jsonContent, nameof(jsonContent));
             Guard.NotNull(settings, nameof(settings));
@@ -164,14 +209,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static ROOT _Read(StringReader textReader, ReadSettings settings)
+        private static MODEL _Read(StringReader textReader, ReadSettings settings)
         {
             Guard.NotNull(textReader, nameof(textReader));
             Guard.NotNull(settings, nameof(settings));
 
             using (var reader = new JsonTextReader(textReader))
             {
-                var root = new ROOT();
+                var root = new MODEL();
                 root.DeserializeObject(reader);
 
                 var ex = root.Validate().FirstOrDefault();
@@ -200,6 +245,10 @@ namespace SharpGLTF.Schema2
         // a possible solution would be to do a shallow copy of RootObject and update Buffers, BufferViews, etc
         // an issue that complicates things is that it requires to copy the extensions of root, buffers, etc
 
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to a file in GLB format.
+        /// </summary>
+        /// <param name="filePath">A valid file path to write to.</param>
         public void SaveGLB(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
@@ -213,9 +262,14 @@ namespace SharpGLTF.Schema2
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
-            Write(name, settings);
+            Write(settings, name);
         }
 
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to a file in GLTF format.
+        /// </summary>
+        /// <param name="filePath">A valid file path to write to.</param>
+        /// <param name="fmt">The formatting of the JSON document.</param>
         public void SaveGLTF(string filePath, Formatting fmt = Formatting.None)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
@@ -228,10 +282,15 @@ namespace SharpGLTF.Schema2
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
-            Write(name, settings);
+            Write(settings, name);
         }
 
-        public void Write(string name, WriteSettings settings)
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to the asset writer in <see cref="WriteSettings"/> configuration.
+        /// </summary>
+        /// <param name="settings">A <see cref="WriteSettings"/> to use to write the files.</param>
+        /// <param name="baseName">The base name to use for asset files.</param>
+        public void Write(WriteSettings settings, string baseName)
         {
             if (settings.BinaryMode)
             {
@@ -248,7 +307,7 @@ namespace SharpGLTF.Schema2
                 for (int i = 0; i < this._buffers.Count; ++i)
                 {
                     var buffer = this._buffers[i];
-                    var bname = this._buffers.Count != 1 ? $"{name}_{i}.bin" : $"{name}.bin";
+                    var bname = this._buffers.Count != 1 ? $"{baseName}_{i}.bin" : $"{baseName}.bin";
                     buffer._WriteToExternal(bname, settings.FileWriter);
                 }
             }
@@ -256,7 +315,7 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < this._images.Count; ++i)
             {
                 var image = this._images[i];
-                var iname = this._images.Count != 1 ? $"{name}_{i}" : $"{name}";
+                var iname = this._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
                 if (settings.EmbedImages) image._EmbedAssets();
                 else image._WriteExternalAssets(iname, settings.FileWriter);
             }
@@ -270,7 +329,7 @@ namespace SharpGLTF.Schema2
                         glb.WriteBinaryModel(w, this);
                     }
 
-                    settings.FileWriter($"{name}.glb", m.ToArray());
+                    settings.FileWriter($"{baseName}.glb", m.ToArray());
                 }
                 else
                 {
@@ -279,7 +338,7 @@ namespace SharpGLTF.Schema2
                         WriteJSON(w, settings.JSonFormatting);
                     }
 
-                    settings.FileWriter($"{name}.gltf", m.ToArray());
+                    settings.FileWriter($"{baseName}.gltf", m.ToArray());
                 }
             }
 
@@ -287,6 +346,11 @@ namespace SharpGLTF.Schema2
             foreach (var i in this._images) i._ClearAfterWrite();
         }
 
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> JSON document to a <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="sw">The target <see cref="TextWriter"/>.</param>
+        /// <param name="fmt">The formatting of the JSON document.</param>
         public void WriteJSON(TextWriter sw, Formatting fmt)
         {
             using (var writer = new JsonTextWriter(sw))
@@ -297,6 +361,11 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets the JSON document of this <see cref="MODEL"/>.
+        /// </summary>
+        /// <param name="fmt">The formatting of the JSON document.</param>
+        /// <returns>A JSON content.</returns>
         public string GetJSON(Formatting fmt)
         {
             using (var ss = new StringWriter())
@@ -306,13 +375,17 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to a <see cref="byte"/> array in GLB format.
+        /// </summary>
+        /// <returns>A <see cref="byte"/> array containing a GLB file.</returns>
         public Byte[] GetGLB()
         {
             using (var m = new MemoryStream())
             {
                 var settings = new WriteSettings(m);
 
-                Write("model", settings);
+                Write(settings, "model");
 
                 return m.ToArray();
             }
