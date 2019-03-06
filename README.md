@@ -37,10 +37,13 @@ Prerelease Nuget packages available [here.](https://www.nuget.org/packages/Sharp
 - [ ] Morphing utilities
 - [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
 
-### Supported Extensions
+### Supported extensions
 
 - [x] [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness)
 - [x] [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit)
+
+### Unsupported extensions
+
 - [ ] [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)
   - Depends on [Google's Draco Project](https://github.com/google/draco) which is C++ ; *Help Needed*
 - [ ] [KHR_lights_punctual](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
