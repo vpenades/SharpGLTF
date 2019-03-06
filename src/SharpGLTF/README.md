@@ -33,7 +33,7 @@ Creating a new gltf model:
 ```c#
 var model = ModelRoot.CreateModel();
 var scene = model.UseScene("Default Scene");
-var node = scene.AddVisualNode("Node1");
+var node = scene.CreateNode("Node1");
 ```
 
 
