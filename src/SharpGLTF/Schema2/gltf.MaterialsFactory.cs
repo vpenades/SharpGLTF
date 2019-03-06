@@ -10,6 +10,11 @@ namespace SharpGLTF.Schema2
     {
         #region API
 
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with default material attributes.
+        /// </summary>
+        /// <param name="diffuseColor">A <see cref="Vector4"/> color where X=Red, Y=Green, Z=Blue, W=Alpha.</param>
+        /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithDefault(Vector4 diffuseColor)
         {
             this.WithPBRMetallicRoughness()
@@ -19,11 +24,19 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with default material attributes.
+        /// </summary>
+        /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithDefault()
         {
             return this.WithPBRMetallicRoughness();
         }
 
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
+        /// </summary>
+        /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithPBRMetallicRoughness()
         {
             this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
@@ -34,6 +47,10 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with PBR Specular Glossiness attributes.
+        /// </summary>
+        /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithPBRSpecularGlossiness()
         {
             this.RemoveExtensions<MaterialUnlit_KHR>();
@@ -42,6 +59,10 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with Unlit attributes.
+        /// </summary>
+        /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithUnlit()
         {
             this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();

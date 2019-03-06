@@ -366,7 +366,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Node"/> instance.</returns>
-        public Node CreateNode(String name)
+        public Node CreateNode(String name = null)
         {
             return this.LogicalParent._CreateLogicalNode(this._nodes);
         }
