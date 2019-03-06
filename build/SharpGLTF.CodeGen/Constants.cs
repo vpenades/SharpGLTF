@@ -33,7 +33,7 @@ namespace SharpGLTF
         /// <summary>
         /// directory within the solution where the generated code is emitted
         /// </summary>
-        public static string TargetProjectDirectory => "src\\SharpGLTF.DOM\\Schema2\\Generated";
+        public static string TargetProjectDirectory => "src\\SharpGLTF\\Schema2\\Generated";
 
         /// <summary>
         /// namespace of the emitted generated code

@@ -17,7 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\MeshBuffers\MeshBuffers.csproj" />
-    <ProjectReference Include="..\..\src\SharpGLTF.DOM\SharpGLTF.csproj" />
+    <ProjectReference Include="..\..\src\SharpGLTF\SharpGLTF.csproj" />
   </ItemGroup>
 
 </Project>
