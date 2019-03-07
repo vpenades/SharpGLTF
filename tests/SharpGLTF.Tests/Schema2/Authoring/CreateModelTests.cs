@@ -31,18 +31,20 @@ namespace SharpGLTF.Schema2.Authoring
 
             root.Extras["value1"] = 17;
             root.Extras["array1"] = new Single[] { 1, 2, 3 };
-            root.Extras["dict1"] = new Dictionary<string, Object>
+            root.Extras["dict1"] = new Dictionary<String, Object>
             {
                 ["A"] = 16,
                 ["B"] = "delta",
                 ["C"] = new Single[] { 4, 6, 7 },
-                ["D"] = new Dictionary<string, Object> { ["S"]= 1, ["T"] = 2 }
+                ["D"] = new Dictionary<String, Object> { ["S"]= 1, ["T"] = 2 }
             };
 
             var json = root.GetJSON(Newtonsoft.Json.Formatting.Indented);
             var bytes = root.GetGLB();
 
             var rootBis = ModelRoot.ParseGLB(bytes);
+
+            CollectionAssert.AreEqual(root.Extras, rootBis.Extras);
 
             Assert.AreEqual(root.Extras["author"], rootBis.Extras["author"]);
             Assert.AreEqual(root.Extras["value1"], rootBis.Extras["value1"]);
