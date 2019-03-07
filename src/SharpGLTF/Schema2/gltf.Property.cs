@@ -14,13 +14,28 @@ namespace SharpGLTF.Schema2
 
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
-        private Object _extras;
+        private Extras _extras;
 
         #endregion
 
         #region properties
 
+        /// <summary>
+        /// Gets a collection of <see cref="JsonSerializable"/> instances.
+        /// </summary>
         public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
+
+        /// <summary>
+        /// Gets a collection of extra dynamic properties.
+        /// </summary>
+        public IDictionary<String, Object> Extras
+        {
+            get
+            {
+                if (_extras == null) _extras = new Extras();
+                return _extras.Properties;
+            }
+        }
 
         #endregion
 
@@ -67,8 +82,7 @@ namespace SharpGLTF.Schema2
         protected override void SerializeProperties(JsonWriter writer)
         {
             SerializeProperty(writer, "extensions", _extensions);
-
-            // SerializeProperty(writer, "extras", _extras);
+            if (_extras != null) SerializeProperty(writer, "extras", _extras);
         }
 
         /// <summary>
@@ -80,10 +94,10 @@ namespace SharpGLTF.Schema2
         {
             switch (property)
             {
-                case "extras": reader.Skip(); break;
                 case "extensions": _DeserializeExtensions(reader, _extensions); break;
 
-                // case "extras": _extras = DeserializeValue<Object>(reader); break;
+                // case "extras": reader.Skip(); break;
+                case "extras": _extras = DeserializeValue<Extras>(reader); break;
 
                 default: reader.Skip(); break;
             }
@@ -123,7 +137,7 @@ namespace SharpGLTF.Schema2
                 }
                 else
                 {
-                    val.DeserializeObject(reader);
+                    val.Deserialize(reader);
                     extensions.Add(val);
                 }
             }

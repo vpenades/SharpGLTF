@@ -15,7 +15,8 @@ namespace SharpGLTF.IO
                 reader.TokenType == JsonToken.Boolean ||
                 reader.TokenType == JsonToken.String ||
                 reader.TokenType == JsonToken.Integer ||
-                reader.TokenType == JsonToken.Float
+                reader.TokenType == JsonToken.Float,
+                $"invalid JSON token {reader.TokenType}"
                 );
 
             return Convert.ChangeType(reader.Value, vtype, System.Globalization.CultureInfo.InvariantCulture);

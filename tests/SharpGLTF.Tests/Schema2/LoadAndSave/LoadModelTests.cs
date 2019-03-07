@@ -86,9 +86,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 if (!f.Contains(section)) continue;
 
                 var model = GltfUtils.LoadModel(f);
-                Assert.NotNull(model);
+                Assert.NotNull(model);                
 
+                // evaluate and save all the triangles to a Wavefront Object
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+
+                // do a model roundtrip                
+                model.MergeBuffers();
+                var bytes = model.GetGLB();
+
+                var modelBis = ModelRoot.ParseGLB(bytes);
             }
         }
 

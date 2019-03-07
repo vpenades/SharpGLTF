@@ -28,6 +28,13 @@ namespace SharpGLTF.IO
 
         protected abstract void SerializeProperties(JsonWriter writer);
 
+        protected static void SerializeProperty(JsonWriter writer, string name, Object value)
+        {
+            if (value == null) return;
+            writer.WritePropertyName(name);
+            _Serialize(writer, value);
+        }
+
         protected static void SerializeProperty(JsonWriter writer, string name, string value)
         {
             if (value == null) return;
@@ -144,6 +151,7 @@ namespace SharpGLTF.IO
             if (minItems.HasValue && collection.Count < minItems.Value) return;
 
             writer.WritePropertyName(name);
+
             writer.WriteStartArray();
             foreach (var item in collection)
             {
@@ -203,18 +211,42 @@ namespace SharpGLTF.IO
                 }
 
                 writer.WriteEndObject();
-
                 return;
             }
 
-            throw new NotImplementedException();
+            if (value is IReadOnlyDictionary<String, Object> vdso)
+            {
+                writer.WriteStartObject();
+                foreach (var item in vdso)
+                {
+                    writer.WritePropertyName(item.Key);
+                    _Serialize(writer, item.Value);
+                }
+
+                writer.WriteEndObject();
+                return;
+            }
+
+            if (value is Array array)
+            {
+                writer.WriteStartArray();
+                foreach (var item in array)
+                {
+                    _Serialize(writer, item);
+                }
+
+                writer.WriteEndArray();
+                return;
+            }
+
+            throw new NotImplementedException($"Serialization of {value.GetType().Name} types is not supported.");
         }
 
         #endregion
 
         #region deserialization
 
-        public void DeserializeObject(JsonReader reader)
+        public void Deserialize(JsonReader reader)
         {
             while (reader.TokenType != JsonToken.StartObject)
             {
@@ -236,6 +268,51 @@ namespace SharpGLTF.IO
         }
 
         protected abstract void DeserializeProperty(JsonReader reader, string property);
+
+        protected static Object DeserializeObject(JsonReader reader)
+        {
+            reader.Read();
+
+            if (reader.TokenType == JsonToken.StartObject)
+            {
+                var dict = new Dictionary<string, object>();
+
+                while (true)
+                {
+                    reader.Read();
+
+                    if (reader.TokenType == JsonToken.StartObject) continue;
+                    if (reader.TokenType == JsonToken.EndObject) break;
+
+                    System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
+                    var key = reader.Value as String;
+                    var val = DeserializeObject(reader);
+
+                    dict[key] = val;
+                }
+
+                return dict;
+            }
+
+            if (reader.TokenType == JsonToken.StartArray)
+            {
+                var items = new List<Object>();
+
+                while (true)
+                {
+                    reader.Read();
+
+                    if (reader.TokenType == JsonToken.StartArray) continue;
+                    if (reader.TokenType == JsonToken.EndArray) break;
+
+                    items.Add(reader.Value);
+                }
+
+                return items.ToArray();
+            }
+
+            return reader.Value;
+        }
 
         protected static T DeserializeValue<T>(JsonReader reader)
         {
@@ -272,8 +349,6 @@ namespace SharpGLTF.IO
 
         protected static void DeserializeDictionary<T>(JsonReader reader, IDictionary<string, T> dict)
         {
-            // System.Diagnostics.Debug.Assert(typeof(T) != typeof(MeshPrimitive));
-
             while (true)
             {
                 reader.Read();
@@ -367,9 +442,9 @@ namespace SharpGLTF.IO
             {
                 System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.StartObject);
 
-                var item = System.Activator.CreateInstance(vtype, true) as JsonSerializable;
+                var item = Activator.CreateInstance(vtype, true) as JsonSerializable;
 
-                item.DeserializeObject(reader);
+                item.Deserialize(reader);
 
                 value = item;
 

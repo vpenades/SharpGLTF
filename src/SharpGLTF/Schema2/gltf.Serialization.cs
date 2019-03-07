@@ -217,7 +217,7 @@ namespace SharpGLTF.Schema2
             using (var reader = new JsonTextReader(textReader))
             {
                 var root = new MODEL();
-                root.DeserializeObject(reader);
+                root.Deserialize(reader);
 
                 var ex = root.Validate().FirstOrDefault();
                 if (ex != null) throw ex;
