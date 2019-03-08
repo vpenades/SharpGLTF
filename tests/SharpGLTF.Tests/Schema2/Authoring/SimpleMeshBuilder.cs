@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Text;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2.Authoring
 {
     class SimpleSceneBuilder<TMaterial>

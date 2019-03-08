@@ -1,0 +1,58 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>SharpGLTF.Toolkit</AssemblyName>
+    <RootNamespace>SharpGLTF</RootNamespace>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Authors>Vicente Penades</Authors>
+    <Description>SharpGLTF.Toolkit extends SharpGLTF library with useful tools and helper classes.</Description>
+    <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
+    <PackageTags>C# glTF 3D</PackageTags>
+    <Version>1.0.0-alpha0005</Version>
+    <LangVersion>latest</LangVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>SharpGLTF.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DocumentationFile>bin\Docs\SharpGLTF.Toolkit.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>    
+    <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpGLTF\SharpGLTF.csproj" />
+  </ItemGroup>
+
+</Project>

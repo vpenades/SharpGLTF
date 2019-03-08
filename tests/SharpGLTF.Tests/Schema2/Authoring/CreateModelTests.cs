@@ -5,8 +5,14 @@ using System.Text;
 
 using NUnit.Framework;
 
+
 namespace SharpGLTF.Schema2.Authoring
 {
+    using Geometry;
+
+    using STATICVERTEX = Geometry.VertexTypes.StaticPositionNormal;
+    using SKINNEDVERTEX = Geometry.VertexTypes.SkinnedPosition;
+
     [TestFixture]
     public class CreateModelTests
     {
@@ -210,17 +216,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
 
-        struct mySimpleVertex
-        {
-            public mySimpleVertex(float px, float py, float pz, float nx, float ny, float nz)
-            {
-                Position = new Vector3(px, py, pz);
-                Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
-            }
-
-            public Vector3 Position;
-            public Vector3 Normal;
-        }
+        
 
         [Test(Description = "Creates an interleaved scene using a mesh builder helper class")]
         public void CreateInterleavedMeshBuilderScene()
@@ -228,12 +224,12 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new InterleavedMeshBuilder<mySimpleVertex, Vector4>();
+            var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
 
-            var v1 = new mySimpleVertex(-10, 10, 0, -10, 10, 15);
-            var v2 = new mySimpleVertex( 10, 10, 0, 10, 10, 15);
-            var v3 = new mySimpleVertex( 10,-10, 0, 10, -10, 15);
-            var v4 = new mySimpleVertex(-10,-10, 0, -10, -10, 15);            
+            var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
+            var v2 = new STATICVERTEX( 10, 10, 0, 10, 10, 15);
+            var v3 = new STATICVERTEX( 10,-10, 0, 10, -10, 15);
+            var v4 = new STATICVERTEX(-10,-10, 0, -10, -10, 15);            
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
@@ -261,12 +257,12 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new InterleavedMeshBuilder<mySimpleVertex, Vector4>();
+            var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
 
-            var v1 = new mySimpleVertex(-10, 10, 0, -10, 10, 15);
-            var v2 = new mySimpleVertex(10, 10, 0, 10, 10, 15);
-            var v3 = new mySimpleVertex(10, -10, 0, 10, -10, 15);
-            var v4 = new mySimpleVertex(-10, -10, 0, -10, -10, 15);
+            var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
+            var v2 = new STATICVERTEX(10, 10, 0, 10, 10, 15);
+            var v3 = new STATICVERTEX(10, -10, 0, 10, -10, 15);
+            var v4 = new STATICVERTEX(-10, -10, 0, -10, -10, 15);
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
@@ -302,26 +298,7 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result.gltf");
         }
 
-        struct mySkinnedVertex
-        {
-            public mySkinnedVertex(float px, float py, float pz, int jointIndex)
-            {
-                Position = new Vector3(px, py, pz);
-                Joints_0 = new Vector4(jointIndex);
-                Weights_0 = Vector4.UnitX;
-            }
-
-            public mySkinnedVertex(float px, float py, float pz, int jointIndex1, int jointIndex2)
-            {
-                Position = new Vector3(px, py, pz);
-                Joints_0 = new Vector4(jointIndex1, jointIndex2,0,0);
-                Weights_0 = new Vector4(0.5f, 0.5f, 0, 0);
-            }
-
-            public Vector3 Position;            
-            public Vector4 Joints_0;
-            public Vector4 Weights_0;
-        }
+        
 
         [Test(Description = "Creates a skinned animated scene using a mesh builder helper class")]
         public void CreateSkinnedAnimatedMeshBuilderScene()
@@ -346,22 +323,22 @@ namespace SharpGLTF.Schema2.Authoring
             snode.Skin.BindJoints(jnode1, jnode2, jnode3);
 
             // create the mesh
-            var meshBuilder = new InterleavedMeshBuilder<mySkinnedVertex, Vector4>();
+            var meshBuilder = new InterleavedMeshBuilder<SKINNEDVERTEX, Vector4>();
 
-            var v1 = new mySkinnedVertex(-10, 0, +10, 0);
-            var v2 = new mySkinnedVertex(+10, 0, +10, 0);
-            var v3 = new mySkinnedVertex(+10, 0, -10, 0);
-            var v4 = new mySkinnedVertex(-10, 0, -10, 0);
+            var v1 = new SKINNEDVERTEX(-10, 0, +10, 0);
+            var v2 = new SKINNEDVERTEX(+10, 0, +10, 0);
+            var v3 = new SKINNEDVERTEX(+10, 0, -10, 0);
+            var v4 = new SKINNEDVERTEX(-10, 0, -10, 0);
 
-            var v5 = new mySkinnedVertex(-10, 40, +10, 0, 1);
-            var v6 = new mySkinnedVertex(+10, 40, +10, 0, 1);
-            var v7 = new mySkinnedVertex(+10, 40, -10, 0, 1);
-            var v8 = new mySkinnedVertex(-10, 40, -10, 0, 1);
+            var v5 = new SKINNEDVERTEX(-10, 40, +10, 0, 1);
+            var v6 = new SKINNEDVERTEX(+10, 40, +10, 0, 1);
+            var v7 = new SKINNEDVERTEX(+10, 40, -10, 0, 1);
+            var v8 = new SKINNEDVERTEX(-10, 40, -10, 0, 1);
 
-            var v9  = new mySkinnedVertex(-5, 80, +5, 2);
-            var v10 = new mySkinnedVertex(+5, 80, +5, 2);
-            var v11 = new mySkinnedVertex(+5, 80, -5, 2);
-            var v12 = new mySkinnedVertex(-5, 80, -5, 2);
+            var v9  = new SKINNEDVERTEX(-5, 80, +5, 2);
+            var v10 = new SKINNEDVERTEX(+5, 80, +5, 2);
+            var v11 = new SKINNEDVERTEX(+5, 80, -5, 2);
+            var v12 = new SKINNEDVERTEX(-5, 80, -5, 2);
 
             meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v1, v2, v6, v5);
             meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v2, v3, v7, v6);

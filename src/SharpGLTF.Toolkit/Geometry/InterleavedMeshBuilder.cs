@@ -3,9 +3,13 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
-namespace SharpGLTF.Schema2.Authoring
+namespace SharpGLTF.Geometry
 {
-    class InterleavedMeshBuilder<TVertex, TMaterial> where TVertex : struct
+    using Collections;
+    using Schema2;
+
+    public class InterleavedMeshBuilder<TVertex, TMaterial>
+        where TVertex : struct
     {
         #region data
 
@@ -44,7 +48,7 @@ namespace SharpGLTF.Schema2.Authoring
             indices.Add(aa);
             indices.Add(bb);
             indices.Add(cc);
-        }        
+        }
 
         public void CopyToNode(Node dstNode, Func<TMaterial, Material> materialEvaluator)
         {
@@ -52,7 +56,7 @@ namespace SharpGLTF.Schema2.Authoring
             CopyToMesh(dstNode.Mesh, materialEvaluator);
         }
 
-        public void CopyToMesh(Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
+        public void CopyToMesh(Schema2.Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
         {
             var root = dstMesh.LogicalParent;
 
@@ -61,12 +65,14 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create vertex buffer
             int byteStride = attributes[0].ByteStride;
-            var vbuffer = root.UseBufferView(new Byte[byteStride * _Vertices.Count], byteStride, BufferMode.ARRAY_BUFFER);
+            var vbytes = new Byte[byteStride * _Vertices.Count];
+
+            var vbuffer = root.UseBufferView(new ArraySegment<byte>(vbytes), byteStride, BufferMode.ARRAY_BUFFER);
 
             // create vertex accessors
             var vertexAccessors = new Dictionary<String, Accessor>();
 
-            foreach(var attribute in attributes)
+            foreach (var attribute in attributes)
             {
                 var accessor = root.CreateAccessor(attribute.Name);
 
@@ -77,12 +83,13 @@ namespace SharpGLTF.Schema2.Authoring
                 if (attributeType == typeof(Vector4)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, _GetVector4Column(_Vertices, attribute.Name), attribute.Encoding, attribute.Normalized);
 
                 vertexAccessors[attribute.Name.ToUpper()] = accessor;
-            }            
+            }
 
             foreach (var kvp in _Indices)
             {
                 // create index buffer
-                var ibuffer = root.UseBufferView(new Byte[4 * kvp.Value.Count], 0, BufferMode.ELEMENT_ARRAY_BUFFER);
+                var ibytes = new Byte[4 * kvp.Value.Count];
+                var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
 
                 var indices = root
                     .CreateAccessor("Indices")
@@ -182,5 +189,5 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         #endregion
-    }    
+    }
 }
