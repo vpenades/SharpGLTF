@@ -46,6 +46,9 @@ namespace SharpGLTF
             
             if (fileName.ToLower().EndsWith(".glb"))
             {
+                // clone the model so merging the buffers will not affect the source model.
+                model = model.DeepClone();
+
                 // ensure the model has just one buffer
                 model.MergeImages();
                 model.MergeBuffers();

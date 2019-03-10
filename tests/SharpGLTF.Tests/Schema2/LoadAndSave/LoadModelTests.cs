@@ -90,6 +90,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 // evaluate and save all the triangles to a Wavefront Object
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
 
                 // attempt clone
                 var xclone = model.DeepClone();
