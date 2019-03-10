@@ -14,6 +14,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Defines the pattern in which a <see cref="ArraySegment{Byte}"/> is accessed and decoded to meaningful values.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Name} {Dimensions}.{Encoding}.{Normalized} {ByteStride}   {ByteOffset} [{ItemsCount}]")]
     public struct MemoryAccessInfo
     {
         #region constructor

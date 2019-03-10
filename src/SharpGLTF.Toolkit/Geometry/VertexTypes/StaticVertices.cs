@@ -13,7 +13,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
         }
 
+        [VertexAttribute("POSITION")]
         public Vector3 Position;
+
+        [VertexAttribute("NORMAL")]
         public Vector3 Normal;
     }
 }

@@ -7,6 +7,7 @@ namespace SharpGLTF.Geometry
 {
     using Collections;
     using Schema2;
+    using VertexTypes;
 
     public class InterleavedMeshBuilder<TVertex, TMaterial>
         where TVertex : struct
@@ -61,7 +62,7 @@ namespace SharpGLTF.Geometry
             var root = dstMesh.LogicalParent;
 
             // get vertex attributes from TVertex type using reflection
-            var attributes = _GetVertexAttributes(_Vertices.Count);
+            var attributes = VertexUtils.GetVertexAttributes(typeof(TVertex), _Vertices.Count);
 
             // create vertex buffer
             int byteStride = attributes[0].ByteStride;
@@ -76,13 +77,13 @@ namespace SharpGLTF.Geometry
             {
                 var accessor = root.CreateAccessor(attribute.Name);
 
-                var attributeType = _GetVertexAttributeType(attribute.Name);
+                var field = VertexUtils.GetVertexField(typeof(TVertex), attribute.Name);
 
-                if (attributeType == typeof(Vector2)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, _GetVector2Column(_Vertices, attribute.Name), attribute.Encoding, attribute.Normalized);
-                if (attributeType == typeof(Vector3)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, _GetVector3Column(_Vertices, attribute.Name), attribute.Encoding, attribute.Normalized);
-                if (attributeType == typeof(Vector4)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, _GetVector4Column(_Vertices, attribute.Name), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector2)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector2Column(_Vertices), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector3)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector3Column(_Vertices), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector4)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector4Column(_Vertices), attribute.Encoding, attribute.Normalized);
 
-                vertexAccessors[attribute.Name.ToUpper()] = accessor;
+                vertexAccessors[attribute.Name] = accessor;
             }
 
             foreach (var kvp in _Indices)
@@ -106,87 +107,6 @@ namespace SharpGLTF.Geometry
 
             root.MergeImages();
             root.MergeBuffers();
-        }
-
-        #endregion
-
-        #region core
-
-        private Geometry.MemoryAccessInfo[] _GetVertexAttributes(int itemsCount)
-        {
-            var type = typeof(TVertex);
-
-            var attributes = new List<Geometry.MemoryAccessInfo>();
-
-            foreach (var field in type.GetFields())
-            {
-                var attributeName = field.Name;
-                var attributeInfo = Geometry.MemoryAccessInfo.CreateDefaultElement(attributeName.ToUpper());
-                attributes.Add(attributeInfo);
-            }
-
-            var array = attributes.ToArray();
-
-            Geometry.MemoryAccessInfo.SetInterleavedInfo(array, 0, itemsCount);
-
-            return array;
-        }
-
-        private static System.Reflection.FieldInfo _GetVertexField(string fieldName)
-        {
-            foreach (var field in typeof(TVertex).GetFields())
-            {
-                if (field.Name.ToLower() == fieldName.ToLower()) return field;
-            }
-
-            return null;
-        }
-
-        private static Type _GetVertexAttributeType(string fieldName)
-        {
-            return _GetVertexField(fieldName).FieldType;
-        }
-
-        private static Vector2[] _GetVector2Column(IReadOnlyList<TVertex> vertices, string fieldName)
-        {
-            var dst = new Vector2[vertices.Count];
-
-            var finfo = _GetVertexField(fieldName);
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                dst[i] = (Vector2)finfo.GetValue(vertices[i]);
-            }
-
-            return dst;
-        }
-
-        private static Vector3[] _GetVector3Column(IReadOnlyList<TVertex> vertices, string fieldName)
-        {
-            var dst = new Vector3[vertices.Count];
-
-            var finfo = _GetVertexField(fieldName);
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                dst[i] = (Vector3)finfo.GetValue(vertices[i]);
-            }
-
-            return dst;
-        }
-
-        private static Vector4[] _GetVector4Column(IReadOnlyList<TVertex> vertices, string fieldName)
-        {
-            var dst = new Vector4[vertices.Count];
-
-            var finfo = _GetVertexField(fieldName);
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                dst[i] = (Vector4)finfo.GetValue(vertices[i]);
-            }
-
-            return dst;
         }
 
         #endregion
