@@ -157,6 +157,10 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <remarks>
         /// When merging the buffers, it also adjusts the BufferView offsets so the data they point to remains the same.
+        ///
+        /// If images are required to be included in the binary, call <see cref="ModelRoot.MergeImages"/> before calling <see cref="MergeBuffers"/>
+        ///
+        /// This action cannot be reversed.
         /// </remarks>
         public void MergeBuffers()
         {

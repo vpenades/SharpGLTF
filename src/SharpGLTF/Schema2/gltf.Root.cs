@@ -49,12 +49,12 @@ namespace SharpGLTF.Schema2
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         /// <remarks>
         /// Deep cloning is performed as a brute force operation; by serializing
-        /// the whole model to GLB into memory, and then deserializing it back.
+        /// the whole model to GLTF into memory, and then deserializing it back.
         /// </remarks>
         public ModelRoot DeepClone()
         {
-            var document = this.GetGLB();
-            return ModelRoot.ParseGLB(document);
+            var dictionary = this.WriteToDictionary("deepclone");
+            return ModelRoot.ReadFromDictionary(dictionary, "deepclone.gltf");
         }
 
         #endregion

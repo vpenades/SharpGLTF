@@ -47,6 +47,7 @@ namespace SharpGLTF
             if (fileName.ToLower().EndsWith(".glb"))
             {
                 // ensure the model has just one buffer
+                model.MergeImages();
                 model.MergeBuffers();
                 model.SaveGLB(fileName);
             }

@@ -45,8 +45,8 @@ namespace SharpGLTF.Schema2.Authoring
                 ["D"] = new Dictionary<String, Object> { ["S"]= 1, ["T"] = 2 }
             };
 
-            var json = root.GetJSON(Newtonsoft.Json.Formatting.Indented);
-            var bytes = root.GetGLB();
+            var json = root.WriteJSON(Newtonsoft.Json.Formatting.Indented);
+            var bytes = root.WriteGLB();
 
             var rootBis = ModelRoot.ParseGLB(bytes);
 
@@ -210,9 +210,9 @@ namespace SharpGLTF.Schema2.Authoring
 
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
-            
-            model.AttachToCurrentTest("result.glb");
-            model.AttachToCurrentTest("result.gltf");
+
+            model.DeepClone().AttachToCurrentTest("result.gltf");
+            model.DeepClone().AttachToCurrentTest("result.glb");            
         }
 
 

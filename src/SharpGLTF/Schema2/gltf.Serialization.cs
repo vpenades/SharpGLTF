@@ -33,15 +33,23 @@ namespace SharpGLTF.Schema2
         {
         }
 
+        internal ReadSettings(AssetReader reader)
+        {
+            FileReader = reader;
+        }
+
         internal ReadSettings(string filePath)
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
             var dir = Path.GetDirectoryName(filePath);
 
-            FileReader = asset => File.ReadAllBytes(Path.Combine(dir, asset));
+            FileReader = assetFileName => File.ReadAllBytes(Path.Combine(dir, assetFileName));
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="AssetReader"/> delegate used to read satellite files.
+        /// </summary>
         public AssetReader FileReader { get; set; }
     }
 
@@ -59,6 +67,11 @@ namespace SharpGLTF.Schema2
             var dir = Path.GetDirectoryName(filePath);
 
             this.FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d);
+        }
+
+        internal WriteSettings(AssetWriter fileWriter)
+        {
+            this.FileWriter = fileWriter;
         }
 
         internal WriteSettings(Func<string, Stream> fileWriter)
@@ -93,6 +106,9 @@ namespace SharpGLTF.Schema2
 
         public Formatting JSonFormatting { get; set; }
 
+        /// <summary>
+        /// Gets or sets the <see cref="AssetWriter"/> delegate used to write satellite files.
+        /// </summary>
         public AssetWriter FileWriter { get; set; }
 
         #endregion
@@ -124,11 +140,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="glb">A <see cref="byte"/> array representing a GLB file</param>
         /// <returns>A <see cref="MODEL"/> instance.</returns>
-        public static MODEL ParseGLB(Byte[] glb)
+        public static MODEL ParseGLB(ArraySegment<Byte> glb)
         {
             Guard.NotNull(glb, nameof(glb));
 
-            using (var m = new MemoryStream(glb))
+            using (var m = new MemoryStream(glb.Array, glb.Offset, glb.Count, false))
             {
                 return ReadGLB(m, new ReadSettings());
             }
@@ -209,7 +225,22 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static MODEL _Read(StringReader textReader, ReadSettings settings)
+        public static MODEL ReadFromDictionary(Dictionary<string, Byte[]> files, string fileName)
+        {
+            var jsonBytes = files[fileName];
+
+            var settings = new ReadSettings(fn => files[fn]);
+
+            using (var m = new MemoryStream(jsonBytes))
+            {
+                using (var s = new StreamReader(m))
+                {
+                    return _Read(s, settings);
+                }
+            }
+        }
+
+        private static MODEL _Read(TextReader textReader, ReadSettings settings)
         {
             Guard.NotNull(textReader, nameof(textReader));
             Guard.NotNull(settings, nameof(settings));
@@ -289,6 +320,71 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
+        /// Writes this <see cref="MODEL"/> to a dictionary where every key is an individual file
+        /// </summary>
+        /// <param name="fileName">the base name to use for the dictionary keys</param>
+        /// <returns>a dictionary instance.</returns>
+        public Dictionary<String, Byte[]> WriteToDictionary(string fileName)
+        {
+            var dict = new Dictionary<string, Byte[]>();
+
+            var settings = new WriteSettings((fn, buff) => dict[fn] = buff);
+
+            this.Write(settings, fileName);
+
+            return dict;
+        }
+
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> JSON document to a <see cref="TextWriter"/>.
+        /// </summary>
+        /// <param name="sw">The target <see cref="TextWriter"/>.</param>
+        /// <param name="fmt">The formatting of the JSON document.</param>
+        public void WriteJSON(TextWriter sw, Formatting fmt)
+        {
+            using (var writer = new JsonTextWriter(sw))
+            {
+                writer.Formatting = fmt;
+
+                this.Serialize(writer);
+            }
+        }
+
+        /// <summary>
+        /// Gets the JSON document of this <see cref="MODEL"/>.
+        /// </summary>
+        /// <param name="fmt">The formatting of the JSON document.</param>
+        /// <returns>A JSON content.</returns>
+        public string WriteJSON(Formatting fmt)
+        {
+            using (var ss = new StringWriter())
+            {
+                WriteJSON(ss, fmt);
+                return ss.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to a <see cref="byte"/> array in GLB format.
+        /// </summary>
+        /// <returns>A <see cref="byte"/> array containing a GLB file.</returns>
+        public ArraySegment<Byte> WriteGLB()
+        {
+            using (var m = new MemoryStream())
+            {
+                var settings = new WriteSettings(m);
+
+                // ensure that images are embedded.
+                settings.EmbedImages = true;
+
+                Write(settings, "model");
+
+                if (m.TryGetBuffer(out ArraySegment<Byte> buffer)) return buffer;
+                return new ArraySegment<byte>(m.ToArray());
+            }
+        }
+
+        /// <summary>
         /// Writes this <see cref="MODEL"/> to the asset writer in <see cref="WriteSettings"/> configuration.
         /// </summary>
         /// <param name="settings">A <see cref="WriteSettings"/> to use to write the files.</param>
@@ -350,54 +446,6 @@ namespace SharpGLTF.Schema2
 
             foreach (var b in this._buffers) b._ClearAfterWrite();
             foreach (var i in this._images) i._ClearAfterWrite();
-        }
-
-        /// <summary>
-        /// Writes this <see cref="MODEL"/> JSON document to a <see cref="TextWriter"/>.
-        /// </summary>
-        /// <param name="sw">The target <see cref="TextWriter"/>.</param>
-        /// <param name="fmt">The formatting of the JSON document.</param>
-        public void WriteJSON(TextWriter sw, Formatting fmt)
-        {
-            using (var writer = new JsonTextWriter(sw))
-            {
-                writer.Formatting = fmt;
-
-                this.Serialize(writer);
-            }
-        }
-
-        /// <summary>
-        /// Gets the JSON document of this <see cref="MODEL"/>.
-        /// </summary>
-        /// <param name="fmt">The formatting of the JSON document.</param>
-        /// <returns>A JSON content.</returns>
-        public string GetJSON(Formatting fmt)
-        {
-            using (var ss = new StringWriter())
-            {
-                WriteJSON(ss, fmt);
-                return ss.ToString();
-            }
-        }
-
-        /// <summary>
-        /// Writes this <see cref="MODEL"/> to a <see cref="byte"/> array in GLB format.
-        /// </summary>
-        /// <returns>A <see cref="byte"/> array containing a GLB file.</returns>
-        public Byte[] GetGLB()
-        {
-            using (var m = new MemoryStream())
-            {
-                var settings = new WriteSettings(m);
-
-                // ensure that images are embedded.
-                settings.EmbedImages = true;
-
-                Write(settings, "model");
-
-                return m.ToArray();
-            }
         }
 
         #endregion

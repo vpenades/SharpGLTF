@@ -111,7 +111,7 @@ namespace SharpGLTF.Schema2
             try
             {
                 Guard.NotNull(model, nameof(model));
-                Guard.IsTrue(model.LogicalBuffers.Count <= 1, nameof(model), $"GLB format only supports one binary buffer, {model.LogicalBuffers.Count} found. It can be solved by calling {nameof(ModelRoot.MergeBuffers)}");
+                Guard.IsTrue(model.LogicalBuffers.Count <= 1, nameof(model), $"GLB format only supports one binary buffer, {model.LogicalBuffers.Count} found. It can be solved by calling {nameof(ModelRoot.MergeImages)} and {nameof(ModelRoot.MergeBuffers)}");
             }
             catch (Exception ex)
             {
@@ -132,7 +132,7 @@ namespace SharpGLTF.Schema2
         {
             var ex = IsBinaryCompatible(model); if (ex != null) throw ex;
 
-            var jsonText = model.GetJSON(Newtonsoft.Json.Formatting.None);
+            var jsonText = model.WriteJSON(Newtonsoft.Json.Formatting.None);
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 
