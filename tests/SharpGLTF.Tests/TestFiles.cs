@@ -16,6 +16,8 @@ namespace SharpGLTF
         {
             var workingDir = System.IO.Path.GetDirectoryName(typeof(TestFiles).Assembly.Location);
 
+            _SchemaDir = System.IO.Path.Combine(workingDir, "glTF-Schema");
+
             _SampleModelsDir = System.IO.Path.Combine(workingDir, "glTF-Sample-Models");
             _PollyModelsDir = System.IO.Path.Combine(workingDir, "glTF-Blender-Exporter");
             _GeneratedAssetsDir = System.IO.Path.Combine(workingDir, "glTF-Asset-Generator");
@@ -34,7 +36,8 @@ namespace SharpGLTF
 
             TestUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
             TestUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);
-            TestUtils.SyncronizeGitRepository("https://github.com/bghgary/glTF-Asset-Generator.git", _GeneratedAssetsDir);            
+            TestUtils.SyncronizeGitRepository("https://github.com/bghgary/glTF-Asset-Generator.git", _GeneratedAssetsDir);
+            TestUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _SchemaDir);
         }
 
         #endregion
@@ -42,6 +45,8 @@ namespace SharpGLTF
         #region data
 
         private static Boolean _RemotesChecked = false;
+
+        private static readonly string _SchemaDir;
         private static readonly string _SampleModelsDir;
         private static readonly string _PollyModelsDir;
         private static readonly string _GeneratedAssetsDir;
@@ -51,6 +56,16 @@ namespace SharpGLTF
         #endregion
 
         #region API
+
+        public static string[] GetSchemaFilePaths()
+        {
+            var dir = System.IO.Path.Combine(_SchemaDir, "extensions", "2.0");
+
+            var gltf = System.IO.Directory.GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories);
+            var glbb = System.IO.Directory.GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories);
+
+            return gltf.Concat(glbb).ToArray();            
+        }
 
         public static string[] GetSampleFilePaths()
         {

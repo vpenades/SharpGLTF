@@ -8,12 +8,21 @@ namespace SharpGLTF.Schema2
 
     static class ExtensionsFactory
     {
+        // extensions design inconsistencies:
+        // https://github.com/KhronosGroup/glTF/issues/1491
+
         #region supported extensions must be registered here
 
         static ExtensionsFactory()
         {
             RegisterExtension<MaterialPBRSpecularGlossiness_KHR>("KHR_materials_pbrSpecularGlossiness");
             RegisterExtension<MaterialUnlit_KHR>("KHR_materials_unlit");
+
+            // if found in model:
+            // RegisterExtension<KHR_lights_punctualglTFextension>("KHR_lights_punctual");
+
+            // if found in node
+            // RegisterExtension<KHR_lights_punctualnodeextension>("KHR_lights_punctual");
         }
 
         #endregion

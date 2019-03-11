@@ -127,7 +127,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void TestLoadUnlitMode()
+        public void TestLoadUnlitModel()
         {
             var f = TestFiles.GetSampleFilePaths()
                 .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
@@ -142,8 +142,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(modelBis);
 
             Assert.IsTrue(modelBis.LogicalMaterials[0].Unlit);
+        }
 
+        [Test]
+        public void TestLoadLightsModel()
+        {
+            var f = TestFiles.GetSchemaFilePaths()
+                .FirstOrDefault(item => item.EndsWith("lights.gltf"));
 
+            var model = GltfUtils.LoadModel(f);
+            Assert.NotNull(model);
         }
 
         #endregion

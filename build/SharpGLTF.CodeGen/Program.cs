@@ -23,7 +23,8 @@ namespace SharpGLTF
 
             _ProcessKhronosPBRExtension();
             _ProcessKhronosUnlitExtension();
-            _ProcessKhronosLightsPunctualExtension();
+            _ProcessKhronosModelLightsPunctualExtension();
+            _ProcessKhronosNodeLightsPunctualExtension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
@@ -129,9 +130,9 @@ namespace SharpGLTF
             ProcessSchema("ext.Unlit.g", ctx);
         }
 
-        private static void _ProcessKhronosLightsPunctualExtension()
+        private static void _ProcessKhronosModelLightsPunctualExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosLightsPunctualSchemaFile);            
+            var ctx = LoadSchemaContext(Constants.KhronosModelLightsPunctualSchemaFile);            
             ctx.Remove("glTF Property");
             ctx.Classes.FirstOrDefault(item => item.PersistentName == "glTF Child of Root Property").IgnoredByEmitter = true;
 
@@ -144,8 +145,18 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector3.One")
                 .SetItemsRange(0);
 
-            ProcessSchema("ext.LightsPunctual.g", ctx);
+            ProcessSchema("ext.ModelLightsPunctual.g", ctx);
         }
+
+        private static void _ProcessKhronosNodeLightsPunctualExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
+            ctx.Remove("glTF Property");            
+
+            ProcessSchema("ext.NodeLightsPunctual.g", ctx);
+        }
+
+
 
         /*
         private static void _ProcessMicrosoftLODExtension()
@@ -204,8 +215,8 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness_KHR");
             newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit_KHR");
 
-            newEmitter.SetRuntimeName("light", "Light_KHR");
-            newEmitter.SetRuntimeName("light/spot", "LightSpot_KHR");
+            newEmitter.SetRuntimeName("light", "PunctualLight");
+            newEmitter.SetRuntimeName("light/spot", "PunctualLightSpot");
 
 
 
