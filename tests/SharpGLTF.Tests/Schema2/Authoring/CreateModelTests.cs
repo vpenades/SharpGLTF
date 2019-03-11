@@ -372,7 +372,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             model.CreateAnimation("Animation")
                 .CreateRotationChannel(jnode2, keyframes);
-
+            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }

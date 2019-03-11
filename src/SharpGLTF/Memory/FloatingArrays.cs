@@ -656,14 +656,15 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Dimensions => _Dimensions;
+
         public Single[] this[int index]
         {
             get
             {
                 var val = new Single[_Dimensions];
-
-                for (int i = 0; i < val.Length; ++i) val[i] = _Accessor[index, i];
-
+                CopyItemTo(index, val);
                 return val;
             }
 
@@ -677,6 +678,13 @@ namespace SharpGLTF.Memory
                     _Accessor[index, i] = value[i];
                 }
             }
+        }
+
+        public void CopyItemTo(int index, Single[] dstItem)
+        {
+            var count = _Dimensions;
+
+            for (int i = 0; i < count; ++i) dstItem[i] = _Accessor[index, i];
         }
 
         public void CopyTo(ArraySegment<Single[]> dst) { EncodedArrayUtils.Copy<Single[]>(this, dst); }

@@ -327,11 +327,15 @@ namespace SharpGLTF.Schema2
             return SourceBufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
         }
 
+        #endregion
+
+        #region API
+
         public void UpdateBounds()
         {
-            var count = this._type.DimCount();
+            var dimensions = this._type.DimCount();
 
-            var bounds = new double[count];
+            var bounds = new double[dimensions];
             this._min.Clear();
             this._min.AddRange(bounds);
             this._max.Clear();
@@ -340,60 +344,19 @@ namespace SharpGLTF.Schema2
             this._min.Fill(double.MaxValue);
             this._max.Fill(double.MinValue);
 
-            if (count == 1)
+            var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
+
+            var current = new float[dimensions];
+
+            for (int i = 0; i < array.Count; ++i)
             {
-                var minmax = this.AsScalarArray().GetBounds();
+                array.CopyItemTo(i, current);
 
-                this._min[0] = minmax.Item1;
-                this._max[0] = minmax.Item2;
-            }
-
-            if (count == 2)
-            {
-                var minmax = this.AsVector2Array().GetBounds();
-
-                this._min[0] = minmax.Item1.X;
-                this._max[0] = minmax.Item2.X;
-
-                this._min[1] = minmax.Item1.Y;
-                this._max[1] = minmax.Item2.Y;
-            }
-
-            if (count == 3)
-            {
-                var minmax = this.AsVector3Array().GetBounds();
-
-                this._min[0] = minmax.Item1.X;
-                this._max[0] = minmax.Item2.X;
-
-                this._min[1] = minmax.Item1.Y;
-                this._max[1] = minmax.Item2.Y;
-
-                this._min[2] = minmax.Item1.Z;
-                this._max[2] = minmax.Item2.Z;
-            }
-
-            if (count == 4)
-            {
-                var minmax = this.AsVector4Array().GetBounds();
-
-                this._min[0] = minmax.Item1.X;
-                this._max[0] = minmax.Item2.X;
-
-                this._min[1] = minmax.Item1.Y;
-                this._max[1] = minmax.Item2.Y;
-
-                this._min[2] = minmax.Item1.Z;
-                this._max[2] = minmax.Item2.Z;
-
-                this._min[3] = minmax.Item1.W;
-                this._max[3] = minmax.Item2.W;
-            }
-
-            if (count > 4)
-            {
-                this._min.Clear();
-                this._max.Clear();
+                for (int j = 0; j < current.Length; ++j)
+                {
+                    this._min[j] = Math.Min(this._min[j], current[j]);
+                    this._max[j] = Math.Max(this._max[j], current[j]);
+                }
             }
         }
 

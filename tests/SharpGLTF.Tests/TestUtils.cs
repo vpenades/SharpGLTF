@@ -43,15 +43,19 @@ namespace SharpGLTF
         {
             // find the output path for the current test
             fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-            
-            if (fileName.ToLower().EndsWith(".glb"))
+
+            if (model.LogicalBuffers.Count > 1 || model.LogicalImages.Count > 0)
             {
                 // clone the model so merging the buffers will not affect the source model.
                 model = model.DeepClone();
 
-                // ensure the model has just one buffer
-                model.MergeImages();
+                if (fileName.ToLower().EndsWith(".glb")) model.MergeImages();
                 model.MergeBuffers();
+            }
+
+            
+            if (fileName.ToLower().EndsWith(".glb"))
+            {
                 model.SaveGLB(fileName);
             }
             else if (fileName.ToLower().EndsWith(".gltf"))
