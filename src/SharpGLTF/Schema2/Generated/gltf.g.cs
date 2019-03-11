@@ -319,13 +319,8 @@ namespace SharpGLTF.Schema2
 		
 		private ComponentType _componentType;
 		
-		private static readonly Boolean _normalizedDefault = false;
-		private Boolean? _normalized = _normalizedDefault;
-		
 		private const Int32 _countMinimum = 1;
 		private Int32 _count;
-		
-		private ElementType _type;
 		
 		private const int _maxMinItems = 1;
 		private const int _maxMaxItems = 16;
@@ -335,7 +330,12 @@ namespace SharpGLTF.Schema2
 		private const int _minMaxItems = 16;
 		private List<Double> _min;
 		
+		private static readonly Boolean _normalizedDefault = false;
+		private Boolean? _normalized = _normalizedDefault;
+		
 		private AccessorSparse _sparse;
+		
+		private ElementType _type;
 		
 	
 		/// <inheritdoc />
@@ -345,12 +345,12 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "bufferView", _bufferView);
 			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
 			SerializePropertyEnumValue<ComponentType>(writer, "componentType", _componentType);
-			SerializeProperty(writer, "normalized", _normalized, _normalizedDefault);
 			SerializeProperty(writer, "count", _count);
-			SerializePropertyEnumSymbol<ElementType>(writer, "type", _type);
 			SerializeProperty(writer, "max", _max, _maxMinItems);
 			SerializeProperty(writer, "min", _min, _minMinItems);
+			SerializeProperty(writer, "normalized", _normalized, _normalizedDefault);
 			SerializePropertyObject(writer, "sparse", _sparse);
+			SerializePropertyEnumSymbol<ElementType>(writer, "type", _type);
 		}
 	
 		/// <inheritdoc />
@@ -361,12 +361,12 @@ namespace SharpGLTF.Schema2
 				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
 				case "componentType": _componentType = DeserializeValue<ComponentType>(reader); break;
-				case "normalized": _normalized = DeserializeValue<Boolean?>(reader); break;
 				case "count": _count = DeserializeValue<Int32>(reader); break;
-				case "type": _type = DeserializeValue<ElementType>(reader); break;
 				case "max": DeserializeList<Double>(reader, _max); break;
 				case "min": DeserializeList<Double>(reader, _min); break;
+				case "normalized": _normalized = DeserializeValue<Boolean?>(reader); break;
 				case "sparse": _sparse = DeserializeValue<AccessorSparse>(reader); break;
+				case "type": _type = DeserializeValue<ElementType>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -518,9 +518,9 @@ namespace SharpGLTF.Schema2
 		
 		private String _generator;
 		
-		private String _version;
-		
 		private String _minVersion;
+		
+		private String _version;
 		
 	
 		/// <inheritdoc />
@@ -529,8 +529,8 @@ namespace SharpGLTF.Schema2
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "copyright", _copyright);
 			SerializeProperty(writer, "generator", _generator);
-			SerializeProperty(writer, "version", _version);
 			SerializeProperty(writer, "minVersion", _minVersion);
+			SerializeProperty(writer, "version", _version);
 		}
 	
 		/// <inheritdoc />
@@ -540,8 +540,8 @@ namespace SharpGLTF.Schema2
 			{
 				case "copyright": _copyright = DeserializeValue<String>(reader); break;
 				case "generator": _generator = DeserializeValue<String>(reader); break;
-				case "version": _version = DeserializeValue<String>(reader); break;
 				case "minVersion": _minVersion = DeserializeValue<String>(reader); break;
+				case "version": _version = DeserializeValue<String>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -554,18 +554,18 @@ namespace SharpGLTF.Schema2
 	partial class Buffer : LogicalChildOfRoot
 	{
 	
-		private String _uri;
-		
 		private const Int32 _byteLengthMinimum = 1;
 		private Int32 _byteLength;
+		
+		private String _uri;
 		
 	
 		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializeProperty(writer, "uri", _uri);
 			SerializeProperty(writer, "byteLength", _byteLength);
+			SerializeProperty(writer, "uri", _uri);
 		}
 	
 		/// <inheritdoc />
@@ -573,8 +573,8 @@ namespace SharpGLTF.Schema2
 		{
 			switch (property)
 			{
-				case "uri": _uri = DeserializeValue<String>(reader); break;
 				case "byteLength": _byteLength = DeserializeValue<Int32>(reader); break;
+				case "uri": _uri = DeserializeValue<String>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -589,12 +589,12 @@ namespace SharpGLTF.Schema2
 	
 		private Int32 _buffer;
 		
+		private const Int32 _byteLengthMinimum = 1;
+		private Int32 _byteLength;
+		
 		private const Int32 _byteOffsetDefault = 0;
 		private const Int32 _byteOffsetMinimum = 0;
 		private Int32? _byteOffset = _byteOffsetDefault;
-		
-		private const Int32 _byteLengthMinimum = 1;
-		private Int32 _byteLength;
 		
 		private const Int32 _byteStrideMinimum = 4;
 		private const Int32 _byteStrideMaximum = 252;
@@ -608,8 +608,8 @@ namespace SharpGLTF.Schema2
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "buffer", _buffer);
-			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
 			SerializeProperty(writer, "byteLength", _byteLength);
+			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
 			SerializeProperty(writer, "byteStride", _byteStride);
 			SerializePropertyEnumValue<BufferMode>(writer, "target", _target);
 		}
@@ -620,8 +620,8 @@ namespace SharpGLTF.Schema2
 			switch (property)
 			{
 				case "buffer": _buffer = DeserializeValue<Int32>(reader); break;
-				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
 				case "byteLength": _byteLength = DeserializeValue<Int32>(reader); break;
+				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
 				case "byteStride": _byteStride = DeserializeValue<Int32?>(reader); break;
 				case "target": _target = DeserializeValue<BufferMode>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
@@ -803,12 +803,12 @@ namespace SharpGLTF.Schema2
 		private const Double _metallicFactorMaximum = 1;
 		private Double? _metallicFactor = _metallicFactorDefault;
 		
+		private TextureInfo _metallicRoughnessTexture;
+		
 		private const Double _roughnessFactorDefault = 1;
 		private const Double _roughnessFactorMinimum = 0;
 		private const Double _roughnessFactorMaximum = 1;
 		private Double? _roughnessFactor = _roughnessFactorDefault;
-		
-		private TextureInfo _metallicRoughnessTexture;
 		
 	
 		/// <inheritdoc />
@@ -818,8 +818,8 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "baseColorFactor", _baseColorFactor, _baseColorFactorDefault);
 			SerializePropertyObject(writer, "baseColorTexture", _baseColorTexture);
 			SerializeProperty(writer, "metallicFactor", _metallicFactor, _metallicFactorDefault);
-			SerializeProperty(writer, "roughnessFactor", _roughnessFactor, _roughnessFactorDefault);
 			SerializePropertyObject(writer, "metallicRoughnessTexture", _metallicRoughnessTexture);
+			SerializeProperty(writer, "roughnessFactor", _roughnessFactor, _roughnessFactorDefault);
 		}
 	
 		/// <inheritdoc />
@@ -830,8 +830,8 @@ namespace SharpGLTF.Schema2
 				case "baseColorFactor": _baseColorFactor = DeserializeValue<Vector4?>(reader); break;
 				case "baseColorTexture": _baseColorTexture = DeserializeValue<TextureInfo>(reader); break;
 				case "metallicFactor": _metallicFactor = DeserializeValue<Double?>(reader); break;
-				case "roughnessFactor": _roughnessFactor = DeserializeValue<Double?>(reader); break;
 				case "metallicRoughnessTexture": _metallicRoughnessTexture = DeserializeValue<TextureInfo>(reader); break;
+				case "roughnessFactor": _roughnessFactor = DeserializeValue<Double?>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -898,40 +898,40 @@ namespace SharpGLTF.Schema2
 	partial class Material : LogicalChildOfRoot
 	{
 	
-		private MaterialPBRMetallicRoughness _pbrMetallicRoughness;
+		private const Double _alphaCutoffDefault = 0.5;
+		private const Double _alphaCutoffMinimum = 0;
+		private Double? _alphaCutoff = _alphaCutoffDefault;
+		
+		private const AlphaMode _alphaModeDefault = AlphaMode.OPAQUE;
+		private AlphaMode? _alphaMode = _alphaModeDefault;
+		
+		private static readonly Boolean _doubleSidedDefault = false;
+		private Boolean? _doubleSided = _doubleSidedDefault;
+		
+		private static readonly Vector3 _emissiveFactorDefault = Vector3.Zero;
+		private Vector3? _emissiveFactor = _emissiveFactorDefault;
+		
+		private TextureInfo _emissiveTexture;
 		
 		private MaterialNormalTextureInfo _normalTexture;
 		
 		private MaterialOcclusionTextureInfo _occlusionTexture;
 		
-		private TextureInfo _emissiveTexture;
-		
-		private static readonly Vector3 _emissiveFactorDefault = Vector3.Zero;
-		private Vector3? _emissiveFactor = _emissiveFactorDefault;
-		
-		private const AlphaMode _alphaModeDefault = AlphaMode.OPAQUE;
-		private AlphaMode? _alphaMode = _alphaModeDefault;
-		
-		private const Double _alphaCutoffDefault = 0.5;
-		private const Double _alphaCutoffMinimum = 0;
-		private Double? _alphaCutoff = _alphaCutoffDefault;
-		
-		private static readonly Boolean _doubleSidedDefault = false;
-		private Boolean? _doubleSided = _doubleSidedDefault;
+		private MaterialPBRMetallicRoughness _pbrMetallicRoughness;
 		
 	
 		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializePropertyObject(writer, "pbrMetallicRoughness", _pbrMetallicRoughness);
+			SerializeProperty(writer, "alphaCutoff", _alphaCutoff, _alphaCutoffDefault);
+			SerializePropertyEnumSymbol<AlphaMode>(writer, "alphaMode", _alphaMode, _alphaModeDefault);
+			SerializeProperty(writer, "doubleSided", _doubleSided, _doubleSidedDefault);
+			SerializeProperty(writer, "emissiveFactor", _emissiveFactor, _emissiveFactorDefault);
+			SerializePropertyObject(writer, "emissiveTexture", _emissiveTexture);
 			SerializePropertyObject(writer, "normalTexture", _normalTexture);
 			SerializePropertyObject(writer, "occlusionTexture", _occlusionTexture);
-			SerializePropertyObject(writer, "emissiveTexture", _emissiveTexture);
-			SerializeProperty(writer, "emissiveFactor", _emissiveFactor, _emissiveFactorDefault);
-			SerializePropertyEnumSymbol<AlphaMode>(writer, "alphaMode", _alphaMode, _alphaModeDefault);
-			SerializeProperty(writer, "alphaCutoff", _alphaCutoff, _alphaCutoffDefault);
-			SerializeProperty(writer, "doubleSided", _doubleSided, _doubleSidedDefault);
+			SerializePropertyObject(writer, "pbrMetallicRoughness", _pbrMetallicRoughness);
 		}
 	
 		/// <inheritdoc />
@@ -939,14 +939,14 @@ namespace SharpGLTF.Schema2
 		{
 			switch (property)
 			{
-				case "pbrMetallicRoughness": _pbrMetallicRoughness = DeserializeValue<MaterialPBRMetallicRoughness>(reader); break;
+				case "alphaCutoff": _alphaCutoff = DeserializeValue<Double?>(reader); break;
+				case "alphaMode": _alphaMode = DeserializeValue<AlphaMode>(reader); break;
+				case "doubleSided": _doubleSided = DeserializeValue<Boolean?>(reader); break;
+				case "emissiveFactor": _emissiveFactor = DeserializeValue<Vector3?>(reader); break;
+				case "emissiveTexture": _emissiveTexture = DeserializeValue<TextureInfo>(reader); break;
 				case "normalTexture": _normalTexture = DeserializeValue<MaterialNormalTextureInfo>(reader); break;
 				case "occlusionTexture": _occlusionTexture = DeserializeValue<MaterialOcclusionTextureInfo>(reader); break;
-				case "emissiveTexture": _emissiveTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "emissiveFactor": _emissiveFactor = DeserializeValue<Vector3?>(reader); break;
-				case "alphaMode": _alphaMode = DeserializeValue<AlphaMode>(reader); break;
-				case "alphaCutoff": _alphaCutoff = DeserializeValue<Double?>(reader); break;
-				case "doubleSided": _doubleSided = DeserializeValue<Boolean?>(reader); break;
+				case "pbrMetallicRoughness": _pbrMetallicRoughness = DeserializeValue<MaterialPBRMetallicRoughness>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -1048,8 +1048,6 @@ namespace SharpGLTF.Schema2
 		private const int _childrenMinItems = 1;
 		private List<Int32> _children;
 		
-		private Int32? _skin;
-		
 		private Matrix4x4? _matrix;
 		
 		private Int32? _mesh;
@@ -1057,6 +1055,8 @@ namespace SharpGLTF.Schema2
 		private Quaternion? _rotation;
 		
 		private Vector3? _scale;
+		
+		private Int32? _skin;
 		
 		private Vector3? _translation;
 		
@@ -1070,11 +1070,11 @@ namespace SharpGLTF.Schema2
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "camera", _camera);
 			SerializeProperty(writer, "children", _children, _childrenMinItems);
-			SerializeProperty(writer, "skin", _skin);
 			SerializeProperty(writer, "matrix", _matrix);
 			SerializeProperty(writer, "mesh", _mesh);
 			SerializeProperty(writer, "rotation", _rotation);
 			SerializeProperty(writer, "scale", _scale);
+			SerializeProperty(writer, "skin", _skin);
 			SerializeProperty(writer, "translation", _translation);
 			SerializeProperty(writer, "weights", _weights, _weightsMinItems);
 		}
@@ -1086,11 +1086,11 @@ namespace SharpGLTF.Schema2
 			{
 				case "camera": _camera = DeserializeValue<Int32?>(reader); break;
 				case "children": DeserializeList<Int32>(reader, _children); break;
-				case "skin": _skin = DeserializeValue<Int32?>(reader); break;
 				case "matrix": _matrix = DeserializeValue<Matrix4x4?>(reader); break;
 				case "mesh": _mesh = DeserializeValue<Int32?>(reader); break;
 				case "rotation": _rotation = DeserializeValue<Quaternion?>(reader); break;
 				case "scale": _scale = DeserializeValue<Vector3?>(reader); break;
+				case "skin": _skin = DeserializeValue<Int32?>(reader); break;
 				case "translation": _translation = DeserializeValue<Vector3?>(reader); break;
 				case "weights": DeserializeList<Double>(reader, _weights); break;
 				default: base.DeserializeProperty(reader, property); break;
@@ -1178,10 +1178,10 @@ namespace SharpGLTF.Schema2
 	
 		private Int32? _inverseBindMatrices;
 		
-		private Int32? _skeleton;
-		
 		private const int _jointsMinItems = 1;
 		private List<Int32> _joints;
+		
+		private Int32? _skeleton;
 		
 	
 		/// <inheritdoc />
@@ -1189,8 +1189,8 @@ namespace SharpGLTF.Schema2
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "inverseBindMatrices", _inverseBindMatrices);
-			SerializeProperty(writer, "skeleton", _skeleton);
 			SerializeProperty(writer, "joints", _joints, _jointsMinItems);
+			SerializeProperty(writer, "skeleton", _skeleton);
 		}
 	
 		/// <inheritdoc />
@@ -1199,8 +1199,8 @@ namespace SharpGLTF.Schema2
 			switch (property)
 			{
 				case "inverseBindMatrices": _inverseBindMatrices = DeserializeValue<Int32?>(reader); break;
-				case "skeleton": _skeleton = DeserializeValue<Int32?>(reader); break;
 				case "joints": DeserializeList<Int32>(reader, _joints); break;
+				case "skeleton": _skeleton = DeserializeValue<Int32?>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -1245,11 +1245,13 @@ namespace SharpGLTF.Schema2
 	partial class ModelRoot : glTFProperty
 	{
 	
-		private const int _extensionsUsedMinItems = 1;
-		private List<String> _extensionsUsed;
+		private Asset _asset;
 		
 		private const int _extensionsRequiredMinItems = 1;
 		private List<String> _extensionsRequired;
+		
+		private const int _extensionsUsedMinItems = 1;
+		private List<String> _extensionsUsed;
 		
 		private const int _accessorsMinItems = 1;
 		private ChildrenCollection<Accessor,ModelRoot> _accessors;
@@ -1257,13 +1259,11 @@ namespace SharpGLTF.Schema2
 		private const int _animationsMinItems = 1;
 		private ChildrenCollection<Animation,ModelRoot> _animations;
 		
-		private Asset _asset;
+		private const int _bufferViewsMinItems = 1;
+		private ChildrenCollection<BufferView,ModelRoot> _bufferViews;
 		
 		private const int _buffersMinItems = 1;
 		private ChildrenCollection<Buffer,ModelRoot> _buffers;
-		
-		private const int _bufferViewsMinItems = 1;
-		private ChildrenCollection<BufferView,ModelRoot> _bufferViews;
 		
 		private const int _camerasMinItems = 1;
 		private ChildrenCollection<Camera,ModelRoot> _cameras;
@@ -1299,13 +1299,13 @@ namespace SharpGLTF.Schema2
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializeProperty(writer, "extensionsUsed", _extensionsUsed, _extensionsUsedMinItems);
+			SerializePropertyObject(writer, "asset", _asset);
 			SerializeProperty(writer, "extensionsRequired", _extensionsRequired, _extensionsRequiredMinItems);
+			SerializeProperty(writer, "extensionsUsed", _extensionsUsed, _extensionsUsedMinItems);
 			SerializeProperty(writer, "accessors", _accessors, _accessorsMinItems);
 			SerializeProperty(writer, "animations", _animations, _animationsMinItems);
-			SerializePropertyObject(writer, "asset", _asset);
-			SerializeProperty(writer, "buffers", _buffers, _buffersMinItems);
 			SerializeProperty(writer, "bufferViews", _bufferViews, _bufferViewsMinItems);
+			SerializeProperty(writer, "buffers", _buffers, _buffersMinItems);
 			SerializeProperty(writer, "cameras", _cameras, _camerasMinItems);
 			SerializeProperty(writer, "images", _images, _imagesMinItems);
 			SerializeProperty(writer, "materials", _materials, _materialsMinItems);
@@ -1323,13 +1323,13 @@ namespace SharpGLTF.Schema2
 		{
 			switch (property)
 			{
-				case "extensionsUsed": DeserializeList<String>(reader, _extensionsUsed); break;
+				case "asset": _asset = DeserializeValue<Asset>(reader); break;
 				case "extensionsRequired": DeserializeList<String>(reader, _extensionsRequired); break;
+				case "extensionsUsed": DeserializeList<String>(reader, _extensionsUsed); break;
 				case "accessors": DeserializeList<Accessor>(reader, _accessors); break;
 				case "animations": DeserializeList<Animation>(reader, _animations); break;
-				case "asset": _asset = DeserializeValue<Asset>(reader); break;
-				case "buffers": DeserializeList<Buffer>(reader, _buffers); break;
 				case "bufferViews": DeserializeList<BufferView>(reader, _bufferViews); break;
+				case "buffers": DeserializeList<Buffer>(reader, _buffers); break;
 				case "cameras": DeserializeList<Camera>(reader, _cameras); break;
 				case "images": DeserializeList<Image>(reader, _images); break;
 				case "materials": DeserializeList<Material>(reader, _materials); break;
@@ -1352,20 +1352,20 @@ namespace SharpGLTF.Schema2
 	partial class Image : LogicalChildOfRoot
 	{
 	
-		private String _uri;
+		private Int32? _bufferView;
 		
 		private String _mimeType;
 		
-		private Int32? _bufferView;
+		private String _uri;
 		
 	
 		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializeProperty(writer, "uri", _uri);
-			SerializeProperty(writer, "mimeType", _mimeType);
 			SerializeProperty(writer, "bufferView", _bufferView);
+			SerializeProperty(writer, "mimeType", _mimeType);
+			SerializeProperty(writer, "uri", _uri);
 		}
 	
 		/// <inheritdoc />
@@ -1373,9 +1373,9 @@ namespace SharpGLTF.Schema2
 		{
 			switch (property)
 			{
-				case "uri": _uri = DeserializeValue<String>(reader); break;
-				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;
 				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
+				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;
+				case "uri": _uri = DeserializeValue<String>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}

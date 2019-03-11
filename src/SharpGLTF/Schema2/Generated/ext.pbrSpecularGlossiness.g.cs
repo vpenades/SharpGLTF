@@ -36,13 +36,13 @@ namespace SharpGLTF.Schema2
 		
 		private TextureInfo _diffuseTexture;
 		
-		private static readonly Vector3 _specularFactorDefault = Vector3.One;
-		private Vector3? _specularFactor = _specularFactorDefault;
-		
 		private const Double _glossinessFactorDefault = 1;
 		private const Double _glossinessFactorMinimum = 0;
 		private const Double _glossinessFactorMaximum = 1;
 		private Double? _glossinessFactor = _glossinessFactorDefault;
+		
+		private static readonly Vector3 _specularFactorDefault = Vector3.One;
+		private Vector3? _specularFactor = _specularFactorDefault;
 		
 		private TextureInfo _specularGlossinessTexture;
 		
@@ -53,8 +53,8 @@ namespace SharpGLTF.Schema2
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "diffuseFactor", _diffuseFactor, _diffuseFactorDefault);
 			SerializePropertyObject(writer, "diffuseTexture", _diffuseTexture);
-			SerializeProperty(writer, "specularFactor", _specularFactor, _specularFactorDefault);
 			SerializeProperty(writer, "glossinessFactor", _glossinessFactor, _glossinessFactorDefault);
+			SerializeProperty(writer, "specularFactor", _specularFactor, _specularFactorDefault);
 			SerializePropertyObject(writer, "specularGlossinessTexture", _specularGlossinessTexture);
 		}
 	
@@ -65,8 +65,8 @@ namespace SharpGLTF.Schema2
 			{
 				case "diffuseFactor": _diffuseFactor = DeserializeValue<Vector4?>(reader); break;
 				case "diffuseTexture": _diffuseTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "specularFactor": _specularFactor = DeserializeValue<Vector3?>(reader); break;
 				case "glossinessFactor": _glossinessFactor = DeserializeValue<Double?>(reader); break;
+				case "specularFactor": _specularFactor = DeserializeValue<Vector3?>(reader); break;
 				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializeValue<TextureInfo>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}

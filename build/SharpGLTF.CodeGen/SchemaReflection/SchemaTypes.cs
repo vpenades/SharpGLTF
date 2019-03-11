@@ -279,22 +279,33 @@ namespace SharpGLTF.SchemaReflection
 
         #region comparer helper
 
-        private sealed class _Comparer : IEqualityComparer<FieldInfo>
+        private sealed class _Comparer : IEqualityComparer<FieldInfo> , IComparer<FieldInfo>
         {
-            public bool Equals(FieldInfo x, FieldInfo y)
+            public int Compare(FieldInfo x, FieldInfo y)
             {
-                return x._PersistentName == y._PersistentName;
+                var xx = _Adjust(x._PersistentName);
+                var yy = _Adjust(y._PersistentName);
+
+                return string.CompareOrdinal(xx, yy);
             }
 
-            public int GetHashCode(FieldInfo obj)
+            private static string _Adjust(string name)
             {
-                return obj._PersistentName.GetHashCode();
+                if (name.StartsWith("asset")) return "____" + name;
+                if (name.StartsWith("extensions")) return "___" + name;
+                return name;
             }
+
+            public bool Equals(FieldInfo x, FieldInfo y) { return Compare(x,y) == 0; }
+
+            public int GetHashCode(FieldInfo obj) { return obj._PersistentName.GetHashCode(); }
         }
 
         private static readonly _Comparer _DefaultComparer = new _Comparer();
 
-        public static IEqualityComparer<FieldInfo> Comparer => _DefaultComparer;        
+        public static IEqualityComparer<FieldInfo> EqualityComparer => _DefaultComparer;
+
+        public static IComparer<FieldInfo> Comparer => _DefaultComparer;
 
         #endregion
     }
@@ -315,7 +326,7 @@ namespace SharpGLTF.SchemaReflection
 
         private readonly String _PersistentName;        
 
-        private readonly HashSet<FieldInfo> _Fields = new HashSet<FieldInfo>(FieldInfo.Comparer);
+        private readonly SortedSet<FieldInfo> _Fields = new SortedSet<FieldInfo>(FieldInfo.Comparer);
 
         private ClassType _BaseClass;
         

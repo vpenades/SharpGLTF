@@ -63,6 +63,8 @@ namespace SharpGLTF.Schema2
 
         public Asset Asset => _asset;
 
+        public IEnumerable<String> ExtensionsUsed               => _extensionsUsed;
+
         public IEnumerable<String> ExtensionsRequired           => _extensionsRequired;
 
         public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions).ToList();
