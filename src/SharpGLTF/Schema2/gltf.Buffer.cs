@@ -57,7 +57,7 @@ namespace SharpGLTF.Schema2
         {
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? satelliteReferenceSolver?.Invoke(uri);
+                ?? satelliteReferenceSolver.Invoke(uri).ToArray();
         }
 
         #endregion
@@ -74,7 +74,7 @@ namespace SharpGLTF.Schema2
             this._uri = satelliteUri;
             this._byteLength = _Content.Length;
 
-            writer(satelliteUri, _Content.GetPaddedContent());
+            writer(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()) );
         }
 
         /// <summary>

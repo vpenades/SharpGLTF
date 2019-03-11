@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 
 namespace SharpGLTF.Schema2
 {
+    using BYTES = ArraySegment<Byte>;
     using MODEL = ModelRoot;
 
     /// <summary>
@@ -15,14 +16,14 @@ namespace SharpGLTF.Schema2
     /// </summary>
     /// <param name="assetName">the asset relative path.</param>
     /// <returns>The file contents as a <see cref="byte"/> array.</returns>
-    public delegate Byte[] AssetReader(String assetName);
+    public delegate BYTES AssetReader(String assetName);
 
     /// <summary>
     /// Callback used for saving associated files of the current model.
     /// </summary>
     /// <param name="assetName">The asset relative path.</param>
     /// <param name="assetData">The file contents as a <see cref="byte"/> array.</param>
-    public delegate void AssetWriter(String assetName, Byte[] assetData);
+    public delegate void AssetWriter(String assetName, BYTES assetData);
 
     /// <summary>
     /// Configuration settings for reading model files.
@@ -44,13 +45,20 @@ namespace SharpGLTF.Schema2
 
             var dir = Path.GetDirectoryName(filePath);
 
-            FileReader = assetFileName => File.ReadAllBytes(Path.Combine(dir, assetFileName));
+            FileReader = assetFileName => new BYTES(File.ReadAllBytes(Path.Combine(dir, assetFileName)));
         }
 
         /// <summary>
         /// Gets or sets the <see cref="AssetReader"/> delegate used to read satellite files.
         /// </summary>
         public AssetReader FileReader { get; set; }
+    }
+
+    public enum ImageWriteMode
+    {
+        SatelliteFile,
+        BufferView,
+        Embedded
     }
 
     /// <summary>
@@ -60,56 +68,143 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        internal WriteSettings(string filePath)
+        internal static WriteSettings ForText(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
             var dir = Path.GetDirectoryName(filePath);
 
-            this.FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d);
-        }
-
-        internal WriteSettings(AssetWriter fileWriter)
-        {
-            this.FileWriter = fileWriter;
-        }
-
-        internal WriteSettings(Func<string, Stream> fileWriter)
-        {
-            void assetWriter(string n, byte[] d)
+            var settings = new WriteSettings
             {
-                using (var s = fileWriter(n))
-                {
-                    s.Write(d, 0, d.Length);
-                }
-            }
+                BinaryMode = false,
+                ImageWriting = ImageWriteMode.SatelliteFile,
+                MergeBuffers = true,
+                JsonFormatting = Formatting.Indented,
 
-            this.FileWriter = assetWriter;
+                FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d.ToArray())
+            };
+
+            return settings;
         }
 
-        internal WriteSettings(MemoryStream memory)
+        internal static WriteSettings ForText(Dictionary<string, BYTES> dict)
         {
-            JSonFormatting = Formatting.None;
-            BinaryMode = true;
-            EmbedImages = true;
+            var settings = new WriteSettings()
+            {
+                BinaryMode = false,
+                ImageWriting = ImageWriteMode.SatelliteFile,
+                MergeBuffers = false,
+                JsonFormatting = Formatting.None,
 
-            this.FileWriter = (fn, d) => memory.Write(d, 0, d.Length);
+                FileWriter = (fn, buff) => dict[fn] = buff
+            };
+
+            return settings;
         }
+
+        internal static WriteSettings ForBinary(string filePath)
+        {
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+
+            var dir = Path.GetDirectoryName(filePath);
+
+            var settings = new WriteSettings
+            {
+                BinaryMode = true,
+                ImageWriting = ImageWriteMode.BufferView,
+                MergeBuffers = true,
+                JsonFormatting = Formatting.None,
+
+                FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d.ToArray())
+            };
+
+            return settings;
+        }
+
+        internal static WriteSettings ForBinary(Stream stream)
+        {
+            Guard.NotNull(stream, nameof(stream));
+            Guard.IsTrue(stream.CanWrite, nameof(stream));
+
+            var settings = new WriteSettings
+            {
+                BinaryMode = true,
+                ImageWriting = ImageWriteMode.BufferView,
+                MergeBuffers = true,
+                JsonFormatting = Formatting.None,
+
+                FileWriter = (fn, d) => stream.Write(d.Array, d.Offset, d.Count)
+            };
+
+            return settings;
+        }
+
+        private WriteSettings() { }
 
         #endregion
 
         #region data
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to write a GLTF or a GLB file
+        /// </summary>
         public Boolean BinaryMode { get; set; }
 
-        public Boolean EmbedImages { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating how to write the images of the model
+        /// </summary>
+        public ImageWriteMode ImageWriting { get; set; }
 
-        public Formatting JSonFormatting { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating whether to merge all the buffers in <see cref="MODEL.LogicalBuffers"/> into a single buffer.
+        /// </summary>
+        public Boolean MergeBuffers { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating how to format the JSON document of the glTF
+        /// </summary>
+        public Formatting JsonFormatting { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="AssetWriter"/> delegate used to write satellite files.
         /// </summary>
         public AssetWriter FileWriter { get; set; }
+
+        internal bool _NoCloneWatchdog = false;
+
+        #endregion
+
+        #region API
+
+        /// <summary>
+        /// Prepares the model for writing with the appropiate settings, cloning it if neccesary.
+        /// </summary>
+        /// <param name="model">The source <see cref="MODEL"/> instance.</param>
+        /// <returns>The source <see cref="MODEL"/> instance, or a cloned and modified instance if current settings required it.</returns>
+        internal MODEL FilterModel(MODEL model)
+        {
+            Guard.NotNull(model,nameof(model));
+
+            var needsMergeBuffers = (this.MergeBuffers | this.BinaryMode) && model.LogicalBuffers.Count > 1;
+
+            var imagesAsBufferViews = model.LogicalImages.Count > 0 && this.ImageWriting == ImageWriteMode.BufferView;
+
+            if (needsMergeBuffers | imagesAsBufferViews)
+            {
+                if (_NoCloneWatchdog) throw new InvalidOperationException($"Current settings require a model rewrite, but {nameof(MODEL.DeepClone)} is not allowed in the current context");
+                model = model.DeepClone();
+            }
+
+            if (ImageWriting == ImageWriteMode.BufferView)
+            {
+                model.MergeImages();
+                needsMergeBuffers |= this.MergeBuffers | this.BinaryMode;
+            }
+
+            if (needsMergeBuffers) model.MergeBuffers();
+
+            return model;
+        }
 
         #endregion
     }
@@ -140,7 +235,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="glb">A <see cref="byte"/> array representing a GLB file</param>
         /// <returns>A <see cref="MODEL"/> instance.</returns>
-        public static MODEL ParseGLB(ArraySegment<Byte> glb)
+        public static MODEL ParseGLB(BYTES glb)
         {
             Guard.NotNull(glb, nameof(glb));
 
@@ -202,7 +297,7 @@ namespace SharpGLTF.Schema2
 
             if (chunks.ContainsKey(glb.CHUNKBIN))
             {
-                settings.FileReader = key => string.IsNullOrEmpty(key) ? chunks[glb.CHUNKBIN] : settings.FileReader?.Invoke(key);
+                settings.FileReader = key => string.IsNullOrEmpty(key) ? new BYTES(chunks[glb.CHUNKBIN]) : settings.FileReader.Invoke(key);
             }
 
             return ParseGLTF(dom, settings);
@@ -225,13 +320,13 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static MODEL ReadFromDictionary(Dictionary<string, Byte[]> files, string fileName)
+        public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
         {
             var jsonBytes = files[fileName];
 
             var settings = new ReadSettings(fn => files[fn]);
 
-            using (var m = new MemoryStream(jsonBytes))
+            using (var m = new MemoryStream(jsonBytes.Array, jsonBytes.Offset, jsonBytes.Count))
             {
                 using (var s = new StreamReader(m))
                 {
@@ -282,18 +377,11 @@ namespace SharpGLTF.Schema2
         /// <param name="filePath">A valid file path to write to.</param>
         public void SaveGLB(string filePath)
         {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
-
-            var settings = new WriteSettings(filePath)
-            {
-                JSonFormatting = Formatting.None,
-                BinaryMode = true,
-                EmbedImages = true
-            };
+            var settings = WriteSettings.ForBinary(filePath);
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
-            Write(settings, name);
+            _Write(settings, name, this);
         }
 
         /// <summary>
@@ -306,17 +394,13 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void SaveGLTF(string filePath, Formatting fmt = Formatting.None)
         {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+            var settings = WriteSettings.ForText(filePath);
 
-            var settings = new WriteSettings(filePath)
-            {
-                JSonFormatting = fmt,
-                BinaryMode = false
-            };
+            settings.JsonFormatting = fmt;
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
-            Write(settings, name);
+            _Write(settings, name, this);
         }
 
         /// <summary>
@@ -324,30 +408,19 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="fileName">the base name to use for the dictionary keys</param>
         /// <returns>a dictionary instance.</returns>
-        public Dictionary<String, Byte[]> WriteToDictionary(string fileName)
+        public Dictionary<String, BYTES> WriteToDictionary(string fileName)
         {
-            var dict = new Dictionary<string, Byte[]>();
+            var dict = new Dictionary<string, BYTES>();
 
-            var settings = new WriteSettings((fn, buff) => dict[fn] = buff);
+            var settings = WriteSettings.ForText(dict);
 
-            this.Write(settings, fileName);
+            // WriteToDictionary is usually called by DeepClone, so allowing a setting that
+            // would imply cloning the model would cause an infine loop and a StackOverflow
+            settings._NoCloneWatchdog = true;
+
+            _Write(settings, fileName, this);
 
             return dict;
-        }
-
-        /// <summary>
-        /// Writes this <see cref="MODEL"/> JSON document to a <see cref="TextWriter"/>.
-        /// </summary>
-        /// <param name="sw">The target <see cref="TextWriter"/>.</param>
-        /// <param name="fmt">The formatting of the JSON document.</param>
-        public void WriteJSON(TextWriter sw, Formatting fmt)
-        {
-            using (var writer = new JsonTextWriter(sw))
-            {
-                writer.Formatting = fmt;
-
-                this.Serialize(writer);
-            }
         }
 
         /// <summary>
@@ -355,11 +428,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="fmt">The formatting of the JSON document.</param>
         /// <returns>A JSON content.</returns>
-        public string WriteJSON(Formatting fmt)
+        public string GetJSON(Formatting fmt)
         {
             using (var ss = new StringWriter())
             {
-                WriteJSON(ss, fmt);
+                _WriteJSON(ss, fmt);
                 return ss.ToString();
             }
         }
@@ -368,20 +441,28 @@ namespace SharpGLTF.Schema2
         /// Writes this <see cref="MODEL"/> to a <see cref="byte"/> array in GLB format.
         /// </summary>
         /// <returns>A <see cref="byte"/> array containing a GLB file.</returns>
-        public ArraySegment<Byte> WriteGLB()
+        public BYTES WriteGLB()
         {
             using (var m = new MemoryStream())
             {
-                var settings = new WriteSettings(m);
+                WriteGLB(m);
 
-                // ensure that images are embedded.
-                settings.EmbedImages = true;
-
-                Write(settings, "model");
-
-                if (m.TryGetBuffer(out ArraySegment<Byte> buffer)) return buffer;
-                return new ArraySegment<byte>(m.ToArray());
+                return m.ToArraySegment();
             }
+        }
+
+        /// <summary>
+        /// Writes this <see cref="MODEL"/> to a <see cref="Stream"/> in GLB format.
+        /// </summary>
+        /// <param name="stream">A <see cref="Stream"/> open for writing.</param>
+        public void WriteGLB(Stream stream)
+        {
+            Guard.NotNull(stream, nameof(stream));
+            Guard.IsTrue(stream.CanWrite, nameof(stream));
+
+            var settings = WriteSettings.ForBinary(stream);
+
+            _Write(settings, "model", this);
         }
 
         /// <summary>
@@ -394,31 +475,56 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void Write(WriteSettings settings, string baseName)
         {
+            _Write(settings, baseName, this);
+        }
+
+        private void _WriteJSON(TextWriter sw, Formatting fmt)
+        {
+            using (var writer = new JsonTextWriter(sw))
+            {
+                writer.Formatting = fmt;
+
+                this.Serialize(writer);
+            }
+        }
+
+        private static void _Write(WriteSettings settings, string baseName, MODEL model)
+        {
+            Guard.NotNull(settings, nameof(settings));
+            Guard.NotNullOrEmpty(baseName, nameof(baseName));
+            Guard.NotNull(model,nameof(model));
+
+            model = settings.FilterModel(model);
+
             if (settings.BinaryMode)
             {
-                var ex = glb.IsBinaryCompatible(this); if (ex != null) throw ex;
+                var ex = glb.IsBinaryCompatible(model);
+                if (ex != null) throw ex;
 
-                for (int i = 0; i < this._buffers.Count; ++i)
+                // setup all buffers to be written internally
+                for (int i = 0; i < model._buffers.Count; ++i)
                 {
-                    var buffer = this._buffers[i];
+                    var buffer = model._buffers[i];
                     buffer._WriteToInternal();
                 }
             }
             else
             {
-                for (int i = 0; i < this._buffers.Count; ++i)
+                // setup all buffers to be written as satellite files
+                for (int i = 0; i < model._buffers.Count; ++i)
                 {
-                    var buffer = this._buffers[i];
-                    var bname = this._buffers.Count != 1 ? $"{baseName}_{i}.bin" : $"{baseName}.bin";
+                    var buffer = model._buffers[i];
+                    var bname = model._buffers.Count != 1 ? $"{baseName}_{i}.bin" : $"{baseName}.bin";
                     buffer._WriteToSatellite(settings.FileWriter, bname);
                 }
             }
 
-            for (int i = 0; i < this._images.Count; ++i)
+            // setup all images to be written to the appropiate location.
+            for (int i = 0; i < model._images.Count; ++i)
             {
-                var image = this._images[i];
-                var iname = this._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
-                if (settings.EmbedImages) image._WriteToInternal();
+                var image = model._images[i];
+                var iname = model._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
+                if (settings.ImageWriting != ImageWriteMode.SatelliteFile) image._WriteToInternal();
                 else image._WriteToSatellite(settings.FileWriter, iname);
             }
 
@@ -428,24 +534,24 @@ namespace SharpGLTF.Schema2
                 {
                     using (var w = new BinaryWriter(m))
                     {
-                        glb.WriteBinaryModel(w, this);
+                        glb.WriteBinaryModel(w, model);
                     }
 
-                    settings.FileWriter($"{baseName}.glb", m.ToArray());
+                    settings.FileWriter($"{baseName}.glb", m.ToArraySegment());
                 }
                 else
                 {
                     using (var w = new StreamWriter(m))
                     {
-                        WriteJSON(w, settings.JSonFormatting);
+                        model._WriteJSON(w, settings.JsonFormatting);
                     }
 
-                    settings.FileWriter($"{baseName}.gltf", m.ToArray());
+                    settings.FileWriter($"{baseName}.gltf", m.ToArraySegment());
                 }
             }
 
-            foreach (var b in this._buffers) b._ClearAfterWrite();
-            foreach (var i in this._images) i._ClearAfterWrite();
+            foreach (var b in model._buffers) b._ClearAfterWrite();
+            foreach (var i in model._images) i._ClearAfterWrite();
         }
 
         #endregion

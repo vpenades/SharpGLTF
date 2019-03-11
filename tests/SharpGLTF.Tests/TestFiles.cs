@@ -96,11 +96,6 @@ namespace SharpGLTF
             return System.IO.Path.Combine(_GeneratedAssetsDir, $"Output\\Compatibility\\Compatibility_0{idx}.gltf");
         }
 
-        public static IEnumerable<string> GetFilePathsWithSpecularGlossinessPBR()
-        {
-            return GetSampleFilePaths().Where(p => p.Contains("\\glTF-pbrSpecularGlossiness\\"));            
-        }
-
         public static string GetPollyFilePath()
         {
             return System.IO.Path.Combine(_PollyModelsDir, "polly", "project_polly.glb");

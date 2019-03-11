@@ -12,15 +12,15 @@ namespace SharpGLTF.Schema2
 
         static ExtensionsFactory()
         {
-            RegisterExtension("KHR_materials_pbrSpecularGlossiness", () => new MaterialPBRSpecularGlossiness_KHR());
-            RegisterExtension("KHR_materials_unlit", () => new MaterialUnlit_KHR());
+            RegisterExtension<MaterialPBRSpecularGlossiness_KHR>("KHR_materials_pbrSpecularGlossiness");
+            RegisterExtension<MaterialUnlit_KHR>("KHR_materials_unlit");
         }
 
         #endregion
 
         #region data
 
-        private static readonly Dictionary<string, Func<JsonSerializable>> _Extensions = new Dictionary<string, Func<JsonSerializable>>();
+        private static readonly Dictionary<string, Type> _Extensions = new Dictionary<string, Type>();
 
         #endregion
 
@@ -28,16 +28,29 @@ namespace SharpGLTF.Schema2
 
         public static IEnumerable<string> SupportedExtensions => _Extensions.Keys;
 
-        public static void RegisterExtension(string persistentName, Func<JsonSerializable> activator)
+        public static void RegisterExtension<T>(string persistentName)
+            where T : JsonSerializable
         {
-            _Extensions[persistentName] = activator;
+            _Extensions[persistentName] = typeof(T);
         }
 
         internal static JsonSerializable Create(string key)
         {
-            if (!_Extensions.TryGetValue(key, out Func<JsonSerializable> activator)) return null;
+            if (!_Extensions.TryGetValue(key, out Type t)) return null;
 
-            return activator.Invoke();
+            var instance = Activator.CreateInstance(t);
+
+            return instance as JsonSerializable;
+        }
+
+        internal static string Identify(Type type)
+        {
+            foreach (var kvp in _Extensions)
+            {
+                if (kvp.Value == type) return kvp.Key;
+            }
+
+            return null;
         }
 
         #endregion

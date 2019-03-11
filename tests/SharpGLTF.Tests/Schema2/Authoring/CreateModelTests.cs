@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2.Authoring
                 ["D"] = new Dictionary<String, Object> { ["S"]= 1, ["T"] = 2 }
             };
 
-            var json = root.WriteJSON(Newtonsoft.Json.Formatting.Indented);
+            var json = root.GetJSON(Newtonsoft.Json.Formatting.Indented);
             var bytes = root.WriteGLB();
 
             var rootBis = ModelRoot.ParseGLB(bytes);

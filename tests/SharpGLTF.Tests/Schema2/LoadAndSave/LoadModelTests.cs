@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
@@ -80,6 +81,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         public void TestLoadSampleModels(string section)
         {
             TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
 
             foreach (var f in TestFiles.GetSampleFilePaths())
             {
@@ -91,27 +93,57 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 // evaluate and save all the triangles to a Wavefront Object
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
-
-                // attempt clone
-                var xclone = model.DeepClone();
-
+                
                 // do a model roundtrip
-                model.MergeImages();
-                model.MergeBuffers();
                 var bytes = model.WriteGLB();
 
                 var modelBis = ModelRoot.ParseGLB(bytes);
             }
         }
 
-        [Test]
-        public void TestLoadSampleModelsWithMaterialSpecularGlossiness()
+        [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]
+        public void TestLoadSpecialCaseModels(string filePath)
         {
-            foreach (var f in TestFiles.GetFilePathsWithSpecularGlossinessPBR())
-            {
-                var root = GltfUtils.LoadModel(f);
-                Assert.NotNull(root);
-            }
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var f = TestFiles.GetSampleFilePaths()
+                .FirstOrDefault(item => item.EndsWith(filePath));
+
+            var model = GltfUtils.LoadModel(f);
+            Assert.NotNull(model);
+
+            // evaluate and save all the triangles to a Wavefront Object
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".gltf"));
+
+            // do a model roundtrip
+            var bytes = model.WriteGLB();
+            var modelBis = ModelRoot.ParseGLB(bytes);
+
+            // clone
+            var cloned = model.DeepClone();
+        }
+
+        [Test]
+        public void TestLoadUnlitMode()
+        {
+            var f = TestFiles.GetSampleFilePaths()
+                .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
+
+            var model = GltfUtils.LoadModel(f);
+            Assert.NotNull(model);
+
+            Assert.IsTrue(model.LogicalMaterials[0].Unlit);
+
+            // do a model roundtrip
+            var modelBis = ModelRoot.ParseGLB(model.WriteGLB());
+            Assert.NotNull(modelBis);
+
+            Assert.IsTrue(modelBis.LogicalMaterials[0].Unlit);
+
+
         }
 
         #endregion

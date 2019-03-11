@@ -104,9 +104,6 @@ namespace SharpGLTF.Geometry
 
                 prim.Material = materialEvaluator(kvp.Key);
             }
-
-            root.MergeImages();
-            root.MergeBuffers();
         }
 
         #endregion

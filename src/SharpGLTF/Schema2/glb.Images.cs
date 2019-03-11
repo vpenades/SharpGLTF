@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharpGLTF.Schema2
@@ -182,7 +183,7 @@ namespace SharpGLTF.Schema2
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDJPEGBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDPNGBUFFER)
-                ?? externalReferenceSolver?.Invoke(uri);
+                ?? externalReferenceSolver.Invoke(uri).ToArray();
         }
 
         #endregion
@@ -228,7 +229,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".png";
-                writer(_uri, _SatelliteImageContent);
+                writer(_uri, new ArraySegment<byte>(_SatelliteImageContent) );
                 return;
             }
 
@@ -236,7 +237,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".jpg";
-                writer(_uri, _SatelliteImageContent);
+                writer(_uri, new ArraySegment<byte>(_SatelliteImageContent) );
                 return;
             }
 

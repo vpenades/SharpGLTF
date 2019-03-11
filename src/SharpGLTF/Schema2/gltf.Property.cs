@@ -81,7 +81,22 @@ namespace SharpGLTF.Schema2
         /// <param name="writer">The target writer.</param>
         protected override void SerializeProperties(JsonWriter writer)
         {
-            SerializeProperty(writer, "extensions", _extensions);
+            if (_extensions.Count > 0)
+            {
+                var dict = new Dictionary<string, JsonSerializable>();
+
+                foreach (var val in this._extensions)
+                {
+                    if (val == null) continue;
+                    var key = ExtensionsFactory.Identify(val.GetType());
+                    if (key == null) continue;
+
+                    dict[key] = val;
+                }
+
+                SerializeProperty(writer, "extensions", dict);
+            }
+
             if (_extras != null) SerializeProperty(writer, "extras", _extras);
         }
 

@@ -341,6 +341,12 @@ namespace SharpGLTF
 
         #region serialization
 
+        public static ArraySegment<Byte> ToArraySegment(this System.IO.MemoryStream m)
+        {
+            if (m.TryGetBuffer(out ArraySegment<Byte> data)) return data;
+            return new ArraySegment<byte>(m.ToArray());
+        }
+
         public static Byte[] GetPaddedContent(this Byte[] content)
         {
             if (content == null) return null;

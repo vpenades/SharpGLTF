@@ -97,9 +97,6 @@ namespace SharpGLTF.Schema2.Authoring
 
                 prim.Material = materialEvaluator(kvp.Key);
             }
-
-            root.MergeImages();
-            root.MergeBuffers();            
         }
 
         private Vector3[] _CalculateNormals()

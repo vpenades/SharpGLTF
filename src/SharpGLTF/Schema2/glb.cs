@@ -132,7 +132,7 @@ namespace SharpGLTF.Schema2
         {
             var ex = IsBinaryCompatible(model); if (ex != null) throw ex;
 
-            var jsonText = model.WriteJSON(Newtonsoft.Json.Formatting.None);
+            var jsonText = model.GetJSON(Newtonsoft.Json.Formatting.None);
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 
