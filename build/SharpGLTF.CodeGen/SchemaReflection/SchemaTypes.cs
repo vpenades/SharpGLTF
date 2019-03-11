@@ -27,7 +27,7 @@ namespace SharpGLTF.SchemaReflection
         /// <summary>
         /// identifier used for serialization and deserialization
         /// </summary>
-        public abstract string PersistentName { get; }
+        public abstract string PersistentName { get; }        
 
         #endregion
 
@@ -335,6 +335,11 @@ namespace SharpGLTF.SchemaReflection
         public ClassType BaseClass { get => _BaseClass; set => _BaseClass = value; }
 
         public IEnumerable<FieldInfo> Fields => _Fields;
+
+        /// <summary>
+        /// True to prevent to codegen emitter to emit this class
+        /// </summary>
+        public bool IgnoredByEmitter { get; set; }
 
         #endregion
 

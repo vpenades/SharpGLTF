@@ -350,6 +350,8 @@ namespace SharpGLTF.CodeGen
 
             foreach (var ctype in context.Classes)
             {
+                if (ctype.IgnoredByEmitter) continue;
+
                 var cout = EmitClass(ctype);
 
                 sb.AppendLine(cout);

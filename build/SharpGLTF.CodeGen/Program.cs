@@ -23,6 +23,7 @@ namespace SharpGLTF
 
             _ProcessKhronosPBRExtension();
             _ProcessKhronosUnlitExtension();
+            _ProcessKhronosLightsPunctualExtension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
@@ -95,13 +96,13 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosPBRExtension()
         {
-            var ctx4 = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
 
             // remove already defined classes
-            ctx4.Remove("glTF Property");
-            ctx4.Remove("Texture Info");
+            ctx.Remove("glTF Property");
+            ctx.Remove("Texture Info");
 
-            ctx4.Classes
+            ctx.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "KHR_materials_pbrSpecularGlossiness glTF extension")
                 .UseField("diffuseFactor")
@@ -109,7 +110,7 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector4.One")
                 .SetItemsRange(0);
 
-            ctx4.Classes
+            ctx.Classes
                 .ToArray()
                 .FirstOrDefault(item => item.PersistentName == "KHR_materials_pbrSpecularGlossiness glTF extension")
                 .UseField("specularFactor")
@@ -117,15 +118,33 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector3.One")
                 .SetItemsRange(0);
 
-            ProcessSchema("ext.pbrSpecularGlossiness.g", ctx4);
+            ProcessSchema("ext.pbrSpecularGlossiness.g", ctx);
         }
 
         private static void _ProcessKhronosUnlitExtension()
         {
-            var ctx4 = LoadSchemaContext(Constants.KhronesUnlitSchemaFile);
-            ctx4.Remove("glTF Property");            
+            var ctx = LoadSchemaContext(Constants.KhronosUnlitSchemaFile);
+            ctx.Remove("glTF Property");
 
-            ProcessSchema("ext.Unlit.g", ctx4);
+            ProcessSchema("ext.Unlit.g", ctx);
+        }
+
+        private static void _ProcessKhronosLightsPunctualExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosLightsPunctualSchemaFile);            
+            ctx.Remove("glTF Property");
+            ctx.Classes.FirstOrDefault(item => item.PersistentName == "glTF Child of Root Property").IgnoredByEmitter = true;
+
+            var light = ctx.Classes
+                .ToArray()
+                .FirstOrDefault(item => item.PersistentName == "light");            
+
+            light.UseField("color")
+                .SetDataType(typeof(System.Numerics.Vector3), true)
+                .SetDefaultValue("Vector3.One")
+                .SetItemsRange(0);
+
+            ProcessSchema("ext.LightsPunctual.g", ctx);
         }
 
         /*
@@ -185,7 +204,10 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness_KHR");
             newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit_KHR");
 
-            
+            newEmitter.SetRuntimeName("light", "Light_KHR");
+            newEmitter.SetRuntimeName("light/spot", "LightSpot_KHR");
+
+
 
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();

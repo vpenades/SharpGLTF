@@ -27,7 +27,8 @@ namespace SharpGLTF
         public static string KhronosSchemaDir => System.IO.Path.Combine(Constants.LocalRepoDirectory, "extensions", "2.0", "Khronos");
         public static string KhronosDracoSchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_draco_mesh_compression", "schema");
         public static string KhronosPbrSpecGlossSchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_materials_pbrSpecularGlossiness", "schema", "glTF.KHR_materials_pbrSpecularGlossiness.schema.json");
-        public static string KhronesUnlitSchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_materials_unlit", "schema", "glTF.KHR_materials_unlit.schema.json");
+        public static string KhronosUnlitSchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_materials_unlit", "schema", "glTF.KHR_materials_unlit.schema.json");
+        public static string KhronosLightsPunctualSchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_lights_punctual", "schema", "glTF.KHR_lights_punctual.schema.json");
 
 
         /// <summary>
