@@ -220,12 +220,26 @@ namespace SharpGLTF
         internal static T? AsNullable<T>(this T value, T defval, T minval, T maxval)
             where T : struct, IEquatable<T>, IComparable<T>
         {
-            if (value.Equals(defval)) return null;
+            if (value.CompareTo(minval) < 0) value = minval;
+            if (value.CompareTo(maxval) > 0) value = maxval;
 
-            if (value.CompareTo(minval) < 0) return minval;
-            if (value.CompareTo(maxval) > 0) return maxval;
+            return value.Equals(defval) ? (T?)null : value;
+        }
 
-            return value;
+        internal static Vector3? AsNullable(this Vector3 value, Vector3 defval, Vector3 minval, Vector3 maxval)
+        {
+            value = Vector3.Min(value, minval);
+            value = Vector3.Max(value, maxval);
+
+            return value.Equals(defval) ? (Vector3?)null : value;
+        }
+
+        internal static Vector4? AsNullable(this Vector4 value, Vector4 defval, Vector4 minval, Vector4 maxval)
+        {
+            value = Vector4.Min(value, minval);
+            value = Vector4.Max(value, maxval);
+
+            return value.Equals(defval) ? (Vector4?)null : value;
         }
 
         internal static String AsNullable(this string value)

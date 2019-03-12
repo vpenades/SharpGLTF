@@ -28,9 +28,10 @@ namespace SharpGLTF.Schema2
             Guard.MustBeGreaterThanOrEqualTo(byteLength.AsValue(0), _byteLengthMinimum, nameof(byteLength));
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
 
-            if (target == BufferMode.ELEMENT_ARRAY_BUFFER)
+            if (target == BufferMode.ELEMENT_ARRAY_BUFFER || byteStride == 0)
             {
                 Guard.IsTrue(byteStride == 0, nameof(byteStride));
+                this._byteStride = null;
             }
             else if (byteStride > 0)
             {
@@ -38,6 +39,7 @@ namespace SharpGLTF.Schema2
 
                 Guard.IsTrue(byteStride.IsMultipleOf(4), nameof(byteStride));
                 Guard.MustBeBetweenOrEqualTo(byteStride, _byteStrideMinimum, _byteStrideMaximum, nameof(byteStride));
+                this._byteStride = byteStride.AsNullable(0, _byteStrideMinimum, _byteStrideMaximum);
             }
 
             this._buffer = buffer.LogicalIndex;
@@ -45,7 +47,6 @@ namespace SharpGLTF.Schema2
             this._byteLength = byteLength.AsValue(buffer.Content.Length);
 
             this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
-            this._byteStride = byteStride.AsNullable(0, _byteStrideMinimum, _byteStrideMaximum);
 
             this._target = target;
         }

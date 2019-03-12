@@ -54,7 +54,7 @@ namespace SharpGLTF.Schema2
         public Material WithPBRSpecularGlossiness()
         {
             this.RemoveExtensions<MaterialUnlit_KHR>();
-            this.SetExtension(new MaterialPBRSpecularGlossiness_KHR());
+            this.SetExtension(new MaterialPBRSpecularGlossiness_KHR(this));
 
             return this;
         }
@@ -66,7 +66,7 @@ namespace SharpGLTF.Schema2
         public Material WithUnlit()
         {
             this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
-            this.SetExtension(new MaterialUnlit_KHR());
+            this.SetExtension(new MaterialUnlit_KHR(this));
 
             return this;
         }
@@ -110,7 +110,7 @@ namespace SharpGLTF.Schema2
                 "Emissive",
                 _GetEmissiveTexture,
                 () => { var rgb = _emissiveFactor.AsValue(_emissiveFactorDefault); return new Vector4(rgb, 1); },
-                value => _emissiveFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_emissiveFactorDefault)
+                value => _emissiveFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_emissiveFactorDefault, Vector3.Zero, Vector3.One)
                 );
         }
 
@@ -182,6 +182,7 @@ namespace SharpGLTF.Schema2
 
     internal sealed partial class MaterialPBRSpecularGlossiness_KHR
     {
+        internal MaterialPBRSpecularGlossiness_KHR(Material material) { }
 
         private TextureInfo _GetDiffuseTexture(bool create)
         {
@@ -228,5 +229,6 @@ namespace SharpGLTF.Schema2
 
     internal sealed partial class MaterialUnlit_KHR
     {
+        internal MaterialUnlit_KHR(Material material) { }
     }
 }

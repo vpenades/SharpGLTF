@@ -88,7 +88,7 @@ namespace SharpGLTF.Schema2
                 foreach (var val in this._extensions)
                 {
                     if (val == null) continue;
-                    var key = ExtensionsFactory.Identify(val.GetType());
+                    var key = ExtensionsFactory.Identify(this.GetType(), val.GetType());
                     if (key == null) continue;
 
                     dict[key] = val;
@@ -109,7 +109,7 @@ namespace SharpGLTF.Schema2
         {
             switch (property)
             {
-                case "extensions": _DeserializeExtensions(reader, _extensions); break;
+                case "extensions": _DeserializeExtensions(this, reader, _extensions); break;
 
                 // case "extras": reader.Skip(); break;
                 case "extras": _extras = DeserializeValue<Extras>(reader); break;
@@ -118,7 +118,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static void _DeserializeExtensions(JsonReader reader, IList<JsonSerializable> extensions)
+        private static void _DeserializeExtensions(JsonSerializable parent, JsonReader reader, IList<JsonSerializable> extensions)
         {
             while (true)
             {
@@ -133,7 +133,7 @@ namespace SharpGLTF.Schema2
                     {
                         if (reader.TokenType == JsonToken.EndArray) break;
 
-                        _DeserializeExtensions(reader, extensions);
+                        _DeserializeExtensions(parent, reader, extensions);
                     }
 
                     break;
@@ -144,7 +144,7 @@ namespace SharpGLTF.Schema2
                 System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
                 var key = reader.Value as String;
 
-                var val = ExtensionsFactory.Create(key);
+                var val = ExtensionsFactory.Create(parent, key);
 
                 if (val == null)
                 {

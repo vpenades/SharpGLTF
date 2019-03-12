@@ -9,14 +9,30 @@ namespace SharpGLTF.Schema2
 
     partial class KHR_lights_punctualglTFextension
     {
-        public ChildrenCollection<PunctualLight, ModelRoot> GetLightsCollection(ModelRoot root)
+        internal KHR_lights_punctualglTFextension(ModelRoot root)
         {
-            if (_lights == null) _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
+            _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
+        }
 
-            return _lights;
+        public IReadOnlyList<PunctualLight> Lights => _lights;
+
+        public PunctualLight CreateLight(string name = null)
+        {
+            var light = new PunctualLight();
+            light.Name = name;
+
+            _lights.Add(light);
+
+            return light;
         }
     }
 
+    public enum PunctualLightType { Directional, Point, Spot }
+
+    /// <remarks>
+    /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
+    /// </remarks>
+    [System.Diagnostics.DebuggerDisplay("{LightType} {Color} {Intensity} {Range}")]
     public partial class PunctualLight
     {
         /// <summary>
@@ -27,22 +43,26 @@ namespace SharpGLTF.Schema2
         public Vector3 Color
         {
             get => _color.AsValue(_colorDefault);
-            set => _color = value.AsNullable(_colorDefault);
+            set => _color = value.AsNullable(_colorDefault, Vector3.Zero, Vector3.One);
         }
 
         public Double Intensity
         {
             get => _intensity.AsValue(_intensityDefault);
-            set => _intensity = value.AsNullable(_intensityDefault, _intensityMinimum, double.MaxValue);
+            set => _intensity = value.AsNullable(_intensityDefault, _intensityMinimum, float.MaxValue);
         }
 
         public Double Range
         {
             get => _range.AsValue(0);
-            set => _range = value.AsNullable(0, _rangeMinimum, double.MaxValue);
+            set => _range = value.AsNullable(0, _rangeMinimum, float.MaxValue);
         }
 
-        public string LightType => _type;
+        public PunctualLightType LightType
+        {
+            get => (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
+            set => this._type = value.ToString().ToLower();
+        }
     }
 
     partial class PunctualLightSpot
@@ -62,6 +82,12 @@ namespace SharpGLTF.Schema2
 
     partial class ModelRoot
     {
+        /// <summary>
+        /// A collection of <see cref="PunctualLight"/> instances.
+        /// </summary>
+        /// <remarks>
+        /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> extension.
+        /// </remarks>
         public IReadOnlyList<PunctualLight> LogicalPunctualLights
         {
             get
@@ -69,7 +95,7 @@ namespace SharpGLTF.Schema2
                 var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
                 if (ext == null) return new PunctualLight[0];
 
-                return ext.GetLightsCollection(this);
+                return ext.Lights;
             }
         }
 
@@ -84,21 +110,20 @@ namespace SharpGLTF.Schema2
             var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
             if (ext == null)
             {
-                ext = new KHR_lights_punctualglTFextension();
+                ext = new KHR_lights_punctualglTFextension(this);
                 this.SetExtension(ext);
             }
 
-            var light = new PunctualLight();
-            light.Name = name;
-
-            ext.GetLightsCollection(this).Add(light);
-
-            return light;
+            return ext.CreateLight(name);
         }
     }
 
     partial class KHR_lights_punctualnodeextension
     {
+        internal KHR_lights_punctualnodeextension(Node node)
+        {
+        }
+
         public int LightIndex
         {
             get => _light;
@@ -123,7 +148,7 @@ namespace SharpGLTF.Schema2
 
                 Guard.MustShareLogicalParent(this, value, nameof(value));
 
-                var ext = new KHR_lights_punctualnodeextension();
+                var ext = new KHR_lights_punctualnodeextension(this);
                 ext.LightIndex = value.LogicalIndex;
 
                 this.SetExtension(ext);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
@@ -15,48 +16,58 @@ namespace SharpGLTF.Schema2
 
         static ExtensionsFactory()
         {
-            RegisterExtension<MaterialPBRSpecularGlossiness_KHR>("KHR_materials_pbrSpecularGlossiness");
-            RegisterExtension<MaterialUnlit_KHR>("KHR_materials_unlit");
+            RegisterExtension<Material, MaterialPBRSpecularGlossiness_KHR>("KHR_materials_pbrSpecularGlossiness");
 
-            // if found in model:
-            // RegisterExtension<KHR_lights_punctualglTFextension>("KHR_lights_punctual");
+            RegisterExtension<Material, MaterialUnlit_KHR>("KHR_materials_unlit");
 
-            // if found in node
-            // RegisterExtension<KHR_lights_punctualnodeextension>("KHR_lights_punctual");
+            RegisterExtension<ModelRoot, KHR_lights_punctualglTFextension>("KHR_lights_punctual");
+            RegisterExtension<Node, KHR_lights_punctualnodeextension>("KHR_lights_punctual");
         }
 
         #endregion
 
         #region data
 
-        private static readonly Dictionary<string, Type> _Extensions = new Dictionary<string, Type>();
+        private static readonly List<(string, Type, Type)> _Extensions = new List<(string, Type, Type)>();
 
         #endregion
 
         #region API
 
-        public static IEnumerable<string> SupportedExtensions => _Extensions.Keys;
+        public static IEnumerable<string> SupportedExtensions => _Extensions.Select(item => item.Item1);
 
-        public static void RegisterExtension<T>(string persistentName)
-            where T : JsonSerializable
+        public static void RegisterExtension<TParent, TExtension>(string persistentName)
+            where TParent : JsonSerializable
+            where TExtension : JsonSerializable
         {
-            _Extensions[persistentName] = typeof(T);
+            _Extensions.Add( (persistentName, typeof(TParent), typeof(TExtension)) );
         }
 
-        internal static JsonSerializable Create(string key)
+        internal static JsonSerializable Create(JsonSerializable parent, string key)
         {
-            if (!_Extensions.TryGetValue(key, out Type t)) return null;
+            var ptype = parent.GetType();
 
-            var instance = Activator.CreateInstance(t);
+            var entry = _Extensions.FirstOrDefault(item => item.Item1 == key && item.Item2 == ptype);
+
+            if (entry.Item1 == null) return null;
+
+            var instance = Activator.CreateInstance
+                (
+                entry.Item3,
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+                null,
+                new Object[] { parent },
+                null
+                );
 
             return instance as JsonSerializable;
         }
 
-        internal static string Identify(Type type)
+        internal static string Identify(Type parentType, Type extensionType)
         {
-            foreach (var kvp in _Extensions)
+            foreach (var entry in _Extensions)
             {
-                if (kvp.Value == type) return kvp.Key;
+                if (entry.Item2 == parentType && entry.Item3 == extensionType) return entry.Item1;
             }
 
             return null;

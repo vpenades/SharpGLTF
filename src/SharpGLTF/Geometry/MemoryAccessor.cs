@@ -84,10 +84,10 @@ namespace SharpGLTF.Geometry
                 if (this.ByteOffset < 0) return false;
                 if (this.ItemsCount < 0) return false;
                 if (this.ByteStride < 0) return false;
-                var len = this.Dimensions.DimCount() * this.Encoding.ByteLength();
-                if (len == 0 || (len & 3) != 0) return false;
+                var blen = this.ByteLength;
+                if (blen == 0 || (blen & 3) != 0) return false;
 
-                if (this.ByteStride > 0 && this.ByteStride < len) return false;
+                if (this.ByteStride > 0 && this.ByteStride < blen) return false;
                 if ((this.ByteStride & 3) != 0) return false;
 
                 return true;

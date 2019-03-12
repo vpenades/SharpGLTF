@@ -152,6 +152,11 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var model = GltfUtils.LoadModel(f);
             Assert.NotNull(model);
+
+            Assert.AreEqual(3, model.LogicalPunctualLights.Count);
+
+            Assert.AreEqual(1, model.DefaultScene.VisualChildren.ElementAt(0).PunctualLight.LogicalIndex);
+            Assert.AreEqual(0, model.DefaultScene.VisualChildren.ElementAt(1).PunctualLight.LogicalIndex);
         }
 
         #endregion

@@ -300,6 +300,9 @@ namespace SharpGLTF.Schema2
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.UseBufferView(new Byte[output.Count * 4 * 3]);
+
+            System.Diagnostics.Debug.Assert(buffer.ByteStride == 0);
+
             var accessor = root.CreateAccessor("Animation.Output")
                 .WithData(buffer, 0, output.Count, ElementType.VEC3, ComponentType.FLOAT, false);
 
