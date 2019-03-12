@@ -75,4 +75,50 @@ namespace SharpGLTF.Schema2
 
         #endregion
     }
+
+    partial class ModelRoot
+    {
+        private IEnumerable<glTFProperty> _GetAllExtensionContainers()
+        {
+            IEnumerable<glTFProperty> containers = new glTFProperty[] { this, this.Asset };
+
+            containers = containers.Concat(this.LogicalAccessors);
+            containers = containers.Concat(this.LogicalAnimations);
+            containers = containers.Concat(this.LogicalBuffers);
+            containers = containers.Concat(this.LogicalBufferViews);
+            containers = containers.Concat(this.LogicalCameras);
+            containers = containers.Concat(this.LogicalImages);
+            containers = containers.Concat(this.LogicalMaterials);
+            containers = containers.Concat(this.LogicalMeshes);
+            containers = containers.Concat(this.LogicalNodes);
+            containers = containers.Concat(this.LogicalPunctualLights);
+            containers = containers.Concat(this.LogicalSamplers);
+            containers = containers.Concat(this.LogicalScenes);
+            containers = containers.Concat(this.LogicalSkins);
+            containers = containers.Concat(this.LogicalTextures);
+            return containers;
+        }
+
+        internal void UpdateExtensionsSupport()
+        {
+            var usedExtensions = new HashSet<string>();
+
+            foreach (var c in _GetAllExtensionContainers())
+            {
+                var ids = c.Extensions.Select(item => ExtensionsFactory.Identify(c.GetType(), item.GetType()));
+
+                foreach (var id in ids) usedExtensions.Add(id);
+            }
+        }
+
+        internal void UsingExtension(Type parentType, Type extensionType)
+        {
+            var id = ExtensionsFactory.Identify(parentType, extensionType);
+            if (string.IsNullOrWhiteSpace(id)) return;
+
+            if (this._extensionsUsed.Contains(id)) return;
+
+            this._extensionsUsed.Add(id);
+        }
+    }
 }

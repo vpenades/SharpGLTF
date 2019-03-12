@@ -49,5 +49,14 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region API
+
+        internal void UsingExtension(Type extensionType)
+        {
+            LogicalParent.UsingExtension(this.GetType(), extensionType);
+        }
+
+        #endregion
     }
 }

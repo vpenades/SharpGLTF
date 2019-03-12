@@ -67,6 +67,21 @@ namespace SharpGLTF.Schema2.Authoring
                 );
         }
 
+        [Test(Description ="Creates a scene with lights")]
+        public void CreateSceneWithLights()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var root = ModelRoot.CreateModel();
+            var scene = root.UseScene("Empty Scene");            
+            var node = scene.CreateNode();
+            node.PunctualLight = root.CreatePunctualLight("Directional Light");
+            node.PunctualLight.LightType = PunctualLightType.Directional;
+
+            root.AttachToCurrentTest("sceneWithLight.gltf");
+        }
+
         [Test(Description ="Creates a model with a triangle mesh")]
         public void CreateSolidTriangleScene()
         {

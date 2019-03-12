@@ -61,7 +61,24 @@ namespace SharpGLTF.Schema2
         public PunctualLightType LightType
         {
             get => (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
-            set => this._type = value.ToString().ToLower();
+            set
+            {
+                this._type = value.ToString().ToLower();
+                if (value != PunctualLightType.Spot) this._spot = null;
+                else if (this._spot == null) this._spot = new PunctualLightSpot();
+            }
+        }
+
+        public float InnerConeAngle
+        {
+            get => this._spot == null ? 0 : (float)this._spot.InnerConeAngle;
+            set { if (this._spot != null) this._spot.InnerConeAngle = value; }
+        }
+
+        public float OuterConeAngle
+        {
+            get => this._spot == null ? 0 : (float)this._spot.OuterConeAngle;
+            set { if (this._spot != null) this._spot.OuterConeAngle = value; }
         }
     }
 
@@ -110,6 +127,8 @@ namespace SharpGLTF.Schema2
             var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
             if (ext == null)
             {
+                this.UsingExtension(typeof(ModelRoot), typeof(KHR_lights_punctualglTFextension));
+
                 ext = new KHR_lights_punctualglTFextension(this);
                 this.SetExtension(ext);
             }
@@ -133,6 +152,12 @@ namespace SharpGLTF.Schema2
 
     partial class Node
     {
+        /// <summary>
+        /// Gets or sets the <see cref="Schema2.PunctualLight"/> of this <see cref="Node"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
+        /// </remarks>
         public PunctualLight PunctualLight
         {
             get
@@ -147,6 +172,8 @@ namespace SharpGLTF.Schema2
                 if (value == null) { this.RemoveExtensions<KHR_lights_punctualnodeextension>(); return; }
 
                 Guard.MustShareLogicalParent(this, value, nameof(value));
+
+                this.UsingExtension(typeof(KHR_lights_punctualnodeextension));
 
                 var ext = new KHR_lights_punctualnodeextension(this);
                 ext.LightIndex = value.LogicalIndex;

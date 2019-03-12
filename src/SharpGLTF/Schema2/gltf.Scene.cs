@@ -138,7 +138,7 @@ namespace SharpGLTF.Schema2
         #region properties - content
 
         /// <summary>
-        /// Gets or sets the <see cref="Mesh"/> of this <see cref="Node"/>.
+        /// Gets or sets the <see cref="Schema2.Mesh"/> of this <see cref="Node"/>.
         /// </summary>
         public Mesh Mesh
         {
@@ -152,7 +152,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Skin"/> of this <see cref="Node"/>.
+        /// Gets or sets the <see cref="Schema2.Skin"/> of this <see cref="Node"/>.
         /// </summary>
         public Skin Skin
         {
