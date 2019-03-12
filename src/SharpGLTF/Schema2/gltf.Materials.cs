@@ -52,7 +52,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets a value indicating whether this <see cref="Material"/> instance has Unlit extension.
         /// </summary>
-        public Boolean Unlit => this.GetExtension<MaterialUnlit_KHR>() != null;
+        public Boolean Unlit => this.GetExtension<MaterialUnlit>() != null;
 
         /// <summary>
         /// Gets a collection of <see cref="MaterialChannelView"/> elements available in this <see cref="Material"/> instance.

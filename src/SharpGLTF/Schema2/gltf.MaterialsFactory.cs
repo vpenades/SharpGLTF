@@ -41,8 +41,8 @@ namespace SharpGLTF.Schema2
         {
             this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
-            this.RemoveExtensions<MaterialUnlit_KHR>();
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            this.RemoveExtensions<MaterialUnlit>();
 
             return this;
         }
@@ -53,8 +53,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithPBRSpecularGlossiness()
         {
-            this.RemoveExtensions<MaterialUnlit_KHR>();
-            this.SetExtension(new MaterialPBRSpecularGlossiness_KHR(this));
+            this.RemoveExtensions<MaterialUnlit>();
+            this.SetExtension(new MaterialPBRSpecularGlossiness(this));
 
             return this;
         }
@@ -65,8 +65,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public Material WithUnlit()
         {
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness_KHR>();
-            this.SetExtension(new MaterialUnlit_KHR(this));
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            this.SetExtension(new MaterialUnlit(this));
 
             return this;
         }
@@ -79,7 +79,7 @@ namespace SharpGLTF.Schema2
                 foreach (var c in channels) yield return c;
             }
 
-            var pbrSpecGloss = this.GetExtension<MaterialPBRSpecularGlossiness_KHR>();
+            var pbrSpecGloss = this.GetExtension<MaterialPBRSpecularGlossiness>();
             if (pbrSpecGloss != null)
             {
                 var channels = pbrSpecGloss.GetChannels(this);
@@ -180,9 +180,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    internal sealed partial class MaterialPBRSpecularGlossiness_KHR
+    internal sealed partial class MaterialPBRSpecularGlossiness
     {
-        internal MaterialPBRSpecularGlossiness_KHR(Material material) { }
+        internal MaterialPBRSpecularGlossiness(Material material) { }
 
         private TextureInfo _GetDiffuseTexture(bool create)
         {
@@ -227,8 +227,8 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    internal sealed partial class MaterialUnlit_KHR
+    internal sealed partial class MaterialUnlit
     {
-        internal MaterialUnlit_KHR(Material material) { }
+        internal MaterialUnlit(Material material) { }
     }
 }

@@ -25,6 +25,7 @@ namespace SharpGLTF
             _ProcessKhronosUnlitExtension();
             _ProcessKhronosModelLightsPunctualExtension();
             _ProcessKhronosNodeLightsPunctualExtension();
+            _ProcessKhronosTextureTransformExtension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
@@ -156,15 +157,27 @@ namespace SharpGLTF
             ProcessSchema("ext.NodeLightsPunctual.g", ctx);
         }
 
-
-
-        /*
-        private static void _ProcessMicrosoftLODExtension()
+        private static void _ProcessKhronosTextureTransformExtension()
         {
-            var ctx3 = LoadSchemaContext("glTF\\extensions\\2.0\\Vendor\\MSFT_lod\\schema\\glTF.MSFT_lod.schema.json");
-            ctx3.Remove("glTF Property");
-            ProcessSchema("ext.msft_lod.g", ctx3);
-        }*/
+            var ctx = LoadSchemaContext(Constants.KhronosTextureTransformSchemaFile);
+            ctx.Remove("glTF Property");
+
+            var tex = ctx.Classes
+                .ToArray()
+                .FirstOrDefault(item => item.PersistentName == "KHR_texture_transform textureInfo extension");
+
+            tex.UseField("offset")
+                .SetDataType(typeof(System.Numerics.Vector2), true)
+                .SetDefaultValue("Vector2.One")
+                .SetItemsRange(0);
+
+            tex.UseField("scale")
+                .SetDataType(typeof(System.Numerics.Vector2), true)
+                .SetDefaultValue("Vector2.One")
+                .SetItemsRange(0);
+
+            ProcessSchema("ext.TextureTransform.g", ctx);
+        }
 
         #endregion
 
@@ -212,11 +225,13 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("CLAMP_TO_EDGE-MIRRORED_REPEAT-REPEAT", "TextureWrapMode");
             newEmitter.SetRuntimeName("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST", "TextureMipMapMode");
 
-            newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness_KHR");
-            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit_KHR");
+            newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness");
+            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");
 
             newEmitter.SetRuntimeName("light", "PunctualLight");
             newEmitter.SetRuntimeName("light/spot", "PunctualLightSpot");
+
+            newEmitter.SetRuntimeName("KHR_texture_transform textureInfo extension", "TextureTransform");
 
 
 

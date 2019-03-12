@@ -400,6 +400,14 @@ namespace SharpGLTF.IO
                 throw new NotImplementedException();
             }
 
+            if (vtype == typeof(System.Numerics.Vector2))
+            {
+                var l = new List<float>();
+                DeserializeList<float>(reader, l);
+                value = new System.Numerics.Vector2(l[0], l[1]);
+                return true;
+            }
+
             if (vtype == typeof(System.Numerics.Vector3))
             {
                 var l = new List<float>();

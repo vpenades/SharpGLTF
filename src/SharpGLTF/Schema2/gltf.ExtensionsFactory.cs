@@ -16,12 +16,14 @@ namespace SharpGLTF.Schema2
 
         static ExtensionsFactory()
         {
-            RegisterExtension<Material, MaterialPBRSpecularGlossiness_KHR>("KHR_materials_pbrSpecularGlossiness");
+            RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness");
 
-            RegisterExtension<Material, MaterialUnlit_KHR>("KHR_materials_unlit");
+            RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit");
 
             RegisterExtension<ModelRoot, KHR_lights_punctualglTFextension>("KHR_lights_punctual");
             RegisterExtension<Node, KHR_lights_punctualnodeextension>("KHR_lights_punctual");
+
+            RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform");
         }
 
         #endregion

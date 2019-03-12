@@ -128,6 +128,11 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
+    partial class TextureTransform
+    {
+        internal TextureTransform(TextureInfo parent) { }
+    }
+
     public partial class ModelRoot
     {
         /// <summary>
