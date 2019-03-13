@@ -8,7 +8,7 @@ namespace SharpGLTF.Memory
 {
     using BYTES = ArraySegment<Byte>;
 
-    using ENCODING = Schema2.IndexType;
+    using ENCODING = Schema2.IndexEncodingType;
 
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="UInt32"/> values

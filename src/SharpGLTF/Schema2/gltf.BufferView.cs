@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
 {
     using BYTES = ArraySegment<Byte>;
 
-    using ENCODING = ComponentType;
+    using ENCODING = EncodingType;
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugProxy))]
     public sealed partial class BufferView

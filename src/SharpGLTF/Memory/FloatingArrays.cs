@@ -9,7 +9,7 @@ namespace SharpGLTF.Memory
 {
     using BYTES = ArraySegment<Byte>;
 
-    using ENCODING = Schema2.ComponentType;
+    using ENCODING = Schema2.EncodingType;
 
     /// <summary>
     /// Wraps a <see cref="ArraySegment{Byte}"/> containing encoded <see cref="Single"/> values

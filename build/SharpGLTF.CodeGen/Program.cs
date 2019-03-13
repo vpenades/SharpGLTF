@@ -212,9 +212,9 @@ namespace SharpGLTF
 
             // newEmitter.SetRuntimeName("Sampler", "TextureSampler");
 
-            newEmitter.SetRuntimeName("UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "IndexType");            
-            newEmitter.SetRuntimeName("BYTE-FLOAT-SHORT-UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "ComponentType");            
-            newEmitter.SetRuntimeName("MAT2-MAT3-MAT4-SCALAR-VEC2-VEC3-VEC4", "ElementType");
+            newEmitter.SetRuntimeName("UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "IndexEncodingType");            
+            newEmitter.SetRuntimeName("BYTE-FLOAT-SHORT-UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "EncodingType");            
+            newEmitter.SetRuntimeName("MAT2-MAT3-MAT4-SCALAR-VEC2-VEC3-VEC4", "DimensionType");
             newEmitter.SetRuntimeName("rotation-scale-translation-weights", "PathType");
             newEmitter.SetRuntimeName("ARRAY_BUFFER-ELEMENT_ARRAY_BUFFER", "BufferMode");
             newEmitter.SetRuntimeName("orthographic-perspective", "CameraType");

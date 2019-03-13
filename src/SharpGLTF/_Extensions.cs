@@ -275,84 +275,84 @@ namespace SharpGLTF
 
         #region vertex & index accessors
 
-        public static int ByteLength(this IndexType encoding)
+        public static int ByteLength(this IndexEncodingType encoding)
         {
             switch (encoding)
             {
-                case IndexType.UNSIGNED_BYTE: return 1;
-                case IndexType.UNSIGNED_SHORT: return 2;
-                case IndexType.UNSIGNED_INT: return 4;
+                case IndexEncodingType.UNSIGNED_BYTE: return 1;
+                case IndexEncodingType.UNSIGNED_SHORT: return 2;
+                case IndexEncodingType.UNSIGNED_INT: return 4;
 
                 default: throw new NotImplementedException();
             }
         }
 
-        public static int ByteLength(this ComponentType encoding)
+        public static int ByteLength(this EncodingType encoding)
         {
             switch (encoding)
             {
-                case ComponentType.BYTE: return 1;
-                case ComponentType.SHORT: return 2;
-                case ComponentType.FLOAT: return 4;
+                case EncodingType.BYTE: return 1;
+                case EncodingType.SHORT: return 2;
+                case EncodingType.FLOAT: return 4;
 
-                case ComponentType.UNSIGNED_BYTE: return 1;
-                case ComponentType.UNSIGNED_SHORT: return 2;
-                case ComponentType.UNSIGNED_INT: return 4;
+                case EncodingType.UNSIGNED_BYTE: return 1;
+                case EncodingType.UNSIGNED_SHORT: return 2;
+                case EncodingType.UNSIGNED_INT: return 4;
 
                 default: throw new NotImplementedException();
             }
         }
 
-        public static ComponentType ToComponent(this IndexType t)
+        public static EncodingType ToComponent(this IndexEncodingType t)
         {
             switch (t)
             {
-                case IndexType.UNSIGNED_BYTE: return ComponentType.UNSIGNED_BYTE;
-                case IndexType.UNSIGNED_SHORT: return ComponentType.UNSIGNED_SHORT;
-                case IndexType.UNSIGNED_INT: return ComponentType.UNSIGNED_INT;
+                case IndexEncodingType.UNSIGNED_BYTE: return EncodingType.UNSIGNED_BYTE;
+                case IndexEncodingType.UNSIGNED_SHORT: return EncodingType.UNSIGNED_SHORT;
+                case IndexEncodingType.UNSIGNED_INT: return EncodingType.UNSIGNED_INT;
 
                 default: throw new NotImplementedException();
             }
         }
 
-        public static IndexType ToIndex(this ComponentType t)
+        public static IndexEncodingType ToIndex(this EncodingType t)
         {
             switch (t)
             {
-                case ComponentType.UNSIGNED_BYTE: return IndexType.UNSIGNED_BYTE;
-                case ComponentType.UNSIGNED_SHORT: return IndexType.UNSIGNED_SHORT;
-                case ComponentType.UNSIGNED_INT: return IndexType.UNSIGNED_INT;
+                case EncodingType.UNSIGNED_BYTE: return IndexEncodingType.UNSIGNED_BYTE;
+                case EncodingType.UNSIGNED_SHORT: return IndexEncodingType.UNSIGNED_SHORT;
+                case EncodingType.UNSIGNED_INT: return IndexEncodingType.UNSIGNED_INT;
 
                 default: throw new NotImplementedException();
             }
         }
 
-        public static int DimCount(this ElementType dimension)
+        public static int DimCount(this DimensionType dimension)
         {
             switch (dimension)
             {
-                case ElementType.SCALAR: return 1;
-                case ElementType.VEC2: return 2;
-                case ElementType.VEC3: return 3;
-                case ElementType.VEC4: return 4;
-                case ElementType.MAT2: return 4;
-                case ElementType.MAT3: return 9;
-                case ElementType.MAT4: return 16;
+                case DimensionType.SCALAR: return 1;
+                case DimensionType.VEC2: return 2;
+                case DimensionType.VEC3: return 3;
+                case DimensionType.VEC4: return 4;
+                case DimensionType.MAT2: return 4;
+                case DimensionType.MAT3: return 9;
+                case DimensionType.MAT4: return 16;
                 default: throw new NotImplementedException();
             }
         }
 
-        internal static ElementType ToDimension(this int l)
+        internal static DimensionType ToDimension(this int l)
         {
             switch (l)
             {
-                case 1: return ElementType.SCALAR;
-                case 2: return ElementType.VEC2;
-                case 3: return ElementType.VEC3;
-                case 4: return ElementType.VEC4;
+                case 1: return DimensionType.SCALAR;
+                case 2: return DimensionType.VEC2;
+                case 3: return DimensionType.VEC3;
+                case 4: return DimensionType.VEC4;
                 // case 4: return ElementType.MAT2;
-                case 9: return ElementType.MAT3;
-                case 16: return ElementType.MAT4;
+                case 9: return DimensionType.MAT3;
+                case 16: return DimensionType.MAT4;
                 default: throw new NotImplementedException();
             }
         }

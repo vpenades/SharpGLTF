@@ -114,12 +114,12 @@ namespace SharpGLTF.Schema2.Authoring
             // create a positions accessor
             var positionsAccessor = model
                 .CreateAccessor()
-                .WithVertexData(positionsView, 0, 3, ElementType.VEC3, ComponentType.FLOAT, false);
+                .WithVertexData(positionsView, 0, 3, DimensionType.VEC3, EncodingType.FLOAT, false);
 
             // create an indices accessor
             var indicesAccessor = model
                 .CreateAccessor()
-                .WithIndexData(indicesView, 0, 3, IndexType.UNSIGNED_INT);
+                .WithIndexData(indicesView, 0, 3, IndexEncodingType.UNSIGNED_INT);
             
             // create mesh primitive
             var primitive = rmesh.CreatePrimitive();

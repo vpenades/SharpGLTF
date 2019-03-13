@@ -52,9 +52,9 @@ namespace SharpGLTF.Schema2
 
         public int ByteOffset                   => this._byteOffset.AsValue(0);
 
-        public ElementType Dimensions           => this._type;
+        public DimensionType Dimensions           => this._type;
 
-        public ComponentType Encoding           => this._componentType;
+        public EncodingType Encoding           => this._componentType;
 
         public Boolean Normalized               => this._normalized.AsValue(false);
 
@@ -97,7 +97,7 @@ namespace SharpGLTF.Schema2
 
         #region Data Buffer API
 
-        public Accessor WithData(BufferView buffer, int byteOffset, int itemCount, ElementType dimensions, ComponentType encoding, Boolean normalized)
+        public Accessor WithData(BufferView buffer, int byteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
@@ -132,7 +132,7 @@ namespace SharpGLTF.Schema2
             return this.WithIndexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Encoding.ToIndex());
         }
 
-        public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<Int32> items, IndexType encoding = IndexType.UNSIGNED_INT)
+        public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<Int32> items, IndexEncodingType encoding = IndexEncodingType.UNSIGNED_INT)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
@@ -145,7 +145,7 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<UInt32> items, IndexType encoding = IndexType.UNSIGNED_INT)
+        public Accessor WithIndexData(BufferView buffer, int byteOffset, IReadOnlyList<UInt32> items, IndexEncodingType encoding = IndexEncodingType.UNSIGNED_INT)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
@@ -158,20 +158,20 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithIndexData(BufferView buffer, int byteOffset, int itemCount, IndexType encoding)
+        public Accessor WithIndexData(BufferView buffer, int byteOffset, int itemCount, IndexEncodingType encoding)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
 
-            return WithData(buffer, byteOffset, itemCount, ElementType.SCALAR, encoding.ToComponent(), false);
+            return WithData(buffer, byteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
         }
 
         public Memory.IntegerArray AsIndicesArray()
         {
             Guard.IsFalse(this.IsSparse, nameof(IsSparse));
-            Guard.IsTrue(this.Dimensions == ElementType.SCALAR, nameof(Dimensions));
+            Guard.IsTrue(this.Dimensions == DimensionType.SCALAR, nameof(Dimensions));
 
             return new Memory.IntegerArray(SourceBufferView.Content, this.ByteOffset, this._count, this.Encoding.ToIndex());
         }
@@ -186,12 +186,12 @@ namespace SharpGLTF.Schema2
             return this.WithVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Single> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Single> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(ElementType.SCALAR.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(DimensionType.SCALAR.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.SCALAR, encoding, normalized)
+            WithVertexData(buffer, bufferByteOffset, items.Count, DimensionType.SCALAR, encoding, normalized)
                 .AsScalarArray()
                 .FillFrom(0, items);
 
@@ -200,12 +200,12 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector2> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector2> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(ElementType.VEC2.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC2.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC2, encoding, normalized)
+            WithVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC2, encoding, normalized)
                 .AsVector2Array()
                 .FillFrom(0, items);
 
@@ -214,12 +214,12 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector3> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector3> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(ElementType.VEC3.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC3.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC3, encoding, normalized)
+            WithVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC3, encoding, normalized)
                 .AsVector3Array()
                 .FillFrom(0, items);
 
@@ -228,12 +228,12 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector4> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector4> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC4, encoding, normalized)
+            WithVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC4, encoding, normalized)
                 .AsVector4Array()
                 .FillFrom(0, items);
 
@@ -242,12 +242,12 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Quaternion> items, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Quaternion> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(ElementType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
 
-            WithVertexData(buffer, bufferByteOffset, items.Count, ElementType.VEC4, encoding, normalized)
+            WithVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC4, encoding, normalized)
                 .AsQuaternionArray()
                 .FillFrom(0, items);
 
@@ -256,7 +256,7 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, int itemCount, ElementType dimensions = ElementType.VEC3, ComponentType encoding = ComponentType.FLOAT, Boolean normalized = false)
+        public Accessor WithVertexData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions = DimensionType.VEC3, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));

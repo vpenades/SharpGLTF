@@ -29,7 +29,7 @@ namespace SharpGLTF.Schema2
             return base.GetLogicalChildren().Concat(_indices, _values);
         }
 
-        internal AccessorSparse(BufferView indices, int indicesOffset, IndexType indicesEncoding, BufferView values, int valuesOffset, int count)
+        internal AccessorSparse(BufferView indices, int indicesOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesOffset, int count)
         {
             Guard.NotNull(indices, nameof(indices));
             Guard.NotNull(values, nameof(values));
@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2
     {
         internal AccessorSparseIndices() { }
 
-        internal AccessorSparseIndices(BufferView bv, int byteOffset, IndexType encoding)
+        internal AccessorSparseIndices(BufferView bv, int byteOffset, IndexEncodingType encoding)
         {
             Guard.NotNull(bv, nameof(bv));
             Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));

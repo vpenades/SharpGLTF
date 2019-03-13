@@ -8,8 +8,8 @@ namespace SharpGLTF.Geometry
 {
     using Memory;
 
-    using DIMENSIONS = Schema2.ElementType;
-    using ENCODING = Schema2.ComponentType;
+    using DIMENSIONS = Schema2.DimensionType;
+    using ENCODING = Schema2.EncodingType;
 
     /// <summary>
     /// Defines the pattern in which a <see cref="ArraySegment{Byte}"/> is accessed and decoded to meaningful values.

@@ -14,11 +14,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexAttributeAttribute(string attributeName)
         {
             this.Name = attributeName;
-            this.Encoding = Schema2.ComponentType.FLOAT;
+            this.Encoding = Schema2.EncodingType.FLOAT;
             this.Normalized = false;
         }
 
-        public VertexAttributeAttribute(string attributeName, Schema2.ComponentType encoding, Boolean normalized)
+        public VertexAttributeAttribute(string attributeName, Schema2.EncodingType encoding, Boolean normalized)
         {
             this.Name = attributeName;
             this.Encoding = encoding;
@@ -31,7 +31,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public string Name { get; private set; }
 
-        public Schema2.ComponentType Encoding { get; private set; }
+        public Schema2.EncodingType Encoding { get; private set; }
 
         public Boolean Normalized { get; private set; }
 

@@ -67,7 +67,7 @@ namespace SharpGLTF.Memory
     {
         public static IntegerArray IndicesRange(int start, int count)
         {
-            var array = new IntegerArray( new ArraySegment<Byte>(new Byte[count * 4]), Schema2.IndexType.UNSIGNED_INT);
+            var array = new IntegerArray( new ArraySegment<Byte>(new Byte[count * 4]), Schema2.IndexEncodingType.UNSIGNED_INT);
 
             for (int i = 0; i < count; ++i)
             {

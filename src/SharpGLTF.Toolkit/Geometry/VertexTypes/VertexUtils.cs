@@ -52,14 +52,14 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (attribute == null) return null;
 
-            var dimensions = (Schema2.ElementType?)null;
+            var dimensions = (Schema2.DimensionType?)null;
 
-            if (finfo.FieldType == typeof(Single)) dimensions = Schema2.ElementType.SCALAR;
-            if (finfo.FieldType == typeof(Vector2)) dimensions = Schema2.ElementType.VEC2;
-            if (finfo.FieldType == typeof(Vector3)) dimensions = Schema2.ElementType.VEC3;
-            if (finfo.FieldType == typeof(Vector4)) dimensions = Schema2.ElementType.VEC4;
-            if (finfo.FieldType == typeof(Quaternion)) dimensions = Schema2.ElementType.VEC4;
-            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = Schema2.ElementType.MAT4;
+            if (finfo.FieldType == typeof(Single)) dimensions = Schema2.DimensionType.SCALAR;
+            if (finfo.FieldType == typeof(Vector2)) dimensions = Schema2.DimensionType.VEC2;
+            if (finfo.FieldType == typeof(Vector3)) dimensions = Schema2.DimensionType.VEC3;
+            if (finfo.FieldType == typeof(Vector4)) dimensions = Schema2.DimensionType.VEC4;
+            if (finfo.FieldType == typeof(Quaternion)) dimensions = Schema2.DimensionType.VEC4;
+            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = Schema2.DimensionType.MAT4;
 
             if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
 

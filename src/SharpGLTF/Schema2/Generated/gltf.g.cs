@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The indices data type.
 	/// </summary>
-	public enum IndexType
+	public enum IndexEncodingType
 	{
 		UNSIGNED_BYTE = 5121,
 		UNSIGNED_SHORT = 5123,
@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The datatype of components in the attribute.
 	/// </summary>
-	public enum ComponentType
+	public enum EncodingType
 	{
 		BYTE = 5120,
 		UNSIGNED_BYTE = 5121,
@@ -53,7 +53,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Specifies if the attribute is a scalar, vector, or matrix.
 	/// </summary>
-	public enum ElementType
+	public enum DimensionType
 	{
 		SCALAR,
 		VEC2,
@@ -206,7 +206,7 @@ namespace SharpGLTF.Schema2
 		private const Int32 _byteOffsetMinimum = 0;
 		private Int32? _byteOffset = _byteOffsetDefault;
 		
-		private IndexType _componentType;
+		private IndexEncodingType _componentType;
 		
 	
 		/// <inheritdoc />
@@ -215,7 +215,7 @@ namespace SharpGLTF.Schema2
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "bufferView", _bufferView);
 			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
-			SerializePropertyEnumValue<IndexType>(writer, "componentType", _componentType);
+			SerializePropertyEnumValue<IndexEncodingType>(writer, "componentType", _componentType);
 		}
 	
 		/// <inheritdoc />
@@ -225,7 +225,7 @@ namespace SharpGLTF.Schema2
 			{
 				case "bufferView": _bufferView = DeserializeValue<Int32>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				case "componentType": _componentType = DeserializeValue<IndexType>(reader); break;
+				case "componentType": _componentType = DeserializeValue<IndexEncodingType>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}
@@ -317,7 +317,7 @@ namespace SharpGLTF.Schema2
 		private const Int32 _byteOffsetMinimum = 0;
 		private Int32? _byteOffset = _byteOffsetDefault;
 		
-		private ComponentType _componentType;
+		private EncodingType _componentType;
 		
 		private const Int32 _countMinimum = 1;
 		private Int32 _count;
@@ -335,7 +335,7 @@ namespace SharpGLTF.Schema2
 		
 		private AccessorSparse _sparse;
 		
-		private ElementType _type;
+		private DimensionType _type;
 		
 	
 		/// <inheritdoc />
@@ -344,13 +344,13 @@ namespace SharpGLTF.Schema2
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "bufferView", _bufferView);
 			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
-			SerializePropertyEnumValue<ComponentType>(writer, "componentType", _componentType);
+			SerializePropertyEnumValue<EncodingType>(writer, "componentType", _componentType);
 			SerializeProperty(writer, "count", _count);
 			SerializeProperty(writer, "max", _max, _maxMinItems);
 			SerializeProperty(writer, "min", _min, _minMinItems);
 			SerializeProperty(writer, "normalized", _normalized, _normalizedDefault);
 			SerializePropertyObject(writer, "sparse", _sparse);
-			SerializePropertyEnumSymbol<ElementType>(writer, "type", _type);
+			SerializePropertyEnumSymbol<DimensionType>(writer, "type", _type);
 		}
 	
 		/// <inheritdoc />
@@ -360,13 +360,13 @@ namespace SharpGLTF.Schema2
 			{
 				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
 				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				case "componentType": _componentType = DeserializeValue<ComponentType>(reader); break;
+				case "componentType": _componentType = DeserializeValue<EncodingType>(reader); break;
 				case "count": _count = DeserializeValue<Int32>(reader); break;
 				case "max": DeserializeList<Double>(reader, _max); break;
 				case "min": DeserializeList<Double>(reader, _min); break;
 				case "normalized": _normalized = DeserializeValue<Boolean?>(reader); break;
 				case "sparse": _sparse = DeserializeValue<AccessorSparse>(reader); break;
-				case "type": _type = DeserializeValue<ElementType>(reader); break;
+				case "type": _type = DeserializeValue<DimensionType>(reader); break;
 				default: base.DeserializeProperty(reader, property); break;
 			}
 		}

@@ -24,10 +24,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("POSITION")]
         public Vector3 Position;
 
-        [VertexAttribute("JOINTS_0", Schema2.ComponentType.UNSIGNED_BYTE, false)]
+        [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_BYTE, false)]
         public Vector4 Joints_0;
 
-        [VertexAttribute("WEIGHTS_0", Schema2.ComponentType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights_0;
     }
 }

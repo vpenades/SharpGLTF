@@ -14,25 +14,25 @@ namespace SharpGLTF.Memory
         [Test]
         public void TestFloatingArray()
         {
-            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17 }, Schema2.ComponentType.UNSIGNED_BYTE, false)[0]);
-            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0 }, Schema2.ComponentType.UNSIGNED_SHORT, false)[0]);            
+            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17 }, Schema2.EncodingType.UNSIGNED_BYTE, false)[0]);
+            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0 }, Schema2.EncodingType.UNSIGNED_SHORT, false)[0]);            
 
-            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17 }, Schema2.ComponentType.BYTE, false)[0]);
-            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0 }, Schema2.ComponentType.SHORT, false)[0]);
+            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17 }, Schema2.EncodingType.BYTE, false)[0]);
+            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0 }, Schema2.EncodingType.SHORT, false)[0]);
 
-            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255 }, Schema2.ComponentType.UNSIGNED_BYTE, true)[0]);
-            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 127 }, Schema2.ComponentType.BYTE, true)[0]);
-            Assert.AreEqual(-1, _CreateFloatingAccessor(new Byte[] { 128 }, Schema2.ComponentType.BYTE, true)[0]);
+            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255 }, Schema2.EncodingType.UNSIGNED_BYTE, true)[0]);
+            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 127 }, Schema2.EncodingType.BYTE, true)[0]);
+            Assert.AreEqual(-1, _CreateFloatingAccessor(new Byte[] { 128 }, Schema2.EncodingType.BYTE, true)[0]);
 
-            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255, 255 }, Schema2.ComponentType.UNSIGNED_SHORT, true)[0]);
-            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255, 127 }, Schema2.ComponentType.SHORT, true)[0]);
-            Assert.AreEqual(-1, _CreateFloatingAccessor(new Byte[] { 0,  128 }, Schema2.ComponentType.SHORT, true)[0]);
+            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255, 255 }, Schema2.EncodingType.UNSIGNED_SHORT, true)[0]);
+            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 255, 127 }, Schema2.EncodingType.SHORT, true)[0]);
+            Assert.AreEqual(-1, _CreateFloatingAccessor(new Byte[] { 0,  128 }, Schema2.EncodingType.SHORT, true)[0]);
 
-            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0, 0, 0 }, Schema2.ComponentType.UNSIGNED_INT, false)[0]);
-            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 0,0, 0x80, 0x3f }, Schema2.ComponentType.FLOAT, false)[0]);
+            Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0, 0, 0 }, Schema2.EncodingType.UNSIGNED_INT, false)[0]);
+            Assert.AreEqual(1, _CreateFloatingAccessor(new Byte[] { 0,0, 0x80, 0x3f }, Schema2.EncodingType.FLOAT, false)[0]);
         }
 
-        private static FloatingAccessor _CreateFloatingAccessor(byte[] data, Schema2.ComponentType encoding, bool normalized)
+        private static FloatingAccessor _CreateFloatingAccessor(byte[] data, Schema2.EncodingType encoding, bool normalized)
         {
             return new FloatingAccessor(new ArraySegment<byte>(data), 0, int.MaxValue, 0, 1, encoding, normalized);
         }
@@ -42,7 +42,7 @@ namespace SharpGLTF.Memory
         {
             var buffer = new Byte[] { 1, 52, 43, 6, 23, 234 };
 
-            var accessor = new Vector2Array(buffer, 0, Schema2.ComponentType.BYTE, true);
+            var accessor = new Vector2Array(buffer, 0, Schema2.EncodingType.BYTE, true);
 
             var result = accessor.ToArray();
 
@@ -57,11 +57,11 @@ namespace SharpGLTF.Memory
 
             var bytes = new Byte[256];
 
-            var v4n = new Vector4Array(bytes.Slice(0), 0, Schema2.ComponentType.UNSIGNED_BYTE, true);
+            var v4n = new Vector4Array(bytes.Slice(0), 0, Schema2.EncodingType.UNSIGNED_BYTE, true);
             v4n[1] = v1;
             VectorAssert.AreEqual(v4n[1], v1, 0.1f);
 
-            var v4u = new Vector4Array(bytes.Slice(0), 0, Schema2.ComponentType.UNSIGNED_BYTE, false);
+            var v4u = new Vector4Array(bytes.Slice(0), 0, Schema2.EncodingType.UNSIGNED_BYTE, false);
             v4u[1] = v2;
             VectorAssert.AreEqual(v4u[1], v2);
         }
@@ -74,8 +74,8 @@ namespace SharpGLTF.Memory
 
             var bytes = new Byte[256];
 
-            var v4n = new Vector4Array(bytes.Slice(0), 0, 5, 8, Schema2.ComponentType.UNSIGNED_BYTE, true);
-            var v4u = new Vector4Array(bytes.Slice(0), 4, 5, 8, Schema2.ComponentType.UNSIGNED_BYTE, false);
+            var v4n = new Vector4Array(bytes.Slice(0), 0, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, true);
+            var v4u = new Vector4Array(bytes.Slice(0), 4, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, false);
 
             v4n[1] = v1;
             VectorAssert.AreEqual(v4n[1], v1, 0.1f);

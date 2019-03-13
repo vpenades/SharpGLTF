@@ -57,17 +57,17 @@ namespace SharpGLTF.Debug
 
         public Schema2.BufferView Source => _Value.SourceBufferView;
 
-        public (Schema2.ElementType, Schema2.ComponentType, bool) Format => (_Value.Dimensions, _Value.Encoding, _Value.Normalized);
+        public (Schema2.DimensionType, Schema2.EncodingType, bool) Format => (_Value.Dimensions, _Value.Encoding, _Value.Normalized);
 
         public Object[] Items
         {
             get
             {
-                if (_Value.Dimensions == Schema2.ElementType.SCALAR) return _Value.AsScalarArray().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.ElementType.VEC2) return _Value.AsVector2Array().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.ElementType.VEC3) return _Value.AsVector3Array().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.ElementType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.ElementType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
+                if (_Value.Dimensions == Schema2.DimensionType.SCALAR) return _Value.AsScalarArray().Cast<Object>().ToArray();
+                if (_Value.Dimensions == Schema2.DimensionType.VEC2) return _Value.AsVector2Array().Cast<Object>().ToArray();
+                if (_Value.Dimensions == Schema2.DimensionType.VEC3) return _Value.AsVector3Array().Cast<Object>().ToArray();
+                if (_Value.Dimensions == Schema2.DimensionType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();
+                if (_Value.Dimensions == Schema2.DimensionType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
 
                 var itemSize = _Value.ItemByteSize;
                 var byteStride = Math.Max(_Value.SourceBufferView.ByteStride, itemSize);
