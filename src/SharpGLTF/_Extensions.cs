@@ -6,6 +6,7 @@ using System.Numerics;
 namespace SharpGLTF
 {
     using Schema2;
+    using System.Linq;
 
     /// <summary>
     /// Extensions used internally.
@@ -263,6 +264,11 @@ namespace SharpGLTF
             {
                 dst.Add(cvt(item));
             }
+        }
+
+        internal static IEnumerable<T> Concat<T>(this IEnumerable<T> collection, params T[] instances)
+        {
+            return collection.Concat(instances.Where(item => item != null));
         }
 
         #endregion

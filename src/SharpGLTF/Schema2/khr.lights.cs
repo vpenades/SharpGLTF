@@ -6,12 +6,18 @@ using System.Numerics;
 namespace SharpGLTF.Schema2
 {
     using Collections;
+    using System.Linq;
 
     partial class KHR_lights_punctualglTFextension
     {
         internal KHR_lights_punctualglTFextension(ModelRoot root)
         {
             _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
+        }
+
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_lights);
         }
 
         public IReadOnlyList<PunctualLight> Lights => _lights;

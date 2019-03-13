@@ -80,37 +80,34 @@ namespace SharpGLTF.Schema2
 
     partial class ModelRoot
     {
-        private IEnumerable<glTFProperty> _GetAllExtensionContainers()
-        {
-            IEnumerable<glTFProperty> containers = new glTFProperty[] { this, this.Asset };
-
-            containers = containers.Concat(this.LogicalAccessors);
-            containers = containers.Concat(this.LogicalAnimations);
-            containers = containers.Concat(this.LogicalBuffers);
-            containers = containers.Concat(this.LogicalBufferViews);
-            containers = containers.Concat(this.LogicalCameras);
-            containers = containers.Concat(this.LogicalImages);
-            containers = containers.Concat(this.LogicalMaterials);
-            containers = containers.Concat(this.LogicalMeshes);
-            containers = containers.Concat(this.LogicalNodes);
-            containers = containers.Concat(this.LogicalPunctualLights);
-            containers = containers.Concat(this.LogicalSamplers);
-            containers = containers.Concat(this.LogicalScenes);
-            containers = containers.Concat(this.LogicalSkins);
-            containers = containers.Concat(this.LogicalTextures);
-            return containers;
-        }
-
         internal void UpdateExtensionsSupport()
         {
-            var usedExtensions = new HashSet<string>();
+            var used = RetrieveUsedExtensions();
 
-            foreach (var c in _GetAllExtensionContainers())
+            // update the used list
+            this._extensionsUsed.Clear();
+            this._extensionsUsed.AddRange(used);
+        }
+
+        internal IEnumerable<string> RetrieveUsedExtensions()
+        {
+            // retrieve ALL the property based objects of the whole model.
+
+            var allObjects = GetLogicalChildren()
+                .SelectMany(item => glTFProperty.Flatten(item)
+                .ToList());
+
+            // check all the extensions used by each object
+            var used = new HashSet<string>();
+
+            foreach (var c in allObjects)
             {
                 var ids = c.Extensions.Select(item => ExtensionsFactory.Identify(c.GetType(), item.GetType()));
 
-                foreach (var id in ids) usedExtensions.Add(id);
+                foreach (var id in ids) used.Add(id);
             }
+
+            return used;
         }
 
         internal void UsingExtension(Type parentType, Type extensionType)

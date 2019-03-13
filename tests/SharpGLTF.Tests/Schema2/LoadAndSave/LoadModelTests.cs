@@ -87,6 +87,12 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 if (!f.Contains(section)) continue;
 
+                if (section.Contains("glTF-pbrSpecularGlossiness"))
+                {
+                    // these ones are included in the pbrSpecularGlossiness but don't actually contain any extension
+                    if (f.EndsWith("BoxInterleaved.gltf")) continue;
+                }
+
                 var model = GltfUtils.LoadModel(f);
                 Assert.NotNull(model);
 
@@ -96,8 +102,11 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 
                 // do a model roundtrip
                 var bytes = model.WriteGLB();
-
                 var modelBis = ModelRoot.ParseGLB(bytes);
+
+                // check extensions used
+                var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
+                CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
             }
         }
 

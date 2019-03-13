@@ -36,6 +36,11 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
+        }
+
         private AnimationSampler _CreateSampler(AnimationInterpolationMode interpolation)
         {
             var sampler = new AnimationSampler(interpolation);

@@ -23,6 +23,17 @@ namespace SharpGLTF.Schema2
             set => _texCoord = value.AsNullable(_texCoordDefault, _texCoordMinimum, int.MaxValue);
         }
 
+        public TextureTransform Transform
+        {
+            get => this.GetExtension<TextureTransform>();
+            set
+            {
+                if (value == null) { this.RemoveExtensions<TextureTransform>(); return; }
+
+                this.SetExtension(value);
+            }
+        }
+
         #endregion
     }
 
@@ -128,9 +139,33 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    partial class TextureTransform
+    public partial class TextureTransform
     {
         internal TextureTransform(TextureInfo parent) { }
+
+        public Vector2 Offset
+        {
+            get => _offset.AsValue(_offsetDefault);
+            set => _offset = value.AsNullable(_offsetDefault);
+        }
+
+        public Vector2 Scale
+        {
+            get => _scale.AsValue(_scaleDefault);
+            set => _scale = value.AsNullable(_scaleDefault);
+        }
+
+        public float Rotation
+        {
+            get => (float)_rotation.AsValue(_rotationDefault);
+            set => _rotation = ((double)value).AsNullable(_rotationDefault);
+        }
+
+        public int TextureCoordinate
+        {
+            get => _texCoord.AsValue(_texCoordMinimum);
+            set => _texCoord = value.AsNullable(_texCoordMinimum);
+        }
     }
 
     public partial class ModelRoot

@@ -63,6 +63,11 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_normalTexture, _emissiveTexture, _occlusionTexture, _pbrMetallicRoughness);
+        }
+
         /// <summary>
         /// Finds an instance of <see cref="MaterialChannelView"/>
         /// </summary>
@@ -128,13 +133,15 @@ namespace SharpGLTF.Schema2
 
         public Texture Texture => _TextureInfoGetter?.Invoke(false) == null ? null : _Material.LogicalParent.LogicalTextures[_TextureInfoGetter(false)._LogicalTextureIndex];
 
-        public int Set => _TextureInfoGetter?.Invoke(false) == null ? 0 : _TextureInfoGetter(false).TextureSet;
+        public int Set => _TextureInfoGetter?.Invoke(false)?.TextureSet ?? 0;
 
         public Image Image => Texture?.Source;
 
         public Sampler Sampler => Texture?.Sampler;
 
         public Vector4 Factor => _FactorGetter();
+
+        public TextureTransform Transform => _TextureInfoGetter?.Invoke(false)?.Transform;
 
         #endregion
 

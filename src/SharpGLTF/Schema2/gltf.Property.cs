@@ -71,6 +71,23 @@ namespace SharpGLTF.Schema2
             _extensions.RemoveAll(item => item.GetType() == typeof(T));
         }
 
+        protected virtual IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return _extensions.OfType<glTFProperty>();
+        }
+
+        protected static IEnumerable<glTFProperty> Flatten(glTFProperty container)
+        {
+            yield return container;
+
+            foreach (var c in container.GetLogicalChildren())
+            {
+                var cc = Flatten(c);
+
+                foreach (var ccc in cc) yield return ccc;
+            }
+        }
+
         #endregion
 
         #region serialization API
