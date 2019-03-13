@@ -183,12 +183,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "name": _name = DeserializeValue<String>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "name": _name = DeserializePropertyValue<String>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -219,14 +219,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "bufferView": _bufferView = DeserializeValue<Int32>(reader); break;
-				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				case "componentType": _componentType = DeserializeValue<IndexEncodingType>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "bufferView": _bufferView = DeserializePropertyValue<Int32>(reader); break;
+				case "byteOffset": _byteOffset = DeserializePropertyValue<Int32?>(reader); break;
+				case "componentType": _componentType = DeserializePropertyValue<IndexEncodingType>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -254,13 +254,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "bufferView": _bufferView = DeserializeValue<Int32>(reader); break;
-				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "bufferView": _bufferView = DeserializePropertyValue<Int32>(reader); break;
+				case "byteOffset": _byteOffset = DeserializePropertyValue<Int32?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -290,14 +290,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "count": _count = DeserializeValue<Int32>(reader); break;
-				case "indices": _indices = DeserializeValue<AccessorSparseIndices>(reader); break;
-				case "values": _values = DeserializeValue<AccessorSparseValues>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "count": _count = DeserializePropertyValue<Int32>(reader); break;
+				case "indices": _indices = DeserializePropertyValue<AccessorSparseIndices>(reader); break;
+				case "values": _values = DeserializePropertyValue<AccessorSparseValues>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -354,20 +354,20 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
-				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				case "componentType": _componentType = DeserializeValue<EncodingType>(reader); break;
-				case "count": _count = DeserializeValue<Int32>(reader); break;
-				case "max": DeserializeList<Double>(reader, _max); break;
-				case "min": DeserializeList<Double>(reader, _min); break;
-				case "normalized": _normalized = DeserializeValue<Boolean?>(reader); break;
-				case "sparse": _sparse = DeserializeValue<AccessorSparse>(reader); break;
-				case "type": _type = DeserializeValue<DimensionType>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "bufferView": _bufferView = DeserializePropertyValue<Int32?>(reader); break;
+				case "byteOffset": _byteOffset = DeserializePropertyValue<Int32?>(reader); break;
+				case "componentType": _componentType = DeserializePropertyValue<EncodingType>(reader); break;
+				case "count": _count = DeserializePropertyValue<Int32>(reader); break;
+				case "max": DeserializePropertyList<Double>(reader, _max); break;
+				case "min": DeserializePropertyList<Double>(reader, _min); break;
+				case "normalized": _normalized = DeserializePropertyValue<Boolean?>(reader); break;
+				case "sparse": _sparse = DeserializePropertyValue<AccessorSparse>(reader); break;
+				case "type": _type = DeserializePropertyValue<DimensionType>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -393,13 +393,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "node": _node = DeserializeValue<Int32?>(reader); break;
-				case "path": _path = DeserializeValue<PathType>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "node": _node = DeserializePropertyValue<Int32?>(reader); break;
+				case "path": _path = DeserializePropertyValue<PathType>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -425,13 +425,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "sampler": _sampler = DeserializeValue<Int32>(reader); break;
-				case "target": _target = DeserializeValue<AnimationChannelTarget>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "sampler": _sampler = DeserializePropertyValue<Int32>(reader); break;
+				case "target": _target = DeserializePropertyValue<AnimationChannelTarget>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -461,14 +461,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "input": _input = DeserializeValue<Int32>(reader); break;
-				case "interpolation": _interpolation = DeserializeValue<AnimationInterpolationMode>(reader); break;
-				case "output": _output = DeserializeValue<Int32>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "input": _input = DeserializePropertyValue<Int32>(reader); break;
+				case "interpolation": _interpolation = DeserializePropertyValue<AnimationInterpolationMode>(reader); break;
+				case "output": _output = DeserializePropertyValue<Int32>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -496,13 +496,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "channels": DeserializeList<AnimationChannel>(reader, _channels); break;
-				case "samplers": DeserializeList<AnimationSampler>(reader, _samplers); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "channels": DeserializePropertyList<AnimationChannel>(reader, _channels); break;
+				case "samplers": DeserializePropertyList<AnimationSampler>(reader, _samplers); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -534,15 +534,15 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "copyright": _copyright = DeserializeValue<String>(reader); break;
-				case "generator": _generator = DeserializeValue<String>(reader); break;
-				case "minVersion": _minVersion = DeserializeValue<String>(reader); break;
-				case "version": _version = DeserializeValue<String>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "copyright": _copyright = DeserializePropertyValue<String>(reader); break;
+				case "generator": _generator = DeserializePropertyValue<String>(reader); break;
+				case "minVersion": _minVersion = DeserializePropertyValue<String>(reader); break;
+				case "version": _version = DeserializePropertyValue<String>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -569,13 +569,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "byteLength": _byteLength = DeserializeValue<Int32>(reader); break;
-				case "uri": _uri = DeserializeValue<String>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "byteLength": _byteLength = DeserializePropertyValue<Int32>(reader); break;
+				case "uri": _uri = DeserializePropertyValue<String>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -615,16 +615,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "buffer": _buffer = DeserializeValue<Int32>(reader); break;
-				case "byteLength": _byteLength = DeserializeValue<Int32>(reader); break;
-				case "byteOffset": _byteOffset = DeserializeValue<Int32?>(reader); break;
-				case "byteStride": _byteStride = DeserializeValue<Int32?>(reader); break;
-				case "target": _target = DeserializeValue<BufferMode>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "buffer": _buffer = DeserializePropertyValue<Int32>(reader); break;
+				case "byteLength": _byteLength = DeserializePropertyValue<Int32>(reader); break;
+				case "byteOffset": _byteOffset = DeserializePropertyValue<Int32?>(reader); break;
+				case "byteStride": _byteStride = DeserializePropertyValue<Int32?>(reader); break;
+				case "target": _target = DeserializePropertyValue<BufferMode>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -658,15 +658,15 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "xmag": _xmag = DeserializeValue<Double>(reader); break;
-				case "ymag": _ymag = DeserializeValue<Double>(reader); break;
-				case "zfar": _zfar = DeserializeValue<Double>(reader); break;
-				case "znear": _znear = DeserializeValue<Double>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "xmag": _xmag = DeserializePropertyValue<Double>(reader); break;
+				case "ymag": _ymag = DeserializePropertyValue<Double>(reader); break;
+				case "zfar": _zfar = DeserializePropertyValue<Double>(reader); break;
+				case "znear": _znear = DeserializePropertyValue<Double>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -702,15 +702,15 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "aspectRatio": _aspectRatio = DeserializeValue<Double?>(reader); break;
-				case "yfov": _yfov = DeserializeValue<Double>(reader); break;
-				case "zfar": _zfar = DeserializeValue<Double?>(reader); break;
-				case "znear": _znear = DeserializeValue<Double>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "aspectRatio": _aspectRatio = DeserializePropertyValue<Double?>(reader); break;
+				case "yfov": _yfov = DeserializePropertyValue<Double>(reader); break;
+				case "zfar": _zfar = DeserializePropertyValue<Double?>(reader); break;
+				case "znear": _znear = DeserializePropertyValue<Double>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -740,14 +740,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "orthographic": _orthographic = DeserializeValue<CameraOrthographic>(reader); break;
-				case "perspective": _perspective = DeserializeValue<CameraPerspective>(reader); break;
-				case "type": _type = DeserializeValue<CameraType>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "orthographic": _orthographic = DeserializePropertyValue<CameraOrthographic>(reader); break;
+				case "perspective": _perspective = DeserializePropertyValue<CameraPerspective>(reader); break;
+				case "type": _type = DeserializePropertyValue<CameraType>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -775,13 +775,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "index": _index = DeserializeValue<Int32>(reader); break;
-				case "texCoord": _texCoord = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "index": _index = DeserializePropertyValue<Int32>(reader); break;
+				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -823,16 +823,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "baseColorFactor": _baseColorFactor = DeserializeValue<Vector4?>(reader); break;
-				case "baseColorTexture": _baseColorTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "metallicFactor": _metallicFactor = DeserializeValue<Double?>(reader); break;
-				case "metallicRoughnessTexture": _metallicRoughnessTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "roughnessFactor": _roughnessFactor = DeserializeValue<Double?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "baseColorFactor": _baseColorFactor = DeserializePropertyValue<Vector4?>(reader); break;
+				case "baseColorTexture": _baseColorTexture = DeserializePropertyValue<TextureInfo>(reader); break;
+				case "metallicFactor": _metallicFactor = DeserializePropertyValue<Double?>(reader); break;
+				case "metallicRoughnessTexture": _metallicRoughnessTexture = DeserializePropertyValue<TextureInfo>(reader); break;
+				case "roughnessFactor": _roughnessFactor = DeserializePropertyValue<Double?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -853,12 +853,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "scale": _scale = DeserializeValue<Double?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "scale": _scale = DeserializePropertyValue<Double?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -881,12 +881,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "strength": _strength = DeserializeValue<Double?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "strength": _strength = DeserializePropertyValue<Double?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -935,19 +935,19 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "alphaCutoff": _alphaCutoff = DeserializeValue<Double?>(reader); break;
-				case "alphaMode": _alphaMode = DeserializeValue<AlphaMode>(reader); break;
-				case "doubleSided": _doubleSided = DeserializeValue<Boolean?>(reader); break;
-				case "emissiveFactor": _emissiveFactor = DeserializeValue<Vector3?>(reader); break;
-				case "emissiveTexture": _emissiveTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "normalTexture": _normalTexture = DeserializeValue<MaterialNormalTextureInfo>(reader); break;
-				case "occlusionTexture": _occlusionTexture = DeserializeValue<MaterialOcclusionTextureInfo>(reader); break;
-				case "pbrMetallicRoughness": _pbrMetallicRoughness = DeserializeValue<MaterialPBRMetallicRoughness>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "alphaCutoff": _alphaCutoff = DeserializePropertyValue<Double?>(reader); break;
+				case "alphaMode": _alphaMode = DeserializePropertyValue<AlphaMode>(reader); break;
+				case "doubleSided": _doubleSided = DeserializePropertyValue<Boolean?>(reader); break;
+				case "emissiveFactor": _emissiveFactor = DeserializePropertyValue<Vector3?>(reader); break;
+				case "emissiveTexture": _emissiveTexture = DeserializePropertyValue<TextureInfo>(reader); break;
+				case "normalTexture": _normalTexture = DeserializePropertyValue<MaterialNormalTextureInfo>(reader); break;
+				case "occlusionTexture": _occlusionTexture = DeserializePropertyValue<MaterialOcclusionTextureInfo>(reader); break;
+				case "pbrMetallicRoughness": _pbrMetallicRoughness = DeserializePropertyValue<MaterialPBRMetallicRoughness>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -984,16 +984,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "attributes": DeserializeDictionary<Int32>(reader, _attributes); break;
-				case "indices": _indices = DeserializeValue<Int32?>(reader); break;
-				case "material": _material = DeserializeValue<Int32?>(reader); break;
-				case "mode": _mode = DeserializeValue<PrimitiveType>(reader); break;
-				case "targets": DeserializeList<Dictionary<String,Int32>>(reader, _targets); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "attributes": DeserializePropertyDictionary<Int32>(reader, _attributes); break;
+				case "indices": _indices = DeserializePropertyValue<Int32?>(reader); break;
+				case "material": _material = DeserializePropertyValue<Int32?>(reader); break;
+				case "mode": _mode = DeserializePropertyValue<PrimitiveType>(reader); break;
+				case "targets": DeserializePropertyList<Dictionary<String,Int32>>(reader, _targets); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1023,13 +1023,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "primitives": DeserializeList<MeshPrimitive>(reader, _primitives); break;
-				case "weights": DeserializeList<Double>(reader, _weights); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "primitives": DeserializePropertyList<MeshPrimitive>(reader, _primitives); break;
+				case "weights": DeserializePropertyList<Double>(reader, _weights); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1080,20 +1080,20 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "camera": _camera = DeserializeValue<Int32?>(reader); break;
-				case "children": DeserializeList<Int32>(reader, _children); break;
-				case "matrix": _matrix = DeserializeValue<Matrix4x4?>(reader); break;
-				case "mesh": _mesh = DeserializeValue<Int32?>(reader); break;
-				case "rotation": _rotation = DeserializeValue<Quaternion?>(reader); break;
-				case "scale": _scale = DeserializeValue<Vector3?>(reader); break;
-				case "skin": _skin = DeserializeValue<Int32?>(reader); break;
-				case "translation": _translation = DeserializeValue<Vector3?>(reader); break;
-				case "weights": DeserializeList<Double>(reader, _weights); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "camera": _camera = DeserializePropertyValue<Int32?>(reader); break;
+				case "children": DeserializePropertyList<Int32>(reader, _children); break;
+				case "matrix": _matrix = DeserializePropertyValue<Matrix4x4?>(reader); break;
+				case "mesh": _mesh = DeserializePropertyValue<Int32?>(reader); break;
+				case "rotation": _rotation = DeserializePropertyValue<Quaternion?>(reader); break;
+				case "scale": _scale = DeserializePropertyValue<Vector3?>(reader); break;
+				case "skin": _skin = DeserializePropertyValue<Int32?>(reader); break;
+				case "translation": _translation = DeserializePropertyValue<Vector3?>(reader); break;
+				case "weights": DeserializePropertyList<Double>(reader, _weights); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1127,15 +1127,15 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "magFilter": _magFilter = DeserializeValue<TextureInterpolationMode>(reader); break;
-				case "minFilter": _minFilter = DeserializeValue<TextureMipMapMode>(reader); break;
-				case "wrapS": _wrapS = DeserializeValue<TextureWrapMode>(reader); break;
-				case "wrapT": _wrapT = DeserializeValue<TextureWrapMode>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "magFilter": _magFilter = DeserializePropertyValue<TextureInterpolationMode>(reader); break;
+				case "minFilter": _minFilter = DeserializePropertyValue<TextureMipMapMode>(reader); break;
+				case "wrapS": _wrapS = DeserializePropertyValue<TextureWrapMode>(reader); break;
+				case "wrapT": _wrapT = DeserializePropertyValue<TextureWrapMode>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1159,12 +1159,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "nodes": DeserializeList<Int32>(reader, _nodes); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "nodes": DeserializePropertyList<Int32>(reader, _nodes); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1194,14 +1194,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "inverseBindMatrices": _inverseBindMatrices = DeserializeValue<Int32?>(reader); break;
-				case "joints": DeserializeList<Int32>(reader, _joints); break;
-				case "skeleton": _skeleton = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "inverseBindMatrices": _inverseBindMatrices = DeserializePropertyValue<Int32?>(reader); break;
+				case "joints": DeserializePropertyList<Int32>(reader, _joints); break;
+				case "skeleton": _skeleton = DeserializePropertyValue<Int32?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1227,13 +1227,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "sampler": _sampler = DeserializeValue<Int32?>(reader); break;
-				case "source": _source = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "sampler": _sampler = DeserializePropertyValue<Int32?>(reader); break;
+				case "source": _source = DeserializePropertyValue<Int32?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1319,28 +1319,28 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "asset": _asset = DeserializeValue<Asset>(reader); break;
-				case "extensionsRequired": DeserializeList<String>(reader, _extensionsRequired); break;
-				case "extensionsUsed": DeserializeList<String>(reader, _extensionsUsed); break;
-				case "accessors": DeserializeList<Accessor>(reader, _accessors); break;
-				case "animations": DeserializeList<Animation>(reader, _animations); break;
-				case "bufferViews": DeserializeList<BufferView>(reader, _bufferViews); break;
-				case "buffers": DeserializeList<Buffer>(reader, _buffers); break;
-				case "cameras": DeserializeList<Camera>(reader, _cameras); break;
-				case "images": DeserializeList<Image>(reader, _images); break;
-				case "materials": DeserializeList<Material>(reader, _materials); break;
-				case "meshes": DeserializeList<Mesh>(reader, _meshes); break;
-				case "nodes": DeserializeList<Node>(reader, _nodes); break;
-				case "samplers": DeserializeList<Sampler>(reader, _samplers); break;
-				case "scene": _scene = DeserializeValue<Int32?>(reader); break;
-				case "scenes": DeserializeList<Scene>(reader, _scenes); break;
-				case "skins": DeserializeList<Skin>(reader, _skins); break;
-				case "textures": DeserializeList<Texture>(reader, _textures); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "asset": _asset = DeserializePropertyValue<Asset>(reader); break;
+				case "extensionsRequired": DeserializePropertyList<String>(reader, _extensionsRequired); break;
+				case "extensionsUsed": DeserializePropertyList<String>(reader, _extensionsUsed); break;
+				case "accessors": DeserializePropertyList<Accessor>(reader, _accessors); break;
+				case "animations": DeserializePropertyList<Animation>(reader, _animations); break;
+				case "bufferViews": DeserializePropertyList<BufferView>(reader, _bufferViews); break;
+				case "buffers": DeserializePropertyList<Buffer>(reader, _buffers); break;
+				case "cameras": DeserializePropertyList<Camera>(reader, _cameras); break;
+				case "images": DeserializePropertyList<Image>(reader, _images); break;
+				case "materials": DeserializePropertyList<Material>(reader, _materials); break;
+				case "meshes": DeserializePropertyList<Mesh>(reader, _meshes); break;
+				case "nodes": DeserializePropertyList<Node>(reader, _nodes); break;
+				case "samplers": DeserializePropertyList<Sampler>(reader, _samplers); break;
+				case "scene": _scene = DeserializePropertyValue<Int32?>(reader); break;
+				case "scenes": DeserializePropertyList<Scene>(reader, _scenes); break;
+				case "skins": DeserializePropertyList<Skin>(reader, _skins); break;
+				case "textures": DeserializePropertyList<Texture>(reader, _textures); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -1369,14 +1369,14 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "bufferView": _bufferView = DeserializeValue<Int32?>(reader); break;
-				case "mimeType": _mimeType = DeserializeValue<String>(reader); break;
-				case "uri": _uri = DeserializeValue<String>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "bufferView": _bufferView = DeserializePropertyValue<Int32?>(reader); break;
+				case "mimeType": _mimeType = DeserializePropertyValue<String>(reader); break;
+				case "uri": _uri = DeserializePropertyValue<String>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	

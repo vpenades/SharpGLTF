@@ -89,13 +89,17 @@ namespace SharpGLTF.Schema2
             this._extensionsUsed.AddRange(used);
         }
 
+        internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()
+        {
+            return GetLogicalChildren()
+                .SelectMany(item => ExtraProperties.Flatten(item)
+                .ToList());
+        }
+
         internal IEnumerable<string> RetrieveUsedExtensions()
         {
             // retrieve ALL the property based objects of the whole model.
-
-            var allObjects = GetLogicalChildren()
-                .SelectMany(item => ExtraProperties.Flatten(item)
-                .ToList());
+            var allObjects = GetLogicalChildrenFlattened();
 
             // check all the extensions used by each object
             var used = new HashSet<string>();

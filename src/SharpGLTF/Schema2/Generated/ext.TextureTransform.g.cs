@@ -55,15 +55,15 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "offset": _offset = DeserializeValue<Vector2?>(reader); break;
-				case "rotation": _rotation = DeserializeValue<Double?>(reader); break;
-				case "scale": _scale = DeserializeValue<Vector2?>(reader); break;
-				case "texCoord": _texCoord = DeserializeValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "offset": _offset = DeserializePropertyValue<Vector2?>(reader); break;
+				case "rotation": _rotation = DeserializePropertyValue<Double?>(reader); break;
+				case "scale": _scale = DeserializePropertyValue<Vector2?>(reader); break;
+				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	

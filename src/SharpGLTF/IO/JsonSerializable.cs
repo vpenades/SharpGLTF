@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 using Newtonsoft.Json;
@@ -19,7 +20,7 @@ namespace SharpGLTF.IO
 
         #region serialization
 
-        public void Serialize(JsonWriter writer)
+        internal void Serialize(JsonWriter writer)
         {
             writer.WriteStartObject();
             SerializeProperties(writer);
@@ -33,13 +34,6 @@ namespace SharpGLTF.IO
             if (value == null) return;
             writer.WritePropertyName(name);
             _Serialize(writer, value);
-        }
-
-        protected static void SerializeProperty(JsonWriter writer, string name, string value)
-        {
-            if (value == null) return;
-            writer.WritePropertyName(name);
-            writer.WriteValue(value);
         }
 
         protected static void SerializeProperty(JsonWriter writer, string name, Boolean? value, Boolean? defval = null)
@@ -74,7 +68,7 @@ namespace SharpGLTF.IO
             writer.WriteValue(value.Value);
         }
 
-        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Vector2? value, System.Numerics.Vector2? defval = null)
+        protected static void SerializeProperty(JsonWriter writer, string name, Vector2? value, Vector2? defval = null)
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
@@ -82,7 +76,7 @@ namespace SharpGLTF.IO
             _Serialize(writer, value.Value);
         }
 
-        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Vector3? value, System.Numerics.Vector3? defval = null)
+        protected static void SerializeProperty(JsonWriter writer, string name, Vector3? value, Vector3? defval = null)
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
@@ -90,7 +84,7 @@ namespace SharpGLTF.IO
             _Serialize(writer, value.Value);
         }
 
-        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Vector4? value, System.Numerics.Vector4? defval = null)
+        protected static void SerializeProperty(JsonWriter writer, string name, Vector4? value, Vector4? defval = null)
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
@@ -98,7 +92,7 @@ namespace SharpGLTF.IO
             _Serialize(writer, value.Value);
         }
 
-        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Quaternion? value, System.Numerics.Quaternion? defval = null)
+        protected static void SerializeProperty(JsonWriter writer, string name, Quaternion? value, Quaternion? defval = null)
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
@@ -106,7 +100,7 @@ namespace SharpGLTF.IO
             _Serialize(writer, value.Value);
         }
 
-        protected static void SerializeProperty(JsonWriter writer, string name, System.Numerics.Matrix4x4? value, System.Numerics.Matrix4x4? defval = null)
+        protected static void SerializeProperty(JsonWriter writer, string name, Matrix4x4? value, Matrix4x4? defval = null)
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
@@ -193,11 +187,11 @@ namespace SharpGLTF.IO
             if (value is Double vfpd) { writer.WriteValue(vfpd); return; }
             if (value is Decimal vfpx) { writer.WriteValue(vfpx); return; }
 
-            if (value is System.Numerics.Vector2 vvv2) { writer.WriteVector2(vvv2); return; }
-            if (value is System.Numerics.Vector3 vvv3) { writer.WriteVector3(vvv3); return; }
-            if (value is System.Numerics.Vector4 vvv4) { writer.WriteVector4(vvv4); return; }
-            if (value is System.Numerics.Quaternion qqq4) { writer.WriteQuaternion(qqq4); return; }
-            if (value is System.Numerics.Matrix4x4 mm44) { writer.WriteMatrix4x4(mm44); return; }
+            if (value is Vector2 vvv2) { writer.WriteVector2(vvv2); return; }
+            if (value is Vector3 vvv3) { writer.WriteVector3(vvv3); return; }
+            if (value is Vector4 vvv4) { writer.WriteVector4(vvv4); return; }
+            if (value is Quaternion qqq4) { writer.WriteQuaternion(qqq4); return; }
+            if (value is Matrix4x4 mm44) { writer.WriteMatrix4x4(mm44); return; }
 
             if (value is JsonSerializable vgltf) { vgltf.Serialize(writer); return; }
 
@@ -246,124 +240,138 @@ namespace SharpGLTF.IO
 
         #region deserialization
 
-        public void Deserialize(JsonReader reader)
+        internal void Deserialize(JsonReader reader)
         {
-            while (reader.TokenType != JsonToken.StartObject)
-            {
-                reader.Read();
-            }
-
-            while (reader.Read() && reader.TokenType != JsonToken.EndObject)
-            {
-                if (reader.TokenType == JsonToken.PropertyName)
-                {
-                    var curProp = reader.Value.ToString();
-                    DeserializeProperty(reader, curProp);
-                }
-                else
-                {
-                    throw new NotImplementedException(); // skip
-                }
-            }
-        }
-
-        protected abstract void DeserializeProperty(JsonReader reader, string property);
-
-        protected static Object DeserializeObject(JsonReader reader)
-        {
-            reader.Read();
+            if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartObject)
             {
-                var dict = new Dictionary<string, object>();
-
-                while (true)
+                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
                 {
-                    reader.Read();
+                    if (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        var key = reader.Value as String;
 
-                    if (reader.TokenType == JsonToken.StartObject) continue;
-                    if (reader.TokenType == JsonToken.EndObject) break;
-
-                    System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-                    var key = reader.Value as String;
-                    var val = DeserializeObject(reader);
-
-                    dict[key] = val;
+                        DeserializeProperty(key, reader);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
+                    }
                 }
 
-                return dict;
+                return;
             }
+
+            throw new NotImplementedException();
+        }
+
+        protected static Object DeserializeObject(JsonReader reader)
+        {
+            if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartArray)
             {
                 var items = new List<Object>();
 
-                while (true)
+                while (reader.Read() && reader.TokenType != JsonToken.EndArray)
                 {
-                    reader.Read();
-
-                    if (reader.TokenType == JsonToken.StartArray) continue;
-                    if (reader.TokenType == JsonToken.EndArray) break;
-
-                    items.Add(reader.Value);
+                    items.Add(DeserializeObject(reader));
                 }
 
                 return items.ToArray();
             }
 
+            if (reader.TokenType == JsonToken.StartObject)
+            {
+                var dict = new Dictionary<string, object>();
+
+                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+                {
+                    if (reader.TokenType == JsonToken.PropertyName)
+                    {
+                        var key = reader.Value as String;
+
+                        dict[key] = DeserializeObject(reader);
+                    }
+                    else
+                    {
+                        throw new JsonReaderException();
+                    }
+                }
+
+                return dict;
+            }
+
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.None);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.EndArray);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.EndObject);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.EndConstructor);
+
             return reader.Value;
         }
 
-        protected static T DeserializeValue<T>(JsonReader reader)
-        {
-            reader.Read();
+        protected abstract void DeserializeProperty(string property, JsonReader reader);
 
+        protected static T DeserializePropertyValue<T>(JsonReader reader)
+        {
             _TryCastValue(reader, typeof(T), out Object v);
+
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartArray);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartObject);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.PropertyName);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
 
             return (T)v;
         }
 
-        protected static void DeserializeValue<T>(JsonReader reader, Action<T> assign)
+        protected static void DeserializePropertyList<T>(JsonReader reader, IList<T> list)
         {
-            var value = DeserializeValue<T>(reader);
-            assign(value);
-        }
+            if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
-        protected static void DeserializeList<T>(JsonReader reader, IList<T> list)
-        {
-            // System.Diagnostics.Debug.Assert(typeof(T) != typeof(MeshPrimitive));
+            if (reader.TokenType != JsonToken.StartArray) throw new JsonReaderException();
+            if (reader.TokenType == JsonToken.StartObject) throw new JsonReaderException();
 
-            while (true)
+            var path2 = reader.Path;
+
+            while (reader.Read() && reader.TokenType != JsonToken.EndArray)
             {
-                reader.Read();
-
-                if (reader.TokenType == JsonToken.StartArray) continue;
-                if (reader.TokenType == JsonToken.EndArray) break;
-
                 if (_TryCastValue(reader, typeof(T), out Object item))
                 {
                     list.Add((T)item);
                 }
+
+                System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartArray);
+                System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartObject);
+                System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.PropertyName);
+                System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
             }
+
+            System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.EndArray);
         }
 
-        protected static void DeserializeDictionary<T>(JsonReader reader, IDictionary<string, T> dict)
+        protected static void DeserializePropertyDictionary<T>(JsonReader reader, IDictionary<string, T> dict)
         {
-            while (true)
+            if (reader.TokenType == JsonToken.PropertyName) reader.Read();
+
+            if (reader.TokenType == JsonToken.StartArray) throw new JsonReaderException();
+            if (reader.TokenType != JsonToken.StartObject) throw new JsonReaderException();
+
+            while (reader.Read() && reader.TokenType != JsonToken.EndObject)
             {
-                reader.Read();
-
-                if (reader.TokenType == JsonToken.StartObject) continue;
-                if (reader.TokenType == JsonToken.EndObject) break;
-
-                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-                var key = reader.Value as String;
-
-                reader.Read();
-
-                if (_TryCastValue(reader, typeof(T), out Object item))
+                if (reader.TokenType == JsonToken.PropertyName)
                 {
-                    dict[key] = (T)item;
+                    var key = reader.Value as String;
+
+                    if (_TryCastValue(reader, typeof(T), out Object val))
+                    {
+                        dict[key] = (T)val;
+                    }
+
+                    System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartArray);
+                    System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartObject);
+                    System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.PropertyName);
+                    System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
                 }
             }
         }
@@ -373,8 +381,10 @@ namespace SharpGLTF.IO
             value = null;
 
             if (reader.TokenType == JsonToken.EndArray) return false;
-            if (reader.TokenType == JsonToken.EndConstructor) return false;
             if (reader.TokenType == JsonToken.EndObject) return false;
+            if (reader.TokenType == JsonToken.EndConstructor) return false;
+
+            if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             // untangle nullable
             var ntype = Nullable.GetUnderlyingType(vtype);
@@ -382,8 +392,12 @@ namespace SharpGLTF.IO
 
             if (vtype == typeof(String) ||
                 vtype == typeof(Boolean) ||
+                vtype == typeof(Int16) ||
                 vtype == typeof(Int32) ||
                 vtype == typeof(Int64) ||
+                vtype == typeof(UInt16) ||
+                vtype == typeof(UInt32) ||
+                vtype == typeof(UInt64) ||
                 vtype == typeof(Single) ||
                 vtype == typeof(Double))
             {
@@ -400,43 +414,43 @@ namespace SharpGLTF.IO
                 throw new NotImplementedException();
             }
 
-            if (vtype == typeof(System.Numerics.Vector2))
+            if (vtype == typeof(Vector2))
             {
                 var l = new List<float>();
-                DeserializeList<float>(reader, l);
-                value = new System.Numerics.Vector2(l[0], l[1]);
+                DeserializePropertyList<float>(reader, l);
+                value = new Vector2(l[0], l[1]);
                 return true;
             }
 
-            if (vtype == typeof(System.Numerics.Vector3))
+            if (vtype == typeof(Vector3))
             {
                 var l = new List<float>();
-                DeserializeList<float>(reader, l);
-                value = new System.Numerics.Vector3(l[0], l[1], l[2]);
+                DeserializePropertyList<float>(reader, l);
+                value = new Vector3(l[0], l[1], l[2]);
                 return true;
             }
 
-            if (vtype == typeof(System.Numerics.Vector4))
+            if (vtype == typeof(Vector4))
             {
                 var l = new List<float>();
-                DeserializeList<float>(reader, l);
-                value = new System.Numerics.Vector4(l[0], l[1], l[2], l[3]);
+                DeserializePropertyList<float>(reader, l);
+                value = new Vector4(l[0], l[1], l[2], l[3]);
                 return true;
             }
 
-            if (vtype == typeof(System.Numerics.Quaternion))
+            if (vtype == typeof(Quaternion))
             {
                 var l = new List<float>();
-                DeserializeList<float>(reader, l);
+                DeserializePropertyList<float>(reader, l);
                 value = new System.Numerics.Quaternion(l[0], l[1], l[2], l[3]);
                 return true;
             }
 
-            if (vtype == typeof(System.Numerics.Matrix4x4))
+            if (vtype == typeof(Matrix4x4))
             {
                 var l = new List<float>();
-                DeserializeList<float>(reader, l);
-                value = new System.Numerics.Matrix4x4
+                DeserializePropertyList<float>(reader, l);
+                value = new Matrix4x4
                     (
                     l[0], l[1], l[2], l[3],
                     l[4], l[5], l[6], l[7],
@@ -448,11 +462,11 @@ namespace SharpGLTF.IO
 
             if (typeof(JsonSerializable).IsAssignableFrom(vtype))
             {
-                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.StartObject);
-
                 var item = Activator.CreateInstance(vtype, true) as JsonSerializable;
 
+                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.StartObject);
                 item.Deserialize(reader);
+                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.EndObject);
 
                 value = item;
 
@@ -468,12 +482,10 @@ namespace SharpGLTF.IO
                     if (valType == typeof(Int32))
                     {
                         var dict = new Dictionary<string, Int32>();
-                        DeserializeDictionary(reader, dict);
+                        DeserializePropertyDictionary(reader, dict);
                         value = dict;
                         return true;
                     }
-
-                    // var dict = System.Activator.CreateInstance(vtype);
                 }
 
                 throw new NotImplementedException($"Can't deserialize {vtype}");

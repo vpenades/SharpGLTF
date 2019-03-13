@@ -75,6 +75,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         [TestCase("\\glTF\\")]
         // [TestCase("\\glTF-Draco\\")] // Not supported
+        [TestCase("\\glTF-IBL\\")]
         [TestCase("\\glTF-Binary\\")]
         [TestCase("\\glTF-Embedded\\")]
         [TestCase("\\glTF-pbrSpecularGlossiness\\")]
@@ -87,12 +88,6 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 if (!f.Contains(section)) continue;
 
-                if (section.Contains("glTF-pbrSpecularGlossiness"))
-                {
-                    // these ones are included in the pbrSpecularGlossiness but don't actually contain any extension
-                    if (f.EndsWith("BoxInterleaved.gltf")) continue;
-                }
-
                 var model = GltfUtils.LoadModel(f);
                 Assert.NotNull(model);
 
@@ -100,16 +95,33 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
                 
-                // do a model roundtrip
-                var bytes = model.WriteGLB();
-                var modelBis = ModelRoot.ParseGLB(bytes);
+                // do a model clone and compare it
+                _AssertAreEqual(model, model.DeepClone());
 
                 // check extensions used
-                var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
-                CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+                if (!model.ExtensionsUsed.Contains("EXT_lights_image_based"))
+                {
+                    var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
+                    CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+                }
             }
         }
 
+        private static void _AssertAreEqual(ModelRoot a, ModelRoot b)
+        {
+            var aa = a.GetLogicalChildrenFlattened().ToList();
+            var bb = b.GetLogicalChildrenFlattened().ToList();
+
+            Assert.AreEqual(aa.Count,bb.Count);
+
+            CollectionAssert.AreEqual
+                (
+                aa.Select(item => item.GetType()),
+                bb.Select(item => item.GetType())
+                );
+        }
+
+        [TestCase("SpecGlossVsMetalRough.gltf")]
         [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]
         public void TestLoadSpecialCaseModels(string filePath)
         {

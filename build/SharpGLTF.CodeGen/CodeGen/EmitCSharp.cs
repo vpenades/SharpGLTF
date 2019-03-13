@@ -526,7 +526,7 @@ namespace SharpGLTF.CodeGen
                     this.AddFieldSerializerCase(smethod);
 
                     // emit deserializer
-                    this.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializeValue<{_Emitter._GetRuntimeName(etype)}>(reader);");
+                    this.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(etype)}>(reader);");
 
                     continue;
                 }
@@ -565,15 +565,15 @@ namespace SharpGLTF.CodeGen
             if (f.FieldType is ArrayType atype)
             {
                 var titem = _Emitter._GetRuntimeName(atype.ItemType);
-                return $"DeserializeList<{titem}>(reader, {fname});";
+                return $"DeserializePropertyList<{titem}>(reader, {fname});";
             }
             else if (f.FieldType is DictionaryType dtype)
             {
                 var titem = _Emitter._GetRuntimeName(dtype.ValueType);
-                return $"DeserializeDictionary<{titem}>(reader, {fname});";
+                return $"DeserializePropertyDictionary<{titem}>(reader, {fname});";
             }
 
-            return $"{fname} = DeserializeValue<{_Emitter._GetRuntimeName(f.FieldType)}>(reader);";
+            return $"{fname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(f.FieldType)}>(reader);";
         }        
 
         public void AddFieldSerializerCase(string line) { _SerializerBody.Add(line); }

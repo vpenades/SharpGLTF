@@ -48,13 +48,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "innerConeAngle": _innerConeAngle = DeserializeValue<Double?>(reader); break;
-				case "outerConeAngle": _outerConeAngle = DeserializeValue<Double?>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(reader); break;
+				case "outerConeAngle": _outerConeAngle = DeserializePropertyValue<Double?>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -93,16 +93,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "color": _color = DeserializeValue<Vector3?>(reader); break;
-				case "intensity": _intensity = DeserializeValue<Double?>(reader); break;
-				case "range": _range = DeserializeValue<Double?>(reader); break;
-				case "spot": _spot = DeserializeValue<PunctualLightSpot>(reader); break;
-				case "type": _type = DeserializeValue<String>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "color": _color = DeserializePropertyValue<Vector3?>(reader); break;
+				case "intensity": _intensity = DeserializePropertyValue<Double?>(reader); break;
+				case "range": _range = DeserializePropertyValue<Double?>(reader); break;
+				case "spot": _spot = DeserializePropertyValue<PunctualLightSpot>(reader); break;
+				case "type": _type = DeserializePropertyValue<String>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	
@@ -123,12 +123,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "lights": DeserializeList<PunctualLight>(reader, _lights); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "lights": DeserializePropertyList<PunctualLight>(reader, _lights); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	

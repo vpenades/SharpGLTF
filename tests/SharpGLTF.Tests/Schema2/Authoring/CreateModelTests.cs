@@ -33,6 +33,8 @@ namespace SharpGLTF.Schema2.Authoring
             var root = ModelRoot.CreateModel();
             var scene = root.UseScene("Empty Scene");
 
+            /*
+
             root.Extras["author"] = "me";
 
             root.Extras["value1"] = 17;
@@ -64,7 +66,7 @@ namespace SharpGLTF.Schema2.Authoring
                 (
                 root.Extras["dict1"] as Dictionary<string, Object>,
                 rootBis.Extras["dict1"] as Dictionary<string, Object>
-                );
+                );*/
         }
 
         [Test(Description ="Creates a scene with lights")]

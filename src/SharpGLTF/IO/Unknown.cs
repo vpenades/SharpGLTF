@@ -4,18 +4,24 @@ using System.Text;
 
 using Newtonsoft.Json;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.IO
 {
-    using IO;
-
-    class Extras : JsonSerializable
+    [System.Diagnostics.DebuggerDisplay("Unknown {_Name}")]
+    class Unknown : JsonSerializable
     {
+        public Unknown(string name) { this._Name = name; }
+
+        private readonly string _Name;
+
         private readonly Dictionary<string, Object> _Properties = new Dictionary<string, object>();
+
+        public string Name => _Name;
 
         public IDictionary<String, Object> Properties => _Properties;
 
-        protected override void DeserializeProperty(JsonReader reader, string property)
+        protected override void DeserializeProperty(string property, JsonReader reader)
         {
+            reader.Read();
             _Properties[property] = DeserializeObject(reader);
         }
 

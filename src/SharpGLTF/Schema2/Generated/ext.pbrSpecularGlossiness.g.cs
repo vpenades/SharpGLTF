@@ -59,16 +59,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(JsonReader reader, string property)
-		{
+		protected override void DeserializeProperty(string property, JsonReader reader)
+        {
 			switch (property)
 			{
-				case "diffuseFactor": _diffuseFactor = DeserializeValue<Vector4?>(reader); break;
-				case "diffuseTexture": _diffuseTexture = DeserializeValue<TextureInfo>(reader); break;
-				case "glossinessFactor": _glossinessFactor = DeserializeValue<Double?>(reader); break;
-				case "specularFactor": _specularFactor = DeserializeValue<Vector3?>(reader); break;
-				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializeValue<TextureInfo>(reader); break;
-				default: base.DeserializeProperty(reader, property); break;
+				case "diffuseFactor": _diffuseFactor = DeserializePropertyValue<Vector4?>(reader); break;
+				case "diffuseTexture": _diffuseTexture = DeserializePropertyValue<TextureInfo>(reader); break;
+				case "glossinessFactor": _glossinessFactor = DeserializePropertyValue<Double?>(reader); break;
+				case "specularFactor": _specularFactor = DeserializePropertyValue<Vector3?>(reader); break;
+				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializePropertyValue<TextureInfo>(reader); break;
+				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
 	

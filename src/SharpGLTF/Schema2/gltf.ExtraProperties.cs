@@ -14,7 +14,7 @@ namespace SharpGLTF.Schema2
 
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
-        private Extras _extras;
+        private readonly List<JsonSerializable> _extras = new List<JsonSerializable>();
 
         #endregion
 
@@ -28,14 +28,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets a collection of extra dynamic properties.
         /// </summary>
-        public IDictionary<String, Object> Extras
-        {
-            get
-            {
-                if (_extras == null) _extras = new Extras();
-                return _extras.Properties;
-            }
-        }
+        public IReadOnlyCollection<JsonSerializable> Extras => _extras;
 
         #endregion
 
@@ -104,36 +97,49 @@ namespace SharpGLTF.Schema2
         {
             if (_extensions.Count > 0)
             {
-                var dict = new Dictionary<string, JsonSerializable>();
-
-                foreach (var val in this._extensions)
-                {
-                    if (val == null) continue;
-                    var key = ExtensionsFactory.Identify(this.GetType(), val.GetType());
-                    if (key == null) continue;
-
-                    dict[key] = val;
-                }
-
+                var dict = _ToDictionary(this, _extensions);
                 SerializeProperty(writer, "extensions", dict);
             }
 
-            if (_extras != null) SerializeProperty(writer, "extras", _extras);
+            if (_extras != null)
+            {
+                var dict = _ToDictionary(this, _extras);
+                SerializeProperty(writer, "extras", dict);
+            }
+        }
+
+        private static IReadOnlyDictionary<string, JsonSerializable> _ToDictionary(JsonSerializable context, IEnumerable<JsonSerializable> serializables)
+        {
+            var dict = new Dictionary<string, JsonSerializable>();
+
+            foreach (var val in serializables)
+            {
+                if (val == null) continue;
+
+                string key = null;
+
+                if (val is Unknown unk) key = unk.Name;
+                else key = ExtensionsFactory.Identify(context.GetType(), val.GetType());
+
+                if (key == null) continue;
+                dict[key] = val;
+            }
+
+            return dict;
         }
 
         /// <summary>
         /// Reads the properties of the current instance from a <see cref="JsonReader"/>.
         /// </summary>
-        /// <param name="reader">The source reader.</param>
         /// <param name="property">The name of the property.</param>
-        protected override void DeserializeProperty(JsonReader reader, string property)
+        /// <param name="reader">The source reader.</param>
+        protected override void DeserializeProperty(string property, JsonReader reader)
         {
             switch (property)
             {
                 case "extensions": _DeserializeExtensions(this, reader, _extensions); break;
 
-                // case "extras": reader.Skip(); break;
-                case "extras": _extras = DeserializeValue<Extras>(reader); break;
+                case "extras": _DeserializeExtensions(this, reader, _extras); break;
 
                 default: reader.Skip(); break;
             }
@@ -141,42 +147,28 @@ namespace SharpGLTF.Schema2
 
         private static void _DeserializeExtensions(JsonSerializable parent, JsonReader reader, IList<JsonSerializable> extensions)
         {
-            while (true)
+            reader.Read();
+
+            if (reader.TokenType == JsonToken.StartObject)
             {
-                reader.Read();
-
-                if (reader.TokenType == JsonToken.EndObject) break;
-                if (reader.TokenType == JsonToken.EndArray) break;
-
-                if (reader.TokenType == JsonToken.StartArray)
+                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
                 {
-                    while (true)
-                    {
-                        if (reader.TokenType == JsonToken.EndArray) break;
+                    var key = reader.Value as String;
 
-                        _DeserializeExtensions(parent, reader, extensions);
+                    var val = ExtensionsFactory.Create(parent, key);
+
+                    if (val != null)
+                    {
+                        val.Deserialize(reader);
+                        extensions.Add(val);
+                        continue;
                     }
 
-                    break;
-                }
-
-                if (reader.TokenType == JsonToken.StartObject) continue;
-
-                System.Diagnostics.Debug.Assert(reader.TokenType == JsonToken.PropertyName);
-                var key = reader.Value as String;
-
-                var val = ExtensionsFactory.Create(parent, key);
-
-                if (val == null)
-                {
-                    reader.Skip();
-                }
-                else
-                {
-                    val.Deserialize(reader);
-                    extensions.Add(val);
+                    DeserializeObject(reader);
                 }
             }
+
+            reader.Skip();
         }
 
         #endregion
