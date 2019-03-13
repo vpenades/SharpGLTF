@@ -27,6 +27,16 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region API
+
+        /// <inheritdoc />
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_orthographic, _perspective);
+        }
+
+        #endregion
     }
 
     public partial class ModelRoot

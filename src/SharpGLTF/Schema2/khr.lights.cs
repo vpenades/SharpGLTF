@@ -15,6 +15,7 @@ namespace SharpGLTF.Schema2
             _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
         }
 
+        /// <inheritdoc />
         protected override IEnumerable<glTFProperty> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_lights);

@@ -331,6 +331,11 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_sparse);
+        }
+
         public void UpdateBounds()
         {
             var dimensions = this._type.DimCount();

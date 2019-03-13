@@ -23,6 +23,12 @@ namespace SharpGLTF.Schema2
     {
         internal AccessorSparse() { }
 
+        /// <inheritdoc />
+        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_indices, _values);
+        }
+
         internal AccessorSparse(BufferView indices, int indicesOffset, IndexType indicesEncoding, BufferView values, int valuesOffset, int count)
         {
             Guard.NotNull(indices, nameof(indices));

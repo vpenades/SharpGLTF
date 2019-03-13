@@ -71,6 +71,10 @@ namespace SharpGLTF.Schema2
             _extensions.RemoveAll(item => item.GetType() == typeof(T));
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="glTFProperty"/> instances stored by this object.
+        /// </summary>
+        /// <returns>A collection of <see cref="glTFProperty"/> instances.</returns>
         protected virtual IEnumerable<glTFProperty> GetLogicalChildren()
         {
             return _extensions.OfType<glTFProperty>();

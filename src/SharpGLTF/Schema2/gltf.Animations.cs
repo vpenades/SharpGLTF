@@ -36,6 +36,7 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        /// <inheritdoc />
         protected override IEnumerable<glTFProperty> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
