@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF extension that enables shifting and scaling UV coordinates on a per-texture basis
 	/// </summary>
-	partial class TextureTransform : glTFProperty
+	partial class TextureTransform : ExtraProperties
 	{
 	
 		private static readonly Vector2 _offsetDefault = Vector2.One;

@@ -94,7 +94,7 @@ namespace SharpGLTF.Schema2
             // retrieve ALL the property based objects of the whole model.
 
             var allObjects = GetLogicalChildren()
-                .SelectMany(item => glTFProperty.Flatten(item)
+                .SelectMany(item => ExtraProperties.Flatten(item)
                 .ToList());
 
             // check all the extensions used by each object

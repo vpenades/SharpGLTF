@@ -41,8 +41,8 @@ namespace SharpGLTF
             // load and process schema
             var ctx1 = LoadSchemaContext(Constants.MainSchemaFile);
 
-            // we remove "glTF Property" because it is hand coded.
-            ctx1.Remove(ctx1.Classes.FirstOrDefault(item => item.PersistentName == "glTF Property"));            
+            // we remove "glTF Property" because it is completely hand coded.
+            ctx1.IgnoredByCodeEmitter("glTF Property");
 
             // mimeType "anyof" is basically the string to use.
             ctx1.Remove(ctx1.Enumerations.FirstOrDefault(item => item.PersistentName == "image/jpeg-image/png"));
@@ -101,8 +101,8 @@ namespace SharpGLTF
             var ctx = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
 
             // remove already defined classes
-            ctx.Remove("glTF Property");
-            ctx.Remove("Texture Info");
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("Texture Info");
 
             ctx.Classes
                 .ToArray()
@@ -126,7 +126,7 @@ namespace SharpGLTF
         private static void _ProcessKhronosUnlitExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosUnlitSchemaFile);
-            ctx.Remove("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Property");
 
             ProcessSchema("ext.Unlit.g", ctx);
         }
@@ -134,8 +134,8 @@ namespace SharpGLTF
         private static void _ProcessKhronosModelLightsPunctualExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosModelLightsPunctualSchemaFile);            
-            ctx.Remove("glTF Property");
-            ctx.Classes.FirstOrDefault(item => item.PersistentName == "glTF Child of Root Property").IgnoredByEmitter = true;
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
             var light = ctx.Classes
                 .ToArray()
@@ -152,7 +152,7 @@ namespace SharpGLTF
         private static void _ProcessKhronosNodeLightsPunctualExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
-            ctx.Remove("glTF Property");            
+            ctx.IgnoredByCodeEmitter("glTF Property");            
 
             ProcessSchema("ext.NodeLightsPunctual.g", ctx);
         }
@@ -160,7 +160,7 @@ namespace SharpGLTF
         private static void _ProcessKhronosTextureTransformExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosTextureTransformSchemaFile);
-            ctx.Remove("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Property");
 
             var tex = ctx.Classes
                 .ToArray()
@@ -204,10 +204,10 @@ namespace SharpGLTF
             newEmitter.DeclareContext(ctx);
             newEmitter.SetCollectionContainer("List<TItem>");
 
-            const string rootName = "ModelRoot";            
+            const string rootName = "ModelRoot";
 
             newEmitter.SetRuntimeName("glTF", rootName);
-            newEmitter.SetRuntimeName("glTF Property", "ExtensionsProperty");
+            newEmitter.SetRuntimeName("glTF Property", "ExtraProperties");
             newEmitter.SetRuntimeName("glTF Child of Root Property", "LogicalChildOfRoot");
 
             // newEmitter.SetRuntimeName("Sampler", "TextureSampler");

@@ -25,7 +25,7 @@ namespace SharpGLTF.Schema2
 {
 	using Collections;
 
-	partial class PunctualLightSpot : glTFProperty
+	partial class PunctualLightSpot : ExtraProperties
 	{
 	
 		private const Double _innerConeAngleDefault = 0;
@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
 	
 	}
 
-	partial class KHR_lights_punctualglTFextension : glTFProperty
+	partial class KHR_lights_punctualglTFextension : ExtraProperties
 	{
 	
 		private const int _lightsMinItems = 1;

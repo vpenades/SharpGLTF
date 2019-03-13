@@ -331,7 +331,7 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_sparse);
         }

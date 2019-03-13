@@ -24,7 +24,7 @@ namespace SharpGLTF.Schema2
         internal AccessorSparse() { }
 
         /// <inheritdoc />
-        protected override IEnumerable<glTFProperty> GetLogicalChildren()
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_indices, _values);
         }

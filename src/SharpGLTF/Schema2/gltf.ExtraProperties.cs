@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
 {
     using IO;
 
-    public abstract class glTFProperty : JsonSerializable
+    public abstract class ExtraProperties : JsonSerializable
     {
         #region data
 
@@ -72,15 +72,15 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets a collection of <see cref="glTFProperty"/> instances stored by this object.
+        /// Gets a collection of <see cref="ExtraProperties"/> instances stored by this object.
         /// </summary>
-        /// <returns>A collection of <see cref="glTFProperty"/> instances.</returns>
-        protected virtual IEnumerable<glTFProperty> GetLogicalChildren()
+        /// <returns>A collection of <see cref="ExtraProperties"/> instances.</returns>
+        protected virtual IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return _extensions.OfType<glTFProperty>();
+            return _extensions.OfType<ExtraProperties>();
         }
 
-        protected static IEnumerable<glTFProperty> Flatten(glTFProperty container)
+        protected static IEnumerable<ExtraProperties> Flatten(ExtraProperties container)
         {
             yield return container;
 

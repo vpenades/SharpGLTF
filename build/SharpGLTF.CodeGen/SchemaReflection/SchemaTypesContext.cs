@@ -85,6 +85,11 @@ namespace SharpGLTF.SchemaReflection
 
             public void Remove(string persistentName) { _Types.Remove(persistentName); }
 
+            public void IgnoredByCodeEmitter(string persistentName)
+            {
+                Classes.FirstOrDefault(item => item.PersistentName == persistentName).IgnoredByEmitter = true;
+            }
+
             #endregion
         }
     }

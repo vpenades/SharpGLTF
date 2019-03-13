@@ -169,7 +169,7 @@ namespace SharpGLTF.Schema2
 	}
 
 
-	partial class LogicalChildOfRoot : glTFProperty
+	partial class LogicalChildOfRoot : ExtraProperties
 	{
 	
 		private String _name;
@@ -197,7 +197,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Indices of those attributes that deviate from their initialization value.
 	/// </summary>
-	partial class AccessorSparseIndices : glTFProperty
+	partial class AccessorSparseIndices : ExtraProperties
 	{
 	
 		private Int32 _bufferView;
@@ -235,7 +235,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Array of size `accessor.sparse.count` times number of components storing the displaced accessor attributes pointed by `accessor.sparse.indices`.
 	/// </summary>
-	partial class AccessorSparseValues : glTFProperty
+	partial class AccessorSparseValues : ExtraProperties
 	{
 	
 		private Int32 _bufferView;
@@ -269,7 +269,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Sparse storage of attributes that deviate from their initialization value.
 	/// </summary>
-	partial class AccessorSparse : glTFProperty
+	partial class AccessorSparse : ExtraProperties
 	{
 	
 		private const Int32 _countMinimum = 1;
@@ -376,7 +376,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The index of the node and TRS property that an animation channel targets.
 	/// </summary>
-	partial class AnimationChannelTarget : glTFProperty
+	partial class AnimationChannelTarget : ExtraProperties
 	{
 	
 		private Int32? _node;
@@ -408,7 +408,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Targets an animation's sampler at a node's property.
 	/// </summary>
-	partial class AnimationChannel : glTFProperty
+	partial class AnimationChannel : ExtraProperties
 	{
 	
 		private Int32 _sampler;
@@ -440,7 +440,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
 	/// </summary>
-	partial class AnimationSampler : glTFProperty
+	partial class AnimationSampler : ExtraProperties
 	{
 	
 		private Int32 _input;
@@ -511,7 +511,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Metadata about the glTF asset.
 	/// </summary>
-	partial class Asset : glTFProperty
+	partial class Asset : ExtraProperties
 	{
 	
 		private String _copyright;
@@ -633,7 +633,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An orthographic camera containing properties to create an orthographic projection matrix.
 	/// </summary>
-	partial class CameraOrthographic : glTFProperty
+	partial class CameraOrthographic : ExtraProperties
 	{
 	
 		private Double _xmag;
@@ -675,7 +675,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A perspective camera containing properties to create a perspective projection matrix.
 	/// </summary>
-	partial class CameraPerspective : glTFProperty
+	partial class CameraPerspective : ExtraProperties
 	{
 	
 		private const Double _aspectRatioMinimum = 0;
@@ -756,7 +756,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Reference to a texture.
 	/// </summary>
-	partial class TextureInfo : glTFProperty
+	partial class TextureInfo : ExtraProperties
 	{
 	
 		private Int32 _index;
@@ -790,7 +790,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
 	/// </summary>
-	partial class MaterialPBRMetallicRoughness : glTFProperty
+	partial class MaterialPBRMetallicRoughness : ExtraProperties
 	{
 	
 		private static readonly Vector4 _baseColorFactorDefault = Vector4.One;
@@ -956,7 +956,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Geometry to be rendered with the given material.
 	/// </summary>
-	partial class MeshPrimitive : glTFProperty
+	partial class MeshPrimitive : ExtraProperties
 	{
 	
 		private Dictionary<String,Int32> _attributes;
@@ -1242,7 +1242,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The root object for a glTF asset.
 	/// </summary>
-	partial class ModelRoot : glTFProperty
+	partial class ModelRoot : ExtraProperties
 	{
 	
 		private Asset _asset;
