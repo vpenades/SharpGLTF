@@ -55,6 +55,8 @@ namespace SharpGLTF.SchemaReflection
 
             public ArrayType UseArray(SchemaType elementType) { return (ArrayType)_UseOrCreate( new ArrayType(this, elementType) ); }
 
+            public ClassType FindClass(string persistentName) { return Classes.FirstOrDefault(item => item.PersistentName == persistentName); }
+
             public ClassType UseClass(string name) { return (ClassType)_UseOrCreate(new ClassType(this, name)); }
 
             public BlittableType UseBlittable(TypeInfo t, bool isNullable = false)
@@ -87,7 +89,9 @@ namespace SharpGLTF.SchemaReflection
 
             public void IgnoredByCodeEmitter(string persistentName)
             {
-                Classes.FirstOrDefault(item => item.PersistentName == persistentName).IgnoredByEmitter = true;
+                var ct = Classes.FirstOrDefault(item => item.PersistentName == persistentName);
+
+                if (ct != null) ct.IgnoredByEmitter = true;
             }
 
             #endregion

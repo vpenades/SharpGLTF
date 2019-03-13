@@ -41,43 +41,34 @@ namespace SharpGLTF
             // load and process schema
             var ctx1 = LoadSchemaContext(Constants.MainSchemaFile);
 
-            // we remove "glTF Property" because it is completely hand coded.
+            // Ignore "glTF Property" because it is completely hand coded.
             ctx1.IgnoredByCodeEmitter("glTF Property");
 
-            // mimeType "anyof" is basically the string to use.
-            ctx1.Remove(ctx1.Enumerations.FirstOrDefault(item => item.PersistentName == "image/jpeg-image/png"));
+            // We will mimeType "anyof" as a plain string.
+            ctx1.Remove("image/jpeg-image/png");            
 
             // replace Image.mimeType type from an Enum to String, so we can serialize it with more formats if required
-            ctx1.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "Image")
-                .UseField("mimeType")
+            ctx1.FindClass("Image")
+                .GetField("mimeType")
                 .FieldType = ctx1.UseString();
 
             // replace Node.Matrix, Node.Rotation, Node.Scale and Node.Translation with System.Numerics.Vectors types
-            var node = ctx1.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "Node");
-
-            node.UseField("matrix").SetDataType(typeof(System.Numerics.Matrix4x4), true).RemoveDefaultValue().SetItemsRange(0);
-            node.UseField("rotation").SetDataType(typeof(System.Numerics.Quaternion), true).RemoveDefaultValue().SetItemsRange(0);
-            node.UseField("scale").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
-            node.UseField("translation").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
+            var node = ctx1.FindClass("Node");
+            node.GetField("matrix").SetDataType(typeof(System.Numerics.Matrix4x4), true).RemoveDefaultValue().SetItemsRange(0);
+            node.GetField("rotation").SetDataType(typeof(System.Numerics.Quaternion), true).RemoveDefaultValue().SetItemsRange(0);
+            node.GetField("scale").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
+            node.GetField("translation").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
 
             // replace Material.emissiveFactor with System.Numerics.Vectors types
-            ctx1.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "Material")
-                .UseField("emissiveFactor")
+            ctx1.FindClass("Material")
+                .GetField("emissiveFactor")
                 .SetDataType(typeof(System.Numerics.Vector3), true)
                 .SetDefaultValue("Vector3.Zero")
                 .SetItemsRange(0);
 
             // replace Material.baseColorFactor with System.Numerics.Vectors types
-            ctx1.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "Material PBR Metallic Roughness")
-                .UseField("baseColorFactor")
+            ctx1.FindClass("Material PBR Metallic Roughness")
+                .GetField("baseColorFactor")
                 .SetDataType(typeof(System.Numerics.Vector4), true)
                 .SetDefaultValue("Vector4.One")
                 .SetItemsRange(0);
@@ -87,35 +78,23 @@ namespace SharpGLTF
 
         #endregion
 
-        #region Extensions code generation        
-
-        private static void _ProcessDracoExtension()
-        {
-            var ctx2 = LoadSchemaContext(Constants.KhronosDracoSchemaFile);
-
-            ProcessSchema("ext.draco.g",ctx2);
-        }
+        #region Extensions code generation
 
         private static void _ProcessKhronosPBRExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
-
-            // remove already defined classes
             ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
 
-            ctx.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "KHR_materials_pbrSpecularGlossiness glTF extension")
-                .UseField("diffuseFactor")
+            ctx.FindClass("KHR_materials_pbrSpecularGlossiness glTF extension")
+                .GetField("diffuseFactor")
                 .SetDataType(typeof(System.Numerics.Vector4), true)
                 .SetDefaultValue("Vector4.One")
                 .SetItemsRange(0);
 
-            ctx.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "KHR_materials_pbrSpecularGlossiness glTF extension")
-                .UseField("specularFactor")
+            ctx.FindClass("KHR_materials_pbrSpecularGlossiness glTF extension")
+                .GetField("specularFactor")
                 .SetDataType(typeof(System.Numerics.Vector3), true)
                 .SetDefaultValue("Vector3.One")
                 .SetItemsRange(0);
@@ -127,6 +106,7 @@ namespace SharpGLTF
         {
             var ctx = LoadSchemaContext(Constants.KhronosUnlitSchemaFile);
             ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
             ProcessSchema("ext.Unlit.g", ctx);
         }
@@ -137,11 +117,8 @@ namespace SharpGLTF
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
-            var light = ctx.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "light");            
-
-            light.UseField("color")
+            ctx.FindClass("light")
+                .GetField("color")
                 .SetDataType(typeof(System.Numerics.Vector3), true)
                 .SetDefaultValue("Vector3.One")
                 .SetItemsRange(0);
@@ -152,7 +129,8 @@ namespace SharpGLTF
         private static void _ProcessKhronosNodeLightsPunctualExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
-            ctx.IgnoredByCodeEmitter("glTF Property");            
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
             ProcessSchema("ext.NodeLightsPunctual.g", ctx);
         }
@@ -161,17 +139,16 @@ namespace SharpGLTF
         {
             var ctx = LoadSchemaContext(Constants.KhronosTextureTransformSchemaFile);
             ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
-            var tex = ctx.Classes
-                .ToArray()
-                .FirstOrDefault(item => item.PersistentName == "KHR_texture_transform textureInfo extension");
+            var tex = ctx.FindClass("KHR_texture_transform textureInfo extension");
 
-            tex.UseField("offset")
+            tex.GetField("offset")
                 .SetDataType(typeof(System.Numerics.Vector2), true)
                 .SetDefaultValue("Vector2.One")
                 .SetItemsRange(0);
 
-            tex.UseField("scale")
+            tex.GetField("scale")
                 .SetDataType(typeof(System.Numerics.Vector2), true)
                 .SetDefaultValue("Vector2.One")
                 .SetItemsRange(0);
@@ -233,19 +210,16 @@ namespace SharpGLTF
 
             newEmitter.SetRuntimeName("KHR_texture_transform textureInfo extension", "TextureTransform");
 
-
-
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();
 
-            var meshClass = classes.FirstOrDefault(c => c.PersistentName == "Mesh");
+            var meshClass = ctx.FindClass("Mesh");
             if (meshClass != null)
             {
                 newEmitter.SetCollectionContainer(meshClass.UseField("primitives"), "ChildrenCollection<TItem,Mesh>");
             }
 
-            var animationClass = classes.FirstOrDefault(c => c.PersistentName == "Animation");
-
+            var animationClass = ctx.FindClass("Animation");
             if (animationClass != null)
             {
                 newEmitter.SetCollectionContainer(animationClass.UseField("channels"), "ChildrenCollection<TItem,Animation>");

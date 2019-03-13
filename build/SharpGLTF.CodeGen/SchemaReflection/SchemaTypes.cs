@@ -345,13 +345,18 @@ namespace SharpGLTF.SchemaReflection
 
         #region API
 
+        public FieldInfo GetField(string name)
+        {
+            return _Fields.First(item => item.PersistentName == name);
+        }
+
         public FieldInfo UseField(string name)
         {
             var f = new FieldInfo(this, name);
 
             _Fields.Add(f);
 
-            return _Fields.FirstOrDefault(item => item.PersistentName == name);
+            return GetField(name);
         }
 
         #endregion
