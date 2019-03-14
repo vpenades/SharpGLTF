@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Text;
 
 namespace SharpGLTF.Debug
-{    
+{
     internal sealed class _CollectionDebugProxy<T>
     {
         // https://referencesource.microsoft.com/#mscorlib/system/collections/generic/debugview.cs,29

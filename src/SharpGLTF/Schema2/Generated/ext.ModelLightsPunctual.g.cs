@@ -49,7 +49,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(reader); break;
@@ -94,7 +94,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "color": _color = DeserializePropertyValue<Vector3?>(reader); break;
@@ -124,7 +124,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "lights": DeserializePropertyList<PunctualLight>(reader, _lights); break;

@@ -37,7 +37,7 @@ namespace SharpGLTF.Schema2
             _materials = new ChildrenCollection<Material, ModelRoot>(this);
             _meshes = new ChildrenCollection<Mesh, ModelRoot>(this);
             _nodes = new ChildrenCollection<Node, ModelRoot>(this);
-            _samplers = new ChildrenCollection<Sampler, ModelRoot>(this);
+            _samplers = new ChildrenCollection<TextureSampler, ModelRoot>(this);
             _scenes = new ChildrenCollection<Scene, ModelRoot>(this);
             _skins = new ChildrenCollection<Skin, ModelRoot>(this);
             _textures = new ChildrenCollection<Texture, ModelRoot>(this);
@@ -53,8 +53,12 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public ModelRoot DeepClone()
         {
-            var dictionary = this.WriteToDictionary("deepclone");
-            return ModelRoot.ReadFromDictionary(dictionary, "deepclone.gltf");
+            var dict = new Dictionary<string, ArraySegment<Byte>>();
+            var settings = WriteSettings.ForDeepClone(dict);
+
+            this.Write(settings, "deepclone");
+
+            return ModelRoot.ReadFromDictionary(dict, "deepclone.gltf");
         }
 
         #endregion
@@ -73,22 +77,22 @@ namespace SharpGLTF.Schema2
 
         #region Logical resouces
 
-        public IReadOnlyList<Material>      LogicalMaterials    => _materials;
-        public IReadOnlyList<Texture>       LogicalTextures     => _textures;
-        public IReadOnlyList<Sampler>       LogicalSamplers     => _samplers;
-        public IReadOnlyList<Image>         LogicalImages       => _images;
+        public IReadOnlyList<Material>          LogicalMaterials        => _materials;
+        public IReadOnlyList<Texture>           LogicalTextures         => _textures;
+        public IReadOnlyList<TextureSampler>    LogicalTextureSamplers  => _samplers;
+        public IReadOnlyList<Image>             LogicalImages           => _images;
 
-        public IReadOnlyList<Buffer>        LogicalBuffers      => _buffers;
-        public IReadOnlyList<BufferView>    LogicalBufferViews  => _bufferViews;
-        public IReadOnlyList<Accessor>      LogicalAccessors    => _accessors;
+        public IReadOnlyList<Buffer>            LogicalBuffers          => _buffers;
+        public IReadOnlyList<BufferView>        LogicalBufferViews      => _bufferViews;
+        public IReadOnlyList<Accessor>          LogicalAccessors        => _accessors;
 
-        public IReadOnlyList<Mesh>          LogicalMeshes       => _meshes;
-        public IReadOnlyList<Skin>          LogicalSkins        => _skins;
-        public IReadOnlyList<Camera>        LogicalCameras      => _cameras;
+        public IReadOnlyList<Mesh>              LogicalMeshes           => _meshes;
+        public IReadOnlyList<Skin>              LogicalSkins            => _skins;
+        public IReadOnlyList<Camera>            LogicalCameras          => _cameras;
 
-        public IReadOnlyList<Node>          LogicalNodes        => _nodes;
-        public IReadOnlyList<Scene>         LogicalScenes       => _scenes;
-        public IReadOnlyList<Animation>     LogicalAnimations   => _animations;
+        public IReadOnlyList<Node>              LogicalNodes            => _nodes;
+        public IReadOnlyList<Scene>             LogicalScenes           => _scenes;
+        public IReadOnlyList<Animation>         LogicalAnimations       => _animations;
 
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
@@ -105,7 +109,7 @@ namespace SharpGLTF.Schema2
             containers = containers.Concat(this.LogicalMaterials);
             containers = containers.Concat(this.LogicalMeshes);
             containers = containers.Concat(this.LogicalNodes);
-            containers = containers.Concat(this.LogicalSamplers);
+            containers = containers.Concat(this.LogicalTextureSamplers);
             containers = containers.Concat(this.LogicalScenes);
             containers = containers.Concat(this.LogicalSkins);
             containers = containers.Concat(this.LogicalTextures);

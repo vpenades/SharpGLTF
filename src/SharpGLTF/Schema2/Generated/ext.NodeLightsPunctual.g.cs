@@ -40,7 +40,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "light": _light = DeserializePropertyValue<Int32>(reader); break;

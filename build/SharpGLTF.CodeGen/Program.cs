@@ -187,7 +187,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("glTF Property", "ExtraProperties");
             newEmitter.SetRuntimeName("glTF Child of Root Property", "LogicalChildOfRoot");
 
-            // newEmitter.SetRuntimeName("Sampler", "TextureSampler");
+            newEmitter.SetRuntimeName("Sampler", "TextureSampler");
 
             newEmitter.SetRuntimeName("UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "IndexEncodingType");            
             newEmitter.SetRuntimeName("BYTE-FLOAT-SHORT-UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "EncodingType");            

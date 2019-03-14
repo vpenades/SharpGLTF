@@ -37,7 +37,7 @@ namespace SharpGLTF.Schema2
     public enum PunctualLightType { Directional, Point, Spot }
 
     /// <remarks>
-    /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
+    /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("{LightType} {Color} {Intensity} {Range}")]
     public partial class PunctualLight
@@ -107,10 +107,10 @@ namespace SharpGLTF.Schema2
     partial class ModelRoot
     {
         /// <summary>
-        /// A collection of <see cref="PunctualLight"/> instances.
+        /// Gets A collection of <see cref="PunctualLight"/> instances.
         /// </summary>
         /// <remarks>
-        /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> extension.
+        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> extension.
         /// </remarks>
         public IReadOnlyList<PunctualLight> LogicalPunctualLights
         {

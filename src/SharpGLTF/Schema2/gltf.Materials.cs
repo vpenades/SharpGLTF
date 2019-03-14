@@ -138,7 +138,7 @@ namespace SharpGLTF.Schema2
 
         public Image Image => Texture?.Source;
 
-        public Sampler Sampler => Texture?.Sampler;
+        public TextureSampler Sampler => Texture?.Sampler;
 
         public Vector4 Factor => _FactorGetter();
 

@@ -56,7 +56,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "offset": _offset = DeserializePropertyValue<Vector2?>(reader); break;

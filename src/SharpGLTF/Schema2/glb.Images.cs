@@ -242,7 +242,6 @@ namespace SharpGLTF.Schema2
             }
 
             throw new NotImplementedException();
-
         }
 
         private void _WriteAsBufferView()

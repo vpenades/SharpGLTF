@@ -81,9 +81,9 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalTextures.IndexOfReference(this);
 
-        public Sampler Sampler
+        public TextureSampler Sampler
         {
-            get => _sampler.HasValue ? LogicalParent.LogicalSamplers[_sampler.Value] : null;
+            get => _sampler.HasValue ? LogicalParent.LogicalTextureSamplers[_sampler.Value] : null;
             set
             {
                 if (value != null) Guard.MustShareLogicalParent(this, value, nameof(value));
@@ -104,14 +104,14 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Sampler[{LogicalIndex}] {Name}")]
-    public sealed partial class Sampler
+    [System.Diagnostics.DebuggerDisplay("TextureSampler[{LogicalIndex}] {Name}")]
+    public sealed partial class TextureSampler
     {
         #region lifecycle
 
-        internal Sampler() { }
+        internal TextureSampler() { }
 
-        internal Sampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        internal TextureSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             _magFilter = mag;
             _minFilter = min;
@@ -124,9 +124,9 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="Sampler"/> at <see cref="ModelRoot.LogicalSamplers"/>
+        /// Gets the zero-based index of this <see cref="TextureSampler"/> at <see cref="ModelRoot.LogicalTextureSamplers"/>
         /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalSamplers.IndexOfReference(this);
+        public int LogicalIndex => this.LogicalParent.LogicalTextureSamplers.IndexOfReference(this);
 
         public TextureInterpolationMode MagFilter => _magFilter ?? TextureInterpolationMode.LINEAR;
 
@@ -171,22 +171,22 @@ namespace SharpGLTF.Schema2
     public partial class ModelRoot
     {
         /// <summary>
-        /// Creates or reuses a <see cref="Sampler"/> instance
-        /// at <see cref="ModelRoot.LogicalSamplers"/>.
+        /// Creates or reuses a <see cref="TextureSampler"/> instance
+        /// at <see cref="ModelRoot.LogicalTextureSamplers"/>.
         /// </summary>
         /// <param name="mag">A value of <see cref="TextureInterpolationMode"/>.</param>
         /// <param name="min">A value of <see cref="TextureMipMapMode"/>.</param>
         /// <param name="ws">The <see cref="TextureWrapMode"/> in the S axis.</param>
         /// <param name="wt">The <see cref="TextureWrapMode"/> in the T axis.</param>
-        /// <returns>A <see cref="Sampler"/> instance.</returns>
-        public Sampler UseSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        /// <returns>A <see cref="TextureSampler"/> instance.</returns>
+        public TextureSampler UseSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
         {
             foreach (var s in this._samplers)
             {
                 if (s.MagFilter == mag && s.MinFilter == min && s.WrapS == ws && s.WrapT == wt) return s;
             }
 
-            var ss = new Sampler(mag, min, ws, wt);
+            var ss = new TextureSampler(mag, min, ws, wt);
 
             this._samplers.Add(ss);
 
@@ -198,9 +198,9 @@ namespace SharpGLTF.Schema2
         /// at <see cref="ModelRoot.LogicalTextures"/>.
         /// </summary>
         /// <param name="image">The source <see cref="Image"/>.</param>
-        /// <param name="sampler">The source <see cref="Sampler"/>.</param>
+        /// <param name="sampler">The source <see cref="TextureSampler"/>.</param>
         /// <returns>A <see cref="Texture"/> instance.</returns>
-        public Texture UseTexture(Image image, Sampler sampler)
+        public Texture UseTexture(Image image, TextureSampler sampler)
         {
             if (image == null) return null;
 
@@ -219,7 +219,7 @@ namespace SharpGLTF.Schema2
             return tex;
         }
 
-        internal T _UseTextureInfo<T>(Image image, Sampler sampler, int textureSet)
+        internal T _UseTextureInfo<T>(Image image, TextureSampler sampler, int textureSet)
             where T : TextureInfo, new()
         {
             var tex = UseTexture(image, sampler);

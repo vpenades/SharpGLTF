@@ -9,7 +9,7 @@ namespace SharpGLTF.Collections
     /// this class is used to compare two T class references,
     /// bypassing any equality operator implemented by the T class.
     /// </summary>
-    /// <see cref="https://stackoverflow.com/questions/4901320/is-there-any-kind-of-referencecomparer-in-net"/>
+    /// <see href="https://stackoverflow.com/questions/4901320/is-there-any-kind-of-referencecomparer-in-net"/>
     sealed class ReferenceComparer<T> : IEqualityComparer<T>
         where T : class
     {

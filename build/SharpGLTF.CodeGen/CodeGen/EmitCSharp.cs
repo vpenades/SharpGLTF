@@ -606,13 +606,13 @@ namespace SharpGLTF.CodeGen
             yield return string.Empty;
 
             yield return "/// <inheritdoc />".Indent(1);
-            yield return "protected override void DeserializeProperty(JsonReader reader, string property)".Indent(1);
+            yield return "protected override void DeserializeProperty(string property, JsonReader reader)".Indent(1);
             yield return "{".Indent(1);
             yield return "switch (property)".Indent(2);
             yield return "{".Indent(2);
 
             foreach (var l in _DeserializerSwitchBody.Indent(3)) yield return l;
-            if (HasBaseClass) yield return "default: base.DeserializeProperty(reader, property); break;".Indent(3);
+            if (HasBaseClass) yield return "default: base.DeserializeProperty(property, reader); break;".Indent(3);
             else yield return "default: throw new NotImplementedException();".Indent(3);
 
             yield return "}".Indent(2);

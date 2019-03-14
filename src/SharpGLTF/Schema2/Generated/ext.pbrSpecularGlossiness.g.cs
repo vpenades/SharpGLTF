@@ -60,7 +60,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "diffuseFactor": _diffuseFactor = DeserializePropertyValue<Vector4?>(reader); break;

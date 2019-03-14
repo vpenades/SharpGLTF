@@ -54,10 +54,24 @@ namespace SharpGLTF.Schema2
         public AssetReader FileReader { get; set; }
     }
 
+    /// <summary>
+    /// Determines the way in which <see cref="Image"/> instances are stored.
+    /// </summary>
     public enum ImageWriteMode
     {
+        /// <summary>
+        /// Images will be stored as external satellite files.
+        /// </summary>
         SatelliteFile,
+
+        /// <summary>
+        /// Images will be stored as internal binary buffers.
+        /// </summary>
         BufferView,
+
+        /// <summary>
+        /// Images will be embedded into the JSON encoded in MIME64.
+        /// </summary>
         Embedded
     }
 
@@ -67,6 +81,27 @@ namespace SharpGLTF.Schema2
     public class WriteSettings
     {
         #region lifecycle
+
+        /// <summary>
+        /// These settings are used exclusively by <see cref="MODEL.DeepClone"/>.
+        /// </summary>
+        /// <param name="dict">The dictionary where the model will be stored</param>
+        /// <returns>The settings to use with <see cref="MODEL.Write(WriteSettings, string)"/></returns>
+        internal static WriteSettings ForDeepClone(Dictionary<string, BYTES> dict)
+        {
+            var settings = new WriteSettings()
+            {
+                BinaryMode = false,
+                ImageWriting = ImageWriteMode.SatelliteFile,
+                MergeBuffers = false,
+                JsonFormatting = Formatting.None,
+                _NoCloneWatchdog = true,
+
+                FileWriter = (fn, buff) => dict[fn] = buff
+            };
+
+            return settings;
+        }
 
         internal static WriteSettings ForText(string filePath)
         {
@@ -183,7 +218,7 @@ namespace SharpGLTF.Schema2
         /// <returns>The source <see cref="MODEL"/> instance, or a cloned and modified instance if current settings required it.</returns>
         internal MODEL FilterModel(MODEL model)
         {
-            Guard.NotNull(model,nameof(model));
+            Guard.NotNull(model, nameof(model));
 
             var needsMergeBuffers = (this.MergeBuffers | this.BinaryMode) && model.LogicalBuffers.Count > 1;
 
@@ -494,7 +529,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(settings, nameof(settings));
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
-            Guard.NotNull(model,nameof(model));
+            Guard.NotNull(model, nameof(model));
 
             model = settings.FilterModel(model);
 

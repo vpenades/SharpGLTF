@@ -184,7 +184,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "name": _name = DeserializePropertyValue<String>(reader); break;
@@ -220,7 +220,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializePropertyValue<Int32>(reader); break;
@@ -255,7 +255,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializePropertyValue<Int32>(reader); break;
@@ -291,7 +291,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "count": _count = DeserializePropertyValue<Int32>(reader); break;
@@ -355,7 +355,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializePropertyValue<Int32?>(reader); break;
@@ -394,7 +394,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "node": _node = DeserializePropertyValue<Int32?>(reader); break;
@@ -426,7 +426,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "sampler": _sampler = DeserializePropertyValue<Int32>(reader); break;
@@ -462,7 +462,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "input": _input = DeserializePropertyValue<Int32>(reader); break;
@@ -497,7 +497,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "channels": DeserializePropertyList<AnimationChannel>(reader, _channels); break;
@@ -535,7 +535,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "copyright": _copyright = DeserializePropertyValue<String>(reader); break;
@@ -570,7 +570,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "byteLength": _byteLength = DeserializePropertyValue<Int32>(reader); break;
@@ -616,7 +616,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "buffer": _buffer = DeserializePropertyValue<Int32>(reader); break;
@@ -659,7 +659,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "xmag": _xmag = DeserializePropertyValue<Double>(reader); break;
@@ -703,7 +703,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "aspectRatio": _aspectRatio = DeserializePropertyValue<Double?>(reader); break;
@@ -741,7 +741,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "orthographic": _orthographic = DeserializePropertyValue<CameraOrthographic>(reader); break;
@@ -776,7 +776,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "index": _index = DeserializePropertyValue<Int32>(reader); break;
@@ -824,7 +824,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "baseColorFactor": _baseColorFactor = DeserializePropertyValue<Vector4?>(reader); break;
@@ -854,7 +854,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "scale": _scale = DeserializePropertyValue<Double?>(reader); break;
@@ -882,7 +882,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "strength": _strength = DeserializePropertyValue<Double?>(reader); break;
@@ -936,7 +936,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "alphaCutoff": _alphaCutoff = DeserializePropertyValue<Double?>(reader); break;
@@ -985,7 +985,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "attributes": DeserializePropertyDictionary<Int32>(reader, _attributes); break;
@@ -1024,7 +1024,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "primitives": DeserializePropertyList<MeshPrimitive>(reader, _primitives); break;
@@ -1081,7 +1081,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "camera": _camera = DeserializePropertyValue<Int32?>(reader); break;
@@ -1102,7 +1102,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Texture sampler properties for filtering and wrapping modes.
 	/// </summary>
-	partial class Sampler : LogicalChildOfRoot
+	partial class TextureSampler : LogicalChildOfRoot
 	{
 	
 		private TextureInterpolationMode? _magFilter;
@@ -1128,7 +1128,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "magFilter": _magFilter = DeserializePropertyValue<TextureInterpolationMode>(reader); break;
@@ -1160,7 +1160,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "nodes": DeserializePropertyList<Int32>(reader, _nodes); break;
@@ -1195,7 +1195,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "inverseBindMatrices": _inverseBindMatrices = DeserializePropertyValue<Int32?>(reader); break;
@@ -1228,7 +1228,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "sampler": _sampler = DeserializePropertyValue<Int32?>(reader); break;
@@ -1281,7 +1281,7 @@ namespace SharpGLTF.Schema2
 		private ChildrenCollection<Node,ModelRoot> _nodes;
 		
 		private const int _samplersMinItems = 1;
-		private ChildrenCollection<Sampler,ModelRoot> _samplers;
+		private ChildrenCollection<TextureSampler,ModelRoot> _samplers;
 		
 		private Int32? _scene;
 		
@@ -1320,7 +1320,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "asset": _asset = DeserializePropertyValue<Asset>(reader); break;
@@ -1335,7 +1335,7 @@ namespace SharpGLTF.Schema2
 				case "materials": DeserializePropertyList<Material>(reader, _materials); break;
 				case "meshes": DeserializePropertyList<Mesh>(reader, _meshes); break;
 				case "nodes": DeserializePropertyList<Node>(reader, _nodes); break;
-				case "samplers": DeserializePropertyList<Sampler>(reader, _samplers); break;
+				case "samplers": DeserializePropertyList<TextureSampler>(reader, _samplers); break;
 				case "scene": _scene = DeserializePropertyValue<Int32?>(reader); break;
 				case "scenes": DeserializePropertyList<Scene>(reader, _scenes); break;
 				case "skins": DeserializePropertyList<Skin>(reader, _skins); break;
@@ -1370,7 +1370,7 @@ namespace SharpGLTF.Schema2
 	
 		/// <inheritdoc />
 		protected override void DeserializeProperty(string property, JsonReader reader)
-        {
+		{
 			switch (property)
 			{
 				case "bufferView": _bufferView = DeserializePropertyValue<Int32?>(reader); break;

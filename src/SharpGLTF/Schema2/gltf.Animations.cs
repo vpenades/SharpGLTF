@@ -350,7 +350,7 @@ namespace SharpGLTF.Schema2
             return (keys, vals);
         }
 
-        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue,TValue,TValue)> keyframes)
+        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue, TValue, TValue)> keyframes)
         {
             var sorted = keyframes.OrderBy(item => item.Key).ToList();
 
