@@ -19,6 +19,14 @@ namespace SharpGLTF.Geometry
 
         #endregion
 
+        #region properties
+
+        public IReadOnlyList<TVertex> Vertices => _Vertices;
+
+        public IReadOnlyCollection<TMaterial> Materials => _Indices.Keys;
+
+        #endregion
+
         #region API
 
         public void AddPolygon(TMaterial material, params TVertex[] points)
@@ -49,6 +57,16 @@ namespace SharpGLTF.Geometry
             indices.Add(aa);
             indices.Add(bb);
             indices.Add(cc);
+        }
+
+        public IEnumerable<(int, int, int)> GetTriangles(TMaterial material)
+        {
+            if (!_Indices.TryGetValue(material, out List<int> indices)) yield break;
+
+            for (int i = 2; i < indices.Count; i += 3)
+            {
+                yield return (indices[i - 2], indices[i - 1], indices[i]);
+            }
         }
 
         public void CopyToNode(Node dstNode, Func<TMaterial, Material> materialEvaluator)

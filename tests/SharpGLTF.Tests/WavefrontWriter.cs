@@ -6,11 +6,10 @@ using System.Text;
 
 using static System.FormattableString;
 
-
-
 namespace SharpGLTF
 {
-    using Collections;
+    using VERTEX = Geometry.VertexTypes.StaticPositionNormal;
+    using MATERIAL = Vector4;
 
     /// <summary>
     /// Tiny wavefront object writer
@@ -19,27 +18,30 @@ namespace SharpGLTF
     {
         #region data
 
-        private readonly VertexColumn<Vector3> _Positions = new VertexColumn<Vector3>();
-        private readonly VertexColumn<Vector3> _Normals = new VertexColumn<Vector3>();
-
-        private readonly List<(int, int, int)> _Indices = new List<(int, int, int)>();        
-
+        private readonly Geometry.InterleavedMeshBuilder<VERTEX, MATERIAL> _Mesh = new Geometry.InterleavedMeshBuilder<VERTEX, MATERIAL>();
+        
         #endregion
 
         #region API        
 
         public void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
         {
-            var aa = _Positions.Use(a);
-            var bb = _Positions.Use(b);
-            var cc = _Positions.Use(c);
+            var aa = new Geometry.VertexTypes.StaticPositionNormal
+            {
+                Position = a
+            };
 
-            // check for degenerated triangles:
-            if (aa == bb) return;
-            if (aa == cc) return;
-            if (bb == cc) return;
+            var bb = new Geometry.VertexTypes.StaticPositionNormal
+            {
+                Position = b
+            };
 
-            _Indices.Add((aa, bb, cc));
+            var cc = new Geometry.VertexTypes.StaticPositionNormal
+            {
+                Position = c
+            };
+
+            _Mesh.AddTriangle(Vector4.One, aa, bb, cc);
         }
 
         public override string ToString()
@@ -48,18 +50,23 @@ namespace SharpGLTF
 
             sb.AppendLine();
 
-            foreach (var v in _Positions)
+            foreach (var v in _Mesh.Vertices)
             {
-                sb.AppendLine(Invariant($"v {v.X} {v.Y} {v.Z}"));
+                sb.AppendLine(Invariant($"v {v.Position.X} {v.Position.Y} {v.Position.Z}"));
             }
 
             sb.AppendLine();
 
             sb.AppendLine("g default");
 
-            foreach (var p in _Indices)
+            foreach(var m in _Mesh.Materials)
             {
-                sb.AppendLine(Invariant($"f {p.Item1 + 1} {p.Item2 + 1} {p.Item3 + 1}"));
+                var triangles = _Mesh.GetTriangles(m);
+
+                foreach (var t in triangles)
+                {
+                    sb.AppendLine(Invariant($"f {t.Item1 + 1} {t.Item2 + 1} {t.Item3 + 1}"));
+                }
             }
 
             return sb.ToString();
