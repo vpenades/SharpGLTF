@@ -15,7 +15,7 @@ namespace SharpGLTF.Geometry
         [OneTimeSetUp]
         public void Setup()
         {
-            TestFiles.CheckoutDataDirectories();
+            TestFiles.DownloadReferenceModels();
         }
 
         #endregion
@@ -23,7 +23,7 @@ namespace SharpGLTF.Geometry
         [Test]
         public void LoadModels()
         {
-            foreach (var f in TestFiles.GetSampleFilePaths())
+            foreach (var f in TestFiles.GetSampleModelsPaths())
             {
                 var root = GltfUtils.LoadModel(f);
                 Assert.NotNull(root);
@@ -33,7 +33,7 @@ namespace SharpGLTF.Geometry
         [Test]
         public void LoadBrokenFile()
         {
-            var f = TestFiles.GetSampleFilePaths().First(item => item.EndsWith(".gltf"));
+            var f = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith(".gltf"));
 
             var json = System.IO.File.ReadAllText(f);
 

@@ -63,32 +63,6 @@ namespace SharpGLTF
             NUnit.Framework.TestContext.AddTestAttachment(fileName);
         }
 
-        public static void SyncronizeGitRepository(string remoteUrl, string localDirectory)
-        {
-            if (LibGit2Sharp.Repository.Discover(localDirectory) == null)
-            {
-                NUnit.Framework.TestContext.Progress.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
-
-                LibGit2Sharp.Repository.Clone(remoteUrl, localDirectory);
-
-                NUnit.Framework.TestContext.Progress.WriteLine($"... Clone Completed");
-
-                return;
-            }
-
-            using (var repo = new LibGit2Sharp.Repository(localDirectory))
-            {
-                var options = new LibGit2Sharp.PullOptions
-                {
-                    FetchOptions = new LibGit2Sharp.FetchOptions()
-                };
-
-                var r = LibGit2Sharp.Commands.Pull(repo, new LibGit2Sharp.Signature("Anonymous", "anon@anon.com", new DateTimeOffset(DateTime.Now)), options);
-
-                NUnit.Framework.TestContext.Progress.WriteLine($"{remoteUrl} is {r.Status}");
-            }
-        }
-
         public static void AttachShowDirLink(this NUnit.Framework.TestContext context)
         {
             context.AttachFileLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
@@ -128,6 +102,76 @@ namespace SharpGLTF
             System.IO.File.WriteAllText(linkPath, sb.ToString());
 
             NUnit.Framework.TestContext.AddTestAttachment(linkPath);
+        }
+    }
+
+
+    static class DownloadUtils
+    {
+        private static readonly Object _DownloadMutex = new object();
+
+        public static void SyncronizeGitRepository(string remoteUrl, string localDirectoryPath)
+        {
+            if (!System.IO.Path.IsPathRooted(localDirectoryPath)) throw new ArgumentException(nameof(localDirectoryPath));
+
+            lock (_DownloadMutex)
+            {
+                if (LibGit2Sharp.Repository.Discover(localDirectoryPath) == null)
+                {
+                    NUnit.Framework.TestContext.Progress.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
+
+                    LibGit2Sharp.Repository.Clone(remoteUrl, localDirectoryPath);
+
+                    NUnit.Framework.TestContext.Progress.WriteLine($"... Clone Completed");
+
+                    return;
+                }
+
+                using (var repo = new LibGit2Sharp.Repository(localDirectoryPath))
+                {
+                    var options = new LibGit2Sharp.PullOptions
+                    {
+                        FetchOptions = new LibGit2Sharp.FetchOptions()
+                    };
+
+                    var r = LibGit2Sharp.Commands.Pull(repo, new LibGit2Sharp.Signature("Anonymous", "anon@anon.com", new DateTimeOffset(DateTime.Now)), options);
+
+                    NUnit.Framework.TestContext.Progress.WriteLine($"{remoteUrl} is {r.Status}");
+                }
+            }
+        }
+
+        public static string DownloadFile(string remoteUri, string localFilePath)
+        {
+            if (!System.IO.Path.IsPathRooted(localFilePath)) throw new ArgumentException(nameof(localFilePath));
+
+            lock (_DownloadMutex)
+            {
+                if (System.IO.File.Exists(localFilePath)) return localFilePath; // we check again because we could have downloaded the file while waiting.
+
+                NUnit.Framework.TestContext.Progress.WriteLine($"Downloading {remoteUri}... Please Wait...");
+
+                var dir = System.IO.Path.GetDirectoryName(localFilePath);
+                System.IO.Directory.CreateDirectory(dir);
+
+                using (var wc = new System.Net.WebClient())
+                {
+                    wc.DownloadFile(remoteUri, localFilePath);
+                }
+
+                if (localFilePath.ToLower().EndsWith(".zip"))
+                {
+                    NUnit.Framework.TestContext.Progress.WriteLine($"Extracting {localFilePath}...");
+
+                    var extractPath = System.IO.Path.Combine(dir, System.IO.Path.GetFileNameWithoutExtension(localFilePath));
+
+                    System.IO.Compression.ZipFile.ExtractToDirectory(localFilePath, extractPath);
+
+                    return extractPath;
+                }
+
+                return localFilePath;
+            }
         }
 
     }

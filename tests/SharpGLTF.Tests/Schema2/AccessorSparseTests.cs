@@ -15,7 +15,7 @@ namespace SharpGLTF.Schema2
         [OneTimeSetUp]
         public void Setup()
         {
-            TestFiles.CheckoutDataDirectories();
+            TestFiles.DownloadReferenceModels();
         }
 
         #endregion
@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
         [Test]
         public void TestLoadSparseModel()
         {
-            var path = TestFiles.GetSampleFilePaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
+            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
             
             var model = ModelRoot.Load(path);
             Assert.NotNull(model);
