@@ -57,17 +57,17 @@ namespace SharpGLTF
 
         #region API
 
-        public static string[] GetSchemaFilePaths()
+        public static IReadOnlyList<string> GetSchemaFilePaths()
         {
             var dir = System.IO.Path.Combine(_SchemaDir, "extensions", "2.0");
 
             var gltf = System.IO.Directory.GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories);
             var glbb = System.IO.Directory.GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories);
 
-            return gltf.Concat(glbb).ToArray();            
+            return gltf.Concat(glbb).ToList();            
         }
 
-        public static string[] GetSampleFilePaths()
+        public static IReadOnlyList<string> GetSampleFilePaths()
         {
             var dir = System.IO.Path.Combine(_SampleModelsDir, "2.0");
 
@@ -88,27 +88,20 @@ namespace SharpGLTF
             return files
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\glTF-Draco\\"))
-                .ToArray();
+                .ToList();
         }
 
-        public static string[] GetGeneratedFilePaths()
+        public static IReadOnlyList<string> GetGeneratedFilePaths()
         {
             var dir = System.IO.Path.Combine(_GeneratedAssetsDir, "Output");
 
             var gltf = System.IO.Directory
-                .GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories)
-                .Where(item => !item.Contains("Output\\Compatibility\\Compatibility"));
+                .GetFiles(dir, "*.gltf", System.IO.SearchOption.AllDirectories);
 
             var glbb = System.IO.Directory
-                .GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories)
-                .Where(item => !item.Contains("Output\\Compatibility\\Compatibility"));
+                .GetFiles(dir, "*.glb", System.IO.SearchOption.AllDirectories);                
 
-            return gltf.Concat(glbb).OrderBy(item => item).ToArray();
-        }
-
-        public static string GetCompatibilityFilePath(int idx)
-        {
-            return System.IO.Path.Combine(_GeneratedAssetsDir, $"Output\\Compatibility\\Compatibility_0{idx}.gltf");
+            return gltf.Concat(glbb).OrderBy(item => item).ToList();
         }
 
         public static string GetPollyFilePath()

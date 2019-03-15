@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace SharpGLTF
 {
     [TestFixture]
-    public class TestAssemblyAPI
+    public class AssemblyAPITests
     {
         [Test]
         public void DumpCurrentAPI()

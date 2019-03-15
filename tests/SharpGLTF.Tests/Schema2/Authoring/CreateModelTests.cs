@@ -76,12 +76,19 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
             var root = ModelRoot.CreateModel();
-            var scene = root.UseScene("Empty Scene");            
-            var node = scene.CreateNode();
-            node.PunctualLight = root.CreatePunctualLight("Directional Light");
-            node.PunctualLight.LightType = PunctualLightType.Directional;
+            var scene = root.UseScene("Empty Scene");
+
+            scene.CreateNode()
+                .PunctualLight = root.CreatePunctualLight(PunctualLightType.Directional)
+                .WithColor(Vector3.UnitX, 2);
+
+            var node2 = scene.CreateNode()
+                .PunctualLight = root.CreatePunctualLight(PunctualLightType.Spot)
+                .WithColor(Vector3.UnitY, 3, 10)
+                .WithSpotCone(0.2f, 0.3f);
 
             root.AttachToCurrentTest("sceneWithLight.gltf");
+            root.AttachToCurrentTest("sceneWithLight.glb");
         }
 
         [Test(Description ="Creates a model with a triangle mesh")]

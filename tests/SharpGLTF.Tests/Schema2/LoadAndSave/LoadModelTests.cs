@@ -27,48 +27,73 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            foreach (var f in TestFiles.GetGeneratedFilePaths())
+            var files = TestFiles.GetGeneratedFilePaths();
+
+            foreach (var f in files)
             {
-                var model = GltfUtils.LoadModel(f);
+                var errors = _LoadNumErrorsForModel(f);
 
-                Assert.NotNull(model);
+                if (errors > 0) continue;
 
-                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+                try
+                {
+                    var model = ModelRoot.Load(f);
+                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+                }
+                catch (IO.UnsupportedExtensionException eex)
+                {
+                    TestContext.WriteLine($"{f.ToShortDisplayPath()} ERROR: {eex.Message}");
+                }
             }
+        }
+
+        // right now this test does not make much sense...
+        // [Test]
+        public void TestLoadInvalidModels()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var files = TestFiles.GetGeneratedFilePaths();
+
+            bool passed = true;
+
+            foreach (var f in files)
+            {
+                var errors = _LoadNumErrorsForModel(f);
+
+                if (errors == 0) continue;
+                
+                try
+                {
+                    var model = GltfUtils.LoadModel(f);
+                    passed = false;
+
+                    TestContext.WriteLine($"FAILED {f.ToShortDisplayPath()}");
+                }
+                catch (Exception ex)
+                {
+                    TestContext.WriteLine($"PASSED {f.ToShortDisplayPath()}");
+                }                
+            }
+
+            Assert.IsTrue(passed);
+        }
+
+        private static int _LoadNumErrorsForModel(string gltfPath)
+        {
+            var dir = System.IO.Path.GetDirectoryName(gltfPath);
+            var fn = System.IO.Path.GetFileNameWithoutExtension(gltfPath);
+
+            var jsonPath = System.IO.Path.Combine(dir, "ValidatorResults", System.IO.Path.ChangeExtension(fn, "json"));
+
+            var content = System.IO.File.ReadAllText(jsonPath);
+            var doc = Newtonsoft.Json.Linq.JObject.Parse(content);
+
+            var token = doc.SelectToken("issues").SelectToken("numErrors");
+
+            return (int)token;
         }
         
-        [TestCase(0)]        
-        [TestCase(6)]
-        public void TestLoadCompatibleModels(int idx)
-        {
-            var filePath = TestFiles.GetCompatibilityFilePath(idx);
-
-            var model = GltfUtils.LoadModel(filePath);
-
-            Assert.NotNull(model);
-        }
-
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(3)]
-        [TestCase(4)]
-        [TestCase(5)]
-        public void TestLoadInvalidModels(int idx)
-        {
-            var filePath = TestFiles.GetCompatibilityFilePath(idx);
-
-            try
-            {                
-                ModelRoot.Load(filePath);
-                Assert.Fail("Did not throw!");
-            }
-            catch(IO.ModelException ex)
-            {
-                TestContext.WriteLine($"{filePath} threw {ex.Message}");
-            }
-                       
-        }
-
         #endregion
 
         #region testing models of https://github.com/KhronosGroup/glTF-Sample-Models.git

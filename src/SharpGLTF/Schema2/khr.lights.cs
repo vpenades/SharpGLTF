@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Numerics;
+using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
     using Collections;
-    using System.Linq;
 
     partial class KHR_lights_punctualglTFextension
     {
@@ -23,9 +23,9 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<PunctualLight> Lights => _lights;
 
-        public PunctualLight CreateLight(string name = null)
+        public PunctualLight CreateLight(string name, PunctualLightType ltype)
         {
-            var light = new PunctualLight();
+            var light = new PunctualLight(ltype);
             light.Name = name;
 
             _lights.Add(light);
@@ -34,6 +34,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    /// <summary>
+    /// Defines all the types of <see cref="PunctualLight"/> types.
+    /// </summary>
     public enum PunctualLightType { Directional, Point, Spot }
 
     /// <remarks>
@@ -42,51 +45,128 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("{LightType} {Color} {Intensity} {Range}")]
     public partial class PunctualLight
     {
+        #region lifecycle
+
+        internal PunctualLight() { }
+
+        internal PunctualLight(PunctualLightType ltype)
+        {
+            _type = ltype.ToString().ToLower();
+
+            if (ltype == PunctualLightType.Spot) _spot = new PunctualLightSpot();
+        }
+
+        /// <summary>
+        /// Sets the cone angles for the <see cref="PunctualLightType.Spot" light/>.
+        /// </summary>
+        /// <param name="innerConeAngle">
+        /// Gets the Angle, in radians, from centre of spotlight where falloff begins.
+        /// Must be greater than or equal to 0 and less than outerConeAngle.
+        /// </param>
+        /// <param name="outerConeAngle">
+        /// Gets Angle, in radians, from centre of spotlight where falloff ends.
+        /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
+        /// </param>
+        /// <returns>This <see cref="PunctualLight"/> instance.</returns>
+        public PunctualLight WithSpotCone(float innerConeAngle, float outerConeAngle)
+        {
+            if (_spot == null) throw new InvalidOperationException($"Expected {PunctualLightType.Spot} but found {LightType}");
+
+            if (innerConeAngle > outerConeAngle) throw new ArgumentException($"{nameof(innerConeAngle)} must be equal or smaller than {nameof(outerConeAngle)}");
+
+            _spot.InnerConeAngle = innerConeAngle;
+            _spot.OuterConeAngle = outerConeAngle;
+
+            return this;
+        }
+
+        /// <summary>
+        /// Defines the light color, intensity and range for the current <see cref="PunctualLight"/>.
+        /// </summary>
+        /// <param name="color">RGB value for light's color in linear space.</param>
+        /// <param name="intensity">
+        /// Brightness of light in. The units that this is defined in depend on the type of light.
+        /// point and spot lights use luminous intensity in candela (lm/sr) while directional
+        /// lights use illuminance in lux (lm/m2)
+        /// </param>
+        /// <param name="range">
+        /// Hint defining a distance cutoff at which the light's intensity may be considered
+        /// to have reached zero. Supported only for point and spot lights. Must be > 0.
+        /// When undefined, range is assumed to be infinite.
+        /// </param>
+        /// <returns>This <see cref="PunctualLight"/> instance.</returns>
+        public PunctualLight WithColor(Vector3 color, float intensity = 1, float range = 0)
+        {
+            this.Color = color;
+            this.Intensity = intensity;
+            this.Range = range;
+            return this;
+        }
+
+        #endregion
+
+        #region properties
+
+        /// <summary>
+        /// For light types that have a direction (directional and spot lights),
+        /// the light's direction is defined as the 3-vector (0.0, 0.0, -1.0)
+        /// </summary>
+        public static Vector3 LocalDirection => -Vector3.UnitZ;
+
         /// <summary>
         /// Gets the zero-based index of this <see cref="PunctualLight"/> at <see cref="ModelRoot.LogicalPunctualLights"/>
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalPunctualLights.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets the type of light.
+        /// </summary>
+        public PunctualLightType LightType => (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
+
+        /// <summary>
+        /// Gets the Angle, in radians, from centre of spotlight where falloff begins.
+        /// Must be greater than or equal to 0 and less than outerConeAngle.
+        /// </summary>
+        public float InnerConeAngle => this._spot == null ? 0 : (float)this._spot.InnerConeAngle;
+
+        /// <summary>
+        /// Gets Angle, in radians, from centre of spotlight where falloff ends.
+        /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
+        /// </summary>
+        public float OuterConeAngle => this._spot == null ? 0 : (float)this._spot.OuterConeAngle;
+
+        /// <summary>
+        /// Gets or sets the RGB value for light's color in linear space.
+        /// </summary>
         public Vector3 Color
         {
             get => _color.AsValue(_colorDefault);
             set => _color = value.AsNullable(_colorDefault, Vector3.Zero, Vector3.One);
         }
 
-        public Double Intensity
+        /// <summary>
+        /// Gets or sets the Brightness of light in. The units that this is defined in depend on the type of light.
+        /// point and spot lights use luminous intensity in candela (lm/sr) while directional
+        /// lights use illuminance in lux (lm/m2)
+        /// </summary>
+        public float Intensity
         {
-            get => _intensity.AsValue(_intensityDefault);
-            set => _intensity = value.AsNullable(_intensityDefault, _intensityMinimum, float.MaxValue);
+            get => (float)_intensity.AsValue(_intensityDefault);
+            set => _intensity = ((double)value).AsNullable(_intensityDefault, _intensityMinimum, float.MaxValue);
         }
 
-        public Double Range
+        /// <summary>
+        /// Gets or sets a Hint defining a distance cutoff at which the light's intensity may be considered
+        /// to have reached zero. Supported only for point and spot lights. Must be > 0.
+        /// When undefined, range is assumed to be infinite.
+        /// </summary>
+        public float Range
         {
-            get => _range.AsValue(0);
-            set => _range = value.AsNullable(0, _rangeMinimum, float.MaxValue);
+            get => (float)_range.AsValue(0);
+            set => _range = LightType == PunctualLightType.Directional ? 0 : ((double)value).AsNullable(0, _rangeMinimum, float.MaxValue);
         }
 
-        public PunctualLightType LightType
-        {
-            get => (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
-            set
-            {
-                this._type = value.ToString().ToLower();
-                if (value != PunctualLightType.Spot) this._spot = null;
-                else if (this._spot == null) this._spot = new PunctualLightSpot();
-            }
-        }
-
-        public float InnerConeAngle
-        {
-            get => this._spot == null ? 0 : (float)this._spot.InnerConeAngle;
-            set { if (this._spot != null) this._spot.InnerConeAngle = value; }
-        }
-
-        public float OuterConeAngle
-        {
-            get => this._spot == null ? 0 : (float)this._spot.OuterConeAngle;
-            set { if (this._spot != null) this._spot.OuterConeAngle = value; }
-        }
+        #endregion
     }
 
     partial class PunctualLightSpot
@@ -127,9 +207,21 @@ namespace SharpGLTF.Schema2
         /// Creates a new <see cref="PunctualLight"/> instance.
         /// and adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
         /// </summary>
-        /// <param name="name">The name of the instance.</param>
+        /// <param name="lightType">A value of <see cref="PunctualLightType"/> describing the type of light to create.</param>
         /// <returns>A <see cref="PunctualLight"/> instance.</returns>
-        public PunctualLight CreatePunctualLight(string name = null)
+        public PunctualLight CreatePunctualLight(PunctualLightType lightType)
+        {
+            return CreatePunctualLight(null, lightType);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="PunctualLight"/> instance.
+        /// and adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <param name="lightType">A value of <see cref="PunctualLightType"/> describing the type of light to create.</param>
+        /// <returns>A <see cref="PunctualLight"/> instance.</returns>
+        public PunctualLight CreatePunctualLight(string name, PunctualLightType lightType)
         {
             var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
             if (ext == null)
@@ -140,7 +232,7 @@ namespace SharpGLTF.Schema2
                 this.SetExtension(ext);
             }
 
-            return ext.CreateLight(name);
+            return ext.CreateLight(name, lightType);
         }
     }
 

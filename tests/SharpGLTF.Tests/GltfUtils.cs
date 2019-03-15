@@ -16,8 +16,6 @@ namespace SharpGLTF
         {
             try
             {
-                TestContext.Progress.WriteLine($"Loading {filePath.ToShortDisplayPath()}");
-
                 return ModelRoot.Load(filePath);
             }
             catch (IO.UnsupportedExtensionException eex)
