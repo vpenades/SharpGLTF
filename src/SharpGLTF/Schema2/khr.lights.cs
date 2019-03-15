@@ -67,8 +67,7 @@ namespace SharpGLTF.Schema2
         /// Gets Angle, in radians, from centre of spotlight where falloff ends.
         /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
         /// </param>
-        /// <returns>This <see cref="PunctualLight"/> instance.</returns>
-        public PunctualLight WithSpotCone(float innerConeAngle, float outerConeAngle)
+        public void SetSpotCone(float innerConeAngle, float outerConeAngle)
         {
             if (_spot == null) throw new InvalidOperationException($"Expected {PunctualLightType.Spot} but found {LightType}");
 
@@ -76,8 +75,6 @@ namespace SharpGLTF.Schema2
 
             _spot.InnerConeAngle = innerConeAngle;
             _spot.OuterConeAngle = outerConeAngle;
-
-            return this;
         }
 
         /// <summary>
@@ -94,13 +91,11 @@ namespace SharpGLTF.Schema2
         /// to have reached zero. Supported only for point and spot lights. Must be > 0.
         /// When undefined, range is assumed to be infinite.
         /// </param>
-        /// <returns>This <see cref="PunctualLight"/> instance.</returns>
-        public PunctualLight WithColor(Vector3 color, float intensity = 1, float range = 0)
+        public void SetColor(Vector3 color, float intensity = 1, float range = 0)
         {
             this.Color = color;
             this.Intensity = intensity;
             this.Range = range;
-            return this;
         }
 
         #endregion

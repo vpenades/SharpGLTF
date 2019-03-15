@@ -58,9 +58,5 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpGLTF\SharpGLTF.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Debug\" />
-  </ItemGroup>
-
+  
 </Project>

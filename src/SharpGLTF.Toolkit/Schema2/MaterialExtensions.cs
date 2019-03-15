@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -63,6 +64,38 @@ namespace SharpGLTF.Schema2
         {
             material.InitializeUnlit();
             return material;
+        }
+
+        /// <summary>
+        /// Creates or reuses an <see cref="Image"/> with the file set by <paramref name="filePath"/>
+        /// </summary>
+        /// <param name="root">The <see cref="ModelRoot"/> root instance.</param>
+        /// <param name="filePath">A valid file path pointing to a valid image</param>
+        /// <returns>A <see cref="Image"/> instance.</returns>
+        public static Image UseImageWithFile(this ModelRoot root, string filePath)
+        {
+            var content = System.IO.File.ReadAllBytes(filePath);
+
+            return root.UseImageWithContent(content);
+        }
+
+        /// <summary>
+        /// Creates or reuses an <see cref="Image"/> with the image content set by <paramref name="imageContent"/>
+        /// </summary>
+        /// <param name="root">The <see cref="ModelRoot"/> root instance.</param>
+        /// <param name="imageContent">A buffer containing the bytes of the image file.</param>
+        /// <returns>A <see cref="Image"/> instance.</returns>
+        public static Image UseImageWithContent(this ModelRoot root, Byte[] imageContent)
+        {
+            foreach (var img in root.LogicalImages)
+            {
+                var existingContent = img.GetImageContent();
+                if (Enumerable.SequenceEqual(existingContent, imageContent)) return img;
+            }
+
+            var image = root.CreateImage();
+            image.SetSatelliteContent(imageContent);
+            return image;
         }
     }
 }

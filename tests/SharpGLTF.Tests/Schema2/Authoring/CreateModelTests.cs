@@ -175,7 +175,7 @@ namespace SharpGLTF.Schema2.Authoring
             // PBRMetallicRoughness has a "BaseColor" and a "Metallic" and a "Roughness" channels.
             primitive.Material
                 .FindChannel("BaseColor")
-                .SetTexture(0, model.CreateImage().WithSatelliteFile(imagePath) );
+                .SetTexture(0, model.UseImageWithFile(imagePath) );
             
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");            

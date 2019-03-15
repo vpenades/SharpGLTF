@@ -114,19 +114,17 @@ namespace SharpGLTF.Schema2
         /// Initializes this <see cref="Image"/> with an image loaded from a file.
         /// </summary>
         /// <param name="filePath">A valid path to an image file.</param>
-        /// <returns>This <see cref="Image"/> instance.</returns>
-        public Image WithSatelliteFile(string filePath)
+        public void SetSatelliteFile(string filePath)
         {
             var content = System.IO.File.ReadAllBytes(filePath);
-            return WithSatelliteContent(content);
+            SetSatelliteContent(content);
         }
 
         /// <summary>
         /// Initializes this <see cref="Image"/> with an image stored in a <see cref="Byte"/> array.
         /// </summary>
         /// <param name="content">A <see cref="Byte"/> array containing a PNG or JPEG image.</param>
-        /// <returns>This <see cref="Image"/> instance.</returns>
-        public Image WithSatelliteContent(Byte[] content)
+        public void SetSatelliteContent(Byte[] content)
         {
             Guard.NotNull(content, nameof(content));
 
@@ -141,8 +139,6 @@ namespace SharpGLTF.Schema2
             this._mimeType = null;
             this._bufferView = null;
             this._SatelliteImageContent = content;
-
-            return this;
         }
 
         /// <summary>
