@@ -97,7 +97,7 @@ namespace SharpGLTF.Schema2
 
         #region Data Buffer API
 
-        public Accessor WithData(BufferView buffer, int byteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
+        public void SetData(BufferView buffer, int byteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
@@ -113,11 +113,9 @@ namespace SharpGLTF.Schema2
             this._normalized = normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
-
-            return this;
         }
 
-        public Memory.Matrix4x4Array AsMatrix4x4Array()
+        public Matrix4x4Array AsMatrix4x4Array()
         {
             return _GetMemoryAccessor().AsMatrix4x4Array();
         }
@@ -161,7 +159,7 @@ namespace SharpGLTF.Schema2
 
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
 
-            WithData(buffer, byteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
+            SetData(buffer, byteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
         }
 
         public IntegerArray AsIndicesArray()
@@ -251,7 +249,7 @@ namespace SharpGLTF.Schema2
 
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ARRAY_BUFFER, nameof(buffer));
 
-            WithData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
+            SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
         }
 
         public IEncodedArray<float> AsScalarArray()

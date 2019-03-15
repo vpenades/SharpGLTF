@@ -318,14 +318,14 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create the three joints that will affect the mesh
             var skelet = scene.CreateNode("Skeleton");
-            var jnode1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
-            var jnode2 = jnode1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
-            var jnode3 = jnode2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
+            var joint1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
+            var joint3 = joint2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
 
             // setup skin
             snode.Skin = model.CreateSkin();
             snode.Skin.Skeleton = skelet;
-            snode.Skin.BindJoints(jnode1, jnode2, jnode3);
+            snode.Skin.BindJoints(joint1, joint2, joint3);
 
             // create the mesh
             var meshBuilder = new InterleavedMeshBuilder<SKINNEDVERTEX, Vector4>();

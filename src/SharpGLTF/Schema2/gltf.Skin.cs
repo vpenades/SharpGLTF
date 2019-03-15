@@ -166,9 +166,9 @@ namespace SharpGLTF.Schema2
             var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
             Memory.EncodedArrayUtils.FillFrom(matrices, 0, joints.Select(item => item.Value));
 
-            var accessor = LogicalParent
-                .CreateAccessor("Bind Matrices")
-                .WithData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
+            var accessor = LogicalParent.CreateAccessor("Bind Matrices");
+
+            accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
 
             this._inverseBindMatrices = accessor.LogicalIndex;
 

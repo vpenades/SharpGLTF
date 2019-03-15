@@ -295,8 +295,9 @@ namespace SharpGLTF.Schema2
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.UseBufferView(new Byte[input.Count * 4]);
-            var accessor = root.CreateAccessor("Animation.Input")
-                .WithData(buffer, 0, input.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            var accessor = root.CreateAccessor("Animation.Input");
+
+            accessor.SetData(buffer, 0, input.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils.FillFrom(accessor.AsScalarArray(), 0, input);
 
@@ -313,8 +314,9 @@ namespace SharpGLTF.Schema2
 
             System.Diagnostics.Debug.Assert(buffer.ByteStride == 0);
 
-            var accessor = root.CreateAccessor("Animation.Output")
-                .WithData(buffer, 0, output.Count, DimensionType.VEC3, EncodingType.FLOAT, false);
+            var accessor = root.CreateAccessor("Animation.Output");
+
+            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC3, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils.FillFrom(accessor.AsVector3Array(), 0, output);
 
@@ -328,8 +330,9 @@ namespace SharpGLTF.Schema2
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.UseBufferView(new Byte[output.Count * 4 * 4]);
-            var accessor = root.CreateAccessor("Animation.Output")
-                .WithData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
+            var accessor = root.CreateAccessor("Animation.Output");
+
+            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils.FillFrom(accessor.AsQuaternionArray(), 0, output);
 
@@ -340,7 +343,9 @@ namespace SharpGLTF.Schema2
 
         private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
         {
-            var sorted = keyframes.OrderBy(item => item.Key).ToList();
+            var sorted = keyframes
+                .OrderBy(item => item.Key)
+                .ToList();
 
             var keys = new Single[sorted.Count];
             var vals = new TValue[sorted.Count];
