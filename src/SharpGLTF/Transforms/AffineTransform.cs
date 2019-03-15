@@ -59,7 +59,7 @@ namespace SharpGLTF.Transforms
                 return
                     Matrix4x4.CreateScale(Scale)
                     *
-                    Matrix4x4.CreateFromQuaternion(Rotation)
+                    Matrix4x4.CreateFromQuaternion(Rotation.Sanitized())
                     *
                     Matrix4x4.CreateTranslation(Translation);
             }

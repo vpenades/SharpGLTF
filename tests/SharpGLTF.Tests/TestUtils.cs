@@ -166,8 +166,6 @@ namespace SharpGLTF
                     var extractPath = System.IO.Path.Combine(dir, System.IO.Path.GetFileNameWithoutExtension(localFilePath));
 
                     System.IO.Compression.ZipFile.ExtractToDirectory(localFilePath, extractPath);
-
-                    return extractPath;
                 }
 
                 return localFilePath;

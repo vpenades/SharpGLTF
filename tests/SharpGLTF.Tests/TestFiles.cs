@@ -87,6 +87,8 @@ namespace SharpGLTF
         {
             var dirPath = System.IO.Path.Combine(paths);
 
+            if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length-4);
+
             if (!System.IO.Path.IsPathFullyQualified(dirPath)) throw new ArgumentException(nameof(dirPath));
 
             var gltf = System.IO.Directory.GetFiles(dirPath, "*.gltf", System.IO.SearchOption.AllDirectories);

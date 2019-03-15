@@ -70,56 +70,62 @@ namespace SharpGLTF.Schema2
 
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
-            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
-                .WithVector3Keys(keyframes);
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetVector3Keys(keyframes);
 
             this._UseChannel(node, PathType.scale)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
-            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
-                .WithVector3Keys(keyframes);
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
+
+            sampler.SetVector3Keys(keyframes);
 
             this._UseChannel(node, PathType.scale)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, Quaternion> keyframes, bool linear = true)
         {
-            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
-                .WithQuaternionKeys(keyframes);
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetQuaternionKeys(keyframes);
 
             this._UseChannel(node, PathType.rotation)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
         {
-            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
-                .WithQuaternionKeys(keyframes);
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
+
+            sampler.SetQuaternionKeys(keyframes);
 
             this._UseChannel(node, PathType.rotation)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
-            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP)
-                .WithVector3Keys(keyframes);
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetVector3Keys(keyframes);
 
             this._UseChannel(node, PathType.translation)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
-            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE)
-                .WithVector3Keys(keyframes);
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
+
+            sampler.SetVector3Keys(keyframes);
 
             this._UseChannel(node, PathType.translation)
-                .WithSampler(sampler);
+                .SetSampler(sampler);
         }
 
         public void CreateMorphChannel(Node node, AnimationInterpolationMode mode, IReadOnlyDictionary<Single, Single[]> keyframes)
@@ -189,14 +195,12 @@ namespace SharpGLTF.Schema2
             _sampler = -1;
         }
 
-        internal AnimationChannel WithSampler(AnimationSampler sampler)
+        internal void SetSampler(AnimationSampler sampler)
         {
             Guard.NotNull(sampler, nameof(sampler));
             Guard.IsTrue(this.LogicalParent == sampler.LogicalParent, nameof(sampler));
 
             _sampler = sampler.LogicalIndex;
-
-            return this;
         }
 
         #endregion
@@ -368,40 +372,32 @@ namespace SharpGLTF.Schema2
             return (keys, vals);
         }
 
-        public AnimationSampler WithVector3Keys(IReadOnlyDictionary<Single, Vector3> keyframes)
+        public void SetVector3Keys(IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
-
-            return this;
         }
 
-        public AnimationSampler WithVector3Keys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
+        public void SetVector3Keys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
-
-            return this;
         }
 
-        public AnimationSampler WithQuaternionKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
+        public void SetQuaternionKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
-
-            return this;
         }
 
-        public AnimationSampler WithQuaternionKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
+        public void SetQuaternionKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
-
-            return this;
         }
 
         public IReadOnlyDictionary<Single, Vector3> AsVector3KeyFrames()

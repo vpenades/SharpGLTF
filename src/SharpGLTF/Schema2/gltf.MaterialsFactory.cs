@@ -11,64 +11,32 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Initializes this <see cref="Material"/> instance with default material attributes.
-        /// </summary>
-        /// <param name="diffuseColor">A <see cref="Vector4"/> color where X=Red, Y=Green, Z=Blue, W=Alpha.</param>
-        /// <returns>This <see cref="Material"/> instance.</returns>
-        public Material WithDefault(Vector4 diffuseColor)
-        {
-            this.WithPBRMetallicRoughness()
-                .FindChannel("BaseColor")
-                .SetFactor(diffuseColor);
-
-            return this;
-        }
-
-        /// <summary>
-        /// Initializes this <see cref="Material"/> instance with default material attributes.
-        /// </summary>
-        /// <returns>This <see cref="Material"/> instance.</returns>
-        public Material WithDefault()
-        {
-            return this.WithPBRMetallicRoughness();
-        }
-
-        /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
         /// </summary>
-        /// <returns>This <see cref="Material"/> instance.</returns>
-        public Material WithPBRMetallicRoughness()
+        public void InitializePBRMetallicRoughness()
         {
             this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.RemoveExtensions<MaterialUnlit>();
-
-            return this;
         }
 
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Specular Glossiness attributes.
         /// </summary>
-        /// <returns>This <see cref="Material"/> instance.</returns>
-        public Material WithPBRSpecularGlossiness()
+        public void InitializePBRSpecularGlossiness()
         {
             this.RemoveExtensions<MaterialUnlit>();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
-
-            return this;
         }
 
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with Unlit attributes.
         /// </summary>
-        /// <returns>This <see cref="Material"/> instance.</returns>
-        public Material WithUnlit()
+        public void InitializeUnlit()
         {
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.SetExtension(new MaterialUnlit(this));
-
-            return this;
         }
 
         private IEnumerable<MaterialChannelView> _GetChannels()

@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace SharpGLTF.Geometry
 {
-    using Memory;
+    using Schema2;
 
     [TestFixture]
     public class CreateMeshTests
@@ -39,7 +39,7 @@ namespace SharpGLTF.Geometry
             // setup a mesh primitive
             var srcPrimitive = srcMesh.CreatePrimitive();
             srcPrimitive.AllocateVertices(positions.Length, "POSITION", "NORMAL");          // (#1)
-            srcPrimitive.AllocateIndices(indices.Length, Schema2.PrimitiveType.TRIANGLES);  // (#2)
+            srcPrimitive.AllocateIndices(indices.Length, PrimitiveType.TRIANGLES);  // (#2)
 
             // assign vertices and indices
             srcPrimitive.Vertices[0].SetValues(0, positions);
@@ -56,7 +56,7 @@ namespace SharpGLTF.Geometry
 
             // Now we switch to the .Schema2 namespace and we create a new scene:
 
-            var model = Schema2.ModelRoot.CreateModel();                        
+            var model = ModelRoot.CreateModel();                        
             var scene = model.UseScene("default");
             var rnode = scene.CreateNode("main scene");
 

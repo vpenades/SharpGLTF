@@ -106,35 +106,21 @@ namespace SharpGLTF.Schema2.Authoring
             // create mesh
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
 
-            // create a vertex buffer with positions and fill it
-            var positionsView = model.UseBufferView(new Byte[12 * 3], 0, null, 0, BufferMode.ARRAY_BUFFER);
-            var positionsArray = new Memory.Vector3Array(positionsView.Content);
-            positionsArray[0] = new Vector3(0, 10, 0);
-            positionsArray[1] = new Vector3(-10, -10, 0);
-            positionsArray[2] = new Vector3(10, -10, 0);
+            var positionsArray = new[]
+            {
+                new Vector3(0, 10, 0),
+                new Vector3(-10, -10, 0),
+                new Vector3(10, -10, 0),
+            };
 
-            // create an index buffer and fill it
-            var indicesView = model.UseBufferView(new Byte[4 * 3], 0, null, 0, BufferMode.ELEMENT_ARRAY_BUFFER);
-            var indicesArray = new Memory.IntegerArray(indicesView.Content);
-            indicesArray[0] = 0;
-            indicesArray[1] = 1;
-            indicesArray[2] = 2;
+            // create an index buffer and fill it            
+            var indicesArray = new[] { 0, 1, 2 };
 
-            // create a positions accessor
-            var positionsAccessor = model
-                .CreateAccessor()
-                .WithVertexData(positionsView, 0, 3, DimensionType.VEC3, EncodingType.FLOAT, false);
-
-            // create an indices accessor
-            var indicesAccessor = model
-                .CreateAccessor()
-                .WithIndexData(indicesView, 0, 3, IndexEncodingType.UNSIGNED_INT);
-            
             // create mesh primitive
-            var primitive = rmesh.CreatePrimitive();
-            primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;
-            primitive.SetVertexAccessor("POSITION", positionsAccessor);
-            primitive.IndexAccessor = indicesAccessor;
+            var primitive = rmesh.CreatePrimitive()
+                .WithVertexAccessor("POSITION", positionsArray)
+                .WithIndicesAccessor(PrimitiveType.TRIANGLES, indicesArray);
+
             primitive.Material = model.CreateMaterial("Default").WithDefault(new Vector4(0, 1, 0, 1));
             primitive.Material.DoubleSided = true;
 
@@ -158,7 +144,7 @@ namespace SharpGLTF.Schema2.Authoring
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
 
             // define the triangle positions
-            var sourcePositions = new[]
+            var positions = new[]
             {
                 new Vector3(0, 10, 0),
                 new Vector3(-10, -10, 0),
@@ -166,32 +152,18 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // define the triangle UV coordinates
-            var sourceTextures = new[]
+            var texCoords = new[]
             {
                 new Vector2(0.5f, -0.8f),
                 new Vector2(-0.5f, 1.2f),
                 new Vector2(1.5f, 1.2f)
             };
-
-            // create a vertex buffer
-            int byteStride = (3 + 2) * 4;
-            var vbuffer = model.UseBufferView(new Byte[byteStride * 3], byteStride, BufferMode.ARRAY_BUFFER);
-
-            // create positions accessor and fill it
-            var vpositions = model
-                .CreateAccessor("Triangle Positions")
-                .WithVertexData(vbuffer, 0, sourcePositions);
-
-            // create texcoord accessor and fill it
-            var vtextures = model
-                .CreateAccessor("Triangle texture coords")
-                .WithVertexData(vbuffer, 12, sourceTextures);
-
+            
             // create a mesh primitive and assgin the accessors and other properties
-            var primitive = rmesh.CreatePrimitive();
-            primitive.SetVertexAccessor("POSITION", vpositions);
-            primitive.SetVertexAccessor("TEXCOORD_0", vtextures);
-            primitive.DrawPrimitiveType = PrimitiveType.TRIANGLES;
+            var primitive = rmesh.CreatePrimitive()
+                .WithVertexAccessor("POSITION", positions)
+                .WithVertexAccessor("TEXCOORD_0", texCoords)
+                .WithIndicesAutomatic(PrimitiveType.TRIANGLES);
 
             // create and assign a material
             primitive.Material = model
@@ -335,10 +307,19 @@ namespace SharpGLTF.Schema2.Authoring
             var scene = model.UseScene("Default");
             var snode = scene.CreateNode("RootNode");
 
+            // create animation sequence with 4 frames
+            var keyframes = new Dictionary<Single, Quaternion>
+            {
+                [1] = Quaternion.Identity,
+                [2] = Quaternion.CreateFromYawPitchRoll(0, 1, 0),
+                [3] = Quaternion.CreateFromYawPitchRoll(0, 0, 1),
+                [4] = Quaternion.Identity,
+            };
+
             // create the three joints that will affect the mesh
             var skelet = scene.CreateNode("Skeleton");
             var jnode1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
-            var jnode2 = jnode1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));
+            var jnode2 = jnode1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
             var jnode3 = jnode2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
 
             // setup skin
@@ -385,18 +366,6 @@ namespace SharpGLTF.Schema2.Authoring
             // fill our node with the mesh
             meshBuilder.CopyToNode(snode, createMaterialForColor);
 
-            // create animation sequence with 4 frames
-            var keyframes = new Dictionary<Single, Quaternion>
-            {
-                [1] = Quaternion.Identity,
-                [2] = Quaternion.CreateFromYawPitchRoll(0, 1, 0),
-                [3] = Quaternion.CreateFromYawPitchRoll(0, 0, 1),
-                [4] = Quaternion.Identity,
-            };
-
-            model.CreateAnimation("Animation")
-                .CreateRotationChannel(jnode2, keyframes);
-            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }

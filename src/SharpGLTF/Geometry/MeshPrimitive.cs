@@ -123,7 +123,7 @@ namespace SharpGLTF.Geometry
         public void AssignTo(Schema2.MeshPrimitive dstPrim)
         {
             var dstAccessor = dstPrim.LogicalParent.LogicalParent.CreateAccessor(this.Name);
-            dstAccessor.WithVertexData(_MemoryAccessor);
+            dstAccessor.SetVertexData(_MemoryAccessor);
             dstPrim.SetVertexAccessor(this._MemoryAccessor.Attribute.Name, dstAccessor);
         }
 
@@ -184,7 +184,7 @@ namespace SharpGLTF.Geometry
         public void AssignToSchema(Schema2.MeshPrimitive dstPrim)
         {
             var dstAccessor = dstPrim.LogicalParent.LogicalParent.CreateAccessor(this.Name);
-            dstAccessor.WithIndexData(_MemoryAccessor);
+            dstAccessor.SetIndexData(_MemoryAccessor);
             dstPrim.IndexAccessor = dstAccessor;
         }
 

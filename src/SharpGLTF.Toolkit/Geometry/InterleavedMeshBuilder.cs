@@ -97,9 +97,9 @@ namespace SharpGLTF.Geometry
 
                 var field = VertexUtils.GetVertexField(typeof(TVertex), attribute.Name);
 
-                if (field.FieldType == typeof(Vector2)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector2Column(_Vertices), attribute.Encoding, attribute.Normalized);
-                if (field.FieldType == typeof(Vector3)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector3Column(_Vertices), attribute.Encoding, attribute.Normalized);
-                if (field.FieldType == typeof(Vector4)) accessor.WithVertexData(vbuffer, attribute.ByteOffset, field.GetVector4Column(_Vertices), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector2)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector2Column(_Vertices), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector3)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector3Column(_Vertices), attribute.Encoding, attribute.Normalized);
+                if (field.FieldType == typeof(Vector4)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector4Column(_Vertices), attribute.Encoding, attribute.Normalized);
 
                 vertexAccessors[attribute.Name] = accessor;
             }
@@ -111,8 +111,9 @@ namespace SharpGLTF.Geometry
                 var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
 
                 var indices = root
-                    .CreateAccessor("Indices")
-                    .WithIndexData(ibuffer, 0, kvp.Value);
+                    .CreateAccessor("Indices");
+
+                indices.SetIndexData(ibuffer, 0, kvp.Value);
 
                 // create mesh primitive
                 var prim = dstMesh.CreatePrimitive();
