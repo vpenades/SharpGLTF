@@ -6,8 +6,6 @@ using System.Text;
 namespace SharpGLTF.Geometry
 {
     using Collections;
-    using Schema2;
-    using VertexTypes;
 
     public class InterleavedMeshBuilder<TVertex, TMaterial>
         where TVertex : struct
@@ -69,38 +67,9 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void CopyToNode(Node dstNode, Func<TMaterial, Material> materialEvaluator)
+        public IReadOnlyList<int> GetIndices(TMaterial material)
         {
-            dstNode.Mesh = dstNode.LogicalParent.CreateMesh();
-            CopyToMesh(dstNode.Mesh, materialEvaluator);
-        }
-
-        public void CopyToMesh(Schema2.Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
-        {
-            var root = dstMesh.LogicalParent;
-
-            // create vertex accessors
-            var vertexAccessors = root.CreateInterleavedVertexAccessors(_Vertices);
-
-            foreach (var kvp in _Indices)
-            {
-                // create index buffer
-                var ibytes = new Byte[4 * kvp.Value.Count];
-                var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
-
-                var indices = root
-                    .CreateAccessor("Indices");
-
-                indices.SetIndexData(ibuffer, 0, kvp.Value);
-
-                // create mesh primitive
-                var prim = dstMesh.CreatePrimitive();
-                foreach (var va in vertexAccessors) prim.SetVertexAccessor(va.Key, va.Value);
-                prim.SetIndexAccessor(indices);
-                prim.DrawPrimitiveType = PrimitiveType.TRIANGLES;
-
-                prim.Material = materialEvaluator(kvp.Key);
-            }
+            return _Indices.TryGetValue(material, out List<int> indices) ? indices : null;
         }
 
         #endregion

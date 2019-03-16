@@ -104,8 +104,9 @@ namespace SharpGLTF.Schema2.Authoring
             // create node
             var rnode = scene.CreateNode("Triangle Node");            
             // create material
-            var material = model.CreateMaterial("Default").WithDefault(new Vector4(0, 1, 0, 1));
-            material.DoubleSided = true;
+            var material = model.CreateMaterial("Default")
+                .WithDefault(new Vector4(0, 1, 0, 1))
+                .WithDoubleSide(true);
 
             // create mesh
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
@@ -147,10 +148,8 @@ namespace SharpGLTF.Schema2.Authoring
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
 
             var material = model.CreateMaterial("Default")
-                .WithPBRMetallicRoughness();
-
-            material.DoubleSided = true;
-            material.FindChannel("BaseColor").SetTexture(0, model.UseImageWithFile(imagePath));
+                .WithPBRMetallicRoughness(Vector4.One, imagePath)
+                .WithDoubleSide(true);                
 
             // define the triangle positions
             var positions = new[]
@@ -197,9 +196,7 @@ namespace SharpGLTF.Schema2.Authoring
             // setup a lambda function that creates a material for a given color
             Material createMaterialForColor(Vector4 color)
             {
-                var material = model.CreateMaterial().WithDefault(color);
-                material.DoubleSided = true;
-                return material;
+                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
             };
 
             // fill our node with the mesh
@@ -255,19 +252,16 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
-            var scene = model.UseScene("Default");
-            var rnode = scene.CreateNode("RootNode");
 
             // setup a lambda function that creates a material for a given color
             Material createMaterialForColor(Vector4 color)
             {
-                var material = model.CreateMaterial().WithDefault(color);
-                material.DoubleSided = true;
-                return material;
+                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
             };
 
-            // fill our node with the mesh
-            meshBuilder.CopyToNode(rnode, createMaterialForColor);
+            model
+                .UseScene("Default")
+                .CreateNode("RootNode").WithMesh( model.CreateMesh("mesh",meshBuilder, createMaterialForColor));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -277,7 +271,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateAnimatedMeshBuilderScene()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();           
+            TestContext.CurrentContext.AttachGltfValidatorLink();
 
             // create animation sequence with 4 frames
             var keyframes = new Dictionary<Single, Vector3>()
@@ -288,11 +282,7 @@ namespace SharpGLTF.Schema2.Authoring
                 [4] = new Vector3(0, 0, 0),
             };
 
-            var model = ModelRoot.CreateModel();
-            var scene = model.UseScene("Default");
-            var rnode = scene.CreateNode("RootNode").WithTranslationAnimation("track1", keyframes);            
-
-            // create mesh
+            // create a mesh
             var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
@@ -301,16 +291,19 @@ namespace SharpGLTF.Schema2.Authoring
             var v4 = new STATICVERTEX(-10, -10, 0, -10, -10, 15);
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
 
+            // create the gltf model
+            var model = ModelRoot.CreateModel();
+
             // setup a lambda function that creates a material for a given color
             Material createMaterialForColor(Vector4 color)
             {
-                var material = model.CreateMaterial().WithDefault(color);
-                material.DoubleSided = true;
-                return material;
-            };
+                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
+            };            
 
-            // fill our node with the mesh
-            meshBuilder.CopyToNode(rnode, createMaterialForColor);
+            model.UseScene("Default")
+                .CreateNode("RootNode")
+                .WithTranslationAnimation("track1", keyframes)
+                .WithMesh(model.CreateMesh("mesh", meshBuilder, createMaterialForColor));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -380,13 +373,10 @@ namespace SharpGLTF.Schema2.Authoring
             // setup a lambda function that creates a material for a given color
             Material createMaterialForColor(Vector4 color)
             {
-                var material = model.CreateMaterial().WithDefault(color);
-                material.DoubleSided = true;
-                return material;
+                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
             };
 
-            // fill our node with the mesh
-            meshBuilder.CopyToNode(snode, createMaterialForColor);
+            snode.WithMesh(model.CreateMesh("mesh", meshBuilder, createMaterialForColor));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");

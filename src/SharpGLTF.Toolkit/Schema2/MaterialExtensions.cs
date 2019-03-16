@@ -33,6 +33,24 @@ namespace SharpGLTF.Schema2
             return material;
         }
 
+        public static Material WithDoubleSide(this Material material, bool enabled)
+        {
+            material.DoubleSided = enabled;
+            return material;
+        }
+
+        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, string imageFilePath)
+        {
+            material.FindChannel(channelName).SetTexture(textureSet, material.LogicalParent.UseImageWithFile(imageFilePath));
+            return material;
+        }
+
+        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, Image image)
+        {
+            material.FindChannel(channelName).SetTexture(textureSet, image);
+            return material;
+        }
+
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
         /// </summary>
@@ -41,6 +59,25 @@ namespace SharpGLTF.Schema2
         public static Material WithPBRMetallicRoughness(this Material material)
         {
             material.InitializePBRMetallicRoughness();
+            return material;
+        }
+
+        public static Material WithPBRMetallicRoughness(this Material material,
+            Vector4 baseColorFactor, string baseColorImageFilePath,
+            float metallicFactor = 1, string metallicImageFilePath = null,
+            float roughnessFactor = 1, string roughtnessImageFilePath = null
+            )
+        {
+            material.WithPBRMetallicRoughness();
+
+            if (!string.IsNullOrWhiteSpace(baseColorImageFilePath)) material.WithChannelTexture("BaseColor", 0, baseColorImageFilePath);
+            if (!string.IsNullOrWhiteSpace(metallicImageFilePath)) material.WithChannelTexture("Metallic", 0, baseColorImageFilePath);
+            if (!string.IsNullOrWhiteSpace(roughtnessImageFilePath)) material.WithChannelTexture("Roughness", 0, baseColorImageFilePath);
+
+            material.FindChannel("BaseColor").SetFactor(baseColorFactor);
+            material.FindChannel("Metallic").SetFactor(metallicFactor);
+            material.FindChannel("Roughness").SetFactor(roughnessFactor);
+
             return material;
         }
 

@@ -150,6 +150,11 @@ namespace SharpGLTF.Schema2
 
         public void SetFactor(Vector4 value) { _FactorSetter?.Invoke(value); }
 
+        public void SetFactor(float value)
+        {
+            SetFactor(new Vector4(1, 1, 1, value));
+        }
+
         public void SetTexture(
             int texSet,
             Image texImg,

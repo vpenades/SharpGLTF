@@ -9,6 +9,45 @@ namespace SharpGLTF.Schema2
 
     public static partial class Toolkit
     {
+        public static Mesh CreateMesh<TVertex>(this ModelRoot root, string name, Geometry.InterleavedMeshBuilder<TVertex, Material> meshBuilder)
+            where TVertex : struct
+        {
+            return root.CreateMesh<TVertex, Material>(name, meshBuilder, k => k);
+        }
+
+        public static Mesh CreateMesh<TVertex, TMaterial>(this ModelRoot root, string name, Geometry.InterleavedMeshBuilder<TVertex, TMaterial> meshBuilder, Func<TMaterial,Material> materialEvaluator)
+            where TVertex : struct
+        {
+            var dstMesh = root.CreateMesh(name);
+
+            // create vertex accessors
+            var vertexAccessors = root.CreateInterleavedVertexAccessors(meshBuilder.Vertices);
+
+            foreach (var mkey in meshBuilder.Materials)
+            {
+                var indices = meshBuilder.GetIndices(mkey);
+
+                // create index buffer
+                var ibytes = new Byte[4 * indices.Count];
+                var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
+
+                var indicesAccessor = root
+                    .CreateAccessor("Indices");
+
+                indicesAccessor.SetIndexData(ibuffer, 0, indices);
+
+                // create mesh primitive
+                var prim = dstMesh.CreatePrimitive();
+                foreach (var va in vertexAccessors) prim.SetVertexAccessor(va.Key, va.Value);
+                prim.SetIndexAccessor(indicesAccessor);
+                prim.DrawPrimitiveType = PrimitiveType.TRIANGLES;
+
+                prim.Material = materialEvaluator(mkey);
+            }
+
+            return dstMesh;
+        }
+
         public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
         {
             var accessors = primitive.LogicalParent.LogicalParent.CreateInterleavedVertexAccessors(vertices);
