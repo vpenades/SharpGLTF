@@ -33,5 +33,11 @@ namespace SharpGLTF.Schema2
 
             return node;
         }
+
+        public static Node WithMesh(this Node node, Mesh mesh)
+        {
+            node.Mesh = mesh;
+            return node;
+        }
     }
 }

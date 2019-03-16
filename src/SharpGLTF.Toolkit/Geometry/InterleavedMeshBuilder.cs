@@ -79,30 +79,8 @@ namespace SharpGLTF.Geometry
         {
             var root = dstMesh.LogicalParent;
 
-            // get vertex attributes from TVertex type using reflection
-            var attributes = VertexUtils.GetVertexAttributes(typeof(TVertex), _Vertices.Count);
-
-            // create vertex buffer
-            int byteStride = attributes[0].ByteStride;
-            var vbytes = new Byte[byteStride * _Vertices.Count];
-
-            var vbuffer = root.UseBufferView(new ArraySegment<byte>(vbytes), byteStride, BufferMode.ARRAY_BUFFER);
-
             // create vertex accessors
-            var vertexAccessors = new Dictionary<String, Accessor>();
-
-            foreach (var attribute in attributes)
-            {
-                var accessor = root.CreateAccessor(attribute.Name);
-
-                var field = VertexUtils.GetVertexField(typeof(TVertex), attribute.Name);
-
-                if (field.FieldType == typeof(Vector2)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector2Column(_Vertices), attribute.Encoding, attribute.Normalized);
-                if (field.FieldType == typeof(Vector3)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector3Column(_Vertices), attribute.Encoding, attribute.Normalized);
-                if (field.FieldType == typeof(Vector4)) accessor.SetVertexData(vbuffer, attribute.ByteOffset, field.GetVector4Column(_Vertices), attribute.Encoding, attribute.Normalized);
-
-                vertexAccessors[attribute.Name] = accessor;
-            }
+            var vertexAccessors = root.CreateInterleavedVertexAccessors(_Vertices);
 
             foreach (var kvp in _Indices)
             {

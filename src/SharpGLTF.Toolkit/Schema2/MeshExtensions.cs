@@ -9,6 +9,15 @@ namespace SharpGLTF.Schema2
 
     public static partial class Toolkit
     {
+        public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
+        {
+            var accessors = primitive.LogicalParent.LogicalParent.CreateInterleavedVertexAccessors(vertices);
+
+            foreach (var va in accessors) primitive.SetVertexAccessor(va.Key, va.Value);
+
+            return primitive;
+        }
+
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector2> values)
         {
             var root = primitive.LogicalParent.LogicalParent;

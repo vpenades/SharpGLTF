@@ -210,7 +210,35 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
 
-        
+        [Test(Description = "Creates an interleaved scene using a toolkit utilities")]
+        public void CreateInterleavedQuadScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var vertices = new[]
+            {
+                new STATICVERTEX(-10,  10, 0, -10,  10, 15),
+                new STATICVERTEX( 10,  10, 0,  10,  10, 15),
+                new STATICVERTEX( 10, -10, 0,  10, -10, 15),
+                new STATICVERTEX(-10, -10, 0, -10, -10, 15)
+            };
+
+            var model = ModelRoot.CreateModel();
+
+            var mesh = model.CreateMesh("mesh1");
+
+            mesh.CreatePrimitive()
+                .WithMaterial(model.CreateMaterial("Default").WithDefault(Vector4.One))
+                .WithVertexAccessors(vertices)
+                .WithIndicesAccessor(PrimitiveType.TRIANGLES, new int[] { 0, 1, 2, 0, 2, 3 });
+
+            var scene = model.UseScene("Default");
+            var rnode = scene.CreateNode("RootNode").WithMesh(mesh);
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
 
         [Test(Description = "Creates an interleaved scene using a mesh builder helper class")]
         public void CreateInterleavedMeshBuilderScene()
@@ -262,8 +290,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             var model = ModelRoot.CreateModel();
             var scene = model.UseScene("Default");
-            var rnode = scene.CreateNode("RootNode").WithTranslationAnimation("track1", keyframes);
-            rnode.LocalTransform = new Transforms.AffineTransform(null, null, null, Vector3.Zero);
+            var rnode = scene.CreateNode("RootNode").WithTranslationAnimation("track1", keyframes);            
 
             // create mesh
             var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
