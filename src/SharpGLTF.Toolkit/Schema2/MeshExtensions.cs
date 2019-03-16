@@ -45,6 +45,24 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
+        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector4> values)
+        {
+            var root = primitive.LogicalParent.LogicalParent;
+
+            // create a vertex buffer and fill it
+            var view = root.UseBufferView(new Byte[16 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var array = new Vector4Array(view.Content);
+            array.FillFrom(0, values);
+
+            var accessor = root.CreateAccessor();
+
+            accessor.SetVertexData(view, 0, values.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
+
+            primitive.SetVertexAccessor(attribute, accessor);
+
+            return primitive;
+        }
+
         public static MeshPrimitive WithIndicesAutomatic(this MeshPrimitive primitive, PrimitiveType primitiveType)
         {
             var root = primitive.LogicalParent.LogicalParent;
@@ -71,6 +89,12 @@ namespace SharpGLTF.Schema2
             primitive.DrawPrimitiveType = primitiveType;
             primitive.SetIndexAccessor(accessor);
 
+            return primitive;
+        }
+
+        public static MeshPrimitive WithMaterial(this MeshPrimitive primitive, Material material)
+        {
+            primitive.Material = material;
             return primitive;
         }
     }

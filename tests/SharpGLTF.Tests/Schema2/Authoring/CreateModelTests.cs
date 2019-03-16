@@ -102,11 +102,16 @@ namespace SharpGLTF.Schema2.Authoring
             // create scene
             var scene = model.DefaultScene = model.UseScene("Default");
             // create node
-            var rnode = scene.CreateNode("Triangle Node");
+            var rnode = scene.CreateNode("Triangle Node");            
+            // create material
+            var material = model.CreateMaterial("Default").WithDefault(new Vector4(0, 1, 0, 1));
+            material.DoubleSided = true;
+
             // create mesh
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
 
-            var positionsArray = new[]
+            // create the vertex positions
+            var positions = new[]
             {
                 new Vector3(0, 10, 0),
                 new Vector3(-10, -10, 0),
@@ -114,15 +119,13 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create an index buffer and fill it            
-            var indicesArray = new[] { 0, 1, 2 };
-
+            var indices = new[] { 0, 1, 2 };
+            
             // create mesh primitive
             var primitive = rmesh.CreatePrimitive()
-                .WithVertexAccessor("POSITION", positionsArray)
-                .WithIndicesAccessor(PrimitiveType.TRIANGLES, indicesArray);
-
-            primitive.Material = model.CreateMaterial("Default").WithDefault(new Vector4(0, 1, 0, 1));
-            primitive.Material.DoubleSided = true;
+                .WithVertexAccessor("POSITION", positions)
+                .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
+                .WithMaterial(material);
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -142,6 +145,12 @@ namespace SharpGLTF.Schema2.Authoring
             var scene = model.UseScene("Default");
             var rnode = scene.CreateNode("Triangle Node");
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
+
+            var material = model.CreateMaterial("Default")
+                .WithPBRMetallicRoughness();
+
+            material.DoubleSided = true;
+            material.FindChannel("BaseColor").SetTexture(0, model.UseImageWithFile(imagePath));
 
             // define the triangle positions
             var positions = new[]
@@ -163,20 +172,9 @@ namespace SharpGLTF.Schema2.Authoring
             var primitive = rmesh.CreatePrimitive()
                 .WithVertexAccessor("POSITION", positions)
                 .WithVertexAccessor("TEXCOORD_0", texCoords)
-                .WithIndicesAutomatic(PrimitiveType.TRIANGLES);
+                .WithIndicesAutomatic(PrimitiveType.TRIANGLES)
+                .WithMaterial(material);
 
-            // create and assign a material
-            primitive.Material = model
-                .CreateMaterial("Default")
-                .WithPBRMetallicRoughness();
-
-            primitive.Material.DoubleSided = true;
-
-            // PBRMetallicRoughness has a "BaseColor" and a "Metallic" and a "Roughness" channels.
-            primitive.Material
-                .FindChannel("BaseColor")
-                .SetTexture(0, model.UseImageWithFile(imagePath) );
-            
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");            
         }
@@ -207,8 +205,8 @@ namespace SharpGLTF.Schema2.Authoring
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
 
-            model.DeepClone().AttachToCurrentTest("result.gltf");
-            model.DeepClone().AttachToCurrentTest("result.glb");            
+            model.AttachToCurrentTest("result.gltf");
+            model.AttachToCurrentTest("result.glb");            
         }
 
 
@@ -251,8 +249,23 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateAnimatedMeshBuilderScene()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();           
 
+            // create animation sequence with 4 frames
+            var keyframes = new Dictionary<Single, Vector3>()
+            {
+                [1] = new Vector3(0, 0, 0),
+                [2] = new Vector3(50, 0, 0),
+                [3] = new Vector3(0, 50, 0),
+                [4] = new Vector3(0, 0, 0),
+            };
+
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");
+            var rnode = scene.CreateNode("RootNode").WithTranslationAnimation("track1", keyframes);
+            rnode.LocalTransform = new Transforms.AffineTransform(null, null, null, Vector3.Zero);
+
+            // create mesh
             var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
@@ -260,11 +273,6 @@ namespace SharpGLTF.Schema2.Authoring
             var v3 = new STATICVERTEX(10, -10, 0, 10, -10, 15);
             var v4 = new STATICVERTEX(-10, -10, 0, -10, -10, 15);
             meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
-
-            var model = ModelRoot.CreateModel();
-            var scene = model.UseScene("Default");
-            var rnode = scene.CreateNode("RootNode");
-            rnode.LocalTransform = new Transforms.AffineTransform(null, null, null, Vector3.Zero);
 
             // setup a lambda function that creates a material for a given color
             Material createMaterialForColor(Vector4 color)
@@ -276,19 +284,6 @@ namespace SharpGLTF.Schema2.Authoring
 
             // fill our node with the mesh
             meshBuilder.CopyToNode(rnode, createMaterialForColor);
-
-            // create animation sequence with 4 frames
-            var keyframes = new Dictionary<Single, Vector3>()
-            {
-                [1] = new Vector3(0, 0, 0),
-                [2] = new Vector3(50, 0, 0),
-                [3] = new Vector3(0, 50, 0),
-                [4] = new Vector3(0, 0, 0),
-            };
-
-            var animation = model.CreateAnimation("Animation");
-            animation.CreateTranslationChannel(rnode, keyframes);
-            
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");

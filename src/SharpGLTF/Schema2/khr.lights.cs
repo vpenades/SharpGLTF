@@ -199,8 +199,8 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates a new <see cref="PunctualLight"/> instance.
-        /// and adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
+        /// Creates a new <see cref="PunctualLight"/> instance and
+        /// adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
         /// </summary>
         /// <param name="lightType">A value of <see cref="PunctualLightType"/> describing the type of light to create.</param>
         /// <returns>A <see cref="PunctualLight"/> instance.</returns>

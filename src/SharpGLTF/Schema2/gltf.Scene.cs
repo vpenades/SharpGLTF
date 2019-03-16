@@ -390,8 +390,8 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates or reuses a <see cref="Scene"/> instance
-        /// at <see cref="ModelRoot.LogicalScenes"/>.
+        /// Creates or reuses a <see cref="Scene"/> instance that has the
+        /// same <paramref name="name"/> at <see cref="ModelRoot.LogicalScenes"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Scene"/> instance.</returns>
