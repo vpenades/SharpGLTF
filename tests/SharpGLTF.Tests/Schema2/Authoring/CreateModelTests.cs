@@ -12,7 +12,7 @@ namespace SharpGLTF.Schema2.Authoring
 
     using STATICVERTEX = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
-    using SKIN4 = Geometry.VertexTypes.SkinJoints4;
+    using SKIN4 = Geometry.VertexTypes.VertexJoints4;
 
     [TestFixture]
     public class CreateModelTests
@@ -227,7 +227,7 @@ namespace SharpGLTF.Schema2.Authoring
             var mesh = model.CreateMesh("mesh1");
 
             mesh.CreatePrimitive()
-                .WithMaterial(model.CreateMaterial("Default").WithDefault(Vector4.One))
+                .WithMaterial(model.CreateMaterial("Default").WithDefault(Vector4.One).WithDoubleSide(true))
                 .WithVertexAccessors(vertices)
                 .WithIndicesAccessor(PrimitiveType.TRIANGLES, new int[] { 0, 1, 2, 0, 2, 3 });
 
@@ -244,25 +244,64 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new StaticMeshBuilder<STATICVERTEX, Vector4>("mesh1");
+            var meshBuilder = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
             var v2 = new STATICVERTEX( 10, 10, 0, 10, 10, 15);
             var v3 = new STATICVERTEX( 10,-10, 0, 10, -10, 15);
             var v4 = new STATICVERTEX(-10,-10, 0, -10, -10, 15);            
-            meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
+            meshBuilder.AddPolygon(Vector4.One, v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
 
             // setup a lambda function that creates a material for a given color
-            Material createMaterialForColor(Vector4 color)
-            {
-                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
-            };
+            Material createMaterialForColor(Vector4 color) => model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
 
-            model
-                .UseScene("Default")
-                .CreateNode("RootNode").WithMesh( model.CreateMesh(createMaterialForColor, meshBuilder));
+            model.UseScene("Default")
+                .CreateNode("RootNode")
+                .WithMesh( model.CreateMesh(createMaterialForColor, meshBuilder));
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
+
+        [Test(Description = "Creates a scene with 4 meshes, where the meshes have been initialized so they can share the same vertex and index buffers")]
+        public void CreateSharedBuffersScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            // create several meshes
+            var meshBuilder1 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            var meshBuilder2 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh2");
+            var meshBuilder3 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh3");
+            var meshBuilder4 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh4");
+
+            meshBuilder1.AddCube(new Vector4(1, 1, 0, 1), Matrix4x4.Identity);
+            meshBuilder2.AddCube(new Vector4(1, 0, 1, 1), Matrix4x4.Identity);
+            meshBuilder3.AddSphere(new Vector4(0, 1, 1, 1), 0.5f, Matrix4x4.Identity);
+            meshBuilder4.AddSphere(new Vector4(1, 1, 0, 1), 0.5f, Matrix4x4.Identity);
+
+            // create the gltf model
+            var model = ModelRoot.CreateModel();
+
+            // setup a lambda function that creates a material for a given color
+            Material createMaterialForColor(Vector4 color) => model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
+
+            var meshes = model.CreateMeshes(createMaterialForColor, meshBuilder1, meshBuilder2, meshBuilder3, meshBuilder4);
+
+            model.UseScene("Default").CreateNode("Cube1").WithMesh(meshes[0]).WithLocalTranslation(new Vector3(-5, 0, 0));
+            model.UseScene("Default").CreateNode("Cube2").WithMesh(meshes[1]).WithLocalTranslation(new Vector3(0, 5, 0));
+            model.UseScene("Default").CreateNode("Sphere1").WithMesh(meshes[2]).WithLocalTranslation(new Vector3(+5, 0, 0));
+            model.UseScene("Default").CreateNode("Sphere2").WithMesh(meshes[3]).WithLocalTranslation(new Vector3(0, -5, 0));
+
+            model.MergeBuffers();
+
+            Assert.AreEqual(1, model.LogicalBuffers.Count);
+            Assert.AreEqual(2, model.LogicalBufferViews.Count);
+            Assert.AreEqual(BufferMode.ARRAY_BUFFER, model.LogicalBufferViews[0].DeviceBufferTarget);
+            Assert.AreEqual(BufferMode.ELEMENT_ARRAY_BUFFER, model.LogicalBufferViews[1].DeviceBufferTarget);
+            Assert.AreEqual(3, model.LogicalMaterials.Count);
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -284,45 +323,27 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh
-            var meshBuilder = new StaticMeshBuilder<STATICVERTEX, Vector4>("mesh1");
-
-            var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
-            var v2 = new STATICVERTEX(10, 10, 0, 10, 10, 15);
-            var v3 = new STATICVERTEX(10, -10, 0, 10, -10, 15);
-            var v4 = new STATICVERTEX(-10, -10, 0, -10, -10, 15);
-            meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), v1, v2, v3, v4);
+            var meshBuilder = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            meshBuilder.AddCube(Vector4.One, Matrix4x4.Identity);            
 
             // create the gltf model
             var model = ModelRoot.CreateModel();
 
-            // setup a lambda function that creates a material for a given color
-            Material createMaterialForColor(Vector4 color)
-            {
-                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
-            };            
-
             model.UseScene("Default")
                 .CreateNode("RootNode")
                 .WithTranslationAnimation("track1", keyframes)
-                .WithMesh(model.CreateMesh(createMaterialForColor, meshBuilder));
+                .WithMesh(model.CreateMesh(c => model.CreateMaterial().WithDefault(c), meshBuilder));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
-        }
-
-        
+        }        
 
         [Test(Description = "Creates a skinned animated scene using a mesh builder helper class")]
         public void CreateSkinnedAnimatedMeshBuilderScene()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
-
-            // create base model
-            var model = ModelRoot.CreateModel();
-            var scene = model.UseScene("Default");
-            var snode = scene.CreateNode("RootNode");
-
+            
             // create animation sequence with 4 frames
             var keyframes = new Dictionary<Single, Quaternion>
             {
@@ -331,20 +352,9 @@ namespace SharpGLTF.Schema2.Authoring
                 [3] = Quaternion.CreateFromYawPitchRoll(0, 0, 1),
                 [4] = Quaternion.Identity,
             };
-
-            // create the three joints that will affect the mesh
-            var skelet = scene.CreateNode("Skeleton");
-            var joint1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
-            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
-            var joint3 = joint2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
-
-            // setup skin
-            snode.Skin = model.CreateSkin();
-            snode.Skin.Skeleton = skelet;
-            snode.Skin.BindJoints(joint1, joint2, joint3);
-
+            
             // create the mesh
-            var meshBuilder = new SkinnedMeshBuilder<VPOS, SKIN4, Vector4>("mesh1");
+            var meshBuilder = new SkinnedMeshBuilder<Vector4, VPOS, SKIN4>("mesh1");
 
             var v1 = (new VPOS(-10, 0, +10), new SKIN4(0));
             var v2 = (new VPOS(+10, 0, +10), new SKIN4(0));
@@ -371,11 +381,24 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v7, v8, v12, v11);
             meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v8, v5, v9, v12);
 
+            // create base model
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");            
+
+            // create the three joints that will affect the mesh
+            var skelet = scene.CreateNode("Skeleton");
+            var joint1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
+            var joint3 = joint2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
+
+            // setup skin
+            var snode = scene.CreateNode("Skeleton Node");
+            snode.Skin = model.CreateSkin();
+            snode.Skin.Skeleton = skelet;
+            snode.Skin.BindJoints(joint1, joint2, joint3);
+
             // setup a lambda function that creates a material for a given color
-            Material createMaterialForColor(Vector4 color)
-            {
-                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
-            };
+            Material createMaterialForColor(Vector4 color) => model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
 
             snode.WithMesh(model.CreateMesh(createMaterialForColor, meshBuilder));
 

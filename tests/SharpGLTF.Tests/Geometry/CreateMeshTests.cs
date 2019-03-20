@@ -34,18 +34,18 @@ namespace SharpGLTF.Geometry
             var indices = new UInt32[] { 0, 1, 2 };
 
             // create a new mesh:
-            var srcMesh = new Mesh();
+            var srcMesh = new Mesh<int?>();
 
             // setup a mesh primitive
             var srcPrimitive = srcMesh.CreatePrimitive();
-            srcPrimitive.AllocateVertices(positions.Length, "POSITION", "NORMAL");          // (#1)
+            srcPrimitive.AllocateVertices(positions.Length, "POSITION", "NORMAL");  // (#1)
             srcPrimitive.AllocateIndices(indices.Length, PrimitiveType.TRIANGLES);  // (#2)
 
             // assign vertices and indices
             srcPrimitive.Vertices[0].SetValues(0, positions);
             srcPrimitive.Vertices[1].SetValues(0, normals);
             srcPrimitive.Indices.SetValues(0, indices);
-            srcPrimitive.MaterialLogicalIndex = 0; // using material with index 0, which will be created later
+            srcPrimitive.Material = 0; // using material with index 0, which will be created later
 
             // check the values we've set match the input data
             CollectionAssert.AreEqual(positions, srcPrimitive.Vertices[0].AsVector3Array());

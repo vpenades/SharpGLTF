@@ -10,165 +10,76 @@ namespace SharpGLTF.Schema2
 
     public static partial class Toolkit
     {
-        public static Mesh CreateMesh<TVertex>(this ModelRoot root, Geometry.StaticMeshBuilder<TVertex, Material> meshBuilder)
-            where TVertex : struct
+        #region meshes
+
+        public static Mesh CreateMesh<TVertex, TSkin>(this ModelRoot root, Geometry.SkinnedMeshBuilder<Material, TVertex, TSkin> meshBuilder)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
         {
-            return root.CreateMesh<TVertex, Material>(k => k, meshBuilder);
+            return root.CreateMeshes(m => m, meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TVertex, TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.StaticMeshBuilder<TVertex, TMaterial> meshBuilder)
-            where TVertex : struct
+        public static Mesh CreateMesh<TMaterial, TVertex, TSkin>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin> meshBuilder)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
         {
-            return root.CreateMeshes(materialEvaluator, meshBuilder)[0];
+            return root.CreateMeshes(materialEvaluator, meshBuilder).First();
         }
 
-        public static Mesh[] CreateMeshes<TVertex, TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.StaticMeshBuilder<TVertex, TMaterial>[] meshBuilders)
-            where TVertex : struct
+        public static Mesh[] CreateMeshes<TMaterial, TVertex, TSkin>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin>[] meshBuilders)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
         {
-            var vertexBlocks = Geometry.VertexTypes.VertexUtils.CreateVertexMemoryAccessors
-                (
-                meshBuilders
+            // create a new schema material for every unique material in the mesh builders.
+            var mapMaterials = meshBuilders
                 .SelectMany(item => item.Primitives)
-                .Select(item => item.Vertices)
-                ).ToList();
+                .Select(item => item.Material)
+                .Distinct()
+                .ToDictionary(k => k, k => materialEvaluator(k));
+
+            // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
+            var srcMeshes = Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin>
+                .MergeBuffers(meshBuilders)
+                .ToList();
 
             var dstMeshes = meshBuilders
                 .Select(item => root.CreateMesh(item.Name))
                 .ToArray();
 
-            var pidx = 0;
-
             for (int i = 0; i < dstMeshes.Length; ++i)
             {
-                var srcMesh = meshBuilders[i];
                 var dstMesh = dstMeshes[i];
+                var srcMesh = srcMeshes[i];
 
-                foreach (var p in srcMesh.Primitives)
+                foreach (var srcPrim in srcMesh)
                 {
-                    var vblock = vertexBlocks[pidx];
-
-                    var prim = dstMesh.CreatePrimitive();
-
-                    foreach (var a in vblock)
-                    {
-                        var accessor = root.CreateAccessor(a.Attribute.Name);
-                        accessor.SetVertexData(a);
-                        prim.SetVertexAccessor(a.Attribute.Name, accessor);
-                    }
-
-                    ++pidx;
+                    dstMesh.CreatePrimitive()
+                        .WithMaterial( mapMaterials[srcPrim.Item1] )
+                        .WithVertexAccessors(srcPrim.Item2)
+                        .WithIndicesAccessor(PrimitiveType.TRIANGLES, srcPrim.Item3);
                 }
             }
 
             return dstMeshes;
         }
 
-        public static Mesh CreateMesh<TVertex, TSkin, TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.SkinnedMeshBuilder<TVertex, TSkin, TMaterial> meshBuilder)
-            where TVertex : struct
-            where TSkin : struct
-        {
-            return root.CreateMeshes(materialEvaluator, meshBuilder)[0];
-        }
-
-        public static Mesh[] CreateMeshes<TVertex, TSkin, TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.SkinnedMeshBuilder<TVertex, TSkin, TMaterial>[] meshBuilders)
-            where TVertex : struct
-            where TSkin : struct
-        {
-            var dstMeshes = meshBuilders
-                .Select(item => root.CreateMesh(item.Name))
-                .ToArray();
-
-            return dstMeshes;
-        }
-
-        /*
-
-        public static Mesh CreateMesh<TVertex, TMaterial>(this ModelRoot root, Geometry.StaticMeshBuilder<TVertex, TMaterial> meshBuilder, Func<TMaterial, Material> materialEvaluator)
-            where TVertex : struct
-        {
-            var dstMesh = root.CreateMesh(meshBuilder.Name);
-
-            // create vertex accessors
-            var vertexAccessors = root.CreateStaticVertexAccessors(meshBuilder.Vertices);
-
-            foreach (var mkey in meshBuilder.Materials)
-            {
-                var indices = meshBuilder.GetIndices(mkey);
-
-                // create index buffer
-                var ibytes = new Byte[4 * indices.Count];
-                var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
-
-                var indicesAccessor = root
-                    .CreateAccessor("Indices");
-
-                indicesAccessor.SetIndexData(ibuffer, 0, indices);
-
-                // create mesh primitive
-                var prim = dstMesh.CreatePrimitive();
-                foreach (var va in vertexAccessors) prim.SetVertexAccessor(va.Key, va.Value);
-                prim.SetIndexAccessor(indicesAccessor);
-                prim.DrawPrimitiveType = PrimitiveType.TRIANGLES;
-
-                prim.Material = materialEvaluator(mkey);
-            }
-
-            return dstMesh;
-        }
-
-        public static Mesh CreateMesh<TVertex, TSkin, TMaterial>(this ModelRoot root, Geometry.SkinnedMeshBuilder<TVertex, TSkin, TMaterial> meshBuilder, Func<TMaterial, Material> materialEvaluator)
-            where TVertex : struct
-            where TSkin : struct
-        {
-            var dstMesh = root.CreateMesh(meshBuilder.Name);
-
-            // create vertex accessors
-            var vertexAccessors = root.CreateSkinedVertexAccessors(meshBuilder.Vertices);
-
-            foreach (var mkey in meshBuilder.Materials)
-            {
-                var indices = meshBuilder.GetIndices(mkey);
-
-                // create index buffer
-                var ibytes = new Byte[4 * indices.Count];
-                var ibuffer = root.UseBufferView(new ArraySegment<byte>(ibytes), 0, BufferMode.ELEMENT_ARRAY_BUFFER);
-
-                var indicesAccessor = root
-                    .CreateAccessor("Indices");
-
-                indicesAccessor.SetIndexData(ibuffer, 0, indices);
-
-                // create mesh primitive
-                var prim = dstMesh.CreatePrimitive();
-                foreach (var va in vertexAccessors) prim.SetVertexAccessor(va.Key, va.Value);
-                prim.SetIndexAccessor(indicesAccessor);
-                prim.DrawPrimitiveType = PrimitiveType.TRIANGLES;
-
-                prim.Material = materialEvaluator(mkey);
-            }
-
-            return dstMesh;
-        }
-        */
+        #endregion
 
         #region accessors
 
-        public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<Geometry.MemoryAccessor> memAccessors)
-        where TVertex : struct
+        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Single> values)
         {
-            var accessors = primitive.LogicalParent.LogicalParent.CreateStaticVertexAccessors(memAccessors);
+            var root = primitive.LogicalParent.LogicalParent;
 
-            foreach (var va in accessors) primitive.SetVertexAccessor(va.Key, va.Value);
+            // create a vertex buffer and fill it
+            var view = root.UseBufferView(new Byte[4 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var array = new ScalarArray(view.Content);
+            array.FillFrom(0, values);
 
-            return primitive;
-        }
+            var accessor = root.CreateAccessor();
+            primitive.SetVertexAccessor(attribute, accessor);
 
-        public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
-            where TVertex : struct
-        {
-            var accessors = primitive.LogicalParent.LogicalParent.CreateStaticVertexAccessors(vertices);
-
-            foreach (var va in accessors) primitive.SetVertexAccessor(va.Key, va.Value);
+            accessor.SetVertexData(view, 0, values.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
             return primitive;
         }
@@ -248,6 +159,53 @@ namespace SharpGLTF.Schema2
             var accessor = root.CreateAccessor();
 
             accessor.SetIndexData(view, 0, values.Count, IndexEncodingType.UNSIGNED_INT);
+
+            primitive.DrawPrimitiveType = primitiveType;
+            primitive.SetIndexAccessor(accessor);
+
+            return primitive;
+        }
+
+        public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+        {
+            var xvertices = vertices.Select(item => (item, default(Geometry.VertexTypes.VertexJoints0))).ToList();
+
+            return primitive.WithVertexAccessors(xvertices);
+        }
+
+        public static MeshPrimitive WithVertexAccessors<TVertex, TSkin>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TSkin)> vertices)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            var memAccessors = Geometry.VertexTypes.VertexUtils.CreateVertexMemoryAccessors(new[] { vertices }).First();
+
+            return primitive.WithVertexAccessors(memAccessors);
+        }
+
+        public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<Geometry.MemoryAccessor> memAccessors)
+        {
+            foreach (var va in memAccessors) primitive.WithVertexAccessor(va);
+
+            return primitive;
+        }
+
+        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, Geometry.MemoryAccessor memAccessor)
+        {
+            var root = primitive.LogicalParent.LogicalParent;
+
+            primitive.SetVertexAccessor(memAccessor.Attribute.Name, root.CreateVertexAccessor(memAccessor));
+
+            return primitive;
+        }
+
+        public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, Geometry.MemoryAccessor memAccessor)
+        {
+            var root = primitive.LogicalParent.LogicalParent;
+
+            var accessor = root.CreateAccessor();
+
+            accessor.SetIndexData(memAccessor);
 
             primitive.DrawPrimitiveType = primitiveType;
             primitive.SetIndexAccessor(accessor);

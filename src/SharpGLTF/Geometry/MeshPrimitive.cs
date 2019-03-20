@@ -28,7 +28,7 @@ namespace SharpGLTF.Geometry
             : base(accessor)
         {
             _MemoryAccessor = accessor._GetMemoryAccessor();
-            _MemoryAccessor.Attribute.Name = attributeName;
+            _MemoryAccessor.SetName(attributeName);
             _Sparse = accessor._GetSparseMemoryAccessor();
         }
 
@@ -65,8 +65,8 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private Geometry.MemoryAccessor _MemoryAccessor;
-        private KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>? _Sparse;
+        private MemoryAccessor _MemoryAccessor;
+        private KeyValuePair<Memory.IntegerArray, MemoryAccessor>? _Sparse;
 
         #endregion
 
@@ -139,7 +139,7 @@ namespace SharpGLTF.Geometry
             : base(accessor)
         {
             _MemoryAccessor = accessor._GetMemoryAccessor();
-            _MemoryAccessor.Attribute.Name = "INDEX";
+            _MemoryAccessor.SetName("INDEX");
         }
 
         public IndicesAccessor(MemoryAccessInfo info)
@@ -191,13 +191,13 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
-    public class MeshPrimitive
+    public class MeshPrimitive<TMaterial>
     {
         #region lifecycle
 
-        internal MeshPrimitive(Mesh owner) { _Owner = owner; }
+        internal MeshPrimitive(Mesh<TMaterial> owner) { _Owner = owner; }
 
-        internal MeshPrimitive(Mesh owner, Schema2.MeshPrimitive primitive)
+        internal MeshPrimitive(Mesh<TMaterial> owner, Schema2.MeshPrimitive primitive)
             : this(owner)
         {
             _Vertices = primitive.VertexAccessors
@@ -215,14 +215,28 @@ namespace SharpGLTF.Geometry
 
             _Indices = primitive.IndexAccessor == null ? null : new IndicesAccessor(primitive.IndexAccessor);
             _PrimitiveDrawType = primitive.DrawPrimitiveType;
-            _MaterialIndex = primitive.Material?.LogicalIndex;
+
+            if (primitive.Material != null)
+            {
+                if (typeof(TMaterial) == typeof(Schema2.Material))
+                {
+                    _Material = (TMaterial)(Object)primitive.Material;
+                }
+
+                if (typeof(TMaterial) == typeof(int?))
+                {
+                    var materialIndex = primitive.Material?.LogicalIndex;
+
+                    _Material = (TMaterial)(Object)materialIndex;
+                }
+            }
         }
 
         #endregion
 
         #region data
 
-        private readonly Mesh _Owner;
+        private readonly Mesh<TMaterial> _Owner;
 
         private VertexAccessor[] _Vertices;
         private readonly List<VertexAccessor[]> _MorphAccessors = new List<VertexAccessor[]>();
@@ -231,7 +245,7 @@ namespace SharpGLTF.Geometry
 
         private Schema2.PrimitiveType _PrimitiveDrawType;
 
-        private int? _MaterialIndex;
+        private TMaterial _Material;
 
         #endregion
 
@@ -241,10 +255,10 @@ namespace SharpGLTF.Geometry
 
         public IndicesAccessor Indices => _Indices;
 
-        public int? MaterialLogicalIndex
+        public TMaterial Material
         {
-            get => _MaterialIndex;
-            set => _MaterialIndex = value;
+            get => _Material;
+            set => _Material = value;
         }
 
         #endregion
@@ -275,54 +289,52 @@ namespace SharpGLTF.Geometry
 
             dstPrim.DrawPrimitiveType = this._PrimitiveDrawType;
 
-            var material = _MaterialIndex.HasValue ? dstPrim.LogicalParent.LogicalParent.LogicalMaterials[_MaterialIndex.Value] : null;
+            if (typeof(TMaterial) == typeof(Schema2.Material))
+            {
+                var material = (Schema2.Material)(Object)_Material;
+                dstPrim.Material = material;
+            }
 
-            dstPrim.Material = material;
+            if (typeof(TMaterial) == typeof(int?))
+            {
+                var materialIndex = (int?)(Object)_Material;
+                var material = materialIndex.HasValue ? dstPrim.LogicalParent.LogicalParent.LogicalMaterials[materialIndex.Value] : null;
+                dstPrim.Material = material;
+            }
         }
 
         #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("Mesh {Name}")]
-    public class Mesh : NamedObject
+    public class Mesh<TMaterial> : NamedObject
     {
         #region lifecycle
 
         public Mesh() { }
 
-        public static Mesh[] Create(IReadOnlyList<Schema2.Mesh> src)
-        {
-            var dst = new Mesh[src.Count];
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                dst[i] = new Mesh(src[i]);
-            }
-
-            return dst;
-        }
-
+        /*
         public Mesh(Schema2.Mesh mesh)
             : base(mesh)
         {
             _Primitives.AddRange(mesh.Primitives, item => new MeshPrimitive(this, item));
             _MorpthWeights.AddRange(mesh.MorphWeights);
-        }
+        }*/
 
         #endregion
 
         #region data
 
-        private readonly List<MeshPrimitive> _Primitives = new List<MeshPrimitive>();
+        private readonly List<MeshPrimitive<TMaterial>> _Primitives = new List<MeshPrimitive<TMaterial>>();
         private readonly List<Single> _MorpthWeights = new List<float>();
 
         #endregion
 
         #region API
 
-        public MeshPrimitive CreatePrimitive()
+        public MeshPrimitive<TMaterial> CreatePrimitive()
         {
-            var p = new MeshPrimitive(this);
+            var p = new MeshPrimitive<TMaterial>(this);
             _Primitives.Add(p);
 
             return p;

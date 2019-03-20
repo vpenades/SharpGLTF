@@ -5,7 +5,9 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    public struct VertexPosition
+    public interface IVertex { }
+
+    public struct VertexPosition : IVertex
     {
         public VertexPosition(float px, float py, float pz)
         {
@@ -16,8 +18,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector3 Position;
     }
 
-    public struct VertexPositionNormal
+    public struct VertexPositionNormal : IVertex
     {
+        public VertexPositionNormal(Vector3 p, Vector3 n)
+        {
+            Position = p;
+            Normal = Vector3.Normalize(n);
+        }
+
         public VertexPositionNormal(float px, float py, float pz, float nx, float ny, float nz)
         {
             Position = new Vector3(px, py, pz);
@@ -31,7 +39,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector3 Normal;
     }
 
-    public struct VertexPositionNormalColor1
+    public struct VertexPositionNormalColor1 : IVertex
     {
         public VertexPositionNormalColor1(Vector3 pos, Vector3 nrm, Vector4 color)
         {
@@ -50,9 +58,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Color;
     }
 
-    public struct VertexPositionNormalTex1
+    public struct VertexPositionNormalTexture1 : IVertex
     {
-        public VertexPositionNormalTex1(Vector3 pos, Vector3 nrm, Vector2 tex)
+        public VertexPositionNormalTexture1(Vector3 pos, Vector3 nrm, Vector2 tex)
         {
             Position = pos;
             Normal = Vector3.Normalize(nrm);

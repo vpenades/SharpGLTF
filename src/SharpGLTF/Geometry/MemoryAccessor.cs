@@ -59,6 +59,17 @@ namespace SharpGLTF.Geometry
             this.Normalized = normalized;
         }
 
+        public MemoryAccessInfo Slice(int start, int count)
+        {
+            var stride = Math.Max(this.ByteStride, this.Dimensions.DimCount() * this.Encoding.ByteLength());
+
+            var clone = this;
+            clone.ByteOffset += start * stride;
+            clone.ItemsCount = Math.Min(clone.ItemsCount, count);
+
+            return clone;
+        }
+
         #endregion
 
         #region data
@@ -146,10 +157,7 @@ namespace SharpGLTF.Geometry
 
             for (int i = 0; i < dst.Length; ++i)
             {
-                var a = attributes[i];
-                a.ByteOffset += a.ByteStride * start;
-                a.ItemsCount = Math.Min(a.ItemsCount, count);
-                dst[i] = a;
+                dst[i] = attributes[i].Slice(start, count);
             }
 
             return dst;
@@ -161,136 +169,149 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Wraps a <see cref="ArraySegment{Byte}"/> decoding it and exposing its content as arrays of different types.
     /// </summary>
-    public struct MemoryAccessor
+    public sealed class MemoryAccessor
     {
         #region constructor
 
         public MemoryAccessor(ArraySegment<Byte> data, MemoryAccessInfo info)
         {
-            this.Attribute = info;
-            this.Data = data;
+            this._Attribute = info;
+            this._Data = data;
         }
 
         public MemoryAccessor(MemoryAccessInfo info)
         {
-            this.Attribute = info;
-            this.Data = default;
+            this._Attribute = info;
+            this._Data = default;
         }
 
         #endregion
 
         #region data
 
-        public MemoryAccessInfo Attribute;
-        public ArraySegment<Byte> Data;
+        private MemoryAccessInfo _Attribute;
+        private ArraySegment<Byte> _Data;
+
+        #endregion
+
+        #region properties
+
+        public MemoryAccessInfo Attribute => _Attribute;
+
+        public ArraySegment<Byte> Data => _Data;
 
         #endregion
 
         #region API
 
+        internal void SetName(string name)
+        {
+            _Attribute.Name = name;
+        }
+
         public void SetIndexDataSource(ArraySegment<Byte> data, int byteOffset, int itemsCount)
         {
-            Guard.IsTrue(Attribute.IsValidIndexer, nameof(Attribute));
-            Data = data;
-            Attribute.ByteOffset = byteOffset;
-            Attribute.ItemsCount = itemsCount;
-            Attribute.ByteStride = 0;
+            Guard.IsTrue(_Attribute.IsValidIndexer, nameof(_Attribute));
+            _Data = data;
+            _Attribute.ByteOffset = byteOffset;
+            _Attribute.ItemsCount = itemsCount;
+            _Attribute.ByteStride = 0;
         }
 
         public void SetVertexDataSource(ArraySegment<Byte> data, int byteOffset, int itemsCount, int byteStride)
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Data = data;
-            Attribute.ByteOffset = byteOffset;
-            Attribute.ItemsCount = itemsCount;
-            Attribute.ByteStride = byteStride;
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            _Data = data;
+            _Attribute.ByteOffset = byteOffset;
+            _Attribute.ItemsCount = itemsCount;
+            _Attribute.ByteStride = byteStride;
         }
 
         public IntegerArray AsIntegerArray()
         {
-            Guard.IsTrue(Attribute.IsValidIndexer, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(Attribute));
-            return new IntegerArray(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.Encoding.ToIndex());
+            Guard.IsTrue(_Attribute.IsValidIndexer, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(_Attribute));
+            return new IntegerArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.Encoding.ToIndex());
         }
 
         public ScalarArray AsScalarArray()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(Attribute));
-            return new ScalarArray(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(_Attribute));
+            return new ScalarArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public Vector2Array AsVector2Array()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.VEC2, nameof(Attribute));
-            return new Vector2Array(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC2, nameof(_Attribute));
+            return new Vector2Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public Vector3Array AsVector3Array()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.VEC3, nameof(Attribute));
-            return new Vector3Array(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC3, nameof(_Attribute));
+            return new Vector3Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public Vector4Array AsVector4Array()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.VEC4, nameof(Attribute));
-            return new Vector4Array(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
+            return new Vector4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public QuaternionArray AsQuaternionArray()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.VEC4, nameof(Attribute));
-            return new QuaternionArray(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
+            return new QuaternionArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public Matrix4x4Array AsMatrix4x4Array()
         {
-            Guard.IsTrue(Attribute.IsValidVertexAttribute, nameof(Attribute));
-            Guard.IsTrue(Attribute.Dimensions == DIMENSIONS.MAT4, nameof(Attribute));
-            return new Matrix4x4Array(Data, Attribute.ByteOffset, Attribute.ItemsCount, Attribute.ByteStride, Attribute.Encoding, Attribute.Normalized);
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.MAT4, nameof(_Attribute));
+            return new Matrix4x4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
         public static IEncodedArray<Single> CreateScalarSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
-            Guard.IsTrue(bottom.Attribute.Dimensions == topValues.Attribute.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom.Attribute.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues.Attribute.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom.Attribute.ItemsCount), nameof(topKeys));
+            Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
+            Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
+            Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
+            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
             return new SparseArray<Single>(bottom.AsScalarArray(), topValues.AsScalarArray(), topKeys);
         }
 
         public static IEncodedArray<Vector2> CreateVector2SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
-            Guard.IsTrue(bottom.Attribute.Dimensions == topValues.Attribute.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom.Attribute.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues.Attribute.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom.Attribute.ItemsCount), nameof(topKeys));
+            Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
+            Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
+            Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
+            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
             return new SparseArray<Vector2>(bottom.AsVector2Array(), topValues.AsVector2Array(), topKeys);
         }
 
         public static IEncodedArray<Vector3> CreateVector3SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
-            Guard.IsTrue(bottom.Attribute.Dimensions == topValues.Attribute.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom.Attribute.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues.Attribute.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom.Attribute.ItemsCount), nameof(topKeys));
+            Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
+            Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
+            Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
+            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
             return new SparseArray<Vector3>(bottom.AsVector3Array(), topValues.AsVector3Array(), topKeys);
         }
 
         public static IEncodedArray<Vector4> CreateVector4SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
-            Guard.IsTrue(bottom.Attribute.Dimensions == topValues.Attribute.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom.Attribute.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues.Attribute.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom.Attribute.ItemsCount), nameof(topKeys));
+            Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
+            Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
+            Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
+            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
             return new SparseArray<Vector4>(bottom.AsVector4Array(), topValues.AsVector4Array(), topKeys);
         }

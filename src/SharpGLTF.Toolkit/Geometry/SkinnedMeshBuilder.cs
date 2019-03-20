@@ -7,13 +7,13 @@ namespace SharpGLTF.Geometry
 {
     using Collections;
 
-    public class SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial>
-        where TVertex : struct
-        where TSkin : struct
+    public class SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>
+        where TVertex : struct, VertexTypes.IVertex
+        where TSkin : struct, VertexTypes.IVertexJoints
     {
         #region lifecycle
 
-        internal SkinnedPrimitiveBuilder(SkinnedMeshBuilder<TVertex, TSkin, TMaterial> mesh, TMaterial material)
+        internal SkinnedPrimitiveBuilder(SkinnedMeshBuilder<TMaterial, TVertex, TSkin> mesh, TMaterial material)
         {
             this._Mesh = mesh;
             this._Material = material;
@@ -23,7 +23,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly SkinnedMeshBuilder<TVertex, TSkin, TMaterial> _Mesh;
+        private readonly SkinnedMeshBuilder<TMaterial, TVertex, TSkin> _Mesh;
 
         private readonly TMaterial _Material;
 
@@ -34,7 +34,7 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
-        public SkinnedMeshBuilder<TVertex, TSkin, TMaterial> Mesh => _Mesh;
+        public SkinnedMeshBuilder<TMaterial, TVertex, TSkin> Mesh => _Mesh;
 
         public TMaterial Material => _Material;
 
@@ -76,9 +76,9 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
-    public class SkinnedMeshBuilder<TVertex, TSkin, TMaterial>
-        where TVertex : struct
-        where TSkin : struct
+    public class SkinnedMeshBuilder<TMaterial, TVertex, TSkin>
+        where TVertex : struct, VertexTypes.IVertex
+        where TSkin : struct, VertexTypes.IVertexJoints
     {
         #region lifecycle
 
@@ -91,7 +91,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<TMaterial, SkinnedPrimitiveBuilder<TVertex,TSkin, TMaterial>> _Primitives = new Dictionary<TMaterial, SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial>>();
+        private readonly Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>> _Primitives = new Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>>();
 
         #endregion
 
@@ -99,7 +99,7 @@ namespace SharpGLTF.Geometry
 
         public string Name { get; set; }
 
-        public IReadOnlyCollection<SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial>> Primitives => _Primitives.Values;
+        public IReadOnlyCollection<SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>> Primitives => _Primitives.Values;
 
         #endregion
 
@@ -115,9 +115,9 @@ namespace SharpGLTF.Geometry
 
         public void AddTriangle(TMaterial material, (TVertex, TSkin) a, (TVertex, TSkin) b, (TVertex, TSkin) c)
         {
-            if (!_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial> primitive))
+            if (!_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive))
             {
-                primitive = new SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial>(this, material);
+                primitive = new SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>(this, material);
                 _Primitives[material] = primitive;
             }
 
@@ -126,16 +126,52 @@ namespace SharpGLTF.Geometry
 
         public IEnumerable<(int, int, int)> GetTriangles(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial> primitive)) return primitive.Triangles;
+            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive)) return primitive.Triangles;
 
             return Enumerable.Empty<(int, int, int)>();
         }
 
         public IReadOnlyList<int> GetIndices(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TVertex, TSkin, TMaterial> primitive)) return primitive.Indices;
+            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive)) return primitive.Indices;
 
             return new int[0];
+        }
+
+        internal static IEnumerable<(TMaterial, MemoryAccessor[], MemoryAccessor)[]> MergeBuffers(IEnumerable<SkinnedMeshBuilder<TMaterial, TVertex, TSkin>> meshBuilders)
+        {
+            var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
+                (
+                meshBuilders
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Vertices)
+                ).ToList();
+
+            var indexBlocks = VertexTypes.VertexUtils.CreateIndexMemoryAccessors
+                (
+                meshBuilders
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Indices)
+                ).ToList();
+
+            int bidx = 0;
+
+            foreach (var meshBuilder in meshBuilders)
+            {
+                var dstMesh = new (TMaterial, MemoryAccessor[], MemoryAccessor)[meshBuilder.Primitives.Count];
+
+                int pidx = 0;
+
+                foreach (var primitiveBuilder in meshBuilder.Primitives)
+                {
+                    dstMesh[pidx] = (primitiveBuilder.Material, vertexBlocks[bidx], indexBlocks[bidx]);
+
+                    ++pidx;
+                    ++bidx;
+                }
+
+                yield return dstMesh;
+            }
         }
 
         #endregion

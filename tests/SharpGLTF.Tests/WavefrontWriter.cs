@@ -18,7 +18,7 @@ namespace SharpGLTF
     {
         #region data
 
-        private readonly Geometry.StaticMeshBuilder<VERTEX, MATERIAL> _Mesh = new Geometry.StaticMeshBuilder<VERTEX, MATERIAL>();
+        private readonly Geometry.StaticMeshBuilder<MATERIAL, VERTEX> _Mesh = new Geometry.StaticMeshBuilder<MATERIAL, VERTEX>();
         
         #endregion
 
@@ -43,7 +43,7 @@ namespace SharpGLTF
             {
                 foreach (var v in p.Vertices)
                 {
-                    sb.AppendLine(Invariant($"v {v.Position.X} {v.Position.Y} {v.Position.Z}"));
+                    sb.AppendLine(Invariant($"v {v.Item1.Position.X} {v.Item1.Position.Y} {v.Item1.Position.Z}"));
                 }
             }
 
