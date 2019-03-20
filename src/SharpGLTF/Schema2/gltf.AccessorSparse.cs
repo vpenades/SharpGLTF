@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2
         {
             var view = root.LogicalBufferViews[this._bufferView];
             var info = new Geometry.MemoryAccessInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
-            return new Geometry.MemoryAccessor(info, view.Content);
+            return new Geometry.MemoryAccessor(view.Content, info);
         }
     }
 }

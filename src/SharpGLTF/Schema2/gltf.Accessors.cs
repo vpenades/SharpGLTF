@@ -81,7 +81,7 @@ namespace SharpGLTF.Schema2
         {
             var view = SourceBufferView;
             var info = new Geometry.MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
-            return new Geometry.MemoryAccessor(info, view.Content);
+            return new Geometry.MemoryAccessor(view.Content, info);
         }
 
         internal KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>? _GetSparseMemoryAccessor()

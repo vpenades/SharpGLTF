@@ -8,7 +8,7 @@ using static System.FormattableString;
 
 namespace SharpGLTF
 {
-    using VERTEX = Geometry.VertexTypes.StaticPositionNormal;
+    using VERTEX = Geometry.VertexTypes.VertexPositionNormal;
     using MATERIAL = Vector4;
 
     /// <summary>
@@ -18,7 +18,7 @@ namespace SharpGLTF
     {
         #region data
 
-        private readonly Geometry.InterleavedMeshBuilder<VERTEX, MATERIAL> _Mesh = new Geometry.InterleavedMeshBuilder<VERTEX, MATERIAL>();
+        private readonly Geometry.StaticMeshBuilder<VERTEX, MATERIAL> _Mesh = new Geometry.StaticMeshBuilder<VERTEX, MATERIAL>();
         
         #endregion
 
@@ -26,20 +26,9 @@ namespace SharpGLTF
 
         public void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
         {
-            var aa = new Geometry.VertexTypes.StaticPositionNormal
-            {
-                Position = a
-            };
-
-            var bb = new Geometry.VertexTypes.StaticPositionNormal
-            {
-                Position = b
-            };
-
-            var cc = new Geometry.VertexTypes.StaticPositionNormal
-            {
-                Position = c
-            };
+            var aa = new VERTEX { Position = a };
+            var bb = new VERTEX { Position = b };
+            var cc = new VERTEX { Position = c };
 
             _Mesh.AddTriangle(Vector4.One, aa, bb, cc);
         }
@@ -50,23 +39,28 @@ namespace SharpGLTF
 
             sb.AppendLine();
 
-            foreach (var v in _Mesh.Vertices)
+            foreach (var p in _Mesh.Primitives)
             {
-                sb.AppendLine(Invariant($"v {v.Position.X} {v.Position.Y} {v.Position.Z}"));
+                foreach (var v in p.Vertices)
+                {
+                    sb.AppendLine(Invariant($"v {v.Position.X} {v.Position.Y} {v.Position.Z}"));
+                }
             }
 
             sb.AppendLine();
 
             sb.AppendLine("g default");
 
-            foreach(var m in _Mesh.Materials)
-            {
-                var triangles = _Mesh.GetTriangles(m);
+            var baseVertexIndex = 1;
 
-                foreach (var t in triangles)
+            foreach(var p in _Mesh.Primitives)
+            {
+                foreach (var t in p.Triangles)
                 {
-                    sb.AppendLine(Invariant($"f {t.Item1 + 1} {t.Item2 + 1} {t.Item3 + 1}"));
+                    sb.AppendLine(Invariant($"f {t.Item1 + baseVertexIndex} {t.Item2 + baseVertexIndex} {t.Item3 + baseVertexIndex}"));
                 }
+
+                baseVertexIndex += p.Vertices.Count;
             }
 
             return sb.ToString();

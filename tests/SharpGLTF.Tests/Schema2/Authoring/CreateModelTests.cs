@@ -10,8 +10,9 @@ namespace SharpGLTF.Schema2.Authoring
 {
     using Geometry;
 
-    using STATICVERTEX = Geometry.VertexTypes.StaticPositionNormal;
-    using SKINNEDVERTEX = Geometry.VertexTypes.SkinnedPosition;
+    using STATICVERTEX = Geometry.VertexTypes.VertexPositionNormal;
+    using VPOS = Geometry.VertexTypes.VertexPosition;
+    using SKIN4 = Geometry.VertexTypes.SkinJoints4;
 
     [TestFixture]
     public class CreateModelTests
@@ -243,7 +244,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
+            var meshBuilder = new StaticMeshBuilder<STATICVERTEX, Vector4>("mesh1");
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
             var v2 = new STATICVERTEX( 10, 10, 0, 10, 10, 15);
@@ -261,7 +262,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             model
                 .UseScene("Default")
-                .CreateNode("RootNode").WithMesh( model.CreateMesh("mesh",meshBuilder, createMaterialForColor));
+                .CreateNode("RootNode").WithMesh( model.CreateMesh(createMaterialForColor, meshBuilder));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -283,7 +284,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh
-            var meshBuilder = new InterleavedMeshBuilder<STATICVERTEX, Vector4>();
+            var meshBuilder = new StaticMeshBuilder<STATICVERTEX, Vector4>("mesh1");
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
             var v2 = new STATICVERTEX(10, 10, 0, 10, 10, 15);
@@ -303,7 +304,7 @@ namespace SharpGLTF.Schema2.Authoring
             model.UseScene("Default")
                 .CreateNode("RootNode")
                 .WithTranslationAnimation("track1", keyframes)
-                .WithMesh(model.CreateMesh("mesh", meshBuilder, createMaterialForColor));
+                .WithMesh(model.CreateMesh(createMaterialForColor, meshBuilder));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -343,22 +344,22 @@ namespace SharpGLTF.Schema2.Authoring
             snode.Skin.BindJoints(joint1, joint2, joint3);
 
             // create the mesh
-            var meshBuilder = new InterleavedMeshBuilder<SKINNEDVERTEX, Vector4>();
+            var meshBuilder = new SkinnedMeshBuilder<VPOS, SKIN4, Vector4>("mesh1");
 
-            var v1 = new SKINNEDVERTEX(-10, 0, +10, 0);
-            var v2 = new SKINNEDVERTEX(+10, 0, +10, 0);
-            var v3 = new SKINNEDVERTEX(+10, 0, -10, 0);
-            var v4 = new SKINNEDVERTEX(-10, 0, -10, 0);
+            var v1 = (new VPOS(-10, 0, +10), new SKIN4(0));
+            var v2 = (new VPOS(+10, 0, +10), new SKIN4(0));
+            var v3 = (new VPOS(+10, 0, -10), new SKIN4(0));
+            var v4 = (new VPOS(-10, 0, -10), new SKIN4(0));
 
-            var v5 = new SKINNEDVERTEX(-10, 40, +10, 0, 1);
-            var v6 = new SKINNEDVERTEX(+10, 40, +10, 0, 1);
-            var v7 = new SKINNEDVERTEX(+10, 40, -10, 0, 1);
-            var v8 = new SKINNEDVERTEX(-10, 40, -10, 0, 1);
+            var v5 = (new VPOS(-10, 40, +10), new SKIN4(0, 1));
+            var v6 = (new VPOS(+10, 40, +10), new SKIN4(0, 1));
+            var v7 = (new VPOS(+10, 40, -10), new SKIN4(0, 1));
+            var v8 = (new VPOS(-10, 40, -10), new SKIN4(0, 1));
 
-            var v9  = new SKINNEDVERTEX(-5, 80, +5, 2);
-            var v10 = new SKINNEDVERTEX(+5, 80, +5, 2);
-            var v11 = new SKINNEDVERTEX(+5, 80, -5, 2);
-            var v12 = new SKINNEDVERTEX(-5, 80, -5, 2);
+            var v9  = (new VPOS(-5, 80, +5), new SKIN4(2));
+            var v10 = (new VPOS(+5, 80, +5), new SKIN4(2));
+            var v11 = (new VPOS(+5, 80, -5), new SKIN4(2));
+            var v12 = (new VPOS(-5, 80, -5), new SKIN4(2));
 
             meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v1, v2, v6, v5);
             meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v2, v3, v7, v6);
@@ -376,7 +377,7 @@ namespace SharpGLTF.Schema2.Authoring
                 return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
             };
 
-            snode.WithMesh(model.CreateMesh("mesh", meshBuilder, createMaterialForColor));
+            snode.WithMesh(model.CreateMesh(createMaterialForColor, meshBuilder));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");

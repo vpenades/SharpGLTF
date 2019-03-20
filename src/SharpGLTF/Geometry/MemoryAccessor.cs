@@ -140,6 +140,21 @@ namespace SharpGLTF.Geometry
             return byteStride;
         }
 
+        public static MemoryAccessInfo[] Slice(MemoryAccessInfo[] attributes, int start, int count)
+        {
+            var dst = new MemoryAccessInfo[attributes.Length];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                var a = attributes[i];
+                a.ByteOffset += a.ByteStride * start;
+                a.ItemsCount = Math.Min(a.ItemsCount, count);
+                dst[i] = a;
+            }
+
+            return dst;
+        }
+
         #endregion
     }
 
@@ -150,7 +165,7 @@ namespace SharpGLTF.Geometry
     {
         #region constructor
 
-        public MemoryAccessor(MemoryAccessInfo info, ArraySegment<Byte> data)
+        public MemoryAccessor(ArraySegment<Byte> data, MemoryAccessInfo info)
         {
             this.Attribute = info;
             this.Data = data;
