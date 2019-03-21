@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
                 .ToDictionary(k => k, k => materialEvaluator(k));
 
             // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
-            var srcMeshes = Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints>
+            var srcMeshes = Geometry.PackedMeshBuilder<TMaterial>
                 .PackMeshes(meshBuilders)
                 .ToList();
 
@@ -172,9 +172,9 @@ namespace SharpGLTF.Schema2
             return primitive.WithVertexAccessors(xvertices);
         }
 
-        public static MeshPrimitive WithVertexAccessors<TVertex, TSkin>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TSkin)> vertices)
+        public static MeshPrimitive WithVertexAccessors<TVertex, TJoints>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TJoints)> vertices)
             where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TSkin : struct, Geometry.VertexTypes.IJoints
+            where TJoints : struct, Geometry.VertexTypes.IJoints
         {
             var memAccessors = Geometry.VertexTypes.VertexUtils.CreateVertexMemoryAccessors(new[] { vertices }).First();
 

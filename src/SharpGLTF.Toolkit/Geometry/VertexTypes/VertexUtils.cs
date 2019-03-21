@@ -10,15 +10,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     public static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex, TSkin>(this IEnumerable<IReadOnlyList<(TVertex, TSkin)>> vertexBlocks)
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex, TJoints>(this IEnumerable<IReadOnlyList<(TVertex, TJoints)>> vertexBlocks)
             where TVertex : struct, IVertex
-            where TSkin : struct, IJoints
+            where TJoints : struct, IJoints
         {
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
             // vertex attributes
-            var attributes = GetVertexAttributes(typeof(TVertex), typeof(TSkin), totalCount);
+            var attributes = GetVertexAttributes(typeof(TVertex), typeof(TJoints), totalCount);
 
             // create master vertex buffer
             int byteStride = attributes[0].ByteStride;
@@ -39,7 +39,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                     var finfo = GetVertexField(typeof(TVertex), accessor.Attribute.Name);
                     if (finfo == null)
                     {
-                        finfo = GetVertexField(typeof(TSkin), accessor.Attribute.Name);
+                        finfo = GetVertexField(typeof(TJoints), accessor.Attribute.Name);
                         isSkin = true;
                     }
 
@@ -94,7 +94,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return null;
         }
 
-        private static MemoryAccessInfo[] GetVertexAttributes(Type vertexType, Type skinType, int itemsCount)
+        private static MemoryAccessInfo[] GetVertexAttributes(Type vertexType, Type jointsType, int itemsCount)
         {
             var attributes = new List<MemoryAccessInfo>();
 
@@ -104,7 +104,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (attribute.HasValue) attributes.Add(attribute.Value);
             }
 
-            foreach (var finfo in skinType.GetFields())
+            foreach (var finfo in jointsType.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
@@ -139,7 +139,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        internal static Single[] GetScalarColumn<TVertex, TSkin>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TSkin)> vertices, bool vertexOrSkin)
+        internal static Single[] GetScalarColumn<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
         {
             var dst = new Single[vertices.Count];
 
@@ -153,7 +153,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        internal static Vector2[] GetVector2Column<TVertex, TSkin>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TSkin)> vertices, bool vertexOrSkin)
+        internal static Vector2[] GetVector2Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
         {
             var dst = new Vector2[vertices.Count];
 
@@ -167,7 +167,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        internal static Vector3[] GetVector3Column<TVertex, TSkin>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TSkin)> vertices, bool vertexOrSkin)
+        internal static Vector3[] GetVector3Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
         {
             var dst = new Vector3[vertices.Count];
 
@@ -181,7 +181,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        internal static Vector4[] GetVector4Column<TVertex, TSkin>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TSkin)> vertices, bool vertexOrSkin)
+        internal static Vector4[] GetVector4Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
         {
             var dst = new Vector4[vertices.Count];
 

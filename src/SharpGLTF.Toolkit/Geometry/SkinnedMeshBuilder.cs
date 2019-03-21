@@ -137,40 +137,7 @@ namespace SharpGLTF.Geometry
 
             return new int[0];
         }
-
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes(IEnumerable<SkinnedMeshBuilder<TMaterial, TVertex, TJoints>> meshBuilders)
-        {
-            var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
-                (
-                meshBuilders
-                .SelectMany(item => item.Primitives)
-                .Select(item => item.Vertices)
-                ).ToList();
-
-            var indexBlocks = VertexTypes.VertexUtils.CreateIndexMemoryAccessors
-                (
-                meshBuilders
-                .SelectMany(item => item.Primitives)
-                .Select(item => item.Indices)
-                ).ToList();
-
-            int idx = 0;
-
-            foreach (var meshBuilder in meshBuilders)
-            {
-                var dstMesh = new PackedMeshBuilder<TMaterial>(meshBuilder.Name);
-
-                foreach (var primitiveBuilder in meshBuilder.Primitives)
-                {
-                    dstMesh.AddPrimitive(primitiveBuilder.Material, vertexBlocks[idx], indexBlocks[idx]);
-
-                    ++idx;
-                }
-
-                yield return dstMesh;
-            }
-        }
-
+        
         #endregion
     }
 }

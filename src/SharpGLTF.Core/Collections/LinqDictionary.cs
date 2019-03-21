@@ -9,6 +9,9 @@ namespace SharpGLTF.Collections
     /// <summary>
     /// Wraps a standard dictionary, but performs a transform in the value
     /// </summary>
+    /// <typeparam name="TKey">The dictionary key type.</typeparam>
+    /// <typeparam name="TValueIn">The internal value type.</typeparam>
+    /// <typeparam name="TValueOut">The exposed value type.</typeparam>
     struct ReadOnlyLinqDictionary<TKey, TValueIn, TValueOut> : IReadOnlyDictionary<TKey, TValueOut>
     {
         #region lifecycle

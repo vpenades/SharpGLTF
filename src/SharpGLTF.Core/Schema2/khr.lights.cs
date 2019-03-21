@@ -103,9 +103,12 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
+        /// Gets the Local light direction.
+        /// </summary>
+        /// <remarks>
         /// For light types that have a direction (directional and spot lights),
         /// the light's direction is defined as the 3-vector (0.0, 0.0, -1.0)
-        /// </summary>
+        /// </remarks>
         public static Vector3 LocalDirection => -Vector3.UnitZ;
 
         /// <summary>

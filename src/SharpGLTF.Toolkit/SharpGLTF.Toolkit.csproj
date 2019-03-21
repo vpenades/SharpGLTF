@@ -52,7 +52,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\SharpGLTF\Debug\Guard.cs" Link="Debug\Guard.cs" />
+    <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
   </ItemGroup>
 
   <ItemGroup>
