@@ -12,25 +12,32 @@ namespace SharpGLTF.Schema2
     {
         #region meshes
 
-        public static Mesh CreateMesh<TVertex, TSkin>(this ModelRoot root, Geometry.SkinnedMeshBuilder<Material, TVertex, TSkin> meshBuilder)
+        public static Mesh CreateMesh<TVertex, TJoints>(this ModelRoot root, Geometry.SkinnedMeshBuilder<Material, TVertex, TJoints> meshBuilder)
             where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
+            where TJoints : struct, Geometry.VertexTypes.IJoints
         {
             return root.CreateMeshes(m => m, meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TMaterial, TVertex, TSkin>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin> meshBuilder)
+        public static Mesh CreateMesh<TMaterial, TVertex, TJoints>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints> meshBuilder)
             where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
+            where TJoints : struct, Geometry.VertexTypes.IJoints
         {
             return root.CreateMeshes(materialEvaluator, meshBuilder).First();
         }
 
-        public static Mesh[] CreateMeshes<TMaterial, TVertex, TSkin>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin>[] meshBuilders)
+        public static IReadOnlyList<Mesh> CreateMeshes<TVertex, TJoints>(this ModelRoot root, params Geometry.SkinnedMeshBuilder<Material, TVertex, TJoints>[] meshBuilders)
             where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
+            where TJoints : struct, Geometry.VertexTypes.IJoints
         {
-            // create a new schema material for every unique material in the mesh builders.
+            return root.CreateMeshes<Material, TVertex, TJoints>(k => k, meshBuilders);
+        }
+
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TVertex, TJoints>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints>[] meshBuilders)
+            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TJoints : struct, Geometry.VertexTypes.IJoints
+        {
+            // create a new material for every unique material in the mesh builders.
             var mapMaterials = meshBuilders
                 .SelectMany(item => item.Primitives)
                 .Select(item => item.Material)
@@ -38,26 +45,17 @@ namespace SharpGLTF.Schema2
                 .ToDictionary(k => k, k => materialEvaluator(k));
 
             // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
-            var srcMeshes = Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TSkin>
-                .MergeBuffers(meshBuilders)
+            var srcMeshes = Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints>
+                .PackMeshes(meshBuilders)
                 .ToList();
 
-            var dstMeshes = meshBuilders
-                .Select(item => root.CreateMesh(item.Name))
-                .ToArray();
+            var dstMeshes = new List<Mesh>();
 
-            for (int i = 0; i < dstMeshes.Length; ++i)
+            foreach (var srcMesh in srcMeshes)
             {
-                var dstMesh = dstMeshes[i];
-                var srcMesh = srcMeshes[i];
+                var dstMesh = srcMesh.CreateSchema2Mesh(root, m => mapMaterials[m]);
 
-                foreach (var srcPrim in srcMesh)
-                {
-                    dstMesh.CreatePrimitive()
-                        .WithMaterial( mapMaterials[srcPrim.Item1] )
-                        .WithVertexAccessors(srcPrim.Item2)
-                        .WithIndicesAccessor(PrimitiveType.TRIANGLES, srcPrim.Item3);
-                }
+                dstMeshes.Add(dstMesh);
             }
 
             return dstMeshes;
@@ -176,21 +174,21 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessors<TVertex, TSkin>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TSkin)> vertices)
             where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TSkin : struct, Geometry.VertexTypes.IVertexJoints
+            where TSkin : struct, Geometry.VertexTypes.IJoints
         {
             var memAccessors = Geometry.VertexTypes.VertexUtils.CreateVertexMemoryAccessors(new[] { vertices }).First();
 
             return primitive.WithVertexAccessors(memAccessors);
         }
 
-        public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<Geometry.MemoryAccessor> memAccessors)
+        public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<Memory.MemoryAccessor> memAccessors)
         {
             foreach (var va in memAccessors) primitive.WithVertexAccessor(va);
 
             return primitive;
         }
 
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, Geometry.MemoryAccessor memAccessor)
+        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, Memory.MemoryAccessor memAccessor)
         {
             var root = primitive.LogicalParent.LogicalParent;
 
@@ -199,7 +197,7 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
-        public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, Geometry.MemoryAccessor memAccessor)
+        public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, Memory.MemoryAccessor memAccessor)
         {
             var root = primitive.LogicalParent.LogicalParent;
 

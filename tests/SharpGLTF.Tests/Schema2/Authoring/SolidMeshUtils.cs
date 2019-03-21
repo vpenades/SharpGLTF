@@ -63,55 +63,57 @@ namespace SharpGLTF.Schema2.Authoring
             var v11 = new Vector3(-t, 0, 1) * radius;
 
             // 5 faces around point 0
-            meshBuilder._AddSphereTriangle(material, xform, v0, v11, v5);
-            meshBuilder._AddSphereTriangle(material, xform, v0, v5, v1);
-            meshBuilder._AddSphereTriangle(material, xform, v0, v1, v7);
-            meshBuilder._AddSphereTriangle(material, xform, v0, v7, v10);
-            meshBuilder._AddSphereTriangle(material, xform, v0, v10, v11);
+            meshBuilder._AddSphereTriangle(material, xform, v0, v11, v5, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v0, v5, v1, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v0, v1, v7, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v0, v7, v10, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v0, v10, v11, 3);
 
             // 5 adjacent faces
-            meshBuilder._AddSphereTriangle(material, xform, v1, v5, v9);
-            meshBuilder._AddSphereTriangle(material, xform, v5, v11, v4);
-            meshBuilder._AddSphereTriangle(material, xform, v11, v10, v2);
-            meshBuilder._AddSphereTriangle(material, xform, v10, v7, v6);
-            meshBuilder._AddSphereTriangle(material, xform, v7, v1, v8);
+            meshBuilder._AddSphereTriangle(material, xform, v1, v5, v9, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v5, v11, v4, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v11, v10, v2, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v10, v7, v6, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v7, v1, v8, 3);
 
             // 5 faces around point 3
-            meshBuilder._AddSphereTriangle(material, xform, v3, v9, v4);
-            meshBuilder._AddSphereTriangle(material, xform, v3, v4, v2);
-            meshBuilder._AddSphereTriangle(material, xform, v3, v2, v6);
-            meshBuilder._AddSphereTriangle(material, xform, v3, v6, v8);
-            meshBuilder._AddSphereTriangle(material, xform, v3, v8, v9);
+            meshBuilder._AddSphereTriangle(material, xform, v3, v9, v4, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v3, v4, v2, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v3, v2, v6, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v3, v6, v8, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v3, v8, v9, 3);
 
             // 5 adjacent faces
-            meshBuilder._AddSphereTriangle(material, xform, v4, v9, v5);
-            meshBuilder._AddSphereTriangle(material, xform, v2, v4, v11);
-            meshBuilder._AddSphereTriangle(material, xform, v6, v2, v10);
-            meshBuilder._AddSphereTriangle(material, xform, v8, v6, v7);
-            meshBuilder._AddSphereTriangle(material, xform, v9, v8, v1);
+            meshBuilder._AddSphereTriangle(material, xform, v4, v9, v5, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v2, v4, v11, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v6, v2, v10, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v8, v6, v7, 3);
+            meshBuilder._AddSphereTriangle(material, xform, v9, v8, v1, 3);
         }
 
-        private static void _AddSphereTriangle<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c)
+        private static void _AddSphereTriangle<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c, int iterations = 0)
         {
+            if (iterations <=0)
+            {
+                var aa = new VPOSNRM(Vector3.Transform(a, xform), Vector3.Normalize(Vector3.TransformNormal(a, xform)));
+                var bb = new VPOSNRM(Vector3.Transform(b, xform), Vector3.Normalize(Vector3.TransformNormal(b, xform)));
+                var cc = new VPOSNRM(Vector3.Transform(c, xform), Vector3.Normalize(Vector3.TransformNormal(c, xform)));
+
+                meshBuilder.AddTriangle(material, aa, bb, cc);
+                return;
+            }
+
+            --iterations;
+
             var ab = Vector3.Normalize(a + b) * a.Length();
             var bc = Vector3.Normalize(b + c) * b.Length();
             var ca = Vector3.Normalize(c + a) * c.Length();
 
-            var aa = new VPOSNRM(Vector3.Transform(a, xform), Vector3.Normalize(Vector3.TransformNormal(a, xform)));
-            var bb = new VPOSNRM(Vector3.Transform(b, xform), Vector3.Normalize(Vector3.TransformNormal(b, xform)));
-            var cc = new VPOSNRM(Vector3.Transform(c, xform), Vector3.Normalize(Vector3.TransformNormal(c, xform)));
+            _AddSphereTriangle(meshBuilder, material, xform, ab, bc, ca, iterations);
 
-            // meshBuilder.AddTriangle(material, aa, bb, cc);
-
-            var aabb = new VPOSNRM(Vector3.Transform(ab, xform), Vector3.Normalize(Vector3.TransformNormal(ab, xform)));
-            var bbcc = new VPOSNRM(Vector3.Transform(bc, xform), Vector3.Normalize(Vector3.TransformNormal(bc, xform)));
-            var ccaa = new VPOSNRM(Vector3.Transform(ca, xform), Vector3.Normalize(Vector3.TransformNormal(ca, xform)));
-
-            meshBuilder.AddTriangle(material, aabb, bbcc, ccaa);
-
-            meshBuilder.AddTriangle(material, aa, aabb, ccaa);
-            meshBuilder.AddTriangle(material, bb, bbcc, aabb);
-            meshBuilder.AddTriangle(material, cc, ccaa, bbcc);
+            _AddSphereTriangle(meshBuilder, material, xform, a, ab, ca, iterations);
+            _AddSphereTriangle(meshBuilder, material, xform, b, bc, ab, iterations);
+            _AddSphereTriangle(meshBuilder, material, xform, c, ca, bc, iterations);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace SharpGLTF.Geometry
     {
         public StaticMeshBuilder(string name = null) : base(name) { }
 
-        public new void AddPolygon(TMaterial material, params TVertex[] points)
+        public void AddPolygon(TMaterial material, params TVertex[] points)
         {
             for (int i = 2; i < points.Length; ++i)
             {

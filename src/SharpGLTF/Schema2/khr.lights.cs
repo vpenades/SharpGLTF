@@ -250,7 +250,7 @@ namespace SharpGLTF.Schema2
         /// Gets or sets the <see cref="Schema2.PunctualLight"/> of this <see cref="Node"/>.
         /// </summary>
         /// <remarks>
-        /// This is part of <see cref="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
+        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
         /// </remarks>
         public PunctualLight PunctualLight
         {

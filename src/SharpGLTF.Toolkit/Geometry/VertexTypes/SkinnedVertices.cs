@@ -5,13 +5,13 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    public interface IVertexJoints { }
+    public interface IJoints { }
 
-    public struct VertexJoints0 : IVertexJoints
+    public struct VertexJoints0 : IJoints
     {
     }
 
-    public struct VertexJoints4 : IVertexJoints
+    public struct VertexJoints4 : IJoints
     {
         public VertexJoints4(int jointIndex)
         {
@@ -32,7 +32,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Weights_0;
     }
 
-    public struct VertexJoints8 : IVertexJoints
+    public struct VertexJoints8 : IJoints
     {
         public VertexJoints8(int jointIndex)
         {

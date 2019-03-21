@@ -4,10 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace SharpGLTF.Geometry
+namespace SharpGLTF.Memory
 {
-    using Memory;
-
     using DIMENSIONS = Schema2.DimensionType;
     using ENCODING = Schema2.EncodingType;
 
@@ -227,12 +225,18 @@ namespace SharpGLTF.Geometry
             _Attribute.ByteStride = byteStride;
         }
 
+        public void Fill(IEnumerable<Int32> values) { AsIntegerArray().FillFrom(0, values); }
+
+        public void Fill(IEnumerable<UInt32> values) { AsIntegerArray().FillFrom(0, values); }
+
         public IntegerArray AsIntegerArray()
         {
             Guard.IsTrue(_Attribute.IsValidIndexer, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(_Attribute));
             return new IntegerArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.Encoding.ToIndex());
         }
+
+        public void Fill(IEnumerable<Single> values) { AsScalarArray().FillFrom(0, values); }
 
         public ScalarArray AsScalarArray()
         {
@@ -241,12 +245,16 @@ namespace SharpGLTF.Geometry
             return new ScalarArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
+        public void Fill(IEnumerable<Vector2> values) { AsVector2Array().FillFrom(0, values); }
+
         public Vector2Array AsVector2Array()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC2, nameof(_Attribute));
             return new Vector2Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
+
+        public void Fill(IEnumerable<Vector3> values) { AsVector3Array().FillFrom(0, values); }
 
         public Vector3Array AsVector3Array()
         {
@@ -255,6 +263,8 @@ namespace SharpGLTF.Geometry
             return new Vector3Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
+        public void Fill(IEnumerable<Vector4> values) { AsVector4Array().FillFrom(0, values); }
+
         public Vector4Array AsVector4Array()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
@@ -262,12 +272,16 @@ namespace SharpGLTF.Geometry
             return new Vector4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
+        public void Fill(IEnumerable<Quaternion> values) { AsQuaternionArray().FillFrom(0, values); }
+
         public QuaternionArray AsQuaternionArray()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
             return new QuaternionArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
+
+        public void Fill(IEnumerable<Matrix4x4> values) { AsMatrix4x4Array().FillFrom(0, values); }
 
         public Matrix4x4Array AsMatrix4x4Array()
         {

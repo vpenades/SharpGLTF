@@ -12,7 +12,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex, TSkin>(this IEnumerable<IReadOnlyList<(TVertex, TSkin)>> vertexBlocks)
             where TVertex : struct, IVertex
-            where TSkin : struct, IVertexJoints
+            where TSkin : struct, IJoints
         {
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
@@ -43,10 +43,10 @@ namespace SharpGLTF.Geometry.VertexTypes
                         isSkin = true;
                     }
 
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().FillFrom(0, GetScalarColumn<TVertex, TSkin>(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().FillFrom(0, GetVector2Column<TVertex, TSkin>(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().FillFrom(0, GetVector3Column<TVertex, TSkin>(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().FillFrom(0, GetVector4Column<TVertex, TSkin>(finfo, block, isSkin));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.Fill(GetScalarColumn(finfo, block, isSkin));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.Fill(GetVector2Column(finfo, block, isSkin));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.Fill(GetVector3Column(finfo, block, isSkin));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.Fill(GetVector4Column(finfo, block, isSkin));
                 }
 
                 yield return accessors;
@@ -71,7 +71,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 var accessor = new MemoryAccessor(ibuffer, attribute.Slice(baseIndicesIndex, block.Count));
 
-                accessor.AsIntegerArray().FillFrom(0, block);
+                accessor.Fill(block);
 
                 yield return accessor;
 

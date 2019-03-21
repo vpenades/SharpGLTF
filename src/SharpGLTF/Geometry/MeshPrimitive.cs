@@ -6,6 +6,9 @@ using System.Text;
 
 namespace SharpGLTF.Geometry
 {
+    using Memory;
+
+    [Obsolete("Still here for reference, but most probably I'll use these objects for read meshes only")]
     public abstract class NamedObject
     {
         public NamedObject() { }
@@ -276,7 +279,7 @@ namespace SharpGLTF.Geometry
             _Indices = IndicesAccessor.CreateAccessors(itemsCount);
         }
 
-        public void AssignToSchema(Schema2.MeshPrimitive dstPrim)
+        internal void CopyTo(Schema2.MeshPrimitive dstPrim)
         {
             // TODO: clear primitive
 
@@ -340,7 +343,7 @@ namespace SharpGLTF.Geometry
             return p;
         }
 
-        public void AssignToSchema(Schema2.Mesh mesh)
+        public void CopyTo(Schema2.Mesh mesh)
         {
             mesh.Name = this.Name;
 
@@ -348,7 +351,7 @@ namespace SharpGLTF.Geometry
             {
                 var dstp = mesh.CreatePrimitive();
 
-                srcp.AssignToSchema(dstp);
+                srcp.CopyTo(dstp);
             }
 
             // todo: set morph targets

@@ -69,15 +69,15 @@ namespace SharpGLTF.Debug
                 if (_Value.Dimensions == Schema2.DimensionType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();
                 if (_Value.Dimensions == Schema2.DimensionType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
 
-                var itemSize = _Value.ItemByteSize;
-                var byteStride = Math.Max(_Value.SourceBufferView.ByteStride, itemSize);
+                var itemByteSz = _Value.ItemByteSize;
+                var byteStride = Math.Max(_Value.SourceBufferView.ByteStride, itemByteSz);
                 var items = new ArraySegment<Byte>[_Value.Count];
 
                 var buffer = _Value.SourceBufferView.Content.Slice(_Value.ByteOffset, _Value.Count * byteStride);
 
                 for (int i = 0; i < items.Length; ++i )
                 {
-                    items[i] = buffer.Slice(i * byteStride, itemSize);
+                    items[i] = buffer.Slice(i * byteStride, itemByteSz);
                 }
 
                 return items.Cast<Object>().ToArray();

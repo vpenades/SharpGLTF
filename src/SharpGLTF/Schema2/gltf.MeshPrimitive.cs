@@ -193,7 +193,7 @@ namespace SharpGLTF.Schema2
 
         public Memory.IntegerArray GetIndices() => IndexAccessor.AsIndicesArray();
 
-        public Geometry.MemoryAccessor GetVertices(string attributeKey) => GetVertexAccessor(attributeKey)._GetMemoryAccessor();
+        public Memory.MemoryAccessor GetVertices(string attributeKey) => GetVertexAccessor(attributeKey)._GetMemoryAccessor();
 
         #endregion
 

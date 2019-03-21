@@ -46,20 +46,45 @@ namespace SharpGLTF.Schema2
 
         internal int _LogicalBufferViewIndex    => this._bufferView.AsValue(-1);
 
+        /// <summary>
+        /// Gets the <see cref="BufferView"/> buffer that contains the items as an encoded byte array.
+        /// </summary>
         public BufferView SourceBufferView      => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
 
+        /// <summary>
+        /// Gets the number of items.
+        /// </summary>
         public int Count                        => this._count;
 
+        /// <summary>
+        /// Gets the starting byte offset within <see cref="SourceBufferView"/>.
+        /// </summary>
         public int ByteOffset                   => this._byteOffset.AsValue(0);
 
+        /// <summary>
+        /// Gets the <see cref="DimensionType"/> of an item.
+        /// </summary>
         public DimensionType Dimensions           => this._type;
 
+        /// <summary>
+        /// Gets the <see cref="EncodingType"/> of an item.
+        /// </summary>
         public EncodingType Encoding           => this._componentType;
 
+        /// <summary>
+        /// Gets a value indicating whether the items values are normalized.
+        /// </summary>
         public Boolean Normalized               => this._normalized.AsValue(false);
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="Accessor"/> has a sparse structure.
+        /// </summary>
         public Boolean IsSparse                 => this._sparse != null;
 
+        /// <summary>
+        /// Gets the number of bytes required to encode a single item in <see cref="SourceBufferView"/>
+        /// Given the current <see cref="Dimensions"/> and <see cref="Encoding"/> states.
+        /// </summary>
         public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
         public Transforms.BoundingBox3? LocalBounds3
@@ -77,18 +102,18 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal Geometry.MemoryAccessor _GetMemoryAccessor()
+        internal MemoryAccessor _GetMemoryAccessor()
         {
             var view = SourceBufferView;
-            var info = new Geometry.MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
-            return new Geometry.MemoryAccessor(view.Content, info);
+            var info = new MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            return new MemoryAccessor(view.Content, info);
         }
 
-        internal KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>? _GetSparseMemoryAccessor()
+        internal KeyValuePair<IntegerArray, MemoryAccessor>? _GetSparseMemoryAccessor()
         {
             return this._sparse == null
                 ?
-                (KeyValuePair<Memory.IntegerArray, Geometry.MemoryAccessor>?)null
+                (KeyValuePair<IntegerArray, MemoryAccessor>?)null
                 :
                 this._sparse._CreateMemoryAccessors(this);
         }
@@ -97,15 +122,24 @@ namespace SharpGLTF.Schema2
 
         #region Data Buffer API
 
-        public void SetData(BufferView buffer, int byteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
+        /// <summary>
+        /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
+        /// </summary>
+        /// <param name="buffer">The <see cref="BufferView"/> source.</param>
+        /// <param name="bufferByteOffset">The start byte offset within <paramref name="buffer"/>.</param>
+        /// <param name="itemCount">The number of items in the accessor.</param>
+        /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
+        /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
+        /// <param name="normalized">The item normalization mode.</param>
+        public void SetData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
         {
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
-            Guard.MustBeGreaterThanOrEqualTo(byteOffset, _byteOffsetMinimum, nameof(byteOffset));
+            Guard.MustBeGreaterThanOrEqualTo(bufferByteOffset, _byteOffsetMinimum, nameof(bufferByteOffset));
             Guard.MustBeGreaterThanOrEqualTo(itemCount, _countMinimum, nameof(itemCount));
 
             this._bufferView = buffer.LogicalIndex;
-            this._byteOffset = byteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
+            this._byteOffset = bufferByteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
             this._count = itemCount;
 
             this._type = dimensions;
@@ -124,42 +158,27 @@ namespace SharpGLTF.Schema2
 
         #region Index Buffer API
 
-        public void SetIndexData(Geometry.MemoryAccessor src)
+        public void SetIndexData(MemoryAccessor src)
         {
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ELEMENT_ARRAY_BUFFER);
             SetIndexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Encoding.ToIndex());
         }
 
-        public void SetIndexData(BufferView buffer, int byteOffset, IReadOnlyList<Int32> items, IndexEncodingType encoding = IndexEncodingType.UNSIGNED_INT)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-
-            SetIndexData(buffer, byteOffset, items.Count, encoding);
-
-            AsIndicesArray().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetIndexData(BufferView buffer, int byteOffset, IReadOnlyList<UInt32> items, IndexEncodingType encoding = IndexEncodingType.UNSIGNED_INT)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-
-            SetIndexData(buffer, byteOffset, items.Count, encoding);
-
-            AsIndicesArray().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetIndexData(BufferView buffer, int byteOffset, int itemCount, IndexEncodingType encoding)
+        /// <summary>
+        /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
+        /// </summary>
+        /// <param name="buffer">The <see cref="BufferView"/> source.</param>
+        /// <param name="bufferByteOffset">The start byte offset within <paramref name="buffer"/>.</param>
+        /// <param name="itemCount">The number of items in the accessor.</param>
+        /// <param name="encoding">The <see cref="IndexEncodingType"/> item encoding.</param>
+        public void SetIndexData(BufferView buffer, int bufferByteOffset, int itemCount, IndexEncodingType encoding)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
 
             if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
 
-            SetData(buffer, byteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
+            SetData(buffer, bufferByteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
         }
 
         public IntegerArray AsIndicesArray()
@@ -174,73 +193,22 @@ namespace SharpGLTF.Schema2
 
         #region Vertex Buffer API
 
-        public void SetVertexData(Geometry.MemoryAccessor src)
+        public void SetVertexData(MemoryAccessor src)
         {
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ARRAY_BUFFER);
 
             SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
         }
 
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Single> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(DimensionType.SCALAR.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            SetVertexData(buffer, bufferByteOffset, items.Count, DimensionType.SCALAR, encoding, normalized);
-
-            AsScalarArray().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector2> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC2.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            SetVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC2, encoding, normalized);
-
-            AsVector2Array().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector3> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC3.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            SetVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC3, encoding, normalized);
-
-            AsVector3Array().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Vector4> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            SetVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC4, encoding, normalized);
-
-            AsVector4Array().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, IReadOnlyList<Quaternion> items, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
-        {
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(DimensionType.VEC4.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            SetVertexData(buffer, bufferByteOffset, items.Count, DimensionType.VEC4, encoding, normalized);
-
-            AsQuaternionArray().FillFrom(0, items);
-
-            this.UpdateBounds();
-        }
-
+        /// <summary>
+        /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
+        /// </summary>
+        /// <param name="buffer">The <see cref="BufferView"/> source.</param>
+        /// <param name="bufferByteOffset">The start byte offset within <paramref name="buffer"/>.</param>
+        /// <param name="itemCount">The number of items in the accessor.</param>
+        /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
+        /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
+        /// <param name="normalized">The item normalization mode.</param>
         public void SetVertexData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions = DimensionType.VEC3, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
         {
             Guard.NotNull(buffer, nameof(buffer));
@@ -252,14 +220,14 @@ namespace SharpGLTF.Schema2
             SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
         }
 
-        public IEncodedArray<float> AsScalarArray()
+        public IEncodedArray<Single> AsScalarArray()
         {
             var memory = _GetMemoryAccessor();
 
             if (this._sparse == null) return memory.AsScalarArray();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Geometry.MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
+            return MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public IEncodedArray<Vector2> AsVector2Array()
@@ -269,7 +237,7 @@ namespace SharpGLTF.Schema2
             if (this._sparse == null) return memory.AsVector2Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Geometry.MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
+            return MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public IEncodedArray<Vector3> AsVector3Array()
@@ -279,7 +247,7 @@ namespace SharpGLTF.Schema2
             if (this._sparse == null) return memory.AsVector3Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Geometry.MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
+            return MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public IEncodedArray<Vector4> AsVector4Array()
@@ -289,7 +257,7 @@ namespace SharpGLTF.Schema2
             if (this._sparse == null) return memory.AsVector4Array();
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return Geometry.MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
+            return MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
         public IEncodedArray<Quaternion> AsQuaternionArray()
@@ -305,11 +273,11 @@ namespace SharpGLTF.Schema2
         {
             if (_sparse != null) throw new InvalidOperationException("Can't be used on Acessors with Sparse Data");
 
-            var byteSize = Encoding.ByteLength() * Dimensions.DimCount();
-            var byteStride = Math.Max(byteSize, SourceBufferView.ByteStride);
+            var itemByteSz = Encoding.ByteLength() * Dimensions.DimCount();
+            var byteStride = Math.Max(itemByteSz, SourceBufferView.ByteStride);
             var byteOffset = vertexIdx * byteStride;
 
-            return SourceBufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), byteSize);
+            return SourceBufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), itemByteSz);
         }
 
         #endregion

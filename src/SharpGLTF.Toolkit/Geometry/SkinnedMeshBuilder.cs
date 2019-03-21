@@ -7,13 +7,13 @@ namespace SharpGLTF.Geometry
 {
     using Collections;
 
-    public class SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>
+    public class SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints>
         where TVertex : struct, VertexTypes.IVertex
-        where TSkin : struct, VertexTypes.IVertexJoints
+        where TJoints : struct, VertexTypes.IJoints
     {
         #region lifecycle
 
-        internal SkinnedPrimitiveBuilder(SkinnedMeshBuilder<TMaterial, TVertex, TSkin> mesh, TMaterial material)
+        internal SkinnedPrimitiveBuilder(SkinnedMeshBuilder<TMaterial, TVertex, TJoints> mesh, TMaterial material)
         {
             this._Mesh = mesh;
             this._Material = material;
@@ -23,22 +23,22 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly SkinnedMeshBuilder<TMaterial, TVertex, TSkin> _Mesh;
+        private readonly SkinnedMeshBuilder<TMaterial, TVertex, TJoints> _Mesh;
 
         private readonly TMaterial _Material;
 
-        private readonly VertexColumn<(TVertex, TSkin)> _Vertices = new VertexColumn<(TVertex, TSkin)>();
+        private readonly VertexColumn<(TVertex, TJoints)> _Vertices = new VertexColumn<(TVertex, TJoints)>();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
 
         #region properties
 
-        public SkinnedMeshBuilder<TMaterial, TVertex, TSkin> Mesh => _Mesh;
+        public SkinnedMeshBuilder<TMaterial, TVertex, TJoints> Mesh => _Mesh;
 
         public TMaterial Material => _Material;
 
-        public IReadOnlyList<(TVertex, TSkin)> Vertices => _Vertices;
+        public IReadOnlyList<(TVertex, TJoints)> Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
@@ -57,7 +57,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void AddTriangle((TVertex, TSkin) a, (TVertex, TSkin) b, (TVertex, TSkin) c)
+        public void AddTriangle((TVertex, TJoints) a, (TVertex, TJoints) b, (TVertex, TJoints) c)
         {
             var aa = _Vertices.Use(a);
             var bb = _Vertices.Use(b);
@@ -76,9 +76,9 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
-    public class SkinnedMeshBuilder<TMaterial, TVertex, TSkin>
+    public class SkinnedMeshBuilder<TMaterial, TVertex, TJoints>
         where TVertex : struct, VertexTypes.IVertex
-        where TSkin : struct, VertexTypes.IVertexJoints
+        where TJoints : struct, VertexTypes.IJoints
     {
         #region lifecycle
 
@@ -91,7 +91,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>> _Primitives = new Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>>();
+        private readonly Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints>> _Primitives = new Dictionary<TMaterial, SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints>>();
 
         #endregion
 
@@ -99,13 +99,13 @@ namespace SharpGLTF.Geometry
 
         public string Name { get; set; }
 
-        public IReadOnlyCollection<SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>> Primitives => _Primitives.Values;
+        public IReadOnlyCollection<SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints>> Primitives => _Primitives.Values;
 
         #endregion
 
         #region API
 
-        public void AddPolygon(TMaterial material, params (TVertex, TSkin)[] points)
+        public void AddPolygon(TMaterial material, params (TVertex, TJoints)[] points)
         {
             for (int i = 2; i < points.Length; ++i)
             {
@@ -113,11 +113,11 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void AddTriangle(TMaterial material, (TVertex, TSkin) a, (TVertex, TSkin) b, (TVertex, TSkin) c)
+        public void AddTriangle(TMaterial material, (TVertex, TJoints) a, (TVertex, TJoints) b, (TVertex, TJoints) c)
         {
-            if (!_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive))
+            if (!_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints> primitive))
             {
-                primitive = new SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin>(this, material);
+                primitive = new SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints>(this, material);
                 _Primitives[material] = primitive;
             }
 
@@ -126,19 +126,19 @@ namespace SharpGLTF.Geometry
 
         public IEnumerable<(int, int, int)> GetTriangles(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive)) return primitive.Triangles;
+            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints> primitive)) return primitive.Triangles;
 
             return Enumerable.Empty<(int, int, int)>();
         }
 
         public IReadOnlyList<int> GetIndices(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TSkin> primitive)) return primitive.Indices;
+            if (_Primitives.TryGetValue(material, out SkinnedPrimitiveBuilder<TMaterial, TVertex, TJoints> primitive)) return primitive.Indices;
 
             return new int[0];
         }
 
-        internal static IEnumerable<(TMaterial, MemoryAccessor[], MemoryAccessor)[]> MergeBuffers(IEnumerable<SkinnedMeshBuilder<TMaterial, TVertex, TSkin>> meshBuilders)
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes(IEnumerable<SkinnedMeshBuilder<TMaterial, TVertex, TJoints>> meshBuilders)
         {
             var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
                 (
@@ -154,20 +154,17 @@ namespace SharpGLTF.Geometry
                 .Select(item => item.Indices)
                 ).ToList();
 
-            int bidx = 0;
+            int idx = 0;
 
             foreach (var meshBuilder in meshBuilders)
             {
-                var dstMesh = new (TMaterial, MemoryAccessor[], MemoryAccessor)[meshBuilder.Primitives.Count];
-
-                int pidx = 0;
+                var dstMesh = new PackedMeshBuilder<TMaterial>(meshBuilder.Name);
 
                 foreach (var primitiveBuilder in meshBuilder.Primitives)
                 {
-                    dstMesh[pidx] = (primitiveBuilder.Material, vertexBlocks[bidx], indexBlocks[bidx]);
+                    dstMesh.AddPrimitive(primitiveBuilder.Material, vertexBlocks[idx], indexBlocks[idx]);
 
-                    ++pidx;
-                    ++bidx;
+                    ++idx;
                 }
 
                 yield return dstMesh;

@@ -69,7 +69,7 @@ namespace SharpGLTF.Geometry
             // this assigns the mesh we've created before to this schema mesh.
             // Notice that the schema buffers being created will be using the
             // memory allocated by (#1) and (#2)
-            srcMesh.AssignToSchema(rnode.Mesh);
+            srcMesh.CopyTo(rnode.Mesh);
                         
             model.AttachToCurrentTest("Triangle.gltf");
             model.AttachToCurrentTest("Triangle.glb");
