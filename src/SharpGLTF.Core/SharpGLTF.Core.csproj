@@ -2,7 +2,7 @@
 
   <PropertyGroup>    
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SharpGLTF</AssemblyName>
+    <AssemblyName>SharpGLTF.Core</AssemblyName>
     <RootNamespace>SharpGLTF</RootNamespace>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
     <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
