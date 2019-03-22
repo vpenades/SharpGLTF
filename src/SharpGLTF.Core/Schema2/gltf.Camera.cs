@@ -33,7 +33,7 @@ namespace SharpGLTF.Schema2
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().Concat(_orthographic, _perspective);
+            return base.GetLogicalChildren().ConcatItems(_orthographic, _perspective);
         }
 
         #endregion

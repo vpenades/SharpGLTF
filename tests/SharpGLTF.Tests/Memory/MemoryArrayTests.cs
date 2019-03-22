@@ -57,11 +57,11 @@ namespace SharpGLTF.Memory
 
             var bytes = new Byte[256];
 
-            var v4n = new Vector4Array(bytes.Slice(0), 0, Schema2.EncodingType.UNSIGNED_BYTE, true);
+            var v4n = new Vector4Array(bytes, 0, Schema2.EncodingType.UNSIGNED_BYTE, true);
             v4n[1] = v1;
             VectorAssert.AreEqual(v4n[1], v1, 0.1f);
 
-            var v4u = new Vector4Array(bytes.Slice(0), 0, Schema2.EncodingType.UNSIGNED_BYTE, false);
+            var v4u = new Vector4Array(bytes, 0, Schema2.EncodingType.UNSIGNED_BYTE, false);
             v4u[1] = v2;
             VectorAssert.AreEqual(v4u[1], v2);
         }
@@ -74,8 +74,8 @@ namespace SharpGLTF.Memory
 
             var bytes = new Byte[256];
 
-            var v4n = new Vector4Array(bytes.Slice(0), 0, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, true);
-            var v4u = new Vector4Array(bytes.Slice(0), 4, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, false);
+            var v4n = new Vector4Array(bytes, 0, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, true);
+            var v4u = new Vector4Array(bytes, 4, 5, 8, Schema2.EncodingType.UNSIGNED_BYTE, false);
 
             v4n[1] = v1;
             VectorAssert.AreEqual(v4n[1], v1, 0.1f);

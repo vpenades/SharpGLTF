@@ -11,10 +11,20 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TVertex, TJoints>(IEnumerable<SkinnedMeshBuilder<TMaterial, TVertex, TJoints>> meshBuilders)
-            where TVertex : struct, VertexTypes.IVertex
-            where TJoints : struct, VertexTypes.IJoints
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, TvJ>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, TvJ>> meshBuilders)
+            where TvP : struct, VertexTypes.IVertexPosition
+            where TvM : struct, VertexTypes.IVertexMaterial
+            where TvJ : struct, VertexTypes.IVertexJoints
         {
+            try
+            {
+                foreach (var m in meshBuilders) m.Validate();
+            }
+            catch(Exception ex)
+            {
+                throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
+            }
+
             var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
                 (
                 meshBuilders

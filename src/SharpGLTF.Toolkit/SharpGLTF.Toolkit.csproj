@@ -53,6 +53,7 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
+    <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
   </ItemGroup>
 
   <ItemGroup>

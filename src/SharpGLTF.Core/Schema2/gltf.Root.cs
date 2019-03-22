@@ -99,7 +99,7 @@ namespace SharpGLTF.Schema2
         {
             var containers = base.GetLogicalChildren();
 
-            containers = containers.Concat(this.Asset);
+            containers = containers.ConcatItems(this.Asset);
             containers = containers.Concat(this.LogicalAccessors);
             containers = containers.Concat(this.LogicalAnimations);
             containers = containers.Concat(this.LogicalBuffers);

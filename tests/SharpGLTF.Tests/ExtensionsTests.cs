@@ -4,8 +4,11 @@ using System.Text;
 
 using NUnit.Framework;
 
+
 namespace SharpGLTF
 {
+    using Schema2;
+
     [TestFixture]
     public class ExtensionsTests
     {

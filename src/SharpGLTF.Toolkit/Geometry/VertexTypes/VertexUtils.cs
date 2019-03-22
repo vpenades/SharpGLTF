@@ -10,15 +10,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     public static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex, TJoints>(this IEnumerable<IReadOnlyList<(TVertex, TJoints)>> vertexBlocks)
-            where TVertex : struct, IVertex
-            where TJoints : struct, IJoints
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvJ>(this IEnumerable<IReadOnlyList<(TvP, TvM, TvJ)>> vertexBlocks)
+            where TvP : struct, IVertexPosition
+            where TvM : struct, IVertexMaterial
+            where TvJ : struct, IVertexJoints
         {
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
             // vertex attributes
-            var attributes = GetVertexAttributes(typeof(TVertex), typeof(TJoints), totalCount);
+            var attributes = GetVertexAttributes(typeof(TvP), typeof(TvM), typeof(TvJ), totalCount);
 
             // create master vertex buffer
             int byteStride = attributes[0].ByteStride;
@@ -35,18 +36,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 foreach (var accessor in accessors)
                 {
-                    bool isSkin = false;
-                    var finfo = GetVertexField(typeof(TVertex), accessor.Attribute.Name);
-                    if (finfo == null)
-                    {
-                        finfo = GetVertexField(typeof(TJoints), accessor.Attribute.Name);
-                        isSkin = true;
-                    }
+                    var columnFunc = GetItemValueFunc<TvP, TvM, TvJ>(accessor.Attribute.Name);
 
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.Fill(GetScalarColumn(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.Fill(GetVector2Column(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.Fill(GetVector3Column(finfo, block, isSkin));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.Fill(GetVector4Column(finfo, block, isSkin));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.Fill(block.GetScalarColumn(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.Fill(block.GetVector2Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.Fill(block.GetVector3Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.Fill(block.GetVector4Column(columnFunc));
                 }
 
                 yield return accessors;
@@ -94,11 +89,17 @@ namespace SharpGLTF.Geometry.VertexTypes
             return null;
         }
 
-        private static MemoryAccessInfo[] GetVertexAttributes(Type vertexType, Type jointsType, int itemsCount)
+        private static MemoryAccessInfo[] GetVertexAttributes(Type vertexType, Type valuesType, Type jointsType, int itemsCount)
         {
             var attributes = new List<MemoryAccessInfo>();
 
             foreach (var finfo in vertexType.GetFields())
+            {
+                var attribute = _GetMemoryAccessInfo(finfo);
+                if (attribute.HasValue) attributes.Add(attribute.Value);
+            }
+
+            foreach (var finfo in valuesType.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
@@ -139,57 +140,49 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        internal static Single[] GetScalarColumn<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
+        private static Func<(TvP, TvM, TvJ), Object> GetItemValueFunc<TvP, TvM, TvJ>(string attributeName)
         {
-            var dst = new Single[vertices.Count];
+            var finfo = GetVertexField(typeof(TvP), attributeName);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Item1);
 
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                var v = vertices[i];
+            finfo = GetVertexField(typeof(TvM), attributeName);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Item2);
 
-                dst[i] = vertexOrSkin ? (Single)finfo.GetValue(v.Item2) : (Single)finfo.GetValue(v.Item1);
-            }
+            finfo = GetVertexField(typeof(TvJ), attributeName);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Item3);
 
-            return dst;
+            throw new NotImplementedException();
         }
 
-        internal static Vector2[] GetVector2Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
+        internal static Single[] GetScalarColumn<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
-            var dst = new Vector2[vertices.Count];
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                var v = vertices[i];
-
-                dst[i] = vertexOrSkin ? (Vector2)finfo.GetValue(v.Item2) : (Vector2)finfo.GetValue(v.Item1);
-            }
-
-            return dst;
+            return GetColumn<TvP, TvM, TvJ, Single>(vertices, func);
         }
 
-        internal static Vector3[] GetVector3Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
+        internal static Vector2[] GetVector2Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
-            var dst = new Vector3[vertices.Count];
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                var v = vertices[i];
-
-                dst[i] = vertexOrSkin ? (Vector3)finfo.GetValue(v.Item2) : (Vector3)finfo.GetValue(v.Item1);
-            }
-
-            return dst;
+            return GetColumn<TvP, TvM, TvJ, Vector2>(vertices, func);
         }
 
-        internal static Vector4[] GetVector4Column<TVertex, TJoints>(this System.Reflection.FieldInfo finfo, IReadOnlyList<(TVertex, TJoints)> vertices, bool vertexOrSkin)
+        internal static Vector3[] GetVector3Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
-            var dst = new Vector4[vertices.Count];
+            return GetColumn<TvP, TvM, TvJ, Vector3>(vertices, func);
+        }
+
+        internal static Vector4[] GetVector4Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        {
+            return GetColumn<TvP, TvM, TvJ, Vector4>(vertices, func);
+        }
+
+        internal static TColumn[] GetColumn<TvP, TvM, TvJ, TColumn>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        {
+            var dst = new TColumn[vertices.Count];
 
             for (int i = 0; i < dst.Length; ++i)
             {
                 var v = vertices[i];
 
-                dst[i] = vertexOrSkin ? (Vector4)finfo.GetValue(v.Item2) : (Vector4)finfo.GetValue(v.Item1);
+                dst[i] = (TColumn)func(v);
             }
 
             return dst;

@@ -6,24 +6,18 @@ using System.Text;
 
 namespace SharpGLTF.Geometry
 {
-    using Collections;
-
-    public class StaticMeshBuilder<TMaterial, TVertex> : SkinnedMeshBuilder<TMaterial, TVertex, VertexTypes.VertexJoints0>
-        where TVertex : struct, VertexTypes.IVertex
+    public class MeshBuilder<TMaterial, TVertex, TValues> : MeshBuilder<TMaterial, TVertex, TValues, VertexTypes.VertexEmpty>
+        where TVertex : struct, VertexTypes.IVertexPosition
+        where TValues : struct, VertexTypes.IVertexMaterial
     {
-        public StaticMeshBuilder(string name = null) : base(name) { }
+        public MeshBuilder(string name = null)
+            : base(name) { }
+    }
 
-        public void AddPolygon(TMaterial material, params TVertex[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(material, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public new void AddTriangle(TMaterial material, TVertex a, TVertex b, TVertex c)
-        {
-            AddTriangle(material, (a, default), (b, default), (c, default));
-        }
+    public class MeshBuilder<TMaterial, TVertex> : MeshBuilder<TMaterial, TVertex, VertexTypes.VertexEmpty, VertexTypes.VertexEmpty>
+       where TVertex : struct, VertexTypes.IVertexPosition
+    {
+        public MeshBuilder(string name = null)
+            : base(name) { }
     }
 }

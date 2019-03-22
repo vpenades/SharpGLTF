@@ -10,6 +10,7 @@ namespace SharpGLTF.Schema2.Authoring
 {
     using Geometry;
 
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using STATICVERTEX = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
     using SKIN4 = Geometry.VertexTypes.VertexJoints4;
@@ -244,7 +245,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
 
             var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
             var v2 = new STATICVERTEX( 10, 10, 0, 10, 10, 15);
@@ -272,10 +273,10 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
             // create several meshes
-            var meshBuilder1 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
-            var meshBuilder2 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh2");
-            var meshBuilder3 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh3");
-            var meshBuilder4 = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh4");
+            var meshBuilder1 = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            var meshBuilder2 = new MeshBuilder<Vector4, STATICVERTEX>("mesh2");
+            var meshBuilder3 = new MeshBuilder<Vector4, STATICVERTEX>("mesh3");
+            var meshBuilder4 = new MeshBuilder<Vector4, STATICVERTEX>("mesh4");
 
             meshBuilder1.AddCube(new Vector4(1, 1, 0, 1), Matrix4x4.Identity);
             meshBuilder2.AddCube(new Vector4(1, 0, 1, 1), Matrix4x4.Identity);
@@ -323,7 +324,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh
-            var meshBuilder = new StaticMeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
             meshBuilder.AddCube(Vector4.One, Matrix4x4.Identity);            
 
             // create the gltf model
@@ -354,7 +355,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
             
             // create the mesh
-            var meshBuilder = new SkinnedMeshBuilder<Vector4, VPOS, SKIN4>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, VPOS, VEMPTY, SKIN4>("mesh1");
 
             var v1 = (new VPOS(-10, 0, +10), new SKIN4(0));
             var v2 = (new VPOS(+10, 0, +10), new SKIN4(0));
@@ -371,15 +372,18 @@ namespace SharpGLTF.Schema2.Authoring
             var v11 = (new VPOS(+5, 80, -5), new SKIN4(2));
             var v12 = (new VPOS(-5, 80, -5), new SKIN4(2));
 
-            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v1, v2, v6, v5);
-            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v2, v3, v7, v6);
-            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v3, v4, v8, v7);
-            meshBuilder.AddPolygon(new Vector4(1, 0, 1, 1), v4, v1, v5, v8);
+            var pink = new Vector4(1, 0, 1, 1);
+            var yellow = new Vector4(1, 1, 0, 1);
 
-            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v5, v6, v10, v9);
-            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v6, v7, v11, v10);
-            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v7, v8, v12, v11);
-            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), v8, v5, v9, v12);
+            meshBuilder.AddPolygon(pink, v1, v2, v6, v5);
+            meshBuilder.AddPolygon(pink, v2, v3, v7, v6);
+            meshBuilder.AddPolygon(pink, v3, v4, v8, v7);
+            meshBuilder.AddPolygon(pink, v4, v1, v5, v8);
+
+            meshBuilder.AddPolygon(yellow, v5, v6, v10, v9);
+            meshBuilder.AddPolygon(yellow, v6, v7, v11, v10);
+            meshBuilder.AddPolygon(yellow, v7, v8, v12, v11);
+            meshBuilder.AddPolygon(yellow, v8, v5, v9, v12);
 
             // create base model
             var model = ModelRoot.CreateModel();

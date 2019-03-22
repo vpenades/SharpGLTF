@@ -8,7 +8,8 @@ using static System.FormattableString;
 
 namespace SharpGLTF
 {
-    using VERTEX = Geometry.VertexTypes.VertexPositionNormal;
+    using POSITION = Geometry.VertexTypes.VertexPositionNormal;
+    using TEXCOORD = Geometry.VertexTypes.VertexEmpty;
     using MATERIAL = Vector4;
 
     /// <summary>
@@ -18,7 +19,7 @@ namespace SharpGLTF
     {
         #region data
 
-        private readonly Geometry.StaticMeshBuilder<MATERIAL, VERTEX> _Mesh = new Geometry.StaticMeshBuilder<MATERIAL, VERTEX>();
+        private readonly Geometry.MeshBuilder<MATERIAL, POSITION, TEXCOORD> _Mesh = new Geometry.MeshBuilder<MATERIAL, POSITION, TEXCOORD>();
         
         #endregion
 
@@ -26,9 +27,9 @@ namespace SharpGLTF
 
         public void AddTriangle(Vector3 a, Vector3 b, Vector3 c)
         {
-            var aa = new VERTEX { Position = a };
-            var bb = new VERTEX { Position = b };
-            var cc = new VERTEX { Position = c };
+            var aa = new POSITION { Position = a };
+            var bb = new POSITION { Position = b };
+            var cc = new POSITION { Position = c };
 
             _Mesh.AddTriangle(Vector4.One, aa, bb, cc);
         }

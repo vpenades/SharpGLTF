@@ -5,14 +5,13 @@ using System.Text;
 
 namespace SharpGLTF.Schema2.Authoring
 {
-    using Geometry;
+    using Geometry;    
     
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
-    
 
     static class SolidMeshUtils
     {
-        public static void AddCube<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform)
+        public static void AddCube<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform)
         {
             meshBuilder._AddCubeFace(material, Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ, xform);
             meshBuilder._AddCubeFace(material, -Vector3.UnitX, Vector3.UnitZ, Vector3.UnitY, xform);
@@ -24,7 +23,7 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder._AddCubeFace(material, -Vector3.UnitZ, Vector3.UnitY, Vector3.UnitX, xform);
         }
 
-        private static void _AddCubeFace<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
+        private static void _AddCubeFace<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
         {
             var p1 = Vector3.Transform(origin - axisX - axisY, xform);
             var p2 = Vector3.Transform(origin + axisX - axisY, xform);
@@ -41,7 +40,7 @@ namespace SharpGLTF.Schema2.Authoring
                 );
         }
 
-        public static void AddSphere<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Single radius, Matrix4x4 xform)
+        public static void AddSphere<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Single radius, Matrix4x4 xform)
         {
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 
@@ -91,7 +90,7 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder._AddSphereTriangle(material, xform, v9, v8, v1, 3);
         }
 
-        private static void _AddSphereTriangle<TMaterial>(this StaticMeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c, int iterations = 0)
+        private static void _AddSphereTriangle<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c, int iterations = 0)
         {
             if (iterations <=0)
             {

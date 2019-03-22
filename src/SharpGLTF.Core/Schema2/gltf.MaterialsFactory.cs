@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().Concat(_baseColorTexture, _metallicRoughnessTexture);
+            return base.GetLogicalChildren().ConcatItems(_baseColorTexture, _metallicRoughnessTexture);
         }
 
         private TextureInfo _GetBaseTexture(bool create)
@@ -161,7 +161,7 @@ namespace SharpGLTF.Schema2
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().Concat(_diffuseTexture, _specularGlossinessTexture);
+            return base.GetLogicalChildren().ConcatItems(_diffuseTexture, _specularGlossinessTexture);
         }
 
         private TextureInfo _GetDiffuseTexture(bool create)

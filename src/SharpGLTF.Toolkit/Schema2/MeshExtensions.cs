@@ -12,30 +12,34 @@ namespace SharpGLTF.Schema2
     {
         #region meshes
 
-        public static Mesh CreateMesh<TVertex, TJoints>(this ModelRoot root, Geometry.SkinnedMeshBuilder<Material, TVertex, TJoints> meshBuilder)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TJoints : struct, Geometry.VertexTypes.IJoints
+        public static Mesh CreateMesh<TvP, TvM, TvJ>(this ModelRoot root, Geometry.MeshBuilder<Material, TvP, TvM, TvJ> meshBuilder)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
             return root.CreateMeshes(m => m, meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TMaterial, TVertex, TJoints>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints> meshBuilder)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TJoints : struct, Geometry.VertexTypes.IJoints
+        public static Mesh CreateMesh<TMaterial, TvP, TvM, TvJ>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.MeshBuilder<TMaterial, TvP, TvM, TvJ> meshBuilder)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
             return root.CreateMeshes(materialEvaluator, meshBuilder).First();
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TVertex, TJoints>(this ModelRoot root, params Geometry.SkinnedMeshBuilder<Material, TVertex, TJoints>[] meshBuilders)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TJoints : struct, Geometry.VertexTypes.IJoints
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvJ>(this ModelRoot root, params Geometry.MeshBuilder<Material, TvP, TvM, TvJ>[] meshBuilders)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
-            return root.CreateMeshes<Material, TVertex, TJoints>(k => k, meshBuilders);
+            return root.CreateMeshes(k => k, meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TVertex, TJoints>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.SkinnedMeshBuilder<TMaterial, TVertex, TJoints>[] meshBuilders)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TJoints : struct, Geometry.VertexTypes.IJoints
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, TvJ>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.MeshBuilder<TMaterial, TvP, TvM, TvJ>[] meshBuilders)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
             // create a new material for every unique material in the mesh builders.
             var mapMaterials = meshBuilders
@@ -165,16 +169,26 @@ namespace SharpGLTF.Schema2
         }
 
         public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
+            where TVertex : struct, Geometry.VertexTypes.IVertexPosition
         {
-            var xvertices = vertices.Select(item => (item, default(Geometry.VertexTypes.VertexJoints0))).ToList();
+            var xvertices = vertices.Select(item => (item, default(Geometry.VertexTypes.VertexEmpty), default(Geometry.VertexTypes.VertexEmpty))).ToList();
 
             return primitive.WithVertexAccessors(xvertices);
         }
 
-        public static MeshPrimitive WithVertexAccessors<TVertex, TJoints>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TJoints)> vertices)
-            where TVertex : struct, Geometry.VertexTypes.IVertex
-            where TJoints : struct, Geometry.VertexTypes.IJoints
+        public static MeshPrimitive WithVertexAccessors<TVertex, TValues>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TValues)> vertices)
+            where TVertex : struct, Geometry.VertexTypes.IVertexPosition
+            where TValues : struct, Geometry.VertexTypes.IVertexMaterial
+        {
+            var xvertices = vertices.Select(item => (item.Item1, item.Item2, default(Geometry.VertexTypes.VertexEmpty))).ToList();
+
+            return primitive.WithVertexAccessors(xvertices);
+        }
+
+        public static MeshPrimitive WithVertexAccessors<TVertex, TValues, TJoints>(this MeshPrimitive primitive, IReadOnlyList<(TVertex, TValues, TJoints)> vertices)
+            where TVertex : struct, Geometry.VertexTypes.IVertexPosition
+            where TValues : struct, Geometry.VertexTypes.IVertexMaterial
+            where TJoints : struct, Geometry.VertexTypes.IVertexJoints
         {
             var memAccessors = Geometry.VertexTypes.VertexUtils.CreateVertexMemoryAccessors(new[] { vertices }).First();
 

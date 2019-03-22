@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().Concat(_indices, _values);
+            return base.GetLogicalChildren().ConcatItems(_indices, _values);
         }
 
         internal AccessorSparse(BufferView indices, int indicesOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesOffset, int count)
