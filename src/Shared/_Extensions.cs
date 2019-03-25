@@ -69,6 +69,30 @@ namespace SharpGLTF
             return q.IsNormalized() ? q : Quaternion.Normalize(q);
         }
 
+        internal static bool IsInRange(this Vector3 value, Vector3 min, Vector3 max)
+        {
+            if (value.X < min.X || value.X > max.X) return false;
+            if (value.Y < min.Y || value.Y > max.Y) return false;
+            if (value.Z < min.Z || value.Z > max.Z) return false;
+            return true;
+        }
+
+        internal static bool IsInRange(this Vector4 value, Vector4 min, Vector4 max)
+        {
+            if (value.X < min.X || value.X > max.X) return false;
+            if (value.Y < min.Y || value.Y > max.Y) return false;
+            if (value.Z < min.Z || value.Z > max.Z) return false;
+            if (value.W < min.W || value.W > max.W) return false;
+            return true;
+        }
+
+        internal static bool IsRound(this Vector4 value)
+        {
+            var r = new Vector4((int)value.X, (int)value.Y, (int)value.Z, (int)value.W);
+
+            return (value - r) == Vector4.Zero;
+        }
+
         #endregion
 
         #region linq

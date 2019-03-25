@@ -10,6 +10,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         void Validate();
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Color material.
+    /// </summary>
     public struct VertexColor1 : IVertexMaterial
     {
         public VertexColor1(Vector4 color)
@@ -28,9 +31,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void Validate()
         {
             if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
+            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
         }
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Texture Coordinate.
+    /// </summary>
     public struct VertexTexture1 : IVertexMaterial
     {
         public VertexTexture1(Vector2 uv)
@@ -52,6 +59,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
+    /// </summary>
     public struct VertexColor1Texture1 : IVertexMaterial
     {
         public VertexColor1Texture1(Vector4 color, Vector2 tex)
@@ -69,6 +79,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void Validate()
         {
             if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
+            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
+
             if (!TexCoord._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord));
         }
     }

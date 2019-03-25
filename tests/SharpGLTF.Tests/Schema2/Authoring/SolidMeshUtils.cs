@@ -31,8 +31,9 @@ namespace SharpGLTF.Schema2.Authoring
             var p4 = Vector3.Transform(origin - axisX + axisY, xform);
             var n = Vector3.Normalize(Vector3.TransformNormal(origin, xform));
 
-            meshBuilder.AddPolygon
-                (material,
+            meshBuilder.UsePrimitive(material)
+                .AddPolygon
+                (
                 new VPOSNRM(p1, n),
                 new VPOSNRM(p2, n),
                 new VPOSNRM(p3, n),
@@ -98,7 +99,7 @@ namespace SharpGLTF.Schema2.Authoring
                 var bb = new VPOSNRM(Vector3.Transform(b, xform), Vector3.Normalize(Vector3.TransformNormal(b, xform)));
                 var cc = new VPOSNRM(Vector3.Transform(c, xform), Vector3.Normalize(Vector3.TransformNormal(c, xform)));
 
-                meshBuilder.AddTriangle(material, aa, bb, cc);
+                meshBuilder.UsePrimitive(material).AddTriangle(aa, bb, cc);
                 return;
             }
 

@@ -11,9 +11,9 @@ namespace SharpGLTF.Schema2.Authoring
     using Geometry;
 
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
-    using STATICVERTEX = Geometry.VertexTypes.VertexPositionNormal;
+    using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
-    using SKIN4 = Geometry.VertexTypes.VertexJoints4;
+    using VSKIN4 = Geometry.VertexTypes.VertexJoints8x4;
 
     [TestFixture]
     public class CreateModelTests
@@ -217,10 +217,10 @@ namespace SharpGLTF.Schema2.Authoring
 
             var vertices = new[]
             {
-                new STATICVERTEX(-10,  10, 0, -10,  10, 15),
-                new STATICVERTEX( 10,  10, 0,  10,  10, 15),
-                new STATICVERTEX( 10, -10, 0,  10, -10, 15),
-                new STATICVERTEX(-10, -10, 0, -10, -10, 15)
+                new VPOSNRM(-10,  10, 0, -10,  10, 15),
+                new VPOSNRM( 10,  10, 0,  10,  10, 15),
+                new VPOSNRM( 10, -10, 0,  10, -10, 15),
+                new VPOSNRM(-10, -10, 0, -10, -10, 15)
             };
 
             var model = ModelRoot.CreateModel();
@@ -245,13 +245,13 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
 
-            var v1 = new STATICVERTEX(-10, 10, 0, -10, 10, 15);
-            var v2 = new STATICVERTEX( 10, 10, 0, 10, 10, 15);
-            var v3 = new STATICVERTEX( 10,-10, 0, 10, -10, 15);
-            var v4 = new STATICVERTEX(-10,-10, 0, -10, -10, 15);            
-            meshBuilder.AddPolygon(Vector4.One, v1, v2, v3, v4);
+            var v1 = new VPOSNRM(-10, 10, 0, -10, 10, 15);
+            var v2 = new VPOSNRM( 10, 10, 0, 10, 10, 15);
+            var v3 = new VPOSNRM( 10,-10, 0, 10, -10, 15);
+            var v4 = new VPOSNRM(-10,-10, 0, -10, -10, 15);            
+            meshBuilder.UsePrimitive(Vector4.One).AddPolygon(v1, v2, v3, v4);
 
             var model = ModelRoot.CreateModel();
 
@@ -273,15 +273,20 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
             // create several meshes
-            var meshBuilder1 = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
-            var meshBuilder2 = new MeshBuilder<Vector4, STATICVERTEX>("mesh2");
-            var meshBuilder3 = new MeshBuilder<Vector4, STATICVERTEX>("mesh3");
-            var meshBuilder4 = new MeshBuilder<Vector4, STATICVERTEX>("mesh4");
+            var meshBuilder1 = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
+            var meshBuilder2 = new MeshBuilder<Vector4, VPOSNRM>("mesh2");
+            var meshBuilder3 = new MeshBuilder<Vector4, VPOSNRM>("mesh3");
+            var meshBuilder4 = new MeshBuilder<Vector4, VPOSNRM>("mesh4");
 
             meshBuilder1.AddCube(new Vector4(1, 1, 0, 1), Matrix4x4.Identity);
             meshBuilder2.AddCube(new Vector4(1, 0, 1, 1), Matrix4x4.Identity);
             meshBuilder3.AddSphere(new Vector4(0, 1, 1, 1), 0.5f, Matrix4x4.Identity);
             meshBuilder4.AddSphere(new Vector4(1, 1, 0, 1), 0.5f, Matrix4x4.Identity);
+
+            meshBuilder1.Validate();
+            meshBuilder2.Validate();
+            meshBuilder3.Validate();
+            meshBuilder4.Validate();
 
             // create the gltf model
             var model = ModelRoot.CreateModel();
@@ -324,8 +329,9 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh
-            var meshBuilder = new MeshBuilder<Vector4, STATICVERTEX>("mesh1");
-            meshBuilder.AddCube(Vector4.One, Matrix4x4.Identity);            
+            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
+            meshBuilder.AddCube(Vector4.One, Matrix4x4.Identity);
+            meshBuilder.Validate();
 
             // create the gltf model
             var model = ModelRoot.CreateModel();
@@ -355,35 +361,37 @@ namespace SharpGLTF.Schema2.Authoring
             };
             
             // create the mesh
-            var meshBuilder = new MeshBuilder<Vector4, VPOS, VEMPTY, SKIN4>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, VPOS, VEMPTY, VSKIN4>("mesh1");
 
-            var v1 = (new VPOS(-10, 0, +10), new SKIN4(0));
-            var v2 = (new VPOS(+10, 0, +10), new SKIN4(0));
-            var v3 = (new VPOS(+10, 0, -10), new SKIN4(0));
-            var v4 = (new VPOS(-10, 0, -10), new SKIN4(0));
+            var v1 = (new VPOS(-10, 0, +10), new VSKIN4(0));
+            var v2 = (new VPOS(+10, 0, +10), new VSKIN4(0));
+            var v3 = (new VPOS(+10, 0, -10), new VSKIN4(0));
+            var v4 = (new VPOS(-10, 0, -10), new VSKIN4(0));
 
-            var v5 = (new VPOS(-10, 40, +10), new SKIN4(0, 1));
-            var v6 = (new VPOS(+10, 40, +10), new SKIN4(0, 1));
-            var v7 = (new VPOS(+10, 40, -10), new SKIN4(0, 1));
-            var v8 = (new VPOS(-10, 40, -10), new SKIN4(0, 1));
+            var v5 = (new VPOS(-10, 40, +10), new VSKIN4(0, 1));
+            var v6 = (new VPOS(+10, 40, +10), new VSKIN4(0, 1));
+            var v7 = (new VPOS(+10, 40, -10), new VSKIN4(0, 1));
+            var v8 = (new VPOS(-10, 40, -10), new VSKIN4(0, 1));
 
-            var v9  = (new VPOS(-5, 80, +5), new SKIN4(2));
-            var v10 = (new VPOS(+5, 80, +5), new SKIN4(2));
-            var v11 = (new VPOS(+5, 80, -5), new SKIN4(2));
-            var v12 = (new VPOS(-5, 80, -5), new SKIN4(2));
+            var v9  = (new VPOS(-5, 80, +5), new VSKIN4(2));
+            var v10 = (new VPOS(+5, 80, +5), new VSKIN4(2));
+            var v11 = (new VPOS(+5, 80, -5), new VSKIN4(2));
+            var v12 = (new VPOS(-5, 80, -5), new VSKIN4(2));
 
             var pink = new Vector4(1, 0, 1, 1);
             var yellow = new Vector4(1, 1, 0, 1);
 
-            meshBuilder.AddPolygon(pink, v1, v2, v6, v5);
-            meshBuilder.AddPolygon(pink, v2, v3, v7, v6);
-            meshBuilder.AddPolygon(pink, v3, v4, v8, v7);
-            meshBuilder.AddPolygon(pink, v4, v1, v5, v8);
+            meshBuilder.UsePrimitive(pink).AddPolygon(v1, v2, v6, v5);
+            meshBuilder.UsePrimitive(pink).AddPolygon(v2, v3, v7, v6);
+            meshBuilder.UsePrimitive(pink).AddPolygon(v3, v4, v8, v7);
+            meshBuilder.UsePrimitive(pink).AddPolygon(v4, v1, v5, v8);
 
-            meshBuilder.AddPolygon(yellow, v5, v6, v10, v9);
-            meshBuilder.AddPolygon(yellow, v6, v7, v11, v10);
-            meshBuilder.AddPolygon(yellow, v7, v8, v12, v11);
-            meshBuilder.AddPolygon(yellow, v8, v5, v9, v12);
+            meshBuilder.UsePrimitive(yellow).AddPolygon(v5, v6, v10, v9);
+            meshBuilder.UsePrimitive(yellow).AddPolygon(v6, v7, v11, v10);
+            meshBuilder.UsePrimitive(yellow).AddPolygon(v7, v8, v12, v11);
+            meshBuilder.UsePrimitive(yellow).AddPolygon(v8, v5, v9, v12);
+
+            meshBuilder.Validate();
 
             // create base model
             var model = ModelRoot.CreateModel();

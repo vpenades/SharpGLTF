@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
     using Memory;
 
-    public static class VertexUtils
+    static class VertexUtils
     {
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvJ>(this IEnumerable<IReadOnlyList<(TvP, TvM, TvJ)>> vertexBlocks)
             where TvP : struct, IVertexPosition
@@ -154,27 +153,27 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new NotImplementedException();
         }
 
-        internal static Single[] GetScalarColumn<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        private static Single[] GetScalarColumn<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
             return GetColumn<TvP, TvM, TvJ, Single>(vertices, func);
         }
 
-        internal static Vector2[] GetVector2Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        private static Vector2[] GetVector2Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
             return GetColumn<TvP, TvM, TvJ, Vector2>(vertices, func);
         }
 
-        internal static Vector3[] GetVector3Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        private static Vector3[] GetVector3Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
             return GetColumn<TvP, TvM, TvJ, Vector3>(vertices, func);
         }
 
-        internal static Vector4[] GetVector4Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        private static Vector4[] GetVector4Column<TvP, TvM, TvJ>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
             return GetColumn<TvP, TvM, TvJ, Vector4>(vertices, func);
         }
 
-        internal static TColumn[] GetColumn<TvP, TvM, TvJ, TColumn>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
+        private static TColumn[] GetColumn<TvP, TvM, TvJ, TColumn>(this IReadOnlyList<(TvP, TvM, TvJ)> vertices, Func<(TvP, TvM, TvJ), Object> func)
         {
             var dst = new TColumn[vertices.Count];
 

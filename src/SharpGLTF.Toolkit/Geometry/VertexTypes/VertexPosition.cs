@@ -10,6 +10,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         void Validate();
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Position.
+    /// </summary>
     public struct VertexPosition : IVertexPosition
     {
         public VertexPosition(Vector3 position)
@@ -36,6 +39,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Position and a Normal.
+    /// </summary>
     public struct VertexPositionNormal : IVertexPosition
     {
         public VertexPositionNormal(Vector3 p, Vector3 n)
@@ -63,6 +69,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
     }
 
+    /// <summary>
+    /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
+    /// </summary>
     public struct VertexPositionNormalTangent : IVertexPosition
     {
         public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
@@ -86,6 +95,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
             if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
             if (!Tangent._IsReal()) throw new NotFiniteNumberException(nameof(Tangent));
+        }
+
+        void IVertexPosition.Validate()
+        {
+            throw new NotImplementedException();
         }
     }
 }

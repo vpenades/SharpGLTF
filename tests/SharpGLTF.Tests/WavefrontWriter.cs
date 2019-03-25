@@ -31,7 +31,7 @@ namespace SharpGLTF
             var bb = new POSITION { Position = b };
             var cc = new POSITION { Position = c };
 
-            _Mesh.AddTriangle(Vector4.One, aa, bb, cc);
+            _Mesh.UsePrimitive(Vector4.One).AddTriangle(aa, bb, cc);
         }
 
         public override string ToString()

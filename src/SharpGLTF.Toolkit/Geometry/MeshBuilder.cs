@@ -6,11 +6,40 @@ using System.Linq;
 namespace SharpGLTF.Geometry
 {
     using Collections;
+    using VertexTypes;
 
+    /// <summary>
+    /// Represents an utility class to help build mesh primitives by adding triangles
+    /// </summary>
+    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvJ}"/> instance.</typeparam>
+    /// <typeparam name="TvP">
+    /// The vertex fragment type with Position, Normal and Tangent.
+    /// Valid types are:
+    /// <see cref="VertexPosition"/>,
+    /// <see cref="VertexPositionNormal"/>,
+    /// <see cref="VertexPositionNormalTangent"/>.
+    /// </typeparam>
+    /// <typeparam name="TvM">
+    /// The vertex fragment type with Colors and Texture Coordinates.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexColor1"/>,
+    /// <see cref="VertexTexture1"/>,
+    /// <see cref="VertexColor1Texture1"/>.
+    /// </typeparam>
+    /// <typeparam name="TvJ">
+    /// The vertex fragment type with Skin Joint Weights.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexJoints8x4"/>,
+    /// <see cref="VertexJoints8x8"/>,
+    /// <see cref="VertexJoints16x4"/>,
+    /// <see cref="VertexJoints16x8"/>.
+    /// </typeparam>
     public class PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>
-        where TvP : struct, VertexTypes.IVertexPosition
-        where TvM : struct, VertexTypes.IVertexMaterial
-        where TvJ : struct, VertexTypes.IVertexJoints
+        where TvP : struct, IVertexPosition
+        where TvM : struct, IVertexMaterial
+        where TvJ : struct, IVertexJoints
     {
         #region lifecycle
 
@@ -91,6 +120,53 @@ namespace SharpGLTF.Geometry
             _Indices.Add(cc);
         }
 
+        public void AddTriangle((TvP, TvM) a, (TvP, TvM) b, (TvP, TvM) c)
+        {
+            AddTriangle((a.Item1, a.Item2, default), (b.Item1, b.Item2, default), (c.Item1, c.Item2, default));
+        }
+
+        public void AddTriangle((TvP, TvJ) a, (TvP, TvJ) b, (TvP, TvJ) c)
+        {
+            AddTriangle((a.Item1, default, a.Item2), (b.Item1, default, b.Item2), (c.Item1, default, c.Item2));
+        }
+
+        public void AddTriangle(TvP a, TvP b, TvP c)
+        {
+            AddTriangle((a, default, default), (b, default, default), (c, default, default));
+        }
+
+        public void AddPolygon(params (TvP, TvM, TvJ)[] points)
+        {
+            for (int i = 2; i < points.Length; ++i)
+            {
+                AddTriangle(points[0], points[i - 1], points[i]);
+            }
+        }
+
+        public void AddPolygon(params (TvP, TvM)[] points)
+        {
+            for (int i = 2; i < points.Length; ++i)
+            {
+                AddTriangle(points[0], points[i - 1], points[i]);
+            }
+        }
+
+        public void AddPolygon(params (TvP, TvJ)[] points)
+        {
+            for (int i = 2; i < points.Length; ++i)
+            {
+                AddTriangle(points[0], points[i - 1], points[i]);
+            }
+        }
+
+        public void AddPolygon(params TvP[] points)
+        {
+            for (int i = 2; i < points.Length; ++i)
+            {
+                AddTriangle(points[0], points[i - 1], points[i]);
+            }
+        }
+
         public void Validate()
         {
             foreach (var v in _Vertices)
@@ -104,10 +180,38 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
+    /// <summary>
+    /// Represents an utility class to help build meshes by adding primitives associated with a given material.
+    /// </summary>
+    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvJ}"/> instance.</typeparam>
+    /// <typeparam name="TvP">
+    /// The vertex fragment type with Position, Normal and Tangent.
+    /// Valid types are:
+    /// <see cref="VertexPosition"/>,
+    /// <see cref="VertexPositionNormal"/>,
+    /// <see cref="VertexPositionNormalTangent"/>.
+    /// </typeparam>
+    /// <typeparam name="TvM">
+    /// The vertex fragment type with Colors and Texture Coordinates.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexColor1"/>,
+    /// <see cref="VertexTexture1"/>,
+    /// <see cref="VertexColor1Texture1"/>.
+    /// </typeparam>
+    /// <typeparam name="TvJ">
+    /// The vertex fragment type with Skin Joint Weights.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexJoints8x4"/>,
+    /// <see cref="VertexJoints8x8"/>,
+    /// <see cref="VertexJoints16x4"/>,
+    /// <see cref="VertexJoints16x8"/>.
+    /// </typeparam>
     public class MeshBuilder<TMaterial, TvP, TvM, TvJ>
-        where TvP : struct, VertexTypes.IVertexPosition
-        where TvM : struct, VertexTypes.IVertexMaterial
-        where TvJ : struct, VertexTypes.IVertexJoints
+        where TvP : struct, IVertexPosition
+        where TvM : struct, IVertexMaterial
+        where TvJ : struct, IVertexJoints
     {
         #region lifecycle
 
@@ -136,39 +240,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void AddPolygon(TMaterial material, params (TvP, TvM, TvJ)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(material, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(TMaterial material, params (TvP, TvM)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(material, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(TMaterial material, params (TvP, TvJ)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(material, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(TMaterial material, params TvP[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(material, points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddTriangle(TMaterial material, (TvP, TvM, TvJ) a, (TvP, TvM, TvJ) b, (TvP, TvM, TvJ) c)
+        public PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> UsePrimitive(TMaterial material)
         {
             if (!_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive))
             {
@@ -176,22 +248,7 @@ namespace SharpGLTF.Geometry
                 _Primitives[material] = primitive;
             }
 
-            primitive.AddTriangle(a, b, c);
-        }
-
-        public void AddTriangle(TMaterial material, (TvP, TvM) a, (TvP, TvM) b, (TvP, TvM) c)
-        {
-            AddTriangle(material, (a.Item1, a.Item2, default), (b.Item1, b.Item2, default), (c.Item1, c.Item2, default));
-        }
-
-        public void AddTriangle(TMaterial material, (TvP, TvJ) a, (TvP, TvJ) b, (TvP, TvJ) c)
-        {
-            AddTriangle(material, (a.Item1, default, a.Item2), (b.Item1, default, b.Item2), (c.Item1, default, c.Item2));
-        }
-
-        public void AddTriangle(TMaterial material, TvP a, TvP b, TvP c)
-        {
-            AddTriangle(material, (a, default, default), (b, default, default), (c, default, default));
+            return primitive;
         }
 
         public IEnumerable<(int, int, int)> GetTriangles(TMaterial material)
