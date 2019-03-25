@@ -8,9 +8,9 @@ Prerelease Nuget packages available [here.](https://www.nuget.org/packages/Sharp
 
 ### Examples
 
-- [Load and save glTF and GLB files.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/LoadAndSave/LoadModelTests.cs#L100)
-- [Create a simple triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L25)
-- [Create a textured triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L76)
+- [Load and save glTF and GLB files.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/LoadAndSave/LoadSampleTests.cs#L32)
+- [Create a simple triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L97)
+- [Create a textured triangle.](https://github.com/vpenades/SharpGLTF/blob/master/tests/SharpGLTF.Tests/Schema2/Authoring/CreateModelTests.cs#L138)
 
 ### Features
 
@@ -41,12 +41,13 @@ Prerelease Nuget packages available [here.](https://www.nuget.org/packages/Sharp
 
 - [x] [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness)
 - [x] [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit)
+- [x] [KHR_lights_punctual](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
 
 ### Unsupported extensions
 
 - [ ] [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)
   - Depends on [Google's Draco Project](https://github.com/google/draco) which is C++ ; *Help Needed*
-- [ ] [KHR_lights_punctual](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
+
 - [ ] [KHR_techniques_webgl](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_techniques_webgl)
 - [ ] [KHR_texture_transform](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform)
 - [ ] [MSFT_texture_dds](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_texture_dds)
