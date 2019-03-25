@@ -7,6 +7,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexPosition
     {
+        void Transform(Matrix4x4 xform);
+
         void Validate();
     }
 
@@ -32,6 +34,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("POSITION")]
         public Vector3 Position;
+
+        public void Transform(Matrix4x4 xform)
+        {
+            Position = Vector3.Transform(Position, xform);
+        }
 
         public void Validate()
         {
@@ -62,6 +69,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("NORMAL")]
         public Vector3 Normal;
 
+        public void Transform(Matrix4x4 xform)
+        {
+            Position = Vector3.Transform(Position, xform);
+            Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
+        }
+
         public void Validate()
         {
             if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
@@ -90,16 +103,21 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
 
+        public void Transform(Matrix4x4 xform)
+        {
+            Position = Vector3.Transform(Position, xform);
+            Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
+
+            // TODO: not sure if this is correct, must be checked. Most probably, if the xform handedness if negative, Tangent.W must be reversed.
+            var txyz = Vector3.Normalize(Vector3.TransformNormal(new Vector3(Tangent.X, Tangent.Y, Tangent.Z), xform));
+            Tangent = new Vector4(txyz, Tangent.W);
+        }
+
         public void Validate()
         {
             if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
             if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
             if (!Tangent._IsReal()) throw new NotFiniteNumberException(nameof(Tangent));
-        }
-
-        void IVertexPosition.Validate()
-        {
-            throw new NotImplementedException();
         }
     }
 }

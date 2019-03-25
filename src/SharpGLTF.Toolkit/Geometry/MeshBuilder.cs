@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Numerics;
 
 namespace SharpGLTF.Geometry
 {
@@ -167,6 +168,25 @@ namespace SharpGLTF.Geometry
             }
         }
 
+        public void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive, Matrix4x4 transform)
+        {
+            if (primitive == null) throw new ArgumentNullException(nameof(primitive));
+
+            foreach (var t in primitive.Triangles)
+            {
+                var a = primitive.Vertices[t.Item1];
+                var b = primitive.Vertices[t.Item2];
+                var c = primitive.Vertices[t.Item3];
+
+                var aa = a.Item1; aa.Transform(transform); a.Item1 = aa;
+                var bb = b.Item1; bb.Transform(transform); b.Item1 = bb;
+                var cc = c.Item1; cc.Transform(transform); c.Item1 = cc;
+
+                AddTriangle(a, b, c);
+            }
+
+        }
+
         public void Validate()
         {
             foreach (var v in _Vertices)
@@ -263,6 +283,14 @@ namespace SharpGLTF.Geometry
             if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive)) return primitive.Indices;
 
             return new int[0];
+        }
+
+        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvJ> mesh, Matrix4x4 transform)
+        {
+            foreach (var p in mesh.Primitives)
+            {
+                UsePrimitive(p.Material).AddPrimitive(p, transform);
+            }
         }
 
         public void Validate()

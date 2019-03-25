@@ -5,6 +5,8 @@ using System.Text;
 
 namespace SharpGLTF.Transforms
 {
+    // https://github.com/KhronosGroup/glTF-Validator/issues/33
+
     /// <summary>
     /// Represents an affine transform in 3D space, defined by a <see cref="Quaternion"/> rotation, a <see cref="Vector3"/> scale and a <see cref="Vector3"/> translation.
     /// </summary>
