@@ -13,8 +13,9 @@ namespace SharpGLTF.IO
 
     using POSITION = Geometry.VertexTypes.VertexPositionNormal;
     using TEXCOORD = Geometry.VertexTypes.VertexTexture1;
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
 
-    using VERTEX = ValueTuple<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1>;
+    using VERTEX = ValueTuple<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
 
     /// <summary>
     /// Tiny wavefront object writer
@@ -26,7 +27,8 @@ namespace SharpGLTF.IO
 
         public struct Material
         {
-            public Vector4 DiffuseColor;
+            public Vector3 DiffuseColor;
+            public Vector3 SpecularColor;
             public BYTES DiffuseTexture;
         }
 
@@ -70,16 +72,21 @@ namespace SharpGLTF.IO
         private IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
-            var images = materials.Select(item => item.DiffuseTexture);
+            var images = materials
+                .Select(item => item.DiffuseTexture)
+                .Where(item => item.Array != null)
+                .Distinct();
 
-            foreach (var img in images.Distinct())
+            bool firstImg = true;
+
+            foreach (var img in images)
             {
-                if (img.Array == null) continue;
-
-                var imgName = $"{baseName}_{files.Count}";
+                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}";
 
                 if (_IsPng(img)) files[imgName + ".png"] = img;
                 if (_IsJpeg(img)) files[imgName + ".jpg"] = img;
+
+                firstImg = false;
             }
 
             // write materials
@@ -96,6 +103,7 @@ namespace SharpGLTF.IO
                 sb.AppendLine("illum 2");
                 sb.AppendLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
                 sb.AppendLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
+                sb.AppendLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
 
                 if (m.DiffuseTexture.Array != null)
                 {
@@ -219,7 +227,7 @@ namespace SharpGLTF.IO
 
         public void AddModel(Schema2.ModelRoot model)
         {
-            foreach (var triangle in model.Triangulate())
+            foreach (var triangle in Schema2.Toolkit.Triangulate<POSITION, TEXCOORD, VEMPTY>(model.DefaultScene))
             {
                 var dstMaterial = new Material();
 
@@ -227,7 +235,13 @@ namespace SharpGLTF.IO
                 if (srcMaterial != null)
                 {
                     var baseColor = srcMaterial.FindChannel("BaseColor");
-                    dstMaterial.DiffuseColor = baseColor.Factor;
+
+                    var clr = new Vector3(baseColor.Factor.X, baseColor.Factor.Y, baseColor.Factor.Z);
+
+                    // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
+                    dstMaterial.DiffuseColor = clr;
+                    dstMaterial.SpecularColor = new Vector3(0.2f);
+
                     dstMaterial.DiffuseTexture = baseColor.Image?.GetImageContent() ?? default;
                 }
 

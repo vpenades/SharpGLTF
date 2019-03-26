@@ -316,6 +316,99 @@ namespace SharpGLTF
             }
         }
 
+        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int count)
+        {
+            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
+        }
+
+        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> indices)
+        {
+            switch (ptype)
+            {
+                case PrimitiveType.TRIANGLES:
+                    {
+                        using (var ator = indices.GetEnumerator())
+                        {
+                            while (true)
+                            {
+                                if (!ator.MoveNext()) break;
+                                var a = ator.Current;
+                                if (!ator.MoveNext()) break;
+                                var b = ator.Current;
+                                if (!ator.MoveNext()) break;
+                                var c = ator.Current;
+
+                                if (!_IsDegenerated(a,b,c)) yield return ((int)a, (int)b, (int)c);
+                            }
+                        }
+
+                        break;
+                    }
+
+                case PrimitiveType.TRIANGLE_FAN:
+                    {
+                        using (var ator = indices.GetEnumerator())
+                        {
+                            if (!ator.MoveNext()) break;
+                            var a = ator.Current;
+                            if (!ator.MoveNext()) break;
+                            var b = ator.Current;
+
+                            while (true)
+                            {
+                                if (!ator.MoveNext()) break;
+                                var c = ator.Current;
+
+                                if (!_IsDegenerated(a, b, c)) yield return ((int)a, (int)b, (int)c);
+
+                                b = c;
+                            }
+                        }
+
+                        break;
+                    }
+
+                case PrimitiveType.TRIANGLE_STRIP:
+                    {
+                        using (var ator = indices.GetEnumerator())
+                        {
+                            if (!ator.MoveNext()) break;
+                            var a = ator.Current;
+                            if (!ator.MoveNext()) break;
+                            var b = ator.Current;
+
+                            bool reversed = false;
+
+                            while (true)
+                            {
+                                if (!ator.MoveNext()) break;
+                                var c = ator.Current;
+
+                                if (!_IsDegenerated(a, b, c))
+                                {
+                                    if (reversed) yield return ((int)b, (int)a, (int)c);
+                                    else yield return ((int)a, (int)b, (int)c);
+                                }
+
+                                a = b;
+                                b = c;
+                                reversed = !reversed;
+                            }
+                        }
+
+                        break;
+                    }
+            }
+        }
+
+        private static bool _IsDegenerated(uint a, uint b, uint c)
+        {
+            if (a == b) return true;
+            if (a == c) return true;
+            if (b == c) return true;
+            return false;
+        }
+
         #endregion
 
         #region serialization

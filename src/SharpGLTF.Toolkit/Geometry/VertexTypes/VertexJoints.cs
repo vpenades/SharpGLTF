@@ -7,6 +7,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexJoints
     {
+        void SetJoints(int jointSet, Vector4 joints, Vector4 weights);
+
         void Validate();
     }
 
@@ -15,6 +17,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexJoints8x4 : IVertexJoints
     {
+        #region constructors
+
         public VertexJoints8x4(int jointIndex)
         {
             Joints = new Vector4(jointIndex);
@@ -27,11 +31,24 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = new Vector4(0.5f, 0.5f, 0, 0);
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_BYTE, false)]
         public Vector4 Joints;
 
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
+
+        #endregion
+
+        #region API
+
+        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        {
+            if (jointSet == 0) { this.Joints = joints; this.Weights = weights; }
+        }
 
         public void Validate()
         {
@@ -40,6 +57,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -47,6 +66,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexJoints16x4 : IVertexJoints
     {
+        #region constructors
+
         public VertexJoints16x4(int jointIndex)
         {
             Joints = new Vector4(jointIndex);
@@ -59,11 +80,24 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = new Vector4(0.5f, 0.5f, 0, 0);
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_SHORT, false)]
         public Vector4 Joints;
 
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
+
+        #endregion
+
+        #region API
+
+        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        {
+            if (jointSet == 0) { this.Joints = joints; this.Weights = weights; }
+        }
 
         public void Validate()
         {
@@ -72,6 +106,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -79,6 +115,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexJoints8x8 : IVertexJoints
     {
+        #region constructors
+
         public VertexJoints8x8(int jointIndex)
         {
             Joints0 = new Vector4(jointIndex);
@@ -95,6 +133,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights1 = Vector4.Zero;
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_BYTE, false)]
         public Vector4 Joints0;
 
@@ -107,6 +149,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
+        #endregion
+
+        #region API
+
+        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        {
+            if (jointSet == 0) { this.Joints0 = joints; this.Weights0 = weights; }
+            if (jointSet == 1) { this.Joints1 = joints; this.Weights1 = weights; }
+        }
+
         public void Validate()
         {
             if (!Joints0._IsReal()) throw new NotFiniteNumberException(nameof(Joints0));
@@ -118,6 +170,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -125,6 +179,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexJoints16x8 : IVertexJoints
     {
+        #region constructors
+
         public VertexJoints16x8(int jointIndex)
         {
             Joints0 = new Vector4(jointIndex);
@@ -141,6 +197,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights1 = Vector4.Zero;
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_SHORT, false)]
         public Vector4 Joints0;
 
@@ -153,6 +213,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
+        #endregion
+
+        #region API
+
+        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        {
+            if (jointSet == 0) { this.Joints0 = joints; this.Weights0 = weights; }
+            if (jointSet == 1) { this.Joints1 = joints; this.Weights1 = weights; }
+        }
+
         public void Validate()
         {
             if (!Joints0._IsReal()) throw new NotFiniteNumberException(nameof(Joints0));
@@ -164,5 +234,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
+
+        #endregion
     }
 }

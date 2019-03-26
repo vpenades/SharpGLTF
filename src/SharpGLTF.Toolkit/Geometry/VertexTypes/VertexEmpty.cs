@@ -15,6 +15,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
         }
 
+        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        {
+        }
+
         public void Validate()
         {
         }

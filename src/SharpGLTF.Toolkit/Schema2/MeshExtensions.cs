@@ -239,6 +239,48 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
+        public static IEnumerable<((TvP, TvM, TvJ), (TvP, TvM, TvJ), (TvP, TvM, TvJ), Material)> Triangulate<TvP, TvM, TvJ>(this Mesh mesh, Matrix4x4 xform)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            var normals = mesh.GetComputedNormals();
+
+            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM, TvJ>(xform, normals));
+        }
+
+        public static IEnumerable<((TvP, TvM, TvJ), (TvP, TvM, TvJ), (TvP, TvM, TvJ), Material)> Triangulate<TvP, TvM, TvJ>(this MeshPrimitive prim, Matrix4x4 xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            var vertices = prim.GetVertexColumns();
+            if (vertices.Normals == null && defaultNormals != null) vertices.SetNormals(defaultNormals);
+
+            var triangles = prim.GetTriangleIndices();
+
+            foreach (var t in triangles)
+            {
+                var ap = vertices.GetPositionFragment<TvP>(t.Item1);
+                var bp = vertices.GetPositionFragment<TvP>(t.Item2);
+                var cp = vertices.GetPositionFragment<TvP>(t.Item3);
+
+                ap.Transform(xform);
+                bp.Transform(xform);
+                cp.Transform(xform);
+
+                var am = vertices.GetMaterialFragment<TvM>(t.Item1);
+                var bm = vertices.GetMaterialFragment<TvM>(t.Item2);
+                var cm = vertices.GetMaterialFragment<TvM>(t.Item3);
+
+                var aj = vertices.GetJointsFragment<TvJ>(t.Item1);
+                var bj = vertices.GetJointsFragment<TvJ>(t.Item2);
+                var cj = vertices.GetJointsFragment<TvJ>(t.Item3);
+
+                yield return ((ap, am, aj), (bp, bm, bj), (cp, cm, cj), prim.Material);
+            }
+        }
+
         public static Geometry.VertexTypes.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
         {
             var vertexAccessors = primitive.VertexAccessors;
@@ -266,27 +308,17 @@ namespace SharpGLTF.Schema2
 
         public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)
         {
-            if (primitive.DrawPrimitiveType == PrimitiveType.POINTS) yield break;
-            if (primitive.DrawPrimitiveType == PrimitiveType.LINES) yield break;
-            if (primitive.DrawPrimitiveType == PrimitiveType.LINE_LOOP) yield break;
-            if (primitive.DrawPrimitiveType == PrimitiveType.LINE_STRIP) yield break;
+            if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.GetVertexAccessor("POSITION").Count);
 
-            var indices = primitive.IndexAccessor != null
-                ?
-                primitive.IndexAccessor.AsIndicesArray()
-                :
-                EncodedArrayUtils.IndicesRange(0, primitive.GetVertexAccessor("POSITION").Count);
-
-            if (primitive.DrawPrimitiveType == PrimitiveType.TRIANGLES)
-            {
-                for (int i = 2; i < indices.Count; i += 3)
-                {
-                    yield return ((int)indices[i - 2], (int)indices[i - 1], (int)indices[i]);
-                }
-            }
+            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
         }
 
-        public static Dictionary<Vector3, Vector3> ComputeNormals(this Mesh mesh)
+        /// <summary>
+        /// Calculates a default set of normals for the given mesh.
+        /// </summary>
+        /// <param name="mesh">A <see cref="Mesh"/> instance.</param>
+        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the keys represent positions and the values represent Normals.</returns>
+        public static Dictionary<Vector3, Vector3> GetComputedNormals(this Mesh mesh)
         {
             var posnrm = new Dictionary<Vector3, Vector3>();
 
@@ -319,6 +351,24 @@ namespace SharpGLTF.Schema2
             }
 
             return posnrm;
+        }
+
+        public static void AddMesh<TMaterial, TvP, TvM, TvJ>(this Geometry.MeshBuilder<TMaterial, TvP, TvM, TvJ> meshBuilder, Mesh srcMesh, Matrix4x4 xform, Func<Material, TMaterial> materialFunc)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            var normals = srcMesh.GetComputedNormals();
+
+            foreach (var srcPrim in srcMesh.Primitives)
+            {
+                var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
+
+                foreach (var tri in srcPrim.Triangulate<TvP, TvM, TvJ>(xform, normals))
+                {
+                    dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
+                }
+            }
         }
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath)
