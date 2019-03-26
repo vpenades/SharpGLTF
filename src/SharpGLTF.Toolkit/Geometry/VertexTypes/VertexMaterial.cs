@@ -7,6 +7,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexMaterial
     {
+        void SetColor(int setIndex, Vector4 color);
+        void SetTexCoord(int setIndex, Vector2 coord);
+
         void Validate();
     }
 
@@ -27,6 +30,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Color;
+
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
         public void Validate()
         {
@@ -53,6 +60,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_0")]
         public Vector2 TexCoord;
 
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
+
         public void Validate()
         {
             if (!TexCoord._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord));
@@ -75,6 +86,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("TEXCOORD_0")]
         public Vector2 TexCoord;
+
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
         public void Validate()
         {

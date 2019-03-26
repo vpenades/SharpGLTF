@@ -62,7 +62,8 @@ namespace SharpGLTF.Schema2
             return material;
         }
 
-        public static Material WithPBRMetallicRoughness(this Material material,
+        public static Material WithPBRMetallicRoughness(
+            this Material material,
             Vector4 baseColorFactor, string baseColorImageFilePath,
             float metallicFactor = 1, string metallicImageFilePath = null,
             float roughnessFactor = 1, string roughtnessImageFilePath = null

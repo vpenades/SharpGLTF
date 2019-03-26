@@ -38,15 +38,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 if (!f.Contains(section)) continue;
 
+                var perf = System.Diagnostics.Stopwatch.StartNew();                
+
                 var model = GltfUtils.LoadModel(f);
                 Assert.NotNull(model);
 
-                // evaluate and save all the triangles to a Wavefront Object
-                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
-                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
-                
+                var perf_load = perf.ElapsedMilliseconds;
+
                 // do a model clone and compare it
                 _AssertAreEqual(model, model.DeepClone());
+
+                var perf_clone= perf.ElapsedMilliseconds;
 
                 // check extensions used
                 if (!model.ExtensionsUsed.Contains("EXT_lights_image_based"))
@@ -54,6 +56,15 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
                     CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
                 }
+                
+                // evaluate and save all the triangles to a Wavefront Object
+                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+                var perf_wavefront = perf.ElapsedMilliseconds;
+
+                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
+                var perf_glb = perf.ElapsedMilliseconds;
+
+                TestContext.Progress.WriteLine($"processed {f.ToShortDisplayPath()} - Load:{perf_load}ms Clone:{perf_clone}ms S.obj:{perf_wavefront}ms S.glb:{perf_glb}ms");
             }
         }
 

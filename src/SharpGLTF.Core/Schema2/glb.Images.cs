@@ -5,6 +5,8 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using BYTES = ArraySegment<Byte>;
+
     [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
     public sealed partial class Image
     {
@@ -89,13 +91,13 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Retrieves the image file as a block of bytes.
         /// </summary>
-        /// <returns>A <see cref="ArraySegment{Byte}"/> block containing the image file.</returns>
-        public ArraySegment<Byte> GetImageContent()
+        /// <returns>A <see cref="BYTES"/> block containing the image file.</returns>
+        public BYTES GetImageContent()
         {
             // the image is stored locally in a temporary buffer
-            if (_SatelliteImageContent != null) return new ArraySegment<byte>(_SatelliteImageContent);
+            if (_SatelliteImageContent != null) return new BYTES(_SatelliteImageContent);
 
-            /// the image is stored in a <see cref="BufferView"/>
+            // the image is stored in a BufferView
             if (this._bufferView.HasValue)
             {
                 var bv = this.LogicalParent.LogicalBufferViews[this._bufferView.Value];

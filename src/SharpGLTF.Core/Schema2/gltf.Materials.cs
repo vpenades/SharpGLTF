@@ -130,6 +130,8 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        public Boolean Exists => _Material != null;
+
         public String Key => _Key;
 
         public Texture Texture => _TextureInfoGetter?.Invoke(false) == null ? null : _Material.LogicalParent.LogicalTextures[_TextureInfoGetter(false)._LogicalTextureIndex];
@@ -140,19 +142,21 @@ namespace SharpGLTF.Schema2
 
         public TextureSampler Sampler => Texture?.Sampler;
 
-        public Vector4 Factor => _FactorGetter();
+        public Vector4 Factor => _FactorGetter?.Invoke() ?? Vector4.One;
 
         public TextureTransform Transform => _TextureInfoGetter?.Invoke(false)?.Transform;
 
         #endregion
 
-        #region fluent API
+        #region API
 
-        public void SetFactor(Vector4 value) { _FactorSetter?.Invoke(value); }
+        public void SetFactor(float value) { SetFactor(new Vector4(1, 1, 1, value)); }
 
-        public void SetFactor(float value)
+        public void SetFactor(Vector4 value)
         {
-            SetFactor(new Vector4(1, 1, 1, value));
+            if (_FactorSetter == null) throw new InvalidOperationException();
+
+            _FactorSetter?.Invoke(value);
         }
 
         public void SetTexture(
@@ -165,6 +169,8 @@ namespace SharpGLTF.Schema2
         {
             if (texImg == null) return; // in theory, we should completely remove the TextureInfo
 
+            if (_Material == null) throw new InvalidOperationException();
+
             var sampler = _Material.LogicalParent.UseSampler(mag, min, ws, wt);
             var texture = _Material.LogicalParent.UseTexture(texImg, sampler);
 
@@ -175,6 +181,8 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(tex, nameof(tex));
             Guard.MustShareLogicalParent(_Material, tex, nameof(tex));
+
+            if (_TextureInfoGetter == null) throw new InvalidOperationException();
 
             var texInfo = _TextureInfoGetter(true);
 

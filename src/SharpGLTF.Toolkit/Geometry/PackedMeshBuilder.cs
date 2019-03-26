@@ -20,7 +20,7 @@ namespace SharpGLTF.Geometry
             {
                 foreach (var m in meshBuilders) m.Validate();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }

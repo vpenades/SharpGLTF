@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
     public static partial class Toolkit
     {
         /// <summary>
-        /// Sets the cone angles for the <see cref="PunctualLightType.Spot" light/>.
+        /// Sets the cone angles for the <see cref="PunctualLightType.Spot"/> light.
         /// </summary>
         /// <param name="light">This <see cref="PunctualLight"/> instance.</param>
         /// <param name="innerConeAngle">

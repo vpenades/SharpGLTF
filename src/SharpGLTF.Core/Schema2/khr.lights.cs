@@ -57,7 +57,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Sets the cone angles for the <see cref="PunctualLightType.Spot" light/>.
+        /// Sets the cone angles for the <see cref="PunctualLightType.Spot"/> light.
         /// </summary>
         /// <param name="innerConeAngle">
         /// Gets the Angle, in radians, from centre of spotlight where falloff begins.

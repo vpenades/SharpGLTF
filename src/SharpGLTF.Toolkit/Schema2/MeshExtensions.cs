@@ -236,5 +236,98 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region evaluation
+
+        public static Geometry.VertexTypes.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
+        {
+            var vertexAccessors = primitive.VertexAccessors;
+
+            var columns = new Geometry.VertexTypes.VertexColumns();
+
+            if (vertexAccessors.ContainsKey("POSITION")) columns.Positions = vertexAccessors["POSITION"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("NORMAL")) columns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("TANGENT")) columns.Tangents = vertexAccessors["TANGENT"].AsVector4Array();
+
+            if (vertexAccessors.ContainsKey("COLOR_0")) columns.Colors0 = vertexAccessors["COLOR_0"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("COLOR_1")) columns.Colors1 = vertexAccessors["COLOR_1"].AsVector4Array();
+
+            if (vertexAccessors.ContainsKey("TEXCOORD_0")) columns.Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_1")) columns.Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
+
+            if (vertexAccessors.ContainsKey("JOINTS_0")) columns.Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("JOINTS_1")) columns.Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
+
+            if (vertexAccessors.ContainsKey("WEIGHTS_0")) columns.Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("WEIGHTS_1")) columns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
+
+            return columns;
+        }
+
+        public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)
+        {
+            if (primitive.DrawPrimitiveType == PrimitiveType.POINTS) yield break;
+            if (primitive.DrawPrimitiveType == PrimitiveType.LINES) yield break;
+            if (primitive.DrawPrimitiveType == PrimitiveType.LINE_LOOP) yield break;
+            if (primitive.DrawPrimitiveType == PrimitiveType.LINE_STRIP) yield break;
+
+            var indices = primitive.IndexAccessor != null
+                ?
+                primitive.IndexAccessor.AsIndicesArray()
+                :
+                EncodedArrayUtils.IndicesRange(0, primitive.GetVertexAccessor("POSITION").Count);
+
+            if (primitive.DrawPrimitiveType == PrimitiveType.TRIANGLES)
+            {
+                for (int i = 2; i < indices.Count; i += 3)
+                {
+                    yield return ((int)indices[i - 2], (int)indices[i - 1], (int)indices[i]);
+                }
+            }
+        }
+
+        public static Dictionary<Vector3, Vector3> ComputeNormals(this Mesh mesh)
+        {
+            var posnrm = new Dictionary<Vector3, Vector3>();
+
+            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
+            {
+                if (!dir._IsReal()) return;
+                if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
+                dict[pos] = n + dir;
+            }
+
+            foreach (var p in mesh.Primitives)
+            {
+                var positions = p.GetVertexAccessor("POSITION").AsVector3Array();
+
+                foreach (var t in p.GetTriangleIndices())
+                {
+                    var p1 = positions[t.Item1];
+                    var p2 = positions[t.Item2];
+                    var p3 = positions[t.Item3];
+                    var d = Vector3.Cross(p2 - p1, p3 - p1);
+                    addDirection(posnrm, p1, d);
+                    addDirection(posnrm, p2, d);
+                    addDirection(posnrm, p3, d);
+                }
+            }
+
+            foreach (var pos in posnrm.Keys.ToList())
+            {
+                posnrm[pos] = Vector3.Normalize(posnrm[pos]);
+            }
+
+            return posnrm;
+        }
+
+        public static void SaveAsWavefront(this ModelRoot model, string filePath)
+        {
+            var wf = new IO.WavefrontWriter();
+            wf.AddModel(model);
+            wf.WriteFiles(filePath);
+        }
+
+        #endregion
     }
 }

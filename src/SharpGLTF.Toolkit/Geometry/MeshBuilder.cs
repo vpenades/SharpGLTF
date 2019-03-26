@@ -184,7 +184,6 @@ namespace SharpGLTF.Geometry
 
                 AddTriangle(a, b, c);
             }
-
         }
 
         public void Validate()

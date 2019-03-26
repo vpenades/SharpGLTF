@@ -5,48 +5,67 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    class VertexColumns
+    public class VertexColumns
     {
-        #region lifecycle
+        #region columns
 
-        public VertexColumns(IReadOnlyDictionary<string, Accessor> vertexAccessors)
-        {
-            if (vertexAccessors.ContainsKey("POSITION")) Positions = vertexAccessors["POSITION"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("NORMAL")) Normals = vertexAccessors["NORMAL"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("TANGENT")) Tangents = vertexAccessors["TANGENT"].AsVector4Array();
+        public Memory.IEncodedArray<Vector3> Positions { get; set; }
+        public Memory.IEncodedArray<Vector3> Normals { get; set; }
+        public Memory.IEncodedArray<Vector4> Tangents { get; set; }
 
-            if (vertexAccessors.ContainsKey("COLOR_0")) Colors0 = vertexAccessors["COLOR_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("COLOR_1")) Colors1 = vertexAccessors["COLOR_1"].AsVector4Array();
+        public Memory.IEncodedArray<Vector4> Colors0 { get; set; }
+        public Memory.IEncodedArray<Vector4> Colors1 { get; set; }
 
-            if (vertexAccessors.ContainsKey("TEXCOORD_0")) Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
-            if (vertexAccessors.ContainsKey("TEXCOORD_1")) Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
+        public Memory.IEncodedArray<Vector2> Textures0 { get; set; }
+        public Memory.IEncodedArray<Vector2> Textures1 { get; set; }
 
-            if (vertexAccessors.ContainsKey("JOINTS_0")) Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("JOINTS_1")) Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
+        public Memory.IEncodedArray<Vector4> Joints0 { get; set; }
+        public Memory.IEncodedArray<Vector4> Joints1 { get; set; }
 
-            if (vertexAccessors.ContainsKey("WEIGHTS_0")) Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("WEIGHTS_1")) Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
-        }
+        public Memory.IEncodedArray<Vector4> Weights0 { get; set; }
+        public Memory.IEncodedArray<Vector4> Weights1 { get; set; }
 
         #endregion
 
-        #region columns
+        #region API
 
-        public Memory.IEncodedArray<Vector3> Positions { get; private set; }
-        public Memory.IEncodedArray<Vector3> Normals { get; private set; }
-        public Memory.IEncodedArray<Vector4> Tangents { get; private set; }
+        public void SetNormals(IReadOnlyDictionary<Vector3, Vector3> normalsMap)
+        {
+            var data = new Byte[12 * Positions.Count];
 
-        public Memory.IEncodedArray<Vector4> Colors0 { get; private set; }
-        public Memory.IEncodedArray<Vector4> Colors1 { get; private set; }
+            Normals = new Memory.Vector3Array(data, 0, Positions.Count, 0);
 
-        public Memory.IEncodedArray<Vector2> Textures0 { get; private set; }
-        public Memory.IEncodedArray<Vector2> Textures1 { get; private set; }
+            for (int i = 0; i < Normals.Count; ++i)
+            {
+                Normals[i] = normalsMap[Positions[i]];
+            }
+        }
 
-        public Memory.IEncodedArray<Vector4> Joints0 { get; private set; }
-        public Memory.IEncodedArray<Vector4> Joints1 { get; private set; }
+        public TvP GetPositionFragment<TvP>(int index)
+            where TvP : struct, IVertexPosition
+        {
+            var pnt = default(TvP);
 
-        public Memory.IEncodedArray<Vector4> Weights0 { get; private set; }
-        public Memory.IEncodedArray<Vector4> Weights1 { get; private set; }
+            if (Positions != null) pnt.SetPosition(Positions[index]);
+            if (Normals != null) pnt.SetNormal(Normals[index]);
+            if (Tangents != null) pnt.SetTangent(Tangents[index]);
+
+            return pnt;
+        }
+
+        public TvM GetMaterialFragment<TvM>(int index)
+            where TvM : struct, IVertexMaterial
+        {
+            var cctt = default(TvM);
+
+            if (Colors0 != null) cctt.SetColor(0, Colors0[index]);
+            if (Colors1 != null) cctt.SetColor(1, Colors1[index]);
+
+            if (Textures0 != null) cctt.SetTexCoord(0, Textures0[index]);
+            if (Textures1 != null) cctt.SetTexCoord(1, Textures1[index]);
+
+            return cctt;
+        }
 
         #endregion
     }

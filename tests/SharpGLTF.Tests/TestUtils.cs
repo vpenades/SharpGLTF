@@ -54,9 +54,7 @@ namespace SharpGLTF
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
-                // evaluate all triangles of the model
-                var wavefront = Schema2.ModelDumpUtils.ToWavefrontWriter(model).ToString();
-                System.IO.File.WriteAllText(fileName, wavefront);                
+                Schema2.Toolkit.SaveAsWavefront(model, fileName);
             }
 
             // Attach the saved file to the current test

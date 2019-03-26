@@ -118,7 +118,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
-
     }
 
     /// <summary>

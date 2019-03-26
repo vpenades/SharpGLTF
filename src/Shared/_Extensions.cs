@@ -230,7 +230,7 @@ namespace SharpGLTF
             return collection.Concat(instances.Where(item => item != null));
         }
 
-        #endregion        
+        #endregion
 
         #region vertex & index accessors
 
