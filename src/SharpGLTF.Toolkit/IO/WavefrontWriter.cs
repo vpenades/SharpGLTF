@@ -227,7 +227,7 @@ namespace SharpGLTF.IO
 
         public void AddModel(Schema2.ModelRoot model)
         {
-            foreach (var triangle in Schema2.Toolkit.Triangulate<POSITION, TEXCOORD, VEMPTY>(model.DefaultScene))
+            foreach (var triangle in Schema2.Schema2Toolkit.Triangulate<POSITION, TEXCOORD, VEMPTY>(model.DefaultScene))
             {
                 var dstMaterial = new Material();
 

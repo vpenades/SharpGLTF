@@ -6,8 +6,10 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
-    public static partial class Toolkit
+    public static partial class Schema2Toolkit
     {
+        #region Fluent API
+
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with default material attributes.
         /// </summary>
@@ -135,5 +137,96 @@ namespace SharpGLTF.Schema2
             image.SetSatelliteContent(imageContent);
             return image;
         }
+
+        #endregion
+
+        #region transfer API
+
+        public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder mb)
+        {
+            mb.Name = srcMaterial.Name;
+            mb.Unlit = srcMaterial.Unlit;
+            mb.Alpha = srcMaterial.Alpha;
+            mb.AlphaCutoff = srcMaterial.AlphaCutoff;
+            mb.DoubleSided = srcMaterial.DoubleSided;
+
+            foreach (var channel in srcMaterial.Channels)
+            {
+                var ch = mb.UseChannel(channel.Key);
+                channel.CopyTo(ch);
+            }
+        }
+
+        public static void CopyTo(this MaterialChannelView srcChannel, Materials.Channel dstChannel)
+        {
+            dstChannel.Factor = srcChannel.Factor;
+
+            if (srcChannel.Texture == null) { dstChannel.Texture = null; return; }
+
+            if (srcChannel.Texture == null) dstChannel.Texture = new Materials.Texture();
+
+            dstChannel.Texture.CoordinateSet = srcChannel.Set;
+            dstChannel.Texture.MinFilter = srcChannel.Sampler.MinFilter;
+            dstChannel.Texture.MagFilter = srcChannel.Sampler.MagFilter;
+            dstChannel.Texture.WrapS = srcChannel.Sampler.WrapS;
+            dstChannel.Texture.WrapT = srcChannel.Sampler.WrapT;
+
+            dstChannel.Texture.Rotation = srcChannel.Transform?.Rotation ?? 0;
+            dstChannel.Texture.Offset = srcChannel.Transform?.Offset ?? Vector2.Zero;
+            dstChannel.Texture.Scale = srcChannel.Transform?.Scale ?? Vector2.One;
+
+            dstChannel.Texture.ImageContent = srcChannel.Image.GetImageContent();
+        }
+
+        public static Material CreateMaterial(this ModelRoot mdl, Materials.MaterialBuilder srcMaterial)
+        {
+            var dstMaterial = mdl.CreateMaterial(srcMaterial.Name);
+
+            dstMaterial.Alpha = srcMaterial.Alpha;
+            dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
+            dstMaterial.DoubleSided = srcMaterial.DoubleSided;
+
+            srcMaterial.GetChannel("Normal").CopyTo(dstMaterial.FindChannel("Normal"));
+            srcMaterial.GetChannel("Occlusion").CopyTo(dstMaterial.FindChannel("Occlusion"));
+            srcMaterial.GetChannel("Emissive").CopyTo(dstMaterial.FindChannel("Emissive"));
+
+            if (srcMaterial.Style == "PBRMetallicRoughness")
+            {
+                dstMaterial.InitializePBRMetallicRoughness();
+
+                srcMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor"));
+                srcMaterial.GetChannel("Metallic").CopyTo(dstMaterial.FindChannel("Metallic"));
+                srcMaterial.GetChannel("Roughness").CopyTo(dstMaterial.FindChannel("Roughness"));
+            }
+            else if (srcMaterial.Style == "PBRSpecularGlossiness")
+            {
+                dstMaterial.InitializePBRSpecularGlossiness();
+
+                srcMaterial.GetChannel("Diffuse").CopyTo(dstMaterial.FindChannel("Diffuse"));
+                srcMaterial.GetChannel("Specular").CopyTo(dstMaterial.FindChannel("Specular"));
+                srcMaterial.GetChannel("Glossiness").CopyTo(dstMaterial.FindChannel("Glossiness"));
+            }
+
+            return dstMaterial;
+        }
+
+        public static void CopyTo(this Materials.Channel srcChannel, MaterialChannelView dstChannel)
+        {
+            if (srcChannel == null) return;
+
+            dstChannel.SetFactor(dstChannel.Factor);
+
+            var srcTex = srcChannel.Texture;
+
+            if (srcTex == null) return;
+
+            var image = dstChannel.LogicalParent.LogicalParent.UseImageWithContent(srcTex.ImageContent.ToArray());
+
+            dstChannel.SetTexture(srcTex.CoordinateSet, image, srcTex.MagFilter, srcTex.MinFilter, srcTex.WrapS, srcTex.WrapT);
+
+            dstChannel.SetTransform(srcTex.CoordinateSet, srcTex.Offset, srcTex.Scale, srcTex.Rotation);
+        }
+
+        #endregion
     }
 }

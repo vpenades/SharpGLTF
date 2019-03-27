@@ -13,9 +13,15 @@ namespace SharpGLTF.Schema2
 
         internal static Asset CreateDefault(string copyright)
         {
+            var av = typeof(Asset).Assembly.GetCustomAttributes(true)
+                .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+                .FirstOrDefault();
+
+            var generator = av == null ? "SharpGLTF" : "SharpGLTF " + av.InformationalVersion;
+
             return new Asset()
             {
-                _generator = "SharpGLTF",
+                _generator = generator,
                 _copyright = copyright,
                 _version = MAXVERSION.ToString(),
                 _minVersion = MINVERSION.ToString()

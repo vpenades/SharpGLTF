@@ -54,7 +54,7 @@ namespace SharpGLTF
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
-                Schema2.Toolkit.SaveAsWavefront(model, fileName);
+                Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName);
             }
 
             // Attach the saved file to the current test

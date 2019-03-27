@@ -34,10 +34,10 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets the <see cref="AlphaCutoff"/> of this <see cref="Material"/> instance.
         /// </summary>
-        public Double AlphaCutoff
+        public Single AlphaCutoff
         {
-            get => _alphaCutoff.AsValue(_alphaCutoffDefault);
-            set => _alphaCutoff = value.AsNullable(_alphaCutoffDefault, _alphaCutoffMinimum, double.MaxValue);
+            get => (Single)_alphaCutoff.AsValue(_alphaCutoffDefault);
+            set => _alphaCutoff = ((Double)value).AsNullable(_alphaCutoffDefault, _alphaCutoffMinimum, double.MaxValue);
         }
 
         /// <summary>
@@ -130,6 +130,8 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        public Material LogicalParent => _Material;
+
         public Boolean Exists => _Material != null;
 
         public String Key => _Key;
@@ -188,6 +190,15 @@ namespace SharpGLTF.Schema2
 
             texInfo.TextureSet = texSet;
             texInfo._LogicalTextureIndex = tex.LogicalIndex;
+        }
+
+        public void SetTransform(int texCoord, Vector2 offset, Vector2 scale, float rotation)
+        {
+            if (_TextureInfoGetter == null) throw new InvalidOperationException();
+
+            var texInfo = _TextureInfoGetter(true);
+
+            texInfo.SetTransform(texCoord, offset, scale, rotation);
         }
 
         #endregion

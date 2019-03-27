@@ -318,27 +318,27 @@ namespace SharpGLTF
 
         public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int count)
         {
-            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
+            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item), IndexEncodingType.UNSIGNED_INT);
         }
 
-        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> indices)
+        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices, IndexEncodingType sourceEncoding)
         {
             switch (ptype)
             {
                 case PrimitiveType.TRIANGLES:
                     {
-                        using (var ator = indices.GetEnumerator())
+                        using (var ptr = sourceIndices.GetEnumerator())
                         {
                             while (true)
                             {
-                                if (!ator.MoveNext()) break;
-                                var a = ator.Current;
-                                if (!ator.MoveNext()) break;
-                                var b = ator.Current;
-                                if (!ator.MoveNext()) break;
-                                var c = ator.Current;
+                                if (!ptr.MoveNext()) break;
+                                var a = ptr.Current;
+                                if (!ptr.MoveNext()) break;
+                                var b = ptr.Current;
+                                if (!ptr.MoveNext()) break;
+                                var c = ptr.Current;
 
-                                if (!_IsDegenerated(a,b,c)) yield return ((int)a, (int)b, (int)c);
+                                if (!_IsDegenerated(a, b, c)) yield return ((int)a, (int)b, (int)c);
                             }
                         }
 
@@ -347,17 +347,17 @@ namespace SharpGLTF
 
                 case PrimitiveType.TRIANGLE_FAN:
                     {
-                        using (var ator = indices.GetEnumerator())
+                        using (var ptr = sourceIndices.GetEnumerator())
                         {
-                            if (!ator.MoveNext()) break;
-                            var a = ator.Current;
-                            if (!ator.MoveNext()) break;
-                            var b = ator.Current;
+                            if (!ptr.MoveNext()) break;
+                            var a = ptr.Current;
+                            if (!ptr.MoveNext()) break;
+                            var b = ptr.Current;
 
                             while (true)
                             {
-                                if (!ator.MoveNext()) break;
-                                var c = ator.Current;
+                                if (!ptr.MoveNext()) break;
+                                var c = ptr.Current;
 
                                 if (!_IsDegenerated(a, b, c)) yield return ((int)a, (int)b, (int)c);
 
@@ -370,19 +370,19 @@ namespace SharpGLTF
 
                 case PrimitiveType.TRIANGLE_STRIP:
                     {
-                        using (var ator = indices.GetEnumerator())
+                        using (var ptr = sourceIndices.GetEnumerator())
                         {
-                            if (!ator.MoveNext()) break;
-                            var a = ator.Current;
-                            if (!ator.MoveNext()) break;
-                            var b = ator.Current;
+                            if (!ptr.MoveNext()) break;
+                            var a = ptr.Current;
+                            if (!ptr.MoveNext()) break;
+                            var b = ptr.Current;
 
                             bool reversed = false;
 
                             while (true)
                             {
-                                if (!ator.MoveNext()) break;
-                                var c = ator.Current;
+                                if (!ptr.MoveNext()) break;
+                                var c = ptr.Current;
 
                                 if (!_IsDegenerated(a, b, c))
                                 {

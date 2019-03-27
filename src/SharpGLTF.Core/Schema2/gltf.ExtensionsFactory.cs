@@ -104,11 +104,20 @@ namespace SharpGLTF.Schema2
             // check all the extensions used by each object
             var used = new HashSet<string>();
 
+            // search for known extensions
             foreach (var c in allObjects)
             {
-                var ids = c.Extensions.Select(item => ExtensionsFactory.Identify(c.GetType(), item.GetType()));
+                var ids = c.Extensions
+                    .Select(item => ExtensionsFactory.Identify(c.GetType(), item.GetType()))
+                    .Where(item => !string.IsNullOrWhiteSpace(item));
 
-                foreach (var id in ids) used.Add(id);
+                used.UnionWith(ids);
+            }
+
+            // search for unknown extensions
+            foreach (var unk in allObjects.SelectMany(item => item.Extensions).OfType<Unknown>())
+            {
+                used.Add(unk.Name);
             }
 
             return used;

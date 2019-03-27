@@ -118,9 +118,9 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Returns true if this <see cref="Skin"/> matches the input values.
         /// </summary>
-        /// <param name="skeleton"></param>
-        /// <param name="joints"></param>
-        /// <returns></returns>
+        /// <param name="skeleton">A <see cref="Node"/> instance that represents the skeleton root.</param>
+        /// <param name="joints">A key value pair collection of <see cref="Node"/> joints and their binding matrices.</param>
+        /// <returns>True if the input values match this <see cref="Skin"/>.</returns>
         public bool IsMatch(Node skeleton, KeyValuePair<Node, Matrix4x4>[] joints)
         {
             if (!ReferenceEquals(skeleton, this.Skeleton)) return false;

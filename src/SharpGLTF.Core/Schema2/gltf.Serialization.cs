@@ -95,6 +95,7 @@ namespace SharpGLTF.Schema2
                 ImageWriting = ImageWriteMode.SatelliteFile,
                 MergeBuffers = false,
                 JsonFormatting = Formatting.None,
+                _UpdateSupportedExtensions = false,
                 _NoCloneWatchdog = true,
 
                 FileWriter = (fn, buff) => dict[fn] = buff
@@ -115,6 +116,7 @@ namespace SharpGLTF.Schema2
                 ImageWriting = ImageWriteMode.SatelliteFile,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.Indented,
+                _UpdateSupportedExtensions = true,
 
                 FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d.ToArray())
             };
@@ -130,6 +132,7 @@ namespace SharpGLTF.Schema2
                 ImageWriting = ImageWriteMode.SatelliteFile,
                 MergeBuffers = false,
                 JsonFormatting = Formatting.None,
+                _UpdateSupportedExtensions = true,
 
                 FileWriter = (fn, buff) => dict[fn] = buff
             };
@@ -149,6 +152,7 @@ namespace SharpGLTF.Schema2
                 ImageWriting = ImageWriteMode.BufferView,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.None,
+                _UpdateSupportedExtensions = true,
 
                 FileWriter = (fn, d) => File.WriteAllBytes(Path.Combine(dir, fn), d.ToArray())
             };
@@ -167,6 +171,7 @@ namespace SharpGLTF.Schema2
                 ImageWriting = ImageWriteMode.BufferView,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.None,
+                _UpdateSupportedExtensions = true,
 
                 FileWriter = (fn, d) => stream.Write(d.Array, d.Offset, d.Count)
             };
@@ -181,12 +186,12 @@ namespace SharpGLTF.Schema2
         #region data
 
         /// <summary>
-        /// Gets or sets a value indicating whether to write a GLTF or a GLB file
+        /// Gets or sets a value indicating whether to write a GLTF or a GLB file.
         /// </summary>
         public Boolean BinaryMode { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating how to write the images of the model
+        /// Gets or sets a value indicating how to write the images of the model.
         /// </summary>
         public ImageWriteMode ImageWriting { get; set; }
 
@@ -196,7 +201,7 @@ namespace SharpGLTF.Schema2
         public Boolean MergeBuffers { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating how to format the JSON document of the glTF
+        /// Gets or sets a value indicating how to format the JSON document of the glTF.
         /// </summary>
         public Formatting JsonFormatting { get; set; }
 
@@ -205,7 +210,15 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public AssetWriter FileWriter { get; set; }
 
-        internal bool _NoCloneWatchdog = false;
+        /// <summary>
+        /// Gets a value indicating whether to scan the whole model for used extensions.
+        /// </summary>
+        internal Boolean _UpdateSupportedExtensions { get; private set; } = true;
+
+        /// <summary>
+        /// Gets a value indicating whether cloning the model upon serialization is not allowed.
+        /// </summary>
+        internal bool _NoCloneWatchdog { get; private set; } = false;
 
         #endregion
 
@@ -451,10 +464,6 @@ namespace SharpGLTF.Schema2
 
             var settings = WriteSettings.ForText(dict);
 
-            // WriteToDictionary is usually called by DeepClone, so allowing a setting that
-            // would imply cloning the model would cause an infine loop and a StackOverflow
-            settings._NoCloneWatchdog = true;
-
             _Write(settings, fileName, this);
 
             return dict;
@@ -532,6 +541,8 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(model, nameof(model));
 
             model = settings.FilterModel(model);
+
+            if (settings._UpdateSupportedExtensions) model.UpdateExtensionsSupport();
 
             if (settings.BinaryMode)
             {

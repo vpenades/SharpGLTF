@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
 {
     using Memory;
 
-    public static partial class Toolkit
+    public static partial class Schema2Toolkit
     {
         #region meshes
 
@@ -310,7 +310,7 @@ namespace SharpGLTF.Schema2
         {
             if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.GetVertexAccessor("POSITION").Count);
 
-            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
+            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray(), primitive.IndexAccessor.Encoding.ToIndex());
         }
 
         /// <summary>

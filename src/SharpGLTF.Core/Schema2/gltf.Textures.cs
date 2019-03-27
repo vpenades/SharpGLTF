@@ -26,12 +26,24 @@ namespace SharpGLTF.Schema2
         public TextureTransform Transform
         {
             get => this.GetExtension<TextureTransform>();
-            set
-            {
-                if (value == null) { this.RemoveExtensions<TextureTransform>(); return; }
+        }
 
-                this.SetExtension(value);
-            }
+        #endregion
+
+        #region API
+
+        public void SetTransform(int texCoord, Vector2 offset, Vector2 scale, float rotation)
+        {
+            var xform = new TextureTransform(this)
+            {
+                TextureCoordinate = texCoord,
+                Offset = offset,
+                Scale = scale,
+                Rotation = rotation
+            };
+
+            if (xform.IsDefault) this.RemoveExtensions<TextureTransform>();
+            else this.SetExtension(xform);
         }
 
         #endregion
@@ -128,20 +140,27 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalTextureSamplers.IndexOfReference(this);
 
-        public TextureInterpolationMode MagFilter => _magFilter ?? TextureInterpolationMode.LINEAR;
+        public TextureInterpolationMode MagFilter => _magFilter.AsValue(TextureInterpolationMode.LINEAR);
 
-        public TextureMipMapMode MinFilter => _minFilter ?? TextureMipMapMode.LINEAR;
+        public TextureMipMapMode MinFilter => _minFilter.AsValue(TextureMipMapMode.LINEAR);
 
-        public TextureWrapMode WrapS => _wrapS ?? _wrapSDefault;
+        public TextureWrapMode WrapS => _wrapS.AsValue(_wrapSDefault);
 
-        public TextureWrapMode WrapT => _wrapT ?? _wrapSDefault;
+        public TextureWrapMode WrapT => _wrapT.AsValue(_wrapTDefault);
 
         #endregion
     }
 
+    [System.Diagnostics.DebuggerDisplay("TextureTransform {TextureCoordinate} {Offset} {Scale} {Rotation}")]
     public partial class TextureTransform
     {
+        #region lifecycle
+
         internal TextureTransform(TextureInfo parent) { }
+
+        #endregion
+
+        #region properties
 
         public Vector2 Offset
         {
@@ -164,8 +183,22 @@ namespace SharpGLTF.Schema2
         public int TextureCoordinate
         {
             get => _texCoord.AsValue(_texCoordMinimum);
-            set => _texCoord = value.AsNullable(_texCoordMinimum);
+            set => _texCoord = value.AsNullable(_texCoordMinimum, _texCoordMinimum, int.MaxValue);
         }
+
+        internal bool IsDefault
+        {
+            get
+            {
+                if (_texCoord.HasValue) return false;
+                if (_offset.HasValue) return false;
+                if (_scale.HasValue) return false;
+                if (_rotation.HasValue) return false;
+                return true;
+            }
+        }
+
+        #endregion
     }
 
     public partial class ModelRoot

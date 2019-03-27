@@ -177,7 +177,11 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithMaterial(material);
 
             model.AttachToCurrentTest("result.glb");
-            model.AttachToCurrentTest("result.gltf");            
+            model.AttachToCurrentTest("result.obj");
+            model.AttachToCurrentTest("result.gltf");
+
+            material.FindChannel("BaseColor").SetTransform(0, Vector2.Zero, Vector2.One, 1.5f);
+            model.AttachToCurrentTest("result_withTransform.glb");
         }
 
         [Test(Description = "Creates a simple scene using a mesh builder helper class")]
