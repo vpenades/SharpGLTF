@@ -59,8 +59,8 @@ namespace SharpGLTF.Schema2
                 this,
                 "Normal",
                 _GetNormalTexture,
-                () => _GetNormalTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, (float)_GetNormalTexture(false).Scale),
-                value => _GetNormalTexture(true).Scale = (double)value.W
+                () => _GetNormalTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, _GetNormalTexture(false).Factor),
+                value => _GetNormalTexture(true).Factor = value.W
                 );
 
             yield return new MaterialChannelView
@@ -68,8 +68,8 @@ namespace SharpGLTF.Schema2
                 this,
                 "Occlusion",
                 _GetOcclusionTexture,
-                () => _GetOcclusionTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, (float)_GetOcclusionTexture(false).Strength),
-                value => _GetOcclusionTexture(true).Strength = (double)value.W
+                () => _GetOcclusionTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, _GetOcclusionTexture(false).Factor),
+                value => _GetOcclusionTexture(true).Factor = value.W
                 );
 
             yield return new MaterialChannelView

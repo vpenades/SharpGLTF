@@ -140,7 +140,7 @@ namespace SharpGLTF.Schema2
 
         public int Set => _TextureInfoGetter?.Invoke(false)?.TextureSet ?? 0;
 
-        public Image Image => Texture?.Source;
+        public Image Image => Texture?.Image;
 
         public TextureSampler Sampler => Texture?.Sampler;
 
@@ -164,8 +164,8 @@ namespace SharpGLTF.Schema2
         public void SetTexture(
             int texSet,
             Image texImg,
-            TextureInterpolationMode mag = TextureInterpolationMode.LINEAR,
             TextureMipMapMode min = TextureMipMapMode.LINEAR_MIPMAP_LINEAR,
+            TextureInterpolationMode mag = TextureInterpolationMode.LINEAR,
             TextureWrapMode ws = TextureWrapMode.REPEAT,
             TextureWrapMode wt = TextureWrapMode.REPEAT)
         {

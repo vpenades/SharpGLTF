@@ -7,77 +7,6 @@ using System.Text;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Texture[{LogicalIndex}] {Name}")]
-    internal partial class TextureInfo
-    {
-        #region properties
-
-        internal int _LogicalTextureIndex
-        {
-            get => _index;
-            set => _index = value;
-        }
-
-        public int TextureSet
-        {
-            get => _texCoord ?? _texCoordDefault;
-            set => _texCoord = value.AsNullable(_texCoordDefault, _texCoordMinimum, int.MaxValue);
-        }
-
-        public TextureTransform Transform
-        {
-            get => this.GetExtension<TextureTransform>();
-        }
-
-        #endregion
-
-        #region API
-
-        public void SetTransform(int texCoord, Vector2 offset, Vector2 scale, float rotation)
-        {
-            var xform = new TextureTransform(this)
-            {
-                TextureCoordinate = texCoord,
-                Offset = offset,
-                Scale = scale,
-                Rotation = rotation
-            };
-
-            if (xform.IsDefault) this.RemoveExtensions<TextureTransform>();
-            else this.SetExtension(xform);
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("Normal Texture[{LogicalIndex}] {Name}")]
-    internal sealed partial class MaterialNormalTextureInfo
-    {
-        #region properties
-
-        public Double Scale
-        {
-            get => this._scale.AsValue(_scaleDefault);
-            set => this._scale = value.AsNullable(_scaleDefault);
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("Occlusion Texture[{LogicalIndex}] {Name}")]
-    internal sealed partial class MaterialOcclusionTextureInfo
-    {
-        #region properties
-
-        public Double Strength
-        {
-            get => this._strength ?? _strengthDefault;
-            set => this._strength = value.AsNullable(_strengthDefault, _strengthMinimum, _strengthMaximum);
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("Texture[{LogicalIndex}] {Name}")]
     public sealed partial class Texture
     {
         #region lifecycle
@@ -103,7 +32,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public Image Source
+        public Image Image
         {
             get => _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
             set
@@ -240,13 +169,13 @@ namespace SharpGLTF.Schema2
             if (image != null) Guard.MustShareLogicalParent(this, image, nameof(image));
             if (sampler != null) Guard.MustShareLogicalParent(this, sampler, nameof(sampler));
 
-            var tex = _textures.FirstOrDefault(item => item.Source == image && item.Sampler == sampler);
+            var tex = _textures.FirstOrDefault(item => item.Image == image && item.Sampler == sampler);
             if (tex != null) return tex;
 
             tex = new Texture();
             _textures.Add(tex);
 
-            tex.Source = image;
+            tex.Image = image;
             tex.Sampler = sampler;
 
             return tex;

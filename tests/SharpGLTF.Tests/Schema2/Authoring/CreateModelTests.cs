@@ -13,6 +13,8 @@ namespace SharpGLTF.Schema2.Authoring
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
+    using VCLR1 = Geometry.VertexTypes.VertexColor1;
+    using VTEX1 = Geometry.VertexTypes.VertexTexture1;
     using VSKIN4 = Geometry.VertexTypes.VertexJoints8x4;
 
     [TestFixture]
@@ -183,35 +185,6 @@ namespace SharpGLTF.Schema2.Authoring
             material.FindChannel("BaseColor").SetTransform(0, Vector2.Zero, Vector2.One, 1.5f);
             model.AttachToCurrentTest("result_withTransform.glb");
         }
-
-        [Test(Description = "Creates a simple scene using a mesh builder helper class")]
-        public void CreateSimpleMeshBuilderScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
-
-            var meshBuilder = new SimpleSceneBuilder<Vector4>();
-            meshBuilder.AddPolygon(new Vector4(1, 1, 1, 1), (-10, 10,  0), (10, 10,  0), (10, -10,  0), (-10, -10,  0));
-            meshBuilder.AddPolygon(new Vector4(1, 1, 0, 1), (-10, 10, 10), (10, 10, 10), (10, -10, 10), (-10, -10, 10));
-            meshBuilder.AddPolygon(new Vector4(1, 0, 0, 1), (-10, 10, 20), (10, 10, 20), (10, -10, 20), (-10, -10, 20));
-
-            var model = ModelRoot.CreateModel();
-            var scene = model.UseScene("Default");
-            var rnode = scene.CreateNode("RootNode");            
-
-            // setup a lambda function that creates a material for a given color
-            Material createMaterialForColor(Vector4 color)
-            {
-                return model.CreateMaterial().WithDefault(color).WithDoubleSide(true);
-            };
-
-            // fill our node with the mesh
-            meshBuilder.CopyToNode(rnode, createMaterialForColor);
-
-            model.AttachToCurrentTest("result.gltf");
-            model.AttachToCurrentTest("result.glb");            
-        }
-
 
         [Test(Description = "Creates an interleaved scene using a toolkit utilities")]
         public void CreateInterleavedQuadScene()
@@ -421,5 +394,53 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
         }
+
+        [Test]
+        public void CreateTerrainScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            // texture path
+            var imagePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", "Texture1.jpg");
+
+            // fancy height function; can be easily replaced with a bitmap sampler.
+            float heightFunction(int xx, int yy)
+            {
+                float x = xx;
+                float y = yy;
+
+                double h = 0;
+
+                h += Math.Sin(x / 45);
+                h += Math.Sin(3 + x / 13) * 0.5f;
+
+                h += Math.Sin(2 + y / 31);
+                h += Math.Sin(y / 13) * 0.5f;
+
+                h += Math.Sin((x + y * 2) / 19);
+
+                h *= 5;
+
+                return (float)h;
+            }
+
+            var terrain = SolidMeshUtils.CreateTerrainMesh(128,128, heightFunction, imagePath);
+
+            // create a new gltf model
+            var model = ModelRoot.CreateModel();
+            
+            // add all meshes (just one in this case) to the model
+            model.CreateMeshes(terrain);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
+            // save the model as GLB
+            model.AttachToCurrentTest("terrain.glb");
+        }
+
+        
     }
 }

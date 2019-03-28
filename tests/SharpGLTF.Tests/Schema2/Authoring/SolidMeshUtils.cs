@@ -7,6 +7,9 @@ namespace SharpGLTF.Schema2.Authoring
 {
     using Geometry;    
     
+    using VPOS = Geometry.VertexTypes.VertexPosition;
+    using VTEX1 = Geometry.VertexTypes.VertexTexture1;
+
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
 
     static class SolidMeshUtils
@@ -109,11 +112,58 @@ namespace SharpGLTF.Schema2.Authoring
             var bc = Vector3.Normalize(b + c) * b.Length();
             var ca = Vector3.Normalize(c + a) * c.Length();
 
+            // central triangle
             _AddSphereTriangle(meshBuilder, material, xform, ab, bc, ca, iterations);
 
+            // vertex triangles
             _AddSphereTriangle(meshBuilder, material, xform, a, ab, ca, iterations);
             _AddSphereTriangle(meshBuilder, material, xform, b, bc, ab, iterations);
             _AddSphereTriangle(meshBuilder, material, xform, c, ca, bc, iterations);
+        }
+
+        public static MeshBuilder<Materials.MaterialBuilder, VPOS, VTEX1> CreateTerrainMesh(int width, int length, Func<int,int,float> heightFunction, string terrainColorImagePath)
+        {
+            // we create a new material to use with the terrain mesh
+            var material = new Materials.MaterialBuilder("TerrainMaterial")
+                .WithChannelTexture("BaseColor", 0, terrainColorImagePath);
+
+            // we create a MeshBuilder
+            var terrainMesh = new MeshBuilder<Materials.MaterialBuilder, VPOS, VTEX1>("terrain");
+
+            var texScale = new Vector2(width, length);
+
+            // fill the MeshBuilder with quads using the heightFunction.
+            for (int y = 1; y < length; ++y)
+            {
+                for (int x = 1; x < width; ++x)
+                {
+                    // quad vertex positions
+
+                    var a = new Vector3(x - 1, heightFunction(x - 1, y + 0), y + 0);
+                    var b = new Vector3(x + 0, heightFunction(x + 0, y + 0), y + 0);
+                    var c = new Vector3(x + 0, heightFunction(x + 0, y - 1), y - 1);
+                    var d = new Vector3(x - 1, heightFunction(x - 1, y - 1), y - 1);
+
+                    // quad UV coordinates
+
+                    var at = new Vector2(a.X, a.Z) / texScale;
+                    var bt = new Vector2(b.X, b.Z) / texScale;
+                    var ct = new Vector2(c.X, c.Z) / texScale;
+                    var dt = new Vector2(d.X, d.Z) / texScale;
+
+                    terrainMesh
+                        .UsePrimitive(material)
+                        .AddPolygon
+                        (
+                            (a, at),
+                            (b, bt),
+                            (c, ct),
+                            (d, dt)
+                        );
+                }
+            }
+
+            return terrainMesh;
         }
     }
 }

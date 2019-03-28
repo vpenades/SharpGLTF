@@ -5,28 +5,66 @@ using System.Text;
 
 namespace SharpGLTF.Materials
 {
+    using BYTES = ArraySegment<Byte>;
+
+    using TEXLERP = Schema2.TextureInterpolationMode;
+    using TEXMIPMAP = Schema2.TextureMipMapMode;
+    using TEXWRAP = Schema2.TextureWrapMode;
+
     [System.Diagnostics.DebuggerDisplay("Texture {CoordinateSet} {MinFilter} {MagFilter} {WrapS} {WrapT} {Rotation} {Offset} {Scale}")]
-    public class Texture
+    public class TextureBuilder
     {
+        #region lifecycle
+
+        internal TextureBuilder() { }
+
+        #endregion
+
         #region properties
 
-        public int CoordinateSet { get; set; }
+        public int CoordinateSet { get; set; } = 0;
 
-        public Single Rotation { get; set; }
+        /*
+        public Single Rotation { get; set; } = 0;
 
-        public Vector2 Offset { get; set; }
+        public Vector2 Offset { get; set; } = Vector2.Zero;
 
-        public Vector2 Scale { get; set; }
+        public Vector2 Scale { get; set; } = Vector2.One;
+        */
 
-        public ArraySegment<Byte> ImageContent { get; set; }
+        public BYTES ImageContent { get; set; }
 
-        public Schema2.TextureMipMapMode MinFilter { get; set; }
+        public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.LINEAR;
 
-        public Schema2.TextureInterpolationMode MagFilter { get; set; }
+        public TEXLERP MagFilter { get; set; } = TEXLERP.LINEAR;
 
-        public Schema2.TextureWrapMode WrapS { get; set; } = Schema2.TextureWrapMode.REPEAT;
+        public TEXWRAP WrapS { get; set; } = TEXWRAP.REPEAT;
 
-        public Schema2.TextureWrapMode WrapT { get; set; } = Schema2.TextureWrapMode.REPEAT;
+        public TEXWRAP WrapT { get; set; } = TEXWRAP.REPEAT;
+
+        #endregion
+
+        #region API
+
+        public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
+
+        public TextureBuilder WithImage(string imageFilePath)
+        {
+            var data = System.IO.File.ReadAllBytes(imageFilePath).Slice(0);
+            return WithImage(data);
+        }
+
+        public TextureBuilder WithImage(BYTES image) { this.ImageContent = image; return this; }
+
+        public TextureBuilder WithSampler(TEXMIPMAP min = TEXMIPMAP.LINEAR, TEXLERP mag = TEXLERP.LINEAR, TEXWRAP ws = TEXWRAP.REPEAT, TEXWRAP wt = TEXWRAP.REPEAT)
+        {
+            this.MinFilter = min;
+            this.MagFilter = mag;
+            this.WrapS = ws;
+            this.WrapT = wt;
+
+            return this;
+        }
 
         #endregion
     }

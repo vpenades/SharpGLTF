@@ -21,4 +21,10 @@
     <ProjectReference Include="..\..\src\SharpGLTF.Core\SharpGLTF.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Assets\Texture1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

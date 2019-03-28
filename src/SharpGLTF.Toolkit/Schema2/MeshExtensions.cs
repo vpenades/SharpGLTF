@@ -33,7 +33,15 @@ namespace SharpGLTF.Schema2
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
-            return root.CreateMeshes(k => k, meshBuilders);
+            return root.CreateMeshes(m => m, meshBuilders);
+        }
+
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvJ>(this ModelRoot root, params Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvJ>[] meshBuilders)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            return root.CreateMeshes(mb => root.CreateMaterial(mb), meshBuilders);
         }
 
         public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, TvJ>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.MeshBuilder<TMaterial, TvP, TvM, TvJ>[] meshBuilders)
@@ -46,7 +54,7 @@ namespace SharpGLTF.Schema2
                 .SelectMany(item => item.Primitives)
                 .Select(item => item.Material)
                 .Distinct()
-                .ToDictionary(k => k, k => materialEvaluator(k));
+                .ToDictionary(m => m, m => materialEvaluator(m));
 
             // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
             var srcMeshes = Geometry.PackedMeshBuilder<TMaterial>

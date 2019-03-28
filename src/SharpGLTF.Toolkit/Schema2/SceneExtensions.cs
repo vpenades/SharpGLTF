@@ -47,6 +47,15 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
+        /// <summary>
+        /// Yield a collection of triangles representing the geometry
+        /// of the input <see cref="Scene"/> in world space.
+        /// </summary>
+        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+        /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
+        /// <typeparam name="TvJ">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <param name="scene">A <see cref="Scene"/> instance.</param>
+        /// <returns>A collection of triangles in world space.</returns>
         public static IEnumerable<((TvP, TvM, TvJ), (TvP, TvM, TvJ), (TvP, TvM, TvJ), Material)> Triangulate<TvP, TvM, TvJ>(this Scene scene)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
@@ -55,6 +64,16 @@ namespace SharpGLTF.Schema2
             return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM, TvJ>(true));
         }
 
+        /// <summary>
+        /// Yield a collection of triangles representing the geometry
+        /// of the input <see cref="Node"/> in local or world space.
+        /// </summary>
+        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+        /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
+        /// <typeparam name="TvJ">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <param name="node">A <see cref="Node"/> instance.</param>
+        /// <param name="inWorldSpace">A value indicating whether the returned triangles must be in local (false) or world (true) space.</param>
+        /// <returns>A collection of triangles in local or world space.</returns>
         public static IEnumerable<((TvP, TvM, TvJ), (TvP, TvM, TvJ), (TvP, TvM, TvJ), Material)> Triangulate<TvP, TvM, TvJ>(this Node node, bool inWorldSpace)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial

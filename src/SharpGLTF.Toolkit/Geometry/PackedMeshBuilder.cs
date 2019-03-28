@@ -7,10 +7,25 @@ namespace SharpGLTF.Geometry
 {
     using Schema2;
 
+    /// <summary>
+    /// Used internally to convert a <see cref="MeshBuilder{TMaterial, TvP, TvM, TvJ}"/>
+    /// to <see cref="Schema2.Mesh"/>.
+    /// </summary>
+    /// <typeparam name="TMaterial">A material key to split primitives by material.</typeparam>
     class PackedMeshBuilder<TMaterial>
     {
         #region lifecycle
 
+        /// <summary>
+        /// Converts a collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvJ}"/>
+        /// to a collection of <see cref="PackedMeshBuilder{TMaterial}"/>, trying to use
+        /// a single vertex buffer and a single index buffer shared by all meshes.
+        /// </summary>
+        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+        /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
+        /// <typeparam name="TvJ">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvJ}"/> instances.</param>
+        /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
         internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, TvJ>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, TvJ>> meshBuilders)
             where TvP : struct, VertexTypes.IVertexPosition
             where TvM : struct, VertexTypes.IVertexMaterial
@@ -63,6 +78,7 @@ namespace SharpGLTF.Geometry
         #region data
 
         private readonly string _MeshName;
+
         private readonly List<PackedPrimitiveBuilder<TMaterial>> _Primitives = new List<PackedPrimitiveBuilder<TMaterial>>();
 
         #endregion
@@ -106,7 +122,9 @@ namespace SharpGLTF.Geometry
         #region data
 
         private readonly TMaterial _Material;
+
         private readonly Memory.MemoryAccessor[] _VertexAccessors;
+
         private readonly Memory.MemoryAccessor _IndexAccessors;
 
         #endregion
