@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
             this.SetExtension(new MaterialUnlit(this));
         }
 
-        private IEnumerable<MaterialChannelView> _GetChannels()
+        private IEnumerable<MaterialChannel> _GetChannels()
         {
             if (_pbrMetallicRoughness != null)
             {
@@ -54,25 +54,11 @@ namespace SharpGLTF.Schema2
                 foreach (var c in channels) yield return c;
             }
 
-            yield return new MaterialChannelView
-                (
-                this,
-                "Normal",
-                _GetNormalTexture,
-                () => _GetNormalTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, _GetNormalTexture(false).Factor),
-                value => _GetNormalTexture(true).Factor = value.W
-                );
+            yield return new MaterialChannel(this, "Normal", _GetNormalTexture);
 
-            yield return new MaterialChannelView
-                (
-                this,
-                "Occlusion",
-                _GetOcclusionTexture,
-                () => _GetOcclusionTexture(false) == null ? Vector4.One : new Vector4(1, 1, 1, _GetOcclusionTexture(false).Factor),
-                value => _GetOcclusionTexture(true).Factor = value.W
-                );
+            yield return new MaterialChannel(this, "Occlusion", _GetOcclusionTexture);
 
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 this,
                 "Emissive",
@@ -123,9 +109,9 @@ namespace SharpGLTF.Schema2
             return _metallicRoughnessTexture;
         }
 
-        public IEnumerable<MaterialChannelView> GetChannels(Material material)
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "BaseColor",
@@ -134,22 +120,21 @@ namespace SharpGLTF.Schema2
                 value => _baseColorFactor = value.AsNullable(_baseColorFactorDefault)
                 );
 
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "Metallic",
                 _GetMetallicTexture,
-                () => new Vector4(1, 1, 1, (float)(_metallicFactor ?? _metallicFactorDefault)),
-                value => _metallicFactor = ((double)value.W).AsNullable(_metallicFactorDefault, _metallicFactorMaximum, _metallicFactorMaximum)
+                () => (float)_metallicFactor.AsValue(_metallicFactorDefault),
+                value => _metallicFactor = ((double)value).AsNullable(_metallicFactorDefault, _metallicFactorMaximum, _metallicFactorMaximum)
                 );
 
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "Roughness",
-                null,
-                () => new Vector4(1, 1, 1, (float)(_roughnessFactor ?? _roughnessFactorDefault)),
-                value => _roughnessFactor = ((double)value.W).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum)
+                () => (float)_roughnessFactor.AsValue(_roughnessFactorDefault),
+                value => _roughnessFactor = ((double)value).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum)
                 );
         }
     }
@@ -176,9 +161,9 @@ namespace SharpGLTF.Schema2
             return _specularGlossinessTexture;
         }
 
-        public IEnumerable<MaterialChannelView> GetChannels(Material material)
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "Diffuse",
@@ -187,20 +172,19 @@ namespace SharpGLTF.Schema2
                 value => _diffuseFactor = value.AsNullable(_diffuseFactorDefault)
                 );
 
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "Glossiness",
                 _GetGlossinessTexture,
-                () => new Vector4(1, 1, 1, (float)_glossinessFactor.AsValue(_glossinessFactorDefault)),
-                value => _glossinessFactor = ((double)value.W).AsNullable(_glossinessFactorDefault, _glossinessFactorMinimum, _glossinessFactorMaximum)
+                () => (float)_glossinessFactor.AsValue(_glossinessFactorDefault),
+                value => _glossinessFactor = ((double)value).AsNullable(_glossinessFactorDefault, _glossinessFactorMinimum, _glossinessFactorMaximum)
                 );
 
-            yield return new MaterialChannelView
+            yield return new MaterialChannel
                 (
                 material,
                 "Specular",
-                null,
                 () => { var rgb = _specularFactor.AsValue(_specularFactorDefault); return new Vector4(rgb, 1); },
                 value => _specularFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_specularFactorDefault)
                 );

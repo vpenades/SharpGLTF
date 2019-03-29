@@ -9,6 +9,8 @@ using static System.FormattableString;
 
 namespace SharpGLTF.IO
 {
+    using Schema2;
+
     using BYTES = ArraySegment<Byte>;
 
     using POSITION = Geometry.VertexTypes.VertexPositionNormal;
@@ -234,15 +236,14 @@ namespace SharpGLTF.IO
                 var srcMaterial = triangle.Item4;
                 if (srcMaterial != null)
                 {
-                    var baseColor = srcMaterial.FindChannel("BaseColor");
-
-                    var clr = new Vector3(baseColor.Factor.X, baseColor.Factor.Y, baseColor.Factor.Z);
-
                     // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
-                    dstMaterial.DiffuseColor = clr;
+
+                    var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
+
+                    dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
                     dstMaterial.SpecularColor = new Vector3(0.2f);
 
-                    dstMaterial.DiffuseTexture = baseColor.Image?.GetImageContent() ?? default;
+                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.Image?.GetImageContent() ?? default;
                 }
 
                 this.AddTriangle(dstMaterial, triangle.Item1, triangle.Item2, triangle.Item3);

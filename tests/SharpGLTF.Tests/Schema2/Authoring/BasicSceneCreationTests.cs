@@ -177,9 +177,6 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.obj");
             model.AttachToCurrentTest("result.gltf");
-
-            material.FindChannel("BaseColor").SetTransform(0, Vector2.Zero, Vector2.One, 1.5f);
-            model.AttachToCurrentTest("result_withTransform.glb");
         }
 
         [Test(Description = "Creates an interleaved scene using a toolkit utilities")]

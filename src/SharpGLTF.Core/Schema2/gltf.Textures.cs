@@ -80,55 +80,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("TextureTransform {TextureCoordinate} {Offset} {Scale} {Rotation}")]
-    public partial class TextureTransform
-    {
-        #region lifecycle
-
-        internal TextureTransform(TextureInfo parent) { }
-
-        #endregion
-
-        #region properties
-
-        public Vector2 Offset
-        {
-            get => _offset.AsValue(_offsetDefault);
-            set => _offset = value.AsNullable(_offsetDefault);
-        }
-
-        public Vector2 Scale
-        {
-            get => _scale.AsValue(_scaleDefault);
-            set => _scale = value.AsNullable(_scaleDefault);
-        }
-
-        public float Rotation
-        {
-            get => (float)_rotation.AsValue(_rotationDefault);
-            set => _rotation = ((double)value).AsNullable(_rotationDefault);
-        }
-
-        public int TextureCoordinate
-        {
-            get => _texCoord.AsValue(_texCoordMinimum);
-            set => _texCoord = value.AsNullable(_texCoordMinimum, _texCoordMinimum, int.MaxValue);
-        }
-
-        internal bool IsDefault
-        {
-            get
-            {
-                if (_texCoord.HasValue) return false;
-                if (_offset.HasValue) return false;
-                if (_scale.HasValue) return false;
-                if (_rotation.HasValue) return false;
-                return true;
-            }
-        }
-
-        #endregion
-    }
+    
 
     public partial class ModelRoot
     {
@@ -190,7 +142,7 @@ namespace SharpGLTF.Schema2
             return new T
             {
                 _LogicalTextureIndex = tex.LogicalIndex,
-                TextureSet = textureSet
+                TextureCoordinate = textureSet
             };
         }
     }

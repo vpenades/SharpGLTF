@@ -35,7 +35,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class MeshBuilder<TvP, TvM, TvJ> : MeshBuilder<Materials.MaterialBuilder,TvP,TvM,TvJ>
+    public class MeshBuilder<TvP, TvM, TvJ> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvJ>
         where TvP : struct, IVertexPosition
         where TvM : struct, IVertexMaterial
         where TvJ : struct, IVertexJoints

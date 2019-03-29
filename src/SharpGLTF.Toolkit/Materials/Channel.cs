@@ -24,7 +24,7 @@ namespace SharpGLTF.Materials
 
         public String Key => _Key;
 
-        public Vector4 Factor { get; set; } = Vector4.One;
+        public Vector4 Color { get; set; } = Vector4.One;
 
         public TextureBuilder Texture { get; set; }
 

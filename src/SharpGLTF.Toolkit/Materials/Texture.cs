@@ -32,6 +32,8 @@ namespace SharpGLTF.Materials
         public Vector2 Scale { get; set; } = Vector2.One;
         */
 
+        public Single Amount { get; set; } = 1;
+
         public BYTES ImageContent { get; set; }
 
         public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.LINEAR;

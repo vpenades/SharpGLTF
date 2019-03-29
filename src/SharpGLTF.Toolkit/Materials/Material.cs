@@ -104,13 +104,13 @@ namespace SharpGLTF.Materials
 
         public MaterialBuilder WithChannelColor(KnownChannels channelKey, Vector4 color)
         {
-            this.UseChannel(channelKey).Factor = color;
+            this.UseChannel(channelKey).Color = color;
             return this;
         }
 
         public MaterialBuilder WithChannelColor(string channelKey, Vector4 color)
         {
-            this.UseChannel(channelKey).Factor = color;
+            this.UseChannel(channelKey).Color = color;
             return this;
         }
 

@@ -28,9 +28,9 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithDefault(this Material material, Vector4 diffuseColor)
         {
-            material.WithPBRMetallicRoughness()
-                .FindChannel("BaseColor")
-                .SetFactor(diffuseColor);
+            var ch = material.WithPBRMetallicRoughness().FindChannel("BaseColor").Value;
+
+            ch.Color = diffuseColor;
 
             return material;
         }
@@ -41,15 +41,30 @@ namespace SharpGLTF.Schema2
             return material;
         }
 
-        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, string imageFilePath)
+        public static Material WithChannelColor(this Material material, string channelName, Vector4 color)
         {
-            material.FindChannel(channelName).SetTexture(textureSet, material.LogicalParent.UseImageWithFile(imageFilePath));
+            var channel = material.FindChannel(channelName).Value;
+
+            channel.Color = color;
+
             return material;
         }
 
-        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, Image image)
+        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, string imageFilePath, float amount = 1)
         {
-            material.FindChannel(channelName).SetTexture(textureSet, image);
+            var image = material.LogicalParent.UseImageWithFile(imageFilePath);
+
+            return material.WithChannelTexture(channelName, textureSet, image, amount);
+        }
+
+        public static Material WithChannelTexture(this Material material, string channelName, int textureSet, Image image, float amount = 1)
+        {
+            var channel = material.FindChannel(channelName).Value;
+
+            channel.SetTexture(textureSet, image);
+
+            channel.TextureAmount = amount;
+
             return material;
         }
 
@@ -66,20 +81,16 @@ namespace SharpGLTF.Schema2
 
         public static Material WithPBRMetallicRoughness(
             this Material material,
-            Vector4 baseColorFactor, string baseColorImageFilePath,
-            float metallicFactor = 1, string metallicImageFilePath = null,
-            float roughnessFactor = 1, string roughtnessImageFilePath = null
+            Vector4 baseColor, string baseColorImageFilePath,
+            float metallicAmount = 1, string metallicImageFilePath = null,
+            float roughnessAmount = 1, string roughtnessImageFilePath = null
             )
         {
             material.WithPBRMetallicRoughness();
 
-            if (!string.IsNullOrWhiteSpace(baseColorImageFilePath)) material.WithChannelTexture("BaseColor", 0, baseColorImageFilePath);
-            if (!string.IsNullOrWhiteSpace(metallicImageFilePath)) material.WithChannelTexture("Metallic", 0, baseColorImageFilePath);
-            if (!string.IsNullOrWhiteSpace(roughtnessImageFilePath)) material.WithChannelTexture("Roughness", 0, baseColorImageFilePath);
-
-            material.FindChannel("BaseColor").SetFactor(baseColorFactor);
-            material.FindChannel("Metallic").SetFactor(metallicFactor);
-            material.FindChannel("Roughness").SetFactor(roughnessFactor);
+            if (!string.IsNullOrWhiteSpace(baseColorImageFilePath)) material.WithChannelColor("BaseColor", baseColor).WithChannelTexture("BaseColor", 0, baseColorImageFilePath);
+            if (!string.IsNullOrWhiteSpace(metallicImageFilePath)) material.WithChannelTexture("Metallic", 0, baseColorImageFilePath, metallicAmount);
+            if (!string.IsNullOrWhiteSpace(roughtnessImageFilePath)) material.WithChannelTexture("Roughness", 0, baseColorImageFilePath, roughnessAmount);
 
             return material;
         }
@@ -170,19 +181,21 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this MaterialChannelView srcChannel, Materials.MaterialChannelBuilder dstChannel)
+        public static void CopyTo(this MaterialChannel srcChannel, Materials.MaterialChannelBuilder dstChannel)
         {
-            dstChannel.Factor = srcChannel.Factor;
+            dstChannel.Color = srcChannel.Color;
 
             if (srcChannel.Texture == null) { dstChannel.Texture = null; return; }
 
-            if (srcChannel.Texture == null) dstChannel.Texture = new Materials.TextureBuilder();
+            if (dstChannel.Texture == null) dstChannel.Texture = new Materials.TextureBuilder();
 
-            dstChannel.Texture.CoordinateSet = srcChannel.Set;
-            dstChannel.Texture.MinFilter = srcChannel.Sampler.MinFilter;
-            dstChannel.Texture.MagFilter = srcChannel.Sampler.MagFilter;
-            dstChannel.Texture.WrapS = srcChannel.Sampler.WrapS;
-            dstChannel.Texture.WrapT = srcChannel.Sampler.WrapT;
+            dstChannel.Texture.Amount = srcChannel.TextureAmount;
+
+            dstChannel.Texture.CoordinateSet = srcChannel.TextureCoordinate;
+            dstChannel.Texture.MinFilter = srcChannel.TextureSampler.MinFilter;
+            dstChannel.Texture.MagFilter = srcChannel.TextureSampler.MagFilter;
+            dstChannel.Texture.WrapS = srcChannel.TextureSampler.WrapS;
+            dstChannel.Texture.WrapT = srcChannel.TextureSampler.WrapT;
 
             /*
             dstChannel.Texture.Rotation = srcChannel.Transform?.Rotation ?? 0;
@@ -190,7 +203,7 @@ namespace SharpGLTF.Schema2
             dstChannel.Texture.Scale = srcChannel.Transform?.Scale ?? Vector2.One;
             */
 
-            dstChannel.Texture.ImageContent = srcChannel.Image.GetImageContent();
+            dstChannel.Texture.ImageContent = srcChannel.Texture.Image.GetImageContent();
         }
 
         public static void CopyTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial)
@@ -201,33 +214,33 @@ namespace SharpGLTF.Schema2
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 
-            srcMaterial.GetChannel("Normal").CopyTo(dstMaterial.FindChannel("Normal"));
-            srcMaterial.GetChannel("Occlusion").CopyTo(dstMaterial.FindChannel("Occlusion"));
-            srcMaterial.GetChannel("Emissive").CopyTo(dstMaterial.FindChannel("Emissive"));
+            srcMaterial.GetChannel("Normal").CopyTo(dstMaterial.FindChannel("Normal").Value);
+            srcMaterial.GetChannel("Occlusion").CopyTo(dstMaterial.FindChannel("Occlusion").Value);
+            srcMaterial.GetChannel("Emissive").CopyTo(dstMaterial.FindChannel("Emissive").Value);
 
             if (srcMaterial.Style == "PBRMetallicRoughness")
             {
                 dstMaterial.InitializePBRMetallicRoughness();
 
-                srcMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor"));
-                srcMaterial.GetChannel("Metallic").CopyTo(dstMaterial.FindChannel("Metallic"));
-                srcMaterial.GetChannel("Roughness").CopyTo(dstMaterial.FindChannel("Roughness"));
+                srcMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor").Value);
+                srcMaterial.GetChannel("Metallic").CopyTo(dstMaterial.FindChannel("Metallic").Value);
+                srcMaterial.GetChannel("Roughness").CopyTo(dstMaterial.FindChannel("Roughness").Value);
             }
             else if (srcMaterial.Style == "PBRSpecularGlossiness")
             {
                 dstMaterial.InitializePBRSpecularGlossiness();
 
-                srcMaterial.GetChannel("Diffuse").CopyTo(dstMaterial.FindChannel("Diffuse"));
-                srcMaterial.GetChannel("Specular").CopyTo(dstMaterial.FindChannel("Specular"));
-                srcMaterial.GetChannel("Glossiness").CopyTo(dstMaterial.FindChannel("Glossiness"));
+                srcMaterial.GetChannel("Diffuse").CopyTo(dstMaterial.FindChannel("Diffuse").Value);
+                srcMaterial.GetChannel("Specular").CopyTo(dstMaterial.FindChannel("Specular").Value);
+                srcMaterial.GetChannel("Glossiness").CopyTo(dstMaterial.FindChannel("Glossiness").Value);
             }
         }
 
-        public static void CopyTo(this Materials.MaterialChannelBuilder srcChannel, MaterialChannelView dstChannel)
+        public static void CopyTo(this Materials.MaterialChannelBuilder srcChannel, MaterialChannel dstChannel)
         {
             if (srcChannel == null) return;
 
-            dstChannel.SetFactor(srcChannel.Factor);
+            dstChannel.Color = srcChannel.Color;
 
             var srcTex = srcChannel.Texture;
 
@@ -238,6 +251,37 @@ namespace SharpGLTF.Schema2
             dstChannel.SetTexture(srcTex.CoordinateSet, image, srcTex.MinFilter, srcTex.MagFilter, srcTex.WrapS, srcTex.WrapT);
 
             // dstChannel.SetTransform(srcTex.CoordinateSet, srcTex.Offset, srcTex.Scale, srcTex.Rotation);
+        }
+
+        #endregion
+
+        #region evaluation API
+
+        public static Vector4 GetDiffuseColor(this Material material, Vector4 defaultColor)
+        {
+            if (material == null) return defaultColor;
+
+            var channel = material.FindChannel("BaseColor");
+            if (channel.HasValue) return channel.Value.Color;
+
+            channel = material.FindChannel("Diffuse");
+            if (channel.HasValue) return channel.Value.Color;
+
+            return defaultColor;
+        }
+
+        public static Texture GetDiffuseTexture(this Material material)
+        {
+            if (material == null) return null;
+
+            var channel = material.FindChannel("BaseColor");
+            if (channel.HasValue) return channel.Value.Texture;
+
+            channel = material.FindChannel("Diffuse");
+            if (channel.HasValue) return channel.Value.Texture;
+
+            return null;
+
         }
 
         #endregion
