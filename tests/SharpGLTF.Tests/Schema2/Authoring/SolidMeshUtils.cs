@@ -125,7 +125,7 @@ namespace SharpGLTF.Schema2.Authoring
         {
             // we create a new material to use with the terrain mesh
             var material = new Materials.MaterialBuilder("TerrainMaterial")
-                .WithChannelTexture("BaseColor", 0, terrainColorImagePath);
+                .WithChannelImage(Materials.KnownChannels.BaseColor, terrainColorImagePath);
 
             // we create a MeshBuilder
             var terrainMesh = new MeshBuilder<VPOS, VTEX1>("terrain");

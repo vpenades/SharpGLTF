@@ -12,12 +12,20 @@ namespace SharpGLTF.Schema2
     {
         #region meshes
 
+        public static Mesh CreateMesh<TvP, TvM, TvJ>(this ModelRoot root, Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvJ> meshBuilder)
+            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvJ : struct, Geometry.VertexTypes.IVertexJoints
+        {
+            return root.CreateMeshes(meshBuilder).First();
+        }
+
         public static Mesh CreateMesh<TvP, TvM, TvJ>(this ModelRoot root, Geometry.MeshBuilder<Material, TvP, TvM, TvJ> meshBuilder)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvJ : struct, Geometry.VertexTypes.IVertexJoints
         {
-            return root.CreateMeshes(m => m, meshBuilder).First();
+            return root.CreateMeshes(meshBuilder).First();
         }
 
         public static Mesh CreateMesh<TMaterial, TvP, TvM, TvJ>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.MeshBuilder<TMaterial, TvP, TvM, TvJ> meshBuilder)

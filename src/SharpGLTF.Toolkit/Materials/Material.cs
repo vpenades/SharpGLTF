@@ -58,6 +58,11 @@ namespace SharpGLTF.Materials
 
         #region API
 
+        public MaterialChannelBuilder GetChannel(KnownChannels channelKey)
+        {
+            return GetChannel(channelKey.ToString());
+        }
+
         public MaterialChannelBuilder GetChannel(string channelKey)
         {
             Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
@@ -65,6 +70,11 @@ namespace SharpGLTF.Materials
             channelKey = channelKey.ToLower();
 
             return _Channels.FirstOrDefault(item => string.Equals(channelKey, item.Key, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public MaterialChannelBuilder UseChannel(KnownChannels channelKey)
+        {
+            return UseChannel(channelKey.ToString());
         }
 
         public MaterialChannelBuilder UseChannel(string channelKey)
@@ -92,16 +102,31 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        public MaterialBuilder WithChannelColor(KnownChannels channelKey, Vector4 color)
+        {
+            this.UseChannel(channelKey).Factor = color;
+            return this;
+        }
+
         public MaterialBuilder WithChannelColor(string channelKey, Vector4 color)
         {
             this.UseChannel(channelKey).Factor = color;
             return this;
         }
 
-        public MaterialBuilder WithChannelTexture(string channelKey, int textureSet, string imageFilePath)
+        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string imageFilePath)
         {
-            this.UseChannel(channelKey).UseTexture()
-                .WithCoordinateSet(textureSet)
+            this.UseChannel(channelKey)
+                .UseTexture()
+                .WithImage(imageFilePath);
+
+            return this;
+        }
+
+        public MaterialBuilder WithChannelImage(string channelKey, string imageFilePath)
+        {
+            this.UseChannel(channelKey)
+                .UseTexture()
                 .WithImage(imageFilePath);
 
             return this;

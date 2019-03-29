@@ -40,4 +40,19 @@ namespace SharpGLTF.Materials
 
         #endregion
     }
+
+    public enum KnownChannels
+    {
+        Normal,
+        Occlusion,
+        Emissive,
+
+        BaseColor,
+        Metallic,
+        Roughness,
+
+        Diffuse,
+        Specular,
+        Glosiness,
+    }
 }
