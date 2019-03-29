@@ -227,7 +227,7 @@ namespace SharpGLTF.Schema2
         {
             if (srcChannel == null) return;
 
-            dstChannel.SetFactor(dstChannel.Factor);
+            dstChannel.SetFactor(srcChannel.Factor);
 
             var srcTex = srcChannel.Texture;
 

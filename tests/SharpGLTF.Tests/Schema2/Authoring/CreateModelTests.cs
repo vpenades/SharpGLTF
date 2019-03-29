@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 
 using NUnit.Framework;
-
 
 namespace SharpGLTF.Schema2.Authoring
 {
     using Geometry;
+    using Materials;
 
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
@@ -16,6 +17,7 @@ namespace SharpGLTF.Schema2.Authoring
     using VCLR1 = Geometry.VertexTypes.VertexColor1;
     using VTEX1 = Geometry.VertexTypes.VertexTexture1;
     using VSKIN4 = Geometry.VertexTypes.VertexJoints8x4;
+    
 
     [TestFixture]
     public class CreateModelTests
@@ -222,7 +224,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh1");
 
             var v1 = new VPOSNRM(-10, 10, 0, -10, 10, 15);
             var v2 = new VPOSNRM( 10, 10, 0, 10, 10, 15);
@@ -250,10 +252,10 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
             // create several meshes
-            var meshBuilder1 = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
-            var meshBuilder2 = new MeshBuilder<Vector4, VPOSNRM>("mesh2");
-            var meshBuilder3 = new MeshBuilder<Vector4, VPOSNRM>("mesh3");
-            var meshBuilder4 = new MeshBuilder<Vector4, VPOSNRM>("mesh4");
+            var meshBuilder1 = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh1");
+            var meshBuilder2 = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh2");
+            var meshBuilder3 = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh3");
+            var meshBuilder4 = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh4");
 
             meshBuilder1.AddCube(new Vector4(1, 1, 0, 1), Matrix4x4.Identity);
             meshBuilder2.AddCube(new Vector4(1, 0, 1, 1), Matrix4x4.Identity);
@@ -306,7 +308,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh
-            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM>("mesh1");
+            var meshBuilder = new MeshBuilder<Vector4, VPOSNRM, VEMPTY, VEMPTY>("mesh1");
             meshBuilder.AddCube(Vector4.One, Matrix4x4.Identity);
             meshBuilder.Validate();
 
@@ -439,6 +441,47 @@ namespace SharpGLTF.Schema2.Authoring
 
             // save the model as GLB
             model.AttachToCurrentTest("terrain.glb");
+        }
+
+        [Test]
+        public void CreateRandomCubesScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var rnd = new Random();
+
+            var materials = Enumerable
+                .Range(0, 10)
+                .Select(idx => new MaterialBuilder()
+                .WithChannelColor("BaseColor", new Vector4(rnd.NextVector3(),1)))
+                .ToList();
+
+            // create a mesh
+            var cubes = new MeshBuilder<VPOSNRM>("cube");
+
+            for(int i=0; i < 100; ++i)
+            {
+                var r = rnd.NextVector3() * 5;
+                var m = materials[rnd.Next(0, 10)];
+                var xform = Matrix4x4.CreateFromYawPitchRoll(r.X,r.Y,r.Z) * Matrix4x4.CreateTranslation(rnd.NextVector3() * 25);
+                cubes.AddCube(m, xform);
+            }
+
+            cubes.Validate();
+
+            // create a new gltf model
+            var model = ModelRoot.CreateModel();
+
+            // add all meshes (just one in this case) to the model
+            model.CreateMeshes(cubes);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
+            // save the model as GLB
+            model.AttachToCurrentTest("cubes.glb");
         }
 
         

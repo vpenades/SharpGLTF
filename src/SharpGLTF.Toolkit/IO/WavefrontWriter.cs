@@ -32,7 +32,7 @@ namespace SharpGLTF.IO
             public BYTES DiffuseTexture;
         }
 
-        private readonly Geometry.MeshBuilder<Material, POSITION, TEXCOORD> _Mesh = new Geometry.MeshBuilder<Material, POSITION, TEXCOORD>();
+        private readonly Geometry.MeshBuilder<Material, POSITION, TEXCOORD, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, POSITION, TEXCOORD, VEMPTY>();
 
         #endregion
 

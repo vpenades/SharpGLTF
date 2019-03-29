@@ -61,7 +61,7 @@ namespace SharpGLTF.Geometry
 
         private readonly TMaterial _Material;
 
-        private readonly VertexColumn<(TvP, TvM, TvJ)> _Vertices = new VertexColumn<(TvP, TvM, TvJ)>();
+        private readonly VertexList<(TvP, TvM, TvJ)> _Vertices = new VertexList<(TvP, TvM, TvJ)>();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion

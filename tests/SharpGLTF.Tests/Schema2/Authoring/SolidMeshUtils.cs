@@ -5,16 +5,16 @@ using System.Text;
 
 namespace SharpGLTF.Schema2.Authoring
 {
-    using Geometry;    
-    
-    using VPOS = Geometry.VertexTypes.VertexPosition;
-    using VTEX1 = Geometry.VertexTypes.VertexTexture1;
+    using Geometry;
 
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
+    using VPOS = Geometry.VertexTypes.VertexPosition;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
+    using VTEX1 = Geometry.VertexTypes.VertexTexture1;    
 
     static class SolidMeshUtils
     {
-        public static void AddCube<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform)
+        public static void AddCube<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Matrix4x4 xform)
         {
             meshBuilder._AddCubeFace(material, Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ, xform);
             meshBuilder._AddCubeFace(material, -Vector3.UnitX, Vector3.UnitZ, Vector3.UnitY, xform);
@@ -26,7 +26,7 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder._AddCubeFace(material, -Vector3.UnitZ, Vector3.UnitY, Vector3.UnitX, xform);
         }
 
-        private static void _AddCubeFace<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
+        private static void _AddCubeFace<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
         {
             var p1 = Vector3.Transform(origin - axisX - axisY, xform);
             var p2 = Vector3.Transform(origin + axisX - axisY, xform);
@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.Authoring
                 );
         }
 
-        public static void AddSphere<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Single radius, Matrix4x4 xform)
+        public static void AddSphere<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Single radius, Matrix4x4 xform)
         {
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 
@@ -94,7 +94,7 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder._AddSphereTriangle(material, xform, v9, v8, v1, 3);
         }
 
-        private static void _AddSphereTriangle<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c, int iterations = 0)
+        private static void _AddSphereTriangle<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Matrix4x4 xform, Vector3 a, Vector3 b, Vector3 c, int iterations = 0)
         {
             if (iterations <=0)
             {
@@ -121,14 +121,14 @@ namespace SharpGLTF.Schema2.Authoring
             _AddSphereTriangle(meshBuilder, material, xform, c, ca, bc, iterations);
         }
 
-        public static MeshBuilder<Materials.MaterialBuilder, VPOS, VTEX1> CreateTerrainMesh(int width, int length, Func<int,int,float> heightFunction, string terrainColorImagePath)
+        public static MeshBuilder<VPOS, VTEX1> CreateTerrainMesh(int width, int length, Func<int,int,float> heightFunction, string terrainColorImagePath)
         {
             // we create a new material to use with the terrain mesh
             var material = new Materials.MaterialBuilder("TerrainMaterial")
                 .WithChannelTexture("BaseColor", 0, terrainColorImagePath);
 
             // we create a MeshBuilder
-            var terrainMesh = new MeshBuilder<Materials.MaterialBuilder, VPOS, VTEX1>("terrain");
+            var terrainMesh = new MeshBuilder<VPOS, VTEX1>("terrain");
 
             var texScale = new Vector2(width, length);
 
@@ -162,6 +162,8 @@ namespace SharpGLTF.Schema2.Authoring
                         );
                 }
             }
+
+            terrainMesh.Validate();
 
             return terrainMesh;
         }
