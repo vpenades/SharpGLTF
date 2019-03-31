@@ -68,7 +68,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The name of the node's TRS property to modify, or the "weights" of the Morph Targets it instantiates. For the "translation" property, the values that are provided by the sampler are the translation along the x, y, and z axes. For the "rotation" property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the "scale" property, the values are the scaling factors along the x, y, and z axes.
 	/// </summary>
-	public enum PathType
+	public enum PropertyPath
 	{
 		translation,
 		rotation,
@@ -137,17 +137,18 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Magnification filter.
 	/// </summary>
-	public enum TextureInterpolationMode
+	public enum TextureInterpolationFilter
 	{
 		NEAREST = 9728,
 		LINEAR = 9729,
+		DEFAULT = 0,
 	}
 
 
 	/// <summary>
 	/// Minification filter.
 	/// </summary>
-	public enum TextureMipMapMode
+	public enum TextureMipMapFilter
 	{
 		NEAREST = 9728,
 		LINEAR = 9729,
@@ -155,6 +156,7 @@ namespace SharpGLTF.Schema2
 		LINEAR_MIPMAP_NEAREST = 9985,
 		NEAREST_MIPMAP_LINEAR = 9986,
 		LINEAR_MIPMAP_LINEAR = 9987,
+		DEFAULT = 0,
 	}
 
 
@@ -381,7 +383,7 @@ namespace SharpGLTF.Schema2
 	
 		private Int32? _node;
 		
-		private PathType _path;
+		private PropertyPath _path;
 		
 	
 		/// <inheritdoc />
@@ -389,7 +391,7 @@ namespace SharpGLTF.Schema2
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "node", _node);
-			SerializePropertyEnumSymbol<PathType>(writer, "path", _path);
+			SerializePropertyEnumSymbol<PropertyPath>(writer, "path", _path);
 		}
 	
 		/// <inheritdoc />
@@ -398,7 +400,7 @@ namespace SharpGLTF.Schema2
 			switch (property)
 			{
 				case "node": _node = DeserializePropertyValue<Int32?>(reader); break;
-				case "path": _path = DeserializePropertyValue<PathType>(reader); break;
+				case "path": _path = DeserializePropertyValue<PropertyPath>(reader); break;
 				default: base.DeserializeProperty(property, reader); break;
 			}
 		}
@@ -1105,9 +1107,9 @@ namespace SharpGLTF.Schema2
 	partial class TextureSampler : LogicalChildOfRoot
 	{
 	
-		private TextureInterpolationMode? _magFilter;
+		private TextureInterpolationFilter? _magFilter;
 		
-		private TextureMipMapMode? _minFilter;
+		private TextureMipMapFilter? _minFilter;
 		
 		private const TextureWrapMode _wrapSDefault = (TextureWrapMode)10497;
 		private TextureWrapMode? _wrapS = _wrapSDefault;
@@ -1120,8 +1122,8 @@ namespace SharpGLTF.Schema2
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializePropertyEnumValue<TextureInterpolationMode>(writer, "magFilter", _magFilter);
-			SerializePropertyEnumValue<TextureMipMapMode>(writer, "minFilter", _minFilter);
+			SerializePropertyEnumValue<TextureInterpolationFilter>(writer, "magFilter", _magFilter);
+			SerializePropertyEnumValue<TextureMipMapFilter>(writer, "minFilter", _minFilter);
 			SerializePropertyEnumValue<TextureWrapMode>(writer, "wrapS", _wrapS, _wrapSDefault);
 			SerializePropertyEnumValue<TextureWrapMode>(writer, "wrapT", _wrapT, _wrapTDefault);
 		}
@@ -1131,8 +1133,8 @@ namespace SharpGLTF.Schema2
 		{
 			switch (property)
 			{
-				case "magFilter": _magFilter = DeserializePropertyValue<TextureInterpolationMode>(reader); break;
-				case "minFilter": _minFilter = DeserializePropertyValue<TextureMipMapMode>(reader); break;
+				case "magFilter": _magFilter = DeserializePropertyValue<TextureInterpolationFilter>(reader); break;
+				case "minFilter": _minFilter = DeserializePropertyValue<TextureMipMapFilter>(reader); break;
 				case "wrapS": _wrapS = DeserializePropertyValue<TextureWrapMode>(reader); break;
 				case "wrapT": _wrapT = DeserializePropertyValue<TextureWrapMode>(reader); break;
 				default: base.DeserializeProperty(property, reader); break;

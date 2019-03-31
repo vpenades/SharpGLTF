@@ -73,6 +73,12 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector4.One")
                 .SetItemsRange(0);
 
+            var tex1 = ctx1.FindEnum("LINEAR-NEAREST");
+            tex1.SetValue("DEFAULT",0);
+
+            var tex2 = ctx1.FindEnum("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST");
+            tex2.SetValue("DEFAULT", 0);
+
             ProcessSchema("gltf.g", ctx1);
         }
 
@@ -192,15 +198,15 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "IndexEncodingType");            
             newEmitter.SetRuntimeName("BYTE-FLOAT-SHORT-UNSIGNED_BYTE-UNSIGNED_INT-UNSIGNED_SHORT", "EncodingType");            
             newEmitter.SetRuntimeName("MAT2-MAT3-MAT4-SCALAR-VEC2-VEC3-VEC4", "DimensionType");
-            newEmitter.SetRuntimeName("rotation-scale-translation-weights", "PathType");
+            newEmitter.SetRuntimeName("rotation-scale-translation-weights", "PropertyPath");
             newEmitter.SetRuntimeName("ARRAY_BUFFER-ELEMENT_ARRAY_BUFFER", "BufferMode");
             newEmitter.SetRuntimeName("orthographic-perspective", "CameraType");
             newEmitter.SetRuntimeName("BLEND-MASK-OPAQUE", "AlphaMode");
             newEmitter.SetRuntimeName("LINE_LOOP-LINE_STRIP-LINES-POINTS-TRIANGLE_FAN-TRIANGLE_STRIP-TRIANGLES", "PrimitiveType");
             newEmitter.SetRuntimeName("CUBICSPLINE-LINEAR-STEP", "AnimationInterpolationMode");
-            newEmitter.SetRuntimeName("LINEAR-NEAREST", "TextureInterpolationMode");
+            newEmitter.SetRuntimeName("LINEAR-NEAREST", "TextureInterpolationFilter");
             newEmitter.SetRuntimeName("CLAMP_TO_EDGE-MIRRORED_REPEAT-REPEAT", "TextureWrapMode");
-            newEmitter.SetRuntimeName("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST", "TextureMipMapMode");
+            newEmitter.SetRuntimeName("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST", "TextureMipMapFilter");
 
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness");
             newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");

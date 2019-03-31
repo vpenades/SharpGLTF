@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -141,7 +142,6 @@ namespace SharpGLTF.IO
         protected static void SerializeProperty<T>(JsonWriter writer, string name, IReadOnlyList<T> collection, int? minItems = 1)
         {
             if (collection == null) return;
-
             if (minItems.HasValue && collection.Count < minItems.Value) return;
 
             writer.WritePropertyName(name);
@@ -160,9 +160,8 @@ namespace SharpGLTF.IO
             if (collection == null) return;
             if (collection.Count < 1) return;
 
-            // a dictionary is serialized as a regular object where every "property" is a key.
-
             writer.WritePropertyName(name);
+
             writer.WriteStartObject();
             foreach (var item in collection)
             {
@@ -181,11 +180,20 @@ namespace SharpGLTF.IO
 
             if (value is String vstr) { writer.WriteValue(vstr); return; }
             if (value is Boolean vbol) { writer.WriteValue(vbol); return; }
-            if (value is Int32 vi32) { writer.WriteValue(vi32); return; }
-            if (value is Int64 vi64) { writer.WriteValue(vi64); return; }
-            if (value is Single vfps) { writer.WriteValue(vfps); return; }
-            if (value is Double vfpd) { writer.WriteValue(vfpd); return; }
-            if (value is Decimal vfpx) { writer.WriteValue(vfpx); return; }
+
+            if (value is Byte vu8) { writer.WriteValue(vu8); return; }
+            if (value is UInt16 vu16) { writer.WriteValue(vu16); return; }
+            if (value is UInt32 vu32) { writer.WriteValue(vu32); return; }
+            if (value is UInt64 vu64) { writer.WriteValue(vu64); return; }
+
+            if (value is SByte vs8) { writer.WriteValue(vs8); return; }
+            if (value is Int16 vs16) { writer.WriteValue(vs16); return; }
+            if (value is Int32 vs32) { writer.WriteValue(vs32); return; }
+            if (value is Int64 vs64) { writer.WriteValue(vs64); return; }
+
+            if (value is Single vf32) { writer.WriteValue(vf32); return; }
+            if (value is Double vf64) { writer.WriteValue(vf64); return; }
+            if (value is Decimal vfxx) { writer.WriteValue(vfxx); return; }
 
             if (value is Vector2 vvv2) { writer.WriteVector2(vvv2); return; }
             if (value is Vector3 vvv3) { writer.WriteVector3(vvv3); return; }
@@ -195,36 +203,26 @@ namespace SharpGLTF.IO
 
             if (value is JsonSerializable vgltf) { vgltf.Serialize(writer); return; }
 
-            if (value is IReadOnlyDictionary<String, Int32> vdsi)
+            if (value is System.Collections.IDictionary dict)
             {
-                writer.WriteStartObject();
-                foreach (var item in vdsi)
-                {
-                    writer.WritePropertyName(item.Key);
-                    _Serialize(writer, item.Value);
-                }
+                if (dict.Count == 0) return;
 
+                writer.WriteStartObject();
+                foreach (var key in dict.Keys)
+                {
+                    writer.WritePropertyName(key.ToString());
+                    _Serialize(writer, dict[key]);
+                }
                 writer.WriteEndObject();
                 return;
             }
 
-            if (value is IReadOnlyDictionary<String, Object> vdso)
+            if (value is System.Collections.IList list)
             {
-                writer.WriteStartObject();
-                foreach (var item in vdso)
-                {
-                    writer.WritePropertyName(item.Key);
-                    _Serialize(writer, item.Value);
-                }
+                if (list.Count == 0) return;
 
-                writer.WriteEndObject();
-                return;
-            }
-
-            if (value is Array array)
-            {
                 writer.WriteStartArray();
-                foreach (var item in array)
+                foreach (var item in list)
                 {
                     _Serialize(writer, item);
                 }
@@ -266,25 +264,25 @@ namespace SharpGLTF.IO
             throw new NotImplementedException();
         }
 
-        protected static Object DeserializeObject(JsonReader reader)
+        protected static Object DeserializeUnknownObject(JsonReader reader)
         {
             if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartArray)
             {
-                var items = new List<Object>();
+                var list = new JsonList();
 
                 while (reader.Read() && reader.TokenType != JsonToken.EndArray)
                 {
-                    items.Add(DeserializeObject(reader));
+                    list.Add(DeserializeUnknownObject(reader));
                 }
 
-                return items.ToArray();
+                return list;
             }
 
             if (reader.TokenType == JsonToken.StartObject)
             {
-                var dict = new Dictionary<string, object>();
+                var dict = new JsonDictionary();
 
                 while (reader.Read() && reader.TokenType != JsonToken.EndObject)
                 {
@@ -292,7 +290,7 @@ namespace SharpGLTF.IO
                     {
                         var key = reader.Value as String;
 
-                        dict[key] = DeserializeObject(reader);
+                        dict[key] = DeserializeUnknownObject(reader);
                     }
                     else
                     {

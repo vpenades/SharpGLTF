@@ -6,6 +6,10 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using TEXLERP = TextureInterpolationFilter;
+    using TEXMIPMAP = TextureMipMapFilter;
+    using TEXWRAP = TextureWrapMode;
+
     [System.Diagnostics.DebuggerDisplay("Texture[{LogicalIndex}] {Name}")]
     public sealed partial class Texture
     {
@@ -52,12 +56,12 @@ namespace SharpGLTF.Schema2
 
         internal TextureSampler() { }
 
-        internal TextureSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        internal TextureSampler(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
         {
-            _magFilter = mag;
-            _minFilter = min;
-            _wrapS = ws;
-            _wrapT = wt;
+            _magFilter = mag.AsNullable(TEXLERP.DEFAULT);
+            _minFilter = min.AsNullable(TEXMIPMAP.DEFAULT);
+            _wrapS = ws.AsNullable(_wrapSDefault);
+            _wrapT = wt.AsNullable(_wrapTDefault);
         }
 
         #endregion
@@ -69,18 +73,29 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalTextureSamplers.IndexOfReference(this);
 
-        public TextureInterpolationMode MagFilter => _magFilter.AsValue(TextureInterpolationMode.LINEAR);
+        public TEXMIPMAP MinFilter => _minFilter.AsValue(TEXMIPMAP.DEFAULT);
 
-        public TextureMipMapMode MinFilter => _minFilter.AsValue(TextureMipMapMode.LINEAR);
+        public TEXLERP MagFilter => _magFilter.AsValue(TEXLERP.DEFAULT);
 
-        public TextureWrapMode WrapS => _wrapS.AsValue(_wrapSDefault);
+        public TEXWRAP WrapS => _wrapS.AsValue(_wrapSDefault);
 
-        public TextureWrapMode WrapT => _wrapT.AsValue(_wrapTDefault);
+        public TEXWRAP WrapT => _wrapT.AsValue(_wrapTDefault);
+
+        #endregion
+
+        #region API
+
+        internal static bool IsDefault(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
+        {
+            if (min != TEXMIPMAP.DEFAULT) return false;
+            if (mag != TEXLERP.DEFAULT) return false;
+            if (ws != _wrapSDefault) return false;
+            if (wt != _wrapTDefault) return false;
+            return true;
+        }
 
         #endregion
     }
-
-    
 
     public partial class ModelRoot
     {
@@ -88,19 +103,21 @@ namespace SharpGLTF.Schema2
         /// Creates or reuses a <see cref="TextureSampler"/> instance
         /// at <see cref="ModelRoot.LogicalTextureSamplers"/>.
         /// </summary>
-        /// <param name="mag">A value of <see cref="TextureInterpolationMode"/>.</param>
-        /// <param name="min">A value of <see cref="TextureMipMapMode"/>.</param>
-        /// <param name="ws">The <see cref="TextureWrapMode"/> in the S axis.</param>
-        /// <param name="wt">The <see cref="TextureWrapMode"/> in the T axis.</param>
-        /// <returns>A <see cref="TextureSampler"/> instance.</returns>
-        public TextureSampler UseSampler(TextureInterpolationMode mag, TextureMipMapMode min, TextureWrapMode ws, TextureWrapMode wt)
+        /// <param name="min">A value of <see cref="TEXMIPMAP"/>.</param>
+        /// <param name="mag">A value of <see cref="TEXLERP"/>.</param>
+        /// <param name="ws">The <see cref="TEXWRAP"/> in the S axis.</param>
+        /// <param name="wt">The <see cref="TEXWRAP"/> in the T axis.</param>
+        /// <returns>A <see cref="TextureSampler"/> instance, or null if all the arguments are default values.</returns>
+        public TextureSampler UseSampler(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
         {
+            if (TextureSampler.IsDefault(min, mag, ws, wt)) return null;
+
             foreach (var s in this._samplers)
             {
-                if (s.MagFilter == mag && s.MinFilter == min && s.WrapS == ws && s.WrapT == wt) return s;
+                if (s.MinFilter == min && s.MagFilter == mag && s.WrapS == ws && s.WrapT == wt) return s;
             }
 
-            var ss = new TextureSampler(mag, min, ws, wt);
+            var ss = new TextureSampler(min, mag, ws, wt);
 
             this._samplers.Add(ss);
 

@@ -7,8 +7,8 @@ namespace SharpGLTF.Materials
 {
     using BYTES = ArraySegment<Byte>;
 
-    using TEXLERP = Schema2.TextureInterpolationMode;
-    using TEXMIPMAP = Schema2.TextureMipMapMode;
+    using TEXLERP = Schema2.TextureInterpolationFilter;
+    using TEXMIPMAP = Schema2.TextureMipMapFilter;
     using TEXWRAP = Schema2.TextureWrapMode;
 
     [System.Diagnostics.DebuggerDisplay("Texture {CoordinateSet} {MinFilter} {MagFilter} {WrapS} {WrapT} {Rotation} {Offset} {Scale}")]
@@ -36,9 +36,9 @@ namespace SharpGLTF.Materials
 
         public BYTES ImageContent { get; set; }
 
-        public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.LINEAR;
+        public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.DEFAULT;
 
-        public TEXLERP MagFilter { get; set; } = TEXLERP.LINEAR;
+        public TEXLERP MagFilter { get; set; } = TEXLERP.DEFAULT;
 
         public TEXWRAP WrapS { get; set; } = TEXWRAP.REPEAT;
 

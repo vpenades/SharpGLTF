@@ -44,6 +44,16 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
+        #region extra properties
+
+        // public String Title { get => _GetExtraInfo("title"); set => _SetExtraInfo("title", value); }
+
+        // public String Author { get => _GetExtraInfo("author"); set => _SetExtraInfo("author", value); }
+
+        // public String License { get => _GetExtraInfo("license"); set => _SetExtraInfo("license", value); }
+
+        #endregion
+
         #region API
 
         public override IEnumerable<Exception> Validate()
@@ -57,6 +67,24 @@ namespace SharpGLTF.Schema2
 
             if (curVer < MINVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}");
             if (curVer > MAXVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MAXVERSION}");
+        }
+
+        private string _GetExtraInfo(string key)
+        {
+            if (this.Extras is IReadOnlyDictionary<string, Object> dict)
+            {
+                return dict.TryGetValue(key, out Object val) ? val as String : null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private void _SetExtraInfo(string key, string val)
+        {
+            throw new NotImplementedException();
+            // if (this.Extras == null) this.Extras = new Dictionary<string, Object>();
         }
 
         #endregion

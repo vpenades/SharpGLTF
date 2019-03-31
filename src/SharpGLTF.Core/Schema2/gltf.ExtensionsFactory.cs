@@ -115,7 +115,7 @@ namespace SharpGLTF.Schema2
             }
 
             // search for unknown extensions
-            foreach (var unk in allObjects.SelectMany(item => item.Extensions).OfType<Unknown>())
+            foreach (var unk in allObjects.SelectMany(item => item.Extensions).OfType<UnknownNode>())
             {
                 used.Add(unk.Name);
             }

@@ -6,23 +6,27 @@ using Newtonsoft.Json;
 
 namespace SharpGLTF.IO
 {
+    public class JsonDictionary : Dictionary<String, Object> { }
+
+    public class JsonList : List<Object> { }
+
     [System.Diagnostics.DebuggerDisplay("Unknown {_Name}")]
-    class Unknown : JsonSerializable
+    class UnknownNode : JsonSerializable
     {
-        public Unknown(string name) { this._Name = name; }
+        public UnknownNode(string name) { this._Name = name; }
 
         private readonly string _Name;
 
-        private readonly Dictionary<string, Object> _Properties = new Dictionary<string, object>();
+        private readonly JsonDictionary _Properties = new JsonDictionary();
 
         public string Name => _Name;
 
-        public IDictionary<String, Object> Properties => _Properties;
+        public JsonDictionary Properties => _Properties;
 
         protected override void DeserializeProperty(string property, JsonReader reader)
         {
             reader.Read();
-            _Properties[property] = DeserializeObject(reader);
+            _Properties[property] = DeserializeUnknownObject(reader);
         }
 
         protected override void SerializeProperties(JsonWriter writer)

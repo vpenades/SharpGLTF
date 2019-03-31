@@ -159,6 +159,22 @@ namespace SharpGLTF.Schema2
         public String Key => _Key;
 
         /// <summary>
+        /// Gets a value indicating whether this channel supports a Color factor.
+        /// </summary>
+        public bool IsColorSupported { get; private set; }
+
+        public Vector4 Color
+        {
+            get => _ColorGetter();
+            set => _ColorSetter(value);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this channel supports textures.
+        /// </summary>
+        public bool IsTextureSupported => _TextureInfo != null;
+
+        /// <summary>
         /// Gets the <see cref="Texture"/> instance used by this Material, or null.
         /// </summary>
         public Texture Texture => _GetTexture();
@@ -172,20 +188,21 @@ namespace SharpGLTF.Schema2
 
         public TextureSampler TextureSampler => Texture?.Sampler;
 
+        /// <summary>
+        /// Gets a value indicating whether this channel supports texture amount factor.
+        /// </summary>
         public bool IsTextureAmountSupported { get; private set; }
 
+        /// <summary>
+        /// Gets or sets the Texture weight in the final shader.
+        /// </summary>
+        /// <remarks>
+        /// Not all channels support this property.
+        /// </remarks>
         public Single TextureAmount
         {
             get => _AmountGetter();
             set => _AmountSetter(value);
-        }
-
-        public bool IsColorSupported { get; private set; }
-
-        public Vector4 Color
-        {
-            get => _ColorGetter();
-            set => _ColorSetter(value);
         }
 
         #endregion
@@ -203,8 +220,8 @@ namespace SharpGLTF.Schema2
         public void SetTexture(
             int texCoord,
             Image texImg,
-            TextureMipMapMode min = TextureMipMapMode.LINEAR_MIPMAP_LINEAR,
-            TextureInterpolationMode mag = TextureInterpolationMode.LINEAR,
+            TextureMipMapFilter min = TextureMipMapFilter.DEFAULT,
+            TextureInterpolationFilter mag = TextureInterpolationFilter.DEFAULT,
             TextureWrapMode ws = TextureWrapMode.REPEAT,
             TextureWrapMode wt = TextureWrapMode.REPEAT)
         {
@@ -212,7 +229,7 @@ namespace SharpGLTF.Schema2
 
             if (_Material == null) throw new InvalidOperationException();
 
-            var sampler = _Material.LogicalParent.UseSampler(mag, min, ws, wt);
+            var sampler = _Material.LogicalParent.UseSampler(min, mag, ws, wt);
             var texture = _Material.LogicalParent.UseTexture(texImg, sampler);
 
             SetTexture(texCoord, texture);

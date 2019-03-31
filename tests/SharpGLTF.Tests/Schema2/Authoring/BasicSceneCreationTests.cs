@@ -30,40 +30,43 @@ namespace SharpGLTF.Schema2.Authoring
             var root = ModelRoot.CreateModel();
             var scene = root.UseScene("Empty Scene");
 
-            /*
+            var dict = root.TryUseExtrasAsDictionary(true);
 
-            root.Extras["author"] = "me";
+            dict["author"] = "me";
 
-            root.Extras["value1"] = 17;
-            root.Extras["array1"] = new Single[] { 1, 2, 3 };
-            root.Extras["dict1"] = new Dictionary<String, Object>
+            dict["value1"] = 17;
+            dict["array1"] = new IO.JsonList { 1, 2, 3 };
+            dict["dict1"] = new IO.JsonDictionary
             {
                 ["A"] = 16,
                 ["B"] = "delta",
-                ["C"] = new Single[] { 4, 6, 7 },
-                ["D"] = new Dictionary<String, Object> { ["S"]= 1, ["T"] = 2 }
+                ["C"] = new IO.JsonList { 4, 6, 7 },
+                ["D"] = new IO.JsonDictionary { ["S"]= 1, ["T"] = 2 }
             };
 
             var json = root.GetJSON(Newtonsoft.Json.Formatting.Indented);
-            var bytes = root.WriteGLB();
 
+            var bytes = root.WriteGLB();
             var rootBis = ModelRoot.ParseGLB(bytes);
 
-            CollectionAssert.AreEqual(root.Extras, rootBis.Extras);
+            var adict = root.TryUseExtrasAsDictionary(false);
+            var bdict = rootBis.TryUseExtrasAsDictionary(false);
 
-            Assert.AreEqual(root.Extras["author"], rootBis.Extras["author"]);
-            Assert.AreEqual(root.Extras["value1"], rootBis.Extras["value1"]);
+            CollectionAssert.AreEqual(adict, bdict);
+
+            Assert.AreEqual(adict["author"], bdict["author"]);
+            Assert.AreEqual(adict["value1"], bdict["value1"]);
             CollectionAssert.AreEqual
                 (
-                root.Extras["array1"] as Array,
-                rootBis.Extras["array1"] as Array
+                adict["array1"] as IO.JsonList,
+                bdict["array1"] as IO.JsonList
                 );
 
             CollectionAssert.AreEqual
                 (
-                root.Extras["dict1"] as Dictionary<string, Object>,
-                rootBis.Extras["dict1"] as Dictionary<string, Object>
-                );*/
+                adict["dict1"] as IO.JsonDictionary,
+                bdict["dict1"] as IO.JsonDictionary
+                );
         }
 
         [Test(Description = "Creates a scene with lights")]

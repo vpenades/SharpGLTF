@@ -26,7 +26,7 @@ namespace SharpGLTF.Schema2
         public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
 
         /// <summary>
-        /// Gets the extras object
+        /// Gets the extras object, where the object can be either an <see cref="Object"/>, a <see cref="JsonList"/> or a <see cref="JsonDictionary"/>
         /// </summary>
         public Object Extras => _extras;
 
@@ -85,6 +85,20 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets the Extras property as a <see cref="JsonDictionary"/>
+        /// </summary>
+        /// <param name="overwrite">true if the current value is to be replaced by a <see cref="JsonDictionary"/> instance.</param>
+        /// <returns>A <see cref="JsonDictionary"/> instance or null.</returns>
+        public JsonDictionary TryUseExtrasAsDictionary(bool overwrite)
+        {
+            if (this._extras is JsonDictionary dict) return dict;
+
+            if (overwrite) this._extras = new JsonDictionary();
+
+            return this._extras as JsonDictionary;
+        }
+
         #endregion
 
         #region serialization API
@@ -117,7 +131,7 @@ namespace SharpGLTF.Schema2
 
                 string key = null;
 
-                if (val is Unknown unk) key = unk.Name;
+                if (val is UnknownNode unk) key = unk.Name;
                 else key = ExtensionsFactory.Identify(context.GetType(), val.GetType());
 
                 if (key == null) continue;
@@ -138,7 +152,7 @@ namespace SharpGLTF.Schema2
             {
                 case "extensions": _DeserializeExtensions(this, reader, _extensions); break;
 
-                case "extras": _extras = DeserializeObject(reader); break;
+                case "extras": _extras = DeserializeUnknownObject(reader); break;
 
                 default: reader.Skip(); break;
             }
@@ -156,7 +170,7 @@ namespace SharpGLTF.Schema2
 
                     var val = ExtensionsFactory.Create(parent, key);
 
-                    if (val == null) val = new Unknown(key);
+                    if (val == null) val = new UnknownNode(key);
 
                     val.Deserialize(reader);
                     extensions.Add(val);

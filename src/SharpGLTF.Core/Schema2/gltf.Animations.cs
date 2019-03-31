@@ -54,7 +54,7 @@ namespace SharpGLTF.Schema2
         /// <remarks>
         /// There can only be one <see cref="AnimationChannel"/> for every node and path
         /// </remarks>
-        private AnimationChannel _UseChannel(Node node, PathType path)
+        private AnimationChannel _UseChannel(Node node, PropertyPath path)
         {
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
@@ -74,7 +74,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetVector3Keys(keyframes);
 
-            this._UseChannel(node, PathType.scale)
+            this._UseChannel(node, PropertyPath.scale)
                 .SetSampler(sampler);
         }
 
@@ -84,7 +84,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetVector3Keys(keyframes);
 
-            this._UseChannel(node, PathType.scale)
+            this._UseChannel(node, PropertyPath.scale)
                 .SetSampler(sampler);
         }
 
@@ -94,7 +94,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetQuaternionKeys(keyframes);
 
-            this._UseChannel(node, PathType.rotation)
+            this._UseChannel(node, PropertyPath.rotation)
                 .SetSampler(sampler);
         }
 
@@ -104,7 +104,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetQuaternionKeys(keyframes);
 
-            this._UseChannel(node, PathType.rotation)
+            this._UseChannel(node, PropertyPath.rotation)
                 .SetSampler(sampler);
         }
 
@@ -114,7 +114,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetVector3Keys(keyframes);
 
-            this._UseChannel(node, PathType.translation)
+            this._UseChannel(node, PropertyPath.translation)
                 .SetSampler(sampler);
         }
 
@@ -124,7 +124,7 @@ namespace SharpGLTF.Schema2
 
             sampler.SetVector3Keys(keyframes);
 
-            this._UseChannel(node, PathType.translation)
+            this._UseChannel(node, PropertyPath.translation)
                 .SetSampler(sampler);
         }
 
@@ -135,7 +135,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyDictionary<Single, Vector3> FindScaleChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.scale);
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.scale);
             if (channel == null) return null;
 
             return channel.Sampler.AsVector3KeyFrames();
@@ -143,7 +143,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyDictionary<Single, Quaternion> FindRotationChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.rotation);
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.rotation);
             if (channel == null) return null;
 
             return channel.Sampler.AsQuaternionKeyFrames();
@@ -151,7 +151,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyDictionary<Single, Vector3> FindTranslationChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PathType.translation);
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.translation);
             if (channel == null) return null;
 
             return channel.Sampler.AsVector3KeyFrames();
@@ -166,7 +166,7 @@ namespace SharpGLTF.Schema2
 
         internal AnimationChannelTarget() { }
 
-        internal AnimationChannelTarget(Node targetNode, PathType targetPath)
+        internal AnimationChannelTarget(Node targetNode, PropertyPath targetPath)
         {
             _node = targetNode.LogicalIndex;
             _path = targetPath;
@@ -178,7 +178,7 @@ namespace SharpGLTF.Schema2
 
         internal int? _NodeId => this._node;
 
-        internal PathType _NodePath => this._path;
+        internal PropertyPath _NodePath => this._path;
 
         #endregion
     }
@@ -189,7 +189,7 @@ namespace SharpGLTF.Schema2
 
         internal AnimationChannel() { }
 
-        internal AnimationChannel(Node targetNode, PathType targetPath)
+        internal AnimationChannel(Node targetNode, PropertyPath targetPath)
         {
             _target = new AnimationChannelTarget(targetNode, targetPath);
             _sampler = -1;
@@ -229,7 +229,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public PathType TargetNodePath => this._target?._NodePath ?? PathType.translation;
+        public PropertyPath TargetNodePath => this._target?._NodePath ?? PropertyPath.translation;
 
         public int OutputByteStride
         {
@@ -237,10 +237,10 @@ namespace SharpGLTF.Schema2
             {
                 switch (TargetNodePath)
                 {
-                    case PathType.translation: return 3;
-                    case PathType.rotation: return 4;
-                    case PathType.scale: return 3;
-                    case PathType.weights: return TargetNode.MorphWeights.Count;
+                    case PropertyPath.translation: return 3;
+                    case PropertyPath.rotation: return 4;
+                    case PropertyPath.scale: return 3;
+                    case PropertyPath.weights: return TargetNode.MorphWeights.Count;
                     default: throw new NotImplementedException();
                 }
             }
