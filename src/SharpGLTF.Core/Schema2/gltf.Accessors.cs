@@ -87,17 +87,6 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
-        public Transforms.BoundingBox3? LocalBounds3
-        {
-            get
-            {
-                if (this._min.Count != 3) return null;
-                if (this._max.Count != 3) return null;
-
-                return new Transforms.BoundingBox3(this._min, this._max);
-            }
-        }
-
         #endregion
 
         #region API

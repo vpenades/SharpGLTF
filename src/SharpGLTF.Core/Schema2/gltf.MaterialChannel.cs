@@ -229,7 +229,7 @@ namespace SharpGLTF.Schema2
 
             if (_Material == null) throw new InvalidOperationException();
 
-            var sampler = _Material.LogicalParent.UseSampler(min, mag, ws, wt);
+            var sampler = _Material.LogicalParent.UseTextureSampler(min, mag, ws, wt);
             var texture = _Material.LogicalParent.UseTexture(texImg, sampler);
 
             SetTexture(texCoord, texture);

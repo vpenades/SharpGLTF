@@ -9,7 +9,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Special accessor to wrap over a base accessor and a sparse accessor
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">An unmanage structure type.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
     public struct SparseArray<T> : IList<T>, IReadOnlyList<T>
         where T : unmanaged

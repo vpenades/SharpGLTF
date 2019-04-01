@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
         /// <param name="ws">The <see cref="TEXWRAP"/> in the S axis.</param>
         /// <param name="wt">The <see cref="TEXWRAP"/> in the T axis.</param>
         /// <returns>A <see cref="TextureSampler"/> instance, or null if all the arguments are default values.</returns>
-        public TextureSampler UseSampler(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
+        public TextureSampler UseTextureSampler(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
         {
             if (TextureSampler.IsDefault(min, mag, ws, wt)) return null;
 

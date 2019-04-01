@@ -59,7 +59,26 @@ namespace SharpGLTF
                 baseName += "CLASS";
             }
 
-            baseName += " " + tinfo.GetFriendlyName();
+            baseName += " " + tinfo.GetQualifiedName();
+
+            if (tinfo.IsClass)
+            {
+                // base classes
+                var baseType = tinfo.BaseType;
+                while (baseType != null && baseType != typeof(object))
+                {
+                    yield return baseName + " { USING " + baseType.GetQualifiedName() + " } ";
+                    baseType = baseType.BaseType;
+                }
+            }
+
+            foreach(var ifaceType in tinfo.GetInterfaces())
+            {
+                if (ifaceType.IsNotPublic) continue;
+
+                yield return baseName + " { USING " + ifaceType.GetQualifiedName() + " } ";
+            }
+
 
             Object instance = null;
 
@@ -101,7 +120,7 @@ namespace SharpGLTF
             if (finfo.IsLiteral) name += "CONST";
             else name += "FIELD";
 
-            name += $" {finfo.Name} {finfo.FieldType.GetFriendlyName()}";
+            name += $" {finfo.Name} {finfo.FieldType.GetQualifiedName()}";
 
             if (finfo.IsStatic)
             {
@@ -121,7 +140,7 @@ namespace SharpGLTF
 
         public static IEnumerable<string> GetPropertySignature(Object instance, PropertyInfo pinfo)
         {
-            var pname = $"{pinfo.Name} {pinfo.PropertyType.GetFriendlyName()}";
+            var pname = $"{pinfo.Name} {pinfo.PropertyType.GetQualifiedName()}";
 
             var getter = pinfo.GetGetMethod();
             if (IsVisible(getter,true)) yield return GetMethodModifiers(getter)+ "PROPERTYGET " + pname;
@@ -132,16 +151,14 @@ namespace SharpGLTF
 
         public static IEnumerable<string> GetMethodSignature(Object instance, MethodBase minfo)
         {
-            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.
-
-            
+            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.            
 
             var mname = GetMethodModifiers(minfo);
 
             if (minfo is MethodInfo mminfo)
             {
                 if (!IsVisible(minfo)) yield break;
-                mname += "METHOD " + mminfo.Name + $" {mminfo.ReturnType.GetFriendlyName()} ";
+                mname += "METHOD " + mminfo.Name + $" {mminfo.ReturnType.GetQualifiedName()} ";
             }
 
             if (minfo is ConstructorInfo cinfo)
@@ -151,10 +168,17 @@ namespace SharpGLTF
             }             
 
             var mparams = minfo.GetParameters()
-                .Select(item => item.ParameterType.GetFriendlyName())
-                .ToList();
+                .Select(item => GetParameterSignature(item))
+                .ToList();            
 
             yield return mname + "(" + string.Join(", ", mparams) + ")";
+        }
+
+        public static string GetParameterSignature(ParameterInfo pinfo)
+        {
+            var isParams = pinfo.GetCustomAttribute(typeof(ParamArrayAttribute)) != null;
+
+            return (isParams ? "params " : "") + pinfo.ParameterType.GetQualifiedName();
         }
 
         public static bool IsVisible(FieldInfo finfo)
@@ -196,22 +220,24 @@ namespace SharpGLTF
             return mod;
         }
 
-        public static string GetFriendlyName(this Type tinfo)
+        public static string GetQualifiedName(this Type tinfo)
         {
-            return tinfo.GetTypeInfo().GetFriendlyName();
+            return tinfo.GetTypeInfo().GetQualifiedName();
         }
 
-        public static string GetFriendlyName(this TypeInfo tinfo)
+        public static string GetQualifiedName(this System.Reflection.TypeInfo tinfo)
         {
-            if (!tinfo.IsGenericType) return tinfo.Name;
-
             var name = tinfo.Name;
 
-            /*
-            if (tinfo.Name == "System.Nullable`1")
+            if (tinfo.IsArray)
             {
-                return tinfo.GenericTypeParameters.First().Name + "?";
-            }*/           
+                var fname = tinfo.GetElementType().GetQualifiedName();
+                fname += "[" + string.Join("", Enumerable.Repeat(",", tinfo.GetArrayRank() - 1)) + "]";                
+
+                return fname; 
+            }
+
+            if (!tinfo.IsGenericType && !tinfo.IsGenericTypeDefinition) return tinfo.Name;            
 
             name = name.Replace("`1","");
             name = name.Replace("`2", "");
@@ -224,7 +250,8 @@ namespace SharpGLTF
 
             var gpm = tinfo
                 .GenericTypeArguments
-                .Select(item => GetFriendlyName(item.GetTypeInfo()))
+                .Concat(tinfo.GenericTypeParameters)
+                .Select(item => GetQualifiedName(item.GetTypeInfo()))
                 .ToList();
 
             if (gpm.Count > 0) name += "<" + string.Join(", ", gpm) + ">";

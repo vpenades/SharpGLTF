@@ -6,7 +6,6 @@ using Newtonsoft.Json;
 
 namespace SharpGLTF.IO
 {
-
     [System.Diagnostics.DebuggerDisplay("Unknown {_Name}")]
     class UnknownNode : JsonSerializable
     {

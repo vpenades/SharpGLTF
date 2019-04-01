@@ -5,11 +5,13 @@ using System.Text;
 
 namespace SharpGLTF.Transforms
 {
-    // https://github.com/KhronosGroup/glTF-Validator/issues/33
-
     /// <summary>
-    /// Represents an affine transform in 3D space, defined by a <see cref="Quaternion"/> rotation, a <see cref="Vector3"/> scale and a <see cref="Vector3"/> translation.
+    /// Represents an affine transform in 3D space,
+    /// defined by a <see cref="Quaternion"/> rotation,
+    /// a <see cref="Vector3"/> scale
+    /// and a <see cref="Vector3"/> translation.
     /// </summary>
+    /// <see href="https://github.com/KhronosGroup/glTF-Validator/issues/33"/>
     public struct AffineTransform
     {
         #region lifecycle
@@ -52,7 +54,7 @@ namespace SharpGLTF.Transforms
         #region properties
 
         /// <summary>
-        /// Gets the <see cref="Matrix"/> transform of the current <see cref="AffineTransform"/>
+        /// Gets the <see cref="Matrix4x4"/> transform of the current <see cref="AffineTransform"/>
         /// </summary>
         public Matrix4x4 Matrix
         {
@@ -96,17 +98,6 @@ namespace SharpGLTF.Transforms
             Matrix4x4.Invert(parentWorld, out Matrix4x4 invWorld);
 
             return childWorld * invWorld;
-        }
-
-        public static Matrix4x4 CreateFromRows(Vector4 x, Vector4 y, Vector4 z, Vector4 w)
-        {
-            return new Matrix4x4
-                (
-                x.X, x.Y, x.Z, x.W,
-                y.X, y.Y, y.Z, y.W,
-                z.X, z.Y, z.Z, z.W,
-                w.X, w.Y, w.Z, w.W
-                );
         }
 
         #endregion

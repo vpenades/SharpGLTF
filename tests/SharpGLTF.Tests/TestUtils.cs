@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SharpGLTF
@@ -58,6 +59,15 @@ namespace SharpGLTF
             }
 
             // Attach the saved file to the current test
+            NUnit.Framework.TestContext.AddTestAttachment(fileName);
+        }
+
+        public static void AttachText(this NUnit.Framework.TestContext context, string fileName, string[] lines)
+        {
+            fileName = context.GetAttachmentPath(fileName, true);
+
+            System.IO.File.WriteAllLines(fileName, lines.ToArray());
+
             NUnit.Framework.TestContext.AddTestAttachment(fileName);
         }
 

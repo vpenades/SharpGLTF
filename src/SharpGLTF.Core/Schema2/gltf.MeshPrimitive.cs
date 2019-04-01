@@ -69,8 +69,6 @@ namespace SharpGLTF.Schema2
 
         public int MorphTargetsCount => _targets.Count;
 
-        public Transforms.BoundingBox3? LocalBounds3 => VertexAccessors["POSITION"]?.LocalBounds3;
-
         public IReadOnlyDictionary<String, Accessor> VertexAccessors => new ReadOnlyLinqDictionary<String, int, Accessor>(_attributes, alidx => this.LogicalParent.LogicalParent.LogicalAccessors[alidx]);
 
         public Accessor IndexAccessor { get => GetIndexAccessor(); set => SetIndexAccessor(value); }

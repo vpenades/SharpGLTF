@@ -34,8 +34,6 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<Single> MorphWeights => _weights.Select(item => (Single)item).ToArray();
 
-        public Transforms.BoundingBox3? LocalBounds3 => Transforms.BoundingBox3.UnionOf(Primitives.Select(item => item.LocalBounds3));
-
         #endregion
 
         #region API

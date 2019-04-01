@@ -161,8 +161,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public Transforms.BoundingBox3? WorldBounds3 => Transforms.BoundingBox3.Create(this);
-
         #endregion
 
         #region API
@@ -313,12 +311,10 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent.LogicalNodes[idx]);
 
-        public Transforms.BoundingBox3? WorldBounds3 => Transforms.BoundingBox3.Create(this);
-
         #endregion
 
         #region API
-        
+
         /// <summary>
         /// Creates a new <see cref="Node"/> instance,
         /// adds it to <see cref="ModelRoot.LogicalNodes"/>
