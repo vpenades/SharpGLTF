@@ -58,7 +58,7 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("TextureTransform {Offset} {Scale} {Rotation} {TextureCoordinate}")]
-    public partial class TextureTransform
+    public sealed partial class TextureTransform
     {
         #region lifecycle
 

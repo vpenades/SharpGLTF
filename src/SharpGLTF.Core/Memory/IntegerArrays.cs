@@ -14,7 +14,7 @@ namespace SharpGLTF.Memory
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="UInt32"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Integer Accessor {Count}")]
-    public struct IntegerArray : IEncodedArray<UInt32>
+    public struct IntegerArray : IList<UInt32>, IReadOnlyList<UInt32>
     {
         #region constructors
 
@@ -130,19 +130,33 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Data.Count / _ByteStride;
 
+        bool ICollection<UInt32>.IsReadOnly => false;
+
         public UInt32 this[int index]
         {
             get => _Getter(index);
             set => _Setter(index, value);
         }
 
-        public void CopyTo(ArraySegment<UInt32> dst) { EncodedArrayUtils.Copy<UInt32>(this, dst); }
-
         public IEnumerator<UInt32> GetEnumerator() { return new EncodedArrayEnumerator<UInt32>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<UInt32>(this); }
 
-        public (UInt32, UInt32) GetBounds() { throw new NotImplementedException(); }
+        public bool Contains(UInt32 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(UInt32 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(UInt32[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<UInt32>.Insert(int index, UInt32 item) { throw new NotSupportedException(); }
+
+        void IList<UInt32>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<UInt32>.Add(UInt32 item) { throw new NotSupportedException(); }
+
+        void ICollection<UInt32>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<UInt32>.Remove(uint item) { throw new NotSupportedException(); }
 
         #endregion
     }

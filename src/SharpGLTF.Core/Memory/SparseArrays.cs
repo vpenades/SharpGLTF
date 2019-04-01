@@ -11,12 +11,12 @@ namespace SharpGLTF.Memory
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
-    public struct SparseArray<T> : IEncodedArray<T>
+    public struct SparseArray<T> : IList<T>, IReadOnlyList<T>
         where T : unmanaged
     {
         #region lifecycle
 
-        public SparseArray(IEncodedArray<T> bottom, IEncodedArray<T> top, IntegerArray topMapping)
+        public SparseArray(IList<T> bottom, IList<T> top, IntegerArray topMapping)
         {
             _BottomItems = bottom;
             _TopItems = top;
@@ -34,10 +34,10 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IEncodedArray<T> _BottomItems;
+        private readonly IList<T> _BottomItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IEncodedArray<T> _TopItems;
+        private readonly IList<T> _TopItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Dictionary<int, int> _Mapping;
@@ -52,6 +52,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _BottomItems.Count;
 
+        public bool IsReadOnly => false;
+
         public T this[int index]
         {
             get => _Mapping.TryGetValue(index, out int topIndex) ? _TopItems[topIndex] : _BottomItems[index];
@@ -61,16 +63,25 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<T> dst) { EncodedArrayUtils.Copy(this, dst); }
-
-        public (T, T) GetBounds()
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerator<T> GetEnumerator() { return new EncodedArrayEnumerator<T>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<T>(this); }
+
+        public bool Contains(T item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(T item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(T[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<T>.Insert(int index, T item) { throw new NotSupportedException(); }
+
+        void IList<T>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<T>.Add(T item) { throw new NotSupportedException(); }
+
+        void ICollection<T>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<T>.Remove(T item) { throw new NotSupportedException(); }
 
         #endregion
     }

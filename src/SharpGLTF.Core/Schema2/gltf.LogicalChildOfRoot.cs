@@ -39,13 +39,11 @@ namespace SharpGLTF.Schema2
             return items.All(item => Object.ReferenceEquals(this.LogicalParent, item.LogicalParent));
         }
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            foreach (var ex in base.Validate()) yield return ex;
+            base.Validate(result);
 
-            if (_name == null) yield break;
-
-            // todo, verify the name does not have invalid characters
+            // TODO: verify the name does not have invalid characters
         }
 
         #endregion

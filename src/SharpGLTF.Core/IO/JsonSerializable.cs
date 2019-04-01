@@ -12,9 +12,17 @@ namespace SharpGLTF.IO
     {
         #region validation
 
-        public virtual IEnumerable<Exception> Validate()
+        public IEnumerable<Exception> Validate()
         {
-            yield break;
+            var result = new List<Exception>();
+
+            Validate(result);
+
+            return result;
+        }
+
+        internal virtual void Validate(IList<Exception> result)
+        {
         }
 
         #endregion
@@ -213,6 +221,7 @@ namespace SharpGLTF.IO
                     writer.WritePropertyName(key.ToString());
                     _Serialize(writer, dict[key]);
                 }
+
                 writer.WriteEndObject();
                 return;
             }

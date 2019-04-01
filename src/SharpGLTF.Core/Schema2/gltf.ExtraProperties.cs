@@ -26,7 +26,7 @@ namespace SharpGLTF.Schema2
         public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
 
         /// <summary>
-        /// Gets the extras object, where the object can be either an <see cref="Object"/>, a <see cref="JsonList"/> or a <see cref="JsonDictionary"/>
+        /// Gets the extras value, where the value can be either an intrinsic type <see cref="TypeCode"/> , a <see cref="JsonList"/> or a <see cref="JsonDictionary"/>
         /// </summary>
         public Object Extras => _extras;
 
@@ -97,6 +97,34 @@ namespace SharpGLTF.Schema2
             if (overwrite) this._extras = new JsonDictionary();
 
             return this._extras as JsonDictionary;
+        }
+
+        /// <summary>
+        /// Gets the Extras property as a <see cref="JsonList"/>
+        /// </summary>
+        /// <param name="overwrite">true if the current value is to be replaced by a <see cref="JsonList"/> instance.</param>
+        /// <returns>A <see cref="JsonDictionary"/> instance or null.</returns>
+        public JsonList TryUseExtrasAsList(bool overwrite)
+        {
+            if (this._extras is JsonList list) return list;
+
+            if (overwrite) this._extras = new JsonList();
+
+            return this._extras as JsonList;
+        }
+
+        #endregion
+
+        #region validation
+
+        internal override void Validate(IList<Exception> result)
+        {
+            base.Validate(result);
+
+            if (this._extras != null)
+            {
+                if (!IO.JsonUtils.IsSerializable(this._extras)) result.Add(new ModelException(this, $"Invalid {Extras} content."));
+            }
         }
 
         #endregion

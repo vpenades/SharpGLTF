@@ -199,21 +199,19 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            var exx = base.Validate().ToList();
+            base.Validate(result);
 
             if (IndexAccessor != null)
             {
                 switch (DrawPrimitiveType)
                 {
                     case PrimitiveType.TRIANGLES:
-                        if ((IndexAccessor.Count % 3) != 0) exx.Add(new EXCEPTION(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
+                        if ((IndexAccessor.Count % 3) != 0) result.Add(new EXCEPTION(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
                         break;
                 }
             }
-
-            return exx;
         }
 
         #endregion

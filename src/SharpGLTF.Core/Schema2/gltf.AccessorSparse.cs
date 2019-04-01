@@ -2,18 +2,6 @@
 
 namespace SharpGLTF.Schema2
 {
-    // TODO:
-    // AccessorSparse is a single child of an Accessor
-    // when an Accessor defines an AccessorSparse, it becomes a "two layers" collection.
-    // the layer at the bottom is the data of the base accessor
-    // the layer on top, replaces just a few elements in the base accessor.
-    // Unlike many other objects in the API, AccessorSparse does not implement IChildOf<Accessor>
-    // which would allow AccessorSparse to access the interal data of its parent.
-    // So we have two choices here:
-    // 1- Implement IChildOf<Accessor> and finish the SingleChild<T> collection object
-    // 2- Make these classes non public, and expose them with a public view object.
-    // 3- Make the whole Accessor+AccessorSparse block non public, and expose them with a public view.
-
     using ROOT = ModelRoot;
 
     public sealed partial class AccessorSparse

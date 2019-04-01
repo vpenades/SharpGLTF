@@ -42,7 +42,7 @@ namespace SharpGLTF.Schema2
     public partial class ModelRoot
     {
         /// <summary>
-        /// Creates a new <see cref="Camera"/> instance
+        /// Creates a new <see cref="Camera"/> instance.
         /// and adds it to <see cref="ModelRoot.LogicalCameras"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>

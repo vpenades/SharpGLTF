@@ -144,38 +144,34 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            var exx = new List<Exception>();
-
             // 1st check version number
 
-            if (Asset == null) exx.Add(new IO.ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
-            else exx.AddRange(Asset.Validate());
+            if (Asset == null) result.Add(new IO.ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
+            else Asset.Validate(result);
 
-            if (exx.Count > 0) return exx;
+            if (result.Count > 0) return;
 
             // 2nd check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                exx.Add(new IO.UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
+                result.Add(new IO.UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
             }
 
-            if (exx.Count > 0) return exx;
+            if (result.Count > 0) return;
 
             // 3rd check base class
 
-            exx.AddRange(base.Validate());
+            base.Validate(result);
 
             // 4th check contents
-            foreach (var s in _scenes) exx.AddRange(s.Validate());
-            foreach (var n in _nodes) exx.AddRange(n.Validate());
-            foreach (var a in _accessors) exx.AddRange(a.Validate());
-            foreach (var m in _meshes) exx.AddRange(m.Validate());
-            foreach (var s in _skins) exx.AddRange(s.Validate());
-
-            return exx;
+            foreach (var s in _scenes) s.Validate(result);
+            foreach (var n in _nodes) n.Validate(result);
+            foreach (var a in _accessors) a.Validate(result);
+            foreach (var m in _meshes) m.Validate(result);
+            foreach (var s in _skins) s.Validate(result);
         }
 
         #endregion

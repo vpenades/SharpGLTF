@@ -220,7 +220,7 @@ namespace SharpGLTF.Schema2
             SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
         }
 
-        public IEncodedArray<Single> AsScalarArray()
+        public IList<Single> AsScalarArray()
         {
             var memory = _GetMemoryAccessor();
 
@@ -230,7 +230,7 @@ namespace SharpGLTF.Schema2
             return MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public IEncodedArray<Vector2> AsVector2Array()
+        public IList<Vector2> AsVector2Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -240,7 +240,7 @@ namespace SharpGLTF.Schema2
             return MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public IEncodedArray<Vector3> AsVector3Array()
+        public IList<Vector3> AsVector3Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -250,7 +250,7 @@ namespace SharpGLTF.Schema2
             return MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public IEncodedArray<Vector4> AsVector4Array()
+        public IList<Vector4> AsVector4Array()
         {
             var memory = _GetMemoryAccessor();
 
@@ -260,7 +260,7 @@ namespace SharpGLTF.Schema2
             return MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public IEncodedArray<Quaternion> AsQuaternionArray()
+        public IList<Quaternion> AsQuaternionArray()
         {
             var memory = _GetMemoryAccessor();
 
@@ -318,38 +318,36 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            var exxx = base.Validate().ToList();
+            base.Validate(result);
 
-            if (!_bufferView.HasValue) { exxx.Add(new EXCEPTION(this, $"BufferView index missing")); return exxx; }
-            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) exxx.Add(new EXCEPTION(this, $"BufferView index out of range"));
+            if (!_bufferView.HasValue) { result.Add(new EXCEPTION(this, $"BufferView index missing")); return; }
+            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) result.Add(new EXCEPTION(this, $"BufferView index out of range"));
 
-            if (_count < 0) exxx.Add(new EXCEPTION(this, $"Count is out of range"));
-            if (_byteOffset < 0) exxx.Add(new EXCEPTION(this, $"ByteOffset is out of range"));
+            if (_count < 0) result.Add(new EXCEPTION(this, $"Count is out of range"));
+            if (_byteOffset < 0) result.Add(new EXCEPTION(this, $"ByteOffset is out of range"));
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len > 0 && (len & 3) != 0) exxx.Add(new EXCEPTION(this, $"Expected length to be multiple of 4, found {len}"));
+                if (len > 0 && (len & 3) != 0) result.Add(new EXCEPTION(this, $"Expected length to be multiple of 4, found {len}"));
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len != 1 && len != 2 && len != 4) exxx.Add(new EXCEPTION(this, $"Expected length to be 1, 2 or 4, found {len}"));
+                if (len != 1 && len != 2 && len != 4) result.Add(new EXCEPTION(this, $"Expected length to be 1, 2 or 4, found {len}"));
             }
 
             // validate bounds
 
-            if (_min.Count != _max.Count) { exxx.Add(new EXCEPTION(this, "min and max length mismatch")); return exxx; }
+            if (_min.Count != _max.Count) { result.Add(new EXCEPTION(this, "min and max length mismatch")); return; }
 
             for (int i = 0; i < _min.Count; ++i)
             {
-                if (_min[i] > _max[i]) exxx.Add(new EXCEPTION(this, $"min[{i}] is larger than max[{i}]"));
+                if (_min[i] > _max[i]) result.Add(new EXCEPTION(this, $"min[{i}] is larger than max[{i}]"));
             }
-
-            return exxx;
         }
 
         #endregion

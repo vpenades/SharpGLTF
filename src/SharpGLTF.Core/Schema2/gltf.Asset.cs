@@ -11,6 +11,8 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
+        internal Asset() { }
+
         internal static Asset CreateDefault(string copyright)
         {
             var av = typeof(Asset).Assembly.GetCustomAttributes(true)
@@ -56,17 +58,17 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            foreach (var ex in base.Validate()) yield return ex;
+            base.Validate(result);
 
-            if (string.IsNullOrWhiteSpace(_version)) yield return new EXCEPTION(this, "version number is missing");
+            if (string.IsNullOrWhiteSpace(_version)) result.Add(new EXCEPTION(this, "version number is missing"));
 
             var curVer = this.Version;
             var minVer = this.MinVersion;
 
-            if (curVer < MINVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}");
-            if (curVer > MAXVERSION) yield return new EXCEPTION(this, $"invalid version number {this.Version} expected {MAXVERSION}");
+            if (curVer < MINVERSION) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}"));
+            if (curVer > MAXVERSION) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MAXVERSION}"));
         }
 
         private string _GetExtraInfo(string key)

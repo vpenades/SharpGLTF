@@ -231,9 +231,9 @@ namespace SharpGLTF.Memory
             _Attribute.ByteStride = byteStride;
         }
 
-        public void Fill(IEnumerable<Int32> values) { AsIntegerArray().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Int32> values) { AsIntegerArray().FillFrom(0, values); }
 
-        public void Fill(IEnumerable<UInt32> values) { AsIntegerArray().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<UInt32> values) { values.CopyTo(AsIntegerArray()); }
 
         public IntegerArray AsIntegerArray()
         {
@@ -242,7 +242,7 @@ namespace SharpGLTF.Memory
             return new IntegerArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.Encoding.ToIndex());
         }
 
-        public void Fill(IEnumerable<Single> values) { AsScalarArray().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Single> values) { values.CopyTo(AsScalarArray()); }
 
         public ScalarArray AsScalarArray()
         {
@@ -251,7 +251,7 @@ namespace SharpGLTF.Memory
             return new ScalarArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IEnumerable<Vector2> values) { AsVector2Array().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Vector2> values) { values.CopyTo(AsVector2Array()); }
 
         public Vector2Array AsVector2Array()
         {
@@ -260,7 +260,7 @@ namespace SharpGLTF.Memory
             return new Vector2Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IEnumerable<Vector3> values) { AsVector3Array().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Vector3> values) { values.CopyTo(AsVector3Array()); }
 
         public Vector3Array AsVector3Array()
         {
@@ -269,7 +269,7 @@ namespace SharpGLTF.Memory
             return new Vector3Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IEnumerable<Vector4> values) { AsVector4Array().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Vector4> values) { values.CopyTo(AsVector4Array()); }
 
         public Vector4Array AsVector4Array()
         {
@@ -278,7 +278,7 @@ namespace SharpGLTF.Memory
             return new Vector4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IEnumerable<Quaternion> values) { AsQuaternionArray().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Quaternion> values) { values.CopyTo(AsQuaternionArray()); }
 
         public QuaternionArray AsQuaternionArray()
         {
@@ -287,7 +287,7 @@ namespace SharpGLTF.Memory
             return new QuaternionArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IEnumerable<Matrix4x4> values) { AsMatrix4x4Array().FillFrom(0, values); }
+        public void Fill(IReadOnlyList<Matrix4x4> values) { values.CopyTo(AsMatrix4x4Array()); }
 
         public Matrix4x4Array AsMatrix4x4Array()
         {
@@ -296,7 +296,7 @@ namespace SharpGLTF.Memory
             return new Matrix4x4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public static IEncodedArray<Single> CreateScalarSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        public static IList<Single> CreateScalarSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
@@ -306,7 +306,7 @@ namespace SharpGLTF.Memory
             return new SparseArray<Single>(bottom.AsScalarArray(), topValues.AsScalarArray(), topKeys);
         }
 
-        public static IEncodedArray<Vector2> CreateVector2SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        public static IList<Vector2> CreateVector2SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
@@ -316,7 +316,7 @@ namespace SharpGLTF.Memory
             return new SparseArray<Vector2>(bottom.AsVector2Array(), topValues.AsVector2Array(), topKeys);
         }
 
-        public static IEncodedArray<Vector3> CreateVector3SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        public static IList<Vector3> CreateVector3SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
@@ -326,7 +326,7 @@ namespace SharpGLTF.Memory
             return new SparseArray<Vector3>(bottom.AsVector3Array(), topValues.AsVector3Array(), topKeys);
         }
 
-        public static IEncodedArray<Vector4> CreateVector4SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        public static IList<Vector4> CreateVector4SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));

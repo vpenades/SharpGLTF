@@ -15,7 +15,7 @@ namespace SharpGLTF
         {
             var assembly = typeof(Schema2.ModelRoot).Assembly;
 
-            var API = DumpAssemblyAPI.DumpAPI(assembly).ToList();
+            var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToList();
 
             foreach(var l in API)
             {

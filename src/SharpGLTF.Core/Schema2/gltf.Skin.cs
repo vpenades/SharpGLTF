@@ -96,9 +96,9 @@ namespace SharpGLTF.Schema2
             return new KeyValuePair<Node, Matrix4x4>(node, matrix);
         }
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            var exx = base.Validate().ToList();
+            base.Validate(result);
 
             // note: this check will fail if the buffers are not set
 
@@ -111,8 +111,6 @@ namespace SharpGLTF.Schema2
 
                 if (invXform.M44 != 1) exx.Add(new ModelException(this, $"Joint {i} has invalid inverse matrix"));
             }*/
-
-            return exx;
         }
 
         /// <summary>
@@ -164,6 +162,7 @@ namespace SharpGLTF.Schema2
             var data = new Byte[joints.Length * 16 * 4];
 
             var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
+
             Memory.EncodedArrayUtils.FillFrom(matrices, 0, joints.Select(item => item.Value));
 
             var accessor = LogicalParent.CreateAccessor("Bind Matrices");

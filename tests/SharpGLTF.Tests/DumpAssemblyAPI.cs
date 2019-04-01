@@ -22,90 +22,178 @@ namespace SharpGLTF
         // Namespace="" Class="" Property=""
         // Namespace="" Class="" Event=""
 
+        // NS foo.bar { STRUCT name        { FIELD name type       } }
+        // NS foo.bar { ABSTRACTCLASS name { PROPERTYGET name type } }
+        // NS foo.bar { ABSTRACTCLASS name { PROTECTEDPROPERTYSET name type } }
 
-        public static IEnumerable<String> DumpAPI(Assembly assembly)
+        // NamesPace { Class|Struct { Class|Struct|Method|Field } }
+
+
+        public static IEnumerable<String> GetAssemblySignature(Assembly assembly)
         {
-            return assembly.ExportedTypes.SelectMany(item => DumpAPI(item.Namespace, item.GetTypeInfo()));
+            return assembly.ExportedTypes
+                .SelectMany(item => GetTypeSignature(item.GetTypeInfo()).Select(l => "NS " + item.Namespace + " { " + l + " } " ) );
         }
 
-        public static IEnumerable<String> DumpAPI(string baseName, TypeInfo type)
+        public static IEnumerable<String> GetTypeSignature(TypeInfo tinfo)
         {
-            if (type.IsNestedPrivate) yield break;
+            if (tinfo.IsNestedPrivate) yield break;
+            if (tinfo.IsNestedAssembly) yield break;
 
-            if (type.IsInterface) baseName += ".INTERFACE";
-            if (type.IsEnum) baseName += ".ENUM";
-            if (type.IsClass)
+            string baseName = string.Empty;
+
+            if (tinfo.IsNestedFamily) baseName += "PROTECTED";                        
+
+            if (tinfo.IsInterface) baseName += "INTERFACE";
+            else if (tinfo.IsEnum) baseName += "ENUM";
+            else if (tinfo.IsValueType) baseName += "STRUCT";
+            else if (tinfo.IsClass)
             {
-                baseName += ".";
-                if (type.IsSealed) baseName += "SEALED";
-                if (type.IsAbstract) baseName += "ABSTRACT";
-                baseName += "CLASS";
-            }            
+                if (tinfo.IsSealed && tinfo.IsAbstract) baseName += "STATIC";
+                else
+                {
+                    if (tinfo.IsSealed) baseName += "SEALED";
+                    if (tinfo.IsAbstract) baseName += "ABSTRACT";
+                }
 
-            baseName += "." + type.GetFriendlyName();
+                baseName += "CLASS";
+            }
+
+            baseName += " " + tinfo.GetFriendlyName();
 
             Object instance = null;
 
-            try { instance = System.Activator.CreateInstance(type); }
+            try { instance = Activator.CreateInstance(tinfo); }
             catch { }
 
-            foreach (var f in type.DeclaredFields)
+            foreach (var m in tinfo.DeclaredMembers)
             {
-                if (f.IsPrivate) continue;
-
-                var name = baseName;
-
-                if (f.IsLiteral) name += ".CONST";
-                else name += ".FIELD";
-
-                name += $".{f.FieldType.GetFriendlyName()}.{f.Name}";
-
-                if (f.IsStatic)
+                var signatures = GetMemberSignature(instance, m);
+                if (signatures == null) continue;
+                foreach (var s in signatures)
                 {
-                    var v = f.GetValue(null);
-                    if (v != null) name += Invariant($"= {v}");
+                    yield return baseName + " { " +  s + " } ";
                 }
-                else if (instance != null)
-                {
-                    var v = f.GetValue(instance);
-                    if (v != null) name += Invariant($"= {v}");
-                }
+            }            
+        }
 
-                yield return name;
-            }
+        public static IEnumerable<string> GetMemberSignature(Object instance, MemberInfo minfo)
+        {
+            if (minfo is FieldInfo finfo) return GetFieldSignature(instance, finfo);
 
-            /* property getters and setters are already dumped by methods
-            foreach (var p in type.DeclaredProperties)
+            if (minfo is TypeInfo tinfo) return GetTypeSignature(tinfo);
+
+            if (minfo is PropertyInfo pinfo) return GetPropertySignature(instance, pinfo);
+
+            if (minfo is MethodInfo xinfo) return GetMethodSignature(instance, xinfo);
+
+            if (minfo is ConstructorInfo cinfo) return GetMethodSignature(instance, cinfo);
+
+            return null;
+        }
+
+        public static IEnumerable<string> GetFieldSignature(Object instance, FieldInfo finfo)
+        {
+            if (!IsVisible(finfo)) yield break;
+
+            var name = string.Empty;
+
+            if (finfo.IsLiteral) name += "CONST";
+            else name += "FIELD";
+
+            name += $" {finfo.Name} {finfo.FieldType.GetFriendlyName()}";
+
+            if (finfo.IsStatic)
             {
-                var pname = $"{baseName}.PROPERTY.{p.PropertyType.GetFriendlyName()}.{p.Name}";
+                name = "STATIC" + name;
 
-                var getter = p.GetGetMethod();
-                if (getter != null && !getter.IsPrivate) yield return pname + ".Get()";
-
-                var setter = p.GetSetMethod();
-                if (setter != null && !setter.IsPrivate) yield return pname + ".Set()";                
+                var v = finfo.GetValue(null);
+                if (v != null) name += Invariant($"= {v}");
             }
-            */
-
-            foreach(var m in type.DeclaredMethods)
+            else if (instance != null)
             {
-                // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.
-
-                if (m.IsPrivate) continue;
-
-                var mname = $"{baseName}.METHOD.{m.ReturnType.GetFriendlyName()}.{m.Name}";
-
-                var mparams = m.GetParameters()
-                    .Select(item => item.ParameterType.GetFriendlyName())
-                    .ToList();
-
-                yield return mname + "(" + string.Join(", ", mparams) + ")";
+                var v = finfo.GetValue(instance);
+                if (v != null) name += Invariant($"= {v}");
             }
 
-            foreach(var n in type.DeclaredNestedTypes)
+            yield return name;
+        }
+
+        public static IEnumerable<string> GetPropertySignature(Object instance, PropertyInfo pinfo)
+        {
+            var pname = $"{pinfo.Name} {pinfo.PropertyType.GetFriendlyName()}";
+
+            var getter = pinfo.GetGetMethod();
+            if (IsVisible(getter,true)) yield return GetMethodModifiers(getter)+ "PROPERTYGET " + pname;
+
+            var setter = pinfo.GetSetMethod();
+            if (IsVisible(setter, true)) yield return GetMethodModifiers(getter) + "PROPERTYSET " + pname;
+        }
+
+        public static IEnumerable<string> GetMethodSignature(Object instance, MethodBase minfo)
+        {
+            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.
+
+            
+
+            var mname = GetMethodModifiers(minfo);
+
+            if (minfo is MethodInfo mminfo)
             {
-                foreach (var nn in DumpAPI(baseName, n)) yield return nn;
+                if (!IsVisible(minfo)) yield break;
+                mname += "METHOD " + mminfo.Name + $" {mminfo.ReturnType.GetFriendlyName()} ";
             }
+
+            if (minfo is ConstructorInfo cinfo)
+            {
+                if (!IsVisible(minfo,true)) yield break;
+                mname += "CONSTRUCTOR ";
+            }             
+
+            var mparams = minfo.GetParameters()
+                .Select(item => item.ParameterType.GetFriendlyName())
+                .ToList();
+
+            yield return mname + "(" + string.Join(", ", mparams) + ")";
+        }
+
+        public static bool IsVisible(FieldInfo finfo)
+        {
+            if (finfo == null) return false;
+
+            if (finfo.IsPrivate) return false;
+            if (finfo.IsAssembly) return false;            
+            if (finfo.IsFamilyOrAssembly) return false;
+
+            return true;
+        }
+
+        public static bool IsVisible(MethodBase minfo, bool withSpecials = false)
+        {
+            if (minfo == null) return false;
+
+            if (minfo.IsSpecialName && !withSpecials) return false;
+
+            if (minfo.IsPrivate) return false;            
+            if (minfo.IsAssembly) return false;
+            if (minfo.IsFamilyOrAssembly) return false;
+
+            return true;
+        }
+
+        public static string GetMethodModifiers(MethodBase minfo)
+        {
+            if (minfo.IsPrivate) return string.Empty;
+
+            var mod = string.Empty;
+
+            if (minfo.IsFamily) mod += "PROTECTED";
+            if (minfo.IsStatic) mod += "STATIC";            
+
+            if (minfo.IsAbstract) mod += "ABSTRACT";
+            else if (minfo.IsVirtual) mod += "VIRTUAL";
+
+            return mod;
         }
 
         public static string GetFriendlyName(this Type tinfo)
@@ -129,6 +217,10 @@ namespace SharpGLTF
             name = name.Replace("`2", "");
             name = name.Replace("`3", "");
             name = name.Replace("`4", "");
+            name = name.Replace("`5", "");
+            name = name.Replace("`6", "");
+            name = name.Replace("`7", "");
+            name = name.Replace("`8", "");
 
             var gpm = tinfo
                 .GenericTypeArguments

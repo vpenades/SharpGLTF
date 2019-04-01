@@ -9,21 +9,21 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region columns
 
-        public Memory.IEncodedArray<Vector3> Positions { get; set; }
-        public Memory.IEncodedArray<Vector3> Normals { get; set; }
-        public Memory.IEncodedArray<Vector4> Tangents { get; set; }
+        public IList<Vector3> Positions { get; set; }
+        public IList<Vector3> Normals { get; set; }
+        public IList<Vector4> Tangents { get; set; }
 
-        public Memory.IEncodedArray<Vector4> Colors0 { get; set; }
-        public Memory.IEncodedArray<Vector4> Colors1 { get; set; }
+        public IList<Vector4> Colors0 { get; set; }
+        public IList<Vector4> Colors1 { get; set; }
 
-        public Memory.IEncodedArray<Vector2> Textures0 { get; set; }
-        public Memory.IEncodedArray<Vector2> Textures1 { get; set; }
+        public IList<Vector2> Textures0 { get; set; }
+        public IList<Vector2> Textures1 { get; set; }
 
-        public Memory.IEncodedArray<Vector4> Joints0 { get; set; }
-        public Memory.IEncodedArray<Vector4> Joints1 { get; set; }
+        public IList<Vector4> Joints0 { get; set; }
+        public IList<Vector4> Joints1 { get; set; }
 
-        public Memory.IEncodedArray<Vector4> Weights0 { get; set; }
-        public Memory.IEncodedArray<Vector4> Weights1 { get; set; }
+        public IList<Vector4> Weights0 { get; set; }
+        public IList<Vector4> Weights1 { get; set; }
 
         #endregion
 

@@ -13,8 +13,6 @@ namespace SharpGLTF.Schema2
         IEnumerable<Node> VisualChildren { get; }
 
         Node CreateNode(string name);
-
-        Node FindNode(string name);
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
@@ -37,8 +35,14 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets the visual parent <see cref="Node"/> instance that contains this <see cref="Node"/>.
+        /// </summary>
         public Node VisualParent => this.LogicalParent._FindVisualParentNode(this);
 
+        /// <summary>
+        /// Gets the visual root <see cref="Scene"/> instance that contains this <see cref="Node"/>.
+        /// </summary>
         public Scene VisualScene
         {
             get
@@ -49,8 +53,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public IEnumerable<Node> VisualChildren => GetVisualChildren();
+        /// <summary>
+        /// Gets the visual children <see cref="Node"/> instances contained in this <see cref="Node"/>.
+        /// </summary>
+        public IEnumerable<Node> VisualChildren => _GetVisualChildren();
 
+        /// <summary>
+        /// Gets a value indicating whether this node is used as a Bone joint in a <see cref="Skin"/>.
+        /// </summary>
         public Boolean IsSkinJoint => Skin.FindSkinsUsingJoint(this).Any();
 
         #endregion
@@ -157,34 +167,10 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal bool _ContainsVisualNode(Node node, bool recursive)
-        {
-            Guard.NotNull(node, nameof(node));
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            if (!recursive) return VisualChildren.Any(item => item == node);
-
-            return VisualChildren.Any(item => item == node || item._ContainsVisualNode(node, recursive));
-        }
-
-        internal bool _HasVisualChild(int nodeIndex) { return _children.Contains(nodeIndex); }
-
-        public IEnumerable<Node> GetVisualChildren()
-        {
-            // TODO: handle MSFT_Lod here ?
-            // maybe we can have a VisualHierarchyManager abstract class with a default implementation
-            // a class declared in the extension... but then, it makes edition horribly complicated.
-            // maybe it's better to have a non serializable _LodLevel that is applied when serializing.
-
-            var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);
-
-            return allChildren;
-        }
-
         /// <summary>
         /// Creates a new <see cref="Node"/> instance,
         /// adds it to <see cref="ModelRoot.LogicalNodes"/>
-        /// and references it in the current <see cref="Node"/>.
+        /// and references it as a child in the current graph.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Node"/> instance.</returns>
@@ -196,19 +182,9 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Finds a node with the given <paramref name="name"/>
+        /// Returns all the <see cref="Node"/> instances of a visual hierarchy as a flattened list.
         /// </summary>
-        /// <param name="name">A name.</param>
-        /// <returns>A <see cref="Node"/> instance.</returns>
-        public Node FindNode(string name)
-        {
-            return this.VisualChildren.FirstOrDefault(item => item.Name == name);
-        }
-
-        /// <summary>
-        /// Returns all the nodes of a visual hierarchy as a flattened list.
-        /// </summary>
-        /// <param name="container">A <see cref="Scene"/> instance or a <see cref="Node"/> instance.</param>
+        /// <param name="container">A <see cref="IVisualNodeContainer"/> instance.</param>
         /// <returns>A collection of <see cref="Node"/> instances.</returns>
         public static IEnumerable<Node> Flatten(IVisualNodeContainer container)
         {
@@ -254,21 +230,44 @@ namespace SharpGLTF.Schema2
                 .Where(item => item._skin.AsValue(int.MinValue) == meshIdx);
         }
 
-        public override IEnumerable<Exception> Validate()
+        internal bool _ContainsVisualNode(Node node, bool recursive)
         {
-            foreach (var ex in base.Validate()) yield return ex;
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            if (!recursive) return VisualChildren.Any(item => item == node);
+
+            return VisualChildren.Any(item => item == node || item._ContainsVisualNode(node, recursive));
+        }
+
+        internal bool _HasVisualChild(int nodeIndex) { return _children.Contains(nodeIndex); }
+
+        internal IEnumerable<Node> _GetVisualChildren()
+        {
+            var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);
+
+            return allChildren;
+        }
+
+        #endregion
+
+        #region validation
+
+        internal override void Validate(IList<Exception> result)
+        {
+            base.Validate(result);
 
             // check out of range indices
             foreach (var idx in this._children)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new EXCEPTION(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) result.Add(new EXCEPTION(this, $"references invalid Node[{idx}]"));
             }
 
             // check duplicated indices
-            if (this._children.Distinct().Count() != this._children.Count) yield return new EXCEPTION(this, "has duplicated node references");
+            if (this._children.Distinct().Count() != this._children.Count) result.Add(new EXCEPTION(this, "has duplicated node references"));
 
             // check self references
-            if (this._children.Contains(this.LogicalIndex)) yield return new EXCEPTION(this, "has self references");
+            if (this._children.Contains(this.LogicalIndex)) result.Add(new EXCEPTION(this, "has self references"));
 
             // check circular references
             var p = this;
@@ -278,7 +277,7 @@ namespace SharpGLTF.Schema2
                 if (p == null) break;
                 if (p.LogicalIndex == this.LogicalIndex)
                 {
-                    yield return new EXCEPTION(this, "has a circular reference");
+                    result.Add(new EXCEPTION(this, "has a circular reference"));
                     break;
                 }
             }
@@ -319,6 +318,18 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
+        
+        /// <summary>
+        /// Creates a new <see cref="Node"/> instance,
+        /// adds it to <see cref="ModelRoot.LogicalNodes"/>
+        /// and references it as a child in the current graph.
+        /// </summary>
+        /// <param name="name">The name of the instance.</param>
+        /// <returns>A <see cref="Node"/> instance.</returns>
+        public Node CreateNode(String name = null)
+        {
+            return this.LogicalParent._CreateLogicalNode(this._nodes);
+        }
 
         internal bool _ContainsVisualNode(Node node, bool recursive)
         {
@@ -332,39 +343,23 @@ namespace SharpGLTF.Schema2
             return VisualChildren.Any(item => item._ContainsVisualNode(node, true));
         }
 
-        /// <summary>
-        /// Creates a new <see cref="Node"/> instance,
-        /// adds it to <see cref="ModelRoot.LogicalNodes"/>
-        /// and references it in the current <see cref="Scene"/>.
-        /// </summary>
-        /// <param name="name">The name of the instance.</param>
-        /// <returns>A <see cref="Node"/> instance.</returns>
-        public Node CreateNode(String name = null)
-        {
-            return this.LogicalParent._CreateLogicalNode(this._nodes);
-        }
+        #endregion
 
-        public Node FindNode(String name)
-        {
-            return this.VisualChildren.FirstOrDefault(item => item.Name == name);
-        }
+        #region validation
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            foreach (var ex in base.Validate()) yield return ex;
+            base.Validate(result);
 
             // check out of range indices
             foreach (var idx in this._nodes)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) yield return new EXCEPTION(this, $"references invalid Node[{idx}]");
+                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) result.Add(new EXCEPTION(this, $"references invalid Node[{idx}]"));
             }
 
             // check duplicated indices
-            if (this._nodes.Distinct().Count() != this._nodes.Count) yield return new EXCEPTION(this, "has duplicated node references");
+            if (this._nodes.Distinct().Count() != this._nodes.Count) result.Add(new EXCEPTION(this, "has duplicated node references"));
         }
-
-        // TODO: AddVisualChild must return a "NodeBuilder"
-        // public Node AddVisualChild() { return LogicalParent._AddLogicalNode(_nodes); }
 
         #endregion
     }

@@ -12,7 +12,7 @@ namespace SharpGLTF.Memory
     using ENCODING = Schema2.EncodingType;
 
     /// <summary>
-    /// Wraps a <see cref="ArraySegment{Byte}"/> containing encoded <see cref="Single"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of strided <see cref="Single"/> values.
     /// </summary>
     struct FloatingAccessor
     {
@@ -211,7 +211,7 @@ namespace SharpGLTF.Memory
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Single"/> values
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Scalar Accessor {Count}")]
-    public struct ScalarArray : IEncodedArray<Single>
+    public struct ScalarArray : IList<Single>, IReadOnlyList<Single>
     {
         #region constructors
 
@@ -277,39 +277,85 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        bool ICollection<Single>.IsReadOnly => false;
+
         public Single this[int index]
         {
             get => _Accessor[index, 0];
             set => _Accessor[index, 0] = value;
         }
 
-        public void CopyTo(ArraySegment<Single> dst) { EncodedArrayUtils.Copy<Single>(this, dst); }
-
         public IEnumerator<Single> GetEnumerator() { return new EncodedArrayEnumerator<Single>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Single>(this); }
 
-        public (Single, Single) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
+        public bool Contains(Single item) { return IndexOf(item) >= 0; }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapScalarToVector4(this); }
+        public int IndexOf(Single item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Single[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Single>.Insert(int index, Single item) { throw new NotSupportedException(); }
+
+        void IList<Single>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Single>.Add(Single item) { throw new NotSupportedException(); }
+
+        void ICollection<Single>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Single>.Remove(Single item) { throw new NotSupportedException(); }
 
         #endregion
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector2"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector2"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
-    public struct Vector2Array : IEncodedArray<Vector2>
+    public struct Vector2Array : IList<Vector2>, IReadOnlyList<Vector2>
     {
         #region constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">>The number of <see cref="Vector2"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector2Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">>The number of <see cref="Vector2"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
             _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 2, encoding, normalized);
@@ -332,6 +378,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        bool ICollection<Vector2>.IsReadOnly => false;
+
         public Vector2 this[int index]
         {
             get
@@ -346,24 +394,34 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Vector2> dst) { EncodedArrayUtils.Copy<Vector2>(this, dst); }
-
         public IEnumerator<Vector2> GetEnumerator() { return new EncodedArrayEnumerator<Vector2>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector2>(this); }
 
-        public (Vector2, Vector2) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
+        public bool Contains(Vector2 item) { return IndexOf(item) >= 0; }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapVector2ToVector4(this); }
+        public int IndexOf(Vector2 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Vector2[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Vector2>.Insert(int index, Vector2 item) { throw new NotSupportedException(); }
+
+        void IList<Vector2>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Vector2>.Add(Vector2 item) { throw new NotSupportedException(); }
+
+        void ICollection<Vector2>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Vector2>.Remove(Vector2 item) { throw new NotSupportedException(); }
 
         #endregion
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector3"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector3"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
-    public struct Vector3Array : IEncodedArray<Vector3>
+    public struct Vector3Array : IList<Vector3>, IReadOnlyList<Vector3>
     {
         #region constructors
 
@@ -429,6 +487,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        bool ICollection<Vector3>.IsReadOnly => false;
+
         public Vector3 this[int index]
         {
             get
@@ -444,24 +504,34 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Vector3> dst) { EncodedArrayUtils.Copy<Vector3>(this, dst); }
-
         public IEnumerator<Vector3> GetEnumerator() { return new EncodedArrayEnumerator<Vector3>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector3>(this); }
 
-        public (Vector3, Vector3) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
+        public bool Contains(Vector3 item) { return IndexOf(item) >= 0; }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapVector3ToVector4(this); }
+        public int IndexOf(Vector3 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Vector3[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Vector3>.Insert(int index, Vector3 item) { throw new NotSupportedException(); }
+
+        void IList<Vector3>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Vector3>.Add(Vector3 item) { throw new NotSupportedException(); }
+
+        void ICollection<Vector3>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Vector3>.Remove(Vector3 item) { throw new NotSupportedException(); }
 
         #endregion
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
-    public struct Vector4Array : IEncodedArray<Vector4>
+    public struct Vector4Array : IList<Vector4>, IReadOnlyList<Vector4>
     {
         #region constructors
 
@@ -493,6 +563,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        bool ICollection<Vector4>.IsReadOnly => false;
+
         public Vector4 this[int index]
         {
             get
@@ -509,24 +581,34 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Vector4> dst) { EncodedArrayUtils.Copy<Vector4>(this, dst); }
-
         public IEnumerator<Vector4> GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Vector4>(this); }
 
-        public (Vector4, Vector4) GetBounds() { return EncodedArrayUtils.GetBounds(this); }
+        public bool Contains(Vector4 item) { return IndexOf(item) >= 0; }
 
-        public IEncodedArray<Vector4> AsVector4() { return this; }
+        public int IndexOf(Vector4 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Vector4[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Vector4>.Insert(int index, Vector4 item) { throw new NotSupportedException(); }
+
+        void IList<Vector4>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Vector4>.Add(Vector4 item) { throw new NotSupportedException(); }
+
+        void ICollection<Vector4>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Vector4>.Remove(Vector4 item) { throw new NotSupportedException(); }
 
         #endregion
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Quaternion"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Quaternion"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Quaternion Accessor {Count}")]
-    public struct QuaternionArray : IEncodedArray<Quaternion>
+    public struct QuaternionArray : IList<Quaternion>, IReadOnlyList<Quaternion>
     {
         #region constructors
 
@@ -558,6 +640,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
 
+        bool ICollection<Quaternion>.IsReadOnly => false;
+
         public Quaternion this[int index]
         {
             get
@@ -574,24 +658,34 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Quaternion> dst) { EncodedArrayUtils.Copy<Quaternion>(this, dst); }
-
         public IEnumerator<Quaternion> GetEnumerator() { return new EncodedArrayEnumerator<Quaternion>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Quaternion>(this); }
 
-        public (Quaternion, Quaternion) GetBounds() { throw new NotImplementedException(); }
+        public bool Contains(Quaternion item) { return IndexOf(item) >= 0; }
 
-        public IEncodedArray<Vector4> AsVector4() { return new _MapQuaternionToVector4(this); }
+        public int IndexOf(Quaternion item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Quaternion[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Quaternion>.Insert(int index, Quaternion item) { throw new NotSupportedException(); }
+
+        void IList<Quaternion>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Quaternion>.Add(Quaternion item) { throw new NotSupportedException(); }
+
+        void ICollection<Quaternion>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Quaternion>.Remove(Quaternion item) { throw new NotSupportedException(); }
 
         #endregion
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Matrix4x4"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Matrix4x4"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("MAtrix4x4 Accessor {Count}")]
-    public struct Matrix4x4Array : IEncodedArray<Matrix4x4>
+    public struct Matrix4x4Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
     {
         #region constructors
 
@@ -622,6 +716,8 @@ namespace SharpGLTF.Memory
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _Accessor.Count;
+
+        bool ICollection<Matrix4x4>.IsReadOnly => false;
 
         public Matrix4x4 this[int index]
         {
@@ -657,13 +753,25 @@ namespace SharpGLTF.Memory
             }
         }
 
-        public void CopyTo(ArraySegment<Matrix4x4> dst) { EncodedArrayUtils.Copy<Matrix4x4>(this, dst); }
-
         public IEnumerator<Matrix4x4> GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
 
-        public (Matrix4x4, Matrix4x4) GetBounds() { throw new NotImplementedException(); }
+        public bool Contains(Matrix4x4 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Matrix4x4 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Matrix4x4[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Matrix4x4>.Insert(int index, Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void IList<Matrix4x4>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Add(Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Matrix4x4>.Remove(Matrix4x4 item) { throw new NotSupportedException(); }
 
         #endregion
     }
@@ -672,7 +780,7 @@ namespace SharpGLTF.Memory
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="float"/> array values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("MultiArray Accessor {Count}")]
-    public struct MultiArray : IEncodedArray<Single[]>
+    public struct MultiArray : IList<Single[]>, IReadOnlyList<Single[]>
     {
         #region constructors
 
@@ -708,6 +816,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Dimensions => _Dimensions;
 
+        bool ICollection<Single[]>.IsReadOnly => false;
+
         public Single[] this[int index]
         {
             get
@@ -736,13 +846,25 @@ namespace SharpGLTF.Memory
             for (int i = 0; i < count; ++i) dstItem[i] = _Accessor[index, i];
         }
 
-        public void CopyTo(ArraySegment<Single[]> dst) { EncodedArrayUtils.Copy<Single[]>(this, dst); }
-
         public IEnumerator<Single[]> GetEnumerator() { return new EncodedArrayEnumerator<Single[]>(this); }
 
         IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Single[]>(this); }
 
-        public (Single[], Single[]) GetBounds() { throw new NotImplementedException(); }
+        public bool Contains(Single[] item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Single[] item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+
+        public void CopyTo(Single[][] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+
+        void IList<Single[]>.Insert(int index, Single[] item) { throw new NotSupportedException(); }
+
+        void IList<Single[]>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Single[]>.Add(Single[] item) { throw new NotSupportedException(); }
+
+        void ICollection<Single[]>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Single[]>.Remove(Single[] item) { throw new NotSupportedException(); }
 
         #endregion
     }

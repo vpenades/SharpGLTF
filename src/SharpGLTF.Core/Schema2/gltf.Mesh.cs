@@ -60,16 +60,14 @@ namespace SharpGLTF.Schema2
             return mp;
         }
 
-        public override IEnumerable<Exception> Validate()
+        internal override void Validate(IList<Exception> result)
         {
-            var exx = base.Validate().ToList();
+            base.Validate(result);
 
             foreach (var p in this.Primitives)
             {
-                exx.AddRange(p.Validate());
+                p.Validate(result);
             }
-
-            return exx;
         }
 
         #endregion

@@ -48,6 +48,40 @@ namespace SharpGLTF.Schema2
         #region evaluation
 
         /// <summary>
+        /// Finds a <see cref="Node"/> by name in the current graph.
+        /// </summary>
+        /// <param name="scene">This <see cref="Scene"/> instance.</param>
+        /// <param name="predicate">A function to test each <see cref="Node"/> for a condition.</param>
+        /// <returns>A <see cref="Node"/> instance, or Null.</returns>
+        public static Node FindNode(this Scene scene, Predicate<Node> predicate)
+        {
+            Guard.NotNull(predicate, nameof(predicate));
+
+            return scene.VisualChildren.FirstOrDefault(n => predicate(n));
+        }
+
+        /// <summary>
+        /// Finds a <see cref="Node"/> by name in the current graph.
+        /// </summary>
+        /// <param name="node">This <see cref="Node"/> instance.</param>
+        /// <param name="predicate">A function to test each <see cref="Node"/> for a condition.</param>
+        /// <returns>A <see cref="Node"/> instance, or Null.</returns>
+        public static Node FindNode(this Node node, Predicate<Node> predicate)
+        {
+            Guard.NotNull(predicate, nameof(predicate));
+
+            if (predicate(node)) return node;
+
+            foreach (var child in node.VisualChildren)
+            {
+                var r = child.FindNode(predicate);
+                if (r != null) return r;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Yield a collection of triangles representing the geometry
         /// of the input <see cref="Scene"/> in world space.
         /// </summary>

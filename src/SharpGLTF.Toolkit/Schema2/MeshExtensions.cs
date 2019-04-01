@@ -85,6 +85,28 @@ namespace SharpGLTF.Schema2
 
         #region accessors
 
+        private static void FillFrom(this IList<UInt32> dst, int dstIndex, IEnumerable<Int32> src)
+        {
+            using (var ator = src.GetEnumerator())
+            {
+                while (dstIndex < dst.Count && ator.MoveNext())
+                {
+                    dst[dstIndex++] = (UInt32)ator.Current;
+                }
+            }
+        }
+
+        private static void FillFrom<T>(this IList<T> dst, int dstIndex, IEnumerable<T> src)
+        {
+            using (var ator = src.GetEnumerator())
+            {
+                while (dstIndex < dst.Count && ator.MoveNext())
+                {
+                    dst[dstIndex++] = ator.Current;
+                }
+            }
+        }
+
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Single> values)
         {
             var root = primitive.LogicalParent.LogicalParent;
