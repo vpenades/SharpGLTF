@@ -223,30 +223,31 @@ namespace SharpGLTF.Schema2.Authoring
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
 
-            var material = new Materials.MaterialBuilder("material1");
-            material.ShaderStyle = "PBRSpecularGlossiness";
-            material.UseChannel("Normal").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_normal.png"));
-            material.UseChannel("Emissive").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"));
-            material.UseChannel("Occlusion").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"));
-            material.UseChannel("Diffuse").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"));
-            material.UseChannel("Glossiness").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
-            material.UseChannel("Specular").Color = Vector4.One * 0.3f;
+            // first, create a default material
+            var material = new Materials.MaterialBuilder("material1 fallback")
+                .WithMetallicRoughnessShader()
+                .WithChannelImage(Materials.KnownChannels.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
+                .WithChannelImage(Materials.KnownChannels.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelImage(Materials.KnownChannels.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelImage(Materials.KnownChannels.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
+                .WithChannelImage(Materials.KnownChannels.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
 
-            var fallback = material.CompatibilityFallback = new Materials.MaterialBuilder("material1 fallback");
-            fallback.UseChannel("Normal").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_normal.png"));
-            fallback.UseChannel("Emissive").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"));
-            fallback.UseChannel("Occlusion").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"));
-            fallback.UseChannel("BaseColor").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"));
-            fallback.UseChannel("Metallic").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
-            fallback.UseChannel("Roughness").Amount = 0.3f;
-
+            // wrap the fallback material with a PBR Specular Glossiness material.
+            material = new Materials.MaterialBuilder("material1")
+                .WithFallback(material)
+                .WithSpecularGlossinessShader()
+                .WithChannelImage(Materials.KnownChannels.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
+                .WithChannelImage(Materials.KnownChannels.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelImage(Materials.KnownChannels.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelImage(Materials.KnownChannels.Diffuse, System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"))
+                .WithChannelImage(Materials.KnownChannels.SpecularGlossiness, System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));                
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
             mesh.UsePrimitive(material).AddPolygon
-                ( (new Vector3(-10, 10, 0), new Vector2(0, 0))
-                , (new Vector3( 10, 10, 0), new Vector2(1, 0))
-                , (new Vector3( 10, -10, 0), new Vector2(1, 1))
-                , (new Vector3(-10, -10, 0), new Vector2(0, 1))
+                ( (new Vector3(-10, 10, 0), new Vector2(1, 0))
+                , (new Vector3( 10, 10, 0), new Vector2(0, 0))
+                , (new Vector3( 10, -10, 0), new Vector2(0, 1))
+                , (new Vector3(-10, -10, 0), new Vector2(1, 1))
                 );
 
             var model = ModelRoot.CreateModel();

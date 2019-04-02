@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
         public int LogicalIndex => this.LogicalParent.LogicalMaterials.IndexOfReference(this);
 
         /// <summary>
-        /// Gets or sets the <see cref="AlphaMode"/> of this <see cref="Material"/> instance.
+        /// Gets or sets the <see cref="AlphaMode"/>.
         /// </summary>
         public AlphaMode Alpha
         {
@@ -32,7 +32,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="AlphaCutoff"/> of this <see cref="Material"/> instance.
+        /// Gets or sets the <see cref="AlphaCutoff"/> value for <see cref="Alpha"/> = <see cref="AlphaMode.MASK"/>.
         /// </summary>
         public Single AlphaCutoff
         {
@@ -82,24 +82,6 @@ namespace SharpGLTF.Schema2
             }
 
             return null;
-        }
-
-        private MaterialNormalTextureInfo _GetNormalTexture(bool create)
-        {
-            if (create && _normalTexture == null) _normalTexture = new MaterialNormalTextureInfo();
-            return _normalTexture;
-        }
-
-        private MaterialOcclusionTextureInfo _GetOcclusionTexture(bool create)
-        {
-            if (create && _occlusionTexture == null) _occlusionTexture = new MaterialOcclusionTextureInfo();
-            return _occlusionTexture;
-        }
-
-        private TextureInfo _GetEmissiveTexture(bool create)
-        {
-            if (create && _emissiveTexture == null) _emissiveTexture = new TextureInfo();
-            return _emissiveTexture;
         }
 
         #endregion

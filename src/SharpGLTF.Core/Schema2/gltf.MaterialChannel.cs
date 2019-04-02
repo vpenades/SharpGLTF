@@ -18,121 +18,40 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo)
+        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Single> cgetter, Action<Single> csetter)
+            : this(m, key, texInfo)
         {
-            Guard.NotNull(m, nameof(m));
-            Guard.NotNullOrEmpty(key, nameof(key));
+            Guard.NotNull(cgetter, nameof(cgetter));
+            Guard.NotNull(csetter, nameof(csetter));
 
-            Guard.NotNull(texInfo, nameof(texInfo));
-
-            _Key = key;
-            _Material = m;
-
-            _TextureInfo = texInfo;
-
-            _ColorGetter = () => Vector4.One;
-            _ColorSetter = val => { };
-
-            _AmountGetter = () => texInfo(false)?.Amount ?? 1;
-            _AmountSetter = val => texInfo(true).Amount = val;
-
-            IsAmountSupported = true;
-            IsColorSupported = false;
-        }
-
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Single> agetter, Action<Single> asetter)
-        {
-            Guard.NotNull(m, nameof(m));
-            Guard.NotNullOrEmpty(key, nameof(key));
-
-            Guard.NotNull(texInfo, nameof(texInfo));
-            Guard.NotNull(agetter, nameof(agetter));
-            Guard.NotNull(asetter, nameof(asetter));
-
-            _Key = key;
-            _Material = m;
-
-            _TextureInfo = texInfo;
-
-            _ColorGetter = () => Vector4.One;
-            _ColorSetter = val => { };
-
-            _AmountGetter = agetter;
-            _AmountSetter = asetter;
-
-            IsAmountSupported = true;
-            IsColorSupported = false;
+            _ParameterGetter = () => new Vector4(cgetter(), 0, 0, 0);
+            _ParameterSetter = value => csetter(value.X);
         }
 
         internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Vector4> cgetter, Action<Vector4> csetter)
+            : this(m, key, texInfo)
+        {
+            Guard.NotNull(cgetter, nameof(cgetter));
+            Guard.NotNull(csetter, nameof(csetter));
+
+            _ParameterGetter = cgetter;
+            _ParameterSetter = csetter;
+        }
+
+        private MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo)
         {
             Guard.NotNull(m, nameof(m));
             Guard.NotNullOrEmpty(key, nameof(key));
 
             Guard.NotNull(texInfo, nameof(texInfo));
 
-            Guard.NotNull(cgetter, nameof(cgetter));
-            Guard.NotNull(csetter, nameof(csetter));
-
             _Key = key;
             _Material = m;
 
             _TextureInfo = texInfo;
 
-            _ColorGetter = cgetter;
-            _ColorSetter = csetter;
-
-            _AmountGetter = () => texInfo(false)?.Amount ?? 1;
-            _AmountSetter = val => texInfo(true).Amount = val;
-
-            IsAmountSupported = false;
-            IsColorSupported = true;
-        }
-
-        internal MaterialChannel(Material m, String key, Func<Single> agetter, Action<Single> asetter)
-        {
-            Guard.NotNull(m, nameof(m));
-            Guard.NotNullOrEmpty(key, nameof(key));
-
-            Guard.NotNull(agetter, nameof(agetter));
-            Guard.NotNull(asetter, nameof(asetter));
-
-            _Key = key;
-            _Material = m;
-
-            _TextureInfo = null;
-
-            _ColorGetter = () => Vector4.One;
-            _ColorSetter = val => { };
-
-            _AmountGetter = agetter;
-            _AmountSetter = asetter;
-
-            IsAmountSupported = true;
-            IsColorSupported = false;
-        }
-
-        internal MaterialChannel(Material m, String key, Func<Vector4> cgetter, Action<Vector4> csetter)
-        {
-            Guard.NotNull(m, nameof(m));
-            Guard.NotNullOrEmpty(key, nameof(key));
-
-            Guard.NotNull(cgetter, nameof(cgetter));
-            Guard.NotNull(csetter, nameof(csetter));
-
-            _Key = key;
-            _Material = m;
-
-            _TextureInfo = null;
-
-            _ColorGetter = cgetter;
-            _ColorSetter = csetter;
-
-            _AmountGetter = () => 1;
-            _AmountSetter = val => { };
-
-            IsAmountSupported = false;
-            IsColorSupported = true;
+            _ParameterGetter = null;
+            _ParameterSetter = null;
         }
 
         #endregion
@@ -144,11 +63,8 @@ namespace SharpGLTF.Schema2
 
         private readonly Func<Boolean, TextureInfo> _TextureInfo;
 
-        private readonly Func<Single> _AmountGetter;
-        private readonly Action<Single> _AmountSetter;
-
-        private readonly Func<Vector4> _ColorGetter;
-        private readonly Action<Vector4> _ColorSetter;
+        private readonly Func<Vector4> _ParameterGetter;
+        private readonly Action<Vector4> _ParameterSetter;
 
         #endregion
 
@@ -159,37 +75,15 @@ namespace SharpGLTF.Schema2
         public String Key => _Key;
 
         /// <summary>
-        /// Gets a value indicating whether this channel supports amount factor.
+        /// Gets or sets the <see cref="Vector4"/> parameter of this channel.
+        /// The meaning of the <see cref="Vector4.X"/>, <see cref="Vector4.Y"/>. <see cref="Vector4.Z"/> and <see cref="Vector4.W"/>
+        /// depend on the type of channel.
         /// </summary>
-        public bool IsAmountSupported { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the Texture weight in the final shader.
-        /// </summary>
-        /// <remarks>
-        /// Not all channels support this property.
-        /// </remarks>
-        public Single Amount
+        public Vector4 Parameter
         {
-            get => _AmountGetter();
-            set => _AmountSetter(value);
+            get => _ParameterGetter();
+            set => _ParameterSetter(value);
         }
-
-        /// <summary>
-        /// Gets a value indicating whether this channel supports a Color factor.
-        /// </summary>
-        public bool IsColorSupported { get; private set; }
-
-        public Vector4 Color
-        {
-            get => _ColorGetter();
-            set => _ColorSetter(value);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether this channel supports textures.
-        /// </summary>
-        public bool IsTextureSupported => _TextureInfo != null;
 
         /// <summary>
         /// Gets the <see cref="Texture"/> instance used by this Material, or null.

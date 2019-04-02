@@ -5,12 +5,32 @@ using System.Text;
 
 namespace SharpGLTF.Materials
 {
-    [System.Diagnostics.DebuggerDisplay("{_Key} {Amount}")]
+    [System.Diagnostics.DebuggerDisplay("{Key} {Parameter}")]
     public class MaterialChannelBuilder
     {
         #region lifecycle
 
-        internal MaterialChannelBuilder(MaterialBuilder parent, string key) { _Parent = parent; _Key = key; }
+        internal MaterialChannelBuilder(MaterialBuilder parent, string key)
+        {
+            _Parent = parent; _Key = key;
+
+            switch (_Key)
+            {
+                case "Emissive": Parameter = Vector4.Zero; break;
+
+                case "Normal":
+                case "Occlusion":
+                    Parameter = new Vector4(1, 0, 0, 0); break;
+
+                case "BaseColor":
+                case "Diffuse":
+                    Parameter = Vector4.One; break;
+
+                case "MetalicRoughness": Parameter = new Vector4(1, 1, 0, 0); break;
+
+                case "SpecularGlossiness": Parameter = Vector4.One; break;
+            }
+        }
 
         #endregion
 
@@ -26,9 +46,7 @@ namespace SharpGLTF.Materials
 
         public String Key => _Key;
 
-        public Single Amount { get; set; } = 1;
-
-        public Vector4 Color { get; set; } = Vector4.One;
+        public Vector4 Parameter { get; set; }
 
         public TextureBuilder Texture { get; private set; }
 
@@ -52,11 +70,9 @@ namespace SharpGLTF.Materials
         Emissive,
 
         BaseColor,
-        Metallic,
-        Roughness,
+        MetallicRoughness,
 
         Diffuse,
-        Specular,
-        Glosiness,
+        SpecularGlossiness,
     }
 }

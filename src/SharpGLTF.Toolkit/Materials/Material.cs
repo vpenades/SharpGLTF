@@ -22,6 +22,10 @@ namespace SharpGLTF.Materials
 
         #region data
 
+        public const string SHADERUNLIT = "Unlit";
+        public const string SHADERPBRMETALLICROUGHNESS = "PBRMetallicRoughness";
+        public const string SHADERPBRSPECULARGLOSSINESS = "PBRSpecularGlossiness";
+
         private readonly List<MaterialChannelBuilder> _Channels = new List<MaterialChannelBuilder>();
 
         private MaterialBuilder _CompatibilityFallbackMaterial;
@@ -40,7 +44,7 @@ namespace SharpGLTF.Materials
 
         public Boolean DoubleSided { get; set; } = false;
 
-        public String ShaderStyle { get; set; } = "PBRMetallicRoughness";
+        public String ShaderStyle { get; set; } = SHADERPBRMETALLICROUGHNESS;
 
         public MaterialBuilder CompatibilityFallback
         {
@@ -55,6 +59,19 @@ namespace SharpGLTF.Materials
         #endregion
 
         #region API
+
+        public MaterialBuilder WithUnlitShader() { return WithShade(SHADERUNLIT); }
+
+        public MaterialBuilder WithMetallicRoughnessShader() { return WithShade(SHADERPBRMETALLICROUGHNESS); }
+
+        public MaterialBuilder WithSpecularGlossinessShader() { return WithShade(SHADERPBRSPECULARGLOSSINESS); }
+
+        public MaterialBuilder WithShade(string shader)
+        {
+            Guard.NotNullOrEmpty(shader, nameof(shader));
+            ShaderStyle = shader;
+            return this;
+        }
 
         public MaterialChannelBuilder GetChannel(KnownChannels channelKey)
         {
@@ -100,15 +117,15 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelColor(KnownChannels channelKey, Vector4 color)
+        public MaterialBuilder WithChannelParam(KnownChannels channelKey, Vector4 parameter)
         {
-            this.UseChannel(channelKey).Color = color;
+            this.UseChannel(channelKey).Parameter = parameter;
             return this;
         }
 
-        public MaterialBuilder WithChannelColor(string channelKey, Vector4 color)
+        public MaterialBuilder WithChannelParam(string channelKey, Vector4 parameter)
         {
-            this.UseChannel(channelKey).Color = color;
+            this.UseChannel(channelKey).Parameter = parameter;
             return this;
         }
 
@@ -127,6 +144,12 @@ namespace SharpGLTF.Materials
                 .UseTexture()
                 .WithImage(imageFilePath);
 
+            return this;
+        }
+
+        public MaterialBuilder WithFallback(MaterialBuilder fallback)
+        {
+            this.CompatibilityFallback = fallback;
             return this;
         }
 

@@ -30,12 +30,6 @@ namespace SharpGLTF.Schema2
             get => this.GetExtension<TextureTransform>();
         }
 
-        public virtual Single Amount
-        {
-            get { return 1; }
-            set { }
-        }
-
         #endregion
 
         #region API
@@ -115,7 +109,7 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
-        public override Single Amount
+        public Single Scale
         {
             get => (Single)this._scale.AsValue(_scaleDefault);
             set => this._scale = ((Double)value).AsNullable(_scaleDefault);
@@ -129,7 +123,7 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
-        public override Single Amount
+        public Single Strength
         {
             get => (Single)this._strength.AsValue(_strengthDefault);
             set => this._strength = ((Double)value).AsNullable(_strengthDefault, _strengthMinimum, _strengthMaximum);
