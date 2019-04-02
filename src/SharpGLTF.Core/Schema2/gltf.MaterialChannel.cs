@@ -36,7 +36,7 @@ namespace SharpGLTF.Schema2
             _AmountGetter = () => texInfo(false)?.Amount ?? 1;
             _AmountSetter = val => texInfo(true).Amount = val;
 
-            IsTextureAmountSupported = true;
+            IsAmountSupported = true;
             IsColorSupported = false;
         }
 
@@ -60,7 +60,7 @@ namespace SharpGLTF.Schema2
             _AmountGetter = agetter;
             _AmountSetter = asetter;
 
-            IsTextureAmountSupported = true;
+            IsAmountSupported = true;
             IsColorSupported = false;
         }
 
@@ -85,7 +85,7 @@ namespace SharpGLTF.Schema2
             _AmountGetter = () => texInfo(false)?.Amount ?? 1;
             _AmountSetter = val => texInfo(true).Amount = val;
 
-            IsTextureAmountSupported = false;
+            IsAmountSupported = false;
             IsColorSupported = true;
         }
 
@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2
             _AmountGetter = agetter;
             _AmountSetter = asetter;
 
-            IsTextureAmountSupported = true;
+            IsAmountSupported = true;
             IsColorSupported = false;
         }
 
@@ -131,7 +131,7 @@ namespace SharpGLTF.Schema2
             _AmountGetter = () => 1;
             _AmountSetter = val => { };
 
-            IsTextureAmountSupported = false;
+            IsAmountSupported = false;
             IsColorSupported = true;
         }
 
@@ -157,6 +157,23 @@ namespace SharpGLTF.Schema2
         public Material LogicalParent => _Material;
 
         public String Key => _Key;
+
+        /// <summary>
+        /// Gets a value indicating whether this channel supports amount factor.
+        /// </summary>
+        public bool IsAmountSupported { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the Texture weight in the final shader.
+        /// </summary>
+        /// <remarks>
+        /// Not all channels support this property.
+        /// </remarks>
+        public Single Amount
+        {
+            get => _AmountGetter();
+            set => _AmountSetter(value);
+        }
 
         /// <summary>
         /// Gets a value indicating whether this channel supports a Color factor.
@@ -187,23 +204,6 @@ namespace SharpGLTF.Schema2
         public TextureTransform TextureTransform => _TextureInfo(false)?.Transform;
 
         public TextureSampler TextureSampler => Texture?.Sampler;
-
-        /// <summary>
-        /// Gets a value indicating whether this channel supports texture amount factor.
-        /// </summary>
-        public bool IsTextureAmountSupported { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the Texture weight in the final shader.
-        /// </summary>
-        /// <remarks>
-        /// Not all channels support this property.
-        /// </remarks>
-        public Single TextureAmount
-        {
-            get => _AmountGetter();
-            set => _AmountSetter(value);
-        }
 
         #endregion
 

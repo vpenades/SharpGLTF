@@ -16,7 +16,13 @@ namespace SharpGLTF.Materials
     {
         #region lifecycle
 
-        internal TextureBuilder() { }
+        internal TextureBuilder(MaterialChannelBuilder parent) { _Parent = parent; }
+
+        #endregion
+
+        #region data
+
+        private readonly MaterialChannelBuilder _Parent;
 
         #endregion
 
@@ -31,8 +37,6 @@ namespace SharpGLTF.Materials
 
         public Vector2 Scale { get; set; } = Vector2.One;
         */
-
-        public Single Amount { get; set; } = 1;
 
         public BYTES ImageContent { get; set; }
 

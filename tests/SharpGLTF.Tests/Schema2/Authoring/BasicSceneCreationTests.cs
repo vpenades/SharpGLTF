@@ -8,7 +8,10 @@ using NUnit.Framework;
 
 namespace SharpGLTF.Schema2.Authoring
 {
-    using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;    
+    using VPOS = Geometry.VertexTypes.VertexPosition;
+    using VTEX = Geometry.VertexTypes.VertexTexture1;
+    using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
+    
 
     [TestFixture]
     public class BasicSceneCreationTests
@@ -210,6 +213,49 @@ namespace SharpGLTF.Schema2.Authoring
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
+        }
+
+        [Test(Description = "Creates a quad mesh with a complex material")]
+        public void CreateFallbackMaterialScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+
+            var material = new Materials.MaterialBuilder("material1");
+            material.ShaderStyle = "PBRSpecularGlossiness";
+            material.UseChannel("Normal").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_normal.png"));
+            material.UseChannel("Emissive").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"));
+            material.UseChannel("Occlusion").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"));
+            material.UseChannel("Diffuse").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"));
+            material.UseChannel("Glossiness").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
+            material.UseChannel("Specular").Color = Vector4.One * 0.3f;
+
+            var fallback = material.CompatibilityFallback = new Materials.MaterialBuilder("material1 fallback");
+            fallback.UseChannel("Normal").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_normal.png"));
+            fallback.UseChannel("Emissive").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"));
+            fallback.UseChannel("Occlusion").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"));
+            fallback.UseChannel("BaseColor").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"));
+            fallback.UseChannel("Metallic").UseTexture().WithImage(System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
+            fallback.UseChannel("Roughness").Amount = 0.3f;
+
+
+            var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
+            mesh.UsePrimitive(material).AddPolygon
+                ( (new Vector3(-10, 10, 0), new Vector2(0, 0))
+                , (new Vector3( 10, 10, 0), new Vector2(1, 0))
+                , (new Vector3( 10, -10, 0), new Vector2(1, 1))
+                , (new Vector3(-10, -10, 0), new Vector2(0, 1))
+                );
+
+            var model = ModelRoot.CreateModel();
+            var scene = model.UseScene("Default");
+            var rnode = scene.CreateNode("RootNode").WithMesh( model.CreateMesh(mesh) );
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+
         }
     }
 }

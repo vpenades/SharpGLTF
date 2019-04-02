@@ -5,16 +5,18 @@ using System.Text;
 
 namespace SharpGLTF.Materials
 {
-    [System.Diagnostics.DebuggerDisplay("{_Key} {Factor}")]
+    [System.Diagnostics.DebuggerDisplay("{_Key} {Amount}")]
     public class MaterialChannelBuilder
     {
         #region lifecycle
 
-        internal MaterialChannelBuilder(string key) { _Key = key; }
+        internal MaterialChannelBuilder(MaterialBuilder parent, string key) { _Parent = parent; _Key = key; }
 
         #endregion
 
         #region data
+
+        private readonly MaterialBuilder _Parent;
 
         private readonly String _Key;
 
@@ -24,9 +26,11 @@ namespace SharpGLTF.Materials
 
         public String Key => _Key;
 
+        public Single Amount { get; set; } = 1;
+
         public Vector4 Color { get; set; } = Vector4.One;
 
-        public TextureBuilder Texture { get; set; }
+        public TextureBuilder Texture { get; private set; }
 
         #endregion
 
@@ -34,7 +38,7 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder UseTexture()
         {
-            if (Texture == null) Texture = new TextureBuilder();
+            if (Texture == null) Texture = new TextureBuilder(this);
             return Texture;
         }
 

@@ -63,7 +63,7 @@ namespace SharpGLTF.Schema2
 
             channel.SetTexture(textureSet, image);
 
-            channel.TextureAmount = amount;
+            channel.Amount = amount;
 
             return material;
         }
@@ -138,6 +138,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Image"/> instance.</returns>
         public static Image UseImageWithContent(this ModelRoot root, Byte[] imageContent)
         {
+            Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
+
             foreach (var img in root.LogicalImages)
             {
                 var existingContent = img.GetImageContent();
@@ -166,17 +168,24 @@ namespace SharpGLTF.Schema2
 
         #region transfer API
 
-        public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder mb)
+        public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial)
         {
-            mb.Name = srcMaterial.Name;
-            mb.Unlit = srcMaterial.Unlit;
-            mb.AlphaMode = srcMaterial.Alpha;
-            mb.AlphaCutoff = srcMaterial.AlphaCutoff;
-            mb.DoubleSided = srcMaterial.DoubleSided;
+            dstMaterial.Name = srcMaterial.Name;
+            dstMaterial.AlphaMode = srcMaterial.Alpha;
+            dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
+            dstMaterial.DoubleSided = srcMaterial.DoubleSided;
+
+            if (srcMaterial.Unlit) dstMaterial.ShaderStyle = "Unlit";
+
+            if (srcMaterial.FindChannel("Diffuse") != null || srcMaterial.FindChannel("Glossiness") != null)
+            {
+                dstMaterial.ShaderStyle = "PBRSpecularGlossiness";
+                // TODO: create fallback material
+            }
 
             foreach (var channel in srcMaterial.Channels)
             {
-                var ch = mb.UseChannel(channel.Key);
+                var ch = dstMaterial.UseChannel(channel.Key);
                 channel.CopyTo(ch);
             }
         }
@@ -184,12 +193,11 @@ namespace SharpGLTF.Schema2
         public static void CopyTo(this MaterialChannel srcChannel, Materials.MaterialChannelBuilder dstChannel)
         {
             dstChannel.Color = srcChannel.Color;
+            dstChannel.Amount = srcChannel.Amount;
 
-            if (srcChannel.Texture == null) { dstChannel.Texture = null; return; }
+            if (srcChannel.Texture == null) { return; }
 
-            if (dstChannel.Texture == null) dstChannel.Texture = new Materials.TextureBuilder();
-
-            dstChannel.Texture.Amount = srcChannel.TextureAmount;
+            if (dstChannel.Texture == null) dstChannel.UseTexture();
 
             dstChannel.Texture.CoordinateSet = srcChannel.TextureCoordinate;
             dstChannel.Texture.MinFilter = srcChannel.TextureSampler.MinFilter;
@@ -218,21 +226,40 @@ namespace SharpGLTF.Schema2
             srcMaterial.GetChannel("Occlusion").CopyTo(dstMaterial.FindChannel("Occlusion").Value);
             srcMaterial.GetChannel("Emissive").CopyTo(dstMaterial.FindChannel("Emissive").Value);
 
-            if (srcMaterial.Style == "PBRMetallicRoughness")
+            Materials.MaterialBuilder defMaterial = null;
+
+            if (srcMaterial.ShaderStyle == "Unlit")
+            {
+                dstMaterial.InitializePBRMetallicRoughness();
+                srcMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor").Value);
+                return;
+            }
+
+            if (srcMaterial.ShaderStyle == "PBRMetallicRoughness")
             {
                 dstMaterial.InitializePBRMetallicRoughness();
 
-                srcMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor").Value);
-                srcMaterial.GetChannel("Metallic").CopyTo(dstMaterial.FindChannel("Metallic").Value);
-                srcMaterial.GetChannel("Roughness").CopyTo(dstMaterial.FindChannel("Roughness").Value);
+                defMaterial = srcMaterial;
             }
-            else if (srcMaterial.Style == "PBRSpecularGlossiness")
+
+            if (srcMaterial.ShaderStyle == "PBRSpecularGlossiness")
             {
-                dstMaterial.InitializePBRSpecularGlossiness();
+                dstMaterial.InitializePBRSpecularGlossiness(srcMaterial.CompatibilityFallback != null);
 
                 srcMaterial.GetChannel("Diffuse").CopyTo(dstMaterial.FindChannel("Diffuse").Value);
                 srcMaterial.GetChannel("Specular").CopyTo(dstMaterial.FindChannel("Specular").Value);
                 srcMaterial.GetChannel("Glossiness").CopyTo(dstMaterial.FindChannel("Glossiness").Value);
+
+                defMaterial = srcMaterial.CompatibilityFallback;
+            }
+
+            if (defMaterial != null)
+            {
+                if (defMaterial.ShaderStyle != "PBRMetallicRoughness") throw new ArgumentException(nameof(srcMaterial.CompatibilityFallback.ShaderStyle));
+
+                defMaterial.GetChannel("BaseColor").CopyTo(dstMaterial.FindChannel("BaseColor").Value);
+                defMaterial.GetChannel("Metallic").CopyTo(dstMaterial.FindChannel("Metallic").Value);
+                defMaterial.GetChannel("Roughness").CopyTo(dstMaterial.FindChannel("Roughness").Value);
             }
         }
 
@@ -241,6 +268,7 @@ namespace SharpGLTF.Schema2
             if (srcChannel == null) return;
 
             dstChannel.Color = srcChannel.Color;
+            dstChannel.Amount = srcChannel.Amount;
 
             var srcTex = srcChannel.Texture;
 
@@ -281,7 +309,6 @@ namespace SharpGLTF.Schema2
             if (channel.HasValue) return channel.Value.Texture;
 
             return null;
-
         }
 
         #endregion

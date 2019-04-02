@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 using NUnit.Framework;
@@ -10,6 +11,29 @@ namespace SharpGLTF
     [TestFixture]
     public class AssemblyAPITests
     {
+        public class TestClass
+        {
+            public int xyz(int x, out int y, ref int z) { y = 0; return x + 7; }
+        }
+
+        [Test]
+        public void DumpTestAPI()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var type = typeof(TestClass);
+
+            var API = DumpAssemblyAPI.GetTypeSignature(type.GetTypeInfo()).OrderBy(item => item).ToArray();
+
+            TestContext.CurrentContext.AttachText("TestAPI.txt", API);
+
+            foreach (var l in API)
+            {
+                TestContext.WriteLine(l);
+            }
+        }
+
+
         [Test]
         public void DumpCoreAPI()
         {

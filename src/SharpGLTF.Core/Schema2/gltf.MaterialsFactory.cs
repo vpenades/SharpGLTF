@@ -15,7 +15,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public void InitializePBRMetallicRoughness()
         {
-            this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.RemoveExtensions<MaterialUnlit>();
@@ -24,8 +24,15 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Specular Glossiness attributes.
         /// </summary>
-        public void InitializePBRSpecularGlossiness()
+        /// <param name="useFallback">true to add a PBRMetallicRoughness fallback material.</param>
+        public void InitializePBRSpecularGlossiness(bool useFallback = false)
         {
+            if (useFallback)
+            {
+                if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+            }
+            else this._pbrMetallicRoughness = null;
+
             this.RemoveExtensions<MaterialUnlit>();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
         }
@@ -35,6 +42,8 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public void InitializeUnlit()
         {
+            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.SetExtension(new MaterialUnlit(this));
         }

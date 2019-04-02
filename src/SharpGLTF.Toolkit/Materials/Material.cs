@@ -8,7 +8,7 @@ namespace SharpGLTF.Materials
 {
     using ALPHA = Schema2.AlphaMode;
 
-    [System.Diagnostics.DebuggerDisplay("{Name} {Style}")]
+    [System.Diagnostics.DebuggerDisplay("{Name} {ShaderStyle}")]
     public class MaterialBuilder
     {
         #region lifecycle
@@ -40,9 +40,7 @@ namespace SharpGLTF.Materials
 
         public Boolean DoubleSided { get; set; } = false;
 
-        public Boolean Unlit { get; set; } = false;
-
-        public String Style { get; set; } = "PBRMetallicRoughness";
+        public String ShaderStyle { get; set; } = "PBRMetallicRoughness";
 
         public MaterialBuilder CompatibilityFallback
         {
@@ -83,7 +81,7 @@ namespace SharpGLTF.Materials
 
             if (ch != null) return ch;
 
-            ch = new MaterialChannelBuilder(channelKey);
+            ch = new MaterialChannelBuilder(this, channelKey);
             _Channels.Add(ch);
 
             return ch;

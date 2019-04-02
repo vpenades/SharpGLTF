@@ -40,24 +40,24 @@ namespace SharpGLTF
             if (tinfo.IsNestedPrivate) yield break;
             if (tinfo.IsNestedAssembly) yield break;
 
-            string baseName = string.Empty;
+            string baseName = string.Empty;            
 
-            if (tinfo.IsNestedFamily) baseName += "PROTECTED";                        
-
-            if (tinfo.IsInterface) baseName += "INTERFACE";
-            else if (tinfo.IsEnum) baseName += "ENUM";
-            else if (tinfo.IsValueType) baseName += "STRUCT";
+            if (tinfo.IsInterface) baseName = "INTERFACE";
+            else if (tinfo.IsEnum) baseName = "ENUM";
+            else if (tinfo.IsValueType) baseName = "STRUCT";
             else if (tinfo.IsClass)
             {
-                if (tinfo.IsSealed && tinfo.IsAbstract) baseName += "STATIC";
+                baseName = "CLASS";
+
+                if (tinfo.IsSealed && tinfo.IsAbstract) baseName += ":STATIC";
                 else
                 {
-                    if (tinfo.IsSealed) baseName += "SEALED";
-                    if (tinfo.IsAbstract) baseName += "ABSTRACT";
+                    if (tinfo.IsSealed) baseName += ":SEALED";
+                    if (tinfo.IsAbstract) baseName += ":ABSTRACT";
                 }
-
-                baseName += "CLASS";
             }
+
+            if (tinfo.IsNestedFamily) baseName += ":PROTECTED";
 
             baseName += " " + tinfo.GetQualifiedName();
 
@@ -115,24 +115,22 @@ namespace SharpGLTF
         {
             if (!IsVisible(finfo)) yield break;
 
-            var name = string.Empty;
+            var name = "FIELD";
 
-            if (finfo.IsLiteral) name += "CONST";
-            else name += "FIELD";
+            if (finfo.IsLiteral) name += ":CONST";
+            if (finfo.IsStatic) name += ":STATIC";
 
             name += $" {finfo.Name} {finfo.FieldType.GetQualifiedName()}";
 
             if (finfo.IsStatic)
             {
-                name = "STATIC" + name;
-
                 var v = finfo.GetValue(null);
-                if (v != null) name += Invariant($"= {v}");
+                if (v != null) name += Invariant($"={v}");
             }
             else if (instance != null)
             {
                 var v = finfo.GetValue(instance);
-                if (v != null) name += Invariant($"= {v}");
+                if (v != null) name += Invariant($"={v}");
             }
 
             yield return name;
@@ -143,29 +141,38 @@ namespace SharpGLTF
             var pname = $"{pinfo.Name} {pinfo.PropertyType.GetQualifiedName()}";
 
             var getter = pinfo.GetGetMethod();
-            if (IsVisible(getter,true)) yield return GetMethodModifiers(getter)+ "PROPERTYGET " + pname;
+            if (IsVisible(getter,true)) yield return "METHOD:GET"+ GetMethodModifiers(getter) + " " + pname;
 
             var setter = pinfo.GetSetMethod();
-            if (IsVisible(setter, true)) yield return GetMethodModifiers(getter) + "PROPERTYSET " + pname;
+            if (IsVisible(setter, true)) yield return "METHOD:SET"+ GetMethodModifiers(setter) +" " + pname;
         }
 
         public static IEnumerable<string> GetMethodSignature(Object instance, MethodBase minfo)
         {
-            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.            
+            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.
 
-            var mname = GetMethodModifiers(minfo);
+            string mname = "METHOD";
 
             if (minfo is MethodInfo mminfo)
             {
+                var isExtension = mminfo.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), true);
+
+                if (isExtension) mname += ":EXTENSION";
+                mname += GetMethodModifiers(minfo);
+
+                mname += " ";
+
                 if (!IsVisible(minfo)) yield break;
-                mname += "METHOD " + mminfo.Name + $" {mminfo.ReturnType.GetQualifiedName()} ";
+                mname += mminfo.Name + $" {mminfo.ReturnType.GetQualifiedName()}";
             }
 
             if (minfo is ConstructorInfo cinfo)
             {
                 if (!IsVisible(minfo,true)) yield break;
-                mname += "CONSTRUCTOR ";
-            }             
+                mname += ":CONSTRUCTOR";
+            }
+
+            mname += " ";
 
             var mparams = minfo.GetParameters()
                 .Select(item => GetParameterSignature(item))
@@ -176,9 +183,18 @@ namespace SharpGLTF
 
         public static string GetParameterSignature(ParameterInfo pinfo)
         {
-            var isParams = pinfo.GetCustomAttribute(typeof(ParamArrayAttribute)) != null;
+            var prefix = string.Empty;
 
-            return (isParams ? "params " : "") + pinfo.ParameterType.GetQualifiedName();
+            if (pinfo.GetCustomAttribute(typeof(ParamArrayAttribute)) != null) prefix += "params ";
+
+            if (pinfo.ParameterType.IsByRef)
+            {
+                if (pinfo.IsIn) prefix += "in ";
+                else if (pinfo.IsOut) prefix += "out ";
+                else prefix += "ref ";
+            }
+
+            return prefix + pinfo.ParameterType.GetQualifiedName();
         }
 
         public static bool IsVisible(FieldInfo finfo)
@@ -203,7 +219,7 @@ namespace SharpGLTF
             if (minfo.IsFamilyOrAssembly) return false;
 
             return true;
-        }
+        }        
 
         public static string GetMethodModifiers(MethodBase minfo)
         {
@@ -211,11 +227,11 @@ namespace SharpGLTF
 
             var mod = string.Empty;
 
-            if (minfo.IsFamily) mod += "PROTECTED";
-            if (minfo.IsStatic) mod += "STATIC";            
+            if (minfo.IsFamily) mod += ":PROTECTED";
+            if (minfo.IsStatic) mod += ":STATIC";            
 
-            if (minfo.IsAbstract) mod += "ABSTRACT";
-            else if (minfo.IsVirtual) mod += "VIRTUAL";
+            if (minfo.IsAbstract) mod += ":ABSTRACT";
+            else if (minfo.IsVirtual) mod += ":VIRTUAL";
 
             return mod;
         }
@@ -227,37 +243,38 @@ namespace SharpGLTF
 
         public static string GetQualifiedName(this System.Reflection.TypeInfo tinfo)
         {
-            var name = tinfo.Name;
-
             if (tinfo.IsArray)
             {
-                var fname = tinfo.GetElementType().GetQualifiedName();
-                fname += "[" + string.Join("", Enumerable.Repeat(",", tinfo.GetArrayRank() - 1)) + "]";                
-
-                return fname; 
+                var itemName = tinfo.GetElementType().GetQualifiedName();
+                itemName += "[" + string.Join("", Enumerable.Repeat(",", tinfo.GetArrayRank() - 1)) + "]";
+                return itemName;
             }
 
-            if (!tinfo.IsGenericType && !tinfo.IsGenericTypeDefinition) return tinfo.Name;            
+            var name = tinfo.Name;
 
-            name = name.Replace("`1","");
-            name = name.Replace("`2", "");
-            name = name.Replace("`3", "");
-            name = name.Replace("`4", "");
-            name = name.Replace("`5", "");
-            name = name.Replace("`6", "");
-            name = name.Replace("`7", "");
-            name = name.Replace("`8", "");
+            name = name.Replace("&", ""); // remove PTR semantics
 
-            var gpm = tinfo
-                .GenericTypeArguments
-                .Concat(tinfo.GenericTypeParameters)
-                .Select(item => GetQualifiedName(item.GetTypeInfo()))
-                .ToList();
+            if (tinfo.IsGenericType || tinfo.IsGenericTypeDefinition)
+            {
+                name = name.Replace("`1", "");
+                name = name.Replace("`2", "");
+                name = name.Replace("`3", "");
+                name = name.Replace("`4", "");
+                name = name.Replace("`5", "");
+                name = name.Replace("`6", "");
+                name = name.Replace("`7", "");
+                name = name.Replace("`8", "");
 
-            if (gpm.Count > 0) name += "<" + string.Join(", ", gpm) + ">";
+                var gpm = tinfo
+                    .GenericTypeArguments
+                    .Concat(tinfo.GenericTypeParameters)
+                    .Select(item => GetQualifiedName(item))
+                    .ToList();
+
+                if (gpm.Count > 0) name += "<" + string.Join(",", gpm) + ">";                
+            }
 
             return name;
-            
         }
     }
 }

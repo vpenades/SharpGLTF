@@ -231,7 +231,7 @@ namespace SharpGLTF.IO
         {
             foreach (var triangle in Schema2.Schema2Toolkit.Triangulate<POSITION, TEXCOORD, VEMPTY>(model.DefaultScene))
             {
-                var dstMaterial = new Material();
+                var dstMaterial = default(Material);
 
                 var srcMaterial = triangle.Item4;
                 if (srcMaterial != null)
