@@ -15,11 +15,9 @@ namespace SharpGLTF.Schema2
 
         internal static Asset CreateDefault(string copyright)
         {
-            var av = typeof(Asset).Assembly.GetCustomAttributes(true)
-                .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
-                .FirstOrDefault();
+            var av = AssemblyInformationalVersion;
 
-            var generator = av == null ? "SharpGLTF" : "SharpGLTF " + av.InformationalVersion;
+            var generator = string.IsNullOrWhiteSpace(av) ? "SharpGLTF" : "SharpGLTF " + av;
 
             return new Asset()
             {
@@ -33,6 +31,18 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region properties
+
+        public static string AssemblyInformationalVersion
+        {
+            get
+            {
+                var av = typeof(Asset).Assembly.GetCustomAttributes(true)
+                .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+                .FirstOrDefault();
+
+                return av?.InformationalVersion ?? string.Empty;
+            }
+        }
 
         private static readonly Version ZEROVERSION = new Version(0, 0);
         private static readonly Version MINVERSION = new Version(2, 0);

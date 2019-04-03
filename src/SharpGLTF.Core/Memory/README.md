@@ -1,7 +1,30 @@
-﻿### Byte Array Accessors
+﻿### Memory namespace
  
- Most data within glTF is stored in binary buffers. These buffers store both integer and floating point values.
- 
- In order to save space, buffer data can be encoded in different ways.
- 
- The helper classes in this namespace simplify the process of reading and writing encoded data to buffers.
+glTF2 stores array structures as encoded byte buffers that are not easy to handle directly.
+
+Data is accessed by `Accessors` pointing to `BufferViews` which point to `Buffers`.
+
+`Buffers` store raw Byte arrays, meanwhile `BufferViews` can be seen as slices over the
+original byte array stored in a `Buffer`
+
+This is equivalent in C# to `Byte[]` and `ArraySegment<Byte>` , a lot of the low level
+API exploits this by using this analogy of reusing low level buffers.
+
+Byte buffers is the lowest storage level of glTF, in order to expose the actual data, the
+byte buffers need to be decoded into structured data. The information required to decode
+the buffers is usually found in `Accessors`.
+
+But the actual encoding and decoding, can be achieved using these wrappers found in the
+`SharpGLTF.Memory` namespace:
+
+- `IntegerArray`
+- `ScalarArray`
+- `Vector2Array`
+- `Vector3Array`
+- `Vector4Array`
+- `QuaternionArray`
+- `Matrix4x4Array`
+- `MultiArray`
+- `SparseArray`
+
+You can use any of these structures to wrap any byte array and expose it as the given type.

@@ -46,7 +46,7 @@ namespace SharpGLTF
             }
         }
 
-        [Test]
+        [Test(Description = "proof of concept to dump the whole public API of an assembly")]
         public void DumpTestAPI()
         {
             TestContext.CurrentContext.AttachShowDirLink();
@@ -64,7 +64,7 @@ namespace SharpGLTF
         }
 
 
-        [Test]
+        [Test(Description ="Checks if we have introduced a breaking change between the current and previous API")]
         public void DumpCoreAPI()
         {
             TestContext.CurrentContext.AttachShowDirLink();
@@ -73,15 +73,14 @@ namespace SharpGLTF
 
             var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToArray();
 
-            TestContext.CurrentContext.AttachText("CoreAPI.txt", API);
+            TestContext.CurrentContext.AttachText($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            foreach(var l in API)
-            {
-                TestContext.WriteLine(l);
-            }
+            var r = _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0005.txt", API);
+
+            Assert.IsTrue(r);
         }
 
-        [Test]
+        [Test(Description = "Checks if we have introduced a breaking change between the current and previous API")]
         public void DumpToolkitAPI()
         {
             TestContext.CurrentContext.AttachShowDirLink();
@@ -90,12 +89,31 @@ namespace SharpGLTF
 
             var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToArray();
 
-            TestContext.CurrentContext.AttachText("ToolkitAPI.txt", API);
+            TestContext.CurrentContext.AttachText($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            foreach (var l in API)
+            var r = _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0005.txt", API);
+
+            Assert.IsTrue(r);
+        }
+
+        private static bool _CheckBackwardsCompatibility(string referenceAPIFile, string[] newLines)
+        {
+            referenceAPIFile = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", referenceAPIFile);
+
+            var refLines = System.IO.File.ReadAllLines(referenceAPIFile);
+
+            bool failed = false;
+
+            foreach(var l in refLines)
             {
-                TestContext.WriteLine(l);
+                if (!newLines.Contains(l))
+                {
+                    TestContext.WriteLine($"Missing:  {l}");
+                    failed = true;
+                }
             }
+
+            return !failed;
         }
     }
 }

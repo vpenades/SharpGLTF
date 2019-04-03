@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Collections
 {
-    public class VertexList<T> : IReadOnlyList<T>
+    class VertexList<T> : IReadOnlyList<T>
         where T : struct
     {
         #region data

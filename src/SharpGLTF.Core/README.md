@@ -1,39 +1,49 @@
-﻿
-#### Development
+﻿# SharpGLTF Core
 
-The bulk of the code is generated from the schema using the SharpGLTF.CodeGen tools.
 
-All generated classes are declared by default as non public, and its fields private.
-The public API functionality is provided with hand coded partial classes.
+#### Namespaces
 
-Since this is a work in progress, not all the features might be publicly available yet.
+##### Namespace Schema2
 
-Internally, the ModelRoot object store almost all the model elements in plain lists,
-and cross referencing is done by integer indices. The public API implentation tries
-to simplify model access by resolving the references and offering a more C# friendly
-API.
+This namespace contains the collection of classes, structures and enumerations that
+represent the bulk of the API to access directly to glTF2 documents.
 
-#### Examples
+It also contains the main entry point Object that represents a glTF2 model: `ModelRoot`
 
-Many examples can be found in the Tests project, but in essence, loading a model
-is as easy as this:
+[Documentation](Schema2/README.md)
 
-```c#
-var model = Schema2.ModelRoot.Load("model.gltf");
-```
+##### Namespace IO
 
-Loading a gltf and saving it as glb:
-```c#
-var model = Schema2.ModelRoot.Load("model.gltf");
-model.MergeBuffers(); // ensure there's only one buffer, which is required by GLB
-model.SaveGLB("model.glb");
-```
+This namespace contains the helper classes to support JSon serialization.
 
-Creating a new gltf model:
-```c#
-var model = ModelRoot.CreateModel();
-var scene = model.UseScene("Default Scene");
-var node = scene.CreateNode("Node1");
-```
+##### Namespace Memory
+
+glTF2 stores array structures as encoded byte buffers that are not easy to handle directly.
+
+[Documentation](Memory/README.md)
+
+#### Extensions
+
+- [x] [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness)
+- [x] [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit)
+- [x] [KHR_lights_punctual](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
+- [x] [KHR_texture_transform](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_transform) (WIP)
+- [ ] [KHR_draco_mesh_compression](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_draco_mesh_compression)
+  - Depends on [Google's Draco Project](https://github.com/google/draco) which is C++ ; *Help Needed*
+
+- [ ] [KHR_techniques_webgl](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_techniques_webgl)
+
+- [ ] [MSFT_texture_dds](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_texture_dds)
+- [ ] [MSFT_lod](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_lod)
+  - When this extension is used, the model's visual tree needs to be abstracted, which requires an extensive API rework, or a full API layer.
+- [ ] [MSFT_packing_normalRoughnessMetallic](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_packing_normalRoughnessMetallic)
+- [ ] [MSFT_packing_occlusionRoughnessMetallic](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/MSFT_packing_occlusionRoughnessMetallic)
+- [ ] [AGI_articulations](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_articulations)
+- [ ] [AGI_stk_metadata](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/AGI_stk_metadata)
+- [ ] [EXT_lights_image_based](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_lights_image_based)
+- [ ] [EXT_texture_webp](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/EXT_texture_webp)
+- [ ] [ADOBE_materials_thin_transparency](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Vendor/ADOBE_materials_thin_transparency)
+
+
 
 
