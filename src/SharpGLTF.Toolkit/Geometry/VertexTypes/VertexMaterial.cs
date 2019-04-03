@@ -99,4 +99,93 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!TexCoord._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord));
         }
     }
+
+    /// <summary>
+    /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
+    /// </summary>
+    public struct VertexColor1Texture2 : IVertexMaterial
+    {
+        public VertexColor1Texture2(Vector4 color, Vector2 tex0, Vector2 tex1)
+        {
+            Color = color;
+            TexCoord0 = tex0;
+            TexCoord1 = tex1;
+        }
+
+        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        public Vector4 Color;
+
+        [VertexAttribute("TEXCOORD_0")]
+        public Vector2 TexCoord0;
+
+        [VertexAttribute("TEXCOORD_1")]
+        public Vector2 TexCoord1;
+
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
+        {
+            if (setIndex == 0) this.TexCoord0 = coord;
+            if (setIndex == 1) this.TexCoord1 = coord;
+        }
+
+        public void Validate()
+        {
+            if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
+            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
+
+            if (!TexCoord0._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord0));
+            if (!TexCoord1._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord1));
+        }
+    }
+
+    /// <summary>
+    /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
+    /// </summary>
+    public struct VertexColor2Texture2 : IVertexMaterial
+    {
+        public VertexColor2Texture2(Vector4 color0, Vector4 color1, Vector2 tex0, Vector2 tex1)
+        {
+            Color0 = color0;
+            Color1 = color1;
+            TexCoord0 = tex0;
+            TexCoord1 = tex1;
+        }
+
+        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        public Vector4 Color0;
+
+        [VertexAttribute("COLOR_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        public Vector4 Color1;
+
+        [VertexAttribute("TEXCOORD_0")]
+        public Vector2 TexCoord0;
+
+        [VertexAttribute("TEXCOORD_1")]
+        public Vector2 TexCoord1;
+
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color)
+        {
+            if (setIndex == 0) this.Color0 = color;
+            if (setIndex == 1) this.Color1 = color;
+        }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
+        {
+            if (setIndex == 0) this.TexCoord0 = coord;
+            if (setIndex == 1) this.TexCoord1 = coord;
+        }
+
+        public void Validate()
+        {
+            if (!Color0._IsReal()) throw new NotFiniteNumberException(nameof(Color0));
+            if (!Color0.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color0));
+
+            if (!Color1._IsReal()) throw new NotFiniteNumberException(nameof(Color1));
+            if (!Color1.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color1));
+
+            if (!TexCoord0._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord0));
+            if (!TexCoord1._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord1));
+        }
+    }
 }

@@ -9,30 +9,16 @@ using static System.FormattableString;
 namespace SharpGLTF
 {
     /// <summary>
-    /// Utility class to hopefully compare breaking changes between APIs
+    /// Utility class to dump the public API of an assembly
     /// </summary>
     static class DumpAssemblyAPI
     {
         // https://www.hanselman.com/blog/ManagingChangeWithNETAssemblyDiffTools.aspx
 
-        // proposed reporting lines:
-
-        // Namespace="" Class="" Method=""
-        // Namespace="" Enum="" Constant=""
-        // Namespace="" Class="" Property=""
-        // Namespace="" Class="" Event=""
-
-        // NS foo.bar { STRUCT name        { FIELD name type       } }
-        // NS foo.bar { ABSTRACTCLASS name { PROPERTYGET name type } }
-        // NS foo.bar { ABSTRACTCLASS name { PROTECTEDPROPERTYSET name type } }
-
-        // NamesPace { Class|Struct { Class|Struct|Method|Field } }
-
-
         public static IEnumerable<String> GetAssemblySignature(Assembly assembly)
         {
             return assembly.ExportedTypes
-                .SelectMany(item => GetTypeSignature(item.GetTypeInfo()).Select(l => "NS " + item.Namespace + " { " + l + " } " ) );
+                .SelectMany(item => GetTypeSignature(item.GetTypeInfo()).Select(l => "NS " + item.Namespace + " { " + l + " }" ) );
         }
 
         public static IEnumerable<String> GetTypeSignature(TypeInfo tinfo)
@@ -40,7 +26,7 @@ namespace SharpGLTF
             if (tinfo.IsNestedPrivate) yield break;
             if (tinfo.IsNestedAssembly) yield break;
 
-            string baseName = string.Empty;            
+            string baseName = string.Empty;
 
             if (tinfo.IsInterface) baseName = "INTERFACE";
             else if (tinfo.IsEnum) baseName = "ENUM";
@@ -61,82 +47,90 @@ namespace SharpGLTF
 
             baseName += " " + tinfo.GetQualifiedName();
 
+            if (tinfo.IsEnum)
+            {
+                foreach(var val in Enum.GetValues(tinfo.AsType()))
+                {
+                    yield return baseName + " { " + val + $"={(int)val}" + " }";
+                }
+
+                yield break;
+            }
+
             if (tinfo.IsClass)
             {
                 // base classes
                 var baseType = tinfo.BaseType;
                 while (baseType != null && baseType != typeof(object))
                 {
-                    yield return baseName + " { USING " + baseType.GetQualifiedName() + " } ";
+                    yield return baseName + " { USING " + baseType.GetQualifiedName() + " }";
                     baseType = baseType.BaseType;
                 }
             }
-
-            foreach(var ifaceType in tinfo.GetInterfaces())
+            
+            foreach (var ifaceType in tinfo.GetInterfaces())
             {
                 if (ifaceType.IsNotPublic) continue;
 
-                yield return baseName + " { USING " + ifaceType.GetQualifiedName() + " } ";
+                yield return baseName + " { USING " + ifaceType.GetQualifiedName() + " }";
             }
-
-
-            Object instance = null;
-
-            try { instance = Activator.CreateInstance(tinfo); }
-            catch { }
 
             foreach (var m in tinfo.DeclaredMembers)
             {
-                var signatures = GetMemberSignature(instance, m);
+                var signatures = GetMemberSignature(m);
                 if (signatures == null) continue;
                 foreach (var s in signatures)
                 {
-                    yield return baseName + " { " +  s + " } ";
+                    yield return baseName + " { " +  s + " }";
                 }
             }            
         }
 
-        public static IEnumerable<string> GetMemberSignature(Object instance, MemberInfo minfo)
+        public static IEnumerable<String> GetMemberSignature(MemberInfo minfo)
         {
-            if (minfo is FieldInfo finfo) return GetFieldSignature(instance, finfo);
+            if (minfo is FieldInfo finfo) return GetFieldSignature(finfo);
 
             if (minfo is TypeInfo tinfo) return GetTypeSignature(tinfo);
 
-            if (minfo is PropertyInfo pinfo) return GetPropertySignature(instance, pinfo);
+            if (minfo is PropertyInfo pinfo) return GetPropertySignature(pinfo);
 
-            if (minfo is MethodInfo xinfo) return GetMethodSignature(instance, xinfo);
+            if (minfo is MethodInfo xinfo) return GetMethodSignature(xinfo);
 
-            if (minfo is ConstructorInfo cinfo) return GetMethodSignature(instance, cinfo);
+            if (minfo is ConstructorInfo cinfo) return GetMethodSignature(cinfo);
+
+            if (minfo is EventInfo einfo) return GetEventSignature(einfo);
 
             return null;
         }
 
-        public static IEnumerable<string> GetFieldSignature(Object instance, FieldInfo finfo)
+        public static IEnumerable<String> GetFieldSignature(FieldInfo finfo)
         {
             if (!IsVisible(finfo)) yield break;
 
             var name = "FIELD";
 
             if (finfo.IsLiteral) name += ":CONST";
-            if (finfo.IsStatic) name += ":STATIC";
+            else if (finfo.IsStatic) name += ":STATIC";
+
+            if (finfo.IsInitOnly) name += ":READONLY";
 
             name += $" {finfo.Name} {finfo.FieldType.GetQualifiedName()}";
-
-            if (finfo.IsStatic)
-            {
-                var v = finfo.GetValue(null);
-                if (v != null) name += Invariant($"={v}");
-            }
-            else if (instance != null)
-            {
-                var v = finfo.GetValue(instance);
-                if (v != null) name += Invariant($"={v}");
-            }
 
             yield return name;
         }
 
-        public static IEnumerable<string> GetPropertySignature(Object instance, PropertyInfo pinfo)
+        public static IEnumerable<String> GetEventSignature(EventInfo einfo)
+        {
+            // if (!IsVisible(einfo)) yield break;
+
+            var name = "EVENT";
+
+            name += $" {einfo.Name} {einfo.EventHandlerType.GetQualifiedName()}";
+
+            yield return name;
+        }
+
+        public static IEnumerable<String> GetPropertySignature(PropertyInfo pinfo)
         {
             var pname = $"{pinfo.Name} {pinfo.PropertyType.GetQualifiedName()}";
 
@@ -147,10 +141,8 @@ namespace SharpGLTF
             if (IsVisible(setter, true)) yield return "METHOD:SET"+ GetMethodModifiers(setter) +" " + pname;
         }
 
-        public static IEnumerable<string> GetMethodSignature(Object instance, MethodBase minfo)
+        public static IEnumerable<String> GetMethodSignature(MethodBase minfo)
         {
-            // TODO: if parameters have default values, dump the same method multiple times with one parameter less each time.
-
             string mname = "METHOD";
 
             if (minfo is MethodInfo mminfo)
@@ -158,7 +150,7 @@ namespace SharpGLTF
                 var isExtension = mminfo.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute), true);
 
                 if (isExtension) mname += ":EXTENSION";
-                mname += GetMethodModifiers(minfo);
+                else mname += GetMethodModifiers(minfo);
 
                 mname += " ";
 
@@ -181,7 +173,7 @@ namespace SharpGLTF
             yield return mname + "(" + string.Join(", ", mparams) + ")";
         }
 
-        public static string GetParameterSignature(ParameterInfo pinfo)
+        public static String GetParameterSignature(ParameterInfo pinfo)
         {
             var prefix = string.Empty;
 
@@ -194,21 +186,18 @@ namespace SharpGLTF
                 else prefix += "ref ";
             }
 
-            return prefix + pinfo.ParameterType.GetQualifiedName();
-        }
+            var postfix = string.Empty;
 
-        public static bool IsVisible(FieldInfo finfo)
-        {
-            if (finfo == null) return false;
+            if (pinfo.HasDefaultValue)
+            {
+                if (pinfo.DefaultValue == null) postfix = "=null";
+                else postfix = "=" + pinfo.DefaultValue.ToString();
+            }
 
-            if (finfo.IsPrivate) return false;
-            if (finfo.IsAssembly) return false;            
-            if (finfo.IsFamilyOrAssembly) return false;
+            return prefix + pinfo.ParameterType.GetQualifiedName() + postfix;
+        }        
 
-            return true;
-        }
-
-        public static bool IsVisible(MethodBase minfo, bool withSpecials = false)
+        public static Boolean IsVisible(MethodBase minfo, Boolean withSpecials = false)
         {
             if (minfo == null) return false;
 
@@ -219,9 +208,20 @@ namespace SharpGLTF
             if (minfo.IsFamilyOrAssembly) return false;
 
             return true;
-        }        
+        }
 
-        public static string GetMethodModifiers(MethodBase minfo)
+        public static Boolean IsVisible(FieldInfo finfo)
+        {
+            if (finfo == null) return false;
+
+            if (finfo.IsPrivate) return false;
+            if (finfo.IsAssembly) return false;
+            if (finfo.IsFamilyOrAssembly) return false;
+
+            return true;
+        }
+
+        public static String GetMethodModifiers(MethodBase minfo)
         {
             if (minfo.IsPrivate) return string.Empty;
 
@@ -236,24 +236,31 @@ namespace SharpGLTF
             return mod;
         }
 
-        public static string GetQualifiedName(this Type tinfo)
+        public static String GetQualifiedName(this Type tinfo)
         {
             return tinfo.GetTypeInfo().GetQualifiedName();
         }
 
-        public static string GetQualifiedName(this System.Reflection.TypeInfo tinfo)
+        public static String GetQualifiedName(this TypeInfo tinfo)
         {
-            if (tinfo.IsArray)
+            var postfix = string.Empty;
+
+            // unwrap jagged array
+            while (tinfo.IsArray)
             {
-                var itemName = tinfo.GetElementType().GetQualifiedName();
-                itemName += "[" + string.Join("", Enumerable.Repeat(",", tinfo.GetArrayRank() - 1)) + "]";
-                return itemName;
+                postfix += "[" + string.Join("", Enumerable.Repeat(",", tinfo.GetArrayRank() - 1)) + "]";
+                tinfo = tinfo.GetElementType().GetTypeInfo();                
             }
 
             var name = tinfo.Name;
 
-            name = name.Replace("&", ""); // remove PTR semantics
+            // remove pointer semantics
+            name = name.Replace("&", ""); 
 
+            // add jagged array postfix
+            name += postfix;
+
+            // handle generic types
             if (tinfo.IsGenericType || tinfo.IsGenericTypeDefinition)
             {
                 name = name.Replace("`1", "");

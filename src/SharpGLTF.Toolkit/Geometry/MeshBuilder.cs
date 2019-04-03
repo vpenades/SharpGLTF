@@ -12,7 +12,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an utility class to help build mesh primitives by adding triangles
     /// </summary>
-    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvJ}"/> instance.</typeparam>
+    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, JvS}"/> instance.</typeparam>
     /// <typeparam name="TvP">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
@@ -28,7 +28,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
     /// </typeparam>
-    /// <typeparam name="TvJ">
+    /// <typeparam name="JvS">
     /// The vertex fragment type with Skin Joint Weights.
     /// Valid types are:
     /// <see cref="VertexEmpty"/>,
@@ -37,14 +37,14 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>
+    public class PrimitiveBuilder<TMaterial, TvP, TvM, JvS>
         where TvP : struct, IVertexPosition
         where TvM : struct, IVertexMaterial
-        where TvJ : struct, IVertexJoints
+        where JvS : struct, IVertexSkinning
     {
         #region lifecycle
 
-        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvP, TvM, TvJ> mesh, TMaterial material, bool strict)
+        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvP, TvM, JvS> mesh, TMaterial material, bool strict)
         {
             this._Scrict = strict;
             this._Mesh = mesh;
@@ -57,22 +57,22 @@ namespace SharpGLTF.Geometry
 
         private readonly bool _Scrict;
 
-        private readonly MeshBuilder<TMaterial, TvP, TvM, TvJ> _Mesh;
+        private readonly MeshBuilder<TMaterial, TvP, TvM, JvS> _Mesh;
 
         private readonly TMaterial _Material;
 
-        private readonly VertexList<(TvP, TvM, TvJ)> _Vertices = new VertexList<(TvP, TvM, TvJ)>();
+        private readonly VertexList<(TvP, TvM, JvS)> _Vertices = new VertexList<(TvP, TvM, JvS)>();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
 
         #region properties
 
-        public MeshBuilder<TMaterial, TvP, TvM, TvJ> Mesh => _Mesh;
+        public MeshBuilder<TMaterial, TvP, TvM, JvS> Mesh => _Mesh;
 
         public TMaterial Material => _Material;
 
-        public IReadOnlyList<(TvP, TvM, TvJ)> Vertices => _Vertices;
+        public IReadOnlyList<(TvP, TvM, JvS)> Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
@@ -91,7 +91,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public int UseVertex((TvP, TvM, TvJ) vertex)
+        public int UseVertex((TvP, TvM, JvS) vertex)
         {
             if (_Scrict)
             {
@@ -103,7 +103,7 @@ namespace SharpGLTF.Geometry
             return _Vertices.Use(vertex);
         }
 
-        public void AddTriangle((TvP, TvM, TvJ) a, (TvP, TvM, TvJ) b, (TvP, TvM, TvJ) c)
+        public void AddTriangle((TvP, TvM, JvS) a, (TvP, TvM, JvS) b, (TvP, TvM, JvS) c)
         {
             var aa = UseVertex(a);
             var bb = UseVertex(b);
@@ -126,7 +126,7 @@ namespace SharpGLTF.Geometry
             AddTriangle((a.Item1, a.Item2, default), (b.Item1, b.Item2, default), (c.Item1, c.Item2, default));
         }
 
-        public void AddTriangle((TvP, TvJ) a, (TvP, TvJ) b, (TvP, TvJ) c)
+        public void AddTriangle((TvP, JvS) a, (TvP, JvS) b, (TvP, JvS) c)
         {
             AddTriangle((a.Item1, default, a.Item2), (b.Item1, default, b.Item2), (c.Item1, default, c.Item2));
         }
@@ -136,7 +136,7 @@ namespace SharpGLTF.Geometry
             AddTriangle((a, default, default), (b, default, default), (c, default, default));
         }
 
-        public void AddPolygon(params (TvP, TvM, TvJ)[] points)
+        public void AddPolygon(params (TvP, TvM, JvS)[] points)
         {
             for (int i = 2; i < points.Length; ++i)
             {
@@ -152,7 +152,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void AddPolygon(params (TvP, TvJ)[] points)
+        public void AddPolygon(params (TvP, JvS)[] points)
         {
             for (int i = 2; i < points.Length; ++i)
             {
@@ -168,7 +168,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive, Matrix4x4 transform)
+        public void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, JvS> primitive, Matrix4x4 transform)
         {
             if (primitive == null) throw new ArgumentNullException(nameof(primitive));
 
@@ -202,7 +202,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>
-    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvJ}"/> instance.</typeparam>
+    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, JvS}"/> instance.</typeparam>
     /// <typeparam name="TvP">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
@@ -218,7 +218,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
     /// </typeparam>
-    /// <typeparam name="TvJ">
+    /// <typeparam name="JvS">
     /// The vertex fragment type with Skin Joint Weights.
     /// Valid types are:
     /// <see cref="VertexEmpty"/>,
@@ -227,10 +227,10 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class MeshBuilder<TMaterial, TvP, TvM, TvJ>
+    public class MeshBuilder<TMaterial, TvP, TvM, JvS>
         where TvP : struct, IVertexPosition
         where TvM : struct, IVertexMaterial
-        where TvJ : struct, IVertexJoints
+        where JvS : struct, IVertexSkinning
     {
         #region lifecycle
 
@@ -243,7 +243,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>> _Primitives = new Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>>();
+        private readonly Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, JvS>> _Primitives = new Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, JvS>>();
 
         #endregion
 
@@ -253,17 +253,17 @@ namespace SharpGLTF.Geometry
 
         public string Name { get; set; }
 
-        public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>> Primitives => _Primitives.Values;
+        public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvP, TvM, JvS>> Primitives => _Primitives.Values;
 
         #endregion
 
         #region API
 
-        public PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> UsePrimitive(TMaterial material)
+        public PrimitiveBuilder<TMaterial, TvP, TvM, JvS> UsePrimitive(TMaterial material)
         {
-            if (!_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive))
+            if (!_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, JvS> primitive))
             {
-                primitive = new PrimitiveBuilder<TMaterial, TvP, TvM, TvJ>(this, material, StrictMode);
+                primitive = new PrimitiveBuilder<TMaterial, TvP, TvM, JvS>(this, material, StrictMode);
                 _Primitives[material] = primitive;
             }
 
@@ -272,19 +272,19 @@ namespace SharpGLTF.Geometry
 
         public IEnumerable<(int, int, int)> GetTriangles(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive)) return primitive.Triangles;
+            if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, JvS> primitive)) return primitive.Triangles;
 
             return Enumerable.Empty<(int, int, int)>();
         }
 
         public IReadOnlyList<int> GetIndices(TMaterial material)
         {
-            if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvJ> primitive)) return primitive.Indices;
+            if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, JvS> primitive)) return primitive.Indices;
 
             return new int[0];
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvJ> mesh, Matrix4x4 transform)
+        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, JvS> mesh, Matrix4x4 transform)
         {
             foreach (var p in mesh.Primitives)
             {

@@ -3,7 +3,7 @@
 #### Overview
 
 glTF materials specification has a rather complex architecture,
-with a number of speciallised objects, plus a good number of extensions.
+with a number of specialized objects, plus a good number of extensions.
 
 In order to streamline and simplify access to materials, a Material Build
 API is provided.
@@ -24,3 +24,7 @@ element has a different meaning, depending on the kind of channel:
 |MetallicRoughness|Metallic Roughness|Metallic Factor|Roughness Factor
 |Diffuse|Specular Glossiness|Diffuse Red|Diffuse Green|Diffuse Blue|Alpha
 |SpecularGlossiness|Specular Glossiness|Specular Red|Specular Green|Specular Blue|Glossiness
+
+#### Implementation
+
+TODO

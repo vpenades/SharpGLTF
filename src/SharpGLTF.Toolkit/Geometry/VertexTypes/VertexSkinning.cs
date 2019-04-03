@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    public interface IVertexJoints
+    public interface IVertexSkinning
     {
         void SetJoints(int jointSet, Vector4 joints, Vector4 weights);
 
@@ -15,7 +15,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 256 bone joints and 4 weights.
     /// </summary>
-    public struct VertexJoints8x4 : IVertexJoints
+    public struct VertexJoints8x4 : IVertexSkinning
     {
         #region constructors
 
@@ -45,7 +45,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        void IVertexSkinning.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
         {
             if (jointSet == 0) { this.Joints = joints; this.Weights = weights; }
         }
@@ -64,7 +64,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 4 weights.
     /// </summary>
-    public struct VertexJoints16x4 : IVertexJoints
+    public struct VertexJoints16x4 : IVertexSkinning
     {
         #region constructors
 
@@ -94,7 +94,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        void IVertexSkinning.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
         {
             if (jointSet == 0) { this.Joints = joints; this.Weights = weights; }
         }
@@ -113,7 +113,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 256 bone joints and 8 weights.
     /// </summary>
-    public struct VertexJoints8x8 : IVertexJoints
+    public struct VertexJoints8x8 : IVertexSkinning
     {
         #region constructors
 
@@ -153,7 +153,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        void IVertexSkinning.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
         {
             if (jointSet == 0) { this.Joints0 = joints; this.Weights0 = weights; }
             if (jointSet == 1) { this.Joints1 = joints; this.Weights1 = weights; }
@@ -177,7 +177,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 8 weights.
     /// </summary>
-    public struct VertexJoints16x8 : IVertexJoints
+    public struct VertexJoints16x8 : IVertexSkinning
     {
         #region constructors
 
@@ -217,7 +217,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexJoints.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
+        void IVertexSkinning.SetJoints(int jointSet, Vector4 joints, Vector4 weights)
         {
             if (jointSet == 0) { this.Joints0 = joints; this.Weights0 = weights; }
             if (jointSet == 1) { this.Joints1 = joints; this.Weights1 = weights; }

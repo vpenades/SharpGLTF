@@ -26,7 +26,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
     /// </typeparam>
-    /// <typeparam name="TvJ">
+    /// <typeparam name="JvS">
     /// The vertex fragment type with Skin Joint Weights.
     /// Valid types are:
     /// <see cref="VertexEmpty"/>,
@@ -35,10 +35,10 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class MeshBuilder<TvP, TvM, TvJ> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvJ>
+    public class MeshBuilder<TvP, TvM, JvS> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, JvS>
         where TvP : struct, IVertexPosition
         where TvM : struct, IVertexMaterial
-        where TvJ : struct, IVertexJoints
+        where JvS : struct, IVertexSkinning
     {
         public MeshBuilder(string name = null)
             : base(name) { }

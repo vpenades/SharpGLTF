@@ -150,7 +150,7 @@ namespace SharpGLTF.Schema2
             {
                 return new Vector4
                     (
-                    (float) _metallicFactor.AsValue( _metallicFactorDefault),
+                    (float)_metallicFactor.AsValue( _metallicFactorDefault),
                     (float)_roughnessFactor.AsValue(_roughnessFactorDefault),
                     0,
                     0

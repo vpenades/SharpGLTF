@@ -1,12 +1,26 @@
-# SharpGLTF
+<p align="center">
+<img src="build/Icons/glTF2Sharp.png" height=128 />
+</p>
 
-SharpGLTF is a NetStandard 2.0, C# library designed to parse and create [Khronos Group glTF 2.0](https://github.com/KhronosGroup/glTF) files.
+---
+
+### Overview
+
+SharpGLTF is a NetStandard 2.0, .NET library designed to support
+[Khronos Group glTF 2.0](https://github.com/KhronosGroup/glTF) file format.
 
 The current status of the library is preview alpha, but, for some use cases it is already usable.
 
-Prerelease Nuget packages available [here.](https://www.nuget.org/packages/SharpGLTF)
+#### Design
 
-### Examples
+The framework is divided in two packages:
+
+- __SharpGLTF.Core__ provides the core glTF2 schema implementation, read & write operations,
+and low level API access to let direct document manipulation.
+- __SharpGLTF.Toolkit__ provides an abstraction layer over the Core package, adding convenient
+extensions and utilities to help creating meshes, materials and scenes.
+
+#### Examples
 
 - [Load and save glTF and GLB files.](https://github.com/vpenades/SharpGLTF/blob/3dfe005ba7210c8327867127681a2b39aa567412/tests/SharpGLTF.Tests/Schema2/LoadAndSave/LoadSampleTests.cs#L32)
 - [Create a simple triangle.](https://github.com/vpenades/SharpGLTF/blob/3dfe005ba7210c8327867127681a2b39aa567412/tests/SharpGLTF.Tests/Schema2/Authoring/BasicSceneCreationTests.cs#L95)
@@ -26,7 +40,7 @@ Prerelease Nuget packages available [here.](https://www.nuget.org/packages/Sharp
 - [x] Reading Base64 encoded buffers.
 - [x] Support of merging buffers to write one buffer *.glb* files.
 
-#### ToDo:
+#### To do:
 - [ ] Writing Base64 encoded buffers.
 - [ ] Scene Evaluation.
 - [ ] GPU Evaluation.
