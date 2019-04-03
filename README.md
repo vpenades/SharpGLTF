@@ -36,10 +36,10 @@ model.SaveGLB("model.glb");
 
 The framework is divided in two packages:
 
-- __[SharpGLTF.Core](src/SharpGLTF.Core/README.md)__ provides the core glTF2 schema implementation, read & write operations,
-and low level API access to let direct document manipulation.
-- __[SharpGLTF.Toolkit](src/SharpGLTF.Toolkit/README.md)__ provides a high level layer over the Core package, adding convenient
-extensions and utilities to help creating meshes, materials and scenes.
+- __[SharpGLTF.Core](src/SharpGLTF.Core/README.md)__ provides the core glTF2 schema implementation,
+read & write operations, and a low level API for direct document access.
+- __[SharpGLTF.Toolkit](src/SharpGLTF.Toolkit/README.md)__ provides a high level API over the Core
+package, adding convenient extensions and utilities to help creating meshes, materials and scenes.
 
 #### Appendix
 

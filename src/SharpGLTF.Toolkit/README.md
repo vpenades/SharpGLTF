@@ -2,14 +2,17 @@
 
 #### Features
 
-- [x] Scene Evaluation.
-- [ ] GPU Evaluation.
-- [x] Mesh Building utilities.
-- [x] Animation utilities.
-- [x] Material utilities
-- [x] Skinning utilities
-- [ ] Morphing utilities
-- [ ] [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
+- Scene Evaluation.
+- Mesh Building utilities.
+- Material Building utilities
+- Animation extension helpers.
+- Skinning helpers.
+
+#### Roadmap
+
+- Morphing utilities
+- [Mikktspace](https://github.com/tcoppex/ext-mikktspace) Tangent space calculation. *Help Need*
+- GPU Evaluation.
 
 #### Namespaces
 

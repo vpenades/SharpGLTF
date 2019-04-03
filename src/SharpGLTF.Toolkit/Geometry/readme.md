@@ -2,20 +2,20 @@
 
 #### Overview
 
-Creating meshes from scratch accessing directly with `SharpGLTF.Schema2`
+Creating meshes from scratch accessing directly to `SharpGLTF.Schema2`
 namespace API is quite complicated, since it implies creating Buffers,
 Accessors, Primitives and Meshes very carefully.
 
 It's even more complicated if we want to optimize the meshes by arrange
-the vertices in an interleaved layour, or even allowing multiple meshes
+the vertices in an interleaved layout, or even allowing multiple meshes
 to share a Vertex and Index buffer.
 
-As an alternative to filling meshes directly into the glTF schema,
+As an alternative to creating meshes directly into a glTF document,
 SharpGLTF Toolkit provides a MeshBuilder class to simplify mesh creation.
 
 #### Implementation
 
-The most useful class for mesh creation is `class MeshBuilder<TvP, TvM, TvS>`
+The most useful class for mesh creation is `MeshBuilder<TvP, TvM, TvS>`
 where:
 
 - TvP is a Position Vertex Fragment structure.
