@@ -16,7 +16,7 @@ Each channel has a Texture, and a Vector4<X,Y,Z,W> parameter, where every
 element has a different meaning, depending on the kind of channel:
 
 |Channel|Shader Style|X|Y|Z|W|
-|-|
+|-|-|-|-|-|-|
 |Normal|All|Scale
 |Occlussion|All|Strength
 |Emissive|All|Red|Green|Blue

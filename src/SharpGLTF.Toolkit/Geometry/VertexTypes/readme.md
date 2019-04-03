@@ -16,7 +16,7 @@ a full vertex in a vertex buffer.
 The table below shows the possible combinations:
 
 |Position|Material|Skinning _(maxBones×weights)_|
-|-|
+|-|-|-|
 |Position|Empty|Empty|
 |Position Normal|Color0|256 ×4
 |Position Normal Tangent|Texture0|256 ×8
