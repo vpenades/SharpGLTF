@@ -16,6 +16,13 @@ The aim of this framework is:
 
 The current status of the library is preview alpha, but, for some use cases it is already usable.
 
+#### Nuget Packages
+
+- [SharpGLTF.Core](https://www.nuget.org/packages/SharpGLTF.Core)
+- [SharpGLTF.Toolkit](https://www.nuget.org/packages/SharpGLTF.Toolkit)
+
+Notice that SharpGLTF.1.0.0-Alpha4 has been deprecated.
+
 #### Quickstart
 
 A simple example of loading a glTF file and saving it as GLB:
