@@ -12,50 +12,50 @@ namespace SharpGLTF.Schema2
     {
         #region meshes
 
-        public static Mesh CreateMesh<TvP, TvM, JvS>(this ModelRoot root, Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, JvS> meshBuilder)
+        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS> meshBuilder)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             return root.CreateMeshes(meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TvP, TvM, JvS>(this ModelRoot root, Geometry.MeshBuilder<Material, TvP, TvM, JvS> meshBuilder)
+        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, Geometry.MeshBuilder<Material, TvP, TvM, TvS> meshBuilder)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             return root.CreateMeshes(meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TMaterial, TvP, TvM, JvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.MeshBuilder<TMaterial, TvP, TvM, JvS> meshBuilder)
+        public static Mesh CreateMesh<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS> meshBuilder)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             return root.CreateMeshes(materialEvaluator, meshBuilder).First();
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, JvS>(this ModelRoot root, params Geometry.MeshBuilder<Material, TvP, TvM, JvS>[] meshBuilders)
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params Geometry.MeshBuilder<Material, TvP, TvM, TvS>[] meshBuilders)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             return root.CreateMeshes(m => m, meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, JvS>(this ModelRoot root, params Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, JvS>[] meshBuilders)
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS>[] meshBuilders)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             return root.CreateMeshes(mb => root.CreateMaterial(mb), meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, JvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.MeshBuilder<TMaterial, TvP, TvM, JvS>[] meshBuilders)
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS>[] meshBuilders)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             // create a new material for every unique material in the mesh builders.
             var mapMaterials = meshBuilders
@@ -277,20 +277,20 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static IEnumerable<((TvP, TvM, JvS), (TvP, TvM, JvS), (TvP, TvM, JvS), Material)> Triangulate<TvP, TvM, JvS>(this Mesh mesh, Matrix4x4 xform)
+        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Mesh mesh, Matrix4x4 xform)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             var normals = mesh.GetComputedNormals();
 
-            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM, JvS>(xform, normals));
+            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM, TvS>(xform, normals));
         }
 
-        public static IEnumerable<((TvP, TvM, JvS), (TvP, TvM, JvS), (TvP, TvM, JvS), Material)> Triangulate<TvP, TvM, JvS>(this MeshPrimitive prim, Matrix4x4 xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
+        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this MeshPrimitive prim, Matrix4x4 xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             var vertices = prim.GetVertexColumns();
             if (vertices.Normals == null && defaultNormals != null) vertices.SetNormals(defaultNormals);
@@ -311,9 +311,9 @@ namespace SharpGLTF.Schema2
                 var bm = vertices.GetMaterialFragment<TvM>(t.Item2);
                 var cm = vertices.GetMaterialFragment<TvM>(t.Item3);
 
-                var aj = vertices.GetJointsFragment<JvS>(t.Item1);
-                var bj = vertices.GetJointsFragment<JvS>(t.Item2);
-                var cj = vertices.GetJointsFragment<JvS>(t.Item3);
+                var aj = vertices.GetSkinningFragment<TvS>(t.Item1);
+                var bj = vertices.GetSkinningFragment<TvS>(t.Item2);
+                var cj = vertices.GetSkinningFragment<TvS>(t.Item3);
 
                 yield return ((ap, am, aj), (bp, bm, bj), (cp, cm, cj), prim.Material);
             }
@@ -391,10 +391,10 @@ namespace SharpGLTF.Schema2
             return posnrm;
         }
 
-        public static void AddMesh<TMaterial, TvP, TvM, JvS>(this Geometry.MeshBuilder<TMaterial, TvP, TvM, JvS> meshBuilder, Mesh srcMesh, Matrix4x4 xform, Func<Material, TMaterial> materialFunc)
+        public static void AddMesh<TMaterial, TvP, TvM, TvS>(this Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS> meshBuilder, Mesh srcMesh, Matrix4x4 xform, Func<Material, TMaterial> materialFunc)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             var normals = srcMesh.GetComputedNormals();
 
@@ -402,7 +402,7 @@ namespace SharpGLTF.Schema2
             {
                 var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
 
-                foreach (var tri in srcPrim.Triangulate<TvP, TvM, JvS>(xform, normals))
+                foreach (var tri in srcPrim.Triangulate<TvP, TvM, TvS>(xform, normals))
                 {
                     dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
                 }

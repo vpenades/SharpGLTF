@@ -5,10 +5,23 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    using JOINTWEIGHT = KeyValuePair<int, float>;
+
     public interface IVertexSkinning
     {
         void SetJoints(int jointSet, Vector4 joints, Vector4 weights);
 
+        int MaxJoints { get; }
+
+        JOINTWEIGHT GetJoint(int index);
+
+        void SetJoint(int index, JOINTWEIGHT jw);
+
+        void AssignFrom(IVertexSkinning vertex);
+
+        // TODO: validation must ensure that:
+        // - there's some positive weight
+        // - every joint is unique
         void Validate();
     }
 
@@ -41,6 +54,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
 
+        public int MaxJoints => 4;
+
         #endregion
 
         #region API
@@ -50,12 +65,47 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (jointSet == 0) { this.Joints = joints; this.Weights = weights; }
         }
 
+        public void AssignFrom(IVertexSkinning vertex)
+        {
+            var c = Math.Min(this.MaxJoints, vertex.MaxJoints);
+
+            for (int i = 0; i < c; ++i)
+            {
+                var jw = vertex.GetJoint(i);
+                this.SetJoint(i, jw);
+            }
+        }
+
         public void Validate()
         {
             if (!Joints._IsReal()) throw new NotFiniteNumberException(nameof(Joints));
             if (!Joints.IsRound() || !Joints.IsInRange(Vector4.Zero, new Vector4(255))) throw new IndexOutOfRangeException(nameof(Joints));
 
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
+        }
+
+        public JOINTWEIGHT GetJoint(int index)
+        {
+            switch (index)
+            {
+                case 0: return new JOINTWEIGHT((int)this.Joints.X, this.Weights.X);
+                case 1: return new JOINTWEIGHT((int)this.Joints.Y, this.Weights.Y);
+                case 2: return new JOINTWEIGHT((int)this.Joints.Z, this.Weights.Z);
+                case 3: return new JOINTWEIGHT((int)this.Joints.W, this.Weights.W);
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void SetJoint(int index, JOINTWEIGHT jw)
+        {
+            switch (index)
+            {
+                case 0: { this.Joints.X = jw.Key; this.Weights.X = jw.Value; return; }
+                case 1: { this.Joints.Y = jw.Key; this.Weights.Y = jw.Value; return; }
+                case 2: { this.Joints.Z = jw.Key; this.Weights.Z = jw.Value; return; }
+                case 3: { this.Joints.W = jw.Key; this.Weights.W = jw.Value; return; }
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
         }
 
         #endregion
@@ -90,6 +140,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
 
+        public int MaxJoints => 4;
+
         #endregion
 
         #region API
@@ -105,6 +157,35 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Joints.IsRound() || !Joints.IsInRange(Vector4.Zero, new Vector4(65535))) throw new IndexOutOfRangeException(nameof(Joints));
 
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
+        }
+
+        public JOINTWEIGHT GetJoint(int index)
+        {
+            switch (index)
+            {
+                case 0: return new JOINTWEIGHT((int)this.Joints.X, this.Weights.X);
+                case 1: return new JOINTWEIGHT((int)this.Joints.Y, this.Weights.Y);
+                case 2: return new JOINTWEIGHT((int)this.Joints.Z, this.Weights.Z);
+                case 3: return new JOINTWEIGHT((int)this.Joints.W, this.Weights.W);
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void SetJoint(int index, JOINTWEIGHT jw)
+        {
+            switch (index)
+            {
+                case 0: { this.Joints.X = jw.Key; this.Weights.X = jw.Value; return; }
+                case 1: { this.Joints.Y = jw.Key; this.Weights.Y = jw.Value; return; }
+                case 2: { this.Joints.Z = jw.Key; this.Weights.Z = jw.Value; return; }
+                case 3: { this.Joints.W = jw.Key; this.Weights.W = jw.Value; return; }
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void AssignFrom(IVertexSkinning vertex)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -149,6 +230,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
+        public int MaxJoints => 8;
+
         #endregion
 
         #region API
@@ -169,6 +252,43 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
+        }
+
+        public JOINTWEIGHT GetJoint(int index)
+        {
+            switch (index)
+            {
+                case 0: return new JOINTWEIGHT((int)this.Joints0.X, this.Weights0.X);
+                case 1: return new JOINTWEIGHT((int)this.Joints0.Y, this.Weights0.Y);
+                case 2: return new JOINTWEIGHT((int)this.Joints0.Z, this.Weights0.Z);
+                case 3: return new JOINTWEIGHT((int)this.Joints0.W, this.Weights0.W);
+                case 4: return new JOINTWEIGHT((int)this.Joints1.X, this.Weights1.X);
+                case 5: return new JOINTWEIGHT((int)this.Joints1.Y, this.Weights1.Y);
+                case 6: return new JOINTWEIGHT((int)this.Joints1.Z, this.Weights1.Z);
+                case 7: return new JOINTWEIGHT((int)this.Joints1.W, this.Weights1.W);
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void SetJoint(int index, JOINTWEIGHT jw)
+        {
+            switch (index)
+            {
+                case 0: { this.Joints0.X = jw.Key; this.Weights0.X = jw.Value; return; }
+                case 1: { this.Joints0.Y = jw.Key; this.Weights0.Y = jw.Value; return; }
+                case 2: { this.Joints0.Z = jw.Key; this.Weights0.Z = jw.Value; return; }
+                case 3: { this.Joints0.W = jw.Key; this.Weights0.W = jw.Value; return; }
+                case 4: { this.Joints1.X = jw.Key; this.Weights1.X = jw.Value; return; }
+                case 5: { this.Joints1.Y = jw.Key; this.Weights1.Y = jw.Value; return; }
+                case 6: { this.Joints1.Z = jw.Key; this.Weights1.Z = jw.Value; return; }
+                case 7: { this.Joints1.W = jw.Key; this.Weights1.W = jw.Value; return; }
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void AssignFrom(IVertexSkinning vertex)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -213,6 +333,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
+        public int MaxJoints => 8;
+
         #endregion
 
         #region API
@@ -233,6 +355,43 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
+        }
+
+        public JOINTWEIGHT GetJoint(int index)
+        {
+            switch (index)
+            {
+                case 0: return new JOINTWEIGHT((int)this.Joints0.X, this.Weights0.X);
+                case 1: return new JOINTWEIGHT((int)this.Joints0.Y, this.Weights0.Y);
+                case 2: return new JOINTWEIGHT((int)this.Joints0.Z, this.Weights0.Z);
+                case 3: return new JOINTWEIGHT((int)this.Joints0.W, this.Weights0.W);
+                case 4: return new JOINTWEIGHT((int)this.Joints1.X, this.Weights1.X);
+                case 5: return new JOINTWEIGHT((int)this.Joints1.Y, this.Weights1.Y);
+                case 6: return new JOINTWEIGHT((int)this.Joints1.Z, this.Weights1.Z);
+                case 7: return new JOINTWEIGHT((int)this.Joints1.W, this.Weights1.W);
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void SetJoint(int index, JOINTWEIGHT jw)
+        {
+            switch (index)
+            {
+                case 0: { this.Joints0.X = jw.Key; this.Weights0.X = jw.Value; return; }
+                case 1: { this.Joints0.Y = jw.Key; this.Weights0.Y = jw.Value; return; }
+                case 2: { this.Joints0.Z = jw.Key; this.Weights0.Z = jw.Value; return; }
+                case 3: { this.Joints0.W = jw.Key; this.Weights0.W = jw.Value; return; }
+                case 4: { this.Joints1.X = jw.Key; this.Weights1.X = jw.Value; return; }
+                case 5: { this.Joints1.Y = jw.Key; this.Weights1.Y = jw.Value; return; }
+                case 6: { this.Joints1.Z = jw.Key; this.Weights1.Z = jw.Value; return; }
+                case 7: { this.Joints1.W = jw.Key; this.Weights1.W = jw.Value; return; }
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        public void AssignFrom(IVertexSkinning vertex)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

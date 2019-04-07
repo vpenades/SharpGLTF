@@ -67,10 +67,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             return cctt;
         }
 
-        public JvS GetJointsFragment<JvS>(int index)
-            where JvS : struct, IVertexSkinning
+        public TvS GetSkinningFragment<TvS>(int index)
+            where TvS : struct, IVertexSkinning
         {
-            var jjjj = default(JvS);
+            var jjjj = default(TvS);
 
             if (Joints0 != null && Weights0 != null) jjjj.SetJoints(0, Joints0[index], Weights0[index]);
             if (Joints1 != null && Weights1 != null) jjjj.SetJoints(1, Joints1[index], Weights1[index]);

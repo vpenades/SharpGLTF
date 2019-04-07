@@ -8,7 +8,7 @@ namespace SharpGLTF.Geometry
     using Schema2;
 
     /// <summary>
-    /// Used internally to convert a <see cref="MeshBuilder{TMaterial, TvP, TvM, JvS}"/>
+    /// Used internally to convert a <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/>
     /// to <see cref="Schema2.Mesh"/>.
     /// </summary>
     /// <typeparam name="TMaterial">A material key to split primitives by material.</typeparam>
@@ -17,19 +17,19 @@ namespace SharpGLTF.Geometry
         #region lifecycle
 
         /// <summary>
-        /// Converts a collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, JvS}"/>
+        /// Converts a collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/>
         /// to a collection of <see cref="PackedMeshBuilder{TMaterial}"/>, trying to use
         /// a single vertex buffer and a single index buffer shared by all meshes.
         /// </summary>
         /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="JvS">The vertex fragment type with Skin Joint Weights.</typeparam>
-        /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, JvS}"/> instances.</param>
+        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> instances.</param>
         /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, JvS>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, JvS>> meshBuilders)
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, TvS>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, TvS>> meshBuilders)
             where TvP : struct, VertexTypes.IVertexPosition
             where TvM : struct, VertexTypes.IVertexMaterial
-            where JvS : struct, VertexTypes.IVertexSkinning
+            where TvS : struct, VertexTypes.IVertexSkinning
         {
             try
             {

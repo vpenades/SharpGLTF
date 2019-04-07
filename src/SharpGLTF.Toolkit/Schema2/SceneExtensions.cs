@@ -87,15 +87,15 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="JvS">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
         /// <param name="scene">A <see cref="Scene"/> instance.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<((TvP, TvM, JvS), (TvP, TvM, JvS), (TvP, TvM, JvS), Material)> Triangulate<TvP, TvM, JvS>(this Scene scene)
+        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Scene scene)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
-            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM, JvS>(true));
+            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM, TvS>(true));
         }
 
         /// <summary>
@@ -104,21 +104,21 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="JvS">The vertex fragment type with Skin Joint Weights.</typeparam>
+        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
         /// <param name="node">A <see cref="Node"/> instance.</param>
         /// <param name="inWorldSpace">A value indicating whether the returned triangles must be in local (false) or world (true) space.</param>
         /// <returns>A collection of triangles in local or world space.</returns>
-        public static IEnumerable<((TvP, TvM, JvS), (TvP, TvM, JvS), (TvP, TvM, JvS), Material)> Triangulate<TvP, TvM, JvS>(this Node node, bool inWorldSpace)
+        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Node node, bool inWorldSpace)
             where TvP : struct, Geometry.VertexTypes.IVertexPosition
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where JvS : struct, Geometry.VertexTypes.IVertexSkinning
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             var mesh = node.Mesh;
-            if (mesh == null) return Enumerable.Empty<((TvP, TvM, JvS), (TvP, TvM, JvS), (TvP, TvM, JvS), Material)>();
+            if (mesh == null) return Enumerable.Empty<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)>();
 
             var xform = inWorldSpace ? node.WorldMatrix : Matrix4x4.Identity;
 
-            return mesh.Triangulate<TvP, TvM, JvS>(xform);
+            return mesh.Triangulate<TvP, TvM, TvS>(xform);
         }
 
         #endregion

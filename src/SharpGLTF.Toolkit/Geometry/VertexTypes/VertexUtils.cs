@@ -9,16 +9,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, JvS>(this IEnumerable<IReadOnlyList<(TvP, TvM, JvS)>> vertexBlocks)
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<(TvP, TvM, TvS)>> vertexBlocks)
             where TvP : struct, IVertexPosition
             where TvM : struct, IVertexMaterial
-            where JvS : struct, IVertexSkinning
+            where TvS : struct, IVertexSkinning
         {
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
             // vertex attributes
-            var attributes = GetVertexAttributes(typeof(TvP), typeof(TvM), typeof(JvS), totalCount);
+            var attributes = GetVertexAttributes(typeof(TvP), typeof(TvM), typeof(TvS), totalCount);
 
             // create master vertex buffer
             int byteStride = attributes[0].ByteStride;
@@ -35,7 +35,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 foreach (var accessor in accessors)
                 {
-                    var columnFunc = GetItemValueFunc<TvP, TvM, JvS>(accessor.Attribute.Name);
+                    var columnFunc = GetItemValueFunc<TvP, TvM, TvS>(accessor.Attribute.Name);
 
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.Fill(block.GetScalarColumn(columnFunc));
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.Fill(block.GetVector2Column(columnFunc));
@@ -139,7 +139,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<(TvP, TvM, JvS), Object> GetItemValueFunc<TvP, TvM, JvS>(string attributeName)
+        private static Func<(TvP, TvM, TvS), Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
         {
             var finfo = GetVertexField(typeof(TvP), attributeName);
             if (finfo != null) return vertex => finfo.GetValue(vertex.Item1);
@@ -147,33 +147,33 @@ namespace SharpGLTF.Geometry.VertexTypes
             finfo = GetVertexField(typeof(TvM), attributeName);
             if (finfo != null) return vertex => finfo.GetValue(vertex.Item2);
 
-            finfo = GetVertexField(typeof(JvS), attributeName);
+            finfo = GetVertexField(typeof(TvS), attributeName);
             if (finfo != null) return vertex => finfo.GetValue(vertex.Item3);
 
             throw new NotImplementedException();
         }
 
-        private static Single[] GetScalarColumn<TvP, TvM, JvS>(this IReadOnlyList<(TvP, TvM, JvS)> vertices, Func<(TvP, TvM, JvS), Object> func)
+        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
         {
-            return GetColumn<TvP, TvM, JvS, Single>(vertices, func);
+            return GetColumn<TvP, TvM, TvS, Single>(vertices, func);
         }
 
-        private static Vector2[] GetVector2Column<TvP, TvM, JvS>(this IReadOnlyList<(TvP, TvM, JvS)> vertices, Func<(TvP, TvM, JvS), Object> func)
+        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
         {
-            return GetColumn<TvP, TvM, JvS, Vector2>(vertices, func);
+            return GetColumn<TvP, TvM, TvS, Vector2>(vertices, func);
         }
 
-        private static Vector3[] GetVector3Column<TvP, TvM, JvS>(this IReadOnlyList<(TvP, TvM, JvS)> vertices, Func<(TvP, TvM, JvS), Object> func)
+        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
         {
-            return GetColumn<TvP, TvM, JvS, Vector3>(vertices, func);
+            return GetColumn<TvP, TvM, TvS, Vector3>(vertices, func);
         }
 
-        private static Vector4[] GetVector4Column<TvP, TvM, JvS>(this IReadOnlyList<(TvP, TvM, JvS)> vertices, Func<(TvP, TvM, JvS), Object> func)
+        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
         {
-            return GetColumn<TvP, TvM, JvS, Vector4>(vertices, func);
+            return GetColumn<TvP, TvM, TvS, Vector4>(vertices, func);
         }
 
-        private static TColumn[] GetColumn<TvP, TvM, JvS, TColumn>(this IReadOnlyList<(TvP, TvM, JvS)> vertices, Func<(TvP, TvM, JvS), Object> func)
+        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
         {
             var dst = new TColumn[vertices.Count];
 
