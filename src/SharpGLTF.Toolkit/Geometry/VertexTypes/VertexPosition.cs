@@ -7,19 +7,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexPosition
     {
-        void SetPosition(Vector3 position);
-        void SetNormal(Vector3 normal);
-        void SetTangent(Vector4 tangent);
+        void Validate();
 
         Vector3 GetPosition();
         Boolean TryGetNormal(out Vector3 normal);
         Boolean TryGetTangent(out Vector4 tangent);
 
-        void AssignFrom(IVertexPosition vertex);
+        void SetPosition(Vector3 position);
+        void SetNormal(Vector3 normal);
+        void SetTangent(Vector4 tangent);
 
         void Transform(Matrix4x4 xform);
-
-        void Validate();
     }
 
     /// <summary>
@@ -27,6 +25,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexPosition : IVertexPosition
     {
+        #region constructors
+
         public VertexPosition(Vector3 position)
         {
             this.Position = position;
@@ -42,8 +42,16 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexPosition(position);
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("POSITION")]
         public Vector3 Position;
+
+        #endregion
+
+        #region API
 
         void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
 
@@ -57,8 +65,6 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void AssignFrom(IVertexPosition vertex) { this.Position = vertex.GetPosition(); }
-
         public void Transform(Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
@@ -68,6 +74,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -75,6 +83,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexPositionNormal : IVertexPosition
     {
+        #region constructors
+
         public VertexPositionNormal(Vector3 p, Vector3 n)
         {
             Position = p;
@@ -87,11 +97,19 @@ namespace SharpGLTF.Geometry.VertexTypes
             Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
         }
 
+        #endregion
+
+        #region data
+
         [VertexAttribute("POSITION")]
         public Vector3 Position;
 
         [VertexAttribute("NORMAL")]
         public Vector3 Normal;
+
+        #endregion
+
+        #region API
 
         void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
 
@@ -105,12 +123,6 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void AssignFrom(IVertexPosition vertex)
-        {
-            this.Position = vertex.GetPosition();
-            if (vertex.TryGetNormal(out Vector3 nrm)) this.Normal = nrm;
-        }
-
         public void Transform(Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
@@ -122,6 +134,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
             if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
         }
+
+        #endregion
     }
 
     /// <summary>
@@ -129,12 +143,18 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// </summary>
     public struct VertexPositionNormalTangent : IVertexPosition
     {
+        #region constructors
+
         public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
         {
             Position = p;
             Normal = Vector3.Normalize(n);
             Tangent = t;
         }
+
+        #endregion
+
+        #region data
 
         [VertexAttribute("POSITION")]
         public Vector3 Position;
@@ -144,6 +164,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
+
+        #endregion
+
+        #region API
 
         void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
 
@@ -156,13 +180,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
-
-        public void AssignFrom(IVertexPosition vertex)
-        {
-            this.Position = vertex.GetPosition();
-            if (vertex.TryGetNormal(out Vector3 nrm)) this.Normal = nrm;
-            if (vertex.TryGetTangent(out Vector4 tgt)) this.Tangent = tgt;
-        }
 
         public void Transform(Matrix4x4 xform)
         {
@@ -180,5 +197,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
             if (!Tangent._IsReal()) throw new NotFiniteNumberException(nameof(Tangent));
         }
+
+        #endregion
     }
 }

@@ -7,6 +7,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     using Memory;
 
+    using JOINTWEIGHT = KeyValuePair<int, float>;
+
     static class VertexUtils
     {
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<(TvP, TvM, TvS)>> vertexBlocks)
@@ -182,6 +184,100 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var v = vertices[i];
 
                 dst[i] = (TColumn)func(v);
+            }
+
+            return dst;
+        }
+
+        public static TvP CloneAs<TvP>(this IVertexPosition src)
+            where TvP : struct, IVertexPosition
+        {
+            if (src.GetType() == typeof(TvP)) return (TvP)src;
+
+            var dst = default(TvP);
+
+            dst.SetPosition(src.GetPosition());
+            if (src.TryGetNormal(out Vector3 nrm)) dst.SetNormal(nrm);
+            if (src.TryGetTangent(out Vector4 tgt)) dst.SetTangent(tgt);
+
+            return dst;
+        }
+
+        public static TvM CloneAs<TvM>(this IVertexMaterial src)
+            where TvM : struct, IVertexMaterial
+        {
+            if (src.GetType() == typeof(TvM)) return (TvM)src;
+
+            var dst = default(TvM);
+
+            int i = 0;
+
+            while (i < Math.Min(src.MaxColors, dst.MaxColors))
+            {
+                dst.SetColor(i, src.GetColor(i));
+                ++i;
+            }
+
+            while (i < dst.MaxColors)
+            {
+                dst.SetColor(i, Vector4.One);
+                ++i;
+            }
+
+            i = 0;
+
+            while (i < Math.Min(src.MaxTextures, dst.MaxTextures))
+            {
+                dst.SetTexCoord(i, src.GetTexCoord(i));
+                ++i;
+            }
+
+            while (i < dst.MaxColors)
+            {
+                dst.SetTexCoord(i, Vector2.Zero);
+                ++i;
+            }
+
+            return dst;
+        }
+
+        public static unsafe TvS CloneAs<TvS>(this IVertexSkinning src)
+            where TvS : struct, IVertexSkinning
+        {
+            if (src.GetType() == typeof(TvS)) return (TvS)src;
+
+            // create copy
+
+            var dst = default(TvS);
+
+            if (dst.MaxJoints >= src.MaxJoints)
+            {
+                for (int i = 0; i < src.MaxJoints; ++i)
+                {
+                    var jw = src.GetJoint(i);
+
+                    dst.SetJoint(i, jw.Joint, jw.Weight);
+                }
+
+                return dst;
+            }
+
+            // if there's more source joints than destination joints, transfer with scale
+
+            Span<JointWeightPair> srcjw = stackalloc JointWeightPair[src.MaxJoints];
+
+            for (int i = 0; i < src.MaxJoints; ++i)
+            {
+                srcjw[i] = src.GetJoint(i);
+            }
+
+            JointWeightPair.InPlaceReverseBubbleSort(srcjw);
+
+            var w = JointWeightPair.CalculateScaleFor(srcjw, dst.MaxJoints);
+
+            for (int i = 0; i < dst.MaxJoints; ++i)
+            {
+                dst.SetJoint(i, srcjw[i].Joint, srcjw[i].Weight * w);
             }
 
             return dst;

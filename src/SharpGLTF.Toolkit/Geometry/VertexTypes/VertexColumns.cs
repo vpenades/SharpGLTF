@@ -58,11 +58,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var cctt = default(TvM);
 
-            if (Colors0 != null) cctt.SetColor(0, Colors0[index]);
-            if (Colors1 != null) cctt.SetColor(1, Colors1[index]);
+            if (Colors0 != null && cctt.MaxColors > 0) cctt.SetColor(0, Colors0[index]);
+            if (Colors1 != null && cctt.MaxColors > 1) cctt.SetColor(1, Colors1[index]);
 
-            if (Textures0 != null) cctt.SetTexCoord(0, Textures0[index]);
-            if (Textures1 != null) cctt.SetTexCoord(1, Textures1[index]);
+            if (Textures0 != null && cctt.MaxTextures > 0) cctt.SetTexCoord(0, Textures0[index]);
+            if (Textures1 != null && cctt.MaxTextures > 1) cctt.SetTexCoord(1, Textures1[index]);
 
             return cctt;
         }
@@ -72,8 +72,27 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var jjjj = default(TvS);
 
-            if (Joints0 != null && Weights0 != null) jjjj.SetJoints(0, Joints0[index], Weights0[index]);
-            if (Joints1 != null && Weights1 != null) jjjj.SetJoints(1, Joints1[index], Weights1[index]);
+            if (Joints0 != null && Weights0 != null)
+            {
+                var j = Joints0[index];
+                var w = Weights0[index];
+
+                jjjj.SetJoint(0, (int)j.X, w.X);
+                jjjj.SetJoint(1, (int)j.Y, w.Y);
+                jjjj.SetJoint(2, (int)j.Z, w.Z);
+                jjjj.SetJoint(3, (int)j.W, w.W);
+            }
+
+            if (Joints1 != null && Weights1 != null)
+            {
+                var j = Joints1[index];
+                var w = Weights1[index];
+
+                jjjj.SetJoint(4, (int)j.X, w.X);
+                jjjj.SetJoint(5, (int)j.Y, w.Y);
+                jjjj.SetJoint(6, (int)j.Z, w.Z);
+                jjjj.SetJoint(7, (int)j.W, w.W);
+            }
 
             return jjjj;
         }

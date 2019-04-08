@@ -16,6 +16,7 @@
     <LangVersion>latest</LangVersion>
     <DebugSymbols>true</DebugSymbols>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,7 +47,7 @@
     <CodeAnalysisRuleSet>..\..\SharpGLTF.ruleset</CodeAnalysisRuleSet>    
     <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <AdditionalFiles Include="..\..\stylecop.json" />
   </ItemGroup>

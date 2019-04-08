@@ -7,20 +7,24 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     public struct VertexEmpty : IVertexMaterial, IVertexSkinning
     {
+        public void Validate() { }
+
         public int MaxJoints => 0;
+
+        public int MaxColors => 0;
+
+        public int MaxTextures => 0;
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
-        void IVertexSkinning.SetJoints(int jointSet, Vector4 joints, Vector4 weights) { }
+        Vector4 IVertexMaterial.GetColor(int index) { throw new NotSupportedException(); }
 
-        public void Validate() { }
+        Vector2 IVertexMaterial.GetTexCoord(int index) { throw new NotSupportedException(); }
 
-        public KeyValuePair<int, float> GetJoint(int index) { return default; }
+        void IVertexSkinning.SetJoint(int index, int joint, float weight) { }
 
-        public void SetJoint(int index, KeyValuePair<int, float> jw) { }
-
-        public void AssignFrom(IVertexSkinning vertex) { }
+        JointWeightPair IVertexSkinning.GetJoint(int index) { throw new NotSupportedException(); }
     }
 }

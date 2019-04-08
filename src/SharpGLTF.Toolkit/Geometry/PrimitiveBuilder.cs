@@ -238,31 +238,18 @@ namespace SharpGLTF.Geometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning
         {
-            var p1 = default(TvP);
-            var p2 = default(TvP);
-            var p3 = default(TvP);
 
-            var m1 = default(TvM);
-            var m2 = default(TvM);
-            var m3 = default(TvM);
+            var p1 = a.Item1.CloneAs<TvP>();
+            var p2 = b.Item1.CloneAs<TvP>();
+            var p3 = c.Item1.CloneAs<TvP>();
 
-            var s1 = default(TvS);
-            var s2 = default(TvS);
-            var s3 = default(TvS);
+            var m1 = a.Item2.CloneAs<TvM>();
+            var m2 = b.Item2.CloneAs<TvM>();
+            var m3 = c.Item2.CloneAs<TvM>();
 
-            p1.AssignFrom(a.Item1);
-            p2.AssignFrom(b.Item1);
-            p3.AssignFrom(c.Item1);
-
-            /*
-            m1.AssignFrom(a.Item2);
-            m2.AssignFrom(b.Item2);
-            m3.AssignFrom(c.Item2);
-
-            s1.AssignFrom(a.Item3);
-            s2.AssignFrom(b.Item3);
-            s3.AssignFrom(c.Item3);
-            */
+            var s1 = a.Item3.CloneAs<TvS>();
+            var s2 = b.Item3.CloneAs<TvS>();
+            var s3 = c.Item3.CloneAs<TvS>();
 
             AddTriangle((p1, m1, s1), (p2, m2, s2), (p3, m3, s3));
         }
@@ -270,31 +257,19 @@ namespace SharpGLTF.Geometry
         public TvPP GetVertexPosition<TvPP>(int index)
             where TvPP : struct, IVertexPosition
         {
-            var p = default(TvPP);
-
-            p.AssignFrom(_Vertices[index].Item1);
-
-            return p;
+            return _Vertices[index].Item1.CloneAs<TvPP>();
         }
 
         public TvMM GetVertexMaterial<TvMM>(int index)
             where TvMM : struct, IVertexMaterial
         {
-            var m = default(TvMM);
-
-            // m.AssignFrom(_Vertices[index].Item2);
-
-            return m;
+            return _Vertices[index].Item2.CloneAs<TvMM>();
         }
 
         public TvSS GetVertexSkinning<TvSS>(int index)
             where TvSS : struct, IVertexSkinning
         {
-            var s = default(TvSS);
-
-            // s.AssignFrom(_Vertices[index].Item3);
-
-            return s;
+            return _Vertices[index].Item3.CloneAs<TvSS>();
         }
 
         #endregion
