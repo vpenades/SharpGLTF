@@ -159,6 +159,9 @@ namespace SharpGLTF.Schema2
 
         public static Material CreateMaterial(this ModelRoot root, Materials.MaterialBuilder mb)
         {
+            Guard.NotNull(root, nameof(root));
+            Guard.NotNull(mb, nameof(mb));
+
             var m = root.CreateMaterial(mb.Name);
 
             mb.CopyTo(m);
@@ -172,6 +175,9 @@ namespace SharpGLTF.Schema2
 
         public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial)
         {
+            Guard.NotNull(srcMaterial, nameof(srcMaterial));
+            Guard.NotNull(dstMaterial, nameof(dstMaterial));
+
             dstMaterial.Name = srcMaterial.Name;
             dstMaterial.AlphaMode = srcMaterial.Alpha;
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
@@ -205,6 +211,9 @@ namespace SharpGLTF.Schema2
 
         public static void CopyChannelsTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial, params string[] channelKeys)
         {
+            Guard.NotNull(srcMaterial, nameof(srcMaterial));
+            Guard.NotNull(dstMaterial, nameof(dstMaterial));
+
             foreach (var k in channelKeys)
             {
                 var src = srcMaterial.FindChannel(k);
@@ -218,6 +227,9 @@ namespace SharpGLTF.Schema2
 
         public static void CopyTo(this MaterialChannel srcChannel, Materials.MaterialChannelBuilder dstChannel)
         {
+            Guard.NotNull(srcChannel, nameof(srcChannel));
+            Guard.NotNull(dstChannel, nameof(dstChannel));
+
             dstChannel.Parameter = srcChannel.Parameter;
 
             if (srcChannel.Texture == null) { return; }
@@ -241,7 +253,10 @@ namespace SharpGLTF.Schema2
 
         public static void CopyTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial)
         {
-            // dstMaterial.Name = srcMaterial.Name;
+            Guard.NotNull(srcMaterial, nameof(srcMaterial));
+            Guard.NotNull(dstMaterial, nameof(dstMaterial));
+
+            srcMaterial.ValidateForSchema2();
 
             dstMaterial.Alpha = srcMaterial.AlphaMode;
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
@@ -280,6 +295,9 @@ namespace SharpGLTF.Schema2
 
         public static void CopyChannelsTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial, params string[] channelKeys)
         {
+            Guard.NotNull(srcMaterial, nameof(srcMaterial));
+            Guard.NotNull(dstMaterial, nameof(dstMaterial));
+
             foreach (var k in channelKeys)
             {
                 var src = srcMaterial.GetChannel(k);
@@ -294,7 +312,8 @@ namespace SharpGLTF.Schema2
 
         public static void CopyTo(this Materials.MaterialChannelBuilder srcChannel, MaterialChannel dstChannel)
         {
-            if (srcChannel == null) return;
+            Guard.NotNull(srcChannel, nameof(srcChannel));
+            Guard.NotNull(dstChannel, nameof(dstChannel));
 
             dstChannel.Parameter = srcChannel.Parameter;
 

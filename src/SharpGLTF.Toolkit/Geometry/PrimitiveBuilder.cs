@@ -70,6 +70,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
+    [System.Diagnostics.DebuggerDisplay("Primitive {_Material}")]
     public class PrimitiveBuilder<TMaterial, TvP, TvM, TvS> : IPrimitiveBuilder, IPrimitive<TMaterial>
         where TvP : struct, IVertexPosition
         where TvM : struct, IVertexMaterial
@@ -128,6 +129,16 @@ namespace SharpGLTF.Geometry
 
         #region API
 
+        /// <summary>
+        /// Adds or reuses a vertex.
+        /// </summary>
+        /// <param name="vertex">
+        /// A vertex formed by
+        /// <typeparamref name="TvP"/>,
+        /// <typeparamref name="TvM"/> and
+        /// <typeparamref name="TvS"/> fragments.
+        /// </param>
+        /// <returns>The index of the vertex.</returns>
         public int UseVertex((TvP, TvM, TvS) vertex)
         {
             if (_Scrict)

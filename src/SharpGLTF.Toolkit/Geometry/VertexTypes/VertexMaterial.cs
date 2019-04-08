@@ -22,6 +22,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Color}")]
     public struct VertexColor1 : IVertexMaterial
     {
         #region constructors
@@ -78,6 +79,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Texture Coordinate.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{TexCoord}")]
     public struct VertexTexture1 : IVertexMaterial
     {
         #region constructors
@@ -133,6 +135,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Color} {TexCoord}")]
     public struct VertexColor1Texture1 : IVertexMaterial
     {
         #region constructors
@@ -191,6 +194,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Color} {TexCoord0} {TexCoord1}")]
     public struct VertexColor1Texture2 : IVertexMaterial
     {
         #region constructors
@@ -262,6 +266,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Color0} {Color1} {TexCoord0} {TexCoord1}")]
     public struct VertexColor2Texture2 : IVertexMaterial
     {
         #region constructors

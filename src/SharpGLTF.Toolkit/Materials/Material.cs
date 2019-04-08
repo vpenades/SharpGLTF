@@ -60,15 +60,38 @@ namespace SharpGLTF.Materials
 
         #region API
 
-        public MaterialBuilder WithUnlitShader() { return WithShade(SHADERUNLIT); }
+        /// <summary>
+        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERUNLIT"/>.
+        /// </summary>
+        /// <returns>This <see cref="MaterialBuilder"/>.</returns>
+        public MaterialBuilder WithUnlitShader() { return WithShader(SHADERUNLIT); }
 
-        public MaterialBuilder WithMetallicRoughnessShader() { return WithShade(SHADERPBRMETALLICROUGHNESS); }
+        /// <summary>
+        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERPBRMETALLICROUGHNESS"/>.
+        /// </summary>
+        /// <returns>This <see cref="MaterialBuilder"/>.</returns>
+        public MaterialBuilder WithMetallicRoughnessShader() { return WithShader(SHADERPBRMETALLICROUGHNESS); }
 
-        public MaterialBuilder WithSpecularGlossinessShader() { return WithShade(SHADERPBRSPECULARGLOSSINESS); }
+        /// <summary>
+        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERPBRSPECULARGLOSSINESS"/>.
+        /// </summary>
+        /// <returns>This <see cref="MaterialBuilder"/>.</returns>
+        public MaterialBuilder WithSpecularGlossinessShader() { return WithShader(SHADERPBRSPECULARGLOSSINESS); }
 
-        public MaterialBuilder WithShade(string shader)
+        /// <summary>
+        /// Sets <see cref="MaterialBuilder.ShaderStyle"/>.
+        /// </summary>
+        /// <param name="shader">
+        /// A valid shader style, which can be one of these values:
+        /// <see cref="SHADERUNLIT"/>,
+        /// <see cref="SHADERPBRMETALLICROUGHNESS"/>,
+        /// <see cref="SHADERPBRSPECULARGLOSSINESS"/>
+        /// </param>
+        /// <returns>This <see cref="MaterialBuilder"/>.</returns>
+        public MaterialBuilder WithShader(string shader)
         {
             Guard.NotNullOrEmpty(shader, nameof(shader));
+            Guard.IsTrue(shader == SHADERUNLIT || shader == SHADERPBRMETALLICROUGHNESS || shader == SHADERPBRSPECULARGLOSSINESS, nameof(shader));
             ShaderStyle = shader;
             return this;
         }
@@ -95,7 +118,6 @@ namespace SharpGLTF.Materials
         public MaterialChannelBuilder UseChannel(string channelKey)
         {
             var ch = GetChannel(channelKey);
-
             if (ch != null) return ch;
 
             ch = new MaterialChannelBuilder(this, channelKey);
@@ -147,11 +169,64 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        /// <summary>
+        /// Defines a fallback <see cref="MaterialBuilder"/> instance for the current <see cref="MaterialBuilder"/>.
+        /// </summary>
+        /// <param name="fallback">
+        /// A <see cref="MaterialBuilder"/> instance
+        /// that must have a <see cref="MaterialBuilder.ShaderStyle"/>
+        /// of type <see cref="SHADERPBRMETALLICROUGHNESS"/></param>
+        /// <returns>This <see cref="MaterialBuilder"/>.</returns>
         public MaterialBuilder WithFallback(MaterialBuilder fallback)
         {
             this.CompatibilityFallback = fallback;
             return this;
         }
+
+        internal void ValidateForSchema2()
+        {
+            if (this.ShaderStyle == SHADERPBRSPECULARGLOSSINESS)
+            {
+                if (this.CompatibilityFallback != null)
+                {
+                    Guard.MustBeNull(this.CompatibilityFallback.CompatibilityFallback, nameof(this.CompatibilityFallback.CompatibilityFallback));
+
+                    Guard.IsTrue(this.CompatibilityFallback.ShaderStyle == SHADERPBRMETALLICROUGHNESS, nameof(CompatibilityFallback.ShaderStyle));
+                }
+            }
+            else
+            {
+                Guard.MustBeNull(this.CompatibilityFallback, nameof(CompatibilityFallback));
+            }
+        }
+
+        public MaterialBuilder WithNormal(string imageFilePath, float scale = 1)
+        {
+            WithChannelImage("Normal", imageFilePath);
+            WithChannelParam("Normal", new Vector4(scale, 0, 0, 0));
+
+            return this;
+        }
+
+        public MaterialBuilder WithOcclusion(string imageFilePath, float strength = 1)
+        {
+            WithChannelImage("Occlusion", imageFilePath);
+            WithChannelParam("Occlusion", new Vector4(strength, 0, 0, 0));
+
+            return this;
+        }
+
+        public MaterialBuilder WithEmissive(string imageFilePath, Vector3 emissiveFactor)
+        {
+            WithChannelImage("Emissive", imageFilePath);
+            WithChannelParam("Emissive", new Vector4(emissiveFactor, 0));
+
+            return this;
+        }
+
+        public MaterialBuilder WithEmissive(string imageFilePath) { return WithChannelImage("Emissive", imageFilePath); }
+
+        public MaterialBuilder WithEmissive(Vector3 emissiveFactor) { return WithChannelParam("Emissive", new Vector4(emissiveFactor, 0)); }
 
         #endregion
     }

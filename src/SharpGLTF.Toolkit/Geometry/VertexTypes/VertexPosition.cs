@@ -23,6 +23,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Position}")]
     public struct VertexPosition : IVertexPosition
     {
         #region constructors
@@ -81,6 +82,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position and a Normal.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Position} {Normal}")]
     public struct VertexPositionNormal : IVertexPosition
     {
         #region constructors
@@ -141,6 +143,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Position} {Normal} {Tangent}")]
     public struct VertexPositionNormalTangent : IVertexPosition
     {
         #region constructors

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    /// <summary>
+    /// Represents a vertex buffer, where every vertex attribute is represented as a vector column.
+    /// </summary>
     public class VertexColumns
     {
         #region columns

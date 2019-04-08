@@ -28,7 +28,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            var files = TestFiles.GetReferenceModelPaths();
+            var files = TestFiles.GetReferenceModelPaths()
+                .Where(item => item.Contains("\\Positive\\"));
 
             foreach (var f in files)
             {

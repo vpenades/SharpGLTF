@@ -5,6 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    [System.Diagnostics.DebuggerDisplay("Empty")]
     public struct VertexEmpty : IVertexMaterial, IVertexSkinning
     {
         public void Validate() { }

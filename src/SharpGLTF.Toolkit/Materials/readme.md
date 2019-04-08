@@ -27,4 +27,26 @@ element has a different meaning, depending on the kind of channel:
 
 #### Implementation
 
-TODO
+To create new materials, there's two ways of doing it; accessing directly to the glTF
+materials namespace, or using the MaterialBuilder class.
+
+The advantage of MaterialBuilder is that it allows to create stand alone materials
+that can be easily edited and used to create glTF materials at any time.
+
+Creating a standard material can be done like this:
+
+```c#
+var material = new Materials.MaterialBuilder("material1")
+                .WithDoubleSide(true)
+                .WithMetallicRoughnessShader()
+                .WithChannelImage("Normal", "WaterBottle_normal.png")
+                .WithChannelImage("Emissive", "WaterBottle_emissive.png")
+                .WithChannelImage("Occlusion", "WaterBottle_occlusion.png")
+                .WithChannelImage("BaseColor", "WaterBottle_baseColor.png")
+                .WithChannelImage("MetallicRoughness", "WaterBottle_roughnessMetallic.png");
+```
+
+MaterialBuilder also supports a fallback material that will be used in case the main material is not
+supported by the rendering engine. But due to glTF limitations, this feature is restricted only to
+a main material using SpecularGlossiness shader, and the fallback material using MatellicRoughness
+shader.

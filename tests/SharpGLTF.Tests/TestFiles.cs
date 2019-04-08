@@ -30,8 +30,8 @@ namespace SharpGLTF
             
             TestContext.Progress.WriteLine("Downloading reference files... It might take a while, please, wait...");            
 
-            var dstPath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "GeneratedReferenceModels", "v_0_6_0.zip");
-            _GeneratedModelsDir = DownloadUtils.DownloadFile("https://github.com/KhronosGroup/glTF-Asset-Generator/releases/download/v0.6.0/GeneratedAssets-0.6.0.zip", dstPath);
+            var dstPath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "GeneratedReferenceModels", "v_0_6_1.zip");
+            _GeneratedModelsDir = DownloadUtils.DownloadFile("https://github.com/KhronosGroup/glTF-Asset-Generator/releases/download/v0.6.1/GeneratedAssets-0.6.1.zip", dstPath);
             
             TestContext.Progress.WriteLine("Checking out test files... It might take a while, please, wait...");            
 
