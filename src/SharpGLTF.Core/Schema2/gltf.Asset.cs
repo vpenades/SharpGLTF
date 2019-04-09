@@ -23,8 +23,8 @@ namespace SharpGLTF.Schema2
             {
                 _generator = generator,
                 _copyright = copyright,
-                _version = MAXVERSION.ToString(),
-                _minVersion = MINVERSION.ToString()
+                _version = MINVERSION.ToString(),
+                _minVersion = null
             };
         }
 
@@ -46,13 +46,13 @@ namespace SharpGLTF.Schema2
 
         private static readonly Version ZEROVERSION = new Version(0, 0);
         private static readonly Version MINVERSION = new Version(2, 0);
-        private static readonly Version MAXVERSION = new Version(2, 0);
 
         public string Copyright { get => _copyright; set => _copyright = value.AsEmptyNullable(); }
         public string Generator { get => _generator; set => _generator = value.AsEmptyNullable(); }
 
         public Version Version      => Version.TryParse(   _version, out Version ver) ? ver : ZEROVERSION;
-        public Version MinVersion   => Version.TryParse(_minVersion, out Version ver) ? ver : ZEROVERSION;
+
+        public Version MinVersion   => Version.TryParse(_minVersion, out Version ver) ? ver : MINVERSION;
 
         #endregion
 
@@ -77,8 +77,7 @@ namespace SharpGLTF.Schema2
             var curVer = this.Version;
             var minVer = this.MinVersion;
 
-            if (curVer < MINVERSION) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}"));
-            if (curVer > MAXVERSION) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MAXVERSION}"));
+            if (curVer < minVer) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}"));
         }
 
         private string _GetExtraInfo(string key)

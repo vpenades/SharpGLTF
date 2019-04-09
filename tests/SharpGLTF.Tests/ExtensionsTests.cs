@@ -12,6 +12,23 @@ namespace SharpGLTF
     [TestFixture]
     public class ExtensionsTests
     {
+        internal static int _WordPadded(int length)
+        {
+            var padding = (length & 3);
+
+            return length + (padding == 0 ? 0 : 4 - padding);
+        }
+
+        [Test]
+        public void Padding()
+        {
+            Assert.AreEqual(4, _WordPadded(1));
+            Assert.AreEqual(4, _WordPadded(2));
+            Assert.AreEqual(4, _WordPadded(3));
+            Assert.AreEqual(4, _WordPadded(4));
+            Assert.AreEqual(8, _WordPadded(5));
+        }
+
         [Test]
         public void TestAsNullableExtensions()
         {

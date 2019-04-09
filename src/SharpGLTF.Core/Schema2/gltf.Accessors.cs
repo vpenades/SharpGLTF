@@ -290,16 +290,23 @@ namespace SharpGLTF.Schema2
 
         public void UpdateBounds()
         {
+            this._min.Clear();
+            this._max.Clear();
+
+            if (this.Count == 0) return;
+
+            // With the current limitations of the serializer, we can only handle floating point values.
+            if (this.Encoding != EncodingType.FLOAT) return;
+
+            // https://github.com/KhronosGroup/glTF-Validator/issues/79
+
             var dimensions = this._type.DimCount();
 
-            var bounds = new double[dimensions];
-            this._min.Clear();
-            this._min.AddRange(bounds);
-            this._max.Clear();
-            this._max.AddRange(bounds);
-
-            this._min.Fill(double.MaxValue);
-            this._max.Fill(double.MinValue);
+            for (int i = 0; i < dimensions; ++i)
+            {
+                this._min.Add(double.MaxValue);
+                this._max.Add(double.MinValue);
+            }
 
             var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
 

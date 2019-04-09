@@ -93,7 +93,7 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.
         /// </summary>
-        public int PaddedByteLength => (this.Dimensions.DimCount() * this.Encoding.ByteLength()).PaddingSize(4);
+        public int PaddedByteLength => (this.Dimensions.DimCount() * this.Encoding.ByteLength()).WordPadded();
 
         public Boolean IsValidVertexAttribute
         {

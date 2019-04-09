@@ -27,6 +27,13 @@ namespace SharpGLTF
             return rest == 0 ? 0 : mult - rest;
         }
 
+        internal static int WordPadded(this int length)
+        {
+            var padding = (length & 3);
+
+            return length + (padding == 0 ? 0 : 4 - padding);
+        }
+
         internal static bool _IsReal(this float value)
         {
             return !(float.IsNaN(value) | float.IsInfinity(value));
