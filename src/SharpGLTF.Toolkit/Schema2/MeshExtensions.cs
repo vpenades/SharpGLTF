@@ -329,8 +329,8 @@ namespace SharpGLTF.Schema2
             if (vertexAccessors.ContainsKey("NORMAL")) columns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
             if (vertexAccessors.ContainsKey("TANGENT")) columns.Tangents = vertexAccessors["TANGENT"].AsVector4Array();
 
-            if (vertexAccessors.ContainsKey("COLOR_0")) columns.Colors0 = vertexAccessors["COLOR_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("COLOR_1")) columns.Colors1 = vertexAccessors["COLOR_1"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("COLOR_0")) columns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray();
+            if (vertexAccessors.ContainsKey("COLOR_1")) columns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray();
 
             if (vertexAccessors.ContainsKey("TEXCOORD_0")) columns.Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
             if (vertexAccessors.ContainsKey("TEXCOORD_1")) columns.Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();

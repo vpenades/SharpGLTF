@@ -90,7 +90,10 @@ namespace SharpGLTF.Memory
 
         #region API
 
-        public int ByteLength => this.Dimensions.DimCount() * this.Encoding.ByteLength();
+        /// <summary>
+        /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.
+        /// </summary>
+        public int PaddedByteLength => (this.Dimensions.DimCount() * this.Encoding.ByteLength()).PaddingSize(4);
 
         public Boolean IsValidVertexAttribute
         {
@@ -99,8 +102,7 @@ namespace SharpGLTF.Memory
                 if (this.ByteOffset < 0) return false;
                 if (this.ItemsCount < 0) return false;
                 if (this.ByteStride < 0) return false;
-                var blen = this.ByteLength;
-                if (blen == 0 || (blen & 3) != 0) return false;
+                var blen = this.PaddedByteLength;
 
                 if (this.ByteStride > 0 && this.ByteStride < blen) return false;
                 if ((this.ByteStride & 3) != 0) return false;
@@ -137,7 +139,7 @@ namespace SharpGLTF.Memory
                 a.ByteOffset = byteOffset;
                 a.ItemsCount = itemsCount;
 
-                var attributeStride = a.ByteLength;
+                var attributeStride = a.PaddedByteLength;
 
                 byteStride += attributeStride;
                 byteOffset += attributeStride;
@@ -278,6 +280,13 @@ namespace SharpGLTF.Memory
             return new Vector4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
+        public ColorArray AsColorArray()
+        {
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC3 || _Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
+            return new ColorArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Dimensions.DimCount(), _Attribute.Encoding, _Attribute.Normalized);
+        }
+
         public void Fill(IReadOnlyList<Quaternion> values) { values.CopyTo(AsQuaternionArray()); }
 
         public QuaternionArray AsQuaternionArray()
@@ -334,6 +343,16 @@ namespace SharpGLTF.Memory
             Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
             return new SparseArray<Vector4>(bottom.AsVector4Array(), topValues.AsVector4Array(), topKeys);
+        }
+
+        public static IList<Vector4> CreateColorSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        {
+            Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
+            Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
+            Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
+            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
+
+            return new SparseArray<Vector4>(bottom.AsColorArray(), topValues.AsColorArray(), topKeys);
         }
 
         #endregion

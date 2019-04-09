@@ -28,39 +28,49 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            var files = TestFiles.GetReferenceModelPaths()
-                .Where(item => item.Contains("\\Positive\\"));
+            var files = TestFiles.GetReferenceModelPaths();
+
+            bool passed = true;
 
             foreach (var f in files)
             {
-                // var errors = _LoadNumErrorsForModel(f);
-                // if (errors > 0) continue;
-
                 try
                 {
-                    var model = ModelRoot.Load(f);
-                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+                    var model = ModelRoot.Load(f.Item1);
+
+                    if (!f.Item2)
+                    {
+                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should not load!");
+                        passed = false;
+                    }
+                    else
+                    {
+                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");                        
+                    }                    
                 }
-                catch (IO.UnsupportedExtensionException eex)
+                catch (Exception ex)
                 {
-                    TestContext.WriteLine($"{f.ToShortDisplayPath()} ERROR: {eex.Message}");
+                    if (f.Item2)
+                    {
+                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should load!");
+                        TestContext.Error.WriteLine($"   ERROR: {ex.Message}");
+                        passed = false;
+                    }
+                    else
+                    {
+                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");
+                        TestContext.WriteLine($"   Exception: {ex.Message}");
+                    }                    
+                }
+
+                if (f.Item2 && !f.Item1.ToLower().Contains("compatibility"))
+                {
+                    var model = ModelRoot.Load(f.Item1);
+                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Item1), ".obj"));
                 }
             }
-        }        
 
-        private static int _LoadNumErrorsForModel(string gltfPath)
-        {
-            var dir = System.IO.Path.GetDirectoryName(gltfPath);
-            var fn = System.IO.Path.GetFileNameWithoutExtension(gltfPath);
-
-            var jsonPath = System.IO.Path.Combine(dir, "ValidatorResults", System.IO.Path.ChangeExtension(fn, "json"));
-
-            var content = System.IO.File.ReadAllText(jsonPath);
-            var doc = Newtonsoft.Json.Linq.JObject.Parse(content);
-
-            var token = doc.SelectToken("issues").SelectToken("numErrors");
-
-            return (int)token;
+            Assert.IsTrue(passed);
         }
     }
 }

@@ -40,7 +40,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             for (int i = 0; i < Normals.Count; ++i)
             {
-                Normals[i] = normalsMap[Positions[i]];
+                if (normalsMap.TryGetValue(Positions[i], out Vector3 nrm))
+                {
+                    Normals[i] = nrm;
+                }
             }
         }
 

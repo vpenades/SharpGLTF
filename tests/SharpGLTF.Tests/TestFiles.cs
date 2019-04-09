@@ -63,9 +63,38 @@ namespace SharpGLTF
             return GetModelPathsInDirectory(_SchemaDir, "extensions", "2.0");         
         }
 
-        public static IReadOnlyList<string> GetReferenceModelPaths()
+        public static IEnumerable<(string, bool)> GetReferenceModelPaths()
         {
-            return GetModelPathsInDirectory(_GeneratedModelsDir);
+            var dirPath = _GeneratedModelsDir;
+            if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length - 4);
+
+            var manifestsPath = System.IO.Path.Combine(dirPath, "Positive");
+
+            var manifests = System.IO.Directory.GetFiles(manifestsPath, "Manifest.json", System.IO.SearchOption.AllDirectories)
+                .Skip(1)
+                .ToArray();
+
+            foreach (var m in manifests)
+            {
+                var d = System.IO.Path.GetDirectoryName(m);
+
+                var content = System.IO.File.ReadAllText(m);
+                var doc = Newtonsoft.Json.Linq.JObject.Parse(content);
+
+                var models = doc.SelectToken("models");
+                
+                foreach(var model in models)
+                {
+                    var mdlPath = (String)model.SelectToken("fileName");
+                    var loadable = (Boolean)model.SelectToken("loadable");
+
+                    mdlPath = System.IO.Path.Combine(d, mdlPath);
+
+                    yield return (mdlPath, loadable);
+                }
+            }
+
+            yield break;
         }
 
         public static IReadOnlyList<string> GetSampleModelsPaths()
