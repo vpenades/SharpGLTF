@@ -325,10 +325,10 @@ namespace SharpGLTF
 
         public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int count)
         {
-            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item), IndexEncodingType.UNSIGNED_INT);
+            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
         }
 
-        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices, IndexEncodingType sourceEncoding)
+        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
         {
             switch (ptype)
             {

@@ -63,12 +63,12 @@ namespace SharpGLTF
             return GetModelPathsInDirectory(_SchemaDir, "extensions", "2.0");         
         }
 
-        public static IEnumerable<(string, bool)> GetReferenceModelPaths()
+        public static IEnumerable<(string, bool)> GetReferenceModelPaths(bool useNegative = false)
         {
             var dirPath = _GeneratedModelsDir;
             if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length - 4);
 
-            var manifestsPath = System.IO.Path.Combine(dirPath, "Positive");
+            var manifestsPath = System.IO.Path.Combine(dirPath, useNegative? "Negative" : "Positive");
 
             var manifests = System.IO.Directory.GetFiles(manifestsPath, "Manifest.json", System.IO.SearchOption.AllDirectories)
                 .Skip(1)
@@ -86,7 +86,10 @@ namespace SharpGLTF
                 foreach(var model in models)
                 {
                     var mdlPath = (String)model.SelectToken("fileName");
-                    var loadable = (Boolean)model.SelectToken("loadable");
+
+                    var loadable = !useNegative;
+
+                    if (loadable) loadable = (Boolean)model.SelectToken("loadable");
 
                     mdlPath = System.IO.Path.Combine(d, mdlPath);
 

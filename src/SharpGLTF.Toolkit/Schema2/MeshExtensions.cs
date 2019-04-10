@@ -348,7 +348,7 @@ namespace SharpGLTF.Schema2
         {
             if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.GetVertexAccessor("POSITION").Count);
 
-            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray(), primitive.IndexAccessor.Encoding.ToIndex());
+            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
         }
 
         /// <summary>

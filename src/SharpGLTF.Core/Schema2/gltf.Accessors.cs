@@ -387,6 +387,44 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal void ValidateIndices(IList<Exception> result, uint vertexCount, PrimitiveType drawingType)
+        {
+            switch (drawingType)
+            {
+                case PrimitiveType.LINE_LOOP:
+                case PrimitiveType.LINE_STRIP:
+                    if (this.Count < 2) result.Add(new EXCEPTION(this, $"Indices count {this.Count} is less than 2"));
+                    break;
+
+                case PrimitiveType.TRIANGLE_FAN:
+                case PrimitiveType.TRIANGLE_STRIP:
+                    if (this.Count < 3) result.Add(new EXCEPTION(this, $"Indices count {this.Count} is less than 3"));
+                    break;
+
+                case PrimitiveType.LINES:
+                    if (!this.Count.IsMultipleOf(2)) result.Add(new EXCEPTION(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}"));
+                    break;
+
+                case PrimitiveType.TRIANGLES:
+                    if (!this.Count.IsMultipleOf(3)) result.Add(new EXCEPTION(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}"));
+                    break;
+            }
+
+            uint restart_value = 0xff;
+            if (this.Encoding == EncodingType.UNSIGNED_SHORT) restart_value = 0xffff;
+            if (this.Encoding == EncodingType.UNSIGNED_INT) restart_value = 0xffffffff;
+
+            var indices = this.AsIndicesArray();
+
+            for (int i = 0; i < indices.Count; ++i)
+            {
+                var idx = indices[i];
+
+                if (idx == restart_value) result.Add(new EXCEPTION(this, $"PRIMITIVE RESTART value {restart_value} found at index {i}"));
+                else if (idx >= vertexCount) result.Add(new EXCEPTION(this, $"Invalid vertex index {idx} found at index {i}"));
+            }
+        }
+
         #endregion
     }
 

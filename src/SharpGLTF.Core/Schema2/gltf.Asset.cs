@@ -46,6 +46,7 @@ namespace SharpGLTF.Schema2
 
         private static readonly Version ZEROVERSION = new Version(0, 0);
         private static readonly Version MINVERSION = new Version(2, 0);
+        private static readonly Version MAXVERSION = new Version(2, 0);
 
         public string Copyright { get => _copyright; set => _copyright = value.AsEmptyNullable(); }
         public string Generator { get => _generator; set => _generator = value.AsEmptyNullable(); }
@@ -74,10 +75,8 @@ namespace SharpGLTF.Schema2
 
             if (string.IsNullOrWhiteSpace(_version)) result.Add(new EXCEPTION(this, "version number is missing"));
 
-            var curVer = this.Version;
-            var minVer = this.MinVersion;
-
-            if (curVer < minVer) result.Add(new EXCEPTION(this, $"invalid version number {this.Version} expected {MINVERSION}"));
+            if (Version < MINVERSION) result.Add(new EXCEPTION(this, $"Minimum supported version is {MINVERSION} but found:{MinVersion}"));
+            if (MinVersion > MAXVERSION) result.Add(new EXCEPTION(this, $"Maximum supported version is {MAXVERSION} but found:{MinVersion}"));
         }
 
         private string _GetExtraInfo(string key)

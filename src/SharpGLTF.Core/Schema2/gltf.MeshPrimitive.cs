@@ -201,15 +201,15 @@ namespace SharpGLTF.Schema2
         {
             base.Validate(result);
 
-            if (IndexAccessor != null)
-            {
-                switch (DrawPrimitiveType)
-                {
-                    case PrimitiveType.TRIANGLES:
-                        if ((IndexAccessor.Count % 3) != 0) result.Add(new EXCEPTION(this, $"Indices count {IndexAccessor.Count} incompatible with Primitive.{DrawPrimitiveType}"));
-                        break;
-                }
-            }
+            var vertexCounts = VertexAccessors
+                .Select(item => item.Value.Count)
+                .Distinct();
+
+            if (vertexCounts.Count() != 1) result.Add(new EXCEPTION(this, $"Vertex Accessors have mismatching vertices count."));
+
+            var vertexCount = (uint)vertexCounts.First();
+
+            if (IndexAccessor != null) IndexAccessor.ValidateIndices(result, vertexCount, DrawPrimitiveType);
         }
 
         #endregion
