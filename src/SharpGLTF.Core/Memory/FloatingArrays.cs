@@ -195,13 +195,21 @@ namespace SharpGLTF.Memory
         public Single this[int index]
         {
             get => _Getter(index * _ByteStride);
-            set => _Setter(index * _ByteStride, value);
+            set
+            {
+                if (!value._IsReal()) throw new NotFiniteNumberException(nameof(value), value);
+                _Setter(index * _ByteStride, value);
+            }
         }
 
         public Single this[int rowIndex, int subIndex]
         {
             get => _Getter((rowIndex * _ByteStride) + (subIndex * _EncodedLen));
-            set => _Setter((rowIndex * _ByteStride) + (subIndex * _EncodedLen), value);
+            set
+            {
+                if (!value._IsReal()) throw new NotFiniteNumberException(nameof(value), value);
+                _Setter((rowIndex * _ByteStride) + (subIndex * _EncodedLen), value);
+            }
         }
 
         #endregion

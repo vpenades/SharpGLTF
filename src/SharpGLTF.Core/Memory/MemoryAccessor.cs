@@ -99,13 +99,15 @@ namespace SharpGLTF.Memory
         {
             get
             {
-                if (this.ByteOffset < 0) return false;
                 if (this.ItemsCount < 0) return false;
-                if (this.ByteStride < 0) return false;
-                var blen = this.PaddedByteLength;
 
-                if (this.ByteStride > 0 && this.ByteStride < blen) return false;
-                if ((this.ByteStride & 3) != 0) return false;
+                if (this.ByteOffset < 0) return false;
+                if (!this.ByteOffset.IsMultipleOf(4)) return false;
+
+                if (this.ByteStride < 0) return false;
+                if (!this.ByteStride.IsMultipleOf(4)) return false;
+
+                if (this.ByteStride > 0 && this.ByteStride < this.PaddedByteLength) return false;
 
                 return true;
             }
@@ -237,14 +239,24 @@ namespace SharpGLTF.Memory
 
         public void Fill(IReadOnlyList<UInt32> values) { values.CopyTo(AsIntegerArray()); }
 
+        public void Fill(IReadOnlyList<Single> values) { values.CopyTo(AsScalarArray()); }
+
+        public void Fill(IReadOnlyList<Vector2> values) { values.CopyTo(AsVector2Array()); }
+
+        public void Fill(IReadOnlyList<Vector3> values) { values.CopyTo(AsVector3Array()); }
+
+        public void Fill(IReadOnlyList<Vector4> values) { values.CopyTo(AsVector4Array()); }
+
+        public void Fill(IReadOnlyList<Quaternion> values) { values.CopyTo(AsQuaternionArray()); }
+
+        public void Fill(IReadOnlyList<Matrix4x4> values) { values.CopyTo(AsMatrix4x4Array()); }
+
         public IntegerArray AsIntegerArray()
         {
             Guard.IsTrue(_Attribute.IsValidIndexer, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(_Attribute));
             return new IntegerArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.Encoding.ToIndex());
         }
-
-        public void Fill(IReadOnlyList<Single> values) { values.CopyTo(AsScalarArray()); }
 
         public ScalarArray AsScalarArray()
         {
@@ -253,8 +265,6 @@ namespace SharpGLTF.Memory
             return new ScalarArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IReadOnlyList<Vector2> values) { values.CopyTo(AsVector2Array()); }
-
         public Vector2Array AsVector2Array()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
@@ -262,16 +272,12 @@ namespace SharpGLTF.Memory
             return new Vector2Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IReadOnlyList<Vector3> values) { values.CopyTo(AsVector3Array()); }
-
         public Vector3Array AsVector3Array()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC3, nameof(_Attribute));
             return new Vector3Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
-
-        public void Fill(IReadOnlyList<Vector4> values) { values.CopyTo(AsVector4Array()); }
 
         public Vector4Array AsVector4Array()
         {
@@ -287,16 +293,12 @@ namespace SharpGLTF.Memory
             return new ColorArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Dimensions.DimCount(), _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public void Fill(IReadOnlyList<Quaternion> values) { values.CopyTo(AsQuaternionArray()); }
-
         public QuaternionArray AsQuaternionArray()
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
             return new QuaternionArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
-
-        public void Fill(IReadOnlyList<Matrix4x4> values) { values.CopyTo(AsMatrix4x4Array()); }
 
         public Matrix4x4Array AsMatrix4x4Array()
         {

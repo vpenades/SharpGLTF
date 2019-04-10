@@ -300,7 +300,7 @@ namespace SharpGLTF.Schema2
 
             // https://github.com/KhronosGroup/glTF-Validator/issues/79
 
-            var dimensions = this._type.DimCount();
+            var dimensions = this.Dimensions.DimCount();
 
             for (int i = 0; i < dimensions; ++i)
             {
@@ -345,14 +345,45 @@ namespace SharpGLTF.Schema2
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
                 if (len != 1 && len != 2 && len != 4) result.Add(new EXCEPTION(this, $"Expected length to be 1, 2 or 4, found {len}"));
             }
+        }
 
-            // validate bounds
+        internal void ValidateBounds(IList<Exception> result)
+        {
+            if (_min.Count == 0 && _max.Count == 0) return;
 
-            if (_min.Count != _max.Count) { result.Add(new EXCEPTION(this, "min and max length mismatch")); return; }
+            var dimensions = this.Dimensions.DimCount();
+
+            if (_min.Count != dimensions) { result.Add(new EXCEPTION(this, $"min bounds length mismatch; expected {dimensions} but found {_min.Count}")); return; }
+            if (_max.Count != dimensions) { result.Add(new EXCEPTION(this, $"max bounds length mismatch; expected {dimensions} but found {_max.Count}")); return; }
 
             for (int i = 0; i < _min.Count; ++i)
             {
                 if (_min[i] > _max[i]) result.Add(new EXCEPTION(this, $"min[{i}] is larger than max[{i}]"));
+            }
+
+            if (this.Encoding != EncodingType.FLOAT) return;
+
+            var current = new float[dimensions];
+            var minimum = this._min.ConvertAll(item => (float)item);
+            var maximum = this._max.ConvertAll(item => (float)item);
+
+            var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
+
+            for (int i = 0; i < array.Count; ++i)
+            {
+                array.CopyItemTo(i, current);
+
+                for (int j = 0; j < current.Length; ++j)
+                {
+                    var v = current[j];
+
+                    if (!v._IsReal()) result.Add(new EXCEPTION(this, $"Item[{j}][{i}] is not a finite number: {v}"));
+
+                    var min = minimum[j];
+                    var max = maximum[j];
+
+                    if (v < min || v > max) result.Add(new EXCEPTION(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}"));
+                }
             }
         }
 

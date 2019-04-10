@@ -169,7 +169,13 @@ namespace SharpGLTF.Schema2
             // 4th check contents
             foreach (var s in _scenes) s.Validate(result);
             foreach (var n in _nodes) n.Validate(result);
-            foreach (var a in _accessors) a.Validate(result);
+
+            foreach (var a in _accessors)
+            {
+                a.Validate(result);
+                a.ValidateBounds(result);
+            }
+
             foreach (var m in _meshes) m.Validate(result);
             foreach (var s in _skins) s.Validate(result);
         }

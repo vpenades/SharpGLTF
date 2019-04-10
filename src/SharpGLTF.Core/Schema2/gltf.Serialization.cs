@@ -395,9 +395,6 @@ namespace SharpGLTF.Schema2
                 reader.Read();
                 root.Deserialize(reader);
 
-                var ex = root.Validate().FirstOrDefault();
-                if (ex != null) throw ex;
-
                 foreach (var buffer in root._buffers)
                 {
                     buffer._ResolveUri(settings.FileReader);
@@ -407,6 +404,9 @@ namespace SharpGLTF.Schema2
                 {
                     image._ResolveUri(settings.FileReader);
                 }
+
+                var ex = root.Validate().FirstOrDefault();
+                if (ex != null) throw ex;
 
                 return root;
             }
