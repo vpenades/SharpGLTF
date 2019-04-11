@@ -29,7 +29,7 @@ namespace SharpGLTF
 
         internal static int WordPadded(this int length)
         {
-            var padding = (length & 3);
+            var padding = length & 3;
 
             return length + (padding == 0 ? 0 : 4 - padding);
         }

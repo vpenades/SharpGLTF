@@ -25,7 +25,7 @@ namespace SharpGLTF.Geometry
         {
             foreach (var f in TestFiles.GetSampleModelsPaths())
             {
-                var root = GltfUtils.LoadModel(f);
+                var root = Schema2.ModelRoot.Load(f);
                 Assert.NotNull(root);
             }
         }

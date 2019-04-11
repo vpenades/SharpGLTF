@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
-    using EXCEPTION = IO.ModelException;
-
     [System.Diagnostics.DebuggerDisplay("{Version} {MinVersion} {Generator} {Copyright}")]
     public sealed partial class Asset
     {
@@ -69,14 +67,16 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
-            if (string.IsNullOrWhiteSpace(_version)) result.Add(new EXCEPTION(this, "version number is missing"));
+            if (string.IsNullOrWhiteSpace(_version)) result.AddError(this, "version number is missing");
 
-            if (Version < MINVERSION) result.Add(new EXCEPTION(this, $"Minimum supported version is {MINVERSION} but found:{MinVersion}"));
-            if (MinVersion > MAXVERSION) result.Add(new EXCEPTION(this, $"Maximum supported version is {MAXVERSION} but found:{MinVersion}"));
+            if (Version < MINVERSION) result.AddError(this, $"Minimum supported version is {MINVERSION} but found:{MinVersion}");
+            if (MinVersion > MAXVERSION) result.AddError(this, $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
+
+            if (MinVersion > Version) result.AddSemanticError(this, $"Asset minVersion {MinVersion} is greater than version {Version}.");
         }
 
         private string _GetExtraInfo(string key)

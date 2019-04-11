@@ -41,7 +41,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                     {
                         var tmp = span[j];
                         span[j] = span[j + 1];
-                        span[j + 1 ] = tmp;
+                        span[j + 1] = tmp;
                         completed = false;
                     }
                 }

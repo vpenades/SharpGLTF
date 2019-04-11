@@ -39,10 +39,10 @@ namespace SharpGLTF.Geometry.VertexTypes
                 {
                     var columnFunc = GetItemValueFunc<TvP, TvM, TvS>(accessor.Attribute.Name);
 
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.Fill(block.GetScalarColumn(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.Fill(block.GetVector2Column(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.Fill(block.GetVector3Column(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.Fill(block.GetVector4Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetScalarColumn(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetVector2Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block.GetVector3Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block.GetVector4Column(columnFunc));
                 }
 
                 yield return accessors;
@@ -67,7 +67,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 var accessor = new MemoryAccessor(ibuffer, attribute.Slice(baseIndicesIndex, block.Count));
 
-                accessor.Fill(block);
+                accessor.AsIntegerArray().Fill(block);
 
                 yield return accessor;
 

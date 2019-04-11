@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace SharpGLTF.Memory
 {
@@ -52,15 +51,12 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public int Count => _BottomItems.Count;
 
-        public bool IsReadOnly => false;
+        public bool IsReadOnly => true;
 
         public T this[int index]
         {
             get => _Mapping.TryGetValue(index, out int topIndex) ? _TopItems[topIndex] : _BottomItems[index];
-            set
-            {
-                if (_Mapping.TryGetValue(index, out int topIndex)) _TopItems[topIndex] = value;
-            }
+            set => throw new NotSupportedException("Collection is read only.");
         }
 
         public IEnumerator<T> GetEnumerator() { return new EncodedArrayEnumerator<T>(this); }
@@ -69,9 +65,9 @@ namespace SharpGLTF.Memory
 
         public bool Contains(T item) { return IndexOf(item) >= 0; }
 
-        public int IndexOf(T item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+        public int IndexOf(T item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(T[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+        public void CopyTo(T[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
 
         void IList<T>.Insert(int index, T item) { throw new NotSupportedException(); }
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Collections;
 using System.Linq;
 
@@ -144,9 +143,13 @@ namespace SharpGLTF.Memory
 
         public bool Contains(UInt32 item) { return IndexOf(item) >= 0; }
 
-        public int IndexOf(UInt32 item) { return EncodedArrayUtils.FirstIndexOf(this, item); }
+        public int IndexOf(UInt32 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(UInt32[] array, int arrayIndex) { EncodedArrayUtils.CopyTo(this, array, arrayIndex); }
+        public void CopyTo(UInt32[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+
+        public void Fill(IEnumerable<Int32> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+
+        public void Fill(IEnumerable<UInt32> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
 
         void IList<UInt32>.Insert(int index, UInt32 item) { throw new NotSupportedException(); }
 

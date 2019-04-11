@@ -85,28 +85,6 @@ namespace SharpGLTF.Schema2
 
         #region accessors
 
-        private static void FillFrom(this IList<UInt32> dst, int dstIndex, IEnumerable<Int32> src)
-        {
-            using (var ator = src.GetEnumerator())
-            {
-                while (dstIndex < dst.Count && ator.MoveNext())
-                {
-                    dst[dstIndex++] = (UInt32)ator.Current;
-                }
-            }
-        }
-
-        private static void FillFrom<T>(this IList<T> dst, int dstIndex, IEnumerable<T> src)
-        {
-            using (var ator = src.GetEnumerator())
-            {
-                while (dstIndex < dst.Count && ator.MoveNext())
-                {
-                    dst[dstIndex++] = ator.Current;
-                }
-            }
-        }
-
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Single> values)
         {
             var root = primitive.LogicalParent.LogicalParent;
@@ -114,7 +92,7 @@ namespace SharpGLTF.Schema2
             // create a vertex buffer and fill it
             var view = root.UseBufferView(new Byte[4 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
             var array = new ScalarArray(view.Content);
-            array.FillFrom(0, values);
+            array.Fill(values);
 
             var accessor = root.CreateAccessor();
             primitive.SetVertexAccessor(attribute, accessor);
@@ -131,7 +109,7 @@ namespace SharpGLTF.Schema2
             // create a vertex buffer and fill it
             var view = root.UseBufferView(new Byte[8 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector2Array(view.Content);
-            array.FillFrom(0, values);
+            array.Fill(values);
 
             var accessor = root.CreateAccessor();
             primitive.SetVertexAccessor(attribute, accessor);
@@ -148,7 +126,7 @@ namespace SharpGLTF.Schema2
             // create a vertex buffer and fill it
             var view = root.UseBufferView(new Byte[12 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector3Array(view.Content);
-            array.FillFrom(0, values);
+            array.Fill(values);
 
             var accessor = root.CreateAccessor();
 
@@ -166,7 +144,7 @@ namespace SharpGLTF.Schema2
             // create a vertex buffer and fill it
             var view = root.UseBufferView(new Byte[16 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector4Array(view.Content);
-            array.FillFrom(0, values);
+            array.Fill(values);
 
             var accessor = root.CreateAccessor();
 
@@ -194,7 +172,7 @@ namespace SharpGLTF.Schema2
             // create an index buffer and fill it
             var view = root.UseBufferView(new Byte[4 * values.Count], 0, null, 0, BufferMode.ELEMENT_ARRAY_BUFFER);
             var array = new IntegerArray(view.Content);
-            array.FillFrom(0, values);
+            array.Fill(values);
 
             var accessor = root.CreateAccessor();
 

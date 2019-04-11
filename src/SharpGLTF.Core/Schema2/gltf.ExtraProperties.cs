@@ -117,13 +117,13 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
             if (this._extras != null)
             {
-                if (!IO.JsonUtils.IsSerializable(this._extras)) result.Add(new ModelException(this, $"Invalid {Extras} content."));
+                if (!IO.JsonUtils.IsSerializable(this._extras)) result.InvalidJson(this, "Extras");
             }
         }
 

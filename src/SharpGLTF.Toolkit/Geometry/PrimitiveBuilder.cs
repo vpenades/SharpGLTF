@@ -249,7 +249,6 @@ namespace SharpGLTF.Geometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning
         {
-
             var p1 = a.Item1.CloneAs<TvP>();
             var p2 = b.Item1.CloneAs<TvP>();
             var p3 = c.Item1.CloneAs<TvP>();

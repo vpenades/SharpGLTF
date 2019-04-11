@@ -299,7 +299,7 @@ namespace SharpGLTF.Schema2
 
             accessor.SetData(buffer, 0, input.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
-            Memory.EncodedArrayUtils.CopyTo(input, accessor.AsScalarArray());
+            Memory.EncodedArrayUtils._CopyTo(input, accessor.AsScalarArray());
 
             accessor.UpdateBounds();
 
@@ -318,7 +318,7 @@ namespace SharpGLTF.Schema2
 
             accessor.SetData(buffer, 0, output.Count, DimensionType.VEC3, EncodingType.FLOAT, false);
 
-            Memory.EncodedArrayUtils.CopyTo(output, accessor.AsVector3Array());
+            Memory.EncodedArrayUtils._CopyTo(output, accessor.AsVector3Array());
 
             accessor.UpdateBounds();
 
@@ -334,7 +334,7 @@ namespace SharpGLTF.Schema2
 
             accessor.SetData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
 
-            Memory.EncodedArrayUtils.CopyTo(output, accessor.AsQuaternionArray());
+            Memory.EncodedArrayUtils._CopyTo(output, accessor.AsQuaternionArray());
 
             accessor.UpdateBounds();
 

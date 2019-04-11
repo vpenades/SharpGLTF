@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Schema2
 {
     using Memory;
-
-    using EXCEPTION = IO.ModelException;
-
-    using ROOT = ModelRoot;
 
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
@@ -324,41 +318,41 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
-            if (!_bufferView.HasValue) { result.Add(new EXCEPTION(this, $"BufferView index missing")); return; }
-            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) result.Add(new EXCEPTION(this, $"BufferView index out of range"));
+            if (!_bufferView.HasValue) { result.AddError(this, $"BufferView index missing"); return; }
+            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) result.AddError(this, $"BufferView index out of range");
 
-            if (_count < 0) result.Add(new EXCEPTION(this, $"Count is out of range"));
-            if (_byteOffset < 0) result.Add(new EXCEPTION(this, $"ByteOffset is out of range"));
+            if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
+            if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len > 0 && (len & 3) != 0) result.Add(new EXCEPTION(this, $"Expected length to be multiple of 4, found {len}"));
+                if (len > 0 && (len & 3) != 0) result.AddError(this, $"Expected length to be multiple of 4, found {len}");
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len != 1 && len != 2 && len != 4) result.Add(new EXCEPTION(this, $"Expected length to be 1, 2 or 4, found {len}"));
+                if (len != 1 && len != 2 && len != 4) result.AddError(this, $"Expected length to be 1, 2 or 4, found {len}");
             }
         }
 
-        internal void ValidateBounds(IList<Exception> result)
+        internal void ValidateBounds(Validation.ValidationContext result)
         {
             if (_min.Count == 0 && _max.Count == 0) return;
 
             var dimensions = this.Dimensions.DimCount();
 
-            if (_min.Count != dimensions) { result.Add(new EXCEPTION(this, $"min bounds length mismatch; expected {dimensions} but found {_min.Count}")); return; }
-            if (_max.Count != dimensions) { result.Add(new EXCEPTION(this, $"max bounds length mismatch; expected {dimensions} but found {_max.Count}")); return; }
+            if (_min.Count != dimensions) { result.AddError(this, $"min bounds length mismatch; expected {dimensions} but found {_min.Count}"); return; }
+            if (_max.Count != dimensions) { result.AddError(this, $"max bounds length mismatch; expected {dimensions} but found {_max.Count}"); return; }
 
             for (int i = 0; i < _min.Count; ++i)
             {
-                if (_min[i] > _max[i]) result.Add(new EXCEPTION(this, $"min[{i}] is larger than max[{i}]"));
+                if (_min[i] > _max[i]) result.AddError(this, $"min[{i}] is larger than max[{i}]");
             }
 
             if (this.Encoding != EncodingType.FLOAT) return;
@@ -377,36 +371,36 @@ namespace SharpGLTF.Schema2
                 {
                     var v = current[j];
 
-                    if (!v._IsReal()) result.Add(new EXCEPTION(this, $"Item[{j}][{i}] is not a finite number: {v}"));
+                    if (!v._IsReal()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
 
                     var min = minimum[j];
                     var max = maximum[j];
 
-                    if (v < min || v > max) result.Add(new EXCEPTION(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}"));
+                    if (v < min || v > max) result.AddError(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}");
                 }
             }
         }
 
-        internal void ValidateIndices(IList<Exception> result, uint vertexCount, PrimitiveType drawingType)
+        internal void ValidateIndices(Validation.ValidationContext result, uint vertexCount, PrimitiveType drawingType)
         {
             switch (drawingType)
             {
                 case PrimitiveType.LINE_LOOP:
                 case PrimitiveType.LINE_STRIP:
-                    if (this.Count < 2) result.Add(new EXCEPTION(this, $"Indices count {this.Count} is less than 2"));
+                    if (this.Count < 2) result.AddError(this, $"Indices count {this.Count} is less than 2");
                     break;
 
                 case PrimitiveType.TRIANGLE_FAN:
                 case PrimitiveType.TRIANGLE_STRIP:
-                    if (this.Count < 3) result.Add(new EXCEPTION(this, $"Indices count {this.Count} is less than 3"));
+                    if (this.Count < 3) result.AddError(this, $"Indices count {this.Count} is less than 3");
                     break;
 
                 case PrimitiveType.LINES:
-                    if (!this.Count.IsMultipleOf(2)) result.Add(new EXCEPTION(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}"));
+                    if (!this.Count.IsMultipleOf(2)) result.AddError(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}");
                     break;
 
                 case PrimitiveType.TRIANGLES:
-                    if (!this.Count.IsMultipleOf(3)) result.Add(new EXCEPTION(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}"));
+                    if (!this.Count.IsMultipleOf(3)) result.AddError(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}");
                     break;
             }
 
@@ -420,8 +414,98 @@ namespace SharpGLTF.Schema2
             {
                 var idx = indices[i];
 
-                if (idx == restart_value) result.Add(new EXCEPTION(this, $"PRIMITIVE RESTART value {restart_value} found at index {i}"));
-                else if (idx >= vertexCount) result.Add(new EXCEPTION(this, $"Invalid vertex index {idx} found at index {i}"));
+                if (idx == restart_value) result.AddError(this, $"Index[{i}] value {idx} is invalid PRIMITIVE RESTART value");
+                else if (idx >= vertexCount) result.AddError(this, $"Index[{i}] value {idx} is out of range {0}-{vertexCount}");
+            }
+        }
+
+        internal void ValidatePositions(Validation.ValidationContext result)
+        {
+            var positions = this.AsVector3Array();
+
+            for (int i = 0; i < positions.Count; ++i)
+            {
+                var pos = positions[i];
+
+                if (!pos._IsReal()) result.AddError(this, $"POSITION[{i}] value {pos} has non finite values");
+            }
+        }
+
+        internal void ValidateNormals(Validation.ValidationContext result)
+        {
+            var normals = this.AsVector3Array();
+
+            for (int i = 0; i < normals.Count; ++i)
+            {
+                var nrm = normals[i];
+
+                if (!nrm._IsReal()) result.AddError(this, $"NORMAL[{i}] value {nrm} has non finite values");
+
+                var len = nrm.Length();
+
+                if (len < 0.99f || len > 1.01f) result.AddError(this, $"NORMAL[{i}] length {len} is not unit length");
+            }
+        }
+
+        internal void ValidateTangents(Validation.ValidationContext result)
+        {
+            var tangents = this.AsVector4Array();
+
+            for (int i = 0; i < tangents.Count; ++i)
+            {
+                var tgt = tangents[i];
+
+                if (!tgt._IsReal()) result.AddError(this, $"TANGENT[{i}] value {tgt} has non finite values");
+
+                var len = new Vector3(tgt.X, tgt.Y, tgt.Z).Length();
+
+                if (len < 0.99f || len > 1.01f) result.AddError(this, $"TANGENT[{i}] length {len} is not unit length");
+
+                if (tgt.W != 1 && tgt.W != -1) result.AddError(this, $"TANGENT[{i}].W {tgt.W} has invalid value");
+            }
+        }
+
+        internal void ValidateJoints(Validation.ValidationContext result, int jwset, int jointsCount)
+        {
+            var jj = this.AsVector4Array();
+
+            void _CheckJoint(Validation.ValidationContext r, float v, int idx, string n)
+            {
+                if (!v._IsReal()) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is not finite");
+                if ((v % 1) != 0) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} should be a round value");
+                if (v < 0 || v >= jointsCount) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is out of range 0-{jointsCount}");
+            }
+
+            for (int i = 0; i < jj.Count; ++i)
+            {
+                var jjjj = jj[i];
+                _CheckJoint(result, jjjj.X, i, "X");
+                _CheckJoint(result, jjjj.Y, i, "Y");
+                _CheckJoint(result, jjjj.Z, i, "Z");
+                _CheckJoint(result, jjjj.W, i, "W");
+            }
+        }
+
+        internal void ValidateWeights(Validation.ValidationContext result, int jwset)
+        {
+            var ww = this.AsVector4Array();
+
+            void _CheckWeight(Validation.ValidationContext r, float v, int idx, string n)
+            {
+                if (!v._IsReal()) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is not finite");
+                if (v < 0 || v > 1) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is out of range 0-1");
+            }
+
+            for (int i = 0; i < ww.Count; ++i)
+            {
+                var wwww = ww[i];
+                _CheckWeight(result, wwww.X, i, "X");
+                _CheckWeight(result, wwww.Y, i, "Y");
+                _CheckWeight(result, wwww.Z, i, "Z");
+                _CheckWeight(result, wwww.W, i, "W");
+
+                // theoretically, the sum of all the weights should give 1, ASSUMING there's only one weight set.
+                // but in practice, that seems not to be true.
             }
         }
 

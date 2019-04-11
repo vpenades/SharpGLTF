@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Memory
 {
@@ -54,37 +51,29 @@ namespace SharpGLTF.Memory
 
     static class EncodedArrayUtils
     {
-        public static void FillFrom(this IList<UInt32> dst, int dstIndex, IEnumerable<Int32> src)
+        public static void _CopyTo(this IEnumerable<Int32> src, IList<UInt32> dst, int dstOffset = 0)
         {
-            using (var ator = src.GetEnumerator())
+            using (var ptr = src.GetEnumerator())
             {
-                while (dstIndex < dst.Count && ator.MoveNext())
+                while (dstOffset < dst.Count && ptr.MoveNext())
                 {
-                    dst[dstIndex++] = (UInt32)ator.Current;
+                    dst[dstOffset++] = (UInt32)ptr.Current;
                 }
             }
         }
 
-        public static void FillFrom<T>(this IList<T> dst, int dstIndex, IEnumerable<T> src)
+        public static void _CopyTo<T>(this IEnumerable<T> src, IList<T> dst, int dstOffset = 0)
         {
-            using (var ator = src.GetEnumerator())
+            using (var ptr = src.GetEnumerator())
             {
-                while (dstIndex < dst.Count && ator.MoveNext())
+                while (dstOffset < dst.Count && ptr.MoveNext())
                 {
-                    dst[dstIndex++] = ator.Current;
+                    dst[dstOffset++] = ptr.Current;
                 }
             }
         }
 
-        public static void CopyTo<T>(this IReadOnlyList<T> src, IList<T> dst, int dstOffset = 0)
-        {
-            for (int i = 0; i < src.Count; ++i)
-            {
-                dst[i + dstOffset] = src[i];
-            }
-        }
-
-        public static int FirstIndexOf<T>(this IReadOnlyList<T> src, T value)
+        public static int _FirstIndexOf<T>(this IReadOnlyList<T> src, T value)
         {
             var comparer = EqualityComparer<T>.Default;
 

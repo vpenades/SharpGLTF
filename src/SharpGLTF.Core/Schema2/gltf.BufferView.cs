@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Schema2
 {
     using BYTES = ArraySegment<Byte>;
-
-    using ENCODING = EncodingType;
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugProxy))]
     public sealed partial class BufferView

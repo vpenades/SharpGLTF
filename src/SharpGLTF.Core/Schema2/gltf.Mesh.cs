@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Schema2
 {
@@ -58,7 +56,7 @@ namespace SharpGLTF.Schema2
             return mp;
         }
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
@@ -68,8 +66,13 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)
+        {
+            foreach (var p in Primitives) p.ValidateSkinning(result, jointsCount);
+        }
+
         #endregion
-    }
+        }
 
     public partial class ModelRoot
     {

@@ -40,7 +40,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 var perf = System.Diagnostics.Stopwatch.StartNew();                
 
-                var model = GltfUtils.LoadModel(f);
+                var model = ModelRoot.Load(f);
                 Assert.NotNull(model);
 
                 var perf_load = perf.ElapsedMilliseconds;
@@ -92,7 +92,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var f = TestFiles.GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(filePath));
 
-            var model = GltfUtils.LoadModel(f);
+            var model = ModelRoot.Load(f);
             Assert.NotNull(model);
 
             // evaluate and save all the triangles to a Wavefront Object
@@ -114,7 +114,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var f = TestFiles.GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
 
-            var model = GltfUtils.LoadModel(f);
+            var model = ModelRoot.Load(f);
             Assert.NotNull(model);
 
             Assert.IsTrue(model.LogicalMaterials[0].Unlit);
@@ -132,7 +132,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var f = TestFiles.GetSchemaExtensionsModelsPaths()
                 .FirstOrDefault(item => item.EndsWith("lights.gltf"));
 
-            var model = GltfUtils.LoadModel(f);
+            var model = ModelRoot.Load(f);
             Assert.NotNull(model);
 
             Assert.AreEqual(3, model.LogicalPunctualLights.Count);

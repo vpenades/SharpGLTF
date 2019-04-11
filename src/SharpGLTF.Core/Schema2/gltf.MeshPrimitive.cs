@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Schema2
 {
     using Collections;
-
-    using EXCEPTION = IO.ModelException;
-    using ROOT = ModelRoot;
 
     [System.Diagnostics.DebuggerDisplay("MeshPrimitive[{LogicalIndex}] {_mode} {_DebuggerDisplay_TryIdentifyContent()}")]
     public sealed partial class MeshPrimitive : IChildOf<Mesh>
@@ -197,7 +192,7 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
@@ -205,11 +200,34 @@ namespace SharpGLTF.Schema2
                 .Select(item => item.Value.Count)
                 .Distinct();
 
-            if (vertexCounts.Count() != 1) result.Add(new EXCEPTION(this, $"Vertex Accessors have mismatching vertices count."));
+            if (vertexCounts.Count() != 1) result.AddError(this, $"Vertex Accessors have mismatching vertices count.");
 
-            var vertexCount = (uint)vertexCounts.First();
+            if (IndexAccessor != null) IndexAccessor.ValidateIndices(result, (uint)vertexCounts.First(), DrawPrimitiveType);
 
-            if (IndexAccessor != null) IndexAccessor.ValidateIndices(result, vertexCount, DrawPrimitiveType);
+            GetVertexAccessor("POSITION")?.ValidatePositions(result);
+            GetVertexAccessor("NORMAL")?.ValidateNormals(result);
+            GetVertexAccessor("TANGENT")?.ValidateTangents(result);
+        }
+
+        internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)
+        {
+            var j0 = GetVertexAccessor("JOINTS_0");
+            var w0 = GetVertexAccessor("WEIGHTS_0");
+            ValidateSkinning(result, j0, w0, 0, jointsCount);
+
+            var j1 = GetVertexAccessor("JOINTS_1");
+            var w1 = GetVertexAccessor("WEIGHTS_1");
+            if (j1 != null || w1 != null) ValidateSkinning(result, j1, w1, 1, jointsCount);
+        }
+
+        private void ValidateSkinning(Validation.ValidationContext result, Accessor j, Accessor w, int jwset, int jointsCount)
+        {
+            if (j == null) result.AddError(this, $"Missing JOINTS_{jwset} vertex attribute");
+            if (w == null) result.AddError(this, $"Missing WEIGHTS_{jwset} vertex attribute");
+            if (j == null || w == null) return;
+
+            j.ValidateJoints(result, jwset, jointsCount);
+            w.ValidateWeights(result, jwset);
         }
 
         #endregion

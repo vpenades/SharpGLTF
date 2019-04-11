@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
 
             // load Polly model
-            var model = GltfUtils.LoadModel(TestFiles.GetPollyFileModelPath());
+            var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath());
 
             Assert.NotNull(model);
 

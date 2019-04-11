@@ -14,14 +14,14 @@ namespace SharpGLTF.IO
 
         public IEnumerable<Exception> Validate()
         {
-            var result = new List<Exception>();
+            var result = new Validation.ValidationContext();
 
             Validate(result);
 
-            return result;
+            return result.Exceptions;
         }
 
-        internal virtual void Validate(IList<Exception> result)
+        internal virtual void Validate(Validation.ValidationContext result)
         {
         }
 

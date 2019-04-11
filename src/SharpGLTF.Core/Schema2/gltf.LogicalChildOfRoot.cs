@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
             return items.All(item => Object.ReferenceEquals(this.LogicalParent, item.LogicalParent));
         }
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 

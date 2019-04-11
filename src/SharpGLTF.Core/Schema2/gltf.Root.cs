@@ -144,23 +144,23 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             // 1st check version number
 
-            if (Asset == null) result.Add(new IO.ModelException(this, "missing Asset object, can't check glTF version")); // fix: create a default Asset
+            if (Asset == null) result.AddError(this, "missing Asset object, can't check glTF version"); // fix: create a default Asset
             else Asset.Validate(result);
 
-            if (result.Count > 0) return;
+            if (result.HasErrors) return;
 
             // 2nd check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                result.Add(new IO.UnsupportedExtensionException(this, iex)); // fix: attempt to remove given extension
+                result.UnsupportedExtensionError(this, iex);
             }
 
-            if (result.Count > 0) return;
+            if (result.HasErrors) return;
 
             // 3rd check base class
 

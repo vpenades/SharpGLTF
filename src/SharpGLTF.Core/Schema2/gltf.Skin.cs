@@ -2,14 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
-    using ROOT = ModelRoot;
-
     [System.Diagnostics.DebuggerDisplay("Skin[{LogicalIndex}] {Name}")]
     public sealed partial class Skin
     {
@@ -91,26 +86,27 @@ namespace SharpGLTF.Schema2
 
             var node = this.LogicalParent.LogicalNodes[nodeIdx];
 
-            var matrix = (Matrix4x4)GetInverseBindMatricesAccessor().AsMatrix4x4Array()[idx];
+            var accessor = GetInverseBindMatricesAccessor();
+
+            var matrix = accessor == null ? Matrix4x4.Identity : accessor.AsMatrix4x4Array()[idx];
 
             return new KeyValuePair<Node, Matrix4x4>(node, matrix);
         }
 
-        internal override void Validate(IList<Exception> result)
+        internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
             // note: this check will fail if the buffers are not set
 
-            /*
-            for(int i=0; i < _joints.Count; ++i)
+            for (int i = 0; i < _joints.Count; ++i)
             {
                 var j = GetJoint(i);
 
                 var invXform = j.Value;
 
-                if (invXform.M44 != 1) exx.Add(new ModelException(this, $"Joint {i} has invalid inverse matrix"));
-            }*/
+                if (invXform.M44 != 1) result.AddError(this, $"Joint {i} has invalid inverse matrix");
+            }
         }
 
         /// <summary>
@@ -163,7 +159,7 @@ namespace SharpGLTF.Schema2
 
             var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
 
-            Memory.EncodedArrayUtils.FillFrom(matrices, 0, joints.Select(item => item.Value));
+            matrices.Fill(joints.Select(item => item.Value));
 
             var accessor = LogicalParent.CreateAccessor("Bind Matrices");
 
