@@ -20,6 +20,12 @@ namespace SharpGLTF.Validation
             _Target = target;
         }
 
+        internal ModelException(TARGET target, Exception ex)
+            : base(_CreateBaseMessage(target, ex.Message), ex)
+        {
+            _Target = target;
+        }
+
         private static string _CreateBaseMessage(TARGET target, String message)
         {
             if (target == null) return message;
@@ -51,6 +57,9 @@ namespace SharpGLTF.Validation
     {
         internal SchemaException(TARGET target, String message)
             : base(target, message) { }
+
+        internal SchemaException(TARGET target, Newtonsoft.Json.JsonReaderException rex)
+            : base(target, rex) { }
     }
 
     /// <summary>

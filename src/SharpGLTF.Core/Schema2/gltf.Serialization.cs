@@ -392,8 +392,15 @@ namespace SharpGLTF.Schema2
             {
                 var root = new MODEL();
 
-                reader.Read();
-                root.Deserialize(reader);
+                try
+                {
+                    reader.Read();
+                    root.Deserialize(reader);
+                }
+                catch (JsonReaderException rex)
+                {
+                    throw new Validation.SchemaException(root, rex);
+                }
 
                 foreach (var buffer in root._buffers)
                 {
