@@ -73,7 +73,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void Validate()
         {
-            if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
+            Position.Validate(nameof(Position));
         }
 
         #endregion
@@ -133,8 +133,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void Validate()
         {
-            if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
-            if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
+            Position.Validate(nameof(Position));
+            Normal.ValidateNormal(nameof(Normal));
         }
 
         #endregion
@@ -196,9 +196,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void Validate()
         {
-            if (!Position._IsReal()) throw new NotFiniteNumberException(nameof(Position));
-            if (!Normal._IsReal()) throw new NotFiniteNumberException(nameof(Normal));
-            if (!Tangent._IsReal()) throw new NotFiniteNumberException(nameof(Tangent));
+            Position.Validate(nameof(Position));
+            Normal.ValidateNormal(nameof(Normal));
+            Tangent.ValidateTangent(nameof(Tangent));
         }
 
         #endregion

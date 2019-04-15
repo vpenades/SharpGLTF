@@ -439,11 +439,7 @@ namespace SharpGLTF.Schema2
             {
                 var nrm = normals[i];
 
-                if (!nrm._IsReal()) result.AddError(this, $"NORMAL[{i}] value {nrm} has non finite values");
-
-                var len = nrm.Length();
-
-                if (len < 0.99f || len > 1.01f) result.AddError(this, $"NORMAL[{i}] length {len} is not unit length");
+                if (!nrm.IsValidNormal()) result.AddError(this, $"NORMAL[{i}] value {nrm} is invalid");
             }
         }
 

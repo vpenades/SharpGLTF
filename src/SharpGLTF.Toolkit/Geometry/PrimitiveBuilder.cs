@@ -112,18 +112,7 @@ namespace SharpGLTF.Geometry
 
         public IReadOnlyList<int> Indices => _Indices;
 
-        public IEnumerable<(int, int, int)> Triangles
-        {
-            get
-            {
-                // TODO: use Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices()
-
-                for (int i = 2; i < _Indices.Count; i += 3)
-                {
-                    yield return (_Indices[i - 2], _Indices[i - 1], _Indices[i]);
-                }
-            }
-        }
+        public IEnumerable<(int, int, int)> Triangles => Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices(_Indices.Select(item => (uint)item));
 
         #endregion
 
@@ -160,9 +149,11 @@ namespace SharpGLTF.Geometry
             // check for degenerated triangles:
             if (aa == bb || aa == cc || bb == cc)
             {
-                if (_Scrict) throw new ArgumentException($"Invalid triangle {aa} {bb} {cc}");
+                if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb} {cc}");
                 return;
             }
+
+            // TODO: check if a triangle with indices aa-bb-cc already exists.
 
             _Indices.Add(aa);
             _Indices.Add(bb);

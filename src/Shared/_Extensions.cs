@@ -100,6 +100,45 @@ namespace SharpGLTF
             return (value - r) == Vector4.Zero;
         }
 
+        internal static void Validate(this Vector3 vector, string msg)
+        {
+            if (!vector._IsReal()) throw new NotFiniteNumberException($"{msg} is invalid.");
+        }
+
+        internal static void ValidateNormal(this Vector3 normal, string msg)
+        {
+            if (!normal._IsReal()) throw new NotFiniteNumberException($"{msg} is invalid.");
+
+            var len = normal.Length();
+
+            if (len < 0.99f || len > 1.01f) throw new ArithmeticException($"{msg} is not unit length.");
+        }
+
+        internal static void ValidateTangent(this Vector4 tangent, string msg)
+        {
+            if (tangent.W != 1 && tangent.W != -1) throw new ArithmeticException(msg);
+
+            new Vector3(tangent.X, tangent.Y, tangent.Z).ValidateNormal(msg);
+        }
+
+        internal static bool IsValidNormal(this Vector3 normal)
+        {
+            if (!normal._IsReal()) return false;
+
+            var len = normal.Length();
+
+            if (len < 0.99f || len > 1.01f) return false;
+
+            return true;
+        }
+
+        internal static bool IsValidTangent(this Vector4 tangent)
+        {
+            if (tangent.W != 1 && tangent.W != -1) return false;
+
+            return new Vector3(tangent.X, tangent.Y, tangent.Z).IsValidNormal();
+        }
+
         #endregion
 
         #region linq

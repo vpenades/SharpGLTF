@@ -40,7 +40,7 @@ namespace SharpGLTF.Geometry
             // break the file
             json = json.Substring(0, json.Length - 40);
 
-            Assert.Throws<Newtonsoft.Json.JsonReaderException>(() => Schema2.ModelRoot.ParseGLTF(json, new Schema2.ReadSettings()));
+            Assert.Throws<Validation.SchemaException>(() => Schema2.ModelRoot.ParseGLTF(json, new Schema2.ReadSettings()));
         }
     }
 }
