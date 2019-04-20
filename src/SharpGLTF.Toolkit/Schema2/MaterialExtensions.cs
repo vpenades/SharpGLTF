@@ -225,7 +225,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this MaterialChannel srcChannel, Materials.MaterialChannelBuilder dstChannel)
+        public static void CopyTo(this MaterialChannel srcChannel, Materials.ChannelBuilder dstChannel)
         {
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));
@@ -310,7 +310,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this Materials.MaterialChannelBuilder srcChannel, MaterialChannel dstChannel)
+        public static void CopyTo(this Materials.ChannelBuilder srcChannel, MaterialChannel dstChannel)
         {
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));

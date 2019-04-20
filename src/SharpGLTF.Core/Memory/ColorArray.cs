@@ -18,12 +18,49 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ColorArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Vector4"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public ColorArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ColorArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public ColorArray(BYTES source, int byteStride = 0, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, dimensions, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ColorArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Vector4"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public ColorArray(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
             Guard.MustBeBetweenOrEqualTo(dimensions, 3, 4, nameof(dimensions));

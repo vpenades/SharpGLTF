@@ -26,7 +26,7 @@ namespace SharpGLTF.Materials
         public const string SHADERPBRMETALLICROUGHNESS = "PBRMetallicRoughness";
         public const string SHADERPBRSPECULARGLOSSINESS = "PBRSpecularGlossiness";
 
-        private readonly List<MaterialChannelBuilder> _Channels = new List<MaterialChannelBuilder>();
+        private readonly List<ChannelBuilder> _Channels = new List<ChannelBuilder>();
 
         private MaterialBuilder _CompatibilityFallbackMaterial;
 
@@ -36,7 +36,7 @@ namespace SharpGLTF.Materials
 
         public string Name { get; set; }
 
-        public IReadOnlyCollection<MaterialChannelBuilder> Channels => _Channels;
+        public IReadOnlyCollection<ChannelBuilder> Channels => _Channels;
 
         public ALPHA AlphaMode { get; set; } = ALPHA.OPAQUE;
 
@@ -96,12 +96,12 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialChannelBuilder GetChannel(KnownChannels channelKey)
+        public ChannelBuilder GetChannel(KnownChannels channelKey)
         {
             return GetChannel(channelKey.ToString());
         }
 
-        public MaterialChannelBuilder GetChannel(string channelKey)
+        public ChannelBuilder GetChannel(string channelKey)
         {
             Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
 
@@ -110,17 +110,17 @@ namespace SharpGLTF.Materials
             return _Channels.FirstOrDefault(item => string.Equals(channelKey, item.Key, StringComparison.OrdinalIgnoreCase));
         }
 
-        public MaterialChannelBuilder UseChannel(KnownChannels channelKey)
+        public ChannelBuilder UseChannel(KnownChannels channelKey)
         {
             return UseChannel(channelKey.ToString());
         }
 
-        public MaterialChannelBuilder UseChannel(string channelKey)
+        public ChannelBuilder UseChannel(string channelKey)
         {
             var ch = GetChannel(channelKey);
             if (ch != null) return ch;
 
-            ch = new MaterialChannelBuilder(this, channelKey);
+            ch = new ChannelBuilder(this, channelKey);
             _Channels.Add(ch);
 
             return ch;

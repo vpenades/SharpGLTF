@@ -548,12 +548,46 @@ namespace SharpGLTF.Memory
     {
         #region constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Vector3"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector4Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
+        /// <param name="itemsCount">The number of <see cref="Vector3"/> items in <paramref name="source"/>.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
         public Vector4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
         {
             _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);

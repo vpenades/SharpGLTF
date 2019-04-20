@@ -16,27 +16,24 @@ namespace SharpGLTF.Materials
     {
         #region lifecycle
 
-        internal TextureBuilder(MaterialChannelBuilder parent) { _Parent = parent; }
+        internal TextureBuilder(ChannelBuilder parent)
+        {
+            Guard.NotNull(parent, nameof(parent));
+
+            _Parent = parent;
+        }
 
         #endregion
 
         #region data
 
-        private readonly MaterialChannelBuilder _Parent;
+        private readonly ChannelBuilder _Parent;
 
         #endregion
 
         #region properties
 
         public int CoordinateSet { get; set; } = 0;
-
-        /*
-        public Single Rotation { get; set; } = 0;
-
-        public Vector2 Offset { get; set; } = Vector2.Zero;
-
-        public Vector2 Scale { get; set; } = Vector2.One;
-        */
 
         public BYTES ImageContent { get; set; }
 
