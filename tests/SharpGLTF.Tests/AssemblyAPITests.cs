@@ -75,7 +75,7 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            var r = _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0005.txt", API);
+            var r = _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0006.txt", API);
 
             Assert.IsTrue(r);
         }
@@ -91,7 +91,7 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            var r = _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0005.txt", API);
+            var r = _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0006.txt", API);
 
             Assert.IsTrue(r);
         }
