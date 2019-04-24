@@ -24,6 +24,8 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Node, KHR_lights_punctualnodeextension>("KHR_lights_punctual");
 
             RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform");
+
+            RegisterExtension<Texture, MSFTTextureDDS>("MSFT_texture_dds");
         }
 
         #endregion

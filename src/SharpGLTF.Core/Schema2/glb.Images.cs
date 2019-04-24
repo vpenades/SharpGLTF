@@ -16,9 +16,11 @@ namespace SharpGLTF.Schema2
         const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
         const string EMBEDDEDJPEGBUFFER = "data:image/jpeg;base64,";
         const string EMBEDDEDPNGBUFFER = "data:image/png;base64,";
+        const string EMBEDDEDDDSBUFFER = "data:image/vnd-ms.dds;base64,";
 
         const string MIMEPNG = "image/png";
         const string MIMEJPEG = "image/jpeg";
+        const string MIMEDDS = "image/vnd-ms.dds";
 
         #endregion
 
@@ -66,6 +68,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public bool IsJpeg => _IsJpeg(GetImageContent());
 
+        /// <summary>
+        /// Gets a value indicating whether the contained image is a DDS image.
+        /// </summary>
+        public bool IsDds => _IsDDS(GetImageContent());
+
         #endregion
 
         #region API
@@ -85,6 +92,15 @@ namespace SharpGLTF.Schema2
             if (data[0] != 0xff) return false;
             if (data[1] != 0xd8) return false;
 
+            return true;
+        }
+
+        private static bool _IsDDS(IReadOnlyList<Byte> data)
+        {
+            if (data[0] != 0x44) return false;
+            if (data[1] != 0x44) return false;
+            if (data[2] != 0x53) return false;
+            if (data[3] != 0x20) return false;
             return true;
         }
 
@@ -134,6 +150,7 @@ namespace SharpGLTF.Schema2
 
             if (_IsPng(content)) imageType = MIMEPNG; // these strings might be wrong
             if (_IsJpeg(content)) imageType = MIMEJPEG; // these strings might be wrong
+            if (_IsDDS(content)) imageType = MIMEDDS; // these strings might be wrong
 
             if (imageType == null) throw new ArgumentException($"{nameof(content)} must be a PNG or JPG image", nameof(content));
 
@@ -181,6 +198,7 @@ namespace SharpGLTF.Schema2
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDJPEGBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDPNGBUFFER)
+                ?? uri._TryParseBase64Unchecked(EMBEDDEDDDSBUFFER)
                 ?? externalReferenceSolver.Invoke(uri).ToArray();
         }
 
@@ -208,6 +226,13 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = MIMEJPEG;
                 _uri = EMBEDDEDJPEGBUFFER + mimeContent;
+                return;
+            }
+
+            if (_IsDDS(_SatelliteImageContent))
+            {
+                _mimeType = MIMEDDS;
+                _uri = EMBEDDEDDDSBUFFER + mimeContent;
                 return;
             }
 
@@ -239,6 +264,14 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
+            if (_IsDDS(_SatelliteImageContent))
+            {
+                _mimeType = null;
+                _uri = satelliteUri += ".dds";
+                writer(_uri, new ArraySegment<byte>(_SatelliteImageContent));
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -248,6 +281,7 @@ namespace SharpGLTF.Schema2
 
             if (_IsPng(GetImageContent())) { _mimeType = MIMEPNG; return; }
             if (_IsJpeg(GetImageContent())) { _mimeType = MIMEJPEG; return; }
+            if (_IsDDS(GetImageContent())) { _mimeType = MIMEDDS; return; }
 
             throw new NotImplementedException();
         }
