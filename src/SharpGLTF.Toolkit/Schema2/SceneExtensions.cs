@@ -91,7 +91,7 @@ namespace SharpGLTF.Schema2
         /// <param name="scene">A <see cref="Scene"/> instance.</param>
         /// <returns>A collection of triangles in world space.</returns>
         public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Scene scene)
-            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
@@ -109,7 +109,7 @@ namespace SharpGLTF.Schema2
         /// <param name="inWorldSpace">A value indicating whether the returned triangles must be in local (false) or world (true) space.</param>
         /// <returns>A collection of triangles in local or world space.</returns>
         public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Node node, bool inWorldSpace)
-            where TvP : struct, Geometry.VertexTypes.IVertexPosition
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {

@@ -11,8 +11,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<(TvP, TvM, TvS)>> vertexBlocks)
-            where TvP : struct, IVertexPosition
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<Vertex<TvP, TvM, TvS>>> vertexBlocks)
+            where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
@@ -141,41 +141,59 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<(TvP, TvM, TvS), Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
+        private static Func<Vertex<TvP, TvM, TvS>, Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             var finfo = GetVertexField(typeof(TvP), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Item1);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Geometry);
 
             finfo = GetVertexField(typeof(TvM), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Item2);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Material);
 
             finfo = GetVertexField(typeof(TvS), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Item3);
+            if (finfo != null) return vertex => finfo.GetValue(vertex.Skinning);
 
             throw new NotImplementedException();
         }
 
-        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
+        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return GetColumn<TvP, TvM, TvS, Single>(vertices, func);
         }
 
-        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
+        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return GetColumn<TvP, TvM, TvS, Vector2>(vertices, func);
         }
 
-        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
+        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return GetColumn<TvP, TvM, TvS, Vector3>(vertices, func);
         }
 
-        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
+        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return GetColumn<TvP, TvM, TvS, Vector4>(vertices, func);
         }
 
-        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<(TvP, TvM, TvS)> vertices, Func<(TvP, TvM, TvS), Object> func)
+        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             var dst = new TColumn[vertices.Count];
 
@@ -189,8 +207,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        public static TvP CloneAs<TvP>(this IVertexPosition src)
-            where TvP : struct, IVertexPosition
+        public static TvP CloneAs<TvP>(this IVertexGeometry src)
+            where TvP : struct, IVertexGeometry
         {
             if (src.GetType() == typeof(TvP)) return (TvP)src;
 

@@ -134,7 +134,7 @@ namespace SharpGLTF.IO
             {
                 foreach (var v in p.Vertices)
                 {
-                    var pos = v.Item1.Position;
+                    var pos = v.Position;
                     sb.AppendLine(Invariant($"v {pos.X} {pos.Y} {pos.Z}"));
                 }
             }
@@ -145,7 +145,7 @@ namespace SharpGLTF.IO
             {
                 foreach (var v in p.Vertices)
                 {
-                    var nrm = v.Item1.Normal;
+                    var nrm = v.Geometry.Normal;
                     sb.AppendLine(Invariant($"vn {nrm.X} {nrm.Y} {nrm.Z}"));
                 }
             }
@@ -156,7 +156,7 @@ namespace SharpGLTF.IO
             {
                 foreach (var v in p.Vertices)
                 {
-                    var uv = v.Item2.TexCoord;
+                    var uv = v.Material.TexCoord;
                     uv.Y = 1 - uv.Y;
 
                     sb.AppendLine(Invariant($"vt {uv.X} {uv.Y}"));

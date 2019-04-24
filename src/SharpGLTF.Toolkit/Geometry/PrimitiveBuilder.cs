@@ -15,8 +15,8 @@ namespace SharpGLTF.Geometry
 
         int VertexCount { get; }
 
-        TvPP GetVertexPosition<TvPP>(int index)
-            where TvPP : struct, IVertexPosition;
+        TvPP GetVertexGeometry<TvPP>(int index)
+            where TvPP : struct, IVertexGeometry;
 
         TvMM GetVertexMaterial<TvMM>(int index)
             where TvMM : struct, IVertexMaterial;
@@ -33,11 +33,11 @@ namespace SharpGLTF.Geometry
     {
         void AddTriangle<TvPP, TvMM, TvSS>
             (
-            (TvPP, TvMM, TvSS) a,
-            (TvPP, TvMM, TvSS) b,
-            (TvPP, TvMM, TvSS) c
+            Vertex<TvPP, TvMM, TvSS> a,
+            Vertex<TvPP, TvMM, TvSS> b,
+            Vertex<TvPP, TvMM, TvSS> c
             )
-            where TvPP : struct, IVertexPosition
+            where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning;
     }
@@ -72,7 +72,7 @@ namespace SharpGLTF.Geometry
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Primitive {_Material}")]
     public class PrimitiveBuilder<TMaterial, TvP, TvM, TvS> : IPrimitiveBuilder, IPrimitive<TMaterial>
-        where TvP : struct, IVertexPosition
+        where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
@@ -95,7 +95,7 @@ namespace SharpGLTF.Geometry
 
         private readonly TMaterial _Material;
 
-        private readonly VertexList<(TvP, TvM, TvS)> _Vertices = new VertexList<(TvP, TvM, TvS)>();
+        private readonly VertexList<Vertex<TvP, TvM, TvS>> _Vertices = new VertexList<Vertex<TvP, TvM, TvS>>();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
@@ -108,7 +108,7 @@ namespace SharpGLTF.Geometry
 
         public int VertexCount => _Vertices.Count;
 
-        public IReadOnlyList<(TvP, TvM, TvS)> Vertices => _Vertices;
+        public IReadOnlyList<Vertex<TvP, TvM, TvS>> Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
@@ -128,19 +128,20 @@ namespace SharpGLTF.Geometry
         /// <typeparamref name="TvS"/> fragments.
         /// </param>
         /// <returns>The index of the vertex.</returns>
-        public int UseVertex((TvP, TvM, TvS) vertex)
+        public int UseVertex(Vertex<TvP, TvM, TvS> vertex)
         {
-            if (_Scrict)
-            {
-                vertex.Item1.Validate();
-                vertex.Item2.Validate();
-                vertex.Item3.Validate();
-            }
+            if (_Scrict) vertex.Validate();
 
             return _Vertices.Use(vertex);
         }
 
-        public void AddTriangle((TvP, TvM, TvS) a, (TvP, TvM, TvS) b, (TvP, TvM, TvS) c)
+        /// <summary>
+        /// Adds a triangle.
+        /// </summary>
+        /// <param name="a">First corner of the triangle.</param>
+        /// <param name="b">Second corner of the triangle.</param>
+        /// <param name="c">Third corner of the triangle.</param>
+        public void AddTriangle(Vertex<TvP, TvM, TvS> a, Vertex<TvP, TvM, TvS> b, Vertex<TvP, TvM, TvS> c)
         {
             var aa = UseVertex(a);
             var bb = UseVertex(b);
@@ -160,46 +161,12 @@ namespace SharpGLTF.Geometry
             _Indices.Add(cc);
         }
 
-        public void AddTriangle((TvP, TvM) a, (TvP, TvM) b, (TvP, TvM) c)
-        {
-            AddTriangle((a.Item1, a.Item2, default), (b.Item1, b.Item2, default), (c.Item1, c.Item2, default));
-        }
-
-        public void AddTriangle((TvP, TvS) a, (TvP, TvS) b, (TvP, TvS) c)
-        {
-            AddTriangle((a.Item1, default, a.Item2), (b.Item1, default, b.Item2), (c.Item1, default, c.Item2));
-        }
-
-        public void AddTriangle(TvP a, TvP b, TvP c)
-        {
-            AddTriangle((a, default, default), (b, default, default), (c, default, default));
-        }
-
-        public void AddPolygon(params (TvP, TvM, TvS)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(params (TvP, TvM)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(params (TvP, TvS)[] points)
-        {
-            for (int i = 2; i < points.Length; ++i)
-            {
-                AddTriangle(points[0], points[i - 1], points[i]);
-            }
-        }
-
-        public void AddPolygon(params TvP[] points)
+        /// <summary>
+        /// Adds a polygon as a decomposed collection of triangles.
+        /// Currently only convex polygons are supported.
+        /// </summary>
+        /// <param name="points">The corners of the polygon.</param>
+        public void AddPolygon(params Vertex<TvP, TvM, TvS>[] points)
         {
             for (int i = 2; i < points.Length; ++i)
             {
@@ -217,9 +184,9 @@ namespace SharpGLTF.Geometry
                 var b = primitive.Vertices[t.Item2];
                 var c = primitive.Vertices[t.Item3];
 
-                var aa = a.Item1; aa.Transform(transform); a.Item1 = aa;
-                var bb = b.Item1; bb.Transform(transform); b.Item1 = bb;
-                var cc = c.Item1; cc.Transform(transform); c.Item1 = cc;
+                var aa = a.Geometry; aa.Transform(transform); a.Geometry = aa;
+                var bb = b.Geometry; bb.Transform(transform); b.Geometry = bb;
+                var cc = c.Geometry; cc.Transform(transform); c.Geometry = cc;
 
                 AddTriangle(a, b, c);
             }
@@ -229,48 +196,38 @@ namespace SharpGLTF.Geometry
         {
             foreach (var v in _Vertices)
             {
-                v.Item1.Validate();
-                v.Item2.Validate();
-                v.Item3.Validate();
+                v.Validate();
             }
         }
 
-        public void AddTriangle<TvPP, TvMM, TvSS>((TvPP, TvMM, TvSS) a, (TvPP, TvMM, TvSS) b, (TvPP, TvMM, TvSS) c)
-            where TvPP : struct, IVertexPosition
+        public void AddTriangle<TvPP, TvMM, TvSS>(Vertex<TvPP, TvMM, TvSS> a, Vertex<TvPP, TvMM, TvSS> b, Vertex<TvPP, TvMM, TvSS> c)
+            where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning
         {
-            var p1 = a.Item1.CloneAs<TvP>();
-            var p2 = b.Item1.CloneAs<TvP>();
-            var p3 = c.Item1.CloneAs<TvP>();
+            var aa = a.CloneAs<TvP, TvM, TvS>();
+            var bb = b.CloneAs<TvP, TvM, TvS>();
+            var cc = c.CloneAs<TvP, TvM, TvS>();
 
-            var m1 = a.Item2.CloneAs<TvM>();
-            var m2 = b.Item2.CloneAs<TvM>();
-            var m3 = c.Item2.CloneAs<TvM>();
-
-            var s1 = a.Item3.CloneAs<TvS>();
-            var s2 = b.Item3.CloneAs<TvS>();
-            var s3 = c.Item3.CloneAs<TvS>();
-
-            AddTriangle((p1, m1, s1), (p2, m2, s2), (p3, m3, s3));
+            AddTriangle(aa, bb, cc);
         }
 
-        public TvPP GetVertexPosition<TvPP>(int index)
-            where TvPP : struct, IVertexPosition
+        public TvPP GetVertexGeometry<TvPP>(int index)
+            where TvPP : struct, IVertexGeometry
         {
-            return _Vertices[index].Item1.CloneAs<TvPP>();
+            return _Vertices[index].Geometry.CloneAs<TvPP>();
         }
 
         public TvMM GetVertexMaterial<TvMM>(int index)
             where TvMM : struct, IVertexMaterial
         {
-            return _Vertices[index].Item2.CloneAs<TvMM>();
+            return _Vertices[index].Material.CloneAs<TvMM>();
         }
 
         public TvSS GetVertexSkinning<TvSS>(int index)
             where TvSS : struct, IVertexSkinning
         {
-            return _Vertices[index].Item3.CloneAs<TvSS>();
+            return _Vertices[index].Skinning.CloneAs<TvSS>();
         }
 
         #endregion

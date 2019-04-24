@@ -48,7 +48,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         public TvP GetPositionFragment<TvP>(int index)
-            where TvP : struct, IVertexPosition
+            where TvP : struct, IVertexGeometry
         {
             var pnt = default(TvP);
 

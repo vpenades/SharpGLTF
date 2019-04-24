@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    public interface IVertexPosition
+    public interface IVertexGeometry
     {
         void Validate();
 
@@ -24,7 +24,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Position}")]
-    public struct VertexPosition : IVertexPosition
+    public struct VertexPosition : IVertexGeometry
     {
         #region constructors
 
@@ -54,11 +54,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
 
-        void IVertexPosition.SetNormal(Vector3 normal) { }
+        void IVertexGeometry.SetNormal(Vector3 normal) { }
 
-        void IVertexPosition.SetTangent(Vector4 tangent) { }
+        void IVertexGeometry.SetTangent(Vector4 tangent) { }
 
         public Vector3 GetPosition() { return this.Position; }
 
@@ -83,7 +83,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position and a Normal.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Position} {Normal}")]
-    public struct VertexPositionNormal : IVertexPosition
+    public struct VertexPositionNormal : IVertexGeometry
     {
         #region constructors
 
@@ -113,11 +113,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
 
-        void IVertexPosition.SetNormal(Vector3 normal) { this.Normal = normal; }
+        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
 
-        void IVertexPosition.SetTangent(Vector4 tangent) { }
+        void IVertexGeometry.SetTangent(Vector4 tangent) { }
 
         public Vector3 GetPosition() { return this.Position; }
 
@@ -144,7 +144,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Position} {Normal} {Tangent}")]
-    public struct VertexPositionNormalTangent : IVertexPosition
+    public struct VertexPositionNormalTangent : IVertexGeometry
     {
         #region constructors
 
@@ -172,11 +172,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexPosition.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
 
-        void IVertexPosition.SetNormal(Vector3 normal) { this.Normal = normal; }
+        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
 
-        void IVertexPosition.SetTangent(Vector4 tangent) { this.Tangent = tangent; }
+        void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = tangent; }
 
         public Vector3 GetPosition() { return this.Position; }
 

@@ -27,7 +27,7 @@ namespace SharpGLTF.Geometry
         /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> instances.</param>
         /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
         internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, TvS>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, TvS>> meshBuilders)
-            where TvP : struct, VertexTypes.IVertexPosition
+            where TvP : struct, VertexTypes.IVertexGeometry
             where TvM : struct, VertexTypes.IVertexMaterial
             where TvS : struct, VertexTypes.IVertexSkinning
         {

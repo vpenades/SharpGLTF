@@ -51,7 +51,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     public class MeshBuilder<TMaterial, TvP, TvM, TvS> : IMeshBuilder<TMaterial>
-        where TvP : struct, IVertexPosition
+        where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
@@ -160,7 +160,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     public class MeshBuilder<TvP, TvM, TvS> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS>
-        where TvP : struct, IVertexPosition
+        where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
@@ -187,7 +187,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1Texture1"/>.
     /// </typeparam>
     public class MeshBuilder<TvP, TvM> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, VertexEmpty>
-        where TvP : struct, IVertexPosition
+        where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
     {
         public MeshBuilder(string name = null)
@@ -205,7 +205,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexPositionNormalTangent"/>.
     /// </typeparam>
     public class MeshBuilder<TvP> : MeshBuilder<Materials.MaterialBuilder, TvP, VertexEmpty, VertexEmpty>
-        where TvP : struct, IVertexPosition
+        where TvP : struct, IVertexGeometry
     {
         public MeshBuilder(string name = null)
             : base(name) { }
