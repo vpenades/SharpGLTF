@@ -26,9 +26,9 @@ namespace SharpGLTF.Schema2
 	using Collections;
 
 	/// <summary>
-	/// glTF extension to specify textures using the DirectDraw Surface file format (DDS).
+	/// glTF extension to specify textures using the WebP image format.
 	/// </summary>
-	partial class TextureDDS : ExtraProperties
+	partial class TextureWEBP : ExtraProperties
 	{
 	
 		private Int32? _source;

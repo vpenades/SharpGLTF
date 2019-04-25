@@ -110,6 +110,7 @@ namespace SharpGLTF.IO
                 if (img._IsPngImage()) files[imgName + ".png"] = img;
                 if (img._IsJpgImage()) files[imgName + ".jpg"] = img;
                 if (img._IsDdsImage()) files[imgName + ".dds"] = img;
+                if (img._IsWebpImage()) files[imgName + ".webp"] = img;
 
                 firstImg = false;
             }

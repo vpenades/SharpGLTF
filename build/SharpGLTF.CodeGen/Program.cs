@@ -27,6 +27,7 @@ namespace SharpGLTF
             _ProcessKhronosNodeLightsPunctualExtension();
             _ProcessKhronosTextureTransformExtension();
             _ProcessMicrosoftTextureDDSExtension();
+            _ProcessTextureWebpExtension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
@@ -171,6 +172,14 @@ namespace SharpGLTF
             ProcessSchema("ext.MSFT.textureDDS.g", ctx);
         }
 
+        private static void _ProcessTextureWebpExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.TextureWebpSchemaFile);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+
+            ProcessSchema("ext.textureWEBP.g", ctx);
+        }
+
         #endregion
 
         #region code generation
@@ -227,7 +236,8 @@ namespace SharpGLTF
 
             newEmitter.SetRuntimeName("KHR_texture_transform textureInfo extension", "TextureTransform");
 
-            newEmitter.SetRuntimeName("MSFT_texture_dds extension", "MSFTTextureDDS");
+            newEmitter.SetRuntimeName("MSFT_texture_dds extension", "TextureDDS");
+            newEmitter.SetRuntimeName("EXT_texture_webp glTF extension", "TextureWEBP");
 
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();

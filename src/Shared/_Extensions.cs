@@ -275,7 +275,7 @@ namespace SharpGLTF
         {
             return collection.Concat(instances.Where(item => item != null));
         }
-        
+
         #endregion
 
         #region images
@@ -304,6 +304,23 @@ namespace SharpGLTF
             if (data[1] != 0x44) return false;
             if (data[2] != 0x53) return false;
             if (data[3] != 0x20) return false;
+            return true;
+        }
+
+        internal static bool _IsWebpImage(this IReadOnlyList<Byte> data)
+        {
+            // RIFF
+            if (data[0] != 0x52) return false;
+            if (data[1] != 0x49) return false;
+            if (data[2] != 0x46) return false;
+            if (data[3] != 0x46) return false;
+
+            // WEBP
+            if (data[8] != 0x57) return false;
+            if (data[9] != 0x45) return false;
+            if (data[10] != 0x42) return false;
+            if (data[11] != 0x50) return false;
+
             return true;
         }
 

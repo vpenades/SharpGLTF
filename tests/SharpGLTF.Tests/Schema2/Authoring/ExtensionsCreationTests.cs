@@ -79,8 +79,9 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result.gltf");
         }
 
-        [Test(Description = "Creates a quad mesh with a DDS Texture")]
-        public void CreateMicrosoftDDSTextureScene()
+        [TestCase("shannon-dxt5.dds")]
+        [TestCase("shannon.webp")]
+        public void CreateExtensionTextureScene(string textureFileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -94,7 +95,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage
                 (
                     Materials.KnownChannels.BaseColor,
-                    System.IO.Path.Combine(basePath, "test-dxt1.dds")
+                    System.IO.Path.Combine(basePath, textureFileName)
                 );                
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
@@ -119,6 +120,6 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result_wf.obj");
             model.AttachToCurrentTest("result_glb.glb");
             model.AttachToCurrentTest("result_gltf.gltf");            
-        }
+        }        
     }
 }

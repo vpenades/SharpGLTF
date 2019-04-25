@@ -25,7 +25,8 @@ namespace SharpGLTF.Schema2
 
             RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform");
 
-            RegisterExtension<Texture, MSFTTextureDDS>("MSFT_texture_dds");
+            RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds");
+            RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp");
         }
 
         #endregion

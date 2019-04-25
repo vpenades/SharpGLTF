@@ -17,10 +17,12 @@ namespace SharpGLTF.Schema2
         const string EMBEDDED_JPEG_BUFFER = "data:image/jpeg;base64,";
         const string EMBEDDED_PNG_BUFFER = "data:image/png;base64,";
         const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds;base64,";
+        const string EMBEDDED_WEBP_BUFFER = "data:image/webp;base64,";
 
         const string MIME_PNG = "image/png";
         const string MIME_JPG = "image/jpeg";
         const string MIME_DDS = "image/vnd-ms.dds";
+        const string MIME_WEBP = "image/webp";
 
         const string DEFAULT_PNG_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAHXpUWHRUaXRsZQAACJlzSU1LLM0pCUmtKCktSgUAKVIFt/VCuZ8AAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAANElEQVQoz2O8cuUKAwxoa2vD2VevXsUqzsRAIqC9Bsb///8TdDey+CD0Awsx7h6NB5prAADPsx0VAB8VRQAAAABJRU5ErkJggg==";
 
@@ -77,6 +79,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public bool IsDds => GetImageContent()._IsDdsImage();
 
+        /// <summary>
+        /// Gets a value indicating whether the contained image is a WEBP image.
+        /// </summary>
+        public bool IsWebp => GetImageContent()._IsWebpImage();
+
         #endregion
 
         #region API
@@ -125,11 +132,12 @@ namespace SharpGLTF.Schema2
 
             string imageType = null;
 
-            if (content._IsPngImage()) imageType = MIME_PNG; // these strings might be wrong
-            if (content._IsJpgImage()) imageType = MIME_JPG; // these strings might be wrong
-            if (content._IsDdsImage()) imageType = MIME_DDS; // these strings might be wrong
+            if (content._IsPngImage()) imageType = MIME_PNG;
+            if (content._IsJpgImage()) imageType = MIME_JPG;
+            if (content._IsDdsImage()) imageType = MIME_DDS;
+            if (content._IsWebpImage()) imageType = MIME_WEBP;
 
-            if (imageType == null) throw new ArgumentException($"{nameof(content)} must be a PNG or JPG image", nameof(content));
+            if (imageType == null) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
             this._uri = null;
             this._mimeType = null;
@@ -213,6 +221,13 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
+            if (_SatelliteImageContent._IsWebpImage())
+            {
+                _mimeType = MIME_WEBP;
+                _uri = EMBEDDED_WEBP_BUFFER + mimeContent;
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
@@ -223,7 +238,11 @@ namespace SharpGLTF.Schema2
         /// <param name="satelliteUri">A local satellite URI</param>
         internal void _WriteToSatellite(AssetWriter writer, string satelliteUri)
         {
-            if (_SatelliteImageContent == null) { _WriteAsBufferView(); return; }
+            if (_SatelliteImageContent == null)
+            {
+                _WriteAsBufferView();
+                return;
+            }
 
             if (_SatelliteImageContent._IsPngImage())
             {
@@ -249,18 +268,27 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
+            if (_SatelliteImageContent._IsWebpImage())
+            {
+                _mimeType = null;
+                _uri = satelliteUri += ".webp";
+                writer(_uri, _SatelliteImageContent.Slice(0));
+                return;
+            }
+
             throw new NotImplementedException();
         }
 
         private void _WriteAsBufferView()
         {
-            Guard.IsTrue(this._bufferView.HasValue, nameof(this._bufferView));
+            Guard.IsTrue(_bufferView.HasValue, nameof(_bufferView));
 
             var imageContent = GetImageContent();
 
             if (imageContent._IsPngImage()) { _mimeType = MIME_PNG; return; }
             if (imageContent._IsJpgImage()) { _mimeType = MIME_JPG; return; }
             if (imageContent._IsDdsImage()) { _mimeType = MIME_DDS; return; }
+            if (imageContent._IsWebpImage()) { _mimeType = MIME_WEBP; return; }
 
             throw new NotImplementedException();
         }
@@ -272,8 +300,8 @@ namespace SharpGLTF.Schema2
         /// </summary>
         internal void _ClearAfterWrite()
         {
-            this._mimeType = null;
-            this._uri = null;
+            _mimeType = null;
+            _uri = null;
         }
 
         #endregion

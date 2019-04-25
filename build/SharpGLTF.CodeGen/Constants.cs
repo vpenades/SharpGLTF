@@ -36,6 +36,8 @@ namespace SharpGLTF
         
         public static string MicrosoftTextureDDSSchemaFile => System.IO.Path.Combine(VendorSchemaDir, "MSFT_texture_dds", "schema", "glTF.MSFT_texture_dds.schema.json");
 
+        public static string TextureWebpSchemaFile => System.IO.Path.Combine(VendorSchemaDir, "EXT_texture_webp", "schema", "glTF.EXT_texture_webp.schema.json");
+
 
         /// <summary>
         /// directory within the solution where the generated code is emitted

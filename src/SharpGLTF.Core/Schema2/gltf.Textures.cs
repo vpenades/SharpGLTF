@@ -57,15 +57,18 @@ namespace SharpGLTF.Schema2
 
         private Image _GetPrimaryImage()
         {
-            var ddstex = this.GetExtension<MSFTTextureDDS>();
+            var ddstex = this.GetExtension<TextureDDS>();
             if (ddstex != null) return ddstex.Image;
 
-            return _source.HasValue? LogicalParent.LogicalImages[_source.Value] : null;
+            var wbptex = this.GetExtension<TextureWEBP>();
+            if (wbptex != null) return wbptex.Image;
+
+            return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }
 
         private Image _GetFallbackImage()
         {
-            var ddstex = this.GetExtension<MSFTTextureDDS>();
+            var ddstex = this.GetExtension<TextureDDS>();
             if (ddstex == null) return null;
 
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
@@ -74,21 +77,22 @@ namespace SharpGLTF.Schema2
         public void ClearImages()
         {
             _source = null;
-            this.RemoveExtensions<MSFTTextureDDS>();
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureWEBP>();
         }
 
         public void SetImage(Image primaryImage)
         {
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
 
-            if (primaryImage.IsDds)
+            if (primaryImage.IsDds || primaryImage.IsWebp)
             {
                 var fallback = LogicalParent.UseImage(Image.DefaultPngImage.Slice(0));
                 SetImages(primaryImage, fallback);
             }
             else
             {
-                this.RemoveExtensions<MSFTTextureDDS>();
+                ClearImages();
                 _source = primaryImage.LogicalIndex;
             }
         }
@@ -97,18 +101,36 @@ namespace SharpGLTF.Schema2
         {
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
-            Guard.IsTrue(primaryImage.IsDds, "primary image must be DDS");
-            Guard.IsTrue(fallbackImage.IsJpeg || fallbackImage.IsPng, nameof(fallbackImage), "fallback image must be PNG or JPEG");
+            Guard.IsTrue(primaryImage.IsDds || primaryImage.IsWebp, "Primary image must be DDS or WEBP");
+            Guard.IsTrue(fallbackImage.IsJpeg || fallbackImage.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
 
-            _UseDDSTexture().Image = primaryImage;
+            ClearImages();
+
+            if (primaryImage.IsDds)
+            {
+                _UseDDSTexture().Image = primaryImage;
+            }
+
+            if (primaryImage.IsWebp)
+            {
+                _UseWEBPTexture().Image = primaryImage;
+            }
 
             _source = fallbackImage.LogicalIndex;
         }
 
-        private MSFTTextureDDS _UseDDSTexture()
+        private TextureDDS _UseDDSTexture()
         {
-            var primary = this.GetExtension<MSFTTextureDDS>();
-            if (primary == null) { primary = new MSFTTextureDDS(this); this.SetExtension(primary); }
+            var primary = this.GetExtension<TextureDDS>();
+            if (primary == null) { primary = new TextureDDS(this); this.SetExtension(primary); }
+
+            return primary;
+        }
+
+        private TextureWEBP _UseWEBPTexture()
+        {
+            var primary = this.GetExtension<TextureWEBP>();
+            if (primary == null) { primary = new TextureWEBP(this); this.SetExtension(primary); }
 
             return primary;
         }
@@ -125,9 +147,9 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    partial class MSFTTextureDDS
+    partial class TextureDDS
     {
-        internal MSFTTextureDDS(Texture parent)
+        internal TextureDDS(Texture parent)
         {
             _Parent = parent;
         }
@@ -139,7 +161,37 @@ namespace SharpGLTF.Schema2
             get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
             set
             {
-                if (value != null) Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                if (value != null)
+                {
+                    Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                    Guard.IsTrue(value.IsDds, nameof(value));
+                }
+
+                _source = value?.LogicalIndex;
+            }
+        }
+    }
+
+    partial class TextureWEBP
+    {
+        internal TextureWEBP(Texture parent)
+        {
+            _Parent = parent;
+        }
+
+        private readonly Texture _Parent;
+
+        public Image Image
+        {
+            get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
+            set
+            {
+                if (value != null)
+                {
+                    Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                    Guard.IsTrue(value.IsWebp, nameof(value));
+                }
+
                 _source = value?.LogicalIndex;
             }
         }
