@@ -13,11 +13,11 @@ namespace SharpGLTF.IO
 
     using BYTES = ArraySegment<Byte>;
 
-    using POSITION = Geometry.VertexTypes.VertexPositionNormal;
-    using TEXCOORD = Geometry.VertexTypes.VertexTexture1;
-    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
-
     using VERTEX = ValueTuple<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
+
+    using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
+    using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
+    using VSKINNING = Geometry.VertexTypes.VertexEmpty;
 
     /// <summary>
     /// Tiny wavefront object writer
@@ -34,7 +34,7 @@ namespace SharpGLTF.IO
             public BYTES DiffuseTexture;
         }
 
-        private readonly Geometry.MeshBuilder<Material, POSITION, TEXCOORD, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, POSITION, TEXCOORD, VEMPTY>();
+        private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VSKINNING> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VSKINNING>();
 
         #endregion
 
@@ -71,13 +71,35 @@ namespace SharpGLTF.IO
             return files;
         }
 
+        // internal class to compare the content of two array segments
+        private class _ArraySegmentEqualityComparer<T> : IEqualityComparer<ArraySegment<T>>
+        {
+            public bool Equals(ArraySegment<T> x, ArraySegment<T> y)
+            {
+                return x.SequenceEqual(y);
+            }
+
+            public int GetHashCode(ArraySegment<T> obj)
+            {
+                int h = 0;
+
+                foreach (var item in obj)
+                {
+                    h ^= obj.GetHashCode();
+                    h *= 17;
+                }
+
+                return h;
+            }
+        }
+
         private IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
             var images = materials
                 .Select(item => item.DiffuseTexture)
                 .Where(item => item.Array != null)
-                .Distinct();
+                .Distinct(new _ArraySegmentEqualityComparer<Byte>() );
 
             bool firstImg = true;
 
@@ -85,8 +107,9 @@ namespace SharpGLTF.IO
             {
                 var imgName = firstImg ? baseName : $"{baseName}_{files.Count}";
 
-                if (_IsPng(img)) files[imgName + ".png"] = img;
-                if (_IsJpeg(img)) files[imgName + ".jpg"] = img;
+                if (img._IsPngImage()) files[imgName + ".png"] = img;
+                if (img._IsJpgImage()) files[imgName + ".jpg"] = img;
+                if (img._IsDdsImage()) files[imgName + ".dds"] = img;
 
                 firstImg = false;
             }
@@ -109,7 +132,7 @@ namespace SharpGLTF.IO
 
                 if (m.DiffuseTexture.Array != null)
                 {
-                    var imgName = files.FirstOrDefault(kvp => kvp.Value == m.DiffuseTexture).Key;
+                    var imgName = files.FirstOrDefault(kvp => kvp.Value.SequenceEqual(m.DiffuseTexture) ).Key;
                     sb.AppendLine($"map_Kd {imgName}");
                 }
 
@@ -205,31 +228,13 @@ namespace SharpGLTF.IO
             }
         }
 
-        private static bool _IsPng(IReadOnlyList<Byte> data)
-        {
-            if (data[0] != 0x89) return false;
-            if (data[1] != 0x50) return false;
-            if (data[2] != 0x4e) return false;
-            if (data[3] != 0x47) return false;
-
-            return true;
-        }
-
-        private static bool _IsJpeg(IReadOnlyList<Byte> data)
-        {
-            if (data[0] != 0xff) return false;
-            if (data[1] != 0xd8) return false;
-
-            return true;
-        }
-
         #endregion
 
         #region schema2 API
 
-        public void AddModel(Schema2.ModelRoot model)
+        public void AddModel(ModelRoot model)
         {
-            foreach (var triangle in Schema2.Schema2Toolkit.Triangulate<POSITION, TEXCOORD, VEMPTY>(model.DefaultScene))
+            foreach (var triangle in Schema2Toolkit.Triangulate<VGEOMETRY, VMATERIAL, VSKINNING>(model.DefaultScene))
             {
                 var dstMaterial = default(Material);
 
@@ -243,7 +248,7 @@ namespace SharpGLTF.IO
                     dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
                     dstMaterial.SpecularColor = new Vector3(0.2f);
 
-                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.Image?.GetImageContent() ?? default;
+                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
                 }
 
                 this.AddTriangle(dstMaterial, triangle.Item1, triangle.Item2, triangle.Item3);

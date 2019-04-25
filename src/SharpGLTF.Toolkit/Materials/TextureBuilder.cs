@@ -29,15 +29,26 @@ namespace SharpGLTF.Materials
 
         private readonly ChannelBuilder _Parent;
 
+        private BYTES _PrimaryImageContent;
+        private BYTES _FallbackImageContent;
+
         #endregion
 
         #region properties
 
         public int CoordinateSet { get; set; } = 0;
 
-        public BYTES PrimaryImageContent { get; set; }
+        public BYTES PrimaryImageContent
+        {
+            get => _PrimaryImageContent;
+            set => WithImage(value);
+        }
 
-        public BYTES FallbackImageContent { get; set; }
+        public BYTES FallbackImageContent
+        {
+            get => _FallbackImageContent;
+            set => WithFallbackImage(value);
+        }
 
         public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.DEFAULT;
 
@@ -53,37 +64,61 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
 
-        public TextureBuilder WithImage(string primaryImagePath, string fallbackImagePath = null)
+        public TextureBuilder WithImage(string imagePath)
         {
-            var primary = System.IO.File.ReadAllBytes(primaryImagePath).Slice(0);
+            var primary = System.IO.File
+                .ReadAllBytes(imagePath)
+                .Slice(0);
 
-            if (string.IsNullOrWhiteSpace(fallbackImagePath)) return WithImage(primary);
-
-            var fallback = System.IO.File.ReadAllBytes(fallbackImagePath).Slice(0);
-
-            return WithImage(primary, fallback);
+            return WithImage(primary);
         }
 
-        public TextureBuilder WithImage(BYTES primary)
+        public TextureBuilder WithImage(BYTES image)
         {
-            this.PrimaryImageContent = primary;
-            this.FallbackImageContent = default;
+            if (image.Count > 0)
+            {
+                Guard.IsTrue(image._IsJpgImage() || image._IsPngImage() || image._IsDdsImage(), nameof(image), "Must be JPG, PNG or DDS");
+            }
+            else
+            {
+                image = default;
+            }
+
+            _PrimaryImageContent = image;
             return this;
         }
 
-        public TextureBuilder WithImage(BYTES primary, BYTES fallback)
+        public TextureBuilder WithFallbackImage(string imagePath)
         {
-            this.PrimaryImageContent = primary;
-            this.FallbackImageContent = fallback;
+            var primary = System.IO.File
+                .ReadAllBytes(imagePath)
+                .Slice(0);
+
+            return WithFallbackImage(primary);
+        }
+
+        public TextureBuilder WithFallbackImage(BYTES image)
+        {
+            if (image.Count > 0)
+            {
+                Guard.IsTrue(image._IsJpgImage() || image._IsPngImage(), nameof(image), "Must be JPG, PNG");
+            }
+            else
+            {
+                image = default;
+            }
+
+            _FallbackImageContent = image;
             return this;
         }
 
-        public TextureBuilder WithSampler(TEXMIPMAP min = TEXMIPMAP.LINEAR, TEXLERP mag = TEXLERP.LINEAR, TEXWRAP ws = TEXWRAP.REPEAT, TEXWRAP wt = TEXWRAP.REPEAT)
+        public TextureBuilder WithSampler(TEXWRAP ws, TEXWRAP wt, TEXMIPMAP min = TEXMIPMAP.DEFAULT, TEXLERP mag = TEXLERP.DEFAULT)
         {
-            this.MinFilter = min;
-            this.MagFilter = mag;
             this.WrapS = ws;
             this.WrapT = wt;
+
+            this.MinFilter = min;
+            this.MagFilter = mag;
 
             return this;
         }

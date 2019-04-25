@@ -83,8 +83,8 @@ namespace SharpGLTF.Schema2
 
             if (primaryImage.IsDds)
             {
-                _source = null;
-                _UseDDSTexture().Image = primaryImage;
+                var fallback = LogicalParent.UseImage(Image.DefaultPngImage.Slice(0));
+                SetImages(primaryImage, fallback);
             }
             else
             {
@@ -227,8 +227,11 @@ namespace SharpGLTF.Schema2
         /// <param name="primary">The source <see cref="Image"/>.</param>
         /// <param name="sampler">The source <see cref="TextureSampler"/>.</param>
         /// <returns>A <see cref="Texture"/> instance.</returns>
-        public Texture UseTexture(Image primary, TextureSampler sampler)
+        public Texture UseTexture(Image primary, TextureSampler sampler = null)
         {
+            // if primary image is null, there's no point in creating a texture.
+            if (primary == null) return null;
+
             return UseTexture(primary, null, sampler);
         }
 
@@ -240,7 +243,7 @@ namespace SharpGLTF.Schema2
         /// <param name="fallback">The source <see cref="Image"/>.</param>
         /// <param name="sampler">The source <see cref="TextureSampler"/>.</param>
         /// <returns>A <see cref="Texture"/> instance.</returns>
-        public Texture UseTexture(Image primary, Image fallback, TextureSampler sampler)
+        public Texture UseTexture(Image primary, Image fallback, TextureSampler sampler = null)
         {
             // if primary image is null, there's no point in creating a texture.
             if (primary == null)

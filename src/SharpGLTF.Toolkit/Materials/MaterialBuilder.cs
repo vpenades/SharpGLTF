@@ -130,41 +130,45 @@ namespace SharpGLTF.Materials
         {
             this.AlphaMode = alphaMode;
             this.AlphaCutoff = alphaCutoff;
+
             return this;
         }
 
         public MaterialBuilder WithDoubleSide(bool enabled)
         {
             this.DoubleSided = enabled;
+
             return this;
         }
 
         public MaterialBuilder WithChannelParam(KnownChannels channelKey, Vector4 parameter)
         {
             this.UseChannel(channelKey).Parameter = parameter;
+
             return this;
         }
 
         public MaterialBuilder WithChannelParam(string channelKey, Vector4 parameter)
         {
             this.UseChannel(channelKey).Parameter = parameter;
-            return this;
-        }
-
-        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string primaryImagePath, string fallbackImagePath = null)
-        {
-            this.UseChannel(channelKey)
-                .UseTexture()
-                .WithImage(primaryImagePath, fallbackImagePath);
 
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(string channelKey, string primaryImagePath, string fallbackImagePath = null)
+        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string primaryImagePath)
         {
             this.UseChannel(channelKey)
                 .UseTexture()
-                .WithImage(primaryImagePath, fallbackImagePath);
+                .WithImage(primaryImagePath);
+
+            return this;
+        }
+
+        public MaterialBuilder WithChannelImage(string channelKey, string primaryImagePath)
+        {
+            this.UseChannel(channelKey)
+                .UseTexture()
+                .WithImage(primaryImagePath);
 
             return this;
         }
@@ -180,6 +184,7 @@ namespace SharpGLTF.Materials
         public MaterialBuilder WithFallback(MaterialBuilder fallback)
         {
             this.CompatibilityFallback = fallback;
+
             return this;
         }
 

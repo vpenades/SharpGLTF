@@ -140,17 +140,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Image"/> instance.</returns>
         public static Image UseImageWithContent(this ModelRoot root, Byte[] imageContent)
         {
-            Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
-
-            foreach (var img in root.LogicalImages)
-            {
-                var existingContent = img.GetImageContent();
-                if (Enumerable.SequenceEqual(existingContent, imageContent)) return img;
-            }
-
-            var image = root.CreateImage();
-            image.SetSatelliteContent(imageContent);
-            return image;
+            return root.UseImage(new ArraySegment<byte>(imageContent));
         }
 
         #endregion

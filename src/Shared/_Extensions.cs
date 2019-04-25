@@ -275,6 +275,37 @@ namespace SharpGLTF
         {
             return collection.Concat(instances.Where(item => item != null));
         }
+        
+        #endregion
+
+        #region images
+
+        internal static bool _IsPngImage(this IReadOnlyList<Byte> data)
+        {
+            if (data[0] != 0x89) return false;
+            if (data[1] != 0x50) return false;
+            if (data[2] != 0x4e) return false;
+            if (data[3] != 0x47) return false;
+
+            return true;
+        }
+
+        internal static bool _IsJpgImage(this IReadOnlyList<Byte> data)
+        {
+            if (data[0] != 0xff) return false;
+            if (data[1] != 0xd8) return false;
+
+            return true;
+        }
+
+        internal static bool _IsDdsImage(this IReadOnlyList<Byte> data)
+        {
+            if (data[0] != 0x44) return false;
+            if (data[1] != 0x44) return false;
+            if (data[2] != 0x53) return false;
+            if (data[3] != 0x20) return false;
+            return true;
+        }
 
         #endregion
 

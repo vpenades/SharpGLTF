@@ -94,8 +94,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage
                 (
                     Materials.KnownChannels.BaseColor,
-                    System.IO.Path.Combine(basePath, "test-dxt1.dds"),
-                    System.IO.Path.Combine(basePath, "test.jpg")
+                    System.IO.Path.Combine(basePath, "test-dxt1.dds")
                 );                
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
@@ -117,8 +116,9 @@ namespace SharpGLTF.Schema2.Authoring
                 .CreateNode("RootNode")
                 .WithMesh(model.LogicalMeshes[0]);
 
-            model.AttachToCurrentTest("result.glb");
-            model.AttachToCurrentTest("result.gltf");
+            model.AttachToCurrentTest("result_wf.obj");
+            model.AttachToCurrentTest("result_glb.glb");
+            model.AttachToCurrentTest("result_gltf.gltf");            
         }
     }
 }
