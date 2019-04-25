@@ -151,20 +151,20 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string imageFilePath)
+        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string primaryImagePath, string fallbackImagePath = null)
         {
             this.UseChannel(channelKey)
                 .UseTexture()
-                .WithImage(imageFilePath);
+                .WithImage(primaryImagePath, fallbackImagePath);
 
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(string channelKey, string imageFilePath)
+        public MaterialBuilder WithChannelImage(string channelKey, string primaryImagePath, string fallbackImagePath = null)
         {
             this.UseChannel(channelKey)
                 .UseTexture()
-                .WithImage(imageFilePath);
+                .WithImage(primaryImagePath, fallbackImagePath);
 
             return this;
         }

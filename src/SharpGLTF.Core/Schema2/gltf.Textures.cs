@@ -36,17 +36,113 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        [Obsolete("Use PrimaryImage")]
         public Image Image
         {
-            get => _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
+            get => PrimaryImage;
             set
             {
-                if (value != null) Guard.MustShareLogicalParent(this, value, nameof(value));
-                _source = value?.LogicalIndex;
+                if (value == null) ClearImages();
+                else SetImage(value);
             }
         }
 
+        public Image PrimaryImage => _GetPrimaryImage();
+
+        public Image FallbackImage => _GetFallbackImage();
+
         #endregion
+
+        #region API
+
+        private Image _GetPrimaryImage()
+        {
+            var ddstex = this.GetExtension<MSFTTextureDDS>();
+            if (ddstex != null) return ddstex.Image;
+
+            return _source.HasValue? LogicalParent.LogicalImages[_source.Value] : null;
+        }
+
+        private Image _GetFallbackImage()
+        {
+            var ddstex = this.GetExtension<MSFTTextureDDS>();
+            if (ddstex == null) return null;
+
+            return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
+        }
+
+        public void ClearImages()
+        {
+            _source = null;
+            this.RemoveExtensions<MSFTTextureDDS>();
+        }
+
+        public void SetImage(Image primaryImage)
+        {
+            Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
+
+            if (primaryImage.IsDds)
+            {
+                _source = null;
+                _UseDDSTexture().Image = primaryImage;
+            }
+            else
+            {
+                this.RemoveExtensions<MSFTTextureDDS>();
+                _source = primaryImage.LogicalIndex;
+            }
+        }
+
+        public void SetImages(Image primaryImage, Image fallbackImage)
+        {
+            Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
+            Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
+            Guard.IsTrue(primaryImage.IsDds, "primary image must be DDS");
+            Guard.IsTrue(fallbackImage.IsJpeg || fallbackImage.IsPng, nameof(fallbackImage), "fallback image must be PNG or JPEG");
+
+            _UseDDSTexture().Image = primaryImage;
+
+            _source = fallbackImage.LogicalIndex;
+        }
+
+        private MSFTTextureDDS _UseDDSTexture()
+        {
+            var primary = this.GetExtension<MSFTTextureDDS>();
+            if (primary == null) { primary = new MSFTTextureDDS(this); this.SetExtension(primary); }
+
+            return primary;
+        }
+
+        internal bool _IsEqualentTo(Image primary, Image fallback, TextureSampler sampler)
+        {
+            if (primary != this.PrimaryImage) return false;
+            if (fallback != this.FallbackImage) return false;
+            if (sampler != this.Sampler) return false;
+
+            return true;
+        }
+
+        #endregion
+    }
+
+    partial class MSFTTextureDDS
+    {
+        internal MSFTTextureDDS(Texture parent)
+        {
+            _Parent = parent;
+        }
+
+        private readonly Texture _Parent;
+
+        public Image Image
+        {
+            get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
+            set
+            {
+                if (value != null) Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                _source = value?.LogicalIndex;
+            }
+        }
     }
 
     [System.Diagnostics.DebuggerDisplay("TextureSampler[{LogicalIndex}] {Name}")]
@@ -103,12 +199,12 @@ namespace SharpGLTF.Schema2
         /// Creates or reuses a <see cref="TextureSampler"/> instance
         /// at <see cref="ModelRoot.LogicalTextureSamplers"/>.
         /// </summary>
-        /// <param name="min">A value of <see cref="TEXMIPMAP"/>.</param>
-        /// <param name="mag">A value of <see cref="TEXLERP"/>.</param>
         /// <param name="ws">The <see cref="TEXWRAP"/> in the S axis.</param>
         /// <param name="wt">The <see cref="TEXWRAP"/> in the T axis.</param>
+        /// <param name="min">A value of <see cref="TEXMIPMAP"/>.</param>
+        /// <param name="mag">A value of <see cref="TEXLERP"/>.</param>
         /// <returns>A <see cref="TextureSampler"/> instance, or null if all the arguments are default values.</returns>
-        public TextureSampler UseTextureSampler(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
+        public TextureSampler UseTextureSampler(TEXWRAP ws, TEXWRAP wt, TEXMIPMAP min, TEXLERP mag)
         {
             if (TextureSampler.IsDefault(min, mag, ws, wt)) return null;
 
@@ -128,39 +224,49 @@ namespace SharpGLTF.Schema2
         /// Creates or reuses a <see cref="Texture"/> instance
         /// at <see cref="ModelRoot.LogicalTextures"/>.
         /// </summary>
-        /// <param name="image">The source <see cref="Image"/>.</param>
+        /// <param name="primary">The source <see cref="Image"/>.</param>
         /// <param name="sampler">The source <see cref="TextureSampler"/>.</param>
         /// <returns>A <see cref="Texture"/> instance.</returns>
-        public Texture UseTexture(Image image, TextureSampler sampler)
+        public Texture UseTexture(Image primary, TextureSampler sampler)
         {
-            if (image == null) return null;
+            return UseTexture(primary, null, sampler);
+        }
 
-            if (image != null) Guard.MustShareLogicalParent(this, image, nameof(image));
-            if (sampler != null) Guard.MustShareLogicalParent(this, sampler, nameof(sampler));
+        /// <summary>
+        /// Creates or reuses a <see cref="Texture"/> instance
+        /// at <see cref="ModelRoot.LogicalTextures"/>.
+        /// </summary>
+        /// <param name="primary">The source <see cref="Image"/>.</param>
+        /// <param name="fallback">The source <see cref="Image"/>.</param>
+        /// <param name="sampler">The source <see cref="TextureSampler"/>.</param>
+        /// <returns>A <see cref="Texture"/> instance.</returns>
+        public Texture UseTexture(Image primary, Image fallback, TextureSampler sampler)
+        {
+            // if primary image is null, there's no point in creating a texture.
+            if (primary == null)
+            {
+                Guard.MustBeNull(fallback, nameof(fallback));
+                return null;
+            }
 
-            var tex = _textures.FirstOrDefault(item => item.Image == image && item.Sampler == sampler);
+            if (primary  != null) Guard.MustShareLogicalParent(this, primary, nameof(primary));
+            if (fallback != null) Guard.MustShareLogicalParent(this, fallback, nameof(primary));
+            if (sampler  != null) Guard.MustShareLogicalParent(this, sampler, nameof(sampler));
+
+            // find if we have an equivalent texture
+            var tex = _textures.FirstOrDefault(item => item._IsEqualentTo(primary, fallback, sampler));
             if (tex != null) return tex;
 
+            // create a new texture
             tex = new Texture();
             _textures.Add(tex);
 
-            tex.Image = image;
+            if (fallback == null) tex.SetImage(primary);
+            else tex.SetImages(primary, fallback);
+
             tex.Sampler = sampler;
 
             return tex;
-        }
-
-        internal T _UseTextureInfo<T>(Image image, TextureSampler sampler, int textureSet)
-            where T : TextureInfo, new()
-        {
-            var tex = UseTexture(image, sampler);
-            if (tex == null) return null;
-
-            return new T
-            {
-                _LogicalTextureIndex = tex.LogicalIndex,
-                TextureCoordinate = textureSet
-            };
         }
     }
 }

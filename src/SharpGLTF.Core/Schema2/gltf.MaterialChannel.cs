@@ -111,18 +111,19 @@ namespace SharpGLTF.Schema2
 
         public void SetTexture(
             int texCoord,
-            Image texImg,
-            TextureMipMapFilter min = TextureMipMapFilter.DEFAULT,
-            TextureInterpolationFilter mag = TextureInterpolationFilter.DEFAULT,
+            Image primaryImg,
+            Image fallbackImg = null,
             TextureWrapMode ws = TextureWrapMode.REPEAT,
-            TextureWrapMode wt = TextureWrapMode.REPEAT)
+            TextureWrapMode wt = TextureWrapMode.REPEAT,
+            TextureMipMapFilter min = TextureMipMapFilter.DEFAULT,
+            TextureInterpolationFilter mag = TextureInterpolationFilter.DEFAULT)
         {
-            if (texImg == null) return; // in theory, we should completely remove the TextureInfo
+            if (primaryImg == null) return; // in theory, we should completely remove the TextureInfo
 
-            if (_Material == null) throw new InvalidOperationException();
+            Guard.NotNull(_Material, nameof(_Material));
 
-            var sampler = _Material.LogicalParent.UseTextureSampler(min, mag, ws, wt);
-            var texture = _Material.LogicalParent.UseTexture(texImg, sampler);
+            var sampler = _Material.LogicalParent.UseTextureSampler(ws, wt, min, mag);
+            var texture = _Material.LogicalParent.UseTexture(primaryImg, fallbackImg, sampler);
 
             SetTexture(texCoord, texture);
         }

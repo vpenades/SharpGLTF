@@ -248,7 +248,12 @@ namespace SharpGLTF.Schema2
             dstChannel.Texture.Scale = srcChannel.Transform?.Scale ?? Vector2.One;
             */
 
-            dstChannel.Texture.ImageContent = srcChannel.Texture.Image.GetImageContent();
+            dstChannel.Texture.PrimaryImageContent = srcChannel.Texture.PrimaryImage.GetImageContent();
+
+            if (srcChannel.Texture.FallbackImage != null)
+            {
+                dstChannel.Texture.FallbackImageContent = srcChannel.Texture.FallbackImage.GetImageContent();
+            }
         }
 
         public static void CopyTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial)
@@ -318,12 +323,24 @@ namespace SharpGLTF.Schema2
             dstChannel.Parameter = srcChannel.Parameter;
 
             var srcTex = srcChannel.Texture;
-
             if (srcTex == null) return;
 
-            var image = dstChannel.LogicalParent.LogicalParent.UseImageWithContent(srcTex.ImageContent.ToArray());
+            var primary = dstChannel
+                .LogicalParent
+                .LogicalParent
+                .UseImageWithContent(srcTex.PrimaryImageContent.ToArray());
 
-            dstChannel.SetTexture(srcTex.CoordinateSet, image, srcTex.MinFilter, srcTex.MagFilter, srcTex.WrapS, srcTex.WrapT);
+            Image fallback = null;
+
+            if (srcTex.FallbackImageContent.Count > 0)
+            {
+                fallback = dstChannel
+                .LogicalParent
+                .LogicalParent
+                .UseImageWithContent(srcTex.FallbackImageContent.ToArray());
+            }
+
+            dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);
 
             // dstChannel.SetTransform(srcTex.CoordinateSet, srcTex.Offset, srcTex.Scale, srcTex.Rotation);
         }

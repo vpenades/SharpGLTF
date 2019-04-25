@@ -78,7 +78,8 @@ namespace SharpGLTF
 
         public static void AttachGltfValidatorLink(this NUnit.Framework.TestContext context)
         {
-            context.AttachUrlLink("🌍 glTF Validator", "http://github.khronos.org/glTF-Validator/");
+            context.AttachUrlLink("🌍 khronos Validator", "http://github.khronos.org/glTF-Validator/");
+            context.AttachUrlLink("🌍 babylonjs sandbox", "https://sandbox.babylonjs.com/");            
         }
 
         public static void AttachFileLink(this NUnit.Framework.TestContext context, string linkPath, string targetPath)

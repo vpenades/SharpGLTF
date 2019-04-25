@@ -35,7 +35,9 @@ namespace SharpGLTF.Materials
 
         public int CoordinateSet { get; set; } = 0;
 
-        public BYTES ImageContent { get; set; }
+        public BYTES PrimaryImageContent { get; set; }
+
+        public BYTES FallbackImageContent { get; set; }
 
         public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.DEFAULT;
 
@@ -51,13 +53,30 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
 
-        public TextureBuilder WithImage(string imageFilePath)
+        public TextureBuilder WithImage(string primaryImagePath, string fallbackImagePath = null)
         {
-            var data = System.IO.File.ReadAllBytes(imageFilePath).Slice(0);
-            return WithImage(data);
+            var primary = System.IO.File.ReadAllBytes(primaryImagePath).Slice(0);
+
+            if (string.IsNullOrWhiteSpace(fallbackImagePath)) return WithImage(primary);
+
+            var fallback = System.IO.File.ReadAllBytes(fallbackImagePath).Slice(0);
+
+            return WithImage(primary, fallback);
         }
 
-        public TextureBuilder WithImage(BYTES image) { this.ImageContent = image; return this; }
+        public TextureBuilder WithImage(BYTES primary)
+        {
+            this.PrimaryImageContent = primary;
+            this.FallbackImageContent = default;
+            return this;
+        }
+
+        public TextureBuilder WithImage(BYTES primary, BYTES fallback)
+        {
+            this.PrimaryImageContent = primary;
+            this.FallbackImageContent = fallback;
+            return this;
+        }
 
         public TextureBuilder WithSampler(TEXMIPMAP min = TEXMIPMAP.LINEAR, TEXLERP mag = TEXLERP.LINEAR, TEXWRAP ws = TEXWRAP.REPEAT, TEXWRAP wt = TEXWRAP.REPEAT)
         {
