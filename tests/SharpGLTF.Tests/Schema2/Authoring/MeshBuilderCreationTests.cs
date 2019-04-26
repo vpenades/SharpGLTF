@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
-using System.Text;
 using System.Linq;
 
 using NUnit.Framework;
@@ -14,16 +13,14 @@ namespace SharpGLTF.Schema2.Authoring
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
-    using VCLR1 = Geometry.VertexTypes.VertexColor1;
-    using VTEX1 = Geometry.VertexTypes.VertexTexture1;
     using VSKIN4 = Geometry.VertexTypes.VertexJoints8x4;
-    
 
     [TestFixture]
+    [Category("Model Authoring")]
     public class MeshBuilderCreationTests
     {
         [Test(Description = "Creates an interleaved scene using a mesh builder helper class")]
-        public void CreateInterleavedMeshBuilderScene()
+        public void CreateSceneWithInterleavedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -55,7 +52,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a scene with 4 meshes, where the meshes have been initialized so they can share the same vertex and index buffers")]
-        public void CreateSharedBuffersScene()
+        public void CreateSceneWithSharedBuffers()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -107,7 +104,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a node animated scene.")]
-        public void CreateAnimatedMeshBuilderScene()
+        public void CreateSceneWithAnimatedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -142,7 +139,7 @@ namespace SharpGLTF.Schema2.Authoring
         }        
 
         [Test(Description = "Creates a skinned animated scene.")]
-        public void CreateSkinnedAnimatedMeshBuilderScene()
+        public void CreateSceneWithSkinnedAnimatedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -213,7 +210,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a textured terrain mesh.")]
-        public void CreateTerrainScene()
+        public void CreateSceneWithTerrain()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -259,7 +256,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test]
-        public void CreateRandomCubesScene()
+        public void CreateSceneWithRandomCubes()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();

@@ -9,6 +9,7 @@ using NUnit.Framework;
 namespace SharpGLTF
 {
     [TestFixture]
+    [Category("API Validation")]
     public class AssemblyAPITests
     {
         public class TestClass

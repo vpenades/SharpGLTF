@@ -11,6 +11,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// Test cases for models found in <see href="https://github.com/bghgary/glTF-Asset-Generator"/>
     /// </summary>
     [TestFixture]
+    [Category("Model Load and Save")]
     public class LoadGeneratedTests
     {
         #region setup
@@ -24,7 +25,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         #endregion        
 
         [Test]
-        public void TestLoadPositiveModels()
+        public void LoadPositiveModels()
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
@@ -74,7 +75,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void TestLoadNegativeModels()
+        public void LoadNegativeModels()
         {
             TestContext.CurrentContext.AttachShowDirLink();
 

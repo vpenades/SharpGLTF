@@ -10,6 +10,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// Test cases for models found in <see href="https://github.com/KhronosGroup/glTF-Blender-Exporter"/>
     /// </summary>
     [TestFixture]
+    [Category("Model Load and Save")]
     public class LoadPollyTest
     {
         #region setup
@@ -23,7 +24,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         #endregion
 
         [Test(Description = "Example of traversing the visual tree all the way to individual vertices and indices")]
-        public void TestLoadPolly()
+        public void LoadPollyModel()
         {
             TestContext.CurrentContext.AttachShowDirLink();
 

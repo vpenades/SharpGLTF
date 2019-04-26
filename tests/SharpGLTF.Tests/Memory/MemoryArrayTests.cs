@@ -1,18 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 using NUnit.Framework;
 
 namespace SharpGLTF.Memory
 {
     [TestFixture]
+    [Category("Core Memory")]
     public class MemoryArrayTests
     {
         [Test]
-        public void TestFloatingArray()
+        public void TestFloatingArrayDecoding()
         {
             Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17 }, Schema2.EncodingType.UNSIGNED_BYTE, false)[0]);
             Assert.AreEqual(17, _CreateFloatingAccessor(new Byte[] { 17, 0 }, Schema2.EncodingType.UNSIGNED_SHORT, false)[0]);            
@@ -35,22 +34,10 @@ namespace SharpGLTF.Memory
         private static FloatingAccessor _CreateFloatingAccessor(byte[] data, Schema2.EncodingType encoding, bool normalized)
         {
             return new FloatingAccessor(new ArraySegment<byte>(data), 0, int.MaxValue, 0, 1, encoding, normalized);
-        }
+        }        
 
         [Test]
-        public void TestLinq()
-        {
-            var buffer = new Byte[] { 1, 52, 43, 6, 23, 234 };
-
-            var accessor = new Vector2Array(buffer, 0, Schema2.EncodingType.BYTE, true);
-
-            var result = accessor.ToArray();
-
-            Assert.AreEqual(3, result.Length);
-        }
-
-        [Test]
-        public void FillEncoded1()
+        public void TestFloatingArrayEncoding1()
         {
             var v1 = new Vector4(0.1f, 0.2f, 0.6f, 0.8f);
             var v2 = new Vector4(1, 2, 3, 4);
@@ -67,7 +54,7 @@ namespace SharpGLTF.Memory
         }
 
         [Test]
-        public void FillEncoded2()
+        public void TestFloatingArrayEncoding2()
         {
             var v1 = new Vector4(0.1f, 0.2f, 0.6f, 0.8f);
             var v2 = new Vector4(1, 2, 3, 4);
@@ -83,6 +70,18 @@ namespace SharpGLTF.Memory
             
             v4u[1] = v2;
             VectorUtils.AreEqual(v4u[1], v2);
+        }
+
+        [Test]
+        public void TestLinqAccess()
+        {
+            var buffer = new Byte[] { 1, 52, 43, 6, 23, 234 };
+
+            var accessor = new Vector2Array(buffer, 0, Schema2.EncodingType.BYTE, true);
+
+            var result = accessor.ToArray();
+
+            Assert.AreEqual(3, result.Length);
         }
     }
 }

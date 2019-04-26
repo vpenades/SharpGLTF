@@ -11,6 +11,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// Test cases for models found in <see href="https://github.com/KhronosGroup/glTF-Sample-Models"/>
     /// </summary>
     [TestFixture]
+    [Category("Model Load and Save")]
     public class LoadSampleTests
     {
         #region setup
@@ -29,7 +30,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase("\\glTF-Binary\\")]
         [TestCase("\\glTF-Embedded\\")]
         [TestCase("\\glTF-pbrSpecularGlossiness\\")]
-        public void TestLoadSampleModels(string section)
+        public void LoadSampleModels(string section)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -57,7 +58,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
                 }
                 
-                // evaluate and save all the triangles to a Wavefront Object
+                // Save models
                 model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
                 var perf_wavefront = perf.ElapsedMilliseconds;
 
@@ -83,33 +84,31 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [TestCase("SpecGlossVsMetalRough.gltf")]
-        [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]
-        public void TestLoadSpecialCaseModels(string filePath)
+        [TestCase(@"TextureTransformTest.gltf")]
+        [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]        
+        public void LoadExtendedModels(string filePath)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
 
-            var f = TestFiles.GetSampleModelsPaths()
+            filePath = TestFiles
+                .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(filePath));
 
-            var model = ModelRoot.Load(f);
+            var model = ModelRoot.Load(filePath);
             Assert.NotNull(model);
 
+            // do a model clone and compare it
+            _AssertAreEqual(model, model.DeepClone());
+
             // evaluate and save all the triangles to a Wavefront Object
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".gltf"));
-
-            // do a model roundtrip
-            var bytes = model.WriteGLB();
-            var modelBis = ModelRoot.ParseGLB(bytes);
-
-            // clone
-            var cloned = model.DeepClone();
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".obj"));
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".glb"));
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".gltf"));
         }
 
         [Test]
-        public void TestLoadUnlitModel()
+        public void LoadUnlitModel()
         {
             var f = TestFiles.GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
@@ -127,7 +126,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void TestLoadLightsModel()
+        public void LoadLightsModel()
         {
             var f = TestFiles.GetSchemaExtensionsModelsPaths()
                 .FirstOrDefault(item => item.EndsWith("lights.gltf"));
@@ -139,6 +138,23 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             Assert.AreEqual(1, model.DefaultScene.VisualChildren.ElementAt(0).PunctualLight.LogicalIndex);
             Assert.AreEqual(0, model.DefaultScene.VisualChildren.ElementAt(1).PunctualLight.LogicalIndex);
+        }
+
+        [Test]
+        public void LoadSparseModel()
+        {
+            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            var primitive = model.LogicalMeshes[0].Primitives[0];
+
+            var accessor = primitive.GetVertexAccessor("POSITION");
+
+            var basePositions = accessor._GetMemoryAccessor().AsVector3Array();
+
+            var positions = accessor.AsVector3Array();
         }
     }
 }

@@ -7,6 +7,7 @@ using NUnit.Framework;
 namespace SharpGLTF.Geometry.VertexTypes
 {
     [TestFixture]
+    [Category("Toolkit")]
     public class JointWeightPairTests
     {
         [Test]

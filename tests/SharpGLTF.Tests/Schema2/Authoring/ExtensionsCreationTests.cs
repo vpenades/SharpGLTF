@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
+﻿using System.Numerics;
 
 using NUnit.Framework;
 
@@ -9,13 +6,13 @@ namespace SharpGLTF.Schema2.Authoring
 {
     using VPOS = Geometry.VertexTypes.VertexPosition;
     using VTEX = Geometry.VertexTypes.VertexTexture1;
-    using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
 
     [TestFixture]
+    [Category("Model Authoring")]
     public class ExtensionsCreationTests
     {
         [Test(Description = "Creates a scene with lights")]
-        public void CreateSceneWithLights()
+        public void CreateSceneWithWithLightsExtension()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -37,7 +34,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a quad mesh with a complex material")]
-        public void CreateFallbackMaterialScene()
+        public void CreateSceneWithSpecularGlossinessExtension()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -81,7 +78,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [TestCase("shannon-dxt5.dds")]
         [TestCase("shannon.webp")]
-        public void CreateExtensionTextureScene(string textureFileName)
+        public void CreateSceneWithTextureExtension(string textureFileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();

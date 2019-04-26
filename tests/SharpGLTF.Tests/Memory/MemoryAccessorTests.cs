@@ -7,10 +7,11 @@ using NUnit.Framework;
 namespace SharpGLTF.Memory
 {
     [TestFixture]
+    [Category("Core Memory")]
     public class MemoryAccessorTests
     {
         [Test]
-        public void TestCreateInterleaved1()
+        public void CreateInterleaved1()
         {
             var pos = MemoryAccessInfo.CreateDefaultElement("POSITION");
             var nrm = MemoryAccessInfo.CreateDefaultElement("NORMAL");

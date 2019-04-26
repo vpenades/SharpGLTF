@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using System.Text;
-using System.Linq;
+﻿using System.Numerics;
 
 using NUnit.Framework;
 
 namespace SharpGLTF.Schema2.Authoring
 {
-    using VPOS = Geometry.VertexTypes.VertexPosition;
-    using VTEX = Geometry.VertexTypes.VertexTexture1;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
-    
+
 
     [TestFixture]
+    [Category("Model Authoring")]
     public class BasicSceneCreationTests
     {
         [Test(Description = "Creates an empty model")]
@@ -73,7 +68,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a model with a triangle mesh")]
-        public void CreateSolidTriangleScene()
+        public void CreateSceneWithSolidTriangle()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -117,7 +112,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates a model with a textured triangle mesh")]
-        public void CreateTextureTriangleScene()
+        public void CreateSceneWithTexturedTriangle()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -164,7 +159,7 @@ namespace SharpGLTF.Schema2.Authoring
         }
 
         [Test(Description = "Creates an interleaved scene using a toolkit utilities")]
-        public void CreateInterleavedQuadScene()
+        public void CreateSceneWithInterleavedQuadMesh()
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -191,8 +186,6 @@ namespace SharpGLTF.Schema2.Authoring
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
-        }
-
-        
+        }        
     }
 }

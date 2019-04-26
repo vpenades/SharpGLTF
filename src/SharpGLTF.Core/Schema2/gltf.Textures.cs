@@ -58,10 +58,10 @@ namespace SharpGLTF.Schema2
         private Image _GetPrimaryImage()
         {
             var ddstex = this.GetExtension<TextureDDS>();
-            if (ddstex != null) return ddstex.Image;
+            if (ddstex != null && ddstex.Image != null) return ddstex.Image;
 
             var wbptex = this.GetExtension<TextureWEBP>();
-            if (wbptex != null) return wbptex.Image;
+            if (wbptex != null && wbptex.Image != null) return wbptex.Image;
 
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }

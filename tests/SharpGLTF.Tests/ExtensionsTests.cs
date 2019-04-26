@@ -10,6 +10,7 @@ namespace SharpGLTF
     using Schema2;
 
     [TestFixture]
+    [Category("Core")]
     public class ExtensionsTests
     {
         internal static int _WordPadded(int length)
@@ -20,7 +21,7 @@ namespace SharpGLTF
         }
 
         [Test]
-        public void Padding()
+        public void TestPadding()
         {
             Assert.AreEqual(4, _WordPadded(1));
             Assert.AreEqual(4, _WordPadded(2));
