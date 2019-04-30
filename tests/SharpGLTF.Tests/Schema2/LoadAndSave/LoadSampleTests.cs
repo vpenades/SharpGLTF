@@ -102,9 +102,11 @@ namespace SharpGLTF.Schema2.LoadAndSave
             _AssertAreEqual(model, model.DeepClone());
 
             // evaluate and save all the triangles to a Wavefront Object
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".obj"));
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".glb"));
-            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".gltf"));
+
+            filePath = System.IO.Path.GetFileNameWithoutExtension(filePath);
+            model.AttachToCurrentTest(filePath + "_wf.obj");
+            model.AttachToCurrentTest(filePath + ".glb");
+            model.AttachToCurrentTest(filePath + ".gltf");
         }
 
         [Test]

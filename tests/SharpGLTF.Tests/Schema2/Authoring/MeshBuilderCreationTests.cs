@@ -165,10 +165,10 @@ namespace SharpGLTF.Schema2.Authoring
             var v3 = (new VPOS(+10, 0, -10), new VSKIN4(0));
             var v4 = (new VPOS(-10, 0, -10), new VSKIN4(0));
 
-            var v5 = (new VPOS(-10, 40, +10), new VSKIN4(0, 1));
-            var v6 = (new VPOS(+10, 40, +10), new VSKIN4(0, 1));
-            var v7 = (new VPOS(+10, 40, -10), new VSKIN4(0, 1));
-            var v8 = (new VPOS(-10, 40, -10), new VSKIN4(0, 1));
+            var v5 = (new VPOS(-10, 40, +10), new VSKIN4((0,0.5f), (1, 0.5f)));
+            var v6 = (new VPOS(+10, 40, +10), new VSKIN4((0, 0.5f), (1, 0.5f)));
+            var v7 = (new VPOS(+10, 40, -10), new VSKIN4((0, 0.5f), (1, 0.5f)));
+            var v8 = (new VPOS(-10, 40, -10), new VSKIN4((0, 0.5f), (1, 0.5f)));
 
             var v9  = (new VPOS(-5, 80, +5), new VSKIN4(2));
             var v10 = (new VPOS(+5, 80, +5), new VSKIN4(2));

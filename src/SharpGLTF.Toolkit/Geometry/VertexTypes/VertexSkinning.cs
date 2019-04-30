@@ -11,6 +11,11 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("{Joint} = {Weight}")]
     public struct JointWeightPair : IComparable<JointWeightPair>
     {
+        public static implicit operator JointWeightPair((int, float) jw)
+        {
+            return new JointWeightPair(jw.Item1, jw.Item2);
+        }
+
         public JointWeightPair(int joint, float weight)
         {
             this.Joint = joint;
@@ -103,10 +108,28 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = Vector4.UnitX;
         }
 
-        public VertexJoints8x4(int jointIndex1, int jointIndex2)
+        public VertexJoints8x4(JointWeightPair a, JointWeightPair b)
         {
-            Joints = new Vector4(jointIndex1, jointIndex2, 0, 0);
-            Weights = new Vector4(0.5f, 0.5f, 0, 0);
+            Joints = new Vector4(a.Joint, b.Joint, 0, 0);
+            Weights = new Vector4(a.Weight, b.Weight, 0, 0);
+
+            InPlaceSort();
+        }
+
+        public VertexJoints8x4(JointWeightPair a, JointWeightPair b, JointWeightPair c)
+        {
+            Joints = new Vector4(a.Joint, b.Joint, c.Joint, 0);
+            Weights = new Vector4(a.Weight, b.Weight, c.Weight, 0);
+
+            InPlaceSort();
+        }
+
+        public VertexJoints8x4(JointWeightPair a, JointWeightPair b, JointWeightPair c, JointWeightPair d)
+        {
+            Joints = new Vector4(a.Joint, b.Joint, c.Joint, d.Joint);
+            Weights = new Vector4(a.Weight, b.Weight, c.Weight, d.Weight);
+
+            InPlaceSort();
         }
 
         #endregion
@@ -157,6 +180,21 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        public void InPlaceSort()
+        {
+            Span<JointWeightPair> pairs = stackalloc JointWeightPair[4];
+
+            pairs[0] = new JointWeightPair((int)Joints.X, Weights.X);
+            pairs[1] = new JointWeightPair((int)Joints.Y, Weights.Y);
+            pairs[2] = new JointWeightPair((int)Joints.Z, Weights.Z);
+            pairs[3] = new JointWeightPair((int)Joints.W, Weights.W);
+
+            JointWeightPair.InPlaceReverseBubbleSort(pairs);
+
+            Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
+            Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
+        }
+
         #endregion
     }
 
@@ -173,10 +211,28 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = Vector4.UnitX;
         }
 
-        public VertexJoints16x4(int jointIndex1, int jointIndex2)
+        public VertexJoints16x4(JointWeightPair a, JointWeightPair b)
         {
-            Joints = new Vector4(jointIndex1, jointIndex2, 0, 0);
-            Weights = new Vector4(0.5f, 0.5f, 0, 0);
+            Joints = new Vector4(a.Joint, b.Joint, 0, 0);
+            Weights = new Vector4(a.Weight, b.Weight, 0, 0);
+
+            InPlaceSort();
+        }
+
+        public VertexJoints16x4(JointWeightPair a, JointWeightPair b, JointWeightPair c)
+        {
+            Joints = new Vector4(a.Joint, b.Joint, c.Joint, 0);
+            Weights = new Vector4(a.Weight, b.Weight, c.Weight, 0);
+
+            InPlaceSort();
+        }
+
+        public VertexJoints16x4(JointWeightPair a, JointWeightPair b, JointWeightPair c, JointWeightPair d)
+        {
+            Joints = new Vector4(a.Joint, b.Joint, c.Joint, d.Joint);
+            Weights = new Vector4(a.Weight, b.Weight, c.Weight, d.Weight);
+
+            InPlaceSort();
         }
 
         #endregion
@@ -225,6 +281,21 @@ namespace SharpGLTF.Geometry.VertexTypes
                 case 3: { this.Joints.W = joint; this.Weights.W = weight; return; }
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
+        }
+
+        public void InPlaceSort()
+        {
+            Span<JointWeightPair> pairs = stackalloc JointWeightPair[4];
+
+            pairs[0] = new JointWeightPair((int)Joints.X, Weights.X);
+            pairs[1] = new JointWeightPair((int)Joints.Y, Weights.Y);
+            pairs[2] = new JointWeightPair((int)Joints.Z, Weights.Z);
+            pairs[3] = new JointWeightPair((int)Joints.W, Weights.W);
+
+            JointWeightPair.InPlaceReverseBubbleSort(pairs);
+
+            Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
+            Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
         #endregion

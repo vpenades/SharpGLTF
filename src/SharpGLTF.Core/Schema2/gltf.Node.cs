@@ -9,7 +9,7 @@ namespace SharpGLTF.Schema2
     {
         IEnumerable<Node> VisualChildren { get; }
 
-        Node CreateNode(string name);
+        Node CreateNode(string name = null);
     }
 
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
@@ -169,7 +169,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Node"/> instance.</returns>
-        public Node CreateNode(string name)
+        public Node CreateNode(string name = null)
         {
             var node = this.LogicalParent._CreateLogicalNode(this._children);
             node.Name = name;

@@ -43,6 +43,12 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        public static Node WithSkin(this Node node, Skin skin)
+        {
+            node.Skin = skin;
+            return node;
+        }
+
         #endregion
 
         #region evaluation
