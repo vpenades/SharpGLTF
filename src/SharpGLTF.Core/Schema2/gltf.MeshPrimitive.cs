@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
     [System.Diagnostics.DebuggerDisplay("MeshPrimitive[{LogicalIndex}] {_mode} {_DebuggerDisplay_TryIdentifyContent()}")]
     public sealed partial class MeshPrimitive : IChildOf<Mesh>
     {

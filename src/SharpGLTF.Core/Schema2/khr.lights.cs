@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
     partial class KHR_lights_punctualglTFextension
     {
         internal KHR_lights_punctualglTFextension(ModelRoot root)
@@ -36,7 +36,12 @@ namespace SharpGLTF.Schema2
     /// <summary>
     /// Defines all the types of <see cref="PunctualLight"/> types.
     /// </summary>
-    public enum PunctualLightType { Directional, Point, Spot }
+    public enum PunctualLightType
+    {
+        Directional,
+        Point,
+        Spot
+    }
 
     /// <remarks>
     /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.

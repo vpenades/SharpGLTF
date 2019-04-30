@@ -6,9 +6,10 @@ using System.Text;
 
 using Newtonsoft.Json;
 
+using BYTES = System.ArraySegment<byte>;
+
 namespace SharpGLTF.Schema2
 {
-    using BYTES = ArraySegment<Byte>;
     using MODEL = ModelRoot;
 
     /// <summary>

@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
+using TARGET = SharpGLTF.IO.JsonSerializable;
+
 namespace SharpGLTF.Validation
 {
-    using TARGET = IO.JsonSerializable;
-
     /// <summary>
     /// Utility class used in the process of model validation.
     /// </summary>

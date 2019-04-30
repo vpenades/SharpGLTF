@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 
+using TARGET = SharpGLTF.IO.JsonSerializable;
+
 namespace SharpGLTF.Validation
 {
-    using TARGET = IO.JsonSerializable;
-
     /// <summary>
     /// Represents an exception produced by the serialization or validation of a gltf model.
     /// </summary>

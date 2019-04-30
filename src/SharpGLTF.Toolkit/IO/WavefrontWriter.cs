@@ -7,10 +7,10 @@ using System.Text;
 
 using static System.FormattableString;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.IO
 {
-    using Schema2;
-
     using BYTES = ArraySegment<Byte>;
 
     using VERTEX = ValueTuple<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;

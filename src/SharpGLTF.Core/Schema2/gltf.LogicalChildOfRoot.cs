@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
     /// <summary>
     /// All gltf elements stored in ModelRoot must inherit from this class.
     /// </summary>

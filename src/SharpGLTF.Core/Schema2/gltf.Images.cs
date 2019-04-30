@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using BYTES = System.ArraySegment<byte>;
+
 namespace SharpGLTF.Schema2
 {
-    using BYTES = ArraySegment<Byte>;
-
     [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
     public sealed partial class Image
     {

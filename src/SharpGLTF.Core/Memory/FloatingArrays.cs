@@ -4,12 +4,12 @@ using System.Numerics;
 using System.Collections;
 using System.Linq;
 
+using BYTES = System.ArraySegment<byte>;
+
+using ENCODING = SharpGLTF.Schema2.EncodingType;
+
 namespace SharpGLTF.Memory
 {
-    using BYTES = ArraySegment<Byte>;
-
-    using ENCODING = Schema2.EncodingType;
-
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of strided <see cref="Single"/> values.
     /// </summary>

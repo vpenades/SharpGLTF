@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
+using ENCODING = SharpGLTF.Schema2.EncodingType;
+
 namespace SharpGLTF.Memory
 {
-    using DIMENSIONS = Schema2.DimensionType;
-    using ENCODING = Schema2.EncodingType;
-
     /// <summary>
     /// Defines the pattern in which a <see cref="ArraySegment{Byte}"/> is accessed and decoded to meaningful values.
     /// </summary>

@@ -4,10 +4,10 @@ using System.Text;
 using System.Linq;
 using System.Numerics;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public sealed partial class Animation
     {

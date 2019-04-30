@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using BYTES = System.ArraySegment<byte>;
+
 namespace SharpGLTF.Schema2
 {
-    using BYTES = ArraySegment<Byte>;
-
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugProxy))]
     public sealed partial class BufferView
     {

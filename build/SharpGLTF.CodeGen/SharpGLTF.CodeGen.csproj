@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
     <RootNamespace>glTF2Sharp</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.26.0" />
-    <PackageReference Include="NJsonSchema.CodeGeneration" Version="9.13.34" />
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="9.13.34" />
+    <PackageReference Include="NJsonSchema.CodeGeneration" Version="9.13.36" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="9.13.36" />
   </ItemGroup>
 
 </Project>

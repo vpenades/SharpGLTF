@@ -4,10 +4,10 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using ALPHA = SharpGLTF.Schema2.AlphaMode;
+
 namespace SharpGLTF.Materials
 {
-    using ALPHA = Schema2.AlphaMode;
-
     [System.Diagnostics.DebuggerDisplay("{Name} {ShaderStyle}")]
     public class MaterialBuilder
     {

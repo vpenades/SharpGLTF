@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+using SharpGLTF.IO;
+
 namespace SharpGLTF.Schema2
 {
-    using IO;
-
     static class ExtensionsFactory
     {
         // extensions design inconsistencies:

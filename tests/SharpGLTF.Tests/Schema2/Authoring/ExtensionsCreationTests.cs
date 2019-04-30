@@ -78,7 +78,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [TestCase("shannon-dxt5.dds")]
         [TestCase("shannon.webp")]
-        public void CreateSceneWithTextureExtension(string textureFileName)
+        public void CreateSceneWithTextureImageExtension(string textureFileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLink();
@@ -118,5 +118,44 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("result_glb.glb");
             model.AttachToCurrentTest("result_gltf.gltf");            
         }        
+
+        [Test]
+        public void CrateSceneWithTextureTransformExtension()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
+
+            // first, create a default material
+            var material = new Materials.MaterialBuilder("material1")
+                .WithDoubleSide(true)
+                .WithMetallicRoughnessShader()
+                .WithChannelImage(Materials.KnownChannels.BaseColor, System.IO.Path.Combine(basePath, "shannon.jpg"));
+
+            material.GetChannel(Materials.KnownChannels.BaseColor).UseTexture().WithTransform(0.40f,0.25f, 0.5f,0.5f);
+
+            var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
+
+            mesh
+                .UsePrimitive(material)
+                .AddPolygon
+                ((new Vector3(-10, 10, 0), new Vector2(1, 0))
+                , (new Vector3(10, 10, 0), new Vector2(0, 0))
+                , (new Vector3(10, -10, 0), new Vector2(0, 1))
+                , (new Vector3(-10, -10, 0), new Vector2(1, 1))
+                );
+
+            var model = ModelRoot.CreateModel();
+
+            model.CreateMeshes(mesh);
+
+            model.UseScene("Default")
+                .CreateNode("RootNode")
+                .WithMesh(model.LogicalMeshes[0]);
+            
+            model.AttachToCurrentTest("result_glb.glb");
+            model.AttachToCurrentTest("result_gltf.gltf");
+        }
     }
 }

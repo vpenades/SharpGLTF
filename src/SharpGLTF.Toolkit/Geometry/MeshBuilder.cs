@@ -4,11 +4,11 @@ using System.Text;
 using System.Linq;
 using System.Numerics;
 
+using SharpGLTF.Collections;
+using SharpGLTF.Geometry.VertexTypes;
+
 namespace SharpGLTF.Geometry
 {
-    using Collections;
-    using VertexTypes;
-
     public interface IMeshBuilder<TMaterial>
     {
         string Name { get; set; }

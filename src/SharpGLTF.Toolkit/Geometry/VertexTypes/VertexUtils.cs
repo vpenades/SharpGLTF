@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using SharpGLTF.Memory;
+
+using JOINTWEIGHT = System.Collections.Generic.KeyValuePair<int, float>;
+
 namespace SharpGLTF.Geometry.VertexTypes
 {
-    using Memory;
-
-    using JOINTWEIGHT = KeyValuePair<int, float>;
-
     static class VertexUtils
     {
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<Vertex<TvP, TvM, TvS>>> vertexBlocks)

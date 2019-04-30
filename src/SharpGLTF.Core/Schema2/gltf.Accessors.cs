@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Numerics;
 
+using SharpGLTF.Memory;
+
 namespace SharpGLTF.Schema2
 {
-    using Memory;
-
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
     [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{SourceBufferView.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]

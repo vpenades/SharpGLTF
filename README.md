@@ -21,8 +21,6 @@ The current status of the library is preview alpha, but, for some use cases it i
 - [SharpGLTF.Core](https://www.nuget.org/packages/SharpGLTF.Core)
 - [SharpGLTF.Toolkit](https://www.nuget.org/packages/SharpGLTF.Toolkit)
 
-Notice that SharpGLTF.1.0.0-Alpha4 has been deprecated.
-
 #### Quickstart
 
 A simple example of loading a glTF file and saving it as GLB:
@@ -31,6 +29,8 @@ A simple example of loading a glTF file and saving it as GLB:
 var model = Schema2.ModelRoot.Load("model.gltf");
 model.SaveGLB("model.glb");
 ```
+
+More examples can be found [here](examples) and in the Test project.
 
 #### Design
 

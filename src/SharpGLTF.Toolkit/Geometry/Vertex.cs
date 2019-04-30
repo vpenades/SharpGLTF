@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
+
+using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    using System.Numerics;
-    using VertexTypes;
-
     /// <summary>
     /// Represents an individual vertex object.
     /// </summary>

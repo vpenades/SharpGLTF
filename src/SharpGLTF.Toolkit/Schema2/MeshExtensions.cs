@@ -4,10 +4,10 @@ using System.Numerics;
 using System.Text;
 using System.Linq;
 
+using SharpGLTF.Memory;
+
 namespace SharpGLTF.Schema2
 {
-    using Memory;
-
     public static partial class Schema2Toolkit
     {
         #region meshes

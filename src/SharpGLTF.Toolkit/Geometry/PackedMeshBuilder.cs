@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Geometry
 {
-    using Schema2;
-
     /// <summary>
     /// Used internally to convert a <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/>
     /// to <see cref="Schema2.Mesh"/>.

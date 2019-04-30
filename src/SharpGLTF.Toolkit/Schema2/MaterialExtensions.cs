@@ -232,11 +232,12 @@ namespace SharpGLTF.Schema2
             dstChannel.Texture.WrapS = srcChannel.TextureSampler.WrapS;
             dstChannel.Texture.WrapT = srcChannel.TextureSampler.WrapT;
 
-            /*
-            dstChannel.Texture.Rotation = srcChannel.Transform?.Rotation ?? 0;
-            dstChannel.Texture.Offset = srcChannel.Transform?.Offset ?? Vector2.Zero;
-            dstChannel.Texture.Scale = srcChannel.Transform?.Scale ?? Vector2.One;
-            */
+            var srcXform = srcChannel.TextureTransform;
+
+            if (srcXform != null)
+            {
+                dstChannel.Texture.WithTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.TextureCoordinateOverride);
+            }
 
             dstChannel.Texture.PrimaryImageContent = srcChannel.Texture.PrimaryImage.GetImageContent();
 
@@ -332,7 +333,12 @@ namespace SharpGLTF.Schema2
 
             dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);
 
-            // dstChannel.SetTransform(srcTex.CoordinateSet, srcTex.Offset, srcTex.Scale, srcTex.Rotation);
+            var srcXform = srcTex.Transform;
+
+            if (srcXform != null)
+            {
+                dstChannel.SetTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.CoordinateSetOverride);
+            }
         }
 
         #endregion

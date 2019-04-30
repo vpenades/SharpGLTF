@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
-    using Collections;
-
     [System.Diagnostics.DebuggerDisplay("Mesh[{LogicalIndex}] {Name}")]
     public sealed partial class Mesh
     {

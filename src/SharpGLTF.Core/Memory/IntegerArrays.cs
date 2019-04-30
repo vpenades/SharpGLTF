@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 
+using BYTES = System.ArraySegment<byte>;
+
+using ENCODING = SharpGLTF.Schema2.IndexEncodingType;
+
 namespace SharpGLTF.Memory
 {
-    using BYTES = ArraySegment<Byte>;
-
-    using ENCODING = Schema2.IndexEncodingType;
-
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="UInt32"/> values
     /// </summary>

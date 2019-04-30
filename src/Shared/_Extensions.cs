@@ -4,10 +4,10 @@ using System.Text;
 using System.Numerics;
 using System.Linq;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF
 {
-    using Schema2;
-
     /// <summary>
     /// Extensions used internally.
     /// </summary>

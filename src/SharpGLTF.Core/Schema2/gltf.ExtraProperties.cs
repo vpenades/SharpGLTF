@@ -4,10 +4,10 @@ using System.Linq;
 
 using Newtonsoft.Json;
 
+using SharpGLTF.IO;
+
 namespace SharpGLTF.Schema2
 {
-    using IO;
-
     public abstract class ExtraProperties : JsonSerializable
     {
         #region data
