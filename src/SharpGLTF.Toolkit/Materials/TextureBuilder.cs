@@ -185,6 +185,5 @@ namespace SharpGLTF.Materials
                 return false;
             }
         }
-
     }
 }

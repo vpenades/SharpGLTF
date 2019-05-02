@@ -77,6 +77,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             return ww / w;
         }
+
+        public static IEnumerable<JointWeightPair> GetJoints(IVertexSkinning vs)
+        {
+            for (int i = 0; i < vs.MaxJoints; ++i)
+            {
+                var jw = vs.GetJoint(i);
+                if (jw.Weight != 0) yield return jw;
+            }
+        }
     }
 
     public interface IVertexSkinning
@@ -93,6 +102,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         JointWeightPair GetJoint(int index);
 
         void SetJoint(int index, int joint, float weight);
+
+        IEnumerable<JointWeightPair> Joints { get; }
     }
 
     /// <summary>
@@ -194,6 +205,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
+
+        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
 
         #endregion
     }
@@ -298,6 +311,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
+        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+
         #endregion
     }
 
@@ -390,6 +405,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+
         #endregion
     }
 
@@ -481,6 +498,8 @@ namespace SharpGLTF.Geometry.VertexTypes
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
+
+        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
 
         #endregion
     }

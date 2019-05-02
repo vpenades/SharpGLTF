@@ -15,16 +15,16 @@ namespace SharpGLTF.Geometry
 
         int VertexCount { get; }
 
-        TvPP GetVertexGeometry<TvPP>(int index)
-            where TvPP : struct, IVertexGeometry;
-
-        TvMM GetVertexMaterial<TvMM>(int index)
-            where TvMM : struct, IVertexMaterial;
-
-        TvSS GetVertexSkinning<TvSS>(int index)
+        Vertex<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
+            where TvPP : struct, IVertexGeometry
+            where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning;
 
         IReadOnlyList<int> Indices { get; }
+
+        IEnumerable<int> Points { get; }
+
+        IEnumerable<(int, int)> Lines { get; }
 
         IEnumerable<(int, int, int)> Triangles { get; }
     }
@@ -78,11 +78,12 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, TMaterial material, bool strict)
+        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, TMaterial material, int primitiveVertexCount, bool strict)
         {
             this._Scrict = strict;
             this._Mesh = mesh;
             this._Material = material;
+            this._PrimitiveVertexCount = primitiveVertexCount;
         }
 
         #endregion
@@ -95,6 +96,8 @@ namespace SharpGLTF.Geometry
 
         private readonly TMaterial _Material;
 
+        private readonly int _PrimitiveVertexCount;
+
         private readonly VertexList<Vertex<TvP, TvM, TvS>> _Vertices = new VertexList<Vertex<TvP, TvM, TvS>>();
         private readonly List<int> _Indices = new List<int>();
 
@@ -106,13 +109,25 @@ namespace SharpGLTF.Geometry
 
         public TMaterial Material => _Material;
 
-        public int VertexCount => _Vertices.Count;
+        /// <summary>
+        /// Gets the number of vertices used by each primitive:
+        /// 1 - Points
+        /// 2 - Lines
+        /// 3 - Triangles
+        /// </summary>
+        public int VerticesPerPrimitive => _PrimitiveVertexCount;
+
+        public int VertexCount => Vertices.Count;
 
         public IReadOnlyList<Vertex<TvP, TvM, TvS>> Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
-        public IEnumerable<(int, int, int)> Triangles => Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices(_Indices.Select(item => (uint)item));
+        public IEnumerable<int> Points => _GetPointIndices();
+
+        public IEnumerable<(int, int)> Lines => _GetLineIndices();
+
+        public IEnumerable<(int, int, int)> Triangles => _GetTriangleIndices();
 
         #endregion
 
@@ -136,6 +151,42 @@ namespace SharpGLTF.Geometry
         }
 
         /// <summary>
+        /// Adds a point.
+        /// </summary>
+        /// <param name="a">vertex for this point.</param>
+        public void AddPoint(Vertex<TvP, TvM, TvS> a)
+        {
+            Guard.IsTrue(_PrimitiveVertexCount == 1, nameof(VerticesPerPrimitive), "Points are not supported for this primitive");
+
+            UseVertex(a);
+        }
+
+        /// <summary>
+        /// Adds a line.
+        /// </summary>
+        /// <param name="a">First corner of the line.</param>
+        /// <param name="b">Second corner of the line.</param>
+        public void AddLine(Vertex<TvP, TvM, TvS> a, Vertex<TvP, TvM, TvS> b)
+        {
+            Guard.IsTrue(_PrimitiveVertexCount == 2, nameof(VerticesPerPrimitive), "Lines are not supported for this primitive");
+
+            var aa = UseVertex(a);
+            var bb = UseVertex(b);
+
+            // check for degenerated triangles:
+            if (aa == bb)
+            {
+                if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb}");
+                return;
+            }
+
+            // TODO: check if a triangle with indices aa-bb-cc already exists.
+
+            _Indices.Add(aa);
+            _Indices.Add(bb);
+        }
+
+        /// <summary>
         /// Adds a triangle.
         /// </summary>
         /// <param name="a">First corner of the triangle.</param>
@@ -143,6 +194,8 @@ namespace SharpGLTF.Geometry
         /// <param name="c">Third corner of the triangle.</param>
         public void AddTriangle(Vertex<TvP, TvM, TvS> a, Vertex<TvP, TvM, TvS> b, Vertex<TvP, TvM, TvS> c)
         {
+            Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
+
             var aa = UseVertex(a);
             var bb = UseVertex(b);
             var cc = UseVertex(c);
@@ -163,32 +216,80 @@ namespace SharpGLTF.Geometry
 
         /// <summary>
         /// Adds a polygon as a decomposed collection of triangles.
-        /// Currently only convex polygons are supported.
         /// </summary>
         /// <param name="points">The corners of the polygon.</param>
+        /// <remarks>
+        /// Polygon triangulation is performed by a <see cref="IPolygonTriangulator"/>
+        /// instance defined in <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}.Triangulator"/>
+        /// </remarks>
         public void AddPolygon(params Vertex<TvP, TvM, TvS>[] points)
         {
-            for (int i = 2; i < points.Length; ++i)
+            Span<Vector3> vertices = stackalloc Vector3[points.Length];
+
+            for (int i = 0; i < vertices.Length; ++i)
             {
-                AddTriangle(points[0], points[i - 1], points[i]);
+                vertices[i] = points[i].Position;
+            }
+
+            // TODO: remove duplicate vertices
+
+            if (vertices.Length < 3) return;
+
+            Span<int> indices = stackalloc int[(vertices.Length - 2) * 3];
+
+            _Mesh._Triangulator.Triangulate(indices, vertices);
+
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                var a = points[indices[i + 0]];
+                var b = points[indices[i + 1]];
+                var c = points[indices[i + 2]];
+
+                AddTriangle(a, b, c);
             }
         }
 
-        public void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive, Matrix4x4 transform)
+        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive, Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
         {
             if (primitive == null) throw new ArgumentNullException(nameof(primitive));
 
-            foreach (var t in primitive.Triangles)
+            if (_PrimitiveVertexCount == 1)
             {
-                var a = primitive.Vertices[t.Item1];
-                var b = primitive.Vertices[t.Item2];
-                var c = primitive.Vertices[t.Item3];
+                foreach (var p in primitive.Points)
+                {
+                    var a = vertexTransform(primitive.Vertices[p]);
 
-                var aa = a.Geometry; aa.Transform(transform); a.Geometry = aa;
-                var bb = b.Geometry; bb.Transform(transform); b.Geometry = bb;
-                var cc = c.Geometry; cc.Transform(transform); c.Geometry = cc;
+                    AddPoint(a);
+                }
 
-                AddTriangle(a, b, c);
+                return;
+            }
+
+            if (_PrimitiveVertexCount == 2)
+            {
+                foreach (var l in primitive.Lines)
+                {
+                    var a = vertexTransform(primitive.Vertices[l.Item1]);
+                    var b = vertexTransform(primitive.Vertices[l.Item2]);
+
+                    AddLine(a, b);
+                }
+
+                return;
+            }
+
+            if (_PrimitiveVertexCount == 3)
+            {
+                foreach (var t in primitive.Triangles)
+                {
+                    var a = vertexTransform(primitive.Vertices[t.Item1]);
+                    var b = vertexTransform(primitive.Vertices[t.Item2]);
+                    var c = vertexTransform(primitive.Vertices[t.Item3]);
+
+                    AddTriangle(a, b, c);
+                }
+
+                return;
             }
         }
 
@@ -212,22 +313,40 @@ namespace SharpGLTF.Geometry
             AddTriangle(aa, bb, cc);
         }
 
-        public TvPP GetVertexGeometry<TvPP>(int index)
+        public Vertex<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
             where TvPP : struct, IVertexGeometry
-        {
-            return _Vertices[index].Geometry.CloneAs<TvPP>();
-        }
-
-        public TvMM GetVertexMaterial<TvMM>(int index)
             where TvMM : struct, IVertexMaterial
-        {
-            return _Vertices[index].Material.CloneAs<TvMM>();
-        }
-
-        public TvSS GetVertexSkinning<TvSS>(int index)
             where TvSS : struct, IVertexSkinning
         {
-            return _Vertices[index].Skinning.CloneAs<TvSS>();
+            var v = _Vertices[index];
+
+            return new Vertex<TvPP, TvMM, TvSS>(v.Geometry.CloneAs<TvPP>(), v.Material.CloneAs<TvMM>(), v.Skinning.CloneAs<TvSS>());
+        }
+
+        private IEnumerable<int> _GetPointIndices()
+        {
+            if (_PrimitiveVertexCount != 1) return Enumerable.Empty<int>();
+
+            return Enumerable.Range(0, _Vertices.Count);
+        }
+
+        private IEnumerable<(int, int)> _GetLineIndices()
+        {
+            if (_PrimitiveVertexCount != 2) return Enumerable.Empty<(int, int)>();
+
+            return Schema2.PrimitiveType.LINES.GetLinesIndices(_Indices.Select(item => (uint)item));
+        }
+
+        private IEnumerable<(int, int, int)> _GetTriangleIndices()
+        {
+            if (_PrimitiveVertexCount != 3) return Enumerable.Empty<(int, int, int)>();
+
+            return Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices(_Indices.Select(item => (uint)item));
+        }
+
+        public void TransformVertices(Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> transformFunc)
+        {
+            _Vertices.TransformVertices(transformFunc);
         }
 
         #endregion

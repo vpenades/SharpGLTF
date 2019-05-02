@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -27,5 +28,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexSkinning.SetJoint(int index, int joint, float weight) { }
 
         JointWeightPair IVertexSkinning.GetJoint(int index) { throw new NotSupportedException(); }
+
+        public IEnumerable<JointWeightPair> Joints => Enumerable.Empty<JointWeightPair>();
     }
 }

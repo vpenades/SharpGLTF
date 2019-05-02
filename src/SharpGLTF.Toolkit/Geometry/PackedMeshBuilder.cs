@@ -62,7 +62,7 @@ namespace SharpGLTF.Geometry
 
                 foreach (var primitiveBuilder in meshBuilder.Primitives)
                 {
-                    dstMesh.AddPrimitive(primitiveBuilder.Material, vertexBlocks[idx], indexBlocks[idx]);
+                    dstMesh.AddPrimitive(primitiveBuilder.Material, primitiveBuilder.VerticesPerPrimitive, vertexBlocks[idx], indexBlocks[idx]);
 
                     ++idx;
                 }
@@ -85,9 +85,9 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void AddPrimitive(TMaterial material, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
+        public void AddPrimitive(TMaterial material, int primitiveVertexCount, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
         {
-            var p = new PackedPrimitiveBuilder<TMaterial>(material, vrtAccessors, idxAccessor);
+            var p = new PackedPrimitiveBuilder<TMaterial>(material, primitiveVertexCount, vrtAccessors, idxAccessor);
             _Primitives.Add(p);
         }
 
@@ -110,9 +110,10 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        internal PackedPrimitiveBuilder(TMaterial material, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
+        internal PackedPrimitiveBuilder(TMaterial material, int primitiveVertexCount, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
         {
             _Material = material;
+            _VerticesPerPrimitive = primitiveVertexCount;
             _VertexAccessors = vrtAccessors;
             _IndexAccessors = idxAccessor;
         }
@@ -122,6 +123,7 @@ namespace SharpGLTF.Geometry
         #region data
 
         private readonly TMaterial _Material;
+        private readonly int _VerticesPerPrimitive;
 
         private readonly Memory.MemoryAccessor[] _VertexAccessors;
 
@@ -133,10 +135,25 @@ namespace SharpGLTF.Geometry
 
         internal void CopyToMesh(Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
         {
+            if (_VerticesPerPrimitive < 1 || _VerticesPerPrimitive > 3) return;
+
+            if (_VerticesPerPrimitive == 1)
+            {
+                dstMesh.CreatePrimitive()
+                        .WithMaterial(materialEvaluator(_Material))
+                        .WithVertexAccessors(_VertexAccessors)
+                        .WithIndicesAutomatic(PrimitiveType.POINTS);
+
+                return;
+            }
+
+            var pt = PrimitiveType.LINES;
+            if (_VerticesPerPrimitive == 3) pt = PrimitiveType.TRIANGLES;
+
             dstMesh.CreatePrimitive()
                         .WithMaterial(materialEvaluator(_Material))
                         .WithVertexAccessors(_VertexAccessors)
-                        .WithIndicesAccessor(PrimitiveType.TRIANGLES, _IndexAccessors);
+                        .WithIndicesAccessor(pt, _IndexAccessors);
         }
 
         #endregion

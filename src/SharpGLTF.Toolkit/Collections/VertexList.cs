@@ -37,6 +37,18 @@ namespace SharpGLTF.Collections
             return index;
         }
 
+        internal void TransformVertices(Func<T, T> transformFunc)
+        {
+            _VertexCache.Clear();
+
+            for (int i = 0; i < _Vertices.Count; ++i)
+            {
+                var v = transformFunc(_Vertices[i]);
+                _Vertices[i] = v;
+                _VertexCache[v] = i;
+            }
+        }
+
         #endregion
     }
 }

@@ -410,6 +410,35 @@ namespace SharpGLTF
             }
         }
 
+        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, int count)
+        {
+            return ptype.GetLinesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
+        }
+
+        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
+        {
+            switch (ptype)
+            {
+                case PrimitiveType.LINES:
+                    {
+                        using (var ptr = sourceIndices.GetEnumerator())
+                        {
+                            while (true)
+                            {
+                                if (!ptr.MoveNext()) break;
+                                var a = ptr.Current;
+                                if (!ptr.MoveNext()) break;
+                                var b = ptr.Current;
+
+                                if (!_IsDegenerated(a, b)) yield return ((int)a, (int)b);
+                            }
+                        }
+
+                        break;
+                    }
+            }
+        }
+
         public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int count)
         {
             return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
@@ -493,6 +522,11 @@ namespace SharpGLTF
                         break;
                     }
             }
+        }
+
+        private static bool _IsDegenerated(uint a, uint b)
+        {
+            return a == b;
         }
 
         private static bool _IsDegenerated(uint a, uint b, uint c)

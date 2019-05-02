@@ -13,11 +13,11 @@ namespace SharpGLTF.Geometry
     {
         string Name { get; set; }
 
-        IReadOnlyCollection<TMaterial> Materials { get; }
+        IEnumerable<TMaterial> Materials { get; }
 
-        IPrimitiveBuilder UsePrimitive(TMaterial material);
+        IReadOnlyCollection<IPrimitive<TMaterial>> Primitives { get; }
 
-        IPrimitive<TMaterial> GetPrimitive(TMaterial material);
+        IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
 
         void Validate();
     }
@@ -66,7 +66,9 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, TvS>> _Primitives = new Dictionary<TMaterial, PrimitiveBuilder<TMaterial, TvP, TvM, TvS>>();
+        private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvP, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvP, TvM, TvS>>();
+
+        internal IPolygonTriangulator _Triangulator = NaivePolygonTriangulation.Default;
 
         #endregion
 
@@ -74,51 +76,69 @@ namespace SharpGLTF.Geometry
 
         public Boolean StrictMode { get; set; }
 
+        public IPolygonTriangulator Triangulator
+        {
+            get => _Triangulator;
+            set => _Triangulator = value == null ? NaivePolygonTriangulation.Default : _Triangulator;
+        }
+
         public string Name { get; set; }
 
-        public IReadOnlyCollection<TMaterial> Materials => _Primitives.Keys;
+        public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Item1).Distinct();
 
         public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvP, TvM, TvS>> Primitives => _Primitives.Values;
 
-        string IMeshBuilder<TMaterial>.Name { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-        IReadOnlyCollection<TMaterial> IMeshBuilder<TMaterial>.Materials => throw new NotImplementedException();
+        IReadOnlyCollection<IPrimitive<TMaterial>> IMeshBuilder<TMaterial>.Primitives => _Primitives.Values;
 
         #endregion
 
         #region API
 
-        private PrimitiveBuilder<TMaterial, TvP, TvM, TvS> _UsePrimitive(TMaterial material)
+        private PrimitiveBuilder<TMaterial, TvP, TvM, TvS> _UsePrimitive((TMaterial, int) key)
         {
-            if (!_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive))
+            if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive))
             {
-                primitive = new PrimitiveBuilder<TMaterial, TvP, TvM, TvS>(this, material, StrictMode);
-                _Primitives[material] = primitive;
+                primitive = new PrimitiveBuilder<TMaterial, TvP, TvM, TvS>(this, key.Item1, key.Item2, StrictMode);
+                _Primitives[key] = primitive;
             }
 
             return primitive;
         }
 
-        public PrimitiveBuilder<TMaterial, TvP, TvM, TvS> UsePrimitive(TMaterial material) { return _UsePrimitive(material); }
-
-        IPrimitiveBuilder IMeshBuilder<TMaterial>.UsePrimitive(TMaterial material) { return _UsePrimitive(material); }
-
-        IPrimitive<TMaterial> IMeshBuilder<TMaterial>.GetPrimitive(TMaterial material)
+        public PrimitiveBuilder<TMaterial, TvP, TvM, TvS> UsePrimitive(TMaterial material, int primitiveVertexCount = 3)
         {
-            if (_Primitives.TryGetValue(material, out PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive))
-            {
-                return primitive;
-            }
+            Guard.NotNull(material, nameof(material));
+            Guard.MustBeBetweenOrEqualTo(primitiveVertexCount, 1, 3, nameof(primitiveVertexCount));
 
-            return null;
+            return _UsePrimitive((material, primitiveVertexCount));
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, Matrix4x4 transform)
+        IPrimitiveBuilder IMeshBuilder<TMaterial>.UsePrimitive(TMaterial material, int primitiveVertexCount)
+        {
+            Guard.NotNull(material, nameof(material));
+            Guard.MustBeBetweenOrEqualTo(primitiveVertexCount, 1, 3, nameof(primitiveVertexCount));
+
+            return _UsePrimitive((material, primitiveVertexCount));
+        }
+
+        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
         {
             foreach (var p in mesh.Primitives)
             {
-                UsePrimitive(p.Material).AddPrimitive(p, transform);
+                var materialKey = materialTransform(p.Material);
+
+                UsePrimitive(materialKey).AddPrimitive(p, vertexTransform);
             }
+        }
+
+        /// <summary>
+        /// Transforms all the points of all the <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/>
+        /// of the this <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> using the given lambfa function.
+        /// </summary>
+        /// <param name="vertexTransform">A lambda function to transform <see cref="Vertex{TvP, TvM, TvS}"/> vertices.</param>
+        public void TransformVertices(Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
+        {
+            foreach (var p in Primitives) p.TransformVertices(vertexTransform);
         }
 
         public void Validate()

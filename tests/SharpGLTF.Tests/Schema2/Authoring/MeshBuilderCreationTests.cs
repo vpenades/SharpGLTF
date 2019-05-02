@@ -255,6 +255,61 @@ namespace SharpGLTF.Schema2.Authoring
             model.AttachToCurrentTest("terrain.glb");
         }
 
+        [Test(Description = "Creates a scene with 1 million points cloud.")]        
+        public void CreateSceneWithPointCloud()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLink();
+
+            var material = new MaterialBuilder("material1").WithUnlitShader();            
+
+            var mesh = new MeshBuilder<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexColor1>("points");
+
+            // create a point cloud primitive
+            var pointCloud = mesh.UsePrimitive(material, 1);
+
+            var rnd = new Random(178);
+            for (int i = 0; i < 1000000; ++i)
+            {
+                var x = (float)(rnd.NextDouble() * 2 - 1);
+                var y = (float)(rnd.NextDouble() * 2 - 1);
+                var z = (float)(rnd.NextDouble() * 2 - 1);
+
+                var opacity = Math.Max(Math.Max(Math.Abs(x), Math.Abs(y)), Math.Abs(z));
+
+                opacity = opacity * opacity * opacity * opacity;
+
+                var r = (float)rnd.NextDouble() * opacity;
+                var g = (float)rnd.NextDouble() * opacity;
+                var b = (float)rnd.NextDouble() * opacity;
+
+                x *= 50;
+                y *= 50;
+                z *= 50;
+
+                pointCloud.AddPoint((new Vector3(x, y + 60, z), new Vector4(r, g, b, 1)));
+            }
+
+            // adds 4 lines as the base of the points
+            mesh.UsePrimitive(material, 2).AddLine((new Vector3(-50, 0, -50), Vector4.One), (new Vector3(+50, 0, -50), Vector4.UnitW));
+            mesh.UsePrimitive(material, 2).AddLine((new Vector3(+50, 0, -50), Vector4.One), (new Vector3(+50, 0, +50), Vector4.UnitW));
+            mesh.UsePrimitive(material, 2).AddLine((new Vector3(+50, 0, +50), Vector4.One), (new Vector3(-50, 0, +50), Vector4.UnitW));
+            mesh.UsePrimitive(material, 2).AddLine((new Vector3(-50, 0, +50), Vector4.One), (new Vector3(-50, 0, -50), Vector4.UnitW));
+
+            // create a new gltf model
+            var model = ModelRoot.CreateModel();
+
+            // add all meshes (just one in this case) to the model
+            model.CreateMeshes(mesh);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
+            // save the model as GLB
+            model.AttachToCurrentTest("PointCloud.glb");
+        }
+
         [Test]
         public void CreateSceneWithRandomCubes()
         {
