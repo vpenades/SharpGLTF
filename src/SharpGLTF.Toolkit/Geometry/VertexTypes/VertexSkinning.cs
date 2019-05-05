@@ -80,9 +80,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static IEnumerable<JointWeightPair> GetJoints(IVertexSkinning vs)
         {
-            for (int i = 0; i < vs.MaxJoints; ++i)
+            for (int i = 0; i < vs.MaxBindings; ++i)
             {
-                var jw = vs.GetJoint(i);
+                var jw = vs.GetBinding(i);
                 if (jw.Weight != 0) yield return jw;
             }
         }
@@ -90,7 +90,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     public interface IVertexSkinning
     {
-        int MaxJoints { get; }
+        int MaxBindings { get; }
 
         // TODO: validation must ensure that:
         // - there's some positive weight
@@ -99,11 +99,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         // - 0 weight joints point to joint 0
         void Validate();
 
-        JointWeightPair GetJoint(int index);
+        JointWeightPair GetBinding(int index);
 
-        void SetJoint(int index, int joint, float weight);
+        void SetBinding(int index, int joint, float weight);
 
-        IEnumerable<JointWeightPair> Joints { get; }
+        IEnumerable<JointWeightPair> Bindings { get; }
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
 
-        public int MaxJoints => 4;
+        public int MaxBindings => 4;
 
         #endregion
 
@@ -167,7 +167,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
 
-        public JointWeightPair GetJoint(int index)
+        public JointWeightPair GetBinding(int index)
         {
             switch (index)
             {
@@ -179,7 +179,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void SetJoint(int index, int joint, float weight)
+        public void SetBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -206,7 +206,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
-        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
 
         #endregion
     }
@@ -258,7 +258,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights;
 
-        public int MaxJoints => 4;
+        public int MaxBindings => 4;
 
         #endregion
 
@@ -272,7 +272,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
 
-        public JointWeightPair GetJoint(int index)
+        public JointWeightPair GetBinding(int index)
         {
             switch (index)
             {
@@ -284,7 +284,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void SetJoint(int index, int joint, float weight)
+        public void SetBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -311,7 +311,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
-        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
 
         #endregion
     }
@@ -355,7 +355,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
-        public int MaxJoints => 8;
+        public int MaxBindings => 8;
 
         #endregion
 
@@ -373,7 +373,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
 
-        public JointWeightPair GetJoint(int index)
+        public JointWeightPair GetBinding(int index)
         {
             switch (index)
             {
@@ -389,7 +389,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void SetJoint(int index, int joint, float weight)
+        public void SetBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -405,7 +405,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
 
         #endregion
     }
@@ -449,7 +449,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Weights1;
 
-        public int MaxJoints => 8;
+        public int MaxBindings => 8;
 
         #endregion
 
@@ -467,7 +467,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
 
-        public JointWeightPair GetJoint(int index)
+        public JointWeightPair GetBinding(int index)
         {
             switch (index)
             {
@@ -483,7 +483,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void SetJoint(int index, int joint, float weight)
+        public void SetBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -499,7 +499,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        IEnumerable<JointWeightPair> IVertexSkinning.Joints => JointWeightPair.GetJoints(this);
+        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
 
         #endregion
     }

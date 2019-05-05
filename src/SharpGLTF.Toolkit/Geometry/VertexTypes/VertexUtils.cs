@@ -268,13 +268,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var dst = default(TvS);
 
-            if (dst.MaxJoints >= src.MaxJoints)
+            if (dst.MaxBindings >= src.MaxBindings)
             {
-                for (int i = 0; i < src.MaxJoints; ++i)
+                for (int i = 0; i < src.MaxBindings; ++i)
                 {
-                    var jw = src.GetJoint(i);
+                    var jw = src.GetBinding(i);
 
-                    dst.SetJoint(i, jw.Joint, jw.Weight);
+                    dst.SetBinding(i, jw.Joint, jw.Weight);
                 }
 
                 return dst;
@@ -282,20 +282,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // if there's more source joints than destination joints, transfer with scale
 
-            Span<JointWeightPair> srcjw = stackalloc JointWeightPair[src.MaxJoints];
+            Span<JointWeightPair> srcjw = stackalloc JointWeightPair[src.MaxBindings];
 
-            for (int i = 0; i < src.MaxJoints; ++i)
+            for (int i = 0; i < src.MaxBindings; ++i)
             {
-                srcjw[i] = src.GetJoint(i);
+                srcjw[i] = src.GetBinding(i);
             }
 
             JointWeightPair.InPlaceReverseBubbleSort(srcjw);
 
-            var w = JointWeightPair.CalculateScaleFor(srcjw, dst.MaxJoints);
+            var w = JointWeightPair.CalculateScaleFor(srcjw, dst.MaxBindings);
 
-            for (int i = 0; i < dst.MaxJoints; ++i)
+            for (int i = 0; i < dst.MaxBindings; ++i)
             {
-                dst.SetJoint(i, srcjw[i].Joint, srcjw[i].Weight * w);
+                dst.SetBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
             }
 
             return dst;

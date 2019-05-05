@@ -11,7 +11,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         public void Validate() { }
 
-        public int MaxJoints => 0;
+        public int MaxBindings => 0;
 
         public int MaxColors => 0;
 
@@ -25,10 +25,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new NotSupportedException(); }
 
-        void IVertexSkinning.SetJoint(int index, int joint, float weight) { }
+        void IVertexSkinning.SetBinding(int index, int joint, float weight) { }
 
-        JointWeightPair IVertexSkinning.GetJoint(int index) { throw new NotSupportedException(); }
+        JointWeightPair IVertexSkinning.GetBinding(int index) { throw new NotSupportedException(); }
 
-        public IEnumerable<JointWeightPair> Joints => Enumerable.Empty<JointWeightPair>();
+        public IEnumerable<JointWeightPair> Bindings => Enumerable.Empty<JointWeightPair>();
     }
 }

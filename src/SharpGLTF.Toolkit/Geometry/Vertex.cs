@@ -34,7 +34,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    [System.Diagnostics.DebuggerDisplay("Primitive {_Material}")]
+    [System.Diagnostics.DebuggerDisplay("Vertex {Geometry} {Material} {Skinning}")]
     public struct Vertex<TvP, TvM, TvS>
         where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
