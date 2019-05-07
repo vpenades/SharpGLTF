@@ -71,7 +71,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithSolidTriangle()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create model
             var model = ModelRoot.CreateModel();
@@ -115,7 +115,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithTexturedTriangle()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // we'll use our icon as the source texture
             var imagePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "..\\..\\..\\..\\..\\build\\Icons\\glTF2Sharp.png");
@@ -162,7 +162,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithInterleavedQuadMesh()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var vertices = new[]
             {

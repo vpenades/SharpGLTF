@@ -15,6 +15,12 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
     public sealed partial class Node : IVisualNodeContainer
     {
+        #region constants
+
+        private const string _NOTRANSFORMMESSAGE = "Node instances with a Skin must not contain spatial transformations.";
+
+        #endregion
+
         #region lifecycle
 
         internal Node()
@@ -72,8 +78,15 @@ namespace SharpGLTF.Schema2
             get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
             set
             {
-                if (value == Matrix4x4.Identity) _matrix = null;
-                else _matrix = value;
+                if (value == Matrix4x4.Identity)
+                {
+                    _matrix = null;
+                }
+                else
+                {
+                    Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
+                    _matrix = value;
+                }
 
                 _scale = null;
                 _rotation = null;
@@ -89,10 +102,14 @@ namespace SharpGLTF.Schema2
             get => new Transforms.AffineTransform(_matrix, _scale, _rotation, _translation);
             set
             {
+                Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
+
+                Guard.IsTrue(value.IsValid, nameof(value));
+
                 _matrix = null;
-                _scale = value.Scale;
-                _rotation = value.Rotation.Sanitized();
-                _translation = value.Translation;
+                _scale = value.Scale.AsNullable(Vector3.One);
+                _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
+                _translation = value.Translation.AsNullable(Vector3.Zero);
             }
         }
 
@@ -125,9 +142,11 @@ namespace SharpGLTF.Schema2
             get => this._mesh.HasValue ? this.LogicalParent.LogicalMeshes[this._mesh.Value] : null;
             set
             {
+                if (value == null) { this._mesh = null; return; }
+
                 Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
-                var idx = this.LogicalParent.LogicalMeshes.IndexOfReference(value);
-                this._mesh = idx < 0 ? (int?)null : idx;
+
+                this._mesh = value.LogicalIndex;
             }
         }
 
@@ -139,9 +158,16 @@ namespace SharpGLTF.Schema2
             get => this._skin.HasValue ? this.LogicalParent.LogicalSkins[this._skin.Value] : null;
             set
             {
+                if (value == null) { this._skin = null; return; }
+
                 Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
-                var idx = this.LogicalParent.LogicalSkins.IndexOfReference(value);
-                this._skin = idx < 0 ? (int?)null : idx;
+                Guard.IsFalse(_matrix.HasValue, _NOTRANSFORMMESSAGE);
+                Guard.IsFalse(_scale.HasValue, _NOTRANSFORMMESSAGE);
+                Guard.IsFalse(_rotation.HasValue, _NOTRANSFORMMESSAGE);
+                Guard.IsFalse(_translation.HasValue, _NOTRANSFORMMESSAGE);
+                // Todo: guard against animations.
+
+                this._skin = value.LogicalIndex;
             }
         }
 

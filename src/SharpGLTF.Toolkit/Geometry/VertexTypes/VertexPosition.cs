@@ -38,6 +38,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Position = new Vector3(px, py, pz);
         }
 
+        public VertexPosition(IVertexGeometry src)
+        {
+            this.Position = src.GetPosition();
+        }
+
         public static implicit operator VertexPosition(Vector3 position)
         {
             return new VertexPosition(position);
@@ -89,14 +94,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexPositionNormal(Vector3 p, Vector3 n)
         {
-            Position = p;
-            Normal = Vector3.Normalize(n);
+            this.Position = p;
+            this.Normal = Vector3.Normalize(n);
         }
 
         public VertexPositionNormal(float px, float py, float pz, float nx, float ny, float nz)
         {
-            Position = new Vector3(px, py, pz);
-            Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
+            this.Position = new Vector3(px, py, pz);
+            this.Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
+        }
+
+        public VertexPositionNormal(IVertexGeometry src)
+        {
+            this.Position = src.GetPosition();
+            src.TryGetNormal(out this.Normal);
         }
 
         #endregion
@@ -150,9 +161,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
         {
-            Position = p;
-            Normal = Vector3.Normalize(n);
-            Tangent = t;
+            this.Position = p;
+            this.Normal = Vector3.Normalize(n);
+            this.Tangent = t;
+        }
+
+        public VertexPositionNormalTangent(IVertexGeometry src)
+        {
+            this.Position = src.GetPosition();
+            src.TryGetNormal(out this.Normal);
+            src.TryGetTangent(out this.Tangent);
         }
 
         #endregion

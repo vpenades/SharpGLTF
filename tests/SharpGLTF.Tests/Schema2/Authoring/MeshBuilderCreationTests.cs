@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithInterleavedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // define 4 vertices
             var v1 = new VPOSNRM(-10, 10, 0, -10, 10, 15);
@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithSharedBuffers()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create materials
             var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1));
@@ -107,7 +107,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithAnimatedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create animation sequence with 4 frames
             var keyframes = new Dictionary<Single, Vector3>()
@@ -142,7 +142,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithSkinnedAnimatedMeshBuilder()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
             
             // create animation sequence with 4 frames
             var keyframes = new Dictionary<Single, Quaternion>
@@ -199,9 +199,8 @@ namespace SharpGLTF.Schema2.Authoring
 
             // setup skin
             var snode = scene.CreateNode("Skeleton Node");
-            snode.Skin = model.CreateSkin();
-            snode.Skin.Skeleton = skelet;
-            snode.Skin.BindJoints(joint1, joint2, joint3);
+            snode.Skin = model.CreateSkin();            
+            snode.Skin.BindJoints(skelet, joint1, joint2, joint3);
 
             snode.WithMesh( model.CreateMesh(meshBuilder) );
 
@@ -213,7 +212,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithTerrain()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // texture path
             var imagePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", "Texture1.jpg");
@@ -259,7 +258,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithPointCloud()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = new MaterialBuilder("material1").WithUnlitShader();            
 
@@ -314,7 +313,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithRandomCubes()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random();
 

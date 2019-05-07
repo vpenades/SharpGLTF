@@ -15,7 +15,7 @@ namespace SharpGLTF.Geometry
 
         int VertexCount { get; }
 
-        Vertex<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
+        VertexBuilder<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
             where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning;
@@ -33,9 +33,9 @@ namespace SharpGLTF.Geometry
     {
         void AddTriangle<TvPP, TvMM, TvSS>
             (
-            Vertex<TvPP, TvMM, TvSS> a,
-            Vertex<TvPP, TvMM, TvSS> b,
-            Vertex<TvPP, TvMM, TvSS> c
+            VertexBuilder<TvPP, TvMM, TvSS> a,
+            VertexBuilder<TvPP, TvMM, TvSS> b,
+            VertexBuilder<TvPP, TvMM, TvSS> c
             )
             where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
@@ -98,7 +98,7 @@ namespace SharpGLTF.Geometry
 
         private readonly int _PrimitiveVertexCount;
 
-        private readonly VertexList<Vertex<TvP, TvM, TvS>> _Vertices = new VertexList<Vertex<TvP, TvM, TvS>>();
+        private readonly VertexList<VertexBuilder<TvP, TvM, TvS>> _Vertices = new VertexList<VertexBuilder<TvP, TvM, TvS>>();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
@@ -119,7 +119,7 @@ namespace SharpGLTF.Geometry
 
         public int VertexCount => Vertices.Count;
 
-        public IReadOnlyList<Vertex<TvP, TvM, TvS>> Vertices => _Vertices;
+        public IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
@@ -143,7 +143,7 @@ namespace SharpGLTF.Geometry
         /// <typeparamref name="TvS"/> fragments.
         /// </param>
         /// <returns>The index of the vertex.</returns>
-        public int UseVertex(Vertex<TvP, TvM, TvS> vertex)
+        public int UseVertex(VertexBuilder<TvP, TvM, TvS> vertex)
         {
             if (_Scrict) vertex.Validate();
 
@@ -154,7 +154,7 @@ namespace SharpGLTF.Geometry
         /// Adds a point.
         /// </summary>
         /// <param name="a">vertex for this point.</param>
-        public void AddPoint(Vertex<TvP, TvM, TvS> a)
+        public void AddPoint(VertexBuilder<TvP, TvM, TvS> a)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 1, nameof(VerticesPerPrimitive), "Points are not supported for this primitive");
 
@@ -166,7 +166,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
-        public void AddLine(Vertex<TvP, TvM, TvS> a, Vertex<TvP, TvM, TvS> b)
+        public void AddLine(VertexBuilder<TvP, TvM, TvS> a, VertexBuilder<TvP, TvM, TvS> b)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 2, nameof(VerticesPerPrimitive), "Lines are not supported for this primitive");
 
@@ -192,7 +192,7 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the triangle.</param>
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
-        public void AddTriangle(Vertex<TvP, TvM, TvS> a, Vertex<TvP, TvM, TvS> b, Vertex<TvP, TvM, TvS> c)
+        public void AddTriangle(VertexBuilder<TvP, TvM, TvS> a, VertexBuilder<TvP, TvM, TvS> b, VertexBuilder<TvP, TvM, TvS> c)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
 
@@ -222,7 +222,7 @@ namespace SharpGLTF.Geometry
         /// Polygon triangulation is performed by a <see cref="IPolygonTriangulator"/>
         /// instance defined in <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}.Triangulator"/>
         /// </remarks>
-        public void AddPolygon(params Vertex<TvP, TvM, TvS>[] points)
+        public void AddPolygon(params VertexBuilder<TvP, TvM, TvS>[] points)
         {
             Span<Vector3> vertices = stackalloc Vector3[points.Length];
 
@@ -249,7 +249,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive, Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
+        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive, Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> vertexTransform)
         {
             if (primitive == null) throw new ArgumentNullException(nameof(primitive));
 
@@ -301,26 +301,26 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void AddTriangle<TvPP, TvMM, TvSS>(Vertex<TvPP, TvMM, TvSS> a, Vertex<TvPP, TvMM, TvSS> b, Vertex<TvPP, TvMM, TvSS> c)
+        public void AddTriangle<TvPP, TvMM, TvSS>(VertexBuilder<TvPP, TvMM, TvSS> a, VertexBuilder<TvPP, TvMM, TvSS> b, VertexBuilder<TvPP, TvMM, TvSS> c)
             where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning
         {
-            var aa = a.CloneAs<TvP, TvM, TvS>();
-            var bb = b.CloneAs<TvP, TvM, TvS>();
-            var cc = c.CloneAs<TvP, TvM, TvS>();
+            var aa = a.ConvertTo<TvP, TvM, TvS>();
+            var bb = b.ConvertTo<TvP, TvM, TvS>();
+            var cc = c.ConvertTo<TvP, TvM, TvS>();
 
             AddTriangle(aa, bb, cc);
         }
 
-        public Vertex<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
+        public VertexBuilder<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
             where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning
         {
             var v = _Vertices[index];
 
-            return new Vertex<TvPP, TvMM, TvSS>(v.Geometry.CloneAs<TvPP>(), v.Material.CloneAs<TvMM>(), v.Skinning.CloneAs<TvSS>());
+            return new VertexBuilder<TvPP, TvMM, TvSS>(v.Geometry.ConvertTo<TvPP>(), v.Material.ConvertTo<TvMM>(), v.Skinning.ConvertTo<TvSS>());
         }
 
         private IEnumerable<int> _GetPointIndices()
@@ -344,7 +344,7 @@ namespace SharpGLTF.Geometry
             return Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices(_Indices.Select(item => (uint)item));
         }
 
-        public void TransformVertices(Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> transformFunc)
+        public void TransformVertices(Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> transformFunc)
         {
             _Vertices.TransformVertices(transformFunc);
         }

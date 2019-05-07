@@ -9,24 +9,34 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Represents a a Node Joint index and its weight in a skinning system.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Joint} = {Weight}")]
-    public struct JointWeightPair : IComparable<JointWeightPair>
+    public struct BoneBinding : IComparable<BoneBinding>
     {
-        public static implicit operator JointWeightPair((int, float) jw)
-        {
-            return new JointWeightPair(jw.Item1, jw.Item2);
-        }
+        #region constructors
 
-        public JointWeightPair(int joint, float weight)
+        public BoneBinding(int joint, float weight)
         {
             this.Joint = joint;
             this.Weight = weight;
             if (Weight == 0) Joint = 0;
         }
 
+        public static implicit operator BoneBinding((int, float) jw)
+        {
+            return new BoneBinding(jw.Item1, jw.Item2);
+        }
+
+        #endregion
+
+        #region data
+
         public int Joint;
         public float Weight;
 
-        public int CompareTo(JointWeightPair other)
+        #endregion
+
+        #region API
+
+        public int CompareTo(BoneBinding other)
         {
             var a = this.Weight.CompareTo(other.Weight);
             if (a != 0) return a;
@@ -34,7 +44,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return this.Joint.CompareTo(other.Joint);
         }
 
-        internal static void InPlaceReverseBubbleSort(Span<JointWeightPair> span)
+        internal static void InPlaceReverseBubbleSort(Span<BoneBinding> span)
         {
             for (int i = 1; i < span.Length; ++i)
             {
@@ -58,10 +68,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <summary>
         /// Calculates the scale to use on the first <paramref name="count"/> weights.
         /// </summary>
-        /// <param name="span">A collection of <see cref="JointWeightPair"/>.</param>
+        /// <param name="span">A collection of <see cref="BoneBinding"/>.</param>
         /// <param name="count">The number of items to take from the beginning of <paramref name="span"/>.</param>
         /// <returns>A Scale factor.</returns>
-        internal static float CalculateScaleFor(Span<JointWeightPair> span, int count)
+        internal static float CalculateScaleFor(Span<BoneBinding> span, int count)
         {
             System.Diagnostics.Debug.Assert(count < span.Length, nameof(count));
 
@@ -78,14 +88,16 @@ namespace SharpGLTF.Geometry.VertexTypes
             return ww / w;
         }
 
-        public static IEnumerable<JointWeightPair> GetJoints(IVertexSkinning vs)
+        public static IEnumerable<BoneBinding> GetBindings(IVertexSkinning vs)
         {
             for (int i = 0; i < vs.MaxBindings; ++i)
             {
-                var jw = vs.GetBinding(i);
+                var jw = vs.GetBoneBinding(i);
                 if (jw.Weight != 0) yield return jw;
             }
         }
+
+        #endregion
     }
 
     public interface IVertexSkinning
@@ -99,11 +111,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         // - 0 weight joints point to joint 0
         void Validate();
 
-        JointWeightPair GetBinding(int index);
+        BoneBinding GetBoneBinding(int index);
 
-        void SetBinding(int index, int joint, float weight);
+        void SetBoneBinding(int index, int joint, float weight);
 
-        IEnumerable<JointWeightPair> Bindings { get; }
+        IEnumerable<BoneBinding> BoneBindings { get; }
     }
 
     /// <summary>
@@ -119,7 +131,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = Vector4.UnitX;
         }
 
-        public VertexJoints8x4(JointWeightPair a, JointWeightPair b)
+        public VertexJoints8x4(BoneBinding a, BoneBinding b)
         {
             Joints = new Vector4(a.Joint, b.Joint, 0, 0);
             Weights = new Vector4(a.Weight, b.Weight, 0, 0);
@@ -127,7 +139,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             InPlaceSort();
         }
 
-        public VertexJoints8x4(JointWeightPair a, JointWeightPair b, JointWeightPair c)
+        public VertexJoints8x4(BoneBinding a, BoneBinding b, BoneBinding c)
         {
             Joints = new Vector4(a.Joint, b.Joint, c.Joint, 0);
             Weights = new Vector4(a.Weight, b.Weight, c.Weight, 0);
@@ -135,12 +147,23 @@ namespace SharpGLTF.Geometry.VertexTypes
             InPlaceSort();
         }
 
-        public VertexJoints8x4(JointWeightPair a, JointWeightPair b, JointWeightPair c, JointWeightPair d)
+        public VertexJoints8x4(BoneBinding a, BoneBinding b, BoneBinding c, BoneBinding d)
         {
             Joints = new Vector4(a.Joint, b.Joint, c.Joint, d.Joint);
             Weights = new Vector4(a.Weight, b.Weight, c.Weight, d.Weight);
 
             InPlaceSort();
+        }
+
+        public VertexJoints8x4(params (int, float)[] bindings)
+        {
+            Joints = Vector4.Zero;
+            Weights = Vector4.Zero;
+
+            for (int i = 0; i < bindings.Length; ++i)
+            {
+                this.SetBoneBinding(i, bindings[i].Item1, bindings[i].Item2);
+            }
         }
 
         #endregion
@@ -167,19 +190,19 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
 
-        public JointWeightPair GetBinding(int index)
+        public BoneBinding GetBoneBinding(int index)
         {
             switch (index)
             {
-                case 0: return new JointWeightPair((int)this.Joints.X, this.Weights.X);
-                case 1: return new JointWeightPair((int)this.Joints.Y, this.Weights.Y);
-                case 2: return new JointWeightPair((int)this.Joints.Z, this.Weights.Z);
-                case 3: return new JointWeightPair((int)this.Joints.W, this.Weights.W);
+                case 0: return new BoneBinding((int)this.Joints.X, this.Weights.X);
+                case 1: return new BoneBinding((int)this.Joints.Y, this.Weights.Y);
+                case 2: return new BoneBinding((int)this.Joints.Z, this.Weights.Z);
+                case 3: return new BoneBinding((int)this.Joints.W, this.Weights.W);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
-        public void SetBinding(int index, int joint, float weight)
+        public void SetBoneBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -193,20 +216,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void InPlaceSort()
         {
-            Span<JointWeightPair> pairs = stackalloc JointWeightPair[4];
+            Span<BoneBinding> pairs = stackalloc BoneBinding[4];
 
-            pairs[0] = new JointWeightPair((int)Joints.X, Weights.X);
-            pairs[1] = new JointWeightPair((int)Joints.Y, Weights.Y);
-            pairs[2] = new JointWeightPair((int)Joints.Z, Weights.Z);
-            pairs[3] = new JointWeightPair((int)Joints.W, Weights.W);
+            pairs[0] = new BoneBinding((int)Joints.X, Weights.X);
+            pairs[1] = new BoneBinding((int)Joints.Y, Weights.Y);
+            pairs[2] = new BoneBinding((int)Joints.Z, Weights.Z);
+            pairs[3] = new BoneBinding((int)Joints.W, Weights.W);
 
-            JointWeightPair.InPlaceReverseBubbleSort(pairs);
+            BoneBinding.InPlaceReverseBubbleSort(pairs);
 
             Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
-        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
+        public IEnumerable<BoneBinding> BoneBindings => BoneBinding.GetBindings(this);
 
         #endregion
     }
@@ -224,7 +247,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = Vector4.UnitX;
         }
 
-        public VertexJoints16x4(JointWeightPair a, JointWeightPair b)
+        public VertexJoints16x4(BoneBinding a, BoneBinding b)
         {
             Joints = new Vector4(a.Joint, b.Joint, 0, 0);
             Weights = new Vector4(a.Weight, b.Weight, 0, 0);
@@ -232,7 +255,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             InPlaceSort();
         }
 
-        public VertexJoints16x4(JointWeightPair a, JointWeightPair b, JointWeightPair c)
+        public VertexJoints16x4(BoneBinding a, BoneBinding b, BoneBinding c)
         {
             Joints = new Vector4(a.Joint, b.Joint, c.Joint, 0);
             Weights = new Vector4(a.Weight, b.Weight, c.Weight, 0);
@@ -240,7 +263,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             InPlaceSort();
         }
 
-        public VertexJoints16x4(JointWeightPair a, JointWeightPair b, JointWeightPair c, JointWeightPair d)
+        public VertexJoints16x4(BoneBinding a, BoneBinding b, BoneBinding c, BoneBinding d)
         {
             Joints = new Vector4(a.Joint, b.Joint, c.Joint, d.Joint);
             Weights = new Vector4(a.Weight, b.Weight, c.Weight, d.Weight);
@@ -272,19 +295,19 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
         }
 
-        public JointWeightPair GetBinding(int index)
+        public BoneBinding GetBoneBinding(int index)
         {
             switch (index)
             {
-                case 0: return new JointWeightPair((int)this.Joints.X, this.Weights.X);
-                case 1: return new JointWeightPair((int)this.Joints.Y, this.Weights.Y);
-                case 2: return new JointWeightPair((int)this.Joints.Z, this.Weights.Z);
-                case 3: return new JointWeightPair((int)this.Joints.W, this.Weights.W);
+                case 0: return new BoneBinding((int)this.Joints.X, this.Weights.X);
+                case 1: return new BoneBinding((int)this.Joints.Y, this.Weights.Y);
+                case 2: return new BoneBinding((int)this.Joints.Z, this.Weights.Z);
+                case 3: return new BoneBinding((int)this.Joints.W, this.Weights.W);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
-        public void SetBinding(int index, int joint, float weight)
+        public void SetBoneBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -298,20 +321,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void InPlaceSort()
         {
-            Span<JointWeightPair> pairs = stackalloc JointWeightPair[4];
+            Span<BoneBinding> pairs = stackalloc BoneBinding[4];
 
-            pairs[0] = new JointWeightPair((int)Joints.X, Weights.X);
-            pairs[1] = new JointWeightPair((int)Joints.Y, Weights.Y);
-            pairs[2] = new JointWeightPair((int)Joints.Z, Weights.Z);
-            pairs[3] = new JointWeightPair((int)Joints.W, Weights.W);
+            pairs[0] = new BoneBinding((int)Joints.X, Weights.X);
+            pairs[1] = new BoneBinding((int)Joints.Y, Weights.Y);
+            pairs[2] = new BoneBinding((int)Joints.Z, Weights.Z);
+            pairs[3] = new BoneBinding((int)Joints.W, Weights.W);
 
-            JointWeightPair.InPlaceReverseBubbleSort(pairs);
+            BoneBinding.InPlaceReverseBubbleSort(pairs);
 
             Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
             Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
         }
 
-        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
+        public IEnumerable<BoneBinding> BoneBindings => BoneBinding.GetBindings(this);
 
         #endregion
     }
@@ -373,23 +396,23 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
 
-        public JointWeightPair GetBinding(int index)
+        public BoneBinding GetBoneBinding(int index)
         {
             switch (index)
             {
-                case 0: return new JointWeightPair((int)this.Joints0.X, this.Weights0.X);
-                case 1: return new JointWeightPair((int)this.Joints0.Y, this.Weights0.Y);
-                case 2: return new JointWeightPair((int)this.Joints0.Z, this.Weights0.Z);
-                case 3: return new JointWeightPair((int)this.Joints0.W, this.Weights0.W);
-                case 4: return new JointWeightPair((int)this.Joints1.X, this.Weights1.X);
-                case 5: return new JointWeightPair((int)this.Joints1.Y, this.Weights1.Y);
-                case 6: return new JointWeightPair((int)this.Joints1.Z, this.Weights1.Z);
-                case 7: return new JointWeightPair((int)this.Joints1.W, this.Weights1.W);
+                case 0: return new BoneBinding((int)this.Joints0.X, this.Weights0.X);
+                case 1: return new BoneBinding((int)this.Joints0.Y, this.Weights0.Y);
+                case 2: return new BoneBinding((int)this.Joints0.Z, this.Weights0.Z);
+                case 3: return new BoneBinding((int)this.Joints0.W, this.Weights0.W);
+                case 4: return new BoneBinding((int)this.Joints1.X, this.Weights1.X);
+                case 5: return new BoneBinding((int)this.Joints1.Y, this.Weights1.Y);
+                case 6: return new BoneBinding((int)this.Joints1.Z, this.Weights1.Z);
+                case 7: return new BoneBinding((int)this.Joints1.W, this.Weights1.W);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
-        public void SetBinding(int index, int joint, float weight)
+        public void SetBoneBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -405,7 +428,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
+        public IEnumerable<BoneBinding> BoneBindings => BoneBinding.GetBindings(this);
 
         #endregion
     }
@@ -467,23 +490,23 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
         }
 
-        public JointWeightPair GetBinding(int index)
+        public BoneBinding GetBoneBinding(int index)
         {
             switch (index)
             {
-                case 0: return new JointWeightPair((int)this.Joints0.X, this.Weights0.X);
-                case 1: return new JointWeightPair((int)this.Joints0.Y, this.Weights0.Y);
-                case 2: return new JointWeightPair((int)this.Joints0.Z, this.Weights0.Z);
-                case 3: return new JointWeightPair((int)this.Joints0.W, this.Weights0.W);
-                case 4: return new JointWeightPair((int)this.Joints1.X, this.Weights1.X);
-                case 5: return new JointWeightPair((int)this.Joints1.Y, this.Weights1.Y);
-                case 6: return new JointWeightPair((int)this.Joints1.Z, this.Weights1.Z);
-                case 7: return new JointWeightPair((int)this.Joints1.W, this.Weights1.W);
+                case 0: return new BoneBinding((int)this.Joints0.X, this.Weights0.X);
+                case 1: return new BoneBinding((int)this.Joints0.Y, this.Weights0.Y);
+                case 2: return new BoneBinding((int)this.Joints0.Z, this.Weights0.Z);
+                case 3: return new BoneBinding((int)this.Joints0.W, this.Weights0.W);
+                case 4: return new BoneBinding((int)this.Joints1.X, this.Weights1.X);
+                case 5: return new BoneBinding((int)this.Joints1.Y, this.Weights1.Y);
+                case 6: return new BoneBinding((int)this.Joints1.Z, this.Weights1.Z);
+                case 7: return new BoneBinding((int)this.Joints1.W, this.Weights1.W);
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
 
-        public void SetBinding(int index, int joint, float weight)
+        public void SetBoneBinding(int index, int joint, float weight)
         {
             switch (index)
             {
@@ -499,7 +522,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public IEnumerable<JointWeightPair> Bindings => JointWeightPair.GetJoints(this);
+        public IEnumerable<BoneBinding> BoneBindings => BoneBinding.GetBindings(this);
 
         #endregion
     }

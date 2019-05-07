@@ -35,71 +35,71 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Vertex {Geometry} {Material} {Skinning}")]
-    public struct Vertex<TvP, TvM, TvS>
+    public struct VertexBuilder<TvP, TvM, TvS>
         where TvP : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
         #region constructors
 
-        public Vertex(TvP g, TvM m, TvS s)
+        public VertexBuilder(TvP g, TvM m, TvS s)
         {
             Geometry = g;
             Material = m;
             Skinning = s;
         }
 
-        public Vertex(TvP g, TvM m)
+        public VertexBuilder(TvP g, TvM m, params (int, float)[] bindings)
+        {
+            Geometry = g;
+            Material = m;
+            Skinning = default;
+
+            for (int i = 0; i < bindings.Length; ++i)
+            {
+                Skinning.SetBoneBinding(i, bindings[i].Item1, bindings[i].Item2);
+            }
+        }
+
+        public VertexBuilder(TvP g, TvM m)
         {
             Geometry = g;
             Material = m;
             Skinning = default;
         }
 
-        public Vertex(TvP g, TvS s)
+        public VertexBuilder(TvP g, TvS s)
         {
             Geometry = g;
             Material = default;
             Skinning = s;
         }
 
-        public Vertex(TvP g)
+        public VertexBuilder(TvP g)
         {
             Geometry = g;
             Material = default;
             Skinning = default;
         }
 
-        public static implicit operator Vertex<TvP, TvM, TvS>((TvP, TvM, TvS) tuple)
+        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvM, TvS) tuple)
         {
-            return new Vertex<TvP, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
         }
 
-        public static implicit operator Vertex<TvP, TvM, TvS>((TvP, TvM) tuple)
+        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvM) tuple)
         {
-            return new Vertex<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
         }
 
-        public static implicit operator Vertex<TvP, TvM, TvS>((TvP, TvS) tuple)
+        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvS) tuple)
         {
-            return new Vertex<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
         }
 
-        public static implicit operator Vertex<TvP, TvM, TvS>(TvP g)
+        public static implicit operator VertexBuilder<TvP, TvM, TvS>(TvP g)
         {
-            return new Vertex<TvP, TvM, TvS>(g);
-        }
-
-        public Vertex<TvPP, TvMM, TvSS> CloneAs<TvPP, TvMM, TvSS>()
-            where TvPP : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning
-        {
-            var p = Geometry.CloneAs<TvPP>();
-            var m = Material.CloneAs<TvMM>();
-            var s = Skinning.CloneAs<TvSS>();
-
-            return new Vertex<TvPP, TvMM, TvSS>(p, m, s);
+            return new VertexBuilder<TvP, TvM, TvS>(g);
         }
 
         #endregion
@@ -129,6 +129,28 @@ namespace SharpGLTF.Geometry
             Geometry.Validate();
             Material.Validate();
             Skinning.Validate();
+        }
+
+        public VertexBuilder<TvPP, TvMM, TvSS> ConvertTo<TvPP, TvMM, TvSS>()
+            where TvPP : struct, IVertexGeometry
+            where TvMM : struct, IVertexMaterial
+            where TvSS : struct, IVertexSkinning
+        {
+            var p = Geometry.ConvertTo<TvPP>();
+            var m = Material.ConvertTo<TvMM>();
+            var s = Skinning.ConvertTo<TvSS>();
+
+            return new VertexBuilder<TvPP, TvMM, TvSS>(p, m, s);
+        }
+
+        public static MeshBuilder<TMaterial, TvP, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
+        {
+            return new MeshBuilder<TMaterial, TvP, TvM, TvS>(name);
+        }
+
+        public static MeshBuilder<TvP, TvM, TvS> CreateCompatibleMesh(string name = null)
+        {
+            return new MeshBuilder<TvP, TvM, TvS>(name);
         }
 
         #endregion

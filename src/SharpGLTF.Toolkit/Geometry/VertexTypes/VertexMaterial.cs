@@ -32,6 +32,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             Color = color;
         }
 
+        public VertexColor1(IVertexMaterial src)
+        {
+            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
+        }
+
         public static implicit operator VertexColor1(Vector4 color)
         {
             return new VertexColor1(color);
@@ -89,6 +94,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             TexCoord = uv;
         }
 
+        public VertexTexture1(IVertexMaterial src)
+        {
+            this.TexCoord = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+        }
+
         public static implicit operator VertexTexture1(Vector2 uv)
         {
             return new VertexTexture1(uv);
@@ -144,6 +154,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             Color = color;
             TexCoord = tex;
+        }
+
+        public VertexColor1Texture1(IVertexMaterial src)
+        {
+            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
+            this.TexCoord = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
         #endregion
@@ -204,6 +220,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             Color = color;
             TexCoord0 = tex0;
             TexCoord1 = tex1;
+        }
+
+        public VertexColor1Texture2(IVertexMaterial src)
+        {
+            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
+            this.TexCoord0 = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord1 = src.MaxTextures > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
         #endregion
@@ -277,6 +300,14 @@ namespace SharpGLTF.Geometry.VertexTypes
             Color1 = color1;
             TexCoord0 = tex0;
             TexCoord1 = tex1;
+        }
+
+        public VertexColor2Texture2(IVertexMaterial src)
+        {
+            this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
+            this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
+            this.TexCoord0 = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord1 = src.MaxTextures > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
         #endregion

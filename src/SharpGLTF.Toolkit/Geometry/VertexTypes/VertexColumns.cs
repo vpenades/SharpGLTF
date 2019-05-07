@@ -83,10 +83,10 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var j = Joints0[index];
                 var w = Weights0[index];
 
-                jjjj.SetBinding(0, (int)j.X, w.X);
-                jjjj.SetBinding(1, (int)j.Y, w.Y);
-                jjjj.SetBinding(2, (int)j.Z, w.Z);
-                jjjj.SetBinding(3, (int)j.W, w.W);
+                jjjj.SetBoneBinding(0, (int)j.X, w.X);
+                jjjj.SetBoneBinding(1, (int)j.Y, w.Y);
+                jjjj.SetBoneBinding(2, (int)j.Z, w.Z);
+                jjjj.SetBoneBinding(3, (int)j.W, w.W);
             }
 
             if (Joints1 != null && Weights1 != null)
@@ -94,10 +94,10 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var j = Joints1[index];
                 var w = Weights1[index];
 
-                jjjj.SetBinding(4, (int)j.X, w.X);
-                jjjj.SetBinding(5, (int)j.Y, w.Y);
-                jjjj.SetBinding(6, (int)j.Z, w.Z);
-                jjjj.SetBinding(7, (int)j.W, w.W);
+                jjjj.SetBoneBinding(4, (int)j.X, w.X);
+                jjjj.SetBoneBinding(5, (int)j.Y, w.Y);
+                jjjj.SetBoneBinding(6, (int)j.Z, w.Z);
+                jjjj.SetBoneBinding(7, (int)j.W, w.W);
             }
 
             return jjjj;

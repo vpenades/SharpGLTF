@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
+
+using NUnit.Framework;
 
 namespace SharpGLTF
 {
-    static class TestUtils
+    static class NUnitUtils
     {
         public static string ToShortDisplayPath(this string path)
         {
@@ -22,7 +25,7 @@ namespace SharpGLTF
             return System.IO.Path.Combine(dir, fxt);
         }        
 
-        public static string GetAttachmentPath(this NUnit.Framework.TestContext context, string fileName, bool ensureDirectoryExists = false)
+        public static string GetAttachmentPath(this TestContext context, string fileName, bool ensureDirectoryExists = false)
         {
             var path = System.IO.Path.Combine(context.TestDirectory, "TestResults", $"{context.Test.ID}");
             var dir = path;
@@ -43,7 +46,7 @@ namespace SharpGLTF
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
         {
             // find the output path for the current test
-            fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
             
             if (fileName.ToLower().EndsWith(".glb"))
             {
@@ -59,62 +62,39 @@ namespace SharpGLTF
             }
 
             // Attach the saved file to the current test
-            NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            TestContext.AddTestAttachment(fileName);
         }
 
-        public static void AttachText(this NUnit.Framework.TestContext context, string fileName, string[] lines)
+        public static void AttachText(this TestContext context, string fileName, string[] lines)
         {
             fileName = context.GetAttachmentPath(fileName, true);
 
             System.IO.File.WriteAllLines(fileName, lines.ToArray());
 
-            NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            TestContext.AddTestAttachment(fileName);
         }
 
-        public static void AttachShowDirLink(this NUnit.Framework.TestContext context)
+        public static void AttachShowDirLink(this TestContext context)
         {
-            context.AttachFileLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
+            context.AttachLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
         }
 
-        public static void AttachGltfValidatorLink(this NUnit.Framework.TestContext context)
+        public static void AttachGltfValidatorLinks(this TestContext context)
         {
-            context.AttachUrlLink("🌍 khronos Validator", "http://github.khronos.org/glTF-Validator/");
-            context.AttachUrlLink("🌍 babylonjs sandbox", "https://sandbox.babylonjs.com/");
-            context.AttachUrlLink("🌍 donmccurdy sandbox", "https://gltf-viewer.donmccurdy.com/");            
+            context.AttachLink("🌍 Khronos Validator", "http://github.khronos.org/glTF-Validator/");
+            context.AttachLink("🌍 BabylonJS Sandbox", "https://sandbox.babylonjs.com/");
+            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");            
         }
 
-        public static void AttachFileLink(this NUnit.Framework.TestContext context, string linkPath, string targetPath)
+        public static void AttachLink(this TestContext context, string linkPath, string targetPath)
         {
-            var sb = new StringBuilder();
-            sb.AppendLine("[InternetShortcut]");
-            sb.AppendLine("URL=file:///" + targetPath);
-            sb.AppendLine("IconIndex=0");
-            string icon = targetPath.Replace('\\', '/');
-            sb.AppendLine("IconFile=" + icon);
+            linkPath = context.GetAttachmentPath(linkPath);
 
-            linkPath = System.IO.Path.ChangeExtension(linkPath, ".url");
-            linkPath = context.GetAttachmentPath(linkPath, true);
+            linkPath = ShortcutUtils.CreateLink(linkPath, targetPath);
 
-            System.IO.File.WriteAllText(linkPath, sb.ToString());
-
-            NUnit.Framework.TestContext.AddTestAttachment(linkPath);
-        }
-
-        public static void AttachUrlLink(this NUnit.Framework.TestContext context, string linkPath, string url)
-        {
-            var sb = new StringBuilder();
-            sb.AppendLine("[InternetShortcut]");
-            sb.AppendLine("URL=" + url);            
-
-            linkPath = System.IO.Path.ChangeExtension(linkPath, ".url");
-            linkPath = context.GetAttachmentPath(linkPath, true);
-
-            System.IO.File.WriteAllText(linkPath, sb.ToString());
-
-            NUnit.Framework.TestContext.AddTestAttachment(linkPath);
-        }
+            TestContext.AddTestAttachment(linkPath);
+        }        
     }
-
 
     static class DownloadUtils
     {
@@ -128,11 +108,11 @@ namespace SharpGLTF
             {
                 if (LibGit2Sharp.Repository.Discover(localDirectoryPath) == null)
                 {
-                    NUnit.Framework.TestContext.Progress.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
+                    TestContext.Progress.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
 
                     LibGit2Sharp.Repository.Clone(remoteUrl, localDirectoryPath);
 
-                    NUnit.Framework.TestContext.Progress.WriteLine($"... Clone Completed");
+                    TestContext.Progress.WriteLine($"... Clone Completed");
 
                     return;
                 }
@@ -146,7 +126,7 @@ namespace SharpGLTF
 
                     var r = LibGit2Sharp.Commands.Pull(repo, new LibGit2Sharp.Signature("Anonymous", "anon@anon.com", new DateTimeOffset(DateTime.Now)), options);
 
-                    NUnit.Framework.TestContext.Progress.WriteLine($"{remoteUrl} is {r.Status}");
+                    TestContext.Progress.WriteLine($"{remoteUrl} is {r.Status}");
                 }
             }
         }
@@ -159,7 +139,7 @@ namespace SharpGLTF
             {
                 if (System.IO.File.Exists(localFilePath)) return localFilePath; // we check again because we could have downloaded the file while waiting.
 
-                NUnit.Framework.TestContext.Progress.WriteLine($"Downloading {remoteUri}... Please Wait...");
+                TestContext.Progress.WriteLine($"Downloading {remoteUri}... Please Wait...");
 
                 var dir = System.IO.Path.GetDirectoryName(localFilePath);
                 System.IO.Directory.CreateDirectory(dir);
@@ -171,7 +151,7 @@ namespace SharpGLTF
 
                 if (localFilePath.ToLower().EndsWith(".zip"))
                 {
-                    NUnit.Framework.TestContext.Progress.WriteLine($"Extracting {localFilePath}...");
+                    TestContext.Progress.WriteLine($"Extracting {localFilePath}...");
 
                     var extractPath = System.IO.Path.Combine(dir, System.IO.Path.GetFileNameWithoutExtension(localFilePath));
 
@@ -181,6 +161,72 @@ namespace SharpGLTF
                 return localFilePath;
             }
         }
+    }
 
+    static class ShortcutUtils
+    {
+        public static string CreateLink(string localLinkPath, string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(localLinkPath)) throw new ArgumentNullException(nameof(localLinkPath));
+            if (string.IsNullOrWhiteSpace(targetPath)) throw new ArgumentNullException(nameof(targetPath));
+
+            if (!Uri.TryCreate(targetPath, UriKind.Absolute, out Uri uri)) throw new UriFormatException(nameof(targetPath));
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("[{000214A0-0000-0000-C000-000000000046}]");
+            sb.AppendLine("Prop3=19,11");
+            sb.AppendLine("[InternetShortcut]");
+            sb.AppendLine("IDList=");
+            sb.AppendLine($"URL={uri.AbsoluteUri}");
+
+            if (uri.IsFile)
+            {                
+                sb.AppendLine("IconIndex=1");
+                string icon = targetPath.Replace('\\', '/');
+                sb.AppendLine("IconFile=" + icon);
+            }
+            else
+            {
+                sb.AppendLine("IconIndex=0");
+            }
+
+            localLinkPath = System.IO.Path.ChangeExtension(localLinkPath, ".url");
+
+            System.IO.File.WriteAllText(localLinkPath, sb.ToString());
+
+            return localLinkPath;
+        }        
+    }
+
+    static class VectorUtils
+    {
+        public static Single NextSingle(this Random rnd)
+        {
+            return (Single)rnd.NextDouble();
+        }
+
+        public static Vector2 NextVector2(this Random rnd)
+        {
+            return new Vector2(rnd.NextSingle(), rnd.NextSingle());
+        }
+
+        public static Vector3 NextVector3(this Random rnd)
+        {
+            return new Vector3(rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle());
+        }
+
+        public static Vector4 NextVector4(this Random rnd)
+        {
+            return new Vector4(rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle());
+        }
+
+        public static void AreEqual(Vector4 a, Vector4 b, double delta = 0)
+        {
+            Assert.AreEqual(a.X, b.X, delta);
+            Assert.AreEqual(a.Y, b.Y, delta);
+            Assert.AreEqual(a.Z, b.Z, delta);
+            Assert.AreEqual(a.W, b.W, delta);
+        }
     }
 }

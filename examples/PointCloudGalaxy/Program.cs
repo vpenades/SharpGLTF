@@ -2,18 +2,21 @@ using System;
 using System.Numerics;
 
 using SharpGLTF.Geometry;
+using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Schema2;
 
 namespace PointCloudGalaxy
 {
+    using VERTEX = VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>;
+
     class Program
     {
         static void Main(string[] args)
         {
             var material = new MaterialBuilder("material1").WithUnlitShader();
 
-            var mesh = new MeshBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition, SharpGLTF.Geometry.VertexTypes.VertexColor1>("points");
+            var mesh = VERTEX.CreateCompatibleMesh("points");
 
             // create a point cloud primitive
             var pointCloud = mesh.UsePrimitive(material, 1);

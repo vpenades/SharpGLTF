@@ -54,6 +54,11 @@ namespace SharpGLTF
             return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
         }
 
+        internal static bool _IsReal(this Quaternion v)
+        {
+            return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
+        }
+
         internal static Vector3 WithLength(this Vector3 v, float len)
         {
             return Vector3.Normalize(v) * len;

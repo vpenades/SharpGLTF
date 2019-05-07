@@ -11,7 +11,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<Vertex<TvP, TvM, TvS>>> vertexBlocks)
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvP, TvM, TvS>>> vertexBlocks)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -141,7 +141,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<Vertex<TvP, TvM, TvS>, Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
+        private static Func<VertexBuilder<TvP, TvM, TvS>, Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -158,7 +158,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new NotImplementedException();
         }
 
-        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -166,7 +166,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetColumn<TvP, TvM, TvS, Single>(vertices, func);
         }
 
-        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -174,7 +174,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetColumn<TvP, TvM, TvS, Vector2>(vertices, func);
         }
 
-        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -182,7 +182,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetColumn<TvP, TvM, TvS, Vector3>(vertices, func);
         }
 
-        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -190,7 +190,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetColumn<TvP, TvM, TvS, Vector4>(vertices, func);
         }
 
-        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<Vertex<TvP, TvM, TvS>> vertices, Func<Vertex<TvP, TvM, TvS>, Object> func)
+        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -207,7 +207,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        public static TvP CloneAs<TvP>(this IVertexGeometry src)
+        public static TvP ConvertTo<TvP>(this IVertexGeometry src)
             where TvP : struct, IVertexGeometry
         {
             if (src.GetType() == typeof(TvP)) return (TvP)src;
@@ -221,7 +221,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        public static TvM CloneAs<TvM>(this IVertexMaterial src)
+        public static TvM ConvertTo<TvM>(this IVertexMaterial src)
             where TvM : struct, IVertexMaterial
         {
             if (src.GetType() == typeof(TvM)) return (TvM)src;
@@ -259,7 +259,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        public static unsafe TvS CloneAs<TvS>(this IVertexSkinning src)
+        public static unsafe TvS ConvertTo<TvS>(this IVertexSkinning src)
             where TvS : struct, IVertexSkinning
         {
             if (src.GetType() == typeof(TvS)) return (TvS)src;
@@ -272,9 +272,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 for (int i = 0; i < src.MaxBindings; ++i)
                 {
-                    var jw = src.GetBinding(i);
+                    var jw = src.GetBoneBinding(i);
 
-                    dst.SetBinding(i, jw.Joint, jw.Weight);
+                    dst.SetBoneBinding(i, jw.Joint, jw.Weight);
                 }
 
                 return dst;
@@ -282,20 +282,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // if there's more source joints than destination joints, transfer with scale
 
-            Span<JointWeightPair> srcjw = stackalloc JointWeightPair[src.MaxBindings];
+            Span<BoneBinding> srcjw = stackalloc BoneBinding[src.MaxBindings];
 
             for (int i = 0; i < src.MaxBindings; ++i)
             {
-                srcjw[i] = src.GetBinding(i);
+                srcjw[i] = src.GetBoneBinding(i);
             }
 
-            JointWeightPair.InPlaceReverseBubbleSort(srcjw);
+            BoneBinding.InPlaceReverseBubbleSort(srcjw);
 
-            var w = JointWeightPair.CalculateScaleFor(srcjw, dst.MaxBindings);
+            var w = BoneBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
 
             for (int i = 0; i < dst.MaxBindings; ++i)
             {
-                dst.SetBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
+                dst.SetBoneBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
             }
 
             return dst;

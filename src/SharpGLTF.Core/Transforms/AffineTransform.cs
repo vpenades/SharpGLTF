@@ -30,6 +30,11 @@ namespace SharpGLTF.Transforms
             }
         }
 
+        public static implicit operator AffineTransform(Matrix4x4 matrix)
+        {
+            return new AffineTransform(matrix, null, null, null);
+        }
+
         #endregion
 
         #region data
@@ -69,6 +74,29 @@ namespace SharpGLTF.Transforms
             }
         }
 
+        public bool IsValid
+        {
+            get
+            {
+                if (!Scale._IsReal()) return false;
+                if (!Rotation._IsReal()) return false;
+                if (!Translation._IsReal()) return false;
+
+                return true;
+            }
+        }
+
+        public bool IsIdentity
+        {
+            get
+            {
+                if (Scale != Vector3.One) return false;
+                if (Rotation != Quaternion.Identity) return false;
+                if (Translation != Vector3.Zero) return false;
+                return true;
+            }
+        }
+
         #endregion
 
         #region API
@@ -99,7 +127,7 @@ namespace SharpGLTF.Transforms
 
             return childWorld * invWorld;
         }
-
+        
         #endregion
     }
 }

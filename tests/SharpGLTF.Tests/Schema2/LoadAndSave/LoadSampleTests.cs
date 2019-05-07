@@ -33,7 +33,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         public void LoadSampleModels(string section)
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             foreach (var f in TestFiles.GetSampleModelsPaths())
             {
@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         public void LoadExtendedModels(string filePath)
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             filePath = TestFiles
                 .GetSampleModelsPaths()

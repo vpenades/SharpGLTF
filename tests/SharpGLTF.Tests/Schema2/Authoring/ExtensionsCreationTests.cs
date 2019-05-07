@@ -15,7 +15,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithWithLightsExtension()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var root = ModelRoot.CreateModel();
             var scene = root.UseScene("Empty Scene");
@@ -37,7 +37,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithSpecularGlossinessExtension()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
 
@@ -81,7 +81,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CreateSceneWithTextureImageExtension(string textureFileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
 
@@ -123,7 +123,7 @@ namespace SharpGLTF.Schema2.Authoring
         public void CrateSceneWithTextureTransformExtension()
         {
             TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
 

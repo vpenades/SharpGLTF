@@ -121,7 +121,7 @@ namespace SharpGLTF.Geometry
             return _UsePrimitive((material, primitiveVertexCount));
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
+        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> vertexTransform)
         {
             foreach (var p in mesh.Primitives)
             {
@@ -135,8 +135,8 @@ namespace SharpGLTF.Geometry
         /// Transforms all the points of all the <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/>
         /// of the this <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> using the given lambfa function.
         /// </summary>
-        /// <param name="vertexTransform">A lambda function to transform <see cref="Vertex{TvP, TvM, TvS}"/> vertices.</param>
-        public void TransformVertices(Func<Vertex<TvP, TvM, TvS>, Vertex<TvP, TvM, TvS>> vertexTransform)
+        /// <param name="vertexTransform">A lambda function to transform <see cref="VertexBuilder{TvP, TvM, TvS}"/> vertices.</param>
+        public void TransformVertices(Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> vertexTransform)
         {
             foreach (var p in Primitives) p.TransformVertices(vertexTransform);
         }

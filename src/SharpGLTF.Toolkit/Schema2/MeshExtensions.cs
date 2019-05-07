@@ -194,7 +194,7 @@ namespace SharpGLTF.Schema2
             where TvP : struct, Geometry.VertexTypes.IVertexGeometry
         {
             var xvertices = vertices
-                .Select(item => new Geometry.Vertex<TvP, Geometry.VertexTypes.VertexEmpty, Geometry.VertexTypes.VertexEmpty>(item))
+                .Select(item => new Geometry.VertexBuilder<TvP, Geometry.VertexTypes.VertexEmpty, Geometry.VertexTypes.VertexEmpty>(item))
                 .ToList();
 
             return primitive.WithVertexAccessors(xvertices);
@@ -205,13 +205,13 @@ namespace SharpGLTF.Schema2
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
         {
             var xvertices = vertices
-                .Select(item => new Geometry.Vertex<TvP, TvM, Geometry.VertexTypes.VertexEmpty>(item.Item1, item.Item2))
+                .Select(item => new Geometry.VertexBuilder<TvP, TvM, Geometry.VertexTypes.VertexEmpty>(item.Item1, item.Item2))
                 .ToList();
 
             return primitive.WithVertexAccessors(xvertices);
         }
 
-        public static MeshPrimitive WithVertexAccessors<TvP, TvM, TvS>(this MeshPrimitive primitive, IReadOnlyList<Geometry.Vertex<TvP, TvM, TvS>> vertices)
+        public static MeshPrimitive WithVertexAccessors<TvP, TvM, TvS>(this MeshPrimitive primitive, IReadOnlyList<Geometry.VertexBuilder<TvP, TvM, TvS>> vertices)
             where TvP : struct, Geometry.VertexTypes.IVertexGeometry
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvS : struct, Geometry.VertexTypes.IVertexSkinning

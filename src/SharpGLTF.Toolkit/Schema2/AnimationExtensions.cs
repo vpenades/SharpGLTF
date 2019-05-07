@@ -15,6 +15,21 @@ namespace SharpGLTF.Schema2
             return animation ?? root.CreateAnimation(name);
         }
 
+        public static Node WithScaleAnimation(this Node node, string animationName, params (Single, Vector3)[] keyframes)
+        {
+            return node.WithScaleAnimation(animationName, keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
+        }
+
+        public static Node WithRotationAnimation(this Node node, string animationName, params (Single, Quaternion)[] keyframes)
+        {
+            return node.WithRotationAnimation(animationName, keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
+        }
+
+        public static Node WithTranslationAnimation(this Node node, string animationName, params (Single, Vector3)[] keyframes)
+        {
+            return node.WithTranslationAnimation(animationName, keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2));
+        }
+
         public static Node WithScaleAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             var root = node.LogicalParent;
