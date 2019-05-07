@@ -200,7 +200,7 @@ namespace SharpGLTF.Schema2.Authoring
             // setup skin
             var snode = scene.CreateNode("Skeleton Node");
             snode.Skin = model.CreateSkin();            
-            snode.Skin.BindJoints(skelet, joint1, joint2, joint3);
+            snode.Skin.BindJoints(joint1, joint2, joint3);
 
             snode.WithMesh( model.CreateMesh(meshBuilder) );
 

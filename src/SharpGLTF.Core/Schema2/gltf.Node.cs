@@ -44,14 +44,18 @@ namespace SharpGLTF.Schema2
         public Node VisualParent => this.LogicalParent._FindVisualParentNode(this);
 
         /// <summary>
+        /// Gets the visual root <see cref="Node"/> instance that contains this <see cref="Node"/>.
+        /// </summary>
+        public Node VisualRoot => this.LogicalParent._FindVisualRootNode(this);
+
+        /// <summary>
         /// Gets the visual root <see cref="Scene"/> instance that contains this <see cref="Node"/>.
         /// </summary>
         public Scene VisualScene
         {
             get
             {
-                var rootNode = this;
-                while (rootNode.VisualParent != null) rootNode = rootNode.VisualParent;
+                var rootNode = this.VisualRoot;
                 return LogicalParent.LogicalScenes.FirstOrDefault(item => item._ContainsVisualNode(rootNode, false));
             }
         }
@@ -65,6 +69,11 @@ namespace SharpGLTF.Schema2
         /// Gets a value indicating whether this node is used as a Bone joint in a <see cref="Skin"/>.
         /// </summary>
         public Boolean IsSkinJoint => Skin.FindSkinsUsingJoint(this).Any();
+
+        /// <summary>
+        /// Gets a value indicating whether this node is used as a Skeleton node in a <see cref="Skin"/>.
+        /// </summary>
+        public Boolean IsSkinSkeleton => Skin.FindSkinsUsingSkeleton(this).Any();
 
         #endregion
 
@@ -334,6 +343,16 @@ namespace SharpGLTF.Schema2
             return _nodes.FirstOrDefault(item => item._HasVisualChild(childIdx));
         }
 
+        internal Node _FindVisualRootNode(Node childNode)
+        {
+            while (true)
+            {
+                var parent = childNode.VisualParent;
+                if (parent == null) return childNode;
+                childNode = parent;
+            }
+        }
+
         internal Node _CreateLogicalNode()
         {
             var n = new Node();
@@ -346,12 +365,6 @@ namespace SharpGLTF.Schema2
             var n = _CreateLogicalNode();
             children.Add(n.LogicalIndex);
             return n;
-        }
-
-        internal Boolean _CheckNodeIsJoint(Node n)
-        {
-            var idx = n.LogicalIndex;
-            return _skins.Any(s => s._ContainsJoint(idx));
         }
     }
 }

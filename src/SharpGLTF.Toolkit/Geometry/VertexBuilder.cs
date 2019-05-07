@@ -57,7 +57,7 @@ namespace SharpGLTF.Geometry
 
             for (int i = 0; i < bindings.Length; ++i)
             {
-                Skinning.SetBoneBinding(i, bindings[i].Item1, bindings[i].Item2);
+                Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
             }
         }
 

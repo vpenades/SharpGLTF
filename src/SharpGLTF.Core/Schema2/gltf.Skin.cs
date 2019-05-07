@@ -64,14 +64,30 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="jointNode">A <see cref="Node"/> joint.</param>
         /// <returns>A collection of <see cref="Skin"/> instances.</returns>
-        public static IEnumerable<Skin> FindSkinsUsingJoint(Node jointNode)
+        internal static IEnumerable<Skin> FindSkinsUsingJoint(Node jointNode)
         {
             var idx = jointNode.LogicalIndex;
 
-            return jointNode.LogicalParent.LogicalSkins.Where(s => s._ContainsJoint(idx));
+            return jointNode
+                .LogicalParent
+                .LogicalSkins
+                .Where(s => s._joints.Contains(idx));
         }
 
-        internal bool _ContainsJoint(int nodeIdx) { return _joints.Contains(nodeIdx); }
+        /// <summary>
+        /// Finds all the skins that are using the given <see cref="Node"/> as a skeleton.
+        /// </summary>
+        /// <param name="skeletonNode">A <see cref="Node"/> skeleton.</param>
+        /// <returns>A collection of <see cref="Skin"/> instances.</returns>
+        internal static IEnumerable<Skin> FindSkinsUsingSkeleton(Node skeletonNode)
+        {
+            var idx = skeletonNode.LogicalIndex;
+
+            return skeletonNode
+                .LogicalParent
+                .LogicalSkins
+                .Where(s => s._skeleton == idx);
+        }
 
         public Accessor GetInverseBindMatricesAccessor()
         {
@@ -133,10 +149,15 @@ namespace SharpGLTF.Schema2
             return true;
         }
 
-        public void BindJoints(Node skeleton, params Node[] joints)
+        public void BindJoints(params Node[] joints)
         {
-            Guard.MustShareLogicalParent(this, skeleton, nameof(skeleton));
             foreach (var j in joints) Guard.MustShareLogicalParent(this, j, nameof(joints));
+
+            var rootJoint = joints.Select(item => item.VisualRoot).Distinct().ToList();
+
+            Guard.IsTrue(rootJoint.Count == 1, nameof(joints), "All joints must have only one root parent");
+
+            var skeleton = rootJoint[0];
 
             this.Skeleton = skeleton;
 

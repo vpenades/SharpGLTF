@@ -49,6 +49,15 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        public static Node WithSkinBinding(this Node node, params Node[] joints)
+        {
+            var skin = node.LogicalParent.CreateSkin();
+            skin.BindJoints(joints);
+
+            node.Skin = skin;
+            return node;
+        }
+
         #endregion
 
         #region evaluation

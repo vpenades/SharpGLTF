@@ -15,15 +15,15 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var pairs = new[]
             {
-                new BoneBinding(2,0),
-                new BoneBinding(1,0.20f),
-                new BoneBinding(3,0.15f),
-                new BoneBinding(2,0.25f),
-                new BoneBinding(4,0),
-                new BoneBinding(7,0.40f)
+                new JointBinding(2,0),
+                new JointBinding(1,0.20f),
+                new JointBinding(3,0.15f),
+                new JointBinding(2,0.25f),
+                new JointBinding(4,0),
+                new JointBinding(7,0.40f)
             };
 
-            BoneBinding.InPlaceReverseBubbleSort(pairs);
+            JointBinding.InPlaceReverseBubbleSort(pairs);
 
             Assert.AreEqual(7, pairs[0].Joint);
             Assert.AreEqual(2, pairs[1].Joint);

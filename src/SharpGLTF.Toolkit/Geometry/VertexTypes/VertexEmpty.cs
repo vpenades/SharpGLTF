@@ -25,10 +25,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new NotSupportedException(); }
 
-        void IVertexSkinning.SetBoneBinding(int index, int joint, float weight) { }
+        void IVertexSkinning.SetJointBinding(int index, int joint, float weight) { }
 
-        BoneBinding IVertexSkinning.GetBoneBinding(int index) { throw new NotSupportedException(); }
+        JointBinding IVertexSkinning.GetJointBinding(int index) { throw new NotSupportedException(); }
 
-        public IEnumerable<BoneBinding> BoneBindings => Enumerable.Empty<BoneBinding>();
+        public IEnumerable<JointBinding> JointBindings => Enumerable.Empty<JointBinding>();
     }
 }

@@ -83,7 +83,8 @@ namespace SharpGLTF
         {
             context.AttachLink("🌍 Khronos Validator", "http://github.khronos.org/glTF-Validator/");
             context.AttachLink("🌍 BabylonJS Sandbox", "https://sandbox.babylonjs.com/");
-            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");            
+            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");
+            context.AttachLink("🌍 VirtualGIS Cesium Sandbox", "https://www.virtualgis.io/gltfviewer/");
         }
 
         public static void AttachLink(this TestContext context, string linkPath, string targetPath)

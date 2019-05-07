@@ -16,6 +16,29 @@ namespace InfiniteSkinnedTentacle
     {
         // Skinning use cases and examples: https://github.com/KhronosGroup/glTF/issues/1403
 
+        // hierarchy created:
+
+        // Mesh1
+        // Skin1─> Armature1
+        // Skin2─> Armature2
+        // Skin3─> Armature3
+        // Scene
+        // ├── Armature1
+        // │   ├── Bone1
+        // │   ├── Bone2
+        // │   └── Bone3        
+        // ├── SkinnedMesh1─> Mesh1, Skin1
+        // ├── Armature2
+        // │   ├── Bone1
+        // │   ├── Bone2
+        // │   └── Bone3
+        // ├── SkinnedMesh2─> Mesh1, Skin2
+        // ├── Armature3
+        // │   ├── Bone1
+        // │   ├── Bone2
+        // │   └── Bone3
+        // └── SkinnedMesh3─> Mesh1, Skin3
+
         private static readonly Random _Randomizer = new Random(17);
 
         static void Main(string[] args)
@@ -60,17 +83,14 @@ namespace InfiniteSkinnedTentacle
                 bindings.Add(bone);                
             }
 
-            var skin = scene.LogicalParent.CreateSkin();            
-            skin.BindJoints(skeleton, bindings.ToArray());
-
             scene.CreateNode()
                 .WithMesh(mesh)
-                .WithSkin(skin);
+                .WithSkinBinding(bindings.ToArray());
         }
 
         static MESH CreateMesh(int boneCount)
         {
-            var mesh = VERTEX.CreateCompatibleMesh("skinned mesh");
+            var mesh = new MESH("skinned mesh");
             var prim = mesh.UsePrimitive(new SharpGLTF.Materials.MaterialBuilder("Default"));
 
             var a0 = default(VERTEX);
@@ -80,10 +100,10 @@ namespace InfiniteSkinnedTentacle
 
             for (int i = 0; i < boneCount; ++i)
             {
-                VERTEX b0 = new VERTEX(new Vector3(-5, i * 10, -5), Vector4.One, (i, 1));
-                VERTEX b1 = new VERTEX(new Vector3(+5, i * 10, -5), Vector4.One, (i, 1));
-                VERTEX b2 = new VERTEX(new Vector3(+5, i * 10, +5), Vector4.One, (i, 1));
-                VERTEX b3 = new VERTEX(new Vector3(-5, i * 10, +5), Vector4.One, (i, 1));
+                var b0 = new VERTEX(new Vector3(-5, i * 10, -5), Vector4.One, (i, 1));
+                var b1 = new VERTEX(new Vector3(+5, i * 10, -5), Vector4.One, (i, 1));
+                var b2 = new VERTEX(new Vector3(+5, i * 10, +5), Vector4.One, (i, 1));
+                var b3 = new VERTEX(new Vector3(-5, i * 10, +5), Vector4.One, (i, 1));
 
                 if (i > 0)
                 {

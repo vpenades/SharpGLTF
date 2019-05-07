@@ -272,9 +272,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 for (int i = 0; i < src.MaxBindings; ++i)
                 {
-                    var jw = src.GetBoneBinding(i);
+                    var jw = src.GetJointBinding(i);
 
-                    dst.SetBoneBinding(i, jw.Joint, jw.Weight);
+                    dst.SetJointBinding(i, jw.Joint, jw.Weight);
                 }
 
                 return dst;
@@ -282,20 +282,20 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // if there's more source joints than destination joints, transfer with scale
 
-            Span<BoneBinding> srcjw = stackalloc BoneBinding[src.MaxBindings];
+            Span<JointBinding> srcjw = stackalloc JointBinding[src.MaxBindings];
 
             for (int i = 0; i < src.MaxBindings; ++i)
             {
-                srcjw[i] = src.GetBoneBinding(i);
+                srcjw[i] = src.GetJointBinding(i);
             }
 
-            BoneBinding.InPlaceReverseBubbleSort(srcjw);
+            JointBinding.InPlaceReverseBubbleSort(srcjw);
 
-            var w = BoneBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
+            var w = JointBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
 
             for (int i = 0; i < dst.MaxBindings; ++i)
             {
-                dst.SetBoneBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
+                dst.SetJointBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
             }
 
             return dst;
