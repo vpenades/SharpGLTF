@@ -10,6 +10,12 @@ namespace SharpGLTF.Schema2
     {
         #region fluent creation
 
+        public static Node WithLocalTransform(this Node node, Transforms.AffineTransform xform)
+        {
+            node.LocalTransform = xform;
+            return node;
+        }
+
         public static Node WithLocalTranslation(this Node node, Vector3 translation)
         {
             var xform = node.LocalTransform;
@@ -53,6 +59,15 @@ namespace SharpGLTF.Schema2
         {
             var skin = node.LogicalParent.CreateSkin();
             skin.BindJoints(joints);
+
+            node.Skin = skin;
+            return node;
+        }
+
+        public static Node WithSkinBinding(this Node node, Matrix4x4 meshPoseTransform, params Node[] joints)
+        {
+            var skin = node.LogicalParent.CreateSkin();
+            skin.BindJoints(meshPoseTransform, joints);
 
             node.Skin = skin;
             return node;

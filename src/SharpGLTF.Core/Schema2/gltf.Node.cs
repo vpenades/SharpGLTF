@@ -262,7 +262,6 @@ namespace SharpGLTF.Schema2
 
         internal bool _ContainsVisualNode(Node node, bool recursive)
         {
-            Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             if (!recursive) return VisualChildren.Any(item => item == node);

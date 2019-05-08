@@ -14,7 +14,7 @@ namespace SharpGLTF.Schema2
         // https://github.com/AnalyticalGraphicsInc/cesium/blob/master/Source/Scene/Model.js#L2526
 
         // max shader joints
-        // https://github.com/KhronosGroup/glTF/issues/283
+        // https://github.com/KhronosGroup/COLLADA2GLTF/issues/110
 
         #region lifecycle
 
@@ -59,6 +59,103 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        public Accessor GetInverseBindMatricesAccessor()
+        {
+            if (!this._inverseBindMatrices.HasValue) return null;
+
+            return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
+        }
+
+        public KeyValuePair<Node, Matrix4x4> GetJoint(int idx)
+        {
+            var nodeIdx = _joints[idx];
+
+            var node = this.LogicalParent.LogicalNodes[nodeIdx];
+
+            var accessor = GetInverseBindMatricesAccessor();
+
+            var matrix = accessor == null ? Matrix4x4.Identity : accessor.AsMatrix4x4Array()[idx];
+
+            return new KeyValuePair<Node, Matrix4x4>(node, matrix);
+        }
+
+        public void BindJoints(params Node[] joints)
+        {
+            var rootJoint = _FindCommonAncestor(joints);
+
+            BindJoints(rootJoint.WorldMatrix, joints);
+        }
+
+        public void BindJoints(Matrix4x4 meshBingTransform, params Node[] joints)
+        {
+            var meshBingInverse = meshBingTransform.Inverse();
+
+            var pairs = new KeyValuePair<Node, Matrix4x4>[joints.Length];
+
+            for (int i = 0; i < pairs.Length; ++i)
+            {
+                var xform = (joints[i].WorldMatrix * meshBingInverse).Inverse();
+
+                pairs[i] = new KeyValuePair<Node, Matrix4x4>(joints[i], xform);
+            }
+
+            BindJoints(pairs);
+        }
+
+        public void BindJoints(KeyValuePair<Node, Matrix4x4>[] joints)
+        {
+            _FindCommonAncestor(joints.Select(item => item.Key));
+
+            foreach (var j in joints) { Guard.IsTrue(j.Value._IsReal(), nameof(joints)); }
+
+            // inverse bind matrices accessor
+
+            var data = new Byte[joints.Length * 16 * 4];
+
+            var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
+
+            matrices.Fill(joints.Select(item => item.Value));
+
+            var accessor = LogicalParent.CreateAccessor("Bind Matrices");
+
+            accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
+
+            this._inverseBindMatrices = accessor.LogicalIndex;
+
+            // joints
+
+            _joints.Clear();
+            _joints.AddRange(joints.Select(item => item.Key.LogicalIndex));
+        }
+
+        #endregion
+
+        #region helpers
+
+        /// <summary>
+        /// Returns true if this <see cref="Skin"/> matches the input values.
+        /// </summary>
+        /// <param name="skeleton">A <see cref="Node"/> instance that represents the skeleton root.</param>
+        /// <param name="joints">A key value pair collection of <see cref="Node"/> joints and their binding matrices.</param>
+        /// <returns>True if the input values match this <see cref="Skin"/>.</returns>
+        internal bool IsMatch(Node skeleton, KeyValuePair<Node, Matrix4x4>[] joints)
+        {
+            if (!ReferenceEquals(skeleton, this.Skeleton)) return false;
+
+            if (joints.Length != this._joints.Count) return false;
+
+            for (int i = 0; i < this._joints.Count; ++i)
+            {
+                var src = joints[i];
+                var dst = GetJoint(i);
+
+                if (!ReferenceEquals(src.Key, dst.Key)) return false;
+                if (src.Value != dst.Value) return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Finds all the skins that are using the given <see cref="Node"/> as a joint.
         /// </summary>
@@ -89,116 +186,67 @@ namespace SharpGLTF.Schema2
                 .Where(s => s._skeleton == idx);
         }
 
-        public Accessor GetInverseBindMatricesAccessor()
+        /// <summary>
+        /// Validates the node tree, ensuring that all nodes share a common ancestor node, and returns it.
+        /// </summary>
+        /// <param name="nodes">A collection of <see cref="Node"/> joints arranged in a tree.</param>
+        /// <returns>The <see cref="Node"/> root of the tree.</returns>
+        private Node _FindCommonAncestor(IEnumerable<Node> nodes)
         {
-            if (!this._inverseBindMatrices.HasValue) return null;
+            foreach (var j in nodes) Guard.MustShareLogicalParent(this, j, nameof(nodes));
 
-            return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
+            var workingNodes = nodes.ToList();
+
+            var rootJoint = workingNodes.First();
+
+            while (true)
+            {
+                if (workingNodes.All(j => rootJoint == j || rootJoint._ContainsVisualNode(j, true))) return rootJoint;
+
+                if (rootJoint.VisualParent == null) break;
+
+                rootJoint = rootJoint.VisualParent;
+            }
+
+            Guard.IsTrue(false, nameof(nodes), "Common ancestor not found");
+            return null;
         }
 
-        public KeyValuePair<Node, Matrix4x4> GetJoint(int idx)
-        {
-            var nodeIdx = _joints[idx];
+        #endregion
 
-            var node = this.LogicalParent.LogicalNodes[nodeIdx];
-
-            var accessor = GetInverseBindMatricesAccessor();
-
-            var matrix = accessor == null ? Matrix4x4.Identity : accessor.AsMatrix4x4Array()[idx];
-
-            return new KeyValuePair<Node, Matrix4x4>(node, matrix);
-        }
+        #region validation
 
         internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
-            // note: this check will fail if the buffers are not set
+            var ibxAccessor = GetInverseBindMatricesAccessor();
+
+            var logicalNodeCount = this.LogicalParent.LogicalNodes.Count;
+
+            if (_skeleton.HasValue)
+            {
+                if (_skeleton.Value < 0 || _skeleton.Value >= logicalNodeCount) result.AddError(this, $"Skeleton Node index reference is out of bounds.");
+            }
+
+            if (_joints == null || _joints.Count < _jointsMinItems)
+            {
+                result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
+                return;
+            }
 
             for (int i = 0; i < _joints.Count; ++i)
             {
-                var j = GetJoint(i);
+                var jidx = _joints[i];
+                if (jidx < 0 || jidx >= logicalNodeCount) result.AddError(this, $"Joint {i} Node index reference is out of bounds.");
 
-                var invXform = j.Value;
-
-                if (invXform.M44 != 1) result.AddError(this, $"Joint {i} has invalid inverse matrix");
+                if (ibxAccessor != null)
+                {
+                    var ibxform = ibxAccessor.AsMatrix4x4Array()[i];
+                    try { ibxform.Inverse(); }
+                    catch { result.AddError(this, $"Joint {i} has invalid bind matrix"); }
+                }
             }
-        }
-
-        /// <summary>
-        /// Returns true if this <see cref="Skin"/> matches the input values.
-        /// </summary>
-        /// <param name="skeleton">A <see cref="Node"/> instance that represents the skeleton root.</param>
-        /// <param name="joints">A key value pair collection of <see cref="Node"/> joints and their binding matrices.</param>
-        /// <returns>True if the input values match this <see cref="Skin"/>.</returns>
-        public bool IsMatch(Node skeleton, KeyValuePair<Node, Matrix4x4>[] joints)
-        {
-            if (!ReferenceEquals(skeleton, this.Skeleton)) return false;
-
-            if (joints.Length != this._joints.Count) return false;
-
-            for (int i = 0; i < this._joints.Count; ++i)
-            {
-                var src = joints[i];
-                var dst = GetJoint(i);
-
-                if (!ReferenceEquals(src.Key, dst.Key)) return false;
-                if (src.Value != dst.Value) return false;
-            }
-
-            return true;
-        }
-
-        public void BindJoints(params Node[] joints)
-        {
-            foreach (var j in joints) Guard.MustShareLogicalParent(this, j, nameof(joints));
-
-            var rootJoint = joints.Select(item => item.VisualRoot).Distinct().ToList();
-
-            Guard.IsTrue(rootJoint.Count == 1, nameof(joints), "All joints must have only one root parent");
-
-            var skeleton = rootJoint[0];
-
-            this.Skeleton = skeleton;
-
-            Matrix4x4.Invert(skeleton.WorldMatrix, out Matrix4x4 skeletonBindXform);
-
-            var pairs = new KeyValuePair<Node, Matrix4x4>[joints.Length];
-
-            for (int i = 0; i < pairs.Length; ++i)
-            {
-                var xform = joints[i].WorldMatrix * skeletonBindXform;
-
-                Matrix4x4.Invert(xform, out Matrix4x4 ixform);
-
-                pairs[i] = new KeyValuePair<Node, Matrix4x4>(joints[i], ixform);
-            }
-
-            BindJoints(pairs);
-        }
-
-        public void BindJoints(KeyValuePair<Node, Matrix4x4>[] joints)
-        {
-            foreach (var j in joints) Guard.MustShareLogicalParent(this, j.Key, nameof(joints));
-
-            // inverse bind matrices accessor
-
-            var data = new Byte[joints.Length * 16 * 4];
-
-            var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
-
-            matrices.Fill(joints.Select(item => item.Value));
-
-            var accessor = LogicalParent.CreateAccessor("Bind Matrices");
-
-            accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
-
-            this._inverseBindMatrices = accessor.LogicalIndex;
-
-            // joints
-
-            _joints.Clear();
-            _joints.AddRange(joints.Select(item => item.Key.LogicalIndex));
         }
 
         #endregion

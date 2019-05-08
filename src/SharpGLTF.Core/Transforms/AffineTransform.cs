@@ -123,11 +123,9 @@ namespace SharpGLTF.Transforms
 
         public static Matrix4x4 WorldToLocal(Matrix4x4 parentWorld, Matrix4x4 childWorld)
         {
-            Matrix4x4.Invert(parentWorld, out Matrix4x4 invWorld);
-
-            return childWorld * invWorld;
+            return childWorld * parentWorld.Inverse();
         }
-        
+
         #endregion
     }
 }

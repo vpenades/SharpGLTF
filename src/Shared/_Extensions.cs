@@ -54,6 +54,15 @@ namespace SharpGLTF
             return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
         }
 
+        internal static bool _IsReal(this Matrix4x4 v)
+        {
+            if (!(v.M11._IsReal() & v.M12._IsReal() & v.M13._IsReal() & v.M14._IsReal())) return false;
+            if (!(v.M21._IsReal() & v.M22._IsReal() & v.M23._IsReal() & v.M24._IsReal())) return false;
+            if (!(v.M31._IsReal() & v.M32._IsReal() & v.M33._IsReal() & v.M34._IsReal())) return false;
+            if (!(v.M41._IsReal() & v.M42._IsReal() & v.M43._IsReal() & v.M44._IsReal())) return false;
+            return true;
+        }
+
         internal static bool _IsReal(this Quaternion v)
         {
             return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
@@ -142,6 +151,13 @@ namespace SharpGLTF
             if (tangent.W != 1 && tangent.W != -1) return false;
 
             return new Vector3(tangent.X, tangent.Y, tangent.Z).IsValidNormal();
+        }
+
+        internal static Matrix4x4 Inverse(this Matrix4x4 src)
+        {
+            if (!Matrix4x4.Invert(src, out Matrix4x4 dst)) Guard.IsTrue(false, nameof(src), "Matrix cannot be inverted.");
+
+            return dst;
         }
 
         #endregion
