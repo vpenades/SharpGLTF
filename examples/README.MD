@@ -1,6 +1,6 @@
 ### Showcase
 
-In here I'll by uploading projects levaraging SharpGLTF.
+In here I'll upload projects levaraging SharpGLTF.
 
 |Project|Description|Result|
 |-|-|-|
