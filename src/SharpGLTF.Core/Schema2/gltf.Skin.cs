@@ -224,11 +224,6 @@ namespace SharpGLTF.Schema2
 
             var logicalNodeCount = this.LogicalParent.LogicalNodes.Count;
 
-            if (_skeleton.HasValue)
-            {
-                if (_skeleton.Value < 0 || _skeleton.Value >= logicalNodeCount) result.AddError(this, $"Skeleton Node index reference is out of bounds.");
-            }
-
             if (_joints == null || _joints.Count < _jointsMinItems)
             {
                 result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
@@ -245,6 +240,23 @@ namespace SharpGLTF.Schema2
                     var ibxform = ibxAccessor.AsMatrix4x4Array()[i];
                     try { ibxform.Inverse(); }
                     catch { result.AddError(this, $"Joint {i} has invalid bind matrix"); }
+                }
+            }
+
+            if (_skeleton.HasValue)
+            {
+                if (_skeleton.Value < 0 || _skeleton.Value >= logicalNodeCount) result.AddError(this, $"Skeleton Node index reference is out of bounds.");
+
+                var skeletonNode = this.Skeleton;
+
+                for (int i = 0; i < this.JointsCount; ++i)
+                {
+                    var jointNode = GetJoint(i).Key;
+
+                    if (skeletonNode == jointNode) continue;
+                    if (skeletonNode._ContainsVisualNode(jointNode, true)) continue;
+
+                    result.AddError(this, $"Skeleton node is not a common ancestor of Joint[{i}]");
                 }
             }
         }
