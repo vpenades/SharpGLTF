@@ -12,7 +12,7 @@ using static System.FormattableString;
 namespace SharpGLTF.IO
 {
     using BYTES = ArraySegment<Byte>;
-    using VERTEX = ValueTuple<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
+    using VERTEX = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
     using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
     using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
     using VSKINNING = Geometry.VertexTypes.VertexEmpty;
@@ -234,6 +234,29 @@ namespace SharpGLTF.IO
         public void AddModel(ModelRoot model)
         {
             foreach (var triangle in Schema2Toolkit.Triangulate<VGEOMETRY, VMATERIAL, VSKINNING>(model.DefaultScene))
+            {
+                var dstMaterial = default(Material);
+
+                var srcMaterial = triangle.Item4;
+                if (srcMaterial != null)
+                {
+                    // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
+
+                    var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
+
+                    dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
+                    dstMaterial.SpecularColor = new Vector3(0.2f);
+
+                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
+                }
+
+                this.AddTriangle(dstMaterial, triangle.Item1, triangle.Item2, triangle.Item3);
+            }
+        }
+
+        public void AddModel(ModelRoot model, Animation animation, float time)
+        {
+            foreach (var triangle in Schema2Toolkit.Triangulate<VGEOMETRY, VMATERIAL>(model.DefaultScene, animation, time))
             {
                 var dstMaterial = default(Material);
 

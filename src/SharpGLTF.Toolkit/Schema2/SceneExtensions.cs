@@ -128,6 +128,13 @@ namespace SharpGLTF.Schema2
             return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM, TvS>(true));
         }
 
+        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Scene scene, Animation animation, float time)
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        {
+            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM>(animation, time));
+        }
+
         /// <summary>
         /// Yield a collection of triangles representing the geometry
         /// of the input <see cref="Node"/> in local or world space.
@@ -149,6 +156,19 @@ namespace SharpGLTF.Schema2
             var xform = inWorldSpace ? node.WorldMatrix : Matrix4x4.Identity;
 
             return mesh.Triangulate<TvP, TvM, TvS>(xform);
+        }
+
+        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Node node, Animation animation, float time)
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        {
+            var mesh = node.Mesh;
+
+            if (mesh == null) return Enumerable.Empty<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)>();
+
+            var xform = node.GetMeshWorldTransform(animation, time);
+
+            return mesh.Triangulate<TvP, TvM>(xform);
         }
 
         #endregion

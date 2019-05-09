@@ -275,6 +275,15 @@ namespace SharpGLTF.Schema2
             return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM, TvS>(xform, normals));
         }
 
+        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Mesh mesh, Transforms.ITransform xform)
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        {
+            var normals = mesh.GetComputedNormals();
+
+            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM>(xform, normals));
+        }
+
         public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this MeshPrimitive prim, Matrix4x4 xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
             where TvP : struct, Geometry.VertexTypes.IVertexGeometry
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
@@ -305,6 +314,43 @@ namespace SharpGLTF.Schema2
 
                 yield return ((ap, am, aj), (bp, bm, bj), (cp, cm, cj), prim.Material);
             }
+        }
+
+        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this MeshPrimitive prim, Transforms.ITransform xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        {
+            var vertices = prim.GetVertexColumns();
+            if (vertices.Normals == null && defaultNormals != null) vertices.SetNormals(defaultNormals);
+
+            vertices.ApplyTransform(xform);
+
+            var triangles = prim.GetTriangleIndices();
+
+            var jointweights = new (int, float)[8];
+
+            foreach (var t in triangles)
+            {
+                var ap = vertices.GetPositionFragment<TvP>(t.Item1);
+                var bp = vertices.GetPositionFragment<TvP>(t.Item2);
+                var cp = vertices.GetPositionFragment<TvP>(t.Item3);
+
+                var am = vertices.GetMaterialFragment<TvM>(t.Item1);
+                var bm = vertices.GetMaterialFragment<TvM>(t.Item2);
+                var cm = vertices.GetMaterialFragment<TvM>(t.Item3);
+
+                yield return ((ap, am), (bp, bm), (cp, cm), prim.Material);
+            }
+        }
+
+        private static TvP _Transform<TvP>(TvP p, (int, float)[] jointweights, Transforms.ITransform xform)
+            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
+        {
+            p.SetPosition(xform.TransformPosition(p.GetPosition(), jointweights));
+            if (p.TryGetNormal(out Vector3 n)) p.SetNormal(xform.TransformNormal(n, jointweights));
+            if (p.TryGetTangent(out Vector4 t)) p.SetTangent(xform.TransformTangent(t, jointweights));
+
+            return p;
         }
 
         public static Geometry.VertexTypes.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
@@ -401,6 +447,13 @@ namespace SharpGLTF.Schema2
         {
             var wf = new IO.WavefrontWriter();
             wf.AddModel(model);
+            wf.WriteFiles(filePath);
+        }
+
+        public static void SaveAsWavefront(this ModelRoot model, string filePath, Animation animation, float time)
+        {
+            var wf = new IO.WavefrontWriter();
+            wf.AddModel(model, animation, time);
             wf.WriteFiles(filePath);
         }
 

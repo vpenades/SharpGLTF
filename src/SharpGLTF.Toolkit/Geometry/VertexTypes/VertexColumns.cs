@@ -34,9 +34,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void SetNormals(IReadOnlyDictionary<Vector3, Vector3> normalsMap)
         {
-            var data = new Byte[12 * Positions.Count];
-
-            Normals = new Memory.Vector3Array(data, 0, Positions.Count, 0);
+            Normals = new Vector3[Positions.Count];
 
             for (int i = 0; i < Normals.Count; ++i)
             {
@@ -45,6 +43,53 @@ namespace SharpGLTF.Geometry.VertexTypes
                     Normals[i] = nrm;
                 }
             }
+        }
+
+        public void ApplyTransform(Transforms.ITransform transform)
+        {
+            var newPos = new Vector3[Positions.Count];
+            var newNrm = Normals == null || Normals.Count < newPos.Length ? null : new Vector3[newPos.Length];
+            var newTgt = Tangents == null || Tangents.Count < newPos.Length ? null : new Vector4[newPos.Length];
+
+            var jw0 = Joints0 != null && Joints0.Count == newPos.Length && Weights0 != null && Weights0.Count == newPos.Length;
+            var jw1 = Joints1 != null && Joints1.Count == newPos.Length && Weights1 != null && Weights1.Count == newPos.Length;
+            var jjww = new (int, float)[8];
+
+            for (int i = 0; i < newPos.Length; ++i)
+            {
+                if (jw0)
+                {
+                    var j = Joints0[i];
+                    var w = Weights0[i];
+                    jjww[0] = ((int)j.X, w.X);
+                    jjww[1] = ((int)j.Y, w.Y);
+                    jjww[2] = ((int)j.Z, w.Z);
+                    jjww[3] = ((int)j.W, w.W);
+                }
+
+                if (jw1)
+                {
+                    var j = Joints1[i];
+                    var w = Weights1[i];
+                    jjww[4] = ((int)j.X, w.X);
+                    jjww[5] = ((int)j.Y, w.Y);
+                    jjww[6] = ((int)j.Z, w.Z);
+                    jjww[7] = ((int)j.W, w.W);
+                }
+
+                newPos[i] = transform.TransformPosition(Positions[i], jjww);
+                if (newNrm != null) newNrm[i] = transform.TransformNormal(Normals[i], jjww);
+                if (newTgt != null) newTgt[i] = transform.TransformTangent(Tangents[i], jjww);
+            }
+
+            Positions = newPos;
+            Normals = newNrm;
+            Tangents = newTgt;
+
+            Joints0 = null;
+            Joints1 = null;
+            Weights0 = null;
+            Weights1 = null;
         }
 
         public TvP GetPositionFragment<TvP>(int index)

@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<MeshPrimitive> Primitives => _primitives;
 
-        public IReadOnlyList<Single> MorphWeights => _weights.Select(item => (Single)item).ToArray();
+        public IReadOnlyList<Single> MorphWeights => _weights.Count == 0 ? null : _weights.Select(item => (Single)item).ToArray();
 
         #endregion
 
@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
-        }
+    }
 
     public partial class ModelRoot
     {

@@ -122,6 +122,23 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public Transforms.AffineTransform GetLocalTransform(Animation animation, float time)
+        {
+            Guard.MustShareLogicalParent(this, animation, nameof(animation));
+
+            var xform = this.LocalTransform;
+
+            var sfunc = animation.FindScaleChannel(this).GetSamplerFunc();
+            var rfunc = animation.FindRotationChannel(this).GetSamplerFunc();
+            var tfunc = animation.FindTranslationChannel(this).GetSamplerFunc();
+
+            if (sfunc != null) xform.Scale = sfunc(time);
+            if (rfunc != null) xform.Rotation = rfunc(time);
+            if (tfunc != null) xform.Translation = tfunc(time);
+
+            return xform;
+        }
+
         /// <summary>
         /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
         /// </summary>
@@ -137,6 +154,59 @@ namespace SharpGLTF.Schema2
                 var vs = VisualParent;
                 LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
             }
+        }
+
+        public Matrix4x4 GetWorldMatrix(Animation animation, float time)
+        {
+            if (animation == null) return this.WorldMatrix;
+
+            var vs = VisualParent;
+            var lm = GetLocalTransform(animation, time).Matrix;
+            return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Transforms.ITransform"/> object, based on the current
+        /// transform state, that can be used to transform the <see cref="Mesh"/>
+        /// vertices to world space.
+        /// </summary>
+        /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
+        public Transforms.ITransform GetMeshWorldTransform() { return GetMeshWorldTransform(null, 0); }
+
+        /// <summary>
+        /// Creates a <see cref="Transforms.ITransform"/> object, based on the current
+        /// transform state, and the given <see cref="Animation"/>, that can be used
+        /// to transform the <see cref="Mesh"/> vertices to world space.
+        /// </summary>
+        /// <param name="animation">The <see cref="Animation"/> to use.</param>
+        /// <param name="time">The time within <paramref name="animation"/>.</param>
+        /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
+        public Transforms.ITransform GetMeshWorldTransform(Animation animation, float time)
+        {
+            float[] weights = null; // this.MorphWeights.ToArray();
+
+            if (weights != null)
+            {
+                Guard.MustShareLogicalParent(this, animation, nameof(animation));
+
+                // TODO: get input only (time) channel, and create
+                // var mfunc = animation.FindMorphingChannel(this).GetSamplerFunc();
+
+            }
+
+            if (this.Skin == null) return new Transforms.StaticTransform(this.GetWorldMatrix(animation, time), weights);
+
+            var jointXforms = new Matrix4x4[this.Skin.JointsCount];
+            var invBindings = new Matrix4x4[this.Skin.JointsCount];
+
+            for (int i = 0; i < this.Skin.JointsCount; ++i)
+            {
+                var j = this.Skin.GetJoint(i);
+                jointXforms[i] = j.Key.GetWorldMatrix(animation, time);
+                invBindings[i] = j.Value;
+            }
+
+            return new Transforms.SkinTransform(invBindings, jointXforms, weights);
         }
 
         #endregion
@@ -185,7 +255,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public IReadOnlyList<Single> MorphWeights
         {
-            get => _weights == null ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
+            get => _weights.Count == 0 ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
             set
             {
                 _weights.Clear();

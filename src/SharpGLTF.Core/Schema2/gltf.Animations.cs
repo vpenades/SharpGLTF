@@ -133,28 +133,28 @@ namespace SharpGLTF.Schema2
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<Single, Vector3> FindScaleChannel(Node node)
+        public IEnumerable<(Single, Vector3)> FindScaleChannel(Node node)
         {
             var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.scale);
             if (channel == null) return null;
 
-            return channel.Sampler.AsVector3KeyFrames();
+            return channel.Sampler.AsLinearVector3KeyFrames();
         }
 
-        public IReadOnlyDictionary<Single, Quaternion> FindRotationChannel(Node node)
+        public IEnumerable<(Single, Quaternion)> FindRotationChannel(Node node)
         {
             var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.rotation);
             if (channel == null) return null;
 
-            return channel.Sampler.AsQuaternionKeyFrames();
+            return channel.Sampler.AsLinearQuaternionKeyFrames();
         }
 
-        public IReadOnlyDictionary<Single, Vector3> FindTranslationChannel(Node node)
+        public IEnumerable<(Single, Vector3)> FindTranslationChannel(Node node)
         {
             var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.translation);
             if (channel == null) return null;
 
-            return channel.Sampler.AsVector3KeyFrames();
+            return channel.Sampler.AsLinearVector3KeyFrames();
         }
 
         #endregion
@@ -361,7 +361,9 @@ namespace SharpGLTF.Schema2
 
         private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue, TValue, TValue)> keyframes)
         {
-            var sorted = keyframes.OrderBy(item => item.Key).ToList();
+            var sorted = keyframes
+                .OrderBy(item => item.Key)
+                .ToList();
 
             var keys = new Single[sorted.Count];
             var vals = new TValue[sorted.Count * 3];
@@ -405,7 +407,7 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
 
-        public IReadOnlyDictionary<Single, Vector3> AsVector3KeyFrames()
+        public IEnumerable<(Single, Vector3)> AsLinearVector3KeyFrames()
         {
             if (this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) throw new ArgumentException();
 
@@ -414,21 +416,17 @@ namespace SharpGLTF.Schema2
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsVector3Array();
 
-            return keys
-                .Zip(frames, (key, val) => (key, val))
-                .ToDictionary(item => item.key, item => item.val);
+            return keys.Zip(frames, (key, val) => (key, val));
         }
 
-        public IReadOnlyDictionary<Single, Quaternion> AsQuaternionKeyFrames()
+        public IEnumerable<(Single, Quaternion)> AsLinearQuaternionKeyFrames()
         {
             var dict = new Dictionary<Single, Quaternion>();
 
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsQuaternionArray();
 
-            return keys
-                .Zip(frames, (key, val) => (key, val))
-                .ToDictionary(item => item.key, item => item.val);
+            return keys.Zip(frames, (key, val) => (key, val));
         }
 
         #endregion

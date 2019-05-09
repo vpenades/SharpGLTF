@@ -160,6 +160,70 @@ namespace SharpGLTF
             return dst;
         }
 
+        internal static (T, T, float) GetSample<T>(this IEnumerable<(float, T)> sequence, float offset)
+        {
+            (float, T)? left = null;
+            (float, T)? right = null;
+            (float, T)? prev = null;
+
+            if (offset < 0) offset = 0;
+
+            foreach (var item in sequence)
+            {
+                if (item.Item1 == offset)
+                {
+                    left = item; continue;
+                }
+
+                if (item.Item1 > offset)
+                {
+                    if (left == null) left = prev;
+                    right = item;
+                    break;
+                }
+
+                prev = item;
+            }
+
+            if (left == null && right == null) return (default(T), default(T), 0);
+            if (left == null) return (right.Value.Item2, right.Value.Item2, 0);
+            if (right == null) return (left.Value.Item2, left.Value.Item2, 0);
+
+            System.Diagnostics.Debug.Assert(left.Value.Item1 < right.Value.Item1);
+
+            var amount = (offset - left.Value.Item1) / (right.Value.Item1 - left.Value.Item1);
+
+            System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1);
+
+            return (left.Value.Item2, right.Value.Item2, amount);
+        }
+
+        internal static Func<float, Vector3> GetSamplerFunc(this IEnumerable<(float, Vector3)> collection)
+        {
+            if (collection == null) return null;
+
+            Vector3 _sampler(float offset)
+            {
+                var sample = collection.GetSample(offset);
+                return Vector3.Lerp(sample.Item1, sample.Item2, sample.Item3);
+            }
+
+            return _sampler;
+        }
+
+        internal static Func<float, Quaternion> GetSamplerFunc(this IEnumerable<(float, Quaternion)> collection)
+        {
+            if (collection == null) return null;
+
+            Quaternion _sampler(float offset)
+            {
+                var sample = collection.GetSample(offset);
+                return Quaternion.Slerp(sample.Item1, sample.Item2, sample.Item3);
+            }
+
+            return _sampler;
+        }
+
         #endregion
 
         #region linq
