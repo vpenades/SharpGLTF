@@ -198,7 +198,7 @@ namespace SharpGLTF
             return (left.Value.Item2, right.Value.Item2, amount);
         }
 
-        internal static Func<float, Vector3> GetSamplerFunc(this IEnumerable<(float, Vector3)> collection)
+        internal static Func<float, Vector3> GetLinearSamplerFunc(this IEnumerable<(float, Vector3)> collection)
         {
             if (collection == null) return null;
 
@@ -211,7 +211,7 @@ namespace SharpGLTF
             return _sampler;
         }
 
-        internal static Func<float, Quaternion> GetSamplerFunc(this IEnumerable<(float, Quaternion)> collection)
+        internal static Func<float, Quaternion> GetLinearSamplerFunc(this IEnumerable<(float, Quaternion)> collection)
         {
             if (collection == null) return null;
 

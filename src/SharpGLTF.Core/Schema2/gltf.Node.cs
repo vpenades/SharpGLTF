@@ -128,9 +128,9 @@ namespace SharpGLTF.Schema2
 
             var xform = this.LocalTransform;
 
-            var sfunc = animation.FindScaleChannel(this).GetSamplerFunc();
-            var rfunc = animation.FindRotationChannel(this).GetSamplerFunc();
-            var tfunc = animation.FindTranslationChannel(this).GetSamplerFunc();
+            var sfunc = animation.FindScaleChannel(this).GetLinearSamplerFunc();
+            var rfunc = animation.FindRotationChannel(this).GetLinearSamplerFunc();
+            var tfunc = animation.FindTranslationChannel(this).GetLinearSamplerFunc();
 
             if (sfunc != null) xform.Scale = sfunc(time);
             if (rfunc != null) xform.Rotation = rfunc(time);

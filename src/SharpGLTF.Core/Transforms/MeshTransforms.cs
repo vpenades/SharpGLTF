@@ -11,13 +11,13 @@ namespace SharpGLTF.Transforms
 {
     public interface ITransform
     {
-        V3 TransformPosition(V3 position, params (int, float)[] skinWeights);
-        V3 TransformNormal(V3 normal, params (int, float)[] skinWeights);
-        V4 TransformTangent(V4 tangent, params (int, float)[] skinWeights);
+        V3 TransformPosition(V3 position, (int, float)[] skinWeights);
+        V3 TransformNormal(V3 normal, (int, float)[] skinWeights);
+        V4 TransformTangent(V4 tangent, (int, float)[] skinWeights);
 
-        V3 TransformPosition(V3[] positions, params (int, float)[] skinWeights);
-        V3 TransformNormal(V3[] normals, params (int, float)[] skinWeights);
-        V4 TransformTangent(V4[] tangents, params (int, float)[] skinWeights);
+        V3 TransformPosition(V3[] positions, (int, float)[] skinWeights);
+        V3 TransformNormal(V3[] normals, (int, float)[] skinWeights);
+        V4 TransformTangent(V4[] tangents, (int, float)[] skinWeights);
     }
 
     public abstract class MorphTransform
@@ -99,7 +99,7 @@ namespace SharpGLTF.Transforms
         #endregion
     }
 
-    public class StaticTransform : MorphTransform , ITransform
+    public class StaticTransform : MorphTransform, ITransform
     {
         public StaticTransform(TRANSFORM xform, params float[] morphWeights)
             : base(morphWeights)
@@ -109,36 +109,36 @@ namespace SharpGLTF.Transforms
 
         private readonly TRANSFORM _Transform;
 
-        public V3 TransformPosition(V3 position, params (int, float)[] skinWeights)
+        public V3 TransformPosition(V3 position, (int, float)[] skinWeights)
         {
             return V3.Transform(position, _Transform);
         }
 
-        public V3 TransformNormal(V3 normal, params (int, float)[] skinWeights)
+        public V3 TransformNormal(V3 normal, (int, float)[] skinWeights)
         {
             return V3.Normalize(V3.Transform(normal, _Transform));
         }
 
-        public V4 TransformTangent(V4 tangent, params (int, float)[] skinWeights)
+        public V4 TransformTangent(V4 tangent, (int, float)[] skinWeights)
         {
             return V4.Transform(tangent, _Transform);
         }
 
-        public V3 TransformPosition(V3[] positions, params (int, float)[] skinWeights)
+        public V3 TransformPosition(V3[] positions, (int, float)[] skinWeights)
         {
             var position = MorphPositions(positions);
 
             return V3.Transform(position, _Transform);
         }
 
-        public V3 TransformNormal(V3[] normals, params (int, float)[] skinWeights)
+        public V3 TransformNormal(V3[] normals, (int, float)[] skinWeights)
         {
             var normal = MorphNormals(normals);
 
             return V3.Normalize(V3.TransformNormal(normal, _Transform));
         }
 
-        public V4 TransformTangent(V4[] tangents, params (int, float)[] skinWeights)
+        public V4 TransformTangent(V4[] tangents, (int, float)[] skinWeights)
         {
             var tangent = MorphTangents(tangents);
 
@@ -150,7 +150,7 @@ namespace SharpGLTF.Transforms
         }
     }
 
-    public class SkinTransform : MorphTransform , ITransform
+    public class SkinTransform : MorphTransform, ITransform
     {
         public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, params float[] morphWeights)
             : base(morphWeights)
@@ -169,7 +169,7 @@ namespace SharpGLTF.Transforms
 
         private readonly TRANSFORM[] _JointTransforms;
 
-        public V3 TransformPosition(V3 localPosition, params (int, float)[] skinWeights)
+        public V3 TransformPosition(V3 localPosition, (int, float)[] skinWeights)
         {
             var worldPosition = V3.Zero;
 
@@ -181,7 +181,7 @@ namespace SharpGLTF.Transforms
             return worldPosition;
         }
 
-        public V3 TransformNormal(V3 localNormal, params (int, float)[] skinWeights)
+        public V3 TransformNormal(V3 localNormal, (int, float)[] skinWeights)
         {
             var worldNormal = V3.Zero;
 
@@ -193,7 +193,7 @@ namespace SharpGLTF.Transforms
             return V3.Normalize(localNormal);
         }
 
-        public V4 TransformTangent(V4 localTangent, params (int, float)[] skinWeights)
+        public V4 TransformTangent(V4 localTangent, (int, float)[] skinWeights)
         {
             var localTangentV = new V3(localTangent.X, localTangent.Y, localTangent.Z);
             var worldTangent = V3.Zero;
@@ -206,19 +206,19 @@ namespace SharpGLTF.Transforms
             return new V4(worldTangent, localTangentV.Z);
         }
 
-        public V3 TransformPosition(V3[] positions, params (int, float)[] skinWeights)
+        public V3 TransformPosition(V3[] positions, (int, float)[] skinWeights)
         {
-            return TransformPosition(MorphPositions(positions));
+            return TransformPosition(MorphPositions(positions), skinWeights);
         }
 
-        public V3 TransformNormal(V3[] normals, params (int, float)[] skinWeights)
+        public V3 TransformNormal(V3[] normals, (int, float)[] skinWeights)
         {
-            return TransformNormal(MorphNormals(normals));
+            return TransformNormal(MorphNormals(normals), skinWeights);
         }
 
-        public V4 TransformTangent(V4[] tangents, params (int, float)[] skinWeights)
+        public V4 TransformTangent(V4[] tangents, (int, float)[] skinWeights)
         {
-            return TransformTangent(MorphTangents(tangents));
+            return TransformTangent(MorphTangents(tangents), skinWeights);
         }
     }
 }

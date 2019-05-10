@@ -290,27 +290,27 @@ namespace SharpGLTF.Schema2
             where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
             var vertices = prim.GetVertexColumns();
-            if (vertices.Normals == null && defaultNormals != null) vertices.SetNormals(defaultNormals);
+            if (vertices.Normals == null && defaultNormals != null) vertices.ApplyNormals(defaultNormals);
 
             var triangles = prim.GetTriangleIndices();
 
             foreach (var t in triangles)
             {
-                var ap = vertices.GetPositionFragment<TvP>(t.Item1);
-                var bp = vertices.GetPositionFragment<TvP>(t.Item2);
-                var cp = vertices.GetPositionFragment<TvP>(t.Item3);
+                var ap = vertices.GetVertexGeometry<TvP>(t.Item1);
+                var bp = vertices.GetVertexGeometry<TvP>(t.Item2);
+                var cp = vertices.GetVertexGeometry<TvP>(t.Item3);
 
                 ap.Transform(xform);
                 bp.Transform(xform);
                 cp.Transform(xform);
 
-                var am = vertices.GetMaterialFragment<TvM>(t.Item1);
-                var bm = vertices.GetMaterialFragment<TvM>(t.Item2);
-                var cm = vertices.GetMaterialFragment<TvM>(t.Item3);
+                var am = vertices.GetVertexMaterial<TvM>(t.Item1);
+                var bm = vertices.GetVertexMaterial<TvM>(t.Item2);
+                var cm = vertices.GetVertexMaterial<TvM>(t.Item3);
 
-                var aj = vertices.GetSkinningFragment<TvS>(t.Item1);
-                var bj = vertices.GetSkinningFragment<TvS>(t.Item2);
-                var cj = vertices.GetSkinningFragment<TvS>(t.Item3);
+                var aj = vertices.GetVertexSkinning<TvS>(t.Item1);
+                var bj = vertices.GetVertexSkinning<TvS>(t.Item2);
+                var cj = vertices.GetVertexSkinning<TvS>(t.Item3);
 
                 yield return ((ap, am, aj), (bp, bm, bj), (cp, cm, cj), prim.Material);
             }
@@ -321,7 +321,7 @@ namespace SharpGLTF.Schema2
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
         {
             var vertices = prim.GetVertexColumns();
-            if (vertices.Normals == null && defaultNormals != null) vertices.SetNormals(defaultNormals);
+            if (vertices.Normals == null && defaultNormals != null) vertices.ApplyNormals(defaultNormals);
 
             vertices.ApplyTransform(xform);
 
@@ -331,15 +331,11 @@ namespace SharpGLTF.Schema2
 
             foreach (var t in triangles)
             {
-                var ap = vertices.GetPositionFragment<TvP>(t.Item1);
-                var bp = vertices.GetPositionFragment<TvP>(t.Item2);
-                var cp = vertices.GetPositionFragment<TvP>(t.Item3);
+                var a = vertices.GetVertex<TvP, TvM>(t.Item1);
+                var b = vertices.GetVertex<TvP, TvM>(t.Item1);
+                var c = vertices.GetVertex<TvP, TvM>(t.Item1);
 
-                var am = vertices.GetMaterialFragment<TvM>(t.Item1);
-                var bm = vertices.GetMaterialFragment<TvM>(t.Item2);
-                var cm = vertices.GetMaterialFragment<TvM>(t.Item3);
-
-                yield return ((ap, am), (bp, bm), (cp, cm), prim.Material);
+                yield return ((a.Geometry, a.Material), (b.Geometry, b.Material), (c.Geometry, c.Material), prim.Material);
             }
         }
 
@@ -353,11 +349,11 @@ namespace SharpGLTF.Schema2
             return p;
         }
 
-        public static Geometry.VertexTypes.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
+        public static Geometry.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
         {
             var vertexAccessors = primitive.VertexAccessors;
 
-            var columns = new Geometry.VertexTypes.VertexColumns();
+            var columns = new Geometry.VertexColumns();
 
             if (vertexAccessors.ContainsKey("POSITION")) columns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) columns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
