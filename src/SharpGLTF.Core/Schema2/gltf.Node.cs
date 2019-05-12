@@ -183,12 +183,14 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
         public Transforms.ITransform GetMeshWorldTransform(Animation animation, float time)
         {
-            float[] weights = null; // this.MorphWeights.ToArray();
+            var weights = this.MorphWeights;
 
-            if (weights != null)
+            if (weights != null && weights.Count == 0) weights = null;
+
+            if (weights != null && animation != null)
             {
                 Guard.MustShareLogicalParent(this, animation, nameof(animation));
-
+                
                 // TODO: get input only (time) channel, and create
                 // var mfunc = animation.FindMorphingChannel(this).GetSamplerFunc();
 
@@ -255,7 +257,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public IReadOnlyList<Single> MorphWeights
         {
-            get => _weights.Count == 0 ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToArray();
+            get => _weights.Count == 0 ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToList();
             set
             {
                 _weights.Clear();

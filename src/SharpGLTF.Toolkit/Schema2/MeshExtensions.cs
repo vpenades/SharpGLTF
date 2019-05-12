@@ -332,46 +332,51 @@ namespace SharpGLTF.Schema2
             foreach (var t in triangles)
             {
                 var a = vertices.GetVertex<TvP, TvM>(t.Item1);
-                var b = vertices.GetVertex<TvP, TvM>(t.Item1);
-                var c = vertices.GetVertex<TvP, TvM>(t.Item1);
+                var b = vertices.GetVertex<TvP, TvM>(t.Item2);
+                var c = vertices.GetVertex<TvP, TvM>(t.Item3);
 
                 yield return ((a.Geometry, a.Material), (b.Geometry, b.Material), (c.Geometry, c.Material), prim.Material);
             }
         }
 
-        private static TvP _Transform<TvP>(TvP p, (int, float)[] jointweights, Transforms.ITransform xform)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-        {
-            p.SetPosition(xform.TransformPosition(p.GetPosition(), jointweights));
-            if (p.TryGetNormal(out Vector3 n)) p.SetNormal(xform.TransformNormal(n, jointweights));
-            if (p.TryGetTangent(out Vector4 t)) p.SetTangent(xform.TransformTangent(t, jointweights));
-
-            return p;
-        }
-
         public static Geometry.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
         {
-            var vertexAccessors = primitive.VertexAccessors;
-
             var columns = new Geometry.VertexColumns();
 
-            if (vertexAccessors.ContainsKey("POSITION")) columns.Positions = vertexAccessors["POSITION"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("NORMAL")) columns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("TANGENT")) columns.Tangents = vertexAccessors["TANGENT"].AsVector4Array();
+            _CopyTo(primitive.VertexAccessors, columns);
 
-            if (vertexAccessors.ContainsKey("COLOR_0")) columns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray();
-            if (vertexAccessors.ContainsKey("COLOR_1")) columns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray();
-
-            if (vertexAccessors.ContainsKey("TEXCOORD_0")) columns.Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
-            if (vertexAccessors.ContainsKey("TEXCOORD_1")) columns.Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
-
-            if (vertexAccessors.ContainsKey("JOINTS_0")) columns.Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("JOINTS_1")) columns.Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
-
-            if (vertexAccessors.ContainsKey("WEIGHTS_0")) columns.Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
-            if (vertexAccessors.ContainsKey("WEIGHTS_1")) columns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
+            for (int i = 0; i < primitive.MorphTargetsCount; ++i)
+            {
+                _CopyTo(primitive.GetMorphTargetAccessors(i), columns.AddMorphTarget());
+            }
 
             return columns;
+        }
+
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, Geometry.VertexColumns dstColumns)
+        {
+            if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsVector4Array();
+
+            if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray();
+            if (vertexAccessors.ContainsKey("COLOR_1")) dstColumns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray();
+
+            if (vertexAccessors.ContainsKey("TEXCOORD_0")) dstColumns.Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_1")) dstColumns.Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
+
+            if (vertexAccessors.ContainsKey("JOINTS_0")) dstColumns.Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("JOINTS_1")) dstColumns.Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
+
+            if (vertexAccessors.ContainsKey("WEIGHTS_0")) dstColumns.Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
+        }
+
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, Geometry.VertexColumns.MorphTarget dstColumns)
+        {
+            if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
+            if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsVector3Array();
         }
 
         public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)

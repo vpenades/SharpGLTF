@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 
 namespace SharpGLTF.Geometry
 {
@@ -35,6 +36,19 @@ namespace SharpGLTF.Geometry
 
         public IList<Vector4> Weights0 { get; set; }
         public IList<Vector4> Weights1 { get; set; }
+
+        public class MorphTarget
+        {
+            public IList<Vector3> Positions { get; set; }
+            public IList<Vector3> Normals { get; set; }
+            public IList<Vector3> Tangents { get; set; }
+        }
+
+        private List<MorphTarget> _MorphTargets;
+
+        private static readonly IReadOnlyList<MorphTarget> _EmptyMorphTargets = new MorphTarget[0];
+
+        public IReadOnlyList<MorphTarget> MorphTargets => _MorphTargets == null ? _EmptyMorphTargets : _MorphTargets;
 
         #endregion
 
@@ -109,6 +123,19 @@ namespace SharpGLTF.Geometry
             IsolateNormals();
             IsolateTangents();
 
+            // prepare morph data, if available
+
+            Vector3[] morphPositions = null;
+            Vector3[] morphNormals = null;
+            Vector3[] morphTangents = null;
+
+            if (_MorphTargets != null)
+            {
+                if (_MorphTargets.All(item => item.Positions != null)) morphPositions = new Vector3[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.Normals != null)) morphNormals = new Vector3[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.Tangents != null)) morphTangents = new Vector3[this.MorphTargets.Count];
+            }
+
             // prepare skinning data, if available
 
             var jw0 = Joints0 != null && Weights0 != null;
@@ -140,18 +167,44 @@ namespace SharpGLTF.Geometry
                     jwjwjwjw[7] = ((int)j.W, w.W);
                 }
 
-                if (Positions != null) Positions[i] = transform.TransformPosition(Positions[i], jwjwjwjw);
-                if (Normals != null) Normals[i] = transform.TransformNormal(Normals[i], jwjwjwjw);
-                if (Tangents != null) Tangents[i] = transform.TransformTangent(Tangents[i], jwjwjwjw);
+                if (Positions != null)
+                {
+                    _FillMorphData(morphPositions, vc => vc.Positions[i]);
+                    Positions[i] = transform.TransformPosition(Positions[i], morphPositions, jwjwjwjw);
+                }
+
+                if (Normals != null)
+                {
+                    _FillMorphData(morphNormals, vc => vc.Normals[i]);
+                    Normals[i] = transform.TransformNormal(Normals[i], morphNormals, jwjwjwjw);
+                }
+
+                if (Tangents != null)
+                {
+                    _FillMorphData(morphTangents, vc => vc.Tangents[i]);
+                    Tangents[i] = transform.TransformTangent(Tangents[i], morphTangents, jwjwjwjw);
+                }
             }
 
             // we've just applied the transform,
             // so we no longer need these columns.
 
+            _MorphTargets = null;
+
             Joints0 = null;
             Joints1 = null;
             Weights0 = null;
             Weights1 = null;
+        }
+
+        private void _FillMorphData(Vector3[] array, Func<MorphTarget, Vector3> selector)
+        {
+            if (array == null) return;
+
+            for (int i = 0; i < this._MorphTargets.Count; ++i)
+            {
+                array[i] = selector(this._MorphTargets[i]);
+            }
         }
 
         public TvG GetVertexGeometry<TvG>(int index)
@@ -232,6 +285,15 @@ namespace SharpGLTF.Geometry
                 GetVertexMaterial<TvM>(index),
                 GetVertexSkinning<TvS>(index)
                 );
+        }
+
+        public MorphTarget AddMorphTarget()
+        {
+            if (_MorphTargets == null) _MorphTargets = new List<MorphTarget>();
+            var mt = new MorphTarget();
+            _MorphTargets.Add(mt);
+
+            return mt;
         }
 
         #endregion

@@ -112,7 +112,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadUnlitModel()
         {
-            var f = TestFiles.GetSampleModelsPaths()
+            var f = TestFiles
+                .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
 
             var model = ModelRoot.Load(f);
@@ -130,7 +131,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadLightsModel()
         {
-            var f = TestFiles.GetSchemaExtensionsModelsPaths()
+            var f = TestFiles
+                .GetSchemaExtensionsModelsPaths()
                 .FirstOrDefault(item => item.EndsWith("lights.gltf"));
 
             var model = ModelRoot.Load(f);
@@ -145,7 +147,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadSparseModel()
         {
-            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
+            var path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
 
             var model = ModelRoot.Load(path);
             Assert.NotNull(model);
@@ -157,6 +161,24 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var basePositions = accessor._GetMemoryAccessor().AsVector3Array();
 
             var positions = accessor.AsVector3Array();
+        }
+
+        [Test]
+        public void LoadMorphTargetModel()
+        {
+            var path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains("MorphPrimitivesTest.glb"));
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            var triangles = model.DefaultScene
+                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .ToArray();
+
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".obj"));
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".glb"));
         }
     }
 }
