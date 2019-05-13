@@ -11,8 +11,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
     {
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvP, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvP, TvM, TvS>>> vertexBlocks)
-            where TvP : struct, IVertexGeometry
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvG, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvG, TvM, TvS>>> vertexBlocks)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
@@ -20,7 +20,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
             // vertex attributes
-            var attributes = GetVertexAttributes(typeof(TvP), typeof(TvM), typeof(TvS), totalCount);
+            var attributes = GetVertexAttributes(typeof(TvG), typeof(TvM), typeof(TvS), totalCount);
 
             // create master vertex buffer
             int byteStride = attributes[0].ByteStride;
@@ -37,7 +37,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 foreach (var accessor in accessors)
                 {
-                    var columnFunc = GetItemValueFunc<TvP, TvM, TvS>(accessor.Attribute.Name);
+                    var columnFunc = GetItemValueFunc<TvG, TvM, TvS>(accessor.Attribute.Name);
 
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetScalarColumn(columnFunc));
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetVector2Column(columnFunc));
@@ -141,12 +141,12 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<VertexBuilder<TvP, TvM, TvS>, Object> GetItemValueFunc<TvP, TvM, TvS>(string attributeName)
-            where TvP : struct, IVertexGeometry
+        private static Func<VertexBuilder<TvG, TvM, TvS>, Object> GetItemValueFunc<TvG, TvM, TvS>(string attributeName)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            var finfo = GetVertexField(typeof(TvP), attributeName);
+            var finfo = GetVertexField(typeof(TvG), attributeName);
             if (finfo != null) return vertex => finfo.GetValue(vertex.Geometry);
 
             finfo = GetVertexField(typeof(TvM), attributeName);
@@ -158,40 +158,40 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new NotImplementedException();
         }
 
-        private static Single[] GetScalarColumn<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
-            where TvP : struct, IVertexGeometry
+        private static Single[] GetScalarColumn<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            return GetColumn<TvP, TvM, TvS, Single>(vertices, func);
+            return GetColumn<TvG, TvM, TvS, Single>(vertices, func);
         }
 
-        private static Vector2[] GetVector2Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
-            where TvP : struct, IVertexGeometry
+        private static Vector2[] GetVector2Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            return GetColumn<TvP, TvM, TvS, Vector2>(vertices, func);
+            return GetColumn<TvG, TvM, TvS, Vector2>(vertices, func);
         }
 
-        private static Vector3[] GetVector3Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
-            where TvP : struct, IVertexGeometry
+        private static Vector3[] GetVector3Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            return GetColumn<TvP, TvM, TvS, Vector3>(vertices, func);
+            return GetColumn<TvG, TvM, TvS, Vector3>(vertices, func);
         }
 
-        private static Vector4[] GetVector4Column<TvP, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
-            where TvP : struct, IVertexGeometry
+        private static Vector4[] GetVector4Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            return GetColumn<TvP, TvM, TvS, Vector4>(vertices, func);
+            return GetColumn<TvG, TvM, TvS, Vector4>(vertices, func);
         }
 
-        private static TColumn[] GetColumn<TvP, TvM, TvS, TColumn>(this IReadOnlyList<VertexBuilder<TvP, TvM, TvS>> vertices, Func<VertexBuilder<TvP, TvM, TvS>, Object> func)
-            where TvP : struct, IVertexGeometry
+        private static TColumn[] GetColumn<TvG, TvM, TvS, TColumn>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
+            where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {

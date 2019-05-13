@@ -124,19 +124,9 @@ namespace SharpGLTF.Schema2
 
         public Transforms.AffineTransform GetLocalTransform(Animation animation, float time)
         {
-            Guard.MustShareLogicalParent(this, animation, nameof(animation));
+            if (animation == null) return this.LocalTransform;
 
-            var xform = this.LocalTransform;
-
-            var sfunc = animation.FindScaleChannel(this).GetLinearSamplerFunc();
-            var rfunc = animation.FindRotationChannel(this).GetLinearSamplerFunc();
-            var tfunc = animation.FindTranslationChannel(this).GetLinearSamplerFunc();
-
-            if (sfunc != null) xform.Scale = sfunc(time);
-            if (rfunc != null) xform.Rotation = rfunc(time);
-            if (tfunc != null) xform.Translation = tfunc(time);
-
-            return xform;
+            return animation.GetLocalTransform(this, time);
         }
 
         /// <summary>
@@ -183,18 +173,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
         public Transforms.ITransform GetMeshWorldTransform(Animation animation, float time)
         {
-            var weights = this.MorphWeights;
-
-            if (weights != null && weights.Count == 0) weights = null;
-
-            if (weights != null && animation != null)
-            {
-                Guard.MustShareLogicalParent(this, animation, nameof(animation));
-                
-                // TODO: get input only (time) channel, and create
-                // var mfunc = animation.FindMorphingChannel(this).GetSamplerFunc();
-
-            }
+            var weights = animation == null ? this.MorphWeights : animation.GetMorphWeights(this, time);
 
             if (this.Skin == null) return new Transforms.StaticTransform(this.GetWorldMatrix(animation, time), weights);
 

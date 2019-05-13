@@ -8,6 +8,11 @@ using SharpGLTF.Memory;
 
 namespace SharpGLTF.Schema2
 {
+    using Geometry;
+    using Geometry.VertexTypes;
+
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
+
     public static partial class Schema2Toolkit
     {
         #region meshes
@@ -265,63 +270,55 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Mesh mesh, Matrix4x4 xform)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> Triangulate<TvG, TvM, TvS>(this Mesh mesh)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
-            var normals = mesh.GetComputedNormals();
-
-            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM, TvS>(xform, normals));
+            return mesh.Primitives.SelectMany(item => item.Triangulate<TvG, TvM, TvS>());
         }
 
-        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Mesh mesh, Transforms.ITransform xform)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-        {
-            var normals = mesh.GetComputedNormals();
-
-            return mesh.Primitives.SelectMany(item => item.Triangulate<TvP, TvM>(xform, normals));
-        }
-
-        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this MeshPrimitive prim, Matrix4x4 xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> Triangulate<TvG, TvM, TvS>(this MeshPrimitive prim)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             var vertices = prim.GetVertexColumns();
-            if (vertices.Normals == null && defaultNormals != null) vertices.ApplyNormals(defaultNormals);
-
             var triangles = prim.GetTriangleIndices();
+
+            bool hasNormals = vertices.Normals != null;
 
             foreach (var t in triangles)
             {
-                var ap = vertices.GetVertexGeometry<TvP>(t.Item1);
-                var bp = vertices.GetVertexGeometry<TvP>(t.Item2);
-                var cp = vertices.GetVertexGeometry<TvP>(t.Item3);
+                var a = vertices.GetVertex<TvG, TvM, TvS>(t.Item1);
+                var b = vertices.GetVertex<TvG, TvM, TvS>(t.Item2);
+                var c = vertices.GetVertex<TvG, TvM, TvS>(t.Item3);
 
-                ap.Transform(xform);
-                bp.Transform(xform);
-                cp.Transform(xform);
+                if (!hasNormals)
+                {
+                    var n = Vector3.Cross(b.Position - a.Position, c.Position - a.Position);
+                    n = Vector3.Normalize(n);
+                    a.Geometry.SetNormal(n);
+                    b.Geometry.SetNormal(n);
+                    c.Geometry.SetNormal(n);
+                }
 
-                var am = vertices.GetVertexMaterial<TvM>(t.Item1);
-                var bm = vertices.GetVertexMaterial<TvM>(t.Item2);
-                var cm = vertices.GetVertexMaterial<TvM>(t.Item3);
-
-                var aj = vertices.GetVertexSkinning<TvS>(t.Item1);
-                var bj = vertices.GetVertexSkinning<TvS>(t.Item2);
-                var cj = vertices.GetVertexSkinning<TvS>(t.Item3);
-
-                yield return ((ap, am, aj), (bp, bm, bj), (cp, cm, cj), prim.Material);
+                yield return (a, b, c, prim.Material);
             }
         }
 
-        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this MeshPrimitive prim, Transforms.ITransform xform, IReadOnlyDictionary<Vector3, Vector3> defaultNormals)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Mesh mesh, Transforms.ITransform xform)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+        {
+            return mesh.Primitives.SelectMany(item => item.Triangulate<TvG, TvM>(xform));
+        }
+
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this MeshPrimitive prim, Transforms.ITransform xform)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
         {
             var vertices = prim.GetVertexColumns();
-            if (vertices.Normals == null && defaultNormals != null) vertices.ApplyNormals(defaultNormals);
 
             vertices.ApplyTransform(xform);
 
@@ -331,17 +328,17 @@ namespace SharpGLTF.Schema2
 
             foreach (var t in triangles)
             {
-                var a = vertices.GetVertex<TvP, TvM>(t.Item1);
-                var b = vertices.GetVertex<TvP, TvM>(t.Item2);
-                var c = vertices.GetVertex<TvP, TvM>(t.Item3);
+                var a = vertices.GetVertex<TvG, TvM>(t.Item1);
+                var b = vertices.GetVertex<TvG, TvM>(t.Item2);
+                var c = vertices.GetVertex<TvG, TvM>(t.Item3);
 
                 yield return ((a.Geometry, a.Material), (b.Geometry, b.Material), (c.Geometry, c.Material), prim.Material);
             }
         }
 
-        public static Geometry.VertexColumns GetVertexColumns(this MeshPrimitive primitive)
+        public static VertexColumns GetVertexColumns(this MeshPrimitive primitive)
         {
-            var columns = new Geometry.VertexColumns();
+            var columns = new VertexColumns();
 
             _CopyTo(primitive.VertexAccessors, columns);
 
@@ -353,7 +350,7 @@ namespace SharpGLTF.Schema2
             return columns;
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, Geometry.VertexColumns dstColumns)
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexColumns dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
@@ -372,7 +369,7 @@ namespace SharpGLTF.Schema2
             if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, Geometry.VertexColumns.MorphTarget dstColumns)
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexColumns.MorphTarget dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
@@ -426,18 +423,16 @@ namespace SharpGLTF.Schema2
             return posnrm;
         }
 
-        public static void AddMesh<TMaterial, TvP, TvM, TvS>(this Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS> meshBuilder, Mesh srcMesh, Matrix4x4 xform, Func<Material, TMaterial> materialFunc)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static void AddMesh<TMaterial, TvG, TvM, TvS>(this MeshBuilder<TMaterial, TvG, TvM, TvS> meshBuilder, Mesh srcMesh, Func<Material, TMaterial> materialFunc)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
-            var normals = srcMesh.GetComputedNormals();
-
             foreach (var srcPrim in srcMesh.Primitives)
             {
                 var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
 
-                foreach (var tri in srcPrim.Triangulate<TvP, TvM, TvS>(xform, normals))
+                foreach (var tri in srcPrim.Triangulate<TvG, TvM, TvS>())
                 {
                     dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
                 }
@@ -446,6 +441,9 @@ namespace SharpGLTF.Schema2
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath)
         {
+            Guard.NotNullOrEmpty(filePath, nameof(filePath));
+            Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
+
             var wf = new IO.WavefrontWriter();
             wf.AddModel(model);
             wf.WriteFiles(filePath);
@@ -453,6 +451,9 @@ namespace SharpGLTF.Schema2
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath, Animation animation, float time)
         {
+            Guard.NotNullOrEmpty(filePath, nameof(filePath));
+            Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
+
             var wf = new IO.WavefrontWriter();
             wf.AddModel(model, animation, time);
             wf.WriteFiles(filePath);

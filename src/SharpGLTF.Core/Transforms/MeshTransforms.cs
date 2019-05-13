@@ -10,6 +10,9 @@ using V4 = System.Numerics.Vector4;
 
 namespace SharpGLTF.Transforms
 {
+    /// <summary>
+    /// Interface for a mesh transform object
+    /// </summary>
     public interface ITransform
     {
         V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights);
@@ -29,12 +32,27 @@ namespace SharpGLTF.Transforms
                 return;
             }
 
-            _InvWeight = 1 - morphWeights.Sum();
-            if (_InvWeight == 1) return;
+            var sum = morphWeights.Sum();
+
+            if (sum == 0)
+            {
+                _InvWeight = 1;
+                return;
+            }
 
             _MorphWeights = new float[morphWeights.Count];
-
             for (int i = 0; i < morphWeights.Count; ++i) _MorphWeights[i] = morphWeights[i];
+
+            if (sum <= 1)
+            {
+                _InvWeight = 1 - sum;
+            }
+            else
+            {
+                _InvWeight = 0;
+                for (int i = 0; i < morphWeights.Count; ++i) _MorphWeights[i] = _MorphWeights[i] / sum;
+            }
+
         }
 
         #endregion
@@ -134,9 +152,11 @@ namespace SharpGLTF.Transforms
 
             var worldPosition = V3.Zero;
 
+            var wnrm = 1.0f / skinWeights.Sum(item => item.Item2);
+
             foreach (var jw in skinWeights)
             {
-                worldPosition += V3.Transform(localPosition, _JointTransforms[jw.Item1]) * jw.Item2;
+                worldPosition += V3.Transform(localPosition, _JointTransforms[jw.Item1]) * jw.Item2 * wnrm;
             }
 
             return worldPosition;

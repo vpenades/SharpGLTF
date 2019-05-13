@@ -32,6 +32,8 @@ namespace SharpGLTF.Schema2
 
         internal IReadOnlyList<AnimationChannel> _Channels => _channels;
 
+        public float Duration => _samplers.Select(item => item.Duration).Max();
+
         #endregion
 
         #region API
@@ -155,6 +157,40 @@ namespace SharpGLTF.Schema2
             if (channel == null) return null;
 
             return channel.Sampler.AsLinearVector3KeyFrames();
+        }
+
+        public Transforms.AffineTransform GetLocalTransform(Node node, float time)
+        {
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            var xform = node.LocalTransform;
+
+            var sfunc = this.FindScaleChannel(node).GetLinearSamplerFunc();
+            var rfunc = this.FindRotationChannel(node).GetLinearSamplerFunc();
+            var tfunc = this.FindTranslationChannel(node).GetLinearSamplerFunc();
+
+            if (sfunc != null) xform.Scale = sfunc(time);
+            if (rfunc != null) xform.Rotation = rfunc(time);
+            if (tfunc != null) xform.Translation = tfunc(time);
+
+            return xform;
+        }
+
+        public IReadOnlyList<float> GetMorphWeights(Node node, float time)
+        {
+            var morphWeights = node.MorphWeights;
+            if (morphWeights == null || morphWeights.Count == 0) return morphWeights;
+
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.weights);
+            if (channel == null) return morphWeights;
+
+            var frames = channel.Sampler.AsLinearArrayKeyFrames(morphWeights.Count);
+
+            var mfunc = frames.GetLinearSamplerFunc();
+
+            return mfunc(time);
         }
 
         #endregion
@@ -286,6 +322,8 @@ namespace SharpGLTF.Schema2
 
         public Accessor Output => this.LogicalParent.LogicalParent.LogicalAccessors[this._output];
 
+        public float Duration { get { var keys = Input.AsScalarArray(); return keys[keys.Count - 1]; } }
+
         #endregion
 
         #region API
@@ -411,8 +449,6 @@ namespace SharpGLTF.Schema2
         {
             if (this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) throw new ArgumentException();
 
-            var dict = new Dictionary<Single, Vector3>();
-
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsVector3Array();
 
@@ -421,10 +457,16 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, Quaternion)> AsLinearQuaternionKeyFrames()
         {
-            var dict = new Dictionary<Single, Quaternion>();
-
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsQuaternionArray();
+
+            return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        public IEnumerable<(Single, Single[])> AsLinearArrayKeyFrames(int dimensions)
+        {
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsMultiArray(dimensions);
 
             return keys.Zip(frames, (key, val) => (key, val));
         }

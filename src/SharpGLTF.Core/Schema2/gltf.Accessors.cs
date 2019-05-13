@@ -262,6 +262,15 @@ namespace SharpGLTF.Schema2
             throw new NotImplementedException();
         }
 
+        public IList<Single[]> AsMultiArray(int dimensions)
+        {
+            var memory = _GetMemoryAccessor();
+
+            if (this._sparse == null) return memory.AsMultiArray(dimensions);
+
+            throw new NotImplementedException();
+        }
+
         public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)
         {
             if (_sparse != null) throw new InvalidOperationException("Can't be used on Acessors with Sparse Data");

@@ -10,7 +10,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an individual vertex object.
     /// </summary>
-    /// <typeparam name="TvP">
+    /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
     /// <see cref="VertexPosition"/>,
@@ -35,21 +35,21 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Vertex {Geometry} {Material} {Skinning}")]
-    public struct VertexBuilder<TvP, TvM, TvS>
-        where TvP : struct, IVertexGeometry
+    public struct VertexBuilder<TvG, TvM, TvS>
+        where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
         #region constructors
 
-        public VertexBuilder(TvP g, TvM m, TvS s)
+        public VertexBuilder(TvG g, TvM m, TvS s)
         {
             Geometry = g;
             Material = m;
             Skinning = s;
         }
 
-        public VertexBuilder(TvP g, TvM m, params (int, float)[] bindings)
+        public VertexBuilder(TvG g, TvM m, params (int, float)[] bindings)
         {
             Geometry = g;
             Material = m;
@@ -61,52 +61,52 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public VertexBuilder(TvP g, TvM m)
+        public VertexBuilder(TvG g, TvM m)
         {
             Geometry = g;
             Material = m;
             Skinning = default;
         }
 
-        public VertexBuilder(TvP g, TvS s)
+        public VertexBuilder(TvG g, TvS s)
         {
             Geometry = g;
             Material = default;
             Skinning = s;
         }
 
-        public VertexBuilder(TvP g)
+        public VertexBuilder(TvG g)
         {
             Geometry = g;
             Material = default;
             Skinning = default;
         }
 
-        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvM, TvS) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM, TvS) tuple)
         {
-            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
         }
 
-        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvM) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM) tuple)
         {
-            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2);
         }
 
-        public static implicit operator VertexBuilder<TvP, TvM, TvS>((TvP, TvS) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvS) tuple)
         {
-            return new VertexBuilder<TvP, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2);
         }
 
-        public static implicit operator VertexBuilder<TvP, TvM, TvS>(TvP g)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>(TvG g)
         {
-            return new VertexBuilder<TvP, TvM, TvS>(g);
+            return new VertexBuilder<TvG, TvM, TvS>(g);
         }
 
         #endregion
 
         #region data
 
-        public TvP Geometry;
+        public TvG Geometry;
         public TvM Material;
         public TvS Skinning;
 
@@ -143,14 +143,14 @@ namespace SharpGLTF.Geometry
             return new VertexBuilder<TvPP, TvMM, TvSS>(p, m, s);
         }
 
-        public static MeshBuilder<TMaterial, TvP, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
+        public static MeshBuilder<TMaterial, TvG, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
         {
-            return new MeshBuilder<TMaterial, TvP, TvM, TvS>(name);
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(name);
         }
 
-        public static MeshBuilder<TvP, TvM, TvS> CreateCompatibleMesh(string name = null)
+        public static MeshBuilder<TvG, TvM, TvS> CreateCompatibleMesh(string name = null)
         {
-            return new MeshBuilder<TvP, TvM, TvS>(name);
+            return new MeshBuilder<TvG, TvM, TvS>(name);
         }
 
         #endregion

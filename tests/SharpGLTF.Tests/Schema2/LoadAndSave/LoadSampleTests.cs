@@ -166,6 +166,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadMorphTargetModel()
         {
+            TestContext.CurrentContext.AttachShowDirLink();
+
             var path = TestFiles
                 .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.Contains("MorphPrimitivesTest.glb"));
@@ -179,6 +181,48 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".obj"));
             model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".glb"));
+        }
+
+        [TestCase("RiggedFigure.glb")]
+        [TestCase("RiggedSimple.glb")]
+        [TestCase("BoxAnimated.glb")]
+        [TestCase("AnimatedMorphCube.glb")]
+        [TestCase("AnimatedMorphSphere.glb")]
+        [TestCase("CesiumMan.glb")]
+        [TestCase("Monster.glb")]
+        [TestCase("BrainStem.glb")]
+        public void LoadAnimatedModels(string path)
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains(path));
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            path = System.IO.Path.GetFileNameWithoutExtension(path);
+
+            model.AttachToCurrentTest(path + ".glb");
+
+            var triangles = model.DefaultScene
+                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .ToArray();            
+
+            var anim = model.LogicalAnimations[0];
+
+            var duration = anim.Duration;
+
+            for(int i=0; i < 10; ++i)
+            {
+                var t = duration * i / 10;
+                int tt = (int)(t * 1000.0f);
+
+                model.AttachToCurrentTest($"{path} at {tt}.obj",anim, t);
+            }
+
+            
         }
     }
 }

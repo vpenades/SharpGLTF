@@ -224,6 +224,26 @@ namespace SharpGLTF
             return _sampler;
         }
 
+        internal static Func<float, float[]> GetLinearSamplerFunc(this IEnumerable<(float, float[])> collection)
+        {
+            if (collection == null) return null;
+
+            float[] _sampler(float offset)
+            {
+                var sample = collection.GetSample(offset);
+                var result = new float[sample.Item1.Length];
+
+                for (int i = 0; i < result.Length; ++i)
+                {
+                    result[i] = sample.Item1[i] * (1 - sample.Item3) + sample.Item2[i] * sample.Item3;
+                }
+
+                return result;
+            }
+
+            return _sampler;
+        }
+
         #endregion
 
         #region linq

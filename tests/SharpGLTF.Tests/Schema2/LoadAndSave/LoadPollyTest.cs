@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
@@ -32,6 +33,10 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath());
 
             Assert.NotNull(model);
+
+            var triangles = model.DefaultScene
+                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexTexture1>(model.LogicalAnimations[0], 0.5f)
+                .ToList();
 
             // Save as GLB, and also evaluate all triangles and save as Wavefront OBJ            
             model.AttachToCurrentTest("polly_out.glb");

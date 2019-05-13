@@ -58,8 +58,22 @@ namespace SharpGLTF
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
+                fileName = fileName.Replace(" ", "_");
                 Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName);
             }
+
+            // Attach the saved file to the current test
+            TestContext.AddTestAttachment(fileName);
+        }
+
+        public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, Schema2.Animation animation, float time)
+        {
+            fileName = fileName.Replace(" ", "_");
+
+            // find the output path for the current test
+            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+            
+            Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName, animation, time);
 
             // Attach the saved file to the current test
             TestContext.AddTestAttachment(fileName);

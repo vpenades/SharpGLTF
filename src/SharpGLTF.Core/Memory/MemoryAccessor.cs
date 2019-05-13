@@ -317,6 +317,14 @@ namespace SharpGLTF.Memory
             return new Matrix4x4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
+        public MultiArray AsMultiArray(int dimensions)
+        {
+            Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.SCALAR, nameof(_Attribute));
+            Guard.IsTrue(_Attribute.ByteStride == 0, nameof(_Attribute));
+            return new MultiArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, dimensions, _Attribute.Encoding, _Attribute.Normalized);
+        }
+
         #endregion
     }
 }

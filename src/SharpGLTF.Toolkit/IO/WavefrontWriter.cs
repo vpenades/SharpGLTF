@@ -15,7 +15,7 @@ namespace SharpGLTF.IO
     using VERTEX = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
     using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
     using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
-    using VSKINNING = Geometry.VertexTypes.VertexEmpty;
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
 
     /// <summary>
     /// Tiny wavefront object writer
@@ -32,7 +32,7 @@ namespace SharpGLTF.IO
             public BYTES DiffuseTexture;
         }
 
-        private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VSKINNING> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VSKINNING>();
+        private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY>();
 
         #endregion
 
@@ -233,7 +233,7 @@ namespace SharpGLTF.IO
 
         public void AddModel(ModelRoot model)
         {
-            foreach (var triangle in Schema2Toolkit.Triangulate<VGEOMETRY, VMATERIAL, VSKINNING>(model.DefaultScene))
+            foreach (var triangle in Schema2Toolkit.Triangulate<VGEOMETRY, VMATERIAL>(model.DefaultScene))
             {
                 var dstMaterial = default(Material);
 

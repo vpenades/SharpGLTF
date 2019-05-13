@@ -26,7 +26,7 @@ namespace SharpGLTF.Geometry
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>
     /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/> instance.</typeparam>
-    /// <typeparam name="TvP">
+    /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
     /// <see cref="VertexPosition"/>,
@@ -50,8 +50,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class MeshBuilder<TMaterial, TvP, TvM, TvS> : IMeshBuilder<TMaterial>
-        where TvP : struct, IVertexGeometry
+    public class MeshBuilder<TMaterial, TvG, TvM, TvS> : IMeshBuilder<TMaterial>
+        where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
@@ -66,7 +66,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvP, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvP, TvM, TvS>>();
+        private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
 
         internal IPolygonTriangulator _Triangulator = NaivePolygonTriangulation.Default;
 
@@ -86,7 +86,7 @@ namespace SharpGLTF.Geometry
 
         public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Item1).Distinct();
 
-        public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvP, TvM, TvS>> Primitives => _Primitives.Values;
+        public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> Primitives => _Primitives.Values;
 
         IReadOnlyCollection<IPrimitive<TMaterial>> IMeshBuilder<TMaterial>.Primitives => _Primitives.Values;
 
@@ -94,18 +94,18 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        private PrimitiveBuilder<TMaterial, TvP, TvM, TvS> _UsePrimitive((TMaterial, int) key)
+        private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial, int) key)
         {
-            if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvP, TvM, TvS> primitive))
+            if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))
             {
-                primitive = new PrimitiveBuilder<TMaterial, TvP, TvM, TvS>(this, key.Item1, key.Item2, StrictMode);
+                primitive = new PrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1, key.Item2, StrictMode);
                 _Primitives[key] = primitive;
             }
 
             return primitive;
         }
 
-        public PrimitiveBuilder<TMaterial, TvP, TvM, TvS> UsePrimitive(TMaterial material, int primitiveVertexCount = 3)
+        public PrimitiveBuilder<TMaterial, TvG, TvM, TvS> UsePrimitive(TMaterial material, int primitiveVertexCount = 3)
         {
             Guard.NotNull(material, nameof(material));
             Guard.MustBeBetweenOrEqualTo(primitiveVertexCount, 1, 3, nameof(primitiveVertexCount));
@@ -121,7 +121,7 @@ namespace SharpGLTF.Geometry
             return _UsePrimitive((material, primitiveVertexCount));
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvP, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> vertexTransform)
+        public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             foreach (var p in mesh.Primitives)
             {
@@ -136,7 +136,7 @@ namespace SharpGLTF.Geometry
         /// of the this <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> using the given lambfa function.
         /// </summary>
         /// <param name="vertexTransform">A lambda function to transform <see cref="VertexBuilder{TvP, TvM, TvS}"/> vertices.</param>
-        public void TransformVertices(Func<VertexBuilder<TvP, TvM, TvS>, VertexBuilder<TvP, TvM, TvS>> vertexTransform)
+        public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             foreach (var p in Primitives) p.TransformVertices(vertexTransform);
         }
@@ -155,7 +155,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>
-    /// <typeparam name="TvP">
+    /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
     /// <see cref="VertexPosition"/>,
@@ -179,8 +179,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
-    public class MeshBuilder<TvP, TvM, TvS> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS>
-        where TvP : struct, IVertexGeometry
+    public class MeshBuilder<TvG, TvM, TvS> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS>
+        where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
@@ -191,7 +191,7 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>
-    /// <typeparam name="TvP">
+    /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
     /// <see cref="VertexPosition"/>,
@@ -206,8 +206,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
     /// </typeparam>
-    public class MeshBuilder<TvP, TvM> : MeshBuilder<Materials.MaterialBuilder, TvP, TvM, VertexEmpty>
-        where TvP : struct, IVertexGeometry
+    public class MeshBuilder<TvG, TvM> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty>
+        where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
     {
         public MeshBuilder(string name = null)
@@ -217,15 +217,15 @@ namespace SharpGLTF.Geometry
     /// <summary>
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>
-    /// <typeparam name="TvP">
+    /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.
     /// Valid types are:
     /// <see cref="VertexPosition"/>,
     /// <see cref="VertexPositionNormal"/>,
     /// <see cref="VertexPositionNormalTangent"/>.
     /// </typeparam>
-    public class MeshBuilder<TvP> : MeshBuilder<Materials.MaterialBuilder, TvP, VertexEmpty, VertexEmpty>
-        where TvP : struct, IVertexGeometry
+    public class MeshBuilder<TvG> : MeshBuilder<Materials.MaterialBuilder, TvG, VertexEmpty, VertexEmpty>
+        where TvG : struct, IVertexGeometry
     {
         public MeshBuilder(string name = null)
             : base(name) { }

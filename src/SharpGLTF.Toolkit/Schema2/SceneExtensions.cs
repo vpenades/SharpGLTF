@@ -6,6 +6,10 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using Geometry;
+    using Geometry.VertexTypes;
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
+
     public static partial class Schema2Toolkit
     {
         #region fluent creation
@@ -112,63 +116,41 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Yield a collection of triangles representing the geometry
-        /// of the input <see cref="Scene"/> in world space.
+        /// Yields a collection of triangles representing the geometry in world space.
         /// </summary>
-        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+        /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
         /// <param name="scene">A <see cref="Scene"/> instance.</param>
+        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
+        /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Scene scene)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
         {
-            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM, TvS>(true));
-        }
-
-        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Scene scene, Animation animation, float time)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-        {
-            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvP, TvM>(animation, time));
+            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvG, TvM>(animation, time));
         }
 
         /// <summary>
-        /// Yield a collection of triangles representing the geometry
-        /// of the input <see cref="Node"/> in local or world space.
+        /// Yields a collection of triangles representing the geometry in world space.
         /// </summary>
-        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+        /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
         /// <param name="node">A <see cref="Node"/> instance.</param>
-        /// <param name="inWorldSpace">A value indicating whether the returned triangles must be in local (false) or world (true) space.</param>
-        /// <returns>A collection of triangles in local or world space.</returns>
-        public static IEnumerable<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)> Triangulate<TvP, TvM, TvS>(this Node node, bool inWorldSpace)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
-        {
-            var mesh = node.Mesh;
-            if (mesh == null) return Enumerable.Empty<((TvP, TvM, TvS), (TvP, TvM, TvS), (TvP, TvM, TvS), Material)>();
-
-            var xform = inWorldSpace ? node.WorldMatrix : Matrix4x4.Identity;
-
-            return mesh.Triangulate<TvP, TvM, TvS>(xform);
-        }
-
-        public static IEnumerable<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)> Triangulate<TvP, TvM>(this Node node, Animation animation, float time)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
+        /// <param name="time">The animation time.</param>
+        /// <returns>A collection of triangles in world space.</returns>
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
         {
             var mesh = node.Mesh;
 
-            if (mesh == null) return Enumerable.Empty<((TvP, TvM), (TvP, TvM), (TvP, TvM), Material)>();
+            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)>();
 
             var xform = node.GetMeshWorldTransform(animation, time);
 
-            return mesh.Triangulate<TvP, TvM>(xform);
+            return mesh.Triangulate<TvG, TvM>(xform);
         }
 
         #endregion
