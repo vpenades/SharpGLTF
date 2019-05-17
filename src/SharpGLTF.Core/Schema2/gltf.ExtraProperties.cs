@@ -143,10 +143,16 @@ namespace SharpGLTF.Schema2
                 SerializeProperty(writer, "extensions", dict);
             }
 
-            if (_extras != null)
+            if (_extras == null) return;
+
+            // todo, only write _extras if it's a known serializable type.
+
+            if (!(_extras is String) && _extras is System.Collections.IEnumerable collection)
             {
-                SerializeProperty(writer, "extras", _extras);
+                if (!collection.Cast<Object>().Any()) return;
             }
+
+            SerializeProperty(writer, "extras", _extras);
         }
 
         private static IReadOnlyDictionary<string, JsonSerializable> _ToDictionary(JsonSerializable context, IEnumerable<JsonSerializable> serializables)

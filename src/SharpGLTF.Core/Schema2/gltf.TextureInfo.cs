@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerDisplay("Texture[{LogicalIndex}] {Name}")]
+    [System.Diagnostics.DebuggerDisplay("LogicalTexture[{_LogicalTextureIndex}]")]
     internal partial class TextureInfo
     {
         #region properties
@@ -102,7 +102,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Normal Texture[{LogicalIndex}] {Name}")]
+    [System.Diagnostics.DebuggerDisplay("Normal LogicalTexture[{_LogicalTextureIndex}] x {Scale}")]
     internal sealed partial class MaterialNormalTextureInfo
     {
         #region properties
@@ -116,7 +116,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Occlusion Texture[{LogicalIndex}] {Name}")]
+    [System.Diagnostics.DebuggerDisplay("Occlusion LogicalTexture[{_LogicalTextureIndex}] x {Strength}")]
     internal sealed partial class MaterialOcclusionTextureInfo
     {
         #region properties
