@@ -21,6 +21,7 @@ namespace SharpGLTF
             _SchemaDir = System.IO.Path.Combine(workingDir, "glTF-Schema");
             _SampleModelsDir = System.IO.Path.Combine(workingDir, "glTF-Sample-Models");
             _PollyModelsDir = System.IO.Path.Combine(workingDir, "glTF-Blender-Exporter");
+            _BabylonJsDir = System.IO.Path.Combine(workingDir, "BabylonJS-MeshesLibrary");
         }
 
         public static void DownloadReferenceModels()
@@ -38,6 +39,7 @@ namespace SharpGLTF
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);            
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _SchemaDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsDir);
 
             TestContext.Progress.WriteLine("... Download Completed.");
         }
@@ -51,6 +53,7 @@ namespace SharpGLTF
         private static readonly string _SchemaDir;
         private static readonly string _SampleModelsDir;
         private static readonly string _PollyModelsDir;
+        private static readonly string _BabylonJsDir;
 
         private static string _GeneratedModelsDir;        
 
@@ -108,7 +111,17 @@ namespace SharpGLTF
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\glTF-Draco\\"))
                 .ToList();
-        }        
+        }
+
+        public static IReadOnlyList<string> GetBabylonJSModelsPaths()
+        {
+            var files = GetModelPathsInDirectory(_BabylonJsDir);
+
+            return files
+                .OrderBy(item => item)
+                .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
+                .ToList();
+        }
 
         public static string GetPollyFileModelPath()
         {

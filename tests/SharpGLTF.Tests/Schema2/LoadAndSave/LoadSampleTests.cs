@@ -39,34 +39,51 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 if (!f.Contains(section)) continue;
 
-                var perf = System.Diagnostics.Stopwatch.StartNew();                
-
-                var model = ModelRoot.Load(f);
-                Assert.NotNull(model);
-
-                var perf_load = perf.ElapsedMilliseconds;
-
-                // do a model clone and compare it
-                _AssertAreEqual(model, model.DeepClone());
-
-                var perf_clone= perf.ElapsedMilliseconds;
-
-                // check extensions used
-                if (!model.ExtensionsUsed.Contains("EXT_lights_image_based"))
-                {
-                    var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
-                    CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
-                }
-                
-                // Save models
-                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
-                var perf_wavefront = perf.ElapsedMilliseconds;
-
-                model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
-                var perf_glb = perf.ElapsedMilliseconds;
-
-                TestContext.Progress.WriteLine($"processed {f.ToShortDisplayPath()} - Load:{perf_load}ms Clone:{perf_clone}ms S.obj:{perf_wavefront}ms S.glb:{perf_glb}ms");
+                _LoadModel(f);
             }
+        }
+
+        [Test]
+        public void LoadBabylonJsModels()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
+            {
+                _LoadModel(f);
+            }
+        }
+
+        private static void _LoadModel(string f)
+        {
+            var perf = System.Diagnostics.Stopwatch.StartNew();
+
+            var model = ModelRoot.Load(f);
+            Assert.NotNull(model);
+
+            var perf_load = perf.ElapsedMilliseconds;
+
+            // do a model clone and compare it
+            _AssertAreEqual(model, model.DeepClone());
+
+            var perf_clone = perf.ElapsedMilliseconds;
+
+            // check extensions used
+            if (!model.ExtensionsUsed.Contains("EXT_lights_image_based"))
+            {
+                var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
+                CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+            }
+
+            // Save models
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".obj"));
+            var perf_wavefront = perf.ElapsedMilliseconds;
+
+            model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f), ".glb"));
+            var perf_glb = perf.ElapsedMilliseconds;
+
+            TestContext.Progress.WriteLine($"processed {f.ToShortDisplayPath()} - Load:{perf_load}ms Clone:{perf_clone}ms S.obj:{perf_wavefront}ms S.glb:{perf_glb}ms");
         }
 
         private static void _AssertAreEqual(ModelRoot a, ModelRoot b)
