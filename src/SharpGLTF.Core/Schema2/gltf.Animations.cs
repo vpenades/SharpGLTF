@@ -471,6 +471,48 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
+        public IEnumerable<(Single, (Vector3, Vector3, Vector3))> AsCubicVector3KeyFrames()
+        {
+            var keys = this.Input.AsScalarArray();
+            var frames = GroupThree(this.Output.AsVector3Array());
+
+            return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        public IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> AsCubicQuaternionKeyFrames()
+        {
+            var keys = this.Input.AsScalarArray();
+            var frames = GroupThree(this.Output.AsQuaternionArray());
+
+            return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        public IEnumerable<(Single, (Single[], Single[], Single[]))> AsCubicArrayKeyFrames(int dimensions)
+        {
+            var keys = this.Input.AsScalarArray();
+            var frames = GroupThree(this.Output.AsMultiArray(dimensions));
+
+            return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        private static IEnumerable<(T, T, T)> GroupThree<T>(IEnumerable<T> collection)
+        {
+            using (var ptr = collection.GetEnumerator())
+            {
+                while (true)
+                {
+                    if (!ptr.MoveNext()) break;
+                    var a = ptr.Current;
+                    if (!ptr.MoveNext()) break;
+                    var b = ptr.Current;
+                    if (!ptr.MoveNext()) break;
+                    var c = ptr.Current;
+
+                    yield return (a, b, c);
+                }
+            }
+        }
+
         #endregion
     }
 

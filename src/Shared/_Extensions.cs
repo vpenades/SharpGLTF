@@ -160,7 +160,7 @@ namespace SharpGLTF
             return dst;
         }
 
-        internal static (T, T, float) GetSample<T>(this IEnumerable<(float, T)> sequence, float offset)
+        internal static (T, T, float, float) GetSample<T>(this IEnumerable<(float, T)> sequence, float offset)
         {
             (float, T)? left = null;
             (float, T)? right = null;
@@ -185,17 +185,19 @@ namespace SharpGLTF
                 prev = item;
             }
 
-            if (left == null && right == null) return (default(T), default(T), 0);
-            if (left == null) return (right.Value.Item2, right.Value.Item2, 0);
-            if (right == null) return (left.Value.Item2, left.Value.Item2, 0);
+            if (left == null && right == null) return (default(T), default(T), 0, 0);
+            if (left == null) return (right.Value.Item2, right.Value.Item2, 0, 0);
+            if (right == null) return (left.Value.Item2, left.Value.Item2, 0, 0);
 
-            System.Diagnostics.Debug.Assert(left.Value.Item1 < right.Value.Item1);
+            var delta = right.Value.Item1 - left.Value.Item1;
 
-            var amount = (offset - left.Value.Item1) / (right.Value.Item1 - left.Value.Item1);
+            System.Diagnostics.Debug.Assert(delta > 0);
+
+            var amount = (offset - left.Value.Item1) / delta;
 
             System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1);
 
-            return (left.Value.Item2, right.Value.Item2, amount);
+            return (left.Value.Item2, right.Value.Item2, amount, delta);
         }
 
         internal static Func<float, Vector3> GetLinearSamplerFunc(this IEnumerable<(float, Vector3)> collection)
@@ -239,6 +241,36 @@ namespace SharpGLTF
                 }
 
                 return result;
+            }
+
+            return _sampler;
+        }
+
+        internal static Func<float, Vector3> GetCubicSamplerFunc(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
+        {
+            // http://www.hugi.scene.org/online/coding/hugi%2012%20-%20cosplqua.htm
+
+            if (collection == null) return null;
+
+            Vector3 _sampler(float offset)
+            {
+                var sample = collection.GetSample(offset);
+
+                var t = sample.Item3;
+                var dt = sample.Item4;
+
+                var tt = t * t;
+                var ttt = tt * t;
+
+                var p0 = sample.Item1.Item1;
+                var m0 = dt * sample.Item1.Item3;
+
+                var p1 = sample.Item2.Item1;
+                var m1 = dt * sample.Item1.Item2;
+
+                var p = (2 * ttt - 3 * tt + 1) * p0 + (ttt - 2 * tt + t) * m0 + (-2 * ttt + 3 * tt) * p1 + (ttt - tt) * m1;
+
+                return p;
             }
 
             return _sampler;
