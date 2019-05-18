@@ -120,6 +120,7 @@ namespace SharpGLTF
             return files
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
+                .Where(item => !item.EndsWith("shaderBall.glb")) // invalid
                 .ToList();
         }
 

@@ -59,8 +59,21 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             var perf = System.Diagnostics.Stopwatch.StartNew();
 
-            var model = ModelRoot.Load(f);
-            Assert.NotNull(model);
+            ModelRoot model = null;
+
+            try
+            {
+                model = ModelRoot.Load(f);
+                Assert.NotNull(model);
+            }
+            catch(Exception ex)
+            {
+                TestContext.Progress.WriteLine($"Failed {f.ToShortDisplayPath()}");
+
+                Assert.Fail(ex.Message);
+            }
+            
+            
 
             var perf_load = perf.ElapsedMilliseconds;
 
@@ -69,8 +82,10 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var perf_clone = perf.ElapsedMilliseconds;
 
+            var unsupportedExtensions = new[] { "MSFT_lod", "EXT_lights_image_based" };
+
             // check extensions used
-            if (!model.ExtensionsUsed.Contains("EXT_lights_image_based"))
+            if (unsupportedExtensions.All(uex => !model.ExtensionsUsed.Contains(uex)))
             {
                 var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
                 CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
