@@ -8,6 +8,8 @@ using SharpGLTF.Collections;
 
 namespace SharpGLTF.Schema2
 {
+    using Transforms;
+
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
     public sealed partial class Animation
     {
@@ -159,15 +161,15 @@ namespace SharpGLTF.Schema2
             return channel.Sampler.AsLinearVector3KeyFrames();
         }
 
-        public Transforms.AffineTransform GetLocalTransform(Node node, float time)
+        public AffineTransform GetLocalTransform(Node node, float time)
         {
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             var xform = node.LocalTransform;
 
-            var sfunc = this.FindScaleChannel(node).GetLinearSamplerFunc();
-            var rfunc = this.FindRotationChannel(node).GetLinearSamplerFunc();
-            var tfunc = this.FindTranslationChannel(node).GetLinearSamplerFunc();
+            var sfunc = this.FindScaleChannel(node).CreateLinearSamplerFunc();
+            var rfunc = this.FindRotationChannel(node).CreateLinearSamplerFunc();
+            var tfunc = this.FindTranslationChannel(node).CreateLinearSamplerFunc();
 
             if (sfunc != null) xform.Scale = sfunc(time);
             if (rfunc != null) xform.Rotation = rfunc(time);
@@ -186,9 +188,9 @@ namespace SharpGLTF.Schema2
             var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.weights);
             if (channel == null) return morphWeights;
 
-            var frames = channel.Sampler.AsLinearArrayKeyFrames(morphWeights.Count);
-
-            var mfunc = frames.GetLinearSamplerFunc();
+            var mfunc = channel.Sampler
+                .AsLinearArrayKeyFrames(morphWeights.Count)
+                .CreateLinearSamplerFunc();
 
             return mfunc(time);
         }
@@ -427,6 +429,10 @@ namespace SharpGLTF.Schema2
         public void SetVector3Keys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
             var kv = _Split(keyframes);
+
+            kv.Item2[0] = Vector3.Zero;
+            kv.Item2[kv.Item2.Length - 1] = Vector3.Zero;
+
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
@@ -441,6 +447,10 @@ namespace SharpGLTF.Schema2
         public void SetQuaternionKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
         {
             var kv = _Split(keyframes);
+
+            kv.Item2[0] = new Quaternion(0, 0, 0, 0);
+            kv.Item2[kv.Item2.Length - 1] = new Quaternion(0, 0, 0, 0);
+
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
