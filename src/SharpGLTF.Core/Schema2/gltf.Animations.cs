@@ -76,7 +76,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
-            sampler.SetVector3Keys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.scale)
                 .SetSampler(sampler);
@@ -86,7 +86,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetVector3Keys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.scale)
                 .SetSampler(sampler);
@@ -96,7 +96,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
-            sampler.SetQuaternionKeys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.rotation)
                 .SetSampler(sampler);
@@ -106,7 +106,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetQuaternionKeys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.rotation)
                 .SetSampler(sampler);
@@ -116,7 +116,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
-            sampler.SetVector3Keys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.translation)
                 .SetSampler(sampler);
@@ -126,7 +126,7 @@ namespace SharpGLTF.Schema2
         {
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetVector3Keys(keyframes);
+            sampler.SetKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.translation)
                 .SetSampler(sampler);
@@ -137,9 +137,14 @@ namespace SharpGLTF.Schema2
             throw new NotImplementedException();
         }
 
+        private AnimationChannel FindChannel(Node node, PropertyPath path)
+        {
+            return _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == path);
+        }
+
         public IEnumerable<(Single, Vector3)> FindScaleChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.scale);
+            var channel = FindChannel(node, PropertyPath.scale);
             if (channel == null) return null;
 
             return channel.Sampler.AsLinearVector3KeyFrames();
@@ -147,7 +152,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, Quaternion)> FindRotationChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.rotation);
+            var channel = FindChannel(node, PropertyPath.rotation);
             if (channel == null) return null;
 
             return channel.Sampler.AsLinearQuaternionKeyFrames();
@@ -155,7 +160,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, Vector3)> FindTranslationChannel(Node node)
         {
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.translation);
+            var channel = FindChannel(node, PropertyPath.translation);
             if (channel == null) return null;
 
             return channel.Sampler.AsLinearVector3KeyFrames();
@@ -167,9 +172,33 @@ namespace SharpGLTF.Schema2
 
             var xform = node.LocalTransform;
 
-            var sfunc = this.FindScaleChannel(node).CreateLinearSamplerFunc();
-            var rfunc = this.FindRotationChannel(node).CreateLinearSamplerFunc();
-            var tfunc = this.FindTranslationChannel(node).CreateLinearSamplerFunc();
+            Func<float, Vector3> sfunc = null;
+            Func<float, Quaternion> rfunc = null;
+            Func<float, Vector3> tfunc = null;
+
+            var schannel = FindChannel(node, PropertyPath.scale);
+            if (schannel != null)
+            {
+                if (schannel.Sampler.InterpolationMode == AnimationInterpolationMode.STEP) sfunc = schannel.Sampler.AsLinearVector3KeyFrames().CreateStepSamplerFunc();
+                if (schannel.Sampler.InterpolationMode == AnimationInterpolationMode.LINEAR) sfunc = schannel.Sampler.AsLinearVector3KeyFrames().CreateLinearSamplerFunc();
+                if (schannel.Sampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) sfunc = schannel.Sampler.AsCubicVector3KeyFrames().CreateCubicSamplerFunc();
+            }
+
+            var rchannel = FindChannel(node, PropertyPath.rotation);
+            if (rchannel != null)
+            {
+                if (rchannel.Sampler.InterpolationMode == AnimationInterpolationMode.STEP) rfunc = rchannel.Sampler.AsLinearQuaternionKeyFrames().CreateStepSamplerFunc();
+                if (rchannel.Sampler.InterpolationMode == AnimationInterpolationMode.LINEAR) rfunc = rchannel.Sampler.AsLinearQuaternionKeyFrames().CreateLinearSamplerFunc();
+                if (rchannel.Sampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) rfunc = rchannel.Sampler.AsCubicQuaternionKeyFrames().CreateCubicSamplerFunc();
+            }
+
+            var tchannel = FindChannel(node, PropertyPath.translation);
+            if (tchannel != null)
+            {
+                if (tchannel.Sampler.InterpolationMode == AnimationInterpolationMode.STEP) tfunc = tchannel.Sampler.AsLinearVector3KeyFrames().CreateStepSamplerFunc();
+                if (tchannel.Sampler.InterpolationMode == AnimationInterpolationMode.LINEAR) tfunc = tchannel.Sampler.AsLinearVector3KeyFrames().CreateLinearSamplerFunc();
+                if (tchannel.Sampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) tfunc = tchannel.Sampler.AsCubicVector3KeyFrames().CreateCubicSamplerFunc();
+            }
 
             if (sfunc != null) xform.Scale = sfunc(time);
             if (rfunc != null) xform.Rotation = rfunc(time);
@@ -185,12 +214,14 @@ namespace SharpGLTF.Schema2
 
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
-            var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == PropertyPath.weights);
-            if (channel == null) return morphWeights;
+            var mchannel = FindChannel(node, PropertyPath.weights);
+            if (mchannel == null) return morphWeights;
 
-            var mfunc = channel.Sampler
-                .AsLinearArrayKeyFrames(morphWeights.Count)
-                .CreateLinearSamplerFunc();
+            Func<float, float[]> mfunc = null;
+
+            if (mchannel.Sampler.InterpolationMode == AnimationInterpolationMode.STEP) mfunc = mchannel.Sampler.AsLinearArrayKeyFrames().CreateStepSamplerFunc();
+            if (mchannel.Sampler.InterpolationMode == AnimationInterpolationMode.LINEAR) mfunc = mchannel.Sampler.AsLinearArrayKeyFrames().CreateLinearSamplerFunc();
+            if (mchannel.Sampler.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) mfunc = mchannel.Sampler.AsCubicArrayKeyFrames().CreateCubicSamplerFunc();
 
             return mfunc(time);
         }
@@ -324,7 +355,7 @@ namespace SharpGLTF.Schema2
 
         public Accessor Output => this.LogicalParent.LogicalParent.LogicalAccessors[this._output];
 
-        public float Duration { get { var keys = Input.AsScalarArray(); return keys[keys.Count - 1]; } }
+        public float Duration { get { var keys = Input.AsScalarArray(); return keys.Count == 0 ? 0 : keys[keys.Count - 1]; } }
 
         #endregion
 
@@ -419,14 +450,14 @@ namespace SharpGLTF.Schema2
             return (keys, vals);
         }
 
-        public void SetVector3Keys(IReadOnlyDictionary<Single, Vector3> keyframes)
+        internal void SetKeys(IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
 
-        public void SetVector3Keys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
+        internal void SetKeys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
             var kv = _Split(keyframes);
 
@@ -437,14 +468,14 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
 
-        public void SetQuaternionKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
+        internal void SetKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
             var kv = _Split(keyframes);
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
 
-        public void SetQuaternionKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
+        internal void SetKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
         {
             var kv = _Split(keyframes);
 
@@ -457,7 +488,7 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, Vector3)> AsLinearVector3KeyFrames()
         {
-            if (this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE) throw new ArgumentException();
+            Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
 
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsVector3Array();
@@ -467,14 +498,20 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, Quaternion)> AsLinearQuaternionKeyFrames()
         {
+            Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsQuaternionArray();
 
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
-        public IEnumerable<(Single, Single[])> AsLinearArrayKeyFrames(int dimensions)
+        public IEnumerable<(Single, Single[])> AsLinearArrayKeyFrames()
         {
+            Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / this.Input.Count;
+
             var keys = this.Input.AsScalarArray();
             var frames = this.Output.AsMultiArray(dimensions);
 
@@ -483,6 +520,8 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, (Vector3, Vector3, Vector3))> AsCubicVector3KeyFrames()
         {
+            Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
             var keys = this.Input.AsScalarArray();
             var frames = GroupThree(this.Output.AsVector3Array());
 
@@ -491,14 +530,20 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> AsCubicQuaternionKeyFrames()
         {
+            Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
             var keys = this.Input.AsScalarArray();
             var frames = GroupThree(this.Output.AsQuaternionArray());
 
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
-        public IEnumerable<(Single, (Single[], Single[], Single[]))> AsCubicArrayKeyFrames(int dimensions)
+        public IEnumerable<(Single, (Single[], Single[], Single[]))> AsCubicArrayKeyFrames()
         {
+            Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / (this.Input.Count * 3);
+
             var keys = this.Input.AsScalarArray();
             var frames = GroupThree(this.Output.AsMultiArray(dimensions));
 
