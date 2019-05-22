@@ -5,6 +5,8 @@ using System.Text;
 
 namespace SharpGLTF.Transforms
 {
+    public delegate T CurveSampler<T>(Single time);
+
     internal static class AnimationSamplerFactory
     {
         private static (T, T, float) _GetSample<T>(this IEnumerable<(float, T)> sequence, float offset)
@@ -47,7 +49,7 @@ namespace SharpGLTF.Transforms
             return (left.Value.Item2, right.Value.Item2, amount);
         }
 
-        internal static Func<float, T> CreateStepSamplerFunc<T>(this IEnumerable<(float, T)> collection)
+        internal static CurveSampler<T> CreateStepSamplerFunc<T>(this IEnumerable<(float, T)> collection)
         {
             if (collection == null) return null;
 
@@ -60,7 +62,7 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static Func<float, Vector3> CreateLinearSamplerFunc(this IEnumerable<(float, Vector3)> collection)
+        internal static CurveSampler<Vector3> CreateLinearSamplerFunc(this IEnumerable<(float, Vector3)> collection)
         {
             if (collection == null) return null;
 
@@ -73,7 +75,7 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static Func<float, Quaternion> CreateLinearSamplerFunc(this IEnumerable<(float, Quaternion)> collection)
+        internal static CurveSampler<Quaternion> CreateLinearSamplerFunc(this IEnumerable<(float, Quaternion)> collection)
         {
             if (collection == null) return null;
 
@@ -86,7 +88,7 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static Func<float, float[]> CreateLinearSamplerFunc(this IEnumerable<(float, float[])> collection)
+        internal static CurveSampler<float[]> CreateLinearSamplerFunc(this IEnumerable<(float, float[])> collection)
         {
             if (collection == null) return null;
 
@@ -106,22 +108,22 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static Func<float, Vector3> CreateCubicSamplerFunc(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
+        internal static CurveSampler<Vector3> CreateCubicSamplerFunc(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
         {
             return CreateCubicSamplerFunc<Vector3>(collection, Hermite);
         }
 
-        internal static Func<float, Quaternion> CreateCubicSamplerFunc(this IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> collection)
+        internal static CurveSampler<Quaternion> CreateCubicSamplerFunc(this IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> collection)
         {
             return CreateCubicSamplerFunc<Quaternion>(collection, Hermite);
         }
 
-        internal static Func<float, float[]> CreateCubicSamplerFunc(this IEnumerable<(float, (float[], float[], float[]))> collection)
+        internal static CurveSampler<float[]> CreateCubicSamplerFunc(this IEnumerable<(float, (float[], float[], float[]))> collection)
         {
             return CreateCubicSamplerFunc<float[]>(collection, Hermite);
         }
 
-        internal static Func<float, T> CreateCubicSamplerFunc<T>(this IEnumerable<(float, (T, T, T))> collection, Func<T, T, T, T, float, T> hermiteFunc)
+        internal static CurveSampler<T> CreateCubicSamplerFunc<T>(this IEnumerable<(float, (T, T, T))> collection, Func<T, T, T, T, float, T> hermiteFunc)
         {
             if (collection == null) return null;
 
