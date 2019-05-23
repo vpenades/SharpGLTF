@@ -76,9 +76,7 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            var r = _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0008.txt", API);
-
-            Assert.IsTrue(r);
+            _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0008.txt", API);
         }
 
         [Test(Description = "Checks if we have introduced a breaking change between the current and previous API")]
@@ -92,29 +90,27 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            var r = _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0008.txt", API);
-
-            Assert.IsTrue(r);
+            _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0008.txt", API);
         }
 
-        private static bool _CheckBackwardsCompatibility(string referenceAPIFile, string[] newLines)
+        private static void _CheckBackwardsCompatibility(string referenceAPIFile, string[] newLines)
         {
             referenceAPIFile = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", referenceAPIFile);
 
             var refLines = System.IO.File.ReadAllLines(referenceAPIFile);
 
-            bool failed = false;
+            bool backwardsCompatible = true;
 
-            foreach(var l in refLines)
+            foreach (var l in refLines)
             {
                 if (!newLines.Contains(l))
                 {
                     TestContext.WriteLine($"Missing:  {l}");
-                    failed = true;
-                }
+                    backwardsCompatible = false;
+                }                
             }
 
-            return !failed;
+            Warn.If(!backwardsCompatible, "Current API is not backwards compatible");
         }
     }
 }

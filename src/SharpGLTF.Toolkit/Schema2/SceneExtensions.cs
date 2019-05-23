@@ -4,12 +4,11 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Geometry;
+using SharpGLTF.Geometry.VertexTypes;
+
 namespace SharpGLTF.Schema2
 {
-    using Geometry;
-    using Geometry.VertexTypes;
-    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
-
     public static partial class Schema2Toolkit
     {
         #region fluent creation
@@ -61,11 +60,7 @@ namespace SharpGLTF.Schema2
 
         public static Node WithSkinBinding(this Node node, params Node[] joints)
         {
-            var skin = node.LogicalParent.CreateSkin();
-            skin.BindJoints(joints);
-
-            node.Skin = skin;
-            return node;
+            return node.WithSkinBinding(node.WorldMatrix, joints);
         }
 
         public static Node WithSkinBinding(this Node node, Matrix4x4 meshPoseTransform, params Node[] joints)
@@ -75,6 +70,20 @@ namespace SharpGLTF.Schema2
 
             node.Skin = skin;
             return node;
+        }
+
+        public static Node WithSkinnedMesh(this Node node, Mesh mesh, params Node[] joints)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(node, mesh, nameof(mesh));
+
+            foreach (var j in joints) Guard.MustShareLogicalParent(node, j, nameof(joints));
+
+            // TODO: the joints must be visible in the visual tree that contains node.
+
+            return node
+                .WithMesh(mesh)
+                .WithSkinBinding(joints);
         }
 
         #endregion
@@ -124,7 +133,7 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -140,13 +149,13 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
             var mesh = node.Mesh;
 
-            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)>();
+            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
             var xform = node.GetMeshWorldTransform(animation, time);
 

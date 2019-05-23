@@ -49,14 +49,17 @@ namespace SharpGLTF.Schema2
         public Node VisualRoot => this.LogicalParent._FindVisualRootNode(this);
 
         /// <summary>
-        /// Gets the visual root <see cref="Scene"/> instance that contains this <see cref="Node"/>.
+        /// Gets the collection of <see cref="Scene"/> instances that reference this <see cref="Node"/>.
         /// </summary>
-        public Scene VisualScene
+        public IEnumerable<Scene> VisualScenes
         {
             get
             {
                 var rootNode = this.VisualRoot;
-                return LogicalParent.LogicalScenes.FirstOrDefault(item => item._ContainsVisualNode(rootNode, false));
+
+                return LogicalParent
+                    .LogicalScenes
+                    .Where(item => item._ContainsVisualNode(rootNode, false));
             }
         }
 
@@ -221,11 +224,11 @@ namespace SharpGLTF.Schema2
                 if (value == null) { this._skin = null; return; }
 
                 Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+
                 Guard.IsFalse(_matrix.HasValue, _NOTRANSFORMMESSAGE);
                 Guard.IsFalse(_scale.HasValue, _NOTRANSFORMMESSAGE);
                 Guard.IsFalse(_rotation.HasValue, _NOTRANSFORMMESSAGE);
                 Guard.IsFalse(_translation.HasValue, _NOTRANSFORMMESSAGE);
-                // Todo: guard against animations.
 
                 this._skin = value.LogicalIndex;
             }

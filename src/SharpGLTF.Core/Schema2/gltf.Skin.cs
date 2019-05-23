@@ -86,9 +86,14 @@ namespace SharpGLTF.Schema2
             BindJoints(rootJoint.WorldMatrix, joints);
         }
 
-        public void BindJoints(Matrix4x4 meshBingTransform, params Node[] joints)
+        /// <summary>
+        /// Binds the tree of bones to the associated skinned mesh.
+        /// </summary>
+        /// <param name="meshBindTransform">The world transform matrix of the mesh at the time of binding.</param>
+        /// <param name="joints">A collection of <see cref="Node"/> joints.</param>
+        public void BindJoints(Matrix4x4 meshBindTransform, params Node[] joints)
         {
-            var meshBingInverse = meshBingTransform.Inverse();
+            var meshBingInverse = meshBindTransform.Inverse();
 
             var pairs = new KeyValuePair<Node, Matrix4x4>[joints.Length];
 

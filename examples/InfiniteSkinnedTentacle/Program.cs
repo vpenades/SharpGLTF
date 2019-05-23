@@ -49,10 +49,10 @@ namespace InfiniteSkinnedTentacle
                 .CreateMeshes(CreateMesh(10))
                 .First();
 
-            RecusiveTentacle(scene, Matrix4x4.CreateTranslation(+25, 0, +25), mesh, Quaternion.CreateFromYawPitchRoll(0f, 0.2f, 0f), 2);
-            RecusiveTentacle(scene, Matrix4x4.CreateTranslation(-25, 0, +25), mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), 2);
-            RecusiveTentacle(scene, Matrix4x4.CreateTranslation(-25, 0, -25), mesh, Quaternion.CreateFromYawPitchRoll(0f, 0f, 0.2f), 2);
-            RecusiveTentacle(scene, Matrix4x4.CreateTranslation(+25, 0, -25), mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), 2);            
+            RecusiveTentacle(scene, scene, Matrix4x4.CreateTranslation(+25, 0, +25), mesh, Quaternion.CreateFromYawPitchRoll(0f, 0.2f, 0f), 2);
+            RecusiveTentacle(scene, scene, Matrix4x4.CreateTranslation(-25, 0, +25), mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), 2);
+            RecusiveTentacle(scene, scene, Matrix4x4.CreateTranslation(-25, 0, -25), mesh, Quaternion.CreateFromYawPitchRoll(0f, 0f, 0.2f), 2);
+            RecusiveTentacle(scene, scene, Matrix4x4.CreateTranslation(+25, 0, -25), mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), 2);            
 
             model.SaveGLB("recursive tentacles.glb");
 
@@ -63,25 +63,25 @@ namespace InfiniteSkinnedTentacle
             model.SaveAsWavefront("recursive_tentacles_at_100.obj", model.LogicalAnimations[0], 1);
         }
         
-        static void RecusiveTentacle(IVisualNodeContainer parent, Matrix4x4 offset, Mesh mesh, Quaternion anim, int repeat)
+        static void RecusiveTentacle(Scene scene, IVisualNodeContainer parent, Matrix4x4 offset, Mesh mesh, Quaternion anim, int repeat)
         {
             parent = parent
                 .CreateNode()
                 .WithLocalTransform(offset);
 
-            parent = AddTentacleSkeleton(parent as Node, mesh, anim);
+            parent = AddTentacleSkeleton(scene, parent as Node, mesh, anim);
 
             if (repeat == 0) return;
 
             var scale = Matrix4x4.CreateScale(0.2f);
 
-            RecusiveTentacle(parent, Matrix4x4.CreateTranslation(+15, 0, +15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0f, 0.2f, 0f), repeat - 1);
-            RecusiveTentacle(parent, Matrix4x4.CreateTranslation(-15, 0, +15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), repeat - 1);
-            RecusiveTentacle(parent, Matrix4x4.CreateTranslation(-15, 0, -15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0f, 0f, 0.2f), repeat - 1);
-            RecusiveTentacle(parent, Matrix4x4.CreateTranslation(+15, 0, -15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), repeat - 1);
+            RecusiveTentacle(scene, parent, Matrix4x4.CreateTranslation(+15, 0, +15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0f, 0.2f, 0f), repeat - 1);
+            RecusiveTentacle(scene, parent, Matrix4x4.CreateTranslation(-15, 0, +15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), repeat - 1);
+            RecusiveTentacle(scene, parent, Matrix4x4.CreateTranslation(-15, 0, -15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0f, 0f, 0.2f), repeat - 1);
+            RecusiveTentacle(scene, parent, Matrix4x4.CreateTranslation(+15, 0, -15) * scale, mesh, Quaternion.CreateFromYawPitchRoll(0.2f, 0f, 0f), repeat - 1);
         }
 
-        static Node AddTentacleSkeleton(Node skeleton, Mesh mesh, Quaternion anim)
+        static Node AddTentacleSkeleton(Scene scene, Node skeleton, Mesh mesh, Quaternion anim)
         {
             var bindings = new List<Node>();
 
@@ -104,9 +104,9 @@ namespace InfiniteSkinnedTentacle
                 bindings.Add(bone);                
             }
 
-            skeleton.VisualScene.CreateNode()
-                .WithMesh(mesh)
-                .WithSkinBinding(bindings.ToArray());
+            scene
+                .CreateNode()
+                .WithSkinnedMesh(mesh, bindings.ToArray());
 
             return bindings.Last();
         }
