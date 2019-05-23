@@ -56,11 +56,11 @@ namespace InfiniteSkinnedTentacle
 
             model.SaveGLB("recursive tentacles.glb");
 
-            model.SaveAsWavefront("recursive tentacles at 000.obj", model.LogicalAnimations[0], 0);
-            model.SaveAsWavefront("recursive tentacles at 025.obj", model.LogicalAnimations[0], 0.25f);
-            model.SaveAsWavefront("recursive tentacles at 050.obj", model.LogicalAnimations[0], 0.50f);
-            model.SaveAsWavefront("recursive tentacles at 075.obj", model.LogicalAnimations[0], 0.75f);
-            model.SaveAsWavefront("recursive tentacles at 100.obj", model.LogicalAnimations[0], 1);
+            model.SaveAsWavefront("recursive_tentacles_at_000.obj", model.LogicalAnimations[0], 0);
+            model.SaveAsWavefront("recursive_tentacles_at_025.obj", model.LogicalAnimations[0], 0.25f);
+            model.SaveAsWavefront("recursive_tentacles_at_050.obj", model.LogicalAnimations[0], 0.50f);
+            model.SaveAsWavefront("recursive_tentacles_at_075.obj", model.LogicalAnimations[0], 0.75f);
+            model.SaveAsWavefront("recursive_tentacles_at_100.obj", model.LogicalAnimations[0], 1);
         }
         
         static void RecusiveTentacle(IVisualNodeContainer parent, Matrix4x4 offset, Mesh mesh, Quaternion anim, int repeat)
