@@ -334,9 +334,10 @@ NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD CreateScaleChannel Void (
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD CreateScaleChannel Void (Node, IReadOnlyDictionary<Single,Vector3>, Boolean=True) } }
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD CreateTranslationChannel Void (Node, IReadOnlyDictionary<Single,ValueTuple<Vector3,Vector3,Vector3>>) } }
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD CreateTranslationChannel Void (Node, IReadOnlyDictionary<Single,Vector3>, Boolean=True) } }
-NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindRotationChannel IEnumerable<ValueTuple<Single,Quaternion>> (Node) } }
-NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindScaleChannel IEnumerable<ValueTuple<Single,Vector3>> (Node) } }
-NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindTranslationChannel IEnumerable<ValueTuple<Single,Vector3>> (Node) } }
+NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindMorphSampler IAnimationSampler<Single[]> (Node) } }
+NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindRotationSampler IAnimationSampler<Quaternion> (Node) } }
+NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindScaleSampler IAnimationSampler<Vector3> (Node) } }
+NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD FindTranslationSampler IAnimationSampler<Vector3> (Node) } }
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD GetLocalTransform AffineTransform (Node, Single) } }
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD GetMorphWeights IReadOnlyList<Single> (Node, Single) } }
 NS SharpGLTF.Schema2 { CLASS:SEALED Animation { METHOD:GET Duration Single } }
@@ -704,6 +705,10 @@ NS SharpGLTF.Schema2 { ENUM TextureMipMapFilter { NEAREST=9728 } }
 NS SharpGLTF.Schema2 { ENUM TextureWrapMode { CLAMP_TO_EDGE=33071 } }
 NS SharpGLTF.Schema2 { ENUM TextureWrapMode { MIRRORED_REPEAT=33648 } }
 NS SharpGLTF.Schema2 { ENUM TextureWrapMode { REPEAT=10497 } }
+NS SharpGLTF.Schema2 { INTERFACE IAnimationSampler<T> { METHOD:ABSTRACT CreateCurveSampler CurveSampler<T> () } }
+NS SharpGLTF.Schema2 { INTERFACE IAnimationSampler<T> { METHOD:ABSTRACT GetCubicKeys IEnumerable<ValueTuple<Single,ValueTuple<T,T,T>>> () } }
+NS SharpGLTF.Schema2 { INTERFACE IAnimationSampler<T> { METHOD:ABSTRACT GetLinearKeys IEnumerable<ValueTuple<Single,T>> () } }
+NS SharpGLTF.Schema2 { INTERFACE IAnimationSampler<T> { METHOD:GET:ABSTRACT InterpolationMode AnimationInterpolationMode } }
 NS SharpGLTF.Schema2 { INTERFACE IVisualNodeContainer { METHOD:ABSTRACT CreateNode Node (String=null) } }
 NS SharpGLTF.Schema2 { INTERFACE IVisualNodeContainer { METHOD:GET:ABSTRACT VisualChildren IEnumerable<Node> } }
 NS SharpGLTF.Schema2 { STRUCT MaterialChannel { METHOD SetTexture Void (Int32, Image, Image=null, TextureWrapMode=REPEAT, TextureWrapMode=REPEAT, TextureMipMapFilter=DEFAULT, TextureInterpolationFilter=DEFAULT) } }
@@ -733,6 +738,14 @@ NS SharpGLTF.Transforms { CLASS:ABSTRACT MorphTransform { METHOD:CONSTRUCTOR (IR
 NS SharpGLTF.Transforms { CLASS:ABSTRACT MorphTransform { METHOD:GET InverseWeight Single } }
 NS SharpGLTF.Transforms { CLASS:ABSTRACT MorphTransform { METHOD:GET MorphWeights IReadOnlyList<Single> } }
 NS SharpGLTF.Transforms { CLASS:ABSTRACT MorphTransform { METHOD:PROTECTED MorphVectors Vector3 (Vector3, Vector3[]) } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { METHOD:CONSTRUCTOR (Object, IntPtr) } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { METHOD:VIRTUAL BeginInvoke IAsyncResult (Single, AsyncCallback, Object) } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { METHOD:VIRTUAL EndInvoke T (IAsyncResult) } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { METHOD:VIRTUAL Invoke T (Single) } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { USING Delegate } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { USING ICloneable } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { USING ISerializable } }
+NS SharpGLTF.Transforms { CLASS:SEALED CurveSampler<T> { USING MulticastDelegate } }
 NS SharpGLTF.Transforms { INTERFACE ITransform { METHOD:ABSTRACT TransformNormal Vector3 (Vector3, Vector3[], ValueTuple[]<Int32,Single>) } }
 NS SharpGLTF.Transforms { INTERFACE ITransform { METHOD:ABSTRACT TransformPosition Vector3 (Vector3, Vector3[], ValueTuple[]<Int32,Single>) } }
 NS SharpGLTF.Transforms { INTERFACE ITransform { METHOD:ABSTRACT TransformTangent Vector4 (Vector4, Vector3[], ValueTuple[]<Int32,Single>) } }
