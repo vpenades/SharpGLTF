@@ -4,7 +4,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+
 using NJsonSchema.References;
+
+using JSONSCHEMA = NJsonSchema.JsonSchema;
 
 namespace SharpGLTF
 {
@@ -297,29 +300,31 @@ namespace SharpGLTF
             return SchemaTypesReader.Generate(ctypes);
         }
 
-        static NJsonSchema.JsonSchema4 LoadSchema(string filePath)
+        static JSONSCHEMA LoadSchema(string filePath)
         {
             // https://blogs.msdn.microsoft.com/benjaminperkins/2017/03/08/how-to-call-an-async-method-from-a-console-app-main-method/
 
             if (!System.IO.File.Exists(filePath)) throw new System.IO.FileNotFoundException(nameof(filePath), filePath);
 
-            return NJsonSchema.JsonSchema4
+            return JSONSCHEMA
                 .FromFileAsync(filePath, s => _Resolver(s,filePath) )
                 .ConfigureAwait(false)
                 .GetAwaiter()
                 .GetResult();
         }
 
-        static NJsonSchema.JsonReferenceResolver _Resolver(NJsonSchema.JsonSchema4 schema, string basePath)
+        static NJsonSchema.JsonReferenceResolver _Resolver(JSONSCHEMA schema, string basePath)
         {
-            var solver = new NJsonSchema.JsonSchemaResolver(schema, new NJsonSchema.Generation.JsonSchemaGeneratorSettings());
+            var generator = new NJsonSchema.Generation.JsonSchemaGeneratorSettings();
+
+            var solver = new NJsonSchema.JsonSchemaAppender(schema, generator.TypeNameGenerator);
 
             return new MyReferenceResolver(solver);            
         }
 
         class MyReferenceResolver : NJsonSchema.JsonReferenceResolver
         {
-            public MyReferenceResolver(NJsonSchema.JsonSchemaResolver resolver) : base(resolver) { }
+            public MyReferenceResolver(NJsonSchema.JsonSchemaAppender resolver) : base(resolver) { }
 
             public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath)
             {

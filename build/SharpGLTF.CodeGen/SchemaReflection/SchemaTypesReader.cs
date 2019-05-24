@@ -4,6 +4,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
+using JSONSCHEMA = NJsonSchema.JsonSchema;
+
 namespace SharpGLTF.SchemaReflection
 {
     /// <summary>
@@ -35,12 +37,12 @@ namespace SharpGLTF.SchemaReflection
 
         #region core
 
-        private static SchemaType _UseType(this SchemaType.Context ctx, NJsonSchema.JsonSchema4 schema, bool isRequired = true)
+        private static SchemaType _UseType(this SchemaType.Context ctx, JSONSCHEMA schema, bool isRequired = true)
         {
             if (ctx == null) throw new ArgumentNullException(nameof(ctx));
             if (schema == null) throw new ArgumentNullException(nameof(schema));            
 
-            if (schema is NJsonSchema.JsonProperty prop)
+            if (schema is NJsonSchema.JsonSchemaProperty prop)
             {
                 // System.Diagnostics.Debug.Assert(prop.Name != "scene");
 
@@ -71,7 +73,7 @@ namespace SharpGLTF.SchemaReflection
 
             if (_IsEnumeration(schema))
             {
-                if (schema is NJsonSchema.JsonProperty property)
+                if (schema is NJsonSchema.JsonSchemaProperty property)
                 {
                     bool isNullable = !isRequired;
 
@@ -170,7 +172,7 @@ namespace SharpGLTF.SchemaReflection
             throw new NotImplementedException();
         }
 
-        private static bool _IsBlittableType(NJsonSchema.JsonSchema4 schema)
+        private static bool _IsBlittableType(JSONSCHEMA schema)
         {
             if (schema == null) return false;
             if (schema.Type == NJsonSchema.JsonObjectType.Boolean) return true;
@@ -180,12 +182,12 @@ namespace SharpGLTF.SchemaReflection
             return false;
         }        
 
-        private static bool _IsStringType(NJsonSchema.JsonSchema4 schema)
+        private static bool _IsStringType(JSONSCHEMA schema)
         {
             return schema.Type == NJsonSchema.JsonObjectType.String;
         }
 
-        private static bool _IsEnumeration(NJsonSchema.JsonSchema4 schema)
+        private static bool _IsEnumeration(JSONSCHEMA schema)
         {
             if (schema.Type != NJsonSchema.JsonObjectType.None) return false;
 
@@ -198,7 +200,7 @@ namespace SharpGLTF.SchemaReflection
             return true;
         }
 
-        private static bool _IsDictionary(NJsonSchema.JsonSchema4 schema)
+        private static bool _IsDictionary(JSONSCHEMA schema)
         {
             // if (schema.Type != NJsonSchema.JsonObjectType.Object) return false;
 
@@ -208,7 +210,7 @@ namespace SharpGLTF.SchemaReflection
             return false;
         }        
 
-        private static NJsonSchema.JsonSchema4 _GetDictionaryValue(NJsonSchema.JsonSchema4 schema)
+        private static JSONSCHEMA _GetDictionaryValue(JSONSCHEMA schema)
         {
             if (schema.AdditionalPropertiesSchema != null)
             {
@@ -225,14 +227,14 @@ namespace SharpGLTF.SchemaReflection
             throw new NotImplementedException();
         }
 
-        private static bool _IsClass(NJsonSchema.JsonSchema4 schema)
+        private static bool _IsClass(JSONSCHEMA schema)
         {
             if (schema.Type != NJsonSchema.JsonObjectType.Object) return false;
             
             return !string.IsNullOrWhiteSpace(schema.Title);            
         }
 
-        private static string[] _GetProperyNames(NJsonSchema.JsonSchema4 schema)
+        private static string[] _GetProperyNames(JSONSCHEMA schema)
         {
             return schema
                     .Properties
@@ -241,7 +243,7 @@ namespace SharpGLTF.SchemaReflection
                     .ToArray();
         }
 
-        private static string[] _GetInheritedPropertyNames(NJsonSchema.JsonSchema4 schema)
+        private static string[] _GetInheritedPropertyNames(JSONSCHEMA schema)
         {
             if (schema?.InheritedSchema == null) return Enumerable.Empty<string>().ToArray();
 
