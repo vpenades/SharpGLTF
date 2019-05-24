@@ -68,7 +68,9 @@ namespace SharpGLTF.Geometry
 
         private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
 
+        #pragma warning disable SA1401 // Fields should be private
         internal IPolygonTriangulator _Triangulator = NaivePolygonTriangulation.Default;
+        #pragma warning restore SA1401 // Fields should be private
 
         #endregion
 

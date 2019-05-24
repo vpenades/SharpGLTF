@@ -21,6 +21,8 @@ namespace SharpGLTF.Geometry
     {
         #region Data Columns
 
+#pragma warning disable CA2227 // Collection properties should be read only
+
         public IList<Vector3> Positions { get; set; }
         public IList<Vector3> Normals { get; set; }
         public IList<Vector4> Tangents { get; set; }
@@ -43,6 +45,8 @@ namespace SharpGLTF.Geometry
             public IList<Vector3> Normals { get; set; }
             public IList<Vector3> Tangents { get; set; }
         }
+
+#pragma warning restore CA2227 // Collection properties should be read only
 
         private List<MorphTarget> _MorphTargets;
 

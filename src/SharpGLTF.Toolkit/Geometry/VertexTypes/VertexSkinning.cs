@@ -9,7 +9,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Represents a a Node Joint index and its weight in a skinning system.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Joint} = {Weight}")]
-    public struct JointBinding : IComparable<JointBinding>
+    public struct JointBinding
     {
         #region constructors
 
@@ -36,12 +36,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public int CompareTo(JointBinding other)
+        private static int CompareWeightTo(JointBinding left, JointBinding right)
         {
-            var a = this.Weight.CompareTo(other.Weight);
+            var a = left.Weight.CompareTo(right.Weight);
             if (a != 0) return a;
 
-            return this.Joint.CompareTo(other.Joint);
+            return left.Joint.CompareTo(right.Joint);
         }
 
         internal static void InPlaceReverseBubbleSort(Span<JointBinding> span)
@@ -52,7 +52,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 for (int j = 0; j < span.Length - 1; ++j)
                 {
-                    if (span[j].CompareTo(span[j + 1]) < 0)
+                    if (CompareWeightTo(span[j], span[j + 1]) < 0)
                     {
                         var tmp = span[j];
                         span[j] = span[j + 1];

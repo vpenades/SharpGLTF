@@ -5,14 +5,11 @@ using System.Text;
 using System.Linq;
 
 using SharpGLTF.Memory;
+using SharpGLTF.Geometry;
+using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Schema2
 {
-    using Geometry;
-    using Geometry.VertexTypes;
-
-    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
-
     public static partial class Schema2Toolkit
     {
         #region meshes
@@ -307,14 +304,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this Mesh mesh, Transforms.ITransform xform)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Mesh mesh, Transforms.ITransform xform)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
             return mesh.Primitives.SelectMany(item => item.Triangulate<TvG, TvM>(xform));
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, VertexBuilder<TvG, TvM, VEMPTY>, Material)> Triangulate<TvG, TvM>(this MeshPrimitive prim, Transforms.ITransform xform)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this MeshPrimitive prim, Transforms.ITransform xform)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {

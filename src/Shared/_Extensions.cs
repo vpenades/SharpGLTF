@@ -159,7 +159,7 @@ namespace SharpGLTF
 
             return dst;
         }
-        
+
         #endregion
 
         #region linq

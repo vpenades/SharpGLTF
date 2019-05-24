@@ -12,10 +12,11 @@ using static System.FormattableString;
 namespace SharpGLTF.IO
 {
     using BYTES = ArraySegment<Byte>;
+    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VERTEX = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
     using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
     using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
-    using VEMPTY = Geometry.VertexTypes.VertexEmpty;
+    
 
     /// <summary>
     /// Tiny wavefront object writer
