@@ -113,7 +113,7 @@ namespace SharpGLTF.Schema2
                 Guard.NotNull(model, nameof(model));
                 Guard.IsTrue(model.LogicalBuffers.Count <= 1, nameof(model), $"GLB format only supports one binary buffer, {model.LogicalBuffers.Count} found. It can be solved by calling {nameof(ModelRoot.MergeImages)} and {nameof(ModelRoot.MergeBuffers)}");
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return ex;
             }

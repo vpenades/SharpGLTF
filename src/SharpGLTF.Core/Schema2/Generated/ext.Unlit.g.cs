@@ -39,11 +39,11 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(string property, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
-			switch (property)
+			switch (jsonPropertyName)
 			{
-				default: base.DeserializeProperty(property, reader); break;
+				default: base.DeserializeProperty(jsonPropertyName, reader); break;
 			}
 		}
 	

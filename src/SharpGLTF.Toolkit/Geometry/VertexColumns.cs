@@ -4,10 +4,10 @@ using System.Numerics;
 using System.Text;
 using System.Linq;
 
+using SharpGLTF.Geometry.VertexTypes;
+
 namespace SharpGLTF.Geometry
 {
-    using VertexTypes;
-
     /// <summary>
     /// Represents a vertex buffer, where every vertex attribute is represented as a vector column.
     /// </summary>

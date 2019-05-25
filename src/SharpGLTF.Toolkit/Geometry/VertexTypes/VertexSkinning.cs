@@ -32,17 +32,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         public int Joint;
         public float Weight;
 
+        private static readonly _WeightComparer _DefaultWeightComparer = new _WeightComparer();
+
+        #endregion
+
+        #region properties
+
+        public static IComparer<JointBinding> WeightComparer => _DefaultWeightComparer;
+
         #endregion
 
         #region API
-
-        private static int CompareWeightTo(JointBinding left, JointBinding right)
-        {
-            var a = left.Weight.CompareTo(right.Weight);
-            if (a != 0) return a;
-
-            return left.Joint.CompareTo(right.Joint);
-        }
 
         internal static void InPlaceReverseBubbleSort(Span<JointBinding> span)
         {
@@ -52,7 +52,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 for (int j = 0; j < span.Length - 1; ++j)
                 {
-                    if (CompareWeightTo(span[j], span[j + 1]) < 0)
+                    if (_DefaultWeightComparer.Compare(span[j], span[j + 1]) < 0)
                     {
                         var tmp = span[j];
                         span[j] = span[j + 1];
@@ -94,6 +94,21 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 var jw = vs.GetJointBinding(i);
                 if (jw.Weight != 0) yield return jw;
+            }
+        }
+
+        #endregion
+
+        #region types
+
+        private sealed class _WeightComparer : IComparer<JointBinding>
+        {
+            public int Compare(JointBinding x, JointBinding y)
+            {
+                var a = x.Weight.CompareTo(y.Weight);
+                if (a != 0) return a;
+
+                return x.Joint.CompareTo(y.Joint);
             }
         }
 

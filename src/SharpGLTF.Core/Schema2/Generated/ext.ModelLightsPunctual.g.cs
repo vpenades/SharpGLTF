@@ -48,13 +48,13 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(string property, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
-			switch (property)
+			switch (jsonPropertyName)
 			{
 				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(reader); break;
 				case "outerConeAngle": _outerConeAngle = DeserializePropertyValue<Double?>(reader); break;
-				default: base.DeserializeProperty(property, reader); break;
+				default: base.DeserializeProperty(jsonPropertyName, reader); break;
 			}
 		}
 	
@@ -93,16 +93,16 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(string property, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
-			switch (property)
+			switch (jsonPropertyName)
 			{
 				case "color": _color = DeserializePropertyValue<Vector3?>(reader); break;
 				case "intensity": _intensity = DeserializePropertyValue<Double?>(reader); break;
 				case "range": _range = DeserializePropertyValue<Double?>(reader); break;
 				case "spot": _spot = DeserializePropertyValue<PunctualLightSpot>(reader); break;
 				case "type": _type = DeserializePropertyValue<String>(reader); break;
-				default: base.DeserializeProperty(property, reader); break;
+				default: base.DeserializeProperty(jsonPropertyName, reader); break;
 			}
 		}
 	
@@ -123,12 +123,12 @@ namespace SharpGLTF.Schema2
 		}
 	
 		/// <inheritdoc />
-		protected override void DeserializeProperty(string property, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
-			switch (property)
+			switch (jsonPropertyName)
 			{
 				case "lights": DeserializePropertyList<PunctualLight>(reader, _lights); break;
-				default: base.DeserializeProperty(property, reader); break;
+				default: base.DeserializeProperty(jsonPropertyName, reader); break;
 			}
 		}
 	

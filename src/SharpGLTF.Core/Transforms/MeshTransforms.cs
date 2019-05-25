@@ -52,7 +52,6 @@ namespace SharpGLTF.Transforms
                 _InvWeight = 0;
                 for (int i = 0; i < morphWeights.Count; ++i) _MorphWeights[i] = _MorphWeights[i] / sum;
             }
-
         }
 
         #endregion

@@ -16,7 +16,6 @@ namespace SharpGLTF.IO
     using VERTEX = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
     using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
     using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
-    
 
     /// <summary>
     /// Tiny wavefront object writer

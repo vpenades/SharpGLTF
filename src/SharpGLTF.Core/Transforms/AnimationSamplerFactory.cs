@@ -99,7 +99,7 @@ namespace SharpGLTF.Transforms
 
                 for (int i = 0; i < result.Length; ++i)
                 {
-                    result[i] = sample.Item1[i] * (1 - sample.Item3) + sample.Item2[i] * sample.Item3;
+                    result[i] = (sample.Item1[i] * (1 - sample.Item3)) + (sample.Item2[i] * sample.Item3);
                 }
 
                 return result;

@@ -318,7 +318,7 @@ namespace SharpGLTF.IO
             return reader.Value;
         }
 
-        protected abstract void DeserializeProperty(string property, JsonReader reader);
+        protected abstract void DeserializeProperty(string jsonPropertyName, JsonReader reader);
 
         protected static T DeserializePropertyValue<T>(JsonReader reader)
         {

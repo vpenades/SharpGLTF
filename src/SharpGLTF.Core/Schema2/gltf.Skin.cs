@@ -244,7 +244,7 @@ namespace SharpGLTF.Schema2
                 {
                     var ibxform = ibxAccessor.AsMatrix4x4Array()[i];
                     try { ibxform.Inverse(); }
-                    catch { result.AddError(this, $"Joint {i} has invalid bind matrix"); }
+                    catch (ArgumentException) { result.AddError(this, $"Joint {i} has invalid bind matrix"); }
                 }
             }
 
