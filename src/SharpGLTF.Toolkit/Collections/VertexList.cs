@@ -5,13 +5,20 @@ using System.Text;
 
 namespace SharpGLTF.Collections
 {
+    /// <summary>
+    /// Represent an ordered collection of <typeparamref name="T"/> vertices, where every vertex is unique.
+    /// </summary>
+    /// <typeparam name="T">A Vertex type</typeparam>
     class VertexList<T> : IReadOnlyList<T>
         where T : struct
     {
         #region data
 
         private readonly List<T> _Vertices = new List<T>();
-        private readonly Dictionary<T, int> _VertexCache = new Dictionary<T, int>();
+
+        private readonly T[] _VertexProbe = new T[1];
+
+        private readonly Dictionary<VertexKey, int> _VertexCache = new Dictionary<VertexKey, int>();
 
         #endregion
 
@@ -27,25 +34,78 @@ namespace SharpGLTF.Collections
 
         public int Use(T v)
         {
-            if (_VertexCache.TryGetValue(v, out int index)) return index;
+            _VertexProbe[0] = v;
+
+            if (_VertexCache.TryGetValue(new VertexKey(_VertexProbe, 0), out int index))
+            {
+                System.Diagnostics.Debug.Assert(Object.Equals(v, _Vertices[index]), "Vertex equality failed");
+                return index;
+            }
 
             index = _Vertices.Count;
 
             _Vertices.Add(v);
-            _VertexCache[v] = index;
+
+            var key = new VertexKey(_Vertices, index);
+
+            _VertexCache[key] = index;
 
             return index;
         }
 
-        internal void TransformVertices(Func<T, T> transformFunc)
+        public void TransformVertices(Func<T, T> transformFunc)
         {
             _VertexCache.Clear();
 
             for (int i = 0; i < _Vertices.Count; ++i)
             {
-                var v = transformFunc(_Vertices[i]);
-                _Vertices[i] = v;
-                _VertexCache[v] = i;
+                _Vertices[i] = transformFunc(_Vertices[i]);
+
+                var key = new VertexKey(_Vertices, i);
+
+                _VertexCache[key] = i;
+            }
+        }
+
+        #endregion
+
+        #region types
+
+        [System.Diagnostics.DebuggerDisplay("{_Index} {GetHashCode()}")]
+        private struct VertexKey : IEquatable<VertexKey>
+        {
+            public VertexKey(IReadOnlyList<T> src, int idx)
+            {
+                _Source = src;
+                _Index = idx;
+            }
+
+            private readonly IReadOnlyList<T> _Source;
+            private readonly int _Index;
+
+            public T GetValue() { return _Source[_Index]; }
+
+            public override int GetHashCode()
+            {
+                return GetValue().GetHashCode();
+            }
+
+            public static bool AreEqual(VertexKey x, VertexKey y)
+            {
+                var xx = x.GetValue();
+                var yy = y.GetValue();
+
+                return object.Equals(xx, yy);
+            }
+
+            public override bool Equals(object obj)
+            {
+                return AreEqual(this, (VertexKey)obj);
+            }
+
+            public bool Equals(VertexKey other)
+            {
+                return AreEqual(this, other);
             }
         }
 
