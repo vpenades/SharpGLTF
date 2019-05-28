@@ -79,6 +79,21 @@ namespace SharpGLTF
             TestContext.AddTestAttachment(fileName);
         }
 
+        public static void AttachToCurrentTest<TvG, TvM, TvS>(this Geometry.MeshBuilder<TvG, TvM, TvS> mesh, string fileName)
+            where TvG : struct, Geometry.VertexTypes.IVertexGeometry
+            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
+            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        {
+            var gl2model = Schema2.ModelRoot.CreateModel();
+
+            var gl2mesh = Schema2.Schema2Toolkit.CreateMeshes(gl2model, mesh).First();
+
+            var node = gl2model.UseScene(0).CreateNode();
+            node.Mesh = gl2mesh;
+
+            gl2model.AttachToCurrentTest(fileName);
+        }
+
         public static void AttachText(this TestContext context, string fileName, string[] lines)
         {
             fileName = context.GetAttachmentPath(fileName, true);

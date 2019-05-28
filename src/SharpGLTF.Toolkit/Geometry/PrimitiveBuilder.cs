@@ -224,16 +224,23 @@ namespace SharpGLTF.Geometry
         /// </remarks>
         public void AddPolygon(params VertexBuilder<TvG, TvM, TvS>[] points)
         {
+            Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
+
+            Guard.NotNull(points, nameof(points));
+            Guard.MustBeGreaterThanOrEqualTo(points.Length, 3, nameof(points));
+
+            if (points.Length == 3)
+            {
+                AddTriangle(points[0], points[1], points[2]);
+                return;
+            }
+
             Span<Vector3> vertices = stackalloc Vector3[points.Length];
 
             for (int i = 0; i < vertices.Length; ++i)
             {
                 vertices[i] = points[i].Position;
             }
-
-            // TODO: remove duplicate vertices
-
-            if (vertices.Length < 3) return;
 
             Span<int> indices = stackalloc int[(vertices.Length - 2) * 3];
 

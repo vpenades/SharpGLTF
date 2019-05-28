@@ -17,7 +17,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         void SetNormal(Vector3 normal);
         void SetTangent(Vector4 tangent);
 
-        void Transform(Matrix4x4 xform);
+        void ApplyTransform(Matrix4x4 xform);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void Transform(Matrix4x4 xform)
+        public void ApplyTransform(Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
         }
@@ -136,7 +136,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void Transform(Matrix4x4 xform)
+        public void ApplyTransform(Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
@@ -202,7 +202,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
 
-        public void Transform(Matrix4x4 xform)
+        public void ApplyTransform(Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));

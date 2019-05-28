@@ -69,7 +69,7 @@ namespace SharpGLTF.Geometry
         private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
 
         #pragma warning disable SA1401 // Fields should be private
-        internal IPolygonTriangulator _Triangulator = NaivePolygonTriangulation.Default;
+        internal IPolygonTriangulator _Triangulator = BasicEarClippingTriangulation.Default;
         #pragma warning restore SA1401 // Fields should be private
 
         #endregion
@@ -81,7 +81,7 @@ namespace SharpGLTF.Geometry
         public IPolygonTriangulator Triangulator
         {
             get => _Triangulator;
-            set => _Triangulator = value == null ? NaivePolygonTriangulation.Default : _Triangulator;
+            set => _Triangulator = value == null ? BasicEarClippingTriangulation.Default : value;
         }
 
         public string Name { get; set; }
