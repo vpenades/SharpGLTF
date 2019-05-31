@@ -5,6 +5,71 @@ using System.Text;
 
 namespace SharpGLTF.Geometry
 {
+
+    static class PolygonToolkit
+    {
+        /// <summary>
+        /// Removes the invalid points of a polygon.
+        /// </summary>
+        /// <param name="inVertices">A list of <see cref="Vector3"/> position points.</param>
+        /// <param name="indices">A list of vertex indices pointing to <paramref name="inVertices"/>.</param>
+        public static void SanitizeIndices(this ReadOnlySpan<Vector3> inVertices, ref Span<int> indices)
+        {
+            Guard.IsFalse(inVertices.IsEmpty, nameof(inVertices));
+            Guard.IsFalse(indices.IsEmpty, nameof(indices));
+
+            int a = 0;
+            while (indices.Length > 1 && a < indices.Length)
+            {
+                // first vertex
+                var aa = inVertices[indices[a]];
+
+                // remove invalid values
+                if (!aa._IsReal())
+                {
+                    RemoveElementAt(ref indices, a);
+                    continue;
+                }
+
+                // second vertex
+                var b = a + 1; if (b >= inVertices.Length) b -= inVertices.Length;
+                var bb = inVertices[indices[b]];
+
+                // remove collapsed points (would produce degenerated triangles)
+                if (aa == bb)
+                {
+                    RemoveElementAt(ref indices, a);
+                    continue;
+                }
+
+                // third vertex
+                var c = b + 1; if (c >= inVertices.Length) c -= inVertices.Length;
+                var cc = inVertices[indices[c]];
+
+                // remove collapsed segments (would produce degenerated triangles)
+                if (aa == cc)
+                {
+                    RemoveElementAt(ref indices, b);
+                    continue;
+                }
+
+                a++;
+            }
+        }
+
+        internal static void RemoveElementAt<T>(ref Span<T> collection, int index)
+        {
+            // tri.Item2 is the index of the ear's triangle.
+            // remove the ear from the array:
+            for (int i = index + 1; i < collection.Length; ++i)
+            {
+                collection[i - 1] = collection[i];
+            }
+
+            collection = collection.Slice(0, collection.Length - 1);
+        }
+    }
+
     public interface IPolygonTriangulator
     {
         void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices);
@@ -77,12 +142,8 @@ namespace SharpGLTF.Geometry
 
                 // tri.Item2 is the index of the ear's triangle.
                 // remove the ear from the array:
-                for (int i = tri.Item2 + 1; i < inIndices.Length; ++i)
-                {
-                    inIndices[i - 1] = inIndices[i];
-                }
 
-                inIndices = inIndices.Slice(0, inIndices.Length - 1);
+                PolygonToolkit.RemoveElementAt(ref inIndices, tri.Item2);
             }
 
             // add last triangle.
