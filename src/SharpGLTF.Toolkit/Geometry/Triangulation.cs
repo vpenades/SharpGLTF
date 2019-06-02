@@ -9,6 +9,43 @@ namespace SharpGLTF.Geometry
     static class PolygonToolkit
     {
         /// <summary>
+        /// Checks if all the indices are valid
+        /// </summary>
+        /// <param name="inVertices">A list of <see cref="Vector3"/> position points.</param>
+        /// <param name="indices">A list of vertex indices pointing to <paramref name="inVertices"/>.</param>
+        public static void CheckIndices(this ReadOnlySpan<Vector3> inVertices, ReadOnlySpan<int> indices)
+        {
+            Guard.IsFalse(inVertices.IsEmpty, nameof(inVertices));
+            Guard.IsFalse(indices.IsEmpty, nameof(indices));
+
+            int a = 0;
+            while (indices.Length > 1 && a < indices.Length)
+            {
+                // first vertex
+                var aa = inVertices[indices[a]];
+
+                // check invalid values
+                Guard.IsTrue(aa._IsReal(), nameof(inVertices));
+
+                // second vertex
+                var b = a + 1; if (b >= indices.Length) b -= inVertices.Length;
+                var bb = inVertices[indices[b]];
+
+                // check collapsed points (would produce degenerated triangles)
+                Guard.IsFalse(aa == bb, nameof(indices));
+
+                // third vertex
+                var c = b + 1; if (c >= indices.Length) c -= inVertices.Length;
+                var cc = inVertices[indices[c]];
+
+                // check collapsed segments (would produce degenerated triangles)
+                Guard.IsFalse(aa == cc, nameof(indices));
+
+                a++;
+            }
+        }
+
+        /// <summary>
         /// Removes the invalid points of a polygon.
         /// </summary>
         /// <param name="inVertices">A list of <see cref="Vector3"/> position points.</param>
@@ -32,7 +69,7 @@ namespace SharpGLTF.Geometry
                 }
 
                 // second vertex
-                var b = a + 1; if (b >= inVertices.Length) b -= inVertices.Length;
+                var b = a + 1; if (b >= indices.Length) b -= indices.Length;
                 var bb = inVertices[indices[b]];
 
                 // remove collapsed points (would produce degenerated triangles)
@@ -43,7 +80,7 @@ namespace SharpGLTF.Geometry
                 }
 
                 // third vertex
-                var c = b + 1; if (c >= inVertices.Length) c -= inVertices.Length;
+                var c = b + 1; if (c >= indices.Length) c -= indices.Length;
                 var cc = inVertices[indices[c]];
 
                 // remove collapsed segments (would produce degenerated triangles)
@@ -72,7 +109,7 @@ namespace SharpGLTF.Geometry
 
     public interface IPolygonTriangulator
     {
-        void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices);
+        void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices, ReadOnlySpan<int> inIndices);
     }
 
     /// <summary>
@@ -88,15 +125,19 @@ namespace SharpGLTF.Geometry
 
         public static IPolygonTriangulator Default => _Instance;
 
-        public void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices)
+        public void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices, ReadOnlySpan<int> inIndices)
         {
             int idx = 0;
 
-            for (int i = 2; i < inVertices.Length; ++i)
+            for (int i = 2; i < inIndices.Length; ++i)
             {
-                outIndices[idx++] = 0;
-                outIndices[idx++] = i - 1;
-                outIndices[idx++] = i;
+                var a = inIndices[idx++];
+                var b = inIndices[idx++];
+                var c = inIndices[idx++];
+
+                outIndices[a] = 0;
+                outIndices[b] = i - 1;
+                outIndices[c] = i;
             }
         }
     }
@@ -111,13 +152,13 @@ namespace SharpGLTF.Geometry
 
         public static IPolygonTriangulator Default => _Instance;
 
-        public void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices)
+        public void Triangulate(Span<int> outIndices, ReadOnlySpan<Vector3> inVertices, ReadOnlySpan<int> inIndices)
         {
             System.Diagnostics.Debug.Assert(outIndices.Length == (inVertices.Length - 2) * 3, $"{nameof(outIndices)} has invalid length");
 
             // setup source Indices
-            Span<int> inIndices = stackalloc int[inVertices.Length];
-            for (int i = 0; i < inIndices.Length; ++i) inIndices[i] = i;
+            Span<int> tmpIndices = stackalloc int[inIndices.Length];
+            inIndices.CopyTo(tmpIndices);
 
             // define master direction
             var masterDirection = Vector3.Zero;
@@ -131,30 +172,30 @@ namespace SharpGLTF.Geometry
             int triIdx = 0;
 
             // begin clipping ears
-            while (inIndices.Length > 3)
+            while (tmpIndices.Length > 3)
             {
-                var tri = _FindEarTriangle(inIndices, inVertices, masterDirection);
+                var tri = _FindEarTriangle(inVertices, tmpIndices, masterDirection);
                 if (tri.Item1 < 0) throw new ArgumentException("failed to triangulate", nameof(inVertices));
 
-                outIndices[triIdx++] = inIndices[tri.Item1];
-                outIndices[triIdx++] = inIndices[tri.Item2];
-                outIndices[triIdx++] = inIndices[tri.Item3];
+                outIndices[triIdx++] = tmpIndices[tri.Item1];
+                outIndices[triIdx++] = tmpIndices[tri.Item2];
+                outIndices[triIdx++] = tmpIndices[tri.Item3];
 
                 // tri.Item2 is the index of the ear's triangle.
                 // remove the ear from the array:
 
-                PolygonToolkit.RemoveElementAt(ref inIndices, tri.Item2);
+                PolygonToolkit.RemoveElementAt(ref tmpIndices, tri.Item2);
             }
 
             // add last triangle.
-            outIndices[triIdx++] = inIndices[0];
-            outIndices[triIdx++] = inIndices[1];
-            outIndices[triIdx++] = inIndices[2];
+            outIndices[triIdx++] = tmpIndices[0];
+            outIndices[triIdx++] = tmpIndices[1];
+            outIndices[triIdx++] = tmpIndices[2];
 
             System.Diagnostics.Debug.Assert(outIndices.Length == triIdx, $"{nameof(outIndices)} has invalid length");
         }
 
-        private static (int, int, int) _FindEarTriangle(ReadOnlySpan<int> inIndices, ReadOnlySpan<Vector3> inVertices, Vector3 masterDirection)
+        private static (int, int, int) _FindEarTriangle(ReadOnlySpan<Vector3> inVertices, ReadOnlySpan<int> inIndices, Vector3 masterDirection)
         {
             for (int i = 0; i < inIndices.Length; ++i)
             {

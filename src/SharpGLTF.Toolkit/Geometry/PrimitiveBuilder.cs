@@ -229,28 +229,36 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(points, nameof(points));
             Guard.MustBeGreaterThanOrEqualTo(points.Length, 3, nameof(points));
 
-            if (points.Length == 3)
-            {
-                AddTriangle(points[0], points[1], points[2]);
-                return;
-            }
-
+            // prepare vertices and indices
             Span<Vector3> vertices = stackalloc Vector3[points.Length];
+            Span<int> inIndices = stackalloc int[points.Length];
 
             for (int i = 0; i < vertices.Length; ++i)
             {
                 vertices[i] = points[i].Position;
+                inIndices[i] = i;
             }
 
-            Span<int> indices = stackalloc int[(vertices.Length - 2) * 3];
+            if (_Scrict) PolygonToolkit.CheckIndices(vertices, inIndices);
+            else PolygonToolkit.SanitizeIndices(vertices, ref inIndices);
 
-            _Mesh._Triangulator.Triangulate(indices, vertices);
-
-            for (int i = 0; i < indices.Length; i += 3)
+            if (inIndices.Length < 3) return;
+            if (inIndices.Length == 3)
             {
-                var a = points[indices[i + 0]];
-                var b = points[indices[i + 1]];
-                var c = points[indices[i + 2]];
+                AddTriangle(points[inIndices[0]], points[inIndices[1]], points[inIndices[2]]);
+                return;
+            }
+
+            // tessellate
+            Span<int> outIndices = stackalloc int[(vertices.Length - 2) * 3];
+
+            _Mesh._Triangulator.Triangulate(outIndices, vertices, inIndices);
+
+            for (int i = 0; i < outIndices.Length; i += 3)
+            {
+                var a = points[outIndices[i + 0]];
+                var b = points[outIndices[i + 1]];
+                var c = points[outIndices[i + 2]];
 
                 AddTriangle(a, b, c);
             }

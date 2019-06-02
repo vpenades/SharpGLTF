@@ -13,39 +13,91 @@ namespace SharpGLTF.Geometry
     [Category("Model Authoring")]
     public class TriangulationTests
     {
-        private static readonly Vector3[] _BowTiePolygon = new[]
+        private static readonly Vector2[] _BowTiePolygon = new[]
         {
-            new Vector3(-10, -10, 0),
-            new Vector3(0, -5, 0),
-            new Vector3(10, -10, 0),
-            new Vector3(10, 10, 0),
-            new Vector3(0, 5, 0),
-            new Vector3(-10, 10, 0)
+            new Vector2(-10, -10),
+            new Vector2(0, -5),
+            new Vector2(10, -10),
+            new Vector2(10, 10),
+            new Vector2(0, 5),
+            new Vector2(-10, 10)
         };
 
-        private static readonly Vector3[] _BridgePolygon = new[]
+        private static readonly Vector2[] _BridgePolygon = new[]
         {            
-            new Vector3(-10, 2, 0),
-            new Vector3(-10, -10, 0),
-            new Vector3(-8, -10, 0),
-            new Vector3(-8, -5, 0),
-            new Vector3(-4, -1, 0),
-            new Vector3(0, 0, 0),
-            new Vector3(+4, -1, 0),
-            new Vector3(+8, -5, 0),
-            new Vector3(+8, -10, 0),
-            new Vector3(+10, -10, 0),
-            new Vector3(+10, 2, 0),
+            new Vector2(-10, 2),
+            new Vector2(-10, -10),
+            new Vector2(-8, -10),
+            new Vector2(-8, -5),
+            new Vector2(-4, -1),
+            new Vector2(0, 0),
+            new Vector2(+4, -1),
+            new Vector2(+8, -5),
+            new Vector2(+8, -10),
+            new Vector2(+10, -10),
+            new Vector2(+10, 2),
         };
 
-        private static readonly Vector3[] _CoLinearBaseTriangle = new[]
+        private static readonly Vector2[] _CoLinearBaseTriangle = new[]
         {
-            new Vector3(0,10,0),
-            new Vector3(-10,-10,0),
-            new Vector3(-5,-10,0),
-            new Vector3(0,-10,0),
-            new Vector3(5,-10,0),
-            new Vector3(10,-10,0),            
+            new Vector2(0,10),
+            new Vector2(-10,-10),
+            new Vector2(-5,-10),
+            new Vector2(0,-10),
+            new Vector2(5,-10),
+            new Vector2(10,-10),            
+        };
+
+        // polygon with a hole, connected to the outside with a "vertex bridge"
+        private static readonly Vector2[] _PoygonWithHole = new[]
+        {
+            new Vector2(0,4),
+            new Vector2(4,0),            
+
+            // inner "hole"            
+            new Vector2(2,0),
+            new Vector2(0,2),
+            new Vector2(-2,0),
+            new Vector2(0,-2),
+            new Vector2(2,0),
+
+            new Vector2(4,0),
+            new Vector2(0,-4),
+            new Vector2(-4,0),
+        };
+
+        // this is a pretty messy polygon with lots of degenerated triangles, and holes
+        private static readonly Vector2[] _SahaquielPolygon = new[]
+        {
+            new Vector2(0,0),
+
+            new Vector2(1,0),
+            new Vector2(2,1),
+            new Vector2(3,0),
+
+            new Vector2(2.5f,0.0f),
+            new Vector2(2.0f,0.5f),
+            new Vector2(1.5f,0.0f),
+            new Vector2(2.0f,-0.5f),
+            new Vector2(2.5f,0.0f),
+
+            new Vector2(2,-1),
+            new Vector2(1, 0),
+
+            new Vector2(0,0),
+            
+            new Vector2(-1,0),
+            new Vector2(-2,-1),
+            new Vector2(-3,0),
+
+            new Vector2(-2.5f,0.0f),
+            new Vector2(-2.0f,-0.5f),
+            new Vector2(-1.5f,0.0f),
+            new Vector2(-2.0f,0.5f),
+            new Vector2(-2.5f,0.0f),
+
+            new Vector2(-2,1),
+            new Vector2(-1, 0),
         };
 
         [Test]
@@ -57,12 +109,16 @@ namespace SharpGLTF.Geometry
             var mesh = VERTEX.CreateCompatibleMesh();
             mesh.Triangulator = BasicEarClippingTriangulation.Default;
 
-            for(int i=0; i < 10; ++i)
+            var polygon = _PoygonWithHole
+                .Select(item => new Vector3(item, 0))
+                .ToArray();
+
+            for (int i=0; i < 10; ++i)
             {
                 var xform = Matrix4x4.CreateFromYawPitchRoll(i, i *2, i);
                 xform = Matrix4x4.CreateTranslation(0, 0, 20) * xform;
 
-                var vertices = _BridgePolygon
+                var vertices = polygon
                     .Select(item => new VERTEX(Vector3.Transform(item,xform)) )
                     .ToArray();
 
