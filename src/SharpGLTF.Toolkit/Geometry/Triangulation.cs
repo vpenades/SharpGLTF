@@ -156,10 +156,6 @@ namespace SharpGLTF.Geometry
         {
             System.Diagnostics.Debug.Assert(outIndices.Length == (inVertices.Length - 2) * 3, $"{nameof(outIndices)} has invalid length");
 
-            // setup source Indices
-            Span<int> tmpIndices = stackalloc int[inIndices.Length];
-            inIndices.CopyTo(tmpIndices);
-
             // define master direction
             var masterDirection = Vector3.Zero;
             for (int i = 2; i < inVertices.Length; ++i)
@@ -169,11 +165,21 @@ namespace SharpGLTF.Geometry
                 masterDirection += Vector3.Cross(ab, ac);
             }
 
+            // setup source Indices
+            Span<int> tmpIndices = stackalloc int[inIndices.Length];
+            inIndices.CopyTo(tmpIndices);
+
             int triIdx = 0;
 
             // begin clipping ears
-            while (tmpIndices.Length > 3)
+            while (true)
             {
+                if (tmpIndices.Length < 3) break;
+
+                PolygonToolkit.SanitizeIndices(inVertices, ref tmpIndices);
+
+                if (tmpIndices.Length < 3) break;
+
                 var tri = _FindEarTriangle(inVertices, tmpIndices, masterDirection);
                 if (tri.Item1 < 0) throw new ArgumentException("failed to triangulate", nameof(inVertices));
 
@@ -187,10 +193,13 @@ namespace SharpGLTF.Geometry
                 PolygonToolkit.RemoveElementAt(ref tmpIndices, tri.Item2);
             }
 
-            // add last triangle.
-            outIndices[triIdx++] = tmpIndices[0];
-            outIndices[triIdx++] = tmpIndices[1];
-            outIndices[triIdx++] = tmpIndices[2];
+            if (tmpIndices.Length >= 3)
+            {
+                // add last triangle.
+                outIndices[triIdx++] = tmpIndices[0];
+                outIndices[triIdx++] = tmpIndices[1];
+                outIndices[triIdx++] = tmpIndices[2];
+            }
 
             System.Diagnostics.Debug.Assert(outIndices.Length == triIdx, $"{nameof(outIndices)} has invalid length");
         }
@@ -209,9 +218,11 @@ namespace SharpGLTF.Geometry
                 var bb = inIndices[b];
                 var cc = inIndices[c];
 
-                var ab = inVertices[bb] - inVertices[aa];
-                var ac = inVertices[cc] - inVertices[aa];
-                var dir = Vector3.Cross(ab, ac);
+                var aaa = inVertices[aa];
+                var bbb = inVertices[bb];
+                var ccc = inVertices[cc];
+
+                var dir = Vector3.Cross(bbb - aaa, ccc - aaa);
 
                 // determine the winding of the ear, and skip it if it's reversed.
                 if (Vector3.Dot(masterDirection, dir) <= 0) continue;

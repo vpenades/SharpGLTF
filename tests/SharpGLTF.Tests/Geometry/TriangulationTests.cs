@@ -66,6 +66,23 @@ namespace SharpGLTF.Geometry
             new Vector2(-4,0),
         };
 
+        
+        private static readonly Vector2[] _SnakePolygon = new[]
+        {
+            new Vector2(0,1),
+            new Vector2(2,3),
+            new Vector2(4,1),
+
+            new Vector2(4,0),
+            new Vector2(2,2),
+            new Vector2(0,0),
+            new Vector2(-2,2),
+            new Vector2(-4,0),
+
+            new Vector2(-4,1),
+            new Vector2(-2,3),
+        };
+
         // this is a pretty messy polygon with lots of degenerated triangles, and holes
         private static readonly Vector2[] _SahaquielPolygon = new[]
         {
@@ -109,7 +126,7 @@ namespace SharpGLTF.Geometry
             var mesh = VERTEX.CreateCompatibleMesh();
             mesh.Triangulator = BasicEarClippingTriangulation.Default;
 
-            var polygon = _PoygonWithHole
+            var polygon = _SnakePolygon
                 .Select(item => new Vector3(item, 0))
                 .ToArray();
 
