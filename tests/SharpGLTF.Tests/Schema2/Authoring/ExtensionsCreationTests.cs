@@ -61,7 +61,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannels.SpecularGlossiness, System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
-            mesh.UsePrimitive(material).AddPolygon
+            mesh.UsePrimitive(material).AddConvexPolygon
                 ((new Vector3(-10, 10, 0), new Vector2(1, 0))
                 , (new Vector3(10, 10, 0), new Vector2(0, 0))
                 , (new Vector3(10, -10, 0), new Vector2(0, 1))
@@ -99,7 +99,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             mesh
                 .UsePrimitive(material)
-                .AddPolygon
+                .AddConvexPolygon
                 ((new Vector3(-10, 10, 0), new Vector2(1, 0))
                 , (new Vector3(10, 10, 0), new Vector2(0, 0))
                 , (new Vector3(10, -10, 0), new Vector2(0, 1))
@@ -139,7 +139,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             mesh
                 .UsePrimitive(material)
-                .AddPolygon
+                .AddConvexPolygon
                 ((new Vector3(-10, 10, 0), new Vector2(1, 0))
                 , (new Vector3(10, 10, 0), new Vector2(0, 0))
                 , (new Vector3(10, -10, 0), new Vector2(0, 1))

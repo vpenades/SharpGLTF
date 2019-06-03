@@ -130,14 +130,14 @@ namespace InfiniteSkinnedTentacle
 
                 if (i == 0)
                 {
-                    prim.AddPolygon(b0, b1, b2, b3);
+                    prim.AddConvexPolygon(b0, b1, b2, b3);
                 }
                 else
                 {
-                    prim.AddPolygon(b0, b1, a1, a0);
-                    prim.AddPolygon(b1, b2, a2, a1);
-                    prim.AddPolygon(b2, b3, a3, a2);
-                    prim.AddPolygon(b3, b0, a0, a3);
+                    prim.AddConvexPolygon(b0, b1, a1, a0);
+                    prim.AddConvexPolygon(b1, b2, a2, a1);
+                    prim.AddConvexPolygon(b2, b3, a3, a2);
+                    prim.AddConvexPolygon(b3, b0, a0, a3);
                 }
 
                 a0 = b0;
@@ -146,9 +146,27 @@ namespace InfiniteSkinnedTentacle
                 a3 = b3;
             }
 
-            prim.AddPolygon(a3, a2, a1, a0);
+            prim.AddConvexPolygon(a3, a2, a1, a0);
 
             return mesh;
+        }
+    }
+
+    static class ToolkitUtils
+    {
+        public static void AddConvexPolygon<TMaterial, TvG, TvM, TvS>(this PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, params VertexBuilder<TvG, TvM, TvS>[] vertices)
+        where TvG : struct, IVertexGeometry
+        where TvM : struct, IVertexMaterial
+        where TvS : struct, IVertexSkinning
+        {
+            for (int i = 2; i < vertices.Length; ++i)
+            {
+                var a = vertices[0];
+                var b = vertices[i - 1];
+                var c = vertices[i];
+
+                primitive.AddTriangle(a, b, c);
+            }
         }
     }
 }

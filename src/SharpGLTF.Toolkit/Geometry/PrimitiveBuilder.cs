@@ -214,56 +214,6 @@ namespace SharpGLTF.Geometry
             _Indices.Add(cc);
         }
 
-        /// <summary>
-        /// Adds a polygon as a decomposed collection of triangles.
-        /// </summary>
-        /// <param name="points">The corners of the polygon.</param>
-        /// <remarks>
-        /// Polygon triangulation is performed by a <see cref="IPolygonTriangulator"/>
-        /// instance defined in <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}.Triangulator"/>
-        /// </remarks>
-        public void AddPolygon(params VertexBuilder<TvG, TvM, TvS>[] points)
-        {
-            Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
-
-            Guard.NotNull(points, nameof(points));
-            Guard.MustBeGreaterThanOrEqualTo(points.Length, 3, nameof(points));
-
-            // prepare vertices and indices
-            Span<Vector3> vertices = stackalloc Vector3[points.Length];
-            Span<int> inIndices = stackalloc int[points.Length];
-
-            for (int i = 0; i < vertices.Length; ++i)
-            {
-                vertices[i] = points[i].Position;
-                inIndices[i] = i;
-            }
-
-            if (_Scrict) PolygonToolkit.CheckIndices(vertices, inIndices);
-            else PolygonToolkit.SanitizeIndices(vertices, ref inIndices);
-
-            if (inIndices.Length < 3) return;
-            if (inIndices.Length == 3)
-            {
-                AddTriangle(points[inIndices[0]], points[inIndices[1]], points[inIndices[2]]);
-                return;
-            }
-
-            // tessellate
-            Span<int> outIndices = stackalloc int[(vertices.Length - 2) * 3];
-
-            _Mesh._Triangulator.Triangulate(outIndices, vertices, inIndices);
-
-            for (int i = 0; i < outIndices.Length; i += 3)
-            {
-                var a = points[outIndices[i + 0]];
-                var b = points[outIndices[i + 1]];
-                var c = points[outIndices[i + 2]];
-
-                AddTriangle(a, b, c);
-            }
-        }
-
         internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             if (primitive == null) throw new ArgumentNullException(nameof(primitive));

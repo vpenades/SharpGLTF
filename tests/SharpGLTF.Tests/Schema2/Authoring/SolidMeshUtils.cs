@@ -35,7 +35,7 @@ namespace SharpGLTF.Schema2.Authoring
             var n = Vector3.Normalize(Vector3.TransformNormal(origin, xform));
 
             meshBuilder.UsePrimitive(material)
-                .AddPolygon
+                .AddConvexPolygon
                 (
                 new VPOSNRM(p1, n),
                 new VPOSNRM(p2, n),
@@ -153,7 +153,7 @@ namespace SharpGLTF.Schema2.Authoring
 
                     terrainMesh
                         .UsePrimitive(material)
-                        .AddPolygon
+                        .AddConvexPolygon
                         (
                             (a, at),
                             (b, bt),
