@@ -8,6 +8,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     public interface IVertexMaterial
     {
         int MaxColors { get; }
+
+        // TODO: rename to MaxTexCoords
         int MaxTextures { get; }
 
         void Validate();
@@ -22,7 +24,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Color}")]
+    [System.Diagnostics.DebuggerDisplay("𝐂:{Color}")]
     public struct VertexColor1 : IVertexMaterial
     {
         #region constructors
@@ -84,7 +86,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Texture Coordinate.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{TexCoord}")]
+    [System.Diagnostics.DebuggerDisplay("𝐔𝐕:{TexCoord}")]
     public struct VertexTexture1 : IVertexMaterial
     {
         #region constructors
@@ -145,7 +147,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Color} {TexCoord}")]
+    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexColor1Texture1 : IVertexMaterial
     {
         #region constructors
@@ -210,7 +212,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Color} {TexCoord0} {TexCoord1}")]
+    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕𝟎:{TexCoord0} 𝐔𝐕𝟏:{TexCoord1}")]
     public struct VertexColor1Texture2 : IVertexMaterial
     {
         #region constructors
@@ -289,7 +291,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and two Texture Coordinates.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Color0} {Color1} {TexCoord0} {TexCoord1}")]
+    [System.Diagnostics.DebuggerDisplay("𝐂𝟎:{Color0} 𝐂𝟏:{Color1} 𝐔𝐕𝟎:{TexCoord0} 𝐔𝐕𝟏:{TexCoord1}")]
     public struct VertexColor2Texture2 : IVertexMaterial
     {
         #region constructors

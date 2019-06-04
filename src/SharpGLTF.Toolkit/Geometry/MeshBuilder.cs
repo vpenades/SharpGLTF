@@ -60,6 +60,8 @@ namespace SharpGLTF.Geometry
         public MeshBuilder(string name = null)
         {
             this.Name = name;
+
+            _Preprocessor = VertexBuilder<TvG, TvM, TvS>.SanitizerPreprocessor;
         }
 
         #endregion
@@ -67,6 +69,8 @@ namespace SharpGLTF.Geometry
         #region data
 
         private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
+
+        internal VertexBuilder<TvG, TvM, TvS>.Preprocessor _Preprocessor;
 
         #endregion
 

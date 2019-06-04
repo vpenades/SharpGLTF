@@ -145,13 +145,10 @@ namespace SharpGLTF.Geometry
         /// <returns>The index of the vertex.</returns>
         public int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
         {
-            if (_Scrict)
+            if (!_Mesh._Preprocessor.PreprocessVertex(ref vertex))
             {
-                vertex.Validate();
-            }
-            else
-            {
-                if (!vertex.Geometry.SanitizeVertex(out vertex.Geometry)) return -1;
+                Guard.IsFalse(_Scrict, nameof(vertex));
+                return -1;
             }
 
             return _Vertices.Use(vertex);

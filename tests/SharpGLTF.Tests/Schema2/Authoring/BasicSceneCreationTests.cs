@@ -166,10 +166,10 @@ namespace SharpGLTF.Schema2.Authoring
 
             var vertices = new[]
             {
-                new VPOSNRM(-10,  10, 0, -10,  10, 15),
-                new VPOSNRM( 10,  10, 0,  10,  10, 15),
-                new VPOSNRM( 10, -10, 0,  10, -10, 15),
-                new VPOSNRM(-10, -10, 0, -10, -10, 15)
+                new VPOSNRM(-10,  10, 0, 0, 0, 1),
+                new VPOSNRM( 10,  10, 0, 0, 0, 1),
+                new VPOSNRM( 10, -10, 0, 0, 0, 1),
+                new VPOSNRM(-10, -10, 0, 0, 0, 1)
             };
 
             var model = ModelRoot.CreateModel();

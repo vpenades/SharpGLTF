@@ -33,9 +33,9 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints8x8"/>,
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
-    /// </typeparam>
-    [System.Diagnostics.DebuggerDisplay("Vertex {Geometry} {Material} {Skinning}")]
-    public struct VertexBuilder<TvG, TvM, TvS>
+    /// </typeparam>    
+    [System.Diagnostics.DebuggerDisplay("Vertex 𝐏:{Position} {_GetDebugWarnings()}")]
+    public partial struct VertexBuilder<TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -114,6 +114,7 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector3 Position
         {
             get => Geometry.GetPosition();
@@ -151,6 +152,41 @@ namespace SharpGLTF.Geometry
         public static MeshBuilder<TvG, TvM, TvS> CreateCompatibleMesh(string name = null)
         {
             return new MeshBuilder<TvG, TvM, TvS>(name);
+        }
+
+        private String _GetDebugWarnings()
+        {
+            var sb = new StringBuilder();
+
+            if (Geometry.TryGetNormal(out Vector3 n))
+            {
+                if (!n.IsValidNormal()) sb.Append($" ❌𝚴:{n}");
+            }
+
+            if (Geometry.TryGetTangent(out Vector4 t))
+            {
+                if (!t.IsValidTangent()) sb.Append($" ❌𝚻:{t}");
+            }
+
+            for (int i = 0; i < Material.MaxColors; ++i)
+            {
+                var c = Material.GetColor(i);
+                if (!c._IsReal() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
+            }
+
+            for (int i = 0; i < Material.MaxTextures; ++i)
+            {
+                var uv = Material.GetTexCoord(i);
+                if (!uv._IsReal()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
+            }
+
+            for (int i = 0; i < Skinning.MaxBindings; ++i)
+            {
+                var jw = Skinning.GetJointBinding(i);
+                if (!jw.Weight._IsReal() || jw.Weight < 0 || jw.Joint < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Joint}:{jw.Weight}");
+            }
+
+            return sb.ToString();
         }
 
         #endregion
