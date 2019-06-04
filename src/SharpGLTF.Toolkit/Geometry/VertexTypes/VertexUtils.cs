@@ -11,6 +11,44 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
     {
+        public static bool SanitizeVertex<TvG>(this TvG inVertex, out TvG outVertex)
+            where TvG : struct, IVertexGeometry
+        {
+            outVertex = inVertex;
+
+            var p = inVertex.GetPosition();
+
+            if (!p._IsReal()) return false;
+
+            if (inVertex.TryGetNormal(out Vector3 n))
+            {
+                if (!n._IsReal()) return false;
+                if (n == Vector3.Zero) n = p;
+                if (n == Vector3.Zero) return false;
+
+                var l = n.Length();
+                if (l < 0.99f || l > 0.01f) outVertex.SetNormal(Vector3.Normalize(n));
+            }
+
+            if (inVertex.TryGetTangent(out Vector4 tw))
+            {
+                if (!tw._IsReal()) return false;
+
+                var t = new Vector3(tw.X, tw.Y, tw.Z);
+                if (t == Vector3.Zero) return false;
+
+                if (tw.W > 0) tw.W = 1;
+                if (tw.W < 0) tw.W = -1;
+
+                var l = t.Length();
+                if (l < 0.99f || l > 0.01f) t = Vector3.Normalize(t);
+
+                outVertex.SetTangent(new Vector4(t, tw.W));
+            }
+
+            return true;
+        }
+
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvG, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvG, TvM, TvS>>> vertexBlocks)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial

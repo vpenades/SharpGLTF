@@ -145,7 +145,14 @@ namespace SharpGLTF.Geometry
         /// <returns>The index of the vertex.</returns>
         public int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
         {
-            if (_Scrict) vertex.Validate();
+            if (_Scrict)
+            {
+                vertex.Validate();
+            }
+            else
+            {
+                if (!vertex.Geometry.SanitizeVertex(out vertex.Geometry)) return -1;
+            }
 
             return _Vertices.Use(vertex);
         }
@@ -174,7 +181,7 @@ namespace SharpGLTF.Geometry
             var bb = UseVertex(b);
 
             // check for degenerated triangles:
-            if (aa == bb)
+            if (aa < 0 || bb < 0 || aa == bb)
             {
                 if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb}");
                 return;
@@ -201,7 +208,7 @@ namespace SharpGLTF.Geometry
             var cc = UseVertex(c);
 
             // check for degenerated triangles:
-            if (aa == bb || aa == cc || bb == cc)
+            if (aa < 0 || bb < 0 || cc < 0 || aa == bb || aa == cc || bb == cc)
             {
                 if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb} {cc}");
                 return;

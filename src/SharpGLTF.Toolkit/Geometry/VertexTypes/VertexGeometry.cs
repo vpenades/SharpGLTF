@@ -95,13 +95,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexPositionNormal(Vector3 p, Vector3 n)
         {
             this.Position = p;
-            this.Normal = Vector3.Normalize(n);
+            this.Normal = n;
         }
 
         public VertexPositionNormal(float px, float py, float pz, float nx, float ny, float nz)
         {
             this.Position = new Vector3(px, py, pz);
-            this.Normal = Vector3.Normalize(new Vector3(nx, ny, nz));
+            this.Normal = new Vector3(nx, ny, nz);
         }
 
         public VertexPositionNormal(IVertexGeometry src)
@@ -162,7 +162,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
         {
             this.Position = p;
-            this.Normal = Vector3.Normalize(n);
+            this.Normal = n;
             this.Tangent = t;
         }
 
