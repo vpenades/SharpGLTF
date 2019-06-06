@@ -224,11 +224,6 @@ namespace SharpGLTF.Schema2
 
     partial class ModelRoot
     {
-        // TODO: usually when we save the gltf file, we need to amend/fix several features,
-        // which goes against good practices of not modifying any file when it is being saved.
-        // a possible solution would be to do a shallow copy of RootObject and update Buffers, BufferViews, etc
-        // an issue that complicates things is that it requires to copy the extensions of root, buffers, etc
-
         /// <summary>
         /// Writes this <see cref="MODEL"/> to a file in GLB format.
         /// </summary>

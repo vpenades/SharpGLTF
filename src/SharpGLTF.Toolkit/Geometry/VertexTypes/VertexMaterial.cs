@@ -9,8 +9,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         int MaxColors { get; }
 
-        // TODO: rename to MaxTexCoords
-        int MaxTextures { get; }
+        int MaxTextCoords { get; }
 
         void Validate();
 
@@ -53,7 +52,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 1;
 
-        public int MaxTextures => 0;
+        public int MaxTextCoords => 0;
 
         #endregion
 
@@ -94,7 +93,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexTexture1(IVertexMaterial src)
         {
-            this.TexCoord = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
         public static implicit operator VertexTexture1(Vector2 uv)
@@ -111,7 +110,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 0;
 
-        public int MaxTextures => 1;
+        public int MaxTextCoords => 1;
 
         #endregion
 
@@ -154,7 +153,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexColor1Texture1(IVertexMaterial src)
         {
             this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.TexCoord = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
         #endregion
@@ -169,7 +168,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 1;
 
-        public int MaxTextures => 1;
+        public int MaxTextCoords => 1;
 
         #endregion
 
@@ -214,8 +213,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexColor1Texture2(IVertexMaterial src)
         {
             this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.TexCoord0 = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-            this.TexCoord1 = src.MaxTextures > 1 ? src.GetTexCoord(1) : Vector2.Zero;
+            this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
         #endregion
@@ -233,7 +232,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 1;
 
-        public int MaxTextures => 2;
+        public int MaxTextCoords => 2;
 
         #endregion
 
@@ -288,8 +287,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
             this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
-            this.TexCoord0 = src.MaxTextures > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-            this.TexCoord1 = src.MaxTextures > 1 ? src.GetTexCoord(1) : Vector2.Zero;
+            this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+            this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
         #endregion
@@ -310,7 +309,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 2;
 
-        public int MaxTextures => 2;
+        public int MaxTextCoords => 2;
 
         #endregion
 

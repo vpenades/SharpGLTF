@@ -282,7 +282,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             i = 0;
 
-            while (i < Math.Min(src.MaxTextures, dst.MaxTextures))
+            while (i < Math.Min(src.MaxTextCoords, dst.MaxTextCoords))
             {
                 dst.SetTexCoord(i, src.GetTexCoord(i));
                 ++i;

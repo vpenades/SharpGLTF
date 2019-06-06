@@ -119,11 +119,6 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         int MaxBindings { get; }
 
-        // TODO: validation must ensure that:
-        // - there's some positive weight
-        // - every joint is unique
-        // - joints are sorted by weight
-        // - 0 weight joints point to joint 0
         void Validate();
 
         JointBinding GetJointBinding(int index);

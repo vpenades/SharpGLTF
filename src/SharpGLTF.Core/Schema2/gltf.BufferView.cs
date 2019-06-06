@@ -231,7 +231,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNullOrEmpty(data, nameof(data));
 
-            // todo: search data on existing data for reusability.
+            // todo: search data on existing buffers for reusability and compression.
 
             // padding
             while ((_Data.Count & 3) != 0) _Data.Add(0);

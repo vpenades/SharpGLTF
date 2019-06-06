@@ -15,7 +15,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxColors => 0;
 
-        public int MaxTextures => 0;
+        public int MaxTextCoords => 0;
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
 

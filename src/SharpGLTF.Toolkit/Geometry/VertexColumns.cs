@@ -231,8 +231,8 @@ namespace SharpGLTF.Geometry
             if (Colors0 != null && cctt.MaxColors > 0) cctt.SetColor(0, Colors0[index]);
             if (Colors1 != null && cctt.MaxColors > 1) cctt.SetColor(1, Colors1[index]);
 
-            if (Textures0 != null && cctt.MaxTextures > 0) cctt.SetTexCoord(0, Textures0[index]);
-            if (Textures1 != null && cctt.MaxTextures > 1) cctt.SetTexCoord(1, Textures1[index]);
+            if (Textures0 != null && cctt.MaxTextCoords > 0) cctt.SetTexCoord(0, Textures0[index]);
+            if (Textures1 != null && cctt.MaxTextCoords > 1) cctt.SetTexCoord(1, Textures1[index]);
 
             return cctt;
         }

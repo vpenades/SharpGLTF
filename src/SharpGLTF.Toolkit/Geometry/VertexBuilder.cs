@@ -281,7 +281,7 @@ namespace SharpGLTF.Geometry
                 if (!c._IsReal() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
             }
 
-            for (int i = 0; i < Material.MaxTextures; ++i)
+            for (int i = 0; i < Material.MaxTextCoords; ++i)
             {
                 var uv = Material.GetTexCoord(i);
                 if (!uv._IsReal()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
