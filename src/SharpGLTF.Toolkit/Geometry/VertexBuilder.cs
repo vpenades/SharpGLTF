@@ -24,6 +24,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1"/>,
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
+    /// <see cref="VertexColor1Texture2"/>.
+    /// <see cref="VertexColor2Texture2"/>.
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.
@@ -33,7 +35,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints8x8"/>,
     /// <see cref="VertexJoints16x4"/>,
     /// <see cref="VertexJoints16x8"/>.
-    /// </typeparam>    
+    /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Vertex 𝐏:{Position} {_GetDebugWarnings()}")]
     public partial struct VertexBuilder<TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
@@ -82,6 +84,18 @@ namespace SharpGLTF.Geometry
             Skinning = default;
         }
 
+        public VertexBuilder(TvG g, params (int, float)[] bindings)
+        {
+            Geometry = g;
+            Material = default;
+            Skinning = default;
+
+            for (int i = 0; i < bindings.Length; ++i)
+            {
+                Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
+            }
+        }
+
         public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM, TvS) tuple)
         {
             return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
@@ -100,6 +114,30 @@ namespace SharpGLTF.Geometry
         public static implicit operator VertexBuilder<TvG, TvM, TvS>(TvG g)
         {
             return new VertexBuilder<TvG, TvM, TvS>(g);
+        }
+
+        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position)
+        {
+            var v = default(VertexBuilder<TvG, TvM, TvS>);
+            v.Geometry.SetPosition(position);
+            return v;
+        }
+
+        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position,Vector3 normal)
+        {
+            var v = default(VertexBuilder<TvG, TvM, TvS>);
+            v.Geometry.SetPosition(position);
+            v.Geometry.SetNormal(normal);
+            return v;
+        }
+
+        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position, Vector3 normal, Vector4 tangent)
+        {
+            var v = default(VertexBuilder<TvG, TvM, TvS>);
+            v.Geometry.SetPosition(position);
+            v.Geometry.SetNormal(normal);
+            v.Geometry.SetTangent(tangent);
+            return v;
         }
 
         #endregion
@@ -124,6 +162,75 @@ namespace SharpGLTF.Geometry
         #endregion
 
         #region API
+
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position)
+        {
+            var v = this;
+            v.Geometry.SetPosition(position);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position, Vector3 normal)
+        {
+            var v = this;
+            v.Geometry.SetPosition(position);
+            v.Geometry.SetNormal(normal);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position, Vector3 normal, Vector4 tangent)
+        {
+            var v = this;
+            v.Geometry.SetPosition(position);
+            v.Geometry.SetNormal(normal);
+            v.Geometry.SetTangent(tangent);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithMaterial(params Vector2[] uvs)
+        {
+            var v = this;
+            for (int i = 0; i < uvs.Length; ++i) v.Material.SetTexCoord(i, uvs[i]);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithMaterial(Vector4 color0, params Vector2[] uvs)
+        {
+            var v = this;
+            v.Material.SetColor(0, color0);
+            for (int i = 0; i < uvs.Length; ++i) v.Material.SetTexCoord(i, uvs[i]);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithMaterial(Vector4 color0, Vector4 color1, params Vector2[] uvs)
+        {
+            var v = this;
+            v.Material.SetColor(0, color0);
+            v.Material.SetColor(1, color1);
+            for (int i = 0; i < uvs.Length; ++i) v.Material.SetTexCoord(i, uvs[i]);
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int, float)[] bindings)
+        {
+            var v = this;
+
+            int i = 0;
+
+            while (i < bindings.Length)
+            {
+                v.Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
+                ++i;
+            }
+
+            while (i < bindings.Length)
+            {
+                v.Skinning.SetJointBinding(i, 0, 0);
+                ++i;
+            }
+
+            return v;
+        }
 
         public void Validate()
         {

@@ -114,6 +114,8 @@ namespace InfiniteSkinnedTentacle
         static MESH CreateMesh(int boneCount)
         {
             var mesh = new MESH("skinned mesh");
+            mesh.VertexPreprocessor.SetDebugPreprocessors();
+
             var prim = mesh.UsePrimitive(new SharpGLTF.Materials.MaterialBuilder("Default"));
 
             var a0 = default(VERTEX);

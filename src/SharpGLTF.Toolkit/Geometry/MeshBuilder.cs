@@ -40,6 +40,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1"/>,
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
+    /// <see cref="VertexColor1Texture2"/>.
+    /// <see cref="VertexColor2Texture2"/>.
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.
@@ -61,7 +63,9 @@ namespace SharpGLTF.Geometry
         {
             this.Name = name;
 
-            _Preprocessor = VertexBuilder<TvG, TvM, TvS>.SanitizerPreprocessor;
+            // this is the recomended preprocesor for release/production
+            _VertexPreprocessor = new VertexPreprocessor<TvG, TvM, TvS>();
+            _VertexPreprocessor.SetSanitizerPreprocessors();
         }
 
         #endregion
@@ -70,15 +74,19 @@ namespace SharpGLTF.Geometry
 
         private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
 
-        internal VertexBuilder<TvG, TvM, TvS>.Preprocessor _Preprocessor;
+        private VertexPreprocessor<TvG, TvM, TvS> _VertexPreprocessor;
 
         #endregion
 
         #region properties
 
-        public Boolean StrictMode { get; set; }
-
         public string Name { get; set; }
+
+        public VertexPreprocessor<TvG, TvM, TvS> VertexPreprocessor
+        {
+            get => _VertexPreprocessor;
+            set => _VertexPreprocessor = value;
+        }
 
         public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Item1).Distinct();
 
@@ -94,7 +102,7 @@ namespace SharpGLTF.Geometry
         {
             if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))
             {
-                primitive = new PrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1, key.Item2, StrictMode);
+                primitive = new PrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1, key.Item2);
                 _Primitives[key] = primitive;
             }
 
@@ -165,6 +173,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1"/>,
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
+    /// <see cref="VertexColor1Texture2"/>.
+    /// <see cref="VertexColor2Texture2"/>.
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.
@@ -201,6 +211,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1"/>,
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
+    /// <see cref="VertexColor1Texture2"/>.
+    /// <see cref="VertexColor2Texture2"/>.
     /// </typeparam>
     public class MeshBuilder<TvG, TvM> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty>
         where TvG : struct, IVertexGeometry

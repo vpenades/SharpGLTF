@@ -26,17 +26,18 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // define 4 vertices
-            var v1 = new VPOSNRM(-10, 10, 0, -10, 10, 15);
-            var v2 = new VPOSNRM(10, 10, 0, 10, 10, 15);
-            var v3 = new VPOSNRM(10, -10, 0, 10, -10, 15);
-            var v4 = new VPOSNRM(-10, -10, 0, -10, -10, 15);
+            var v1 = new VPOSNRM(-10, 10, 0, 0, 0, 1);
+            var v2 = new VPOSNRM(10, 10, 0, 0, 0, 1);
+            var v3 = new VPOSNRM(10, -10, 0, 0, 0, 1);
+            var v4 = new VPOSNRM(-10, -10, 0, 0, 0, 1);
 
             // create a material
             var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, Vector4.One);
 
             // create model
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
-            
+            meshBuilder.VertexPreprocessor.SetDebugPreprocessors();
+
             // add a polygon to the primitive that uses material1 as key.
             meshBuilder.UsePrimitive(material1).AddConvexPolygon(v1, v2, v3, v4);
 
@@ -63,9 +64,13 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create several meshes
             var meshBuilder1 = new MeshBuilder<VPOSNRM>("mesh1");
+                meshBuilder1.VertexPreprocessor.SetDebugPreprocessors();
             var meshBuilder2 = new MeshBuilder<VPOSNRM>("mesh2");
+                meshBuilder2.VertexPreprocessor.SetDebugPreprocessors();
             var meshBuilder3 = new MeshBuilder<VPOSNRM>("mesh3");
+                meshBuilder3.VertexPreprocessor.SetDebugPreprocessors();
             var meshBuilder4 = new MeshBuilder<VPOSNRM>("mesh4");
+                meshBuilder4.VertexPreprocessor.SetDebugPreprocessors();
 
             meshBuilder1.AddCube(material1, Matrix4x4.Identity);
             meshBuilder2.AddCube(material2, Matrix4x4.Identity);
@@ -123,6 +128,8 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create a mesh
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
+            meshBuilder.VertexPreprocessor.SetDebugPreprocessors();
+
             meshBuilder.AddCube(material1, Matrix4x4.Identity);
             meshBuilder.Validate();
 
@@ -159,6 +166,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create the mesh
             var meshBuilder = new MeshBuilder<VPOS, VEMPTY, VSKIN4>("mesh1");
+            meshBuilder.VertexPreprocessor.SetDebugPreprocessors();
 
             var v1 = (new VPOS(-10, 0, +10), new VSKIN4(0));
             var v2 = (new VPOS(+10, 0, +10), new VSKIN4(0));
@@ -262,7 +270,8 @@ namespace SharpGLTF.Schema2.Authoring
 
             var material = new MaterialBuilder("material1").WithUnlitShader();            
 
-            var mesh = new MeshBuilder<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexColor1>("points");
+            var mesh = new MeshBuilder<VPOS, Geometry.VertexTypes.VertexColor1>("points");
+            mesh.VertexPreprocessor.SetDebugPreprocessors();
 
             // create a point cloud primitive
             var pointCloud = mesh.UsePrimitive(material, 1);
@@ -325,8 +334,9 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create a mesh
             var cubes = new MeshBuilder<VPOSNRM>("cube");
+            cubes.VertexPreprocessor.SetDebugPreprocessors();
 
-            for(int i=0; i < 100; ++i)
+            for (int i=0; i < 100; ++i)
             {
                 var r = rnd.NextVector3() * 5;
                 var m = materials[rnd.Next(0, 10)];

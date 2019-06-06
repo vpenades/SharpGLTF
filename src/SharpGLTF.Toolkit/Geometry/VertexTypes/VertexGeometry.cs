@@ -76,10 +76,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Position = Vector3.Transform(Position, xform);
         }
 
-        public void Validate()
-        {
-            Position.Validate(nameof(Position));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }
@@ -142,11 +139,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
         }
 
-        public void Validate()
-        {
-            Position.Validate(nameof(Position));
-            Normal.ValidateNormal(nameof(Normal));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }
@@ -212,12 +205,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             Tangent = new Vector4(txyz, Tangent.W);
         }
 
-        public void Validate()
-        {
-            Position.Validate(nameof(Position));
-            Normal.ValidateNormal(nameof(Normal));
-            Tangent.ValidateTangent(nameof(Tangent));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }

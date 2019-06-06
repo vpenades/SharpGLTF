@@ -74,11 +74,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new NotSupportedException();
         }
 
-        public void Validate()
-        {
-            if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
-            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -136,10 +132,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return TexCoord;
         }
 
-        public void Validate()
-        {
-            if (!TexCoord._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -198,13 +191,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return TexCoord;
         }
 
-        public void Validate()
-        {
-            if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
-            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
-
-            if (!TexCoord._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -276,14 +263,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void Validate()
-        {
-            if (!Color._IsReal()) throw new NotFiniteNumberException(nameof(Color));
-            if (!Color.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color));
-
-            if (!TexCoord0._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord0));
-            if (!TexCoord1._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord1));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -368,17 +348,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void Validate()
-        {
-            if (!Color0._IsReal()) throw new NotFiniteNumberException(nameof(Color0));
-            if (!Color0.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color0));
-
-            if (!Color1._IsReal()) throw new NotFiniteNumberException(nameof(Color1));
-            if (!Color1.IsInRange(Vector4.Zero, Vector4.One)) throw new IndexOutOfRangeException(nameof(Color1));
-
-            if (!TexCoord0._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord0));
-            if (!TexCoord1._IsReal()) throw new NotFiniteNumberException(nameof(TexCoord1));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }

@@ -138,7 +138,7 @@ namespace SharpGLTF
         public static void MustBeBetweenOrEqualTo<TValue>(TValue value, TValue minInclusive, TValue maxInclusive, string parameterName)
             where TValue : IComparable<TValue>
         {
-            if (value.CompareTo(minInclusive) >= 0 || value.CompareTo(maxInclusive) <= 0) return;
+            if (value.CompareTo(minInclusive) >= 0 && value.CompareTo(maxInclusive) <= 0) return;
 
             throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be greater than or equal to {minInclusive} and less than or equal to {maxInclusive}.");
         }

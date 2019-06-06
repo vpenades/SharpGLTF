@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace SharpGLTF.Schema2.Authoring
 {
-    using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
+    using VPOSNRM = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal,Geometry.VertexTypes.VertexEmpty,Geometry.VertexTypes.VertexEmpty>;
 
 
     [TestFixture]
@@ -166,10 +166,10 @@ namespace SharpGLTF.Schema2.Authoring
 
             var vertices = new[]
             {
-                new VPOSNRM(-10,  10, 0, 0, 0, 1),
-                new VPOSNRM( 10,  10, 0, 0, 0, 1),
-                new VPOSNRM( 10, -10, 0, 0, 0, 1),
-                new VPOSNRM(-10, -10, 0, 0, 0, 1)
+                VPOSNRM.Create(new Vector3(-10,  10, 0), Vector3.UnitZ),
+                VPOSNRM.Create(new Vector3( 10,  10, 0), Vector3.UnitZ),
+                VPOSNRM.Create(new Vector3( 10, -10, 0), Vector3.UnitZ),
+                VPOSNRM.Create(new Vector3(-10, -10, 0), Vector3.UnitZ)
             };
 
             var model = ModelRoot.CreateModel();

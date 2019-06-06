@@ -7,5 +7,4 @@ using System.Text;
 
 namespace SharpGLTF.Debug
 {
-
 }

@@ -5,10 +5,128 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    public delegate TvG? VertexGeometryPreprocessor<TvG>(TvG arg)
+        where TvG : struct, IVertexGeometry;
+
+    public delegate TvM? VertexMaterialPreprocessor<TvM>(TvM arg)
+        where TvM : struct, IVertexMaterial;
+
+    public delegate TvS? VertexSkinningPreprocessor<TvS>(TvS arg)
+        where TvS : struct, IVertexSkinning;
+
     /// <summary>
-    /// Defines a set of vertex preprocessors to be used with <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}"/>
+    /// Represents a <see cref="VertexBuilder{TvG, TvM, TvS}"/> preprocessor used by <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}.VertexPreprocessor"/>
     /// </summary>
-    static class VertexPreprocessors
+    /// <typeparam name="TvG">
+    /// The vertex fragment type with Position, Normal and Tangent.
+    /// Valid types are:
+    /// <see cref="VertexPosition"/>,
+    /// <see cref="VertexPositionNormal"/>,
+    /// <see cref="VertexPositionNormalTangent"/>.
+    /// </typeparam>
+    /// <typeparam name="TvM">
+    /// The vertex fragment type with Colors and Texture Coordinates.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexColor1"/>,
+    /// <see cref="VertexTexture1"/>,
+    /// <see cref="VertexColor1Texture1"/>.
+    /// </typeparam>
+    /// <typeparam name="TvS">
+    /// The vertex fragment type with Skin Joint Weights.
+    /// Valid types are:
+    /// <see cref="VertexEmpty"/>,
+    /// <see cref="VertexJoints8x4"/>,
+    /// <see cref="VertexJoints8x8"/>,
+    /// <see cref="VertexJoints16x4"/>,
+    /// <see cref="VertexJoints16x8"/>.
+    /// </typeparam>
+    public sealed class VertexPreprocessor<TvG, TvM, TvS>
+        where TvG : struct, IVertexGeometry
+        where TvM : struct, IVertexMaterial
+        where TvS : struct, IVertexSkinning
+    {
+        #region data
+
+        private readonly List<VertexGeometryPreprocessor<TvG>> _GeometryPreprocessor = new List<VertexGeometryPreprocessor<TvG>>();
+        private readonly List<VertexMaterialPreprocessor<TvM>> _MaterialPreprocessor = new List<VertexMaterialPreprocessor<TvM>>();
+        private readonly List<VertexSkinningPreprocessor<TvS>> _SkinningPreprocessor = new List<VertexSkinningPreprocessor<TvS>>();
+
+        #endregion
+
+        #region API
+
+        public void Clear()
+        {
+            _GeometryPreprocessor.Clear();
+            _MaterialPreprocessor.Clear();
+            _SkinningPreprocessor.Clear();
+        }
+
+        public void Append(VertexGeometryPreprocessor<TvG> func)
+        {
+            _GeometryPreprocessor.Add(func);
+        }
+
+        public void Append(VertexMaterialPreprocessor<TvM> func)
+        {
+            _MaterialPreprocessor.Add(func);
+        }
+
+        public void Append(VertexSkinningPreprocessor<TvS> func)
+        {
+            _SkinningPreprocessor.Add(func);
+        }
+
+        public void SetDebugPreprocessors()
+        {
+            Clear();
+            Append(FragmentPreprocessors.ValidateVertexGeometry);
+            Append(FragmentPreprocessors.ValidateVertexMaterial);
+            Append(FragmentPreprocessors.ValidateVertexSkinning);
+        }
+
+        public void SetSanitizerPreprocessors()
+        {
+            Clear();
+            Append(FragmentPreprocessors.SanitizeVertexGeometry);
+            Append(FragmentPreprocessors.SanitizeVertexMaterial);
+            Append(FragmentPreprocessors.SanitizeVertexSkinning);
+        }
+
+        public bool PreprocessVertex(ref VertexBuilder<TvG, TvM, TvS> vertex)
+        {
+            foreach (var f in _GeometryPreprocessor)
+            {
+                var g = f(vertex.Geometry);
+                if (!g.HasValue) return false;
+                vertex.Geometry = g.Value;
+            }
+
+            foreach (var f in _MaterialPreprocessor)
+            {
+                var m = f(vertex.Material);
+                if (!m.HasValue) return false;
+                vertex.Material = m.Value;
+            }
+
+            foreach (var f in _SkinningPreprocessor)
+            {
+                var s = f(vertex.Skinning);
+                if (!s.HasValue) return false;
+                vertex.Skinning = s.Value;
+            }
+
+            return true;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines a set of vertex fragment preprocessors to be used with <see cref="VertexPreprocessor{TvG, TvM, TvS}"/>
+    /// </summary>
+    static class FragmentPreprocessors
     {
         /// <summary>
         /// validates a vertex geometry, throwing exceptions if found invalid
@@ -32,14 +150,14 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (vertex.TryGetNormal(out Vector3 n))
             {
                 Guard.IsTrue(n._IsReal(), "Normal", "Values are not finite.");
-                Guard.MustBeBetweenOrEqualTo(n.Length(), -0.99f, 0.01f, "Normal.Length");
+                Guard.MustBeBetweenOrEqualTo(n.Length(), 0.99f, 1.01f, "Normal.Length");
             }
 
             if (vertex.TryGetTangent(out Vector4 t))
             {
                 Guard.IsTrue(t._IsReal(), "Tangent", "Values are not finite.");
                 Guard.IsTrue(t.W == 1 || t.W == -1, "Tangent.W", "Invalid value");
-                Guard.MustBeBetweenOrEqualTo(new Vector3(t.X, t.Y, t.Z).Length(), -0.99f, 0.01f, "Tangent.XYZ.Length");
+                Guard.MustBeBetweenOrEqualTo(new Vector3(t.X, t.Y, t.Z).Length(), 0.99f, 1.01f, "Tangent.XYZ.Length");
             }
 
             return vertex;
@@ -99,6 +217,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (vertex.MaxBindings == 0) return vertex;
 
+            // Apparently the consensus is that weights are required to be normalized.
+            // More here: https://github.com/KhronosGroup/glTF/issues/1213
+
             float weightsSum = 0;
 
             for (int i = 0; i < vertex.MaxBindings; ++i)
@@ -107,9 +228,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 Guard.MustBeGreaterThanOrEqualTo(pair.Joint, 0, $"Joint{i}");
                 Guard.IsTrue(pair.Weight._IsReal(), $"Weight{i}", "Values are not finite.");
+                if (pair.Weight == 0) Guard.IsTrue(pair.Joint == 0, "joints with weight zero must be set to zero");
 
                 weightsSum += pair.Weight;
             }
+
+            // TODO: check that joints are unique
 
             Guard.MustBeBetweenOrEqualTo(weightsSum, 0.99f, 1.01f, "Weights SUM");
 
@@ -219,18 +343,29 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             Span<JointBinding> pairs = stackalloc JointBinding[vertex.MaxBindings];
 
+            // Apparently the consensus is that weights are required to be normalized.
+            // More here: https://github.com/KhronosGroup/glTF/issues/1213
+
+            float weightsSum = 0;
+
             for (int i = 0; i < pairs.Length; ++i)
             {
                 var pair = vertex.GetJointBinding(i);
 
-                pairs[i] = pair;
+                pairs[i] = pair.Weight == 0 ? default : pair;
+
+                weightsSum += pair.Weight;
             }
+
+            // TODO: check that joints are unique, and if not, do a merge.
+
+            if (weightsSum == 0) weightsSum = 1;
 
             JointBinding.InPlaceReverseBubbleSort(pairs);
 
             for (int i = 0; i < pairs.Length; ++i)
             {
-                vertex.SetJointBinding(i, pairs[i].Joint, pairs[i].Weight);
+                vertex.SetJointBinding(i, pairs[i].Joint, pairs[i].Weight / weightsSum);
             }
 
             return vertex;

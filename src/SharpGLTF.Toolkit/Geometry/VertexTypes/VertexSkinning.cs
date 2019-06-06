@@ -197,13 +197,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate()
-        {
-            if (!Joints._IsReal()) throw new NotFiniteNumberException(nameof(Joints));
-            if (!Joints.IsRound() || !Joints.IsInRange(Vector4.Zero, new Vector4(255))) throw new IndexOutOfRangeException(nameof(Joints));
-
-            if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
 
         public JointBinding GetJointBinding(int index)
         {
@@ -302,13 +296,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate()
-        {
-            if (!Joints._IsReal()) throw new NotFiniteNumberException(nameof(Joints));
-            if (!Joints.IsRound() || !Joints.IsInRange(Vector4.Zero, new Vector4(65535))) throw new IndexOutOfRangeException(nameof(Joints));
-
-            if (!Weights._IsReal()) throw new NotFiniteNumberException(nameof(Weights));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
 
         public JointBinding GetJointBinding(int index)
         {
@@ -399,17 +387,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate()
-        {
-            if (!Joints0._IsReal()) throw new NotFiniteNumberException(nameof(Joints0));
-            if (!Joints1._IsReal()) throw new NotFiniteNumberException(nameof(Joints1));
-
-            if (!Joints0.IsRound() || !Joints0.IsInRange(Vector4.Zero, new Vector4(255))) throw new IndexOutOfRangeException(nameof(Joints0));
-            if (!Joints1.IsRound() || !Joints1.IsInRange(Vector4.Zero, new Vector4(255))) throw new IndexOutOfRangeException(nameof(Joints1));
-
-            if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
-            if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
 
         public JointBinding GetJointBinding(int index)
         {
@@ -493,17 +471,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate()
-        {
-            if (!Joints0._IsReal()) throw new NotFiniteNumberException(nameof(Joints0));
-            if (!Joints1._IsReal()) throw new NotFiniteNumberException(nameof(Joints1));
-
-            if (!Joints0.IsRound() || !Joints0.IsInRange(Vector4.Zero, new Vector4(65535))) throw new IndexOutOfRangeException(nameof(Joints0));
-            if (!Joints1.IsRound() || !Joints1.IsInRange(Vector4.Zero, new Vector4(65535))) throw new IndexOutOfRangeException(nameof(Joints1));
-
-            if (!Weights0._IsReal()) throw new NotFiniteNumberException(nameof(Weights0));
-            if (!Weights1._IsReal()) throw new NotFiniteNumberException(nameof(Weights1));
-        }
+        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
 
         public JointBinding GetJointBinding(int index)
         {

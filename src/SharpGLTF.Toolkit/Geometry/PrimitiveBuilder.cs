@@ -60,6 +60,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexColor1"/>,
     /// <see cref="VertexTexture1"/>,
     /// <see cref="VertexColor1Texture1"/>.
+    /// <see cref="VertexColor1Texture2"/>.
+    /// <see cref="VertexColor2Texture2"/>.
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.
@@ -78,9 +80,8 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material, int primitiveVertexCount, bool strict)
+        internal PrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material, int primitiveVertexCount)
         {
-            this._Scrict = strict;
             this._Mesh = mesh;
             this._Material = material;
             this._PrimitiveVertexCount = primitiveVertexCount;
@@ -89,8 +90,6 @@ namespace SharpGLTF.Geometry
         #endregion
 
         #region data
-
-        private readonly bool _Scrict;
 
         private readonly MeshBuilder<TMaterial, TvG, TvM, TvS> _Mesh;
 
@@ -145,10 +144,9 @@ namespace SharpGLTF.Geometry
         /// <returns>The index of the vertex.</returns>
         public int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
         {
-            if (!_Mesh._Preprocessor.PreprocessVertex(ref vertex))
+            if (_Mesh.VertexPreprocessor != null)
             {
-                Guard.IsFalse(_Scrict, nameof(vertex));
-                return -1;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref vertex)) return -1;
             }
 
             return _Vertices.Use(vertex);
@@ -174,15 +172,17 @@ namespace SharpGLTF.Geometry
         {
             Guard.IsTrue(_PrimitiveVertexCount == 2, nameof(VerticesPerPrimitive), "Lines are not supported for this primitive");
 
-            var aa = UseVertex(a);
-            var bb = UseVertex(b);
-
-            // check for degenerated triangles:
-            if (aa < 0 || bb < 0 || aa == bb)
+            if (_Mesh.VertexPreprocessor != null)
             {
-                if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb}");
-                return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return;
             }
+
+            var aa = _Vertices.Use(a);
+            var bb = _Vertices.Use(b);
+
+            // check for degenerated line
+            if (aa == bb) return;
 
             // TODO: check if a triangle with indices aa-bb-cc already exists.
 
@@ -200,18 +200,23 @@ namespace SharpGLTF.Geometry
         {
             Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
 
-            var aa = UseVertex(a);
-            var bb = UseVertex(b);
-            var cc = UseVertex(c);
-
-            // check for degenerated triangles:
-            if (aa < 0 || bb < 0 || cc < 0 || aa == bb || aa == cc || bb == cc)
+            if (_Mesh.VertexPreprocessor != null)
             {
-                if (_Scrict) throw new ArgumentException($"Invalid triangle indices {aa} {bb} {cc}");
-                return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref c)) return;
             }
 
-            // TODO: check if a triangle with indices aa-bb-cc already exists.
+            // check for degenerated triangle
+            if (a.Equals(b) || a.Equals(c) || b.Equals(c)) return;
+
+            var aa = _Vertices.Use(a);
+            var bb = _Vertices.Use(b);
+            var cc = _Vertices.Use(c);
+
+            System.Diagnostics.Debug.Assert(aa != bb && aa != cc && bb != cc, "unexpected degenerated triangle");
+
+            // TODO: check if a triangle with indices aa-bb-cc already exists, since there's no point in having the same polygon twice.
 
             _Indices.Add(aa);
             _Indices.Add(bb);
