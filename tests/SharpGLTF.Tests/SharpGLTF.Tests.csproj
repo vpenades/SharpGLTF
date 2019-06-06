@@ -12,7 +12,7 @@
     <PackageReference Include="LibGit2Sharp" Version="0.26.0" />
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.0" />    
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.1.1" />    
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +33,9 @@
     <None Update="Assets\API.Core.1.0.0-alpha0008.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Assets\API.Core.1.0.0-alpha0009.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Assets\API.Toolkit.1.0.0-alpha0005.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -43,6 +46,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\API.Toolkit.1.0.0-alpha0008.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\API.Toolkit.1.0.0-alpha0009.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Assets\Invalid_Json.gltf">

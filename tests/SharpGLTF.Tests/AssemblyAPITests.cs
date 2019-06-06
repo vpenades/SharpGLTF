@@ -76,7 +76,7 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0008.txt", API);
+            _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0009.txt", API);
         }
 
         [Test(Description = "Checks if we have introduced a breaking change between the current and previous API")]
@@ -90,7 +90,7 @@ namespace SharpGLTF
 
             TestContext.CurrentContext.AttachText($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
 
-            _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0008.txt", API);
+            _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0009.txt", API);
         }
 
         private static void _CheckBackwardsCompatibility(string referenceAPIFile, string[] newLines)
