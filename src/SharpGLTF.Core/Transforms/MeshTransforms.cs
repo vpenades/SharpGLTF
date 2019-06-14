@@ -15,6 +15,16 @@ namespace SharpGLTF.Transforms
     /// </summary>
     public interface ITransform
     {
+        /// <summary>
+        /// Gets a value indicating whether the current <see cref="ITransform"/> will render visible geometry.
+        /// </summary>
+        bool Visible { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the triangles need to be flipped to render correctly.
+        /// </summary>
+        bool FlipFaces { get; }
+
         V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights);
         V3 TransformNormal(V3 normal, V3[] morphTargets, (int, float)[] skinWeights);
         V4 TransformTangent(V4 tangent, V3[] morphTargets, (int, float)[] skinWeights);
@@ -98,9 +108,27 @@ namespace SharpGLTF.Transforms
             : base(morphWeights)
         {
             _Transform = xform;
+
+            // http://m-hikari.com/ija/ija-password-2009/ija-password5-8-2009/hajrizajIJA5-8-2009.pdf
+            var determinant3x3 =
+                +(xform.M13 * xform.M21 * xform.M32)
+                +(xform.M11 * xform.M22 * xform.M33)
+                +(xform.M12 * xform.M23 * xform.M31)
+                -(xform.M12 * xform.M21 * xform.M33)
+                -(xform.M13 * xform.M22 * xform.M31)
+                -(xform.M11 * xform.M23 * xform.M32);
+
+            _Visible = Math.Abs(determinant3x3) > float.Epsilon;
+            _FlipFaces = determinant3x3 < 0;
         }
 
         private readonly TRANSFORM _Transform;
+        private readonly Boolean _Visible;
+        private readonly Boolean _FlipFaces;
+
+        public Boolean Visible => _Visible;
+
+        public Boolean FlipFaces => _FlipFaces;
 
         public V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights)
         {
@@ -144,6 +172,10 @@ namespace SharpGLTF.Transforms
         }
 
         private readonly TRANSFORM[] _JointTransforms;
+
+        public bool Visible => true;
+
+        public bool FlipFaces => false;
 
         public V3 TransformPosition(V3 localPosition, V3[] morphTargets, (int, float)[] skinWeights)
         {

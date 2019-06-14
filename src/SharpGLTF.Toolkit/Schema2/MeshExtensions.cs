@@ -315,6 +315,8 @@ namespace SharpGLTF.Schema2
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
+            if (!xform.Visible) yield break;
+
             var vertices = prim.GetVertexColumns();
 
             vertices.ApplyTransform(xform);
@@ -326,8 +328,8 @@ namespace SharpGLTF.Schema2
             foreach (var t in triangles)
             {
                 var a = vertices.GetVertex<TvG, TvM>(t.Item1);
-                var b = vertices.GetVertex<TvG, TvM>(t.Item2);
-                var c = vertices.GetVertex<TvG, TvM>(t.Item3);
+                var b = vertices.GetVertex<TvG, TvM>(xform.FlipFaces ? t.Item3 : t.Item2);
+                var c = vertices.GetVertex<TvG, TvM>(xform.FlipFaces ? t.Item2 : t.Item3);
 
                 yield return ((a.Geometry, a.Material), (b.Geometry, b.Material), (c.Geometry, c.Material), prim.Material);
             }
