@@ -358,6 +358,44 @@ namespace SharpGLTF.Schema2.Authoring
 
             // save the model as GLB
             model.AttachToCurrentTest("cubes.glb");
-        }        
+        }
+
+        [Test(Description ="Simulates animating mesh visibility by setting scale to (0,0,0)")]
+        public void CreateSceneWithAnimatedVisibility()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();            
+
+            // create a mesh
+            var cube = new MeshBuilder<VPOSNRM>("cube");
+            cube.VertexPreprocessor.SetDebugPreprocessors();
+            cube.AddCube(new MaterialBuilder(), Matrix4x4.Identity);
+            cube.Validate();
+
+            // create a new gltf model
+            var model = ModelRoot.CreateModel();
+
+            // add all meshes (just one in this case) to the model
+            model.CreateMeshes(cube);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode()
+                .WithMesh(model.LogicalMeshes[0])
+                .WithScaleAnimation("SimulatedVisibility"
+                    , (0, Vector3.One)
+                    , (1 - 0.0001f, Vector3.One)
+                    , (1, Vector3.Zero)
+                    , (2 - 0.0001f, Vector3.Zero)
+                    , (2, Vector3.One)
+                    , (3, Vector3.One)
+                    , (4, -Vector3.One)
+                    , (5, -Vector3.One)
+                    , (6, Vector3.One)
+                );
+
+            // save the model as GLB
+            model.AttachToCurrentTest("animatedvisibility.glb");
+        }
     }
 }
