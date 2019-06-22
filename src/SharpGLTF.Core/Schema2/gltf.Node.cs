@@ -198,6 +198,22 @@ namespace SharpGLTF.Schema2
         #region properties - content
 
         /// <summary>
+        /// Gets or sets the <see cref="Schema2.Camera"/> of this <see cref="Node"/>.
+        /// </summary>
+        public Camera Camera
+        {
+            get => this._camera.HasValue ? this.LogicalParent.LogicalCameras[this._camera.Value] : null;
+            set
+            {
+                if (value == null) { this._camera = null; return; }
+
+                Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+
+                this._camera = value.LogicalIndex;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="Schema2.Mesh"/> of this <see cref="Node"/>.
         /// </summary>
         public Mesh Mesh

@@ -155,7 +155,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the projection matrix for the current settings
         /// </summary>
-        public System.Numerics.Matrix4x4 Matrix => Transforms.Camera.CreateOrthographicMatrix(XMag, YMag, ZNear, ZFar);
+        public System.Numerics.Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(XMag, YMag, ZNear, ZFar);
 
         #endregion
     }
@@ -209,7 +209,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the projection matrix for the current settings
         /// </summary>
-        public System.Numerics.Matrix4x4 Matrix => Transforms.Camera.CreateOrthographicMatrix(AspectRatio.AsValue(1), VerticalFOV, ZNear, ZFar);
+        public System.Numerics.Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(AspectRatio.AsValue(1), VerticalFOV, ZNear, ZFar);
 
         #endregion
     }

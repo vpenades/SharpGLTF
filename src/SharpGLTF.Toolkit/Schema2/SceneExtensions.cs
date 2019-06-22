@@ -86,6 +86,26 @@ namespace SharpGLTF.Schema2
                 .WithSkinBinding(joints);
         }
 
+        public static Node WithPerspectiveCamera(this Node node, float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+        {
+            var camera = node.LogicalParent.CreateCamera();
+            camera.SetPerspectiveMode(aspectRatio, fovy, znear, zfar);
+
+            node.Camera = camera;
+
+            return node;
+        }
+
+        public static Node WithOrthographicCamera(this Node node, float xmag, float ymag, float znear, float zfar)
+        {
+            var camera = node.LogicalParent.CreateCamera();
+            camera.SetOrthographicMode(xmag, ymag, znear, zfar);
+
+            node.Camera = camera;
+
+            return node;
+        }
+
         #endregion
 
         #region evaluation

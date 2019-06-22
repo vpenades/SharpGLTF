@@ -186,6 +186,33 @@ namespace SharpGLTF.Schema2.Authoring
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
-        }        
+        }
+
+        [Test(Description = "Creates a scene with a perspective camera")]
+        public void CreateSceneWithCamera()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var mesh = new Geometry.MeshBuilder<Geometry.VertexTypes.VertexPositionNormal>();
+
+            mesh.AddCube(new Materials.MaterialBuilder(), Matrix4x4.Identity);            
+
+            var model = ModelRoot.CreateModel();
+
+            model.CreateMeshes(mesh);
+
+            model.UseScene(0)
+                .CreateNode()
+                .WithMesh(model.LogicalMeshes[0]);
+
+            model.UseScene(0)
+                .CreateNode()
+                .WithLocalTranslation(new Vector3(0, 3, 10))
+                .WithPerspectiveCamera(null, 1, 0.1f);                
+
+            model.AttachToCurrentTest("result.glb");
+            model.AttachToCurrentTest("result.gltf");
+        }
     }
 }

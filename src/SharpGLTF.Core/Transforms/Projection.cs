@@ -9,7 +9,7 @@ namespace SharpGLTF.Transforms
     /// Utility class to calculate camera matrices
     /// </summary>
     /// <see href="https://github.com/KhronosGroup/glTF/blob/master/specification/2.0/README.md#projection-matrices"/>
-    public static class Camera
+    public static class Projection
     {
         /// <summary>
         /// Calculates an orthographic projection matrix.
@@ -61,8 +61,9 @@ namespace SharpGLTF.Transforms
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
 
             var v = (float)Math.Tan(0.5 * yfov);
+            var h = aspectRatio * v;
 
-            var x = 1 / (aspectRatio * v);
+            var x = 1 / h;
             var y = 1 / v;
             var z = -1f;
             var w = -2 * znear;
@@ -82,7 +83,5 @@ namespace SharpGLTF.Transforms
                 0, 0, -1, 0
                 );
         }
-
-
     }
 }
