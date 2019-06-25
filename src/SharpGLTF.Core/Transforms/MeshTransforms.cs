@@ -28,6 +28,8 @@ namespace SharpGLTF.Transforms
         V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights);
         V3 TransformNormal(V3 normal, V3[] morphTargets, (int, float)[] skinWeights);
         V4 TransformTangent(V4 tangent, V3[] morphTargets, (int, float)[] skinWeights);
+
+        V4 MorphColors(V4 color, V4[] morphTargets);
     }
 
     public abstract class MorphTransform
@@ -98,6 +100,24 @@ namespace SharpGLTF.Transforms
 
             return p;
         }
+
+        protected V4 MorphVectors(V4 value, V4[] morphTargets)
+        {
+            if (_InvWeight == 1 || morphTargets == null || morphTargets.Length == 0) return value;
+
+            Guard.IsTrue(_MorphWeights.Length == morphTargets.Length, nameof(morphTargets));
+
+            var p = value * _InvWeight;
+
+            for (int i = 0; i < _MorphWeights.Length; ++i)
+            {
+                p += morphTargets[i] * _MorphWeights[i];
+            }
+
+            return p;
+        }
+
+        public V4 MorphColors(V4 color, V4[] morphTargets) { return MorphVectors(color, morphTargets); }
 
         #endregion
     }

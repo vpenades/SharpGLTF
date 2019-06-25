@@ -335,9 +335,9 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static VertexColumns GetVertexColumns(this MeshPrimitive primitive)
+        public static VertexBufferColumns GetVertexColumns(this MeshPrimitive primitive)
         {
-            var columns = new VertexColumns();
+            var columns = new VertexBufferColumns();
 
             _CopyTo(primitive.VertexAccessors, columns);
 
@@ -349,7 +349,7 @@ namespace SharpGLTF.Schema2
             return columns;
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexColumns dstColumns)
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexBufferColumns dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
@@ -358,8 +358,8 @@ namespace SharpGLTF.Schema2
             if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray();
             if (vertexAccessors.ContainsKey("COLOR_1")) dstColumns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray();
 
-            if (vertexAccessors.ContainsKey("TEXCOORD_0")) dstColumns.Textures0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
-            if (vertexAccessors.ContainsKey("TEXCOORD_1")) dstColumns.Textures1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_0")) dstColumns.TexCoords0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_1")) dstColumns.TexCoords1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
 
             if (vertexAccessors.ContainsKey("JOINTS_0")) dstColumns.Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
             if (vertexAccessors.ContainsKey("JOINTS_1")) dstColumns.Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
@@ -368,11 +368,13 @@ namespace SharpGLTF.Schema2
             if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexColumns.MorphTarget dstColumns)
+        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, MorphTargetColumns dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
             if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsVector3Array();
+
+            if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsVector4Array();
         }
 
         public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)
