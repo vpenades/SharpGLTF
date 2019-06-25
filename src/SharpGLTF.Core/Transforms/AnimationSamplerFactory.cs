@@ -9,7 +9,15 @@ namespace SharpGLTF.Transforms
 
     internal static class AnimationSamplerFactory
     {
-        private static (T, T, float) _GetSample<T>(this IEnumerable<(float, T)> sequence, float offset)
+        /// <summary>
+        /// Given a <paramref name="sequence"/> of float+<typeparamref name="T"/> pairs and a <paramref name="offset"/> time,
+        /// it finds two consecutive values and the LERP amout.
+        /// </summary>
+        /// <typeparam name="T">The value type</typeparam>
+        /// <param name="sequence">A sequence of float+<typeparamref name="T"/> pairs</param>
+        /// <param name="offset">the time point within the sequence</param>
+        /// <returns>Two consecutive <typeparamref name="T"/> values and a float amount to LERP them.</returns>
+        private static (T, T, float) _FindSample<T>(this IEnumerable<(float, T)> sequence, float offset)
         {
             (float, T)? left = null;
             (float, T)? right = null;
@@ -55,7 +63,7 @@ namespace SharpGLTF.Transforms
 
             T _sampler(float offset)
             {
-                var sample = collection._GetSample(offset);
+                var sample = collection._FindSample(offset);
                 return sample.Item1;
             }
 
@@ -68,7 +76,7 @@ namespace SharpGLTF.Transforms
 
             Vector3 _sampler(float offset)
             {
-                var sample = collection._GetSample(offset);
+                var sample = collection._FindSample(offset);
                 return Vector3.Lerp(sample.Item1, sample.Item2, sample.Item3);
             }
 
@@ -81,7 +89,7 @@ namespace SharpGLTF.Transforms
 
             Quaternion _sampler(float offset)
             {
-                var sample = collection._GetSample(offset);
+                var sample = collection._FindSample(offset);
                 return Quaternion.Slerp(sample.Item1, sample.Item2, sample.Item3);
             }
 
@@ -94,7 +102,7 @@ namespace SharpGLTF.Transforms
 
             float[] _sampler(float offset)
             {
-                var sample = collection._GetSample(offset);
+                var sample = collection._FindSample(offset);
                 var result = new float[sample.Item1.Length];
 
                 for (int i = 0; i < result.Length; ++i)
@@ -129,7 +137,7 @@ namespace SharpGLTF.Transforms
 
             T _sampler(float offset)
             {
-                var sample = collection._GetSample(offset);
+                var sample = collection._FindSample(offset);
 
                 return hermiteFunc(sample.Item1.Item2, sample.Item1.Item3, sample.Item2.Item2, sample.Item2.Item1, sample.Item3);
             }

@@ -16,6 +16,16 @@ namespace SharpGLTF.Transforms
     {
         #region lifecycle
 
+        public static AffineTransform Create(Matrix4x4 matrix)
+        {
+            return new AffineTransform(matrix, null, null, null);
+        }
+
+        public static AffineTransform Create(Vector3? s, Quaternion? r, Vector3? t)
+        {
+            return new AffineTransform(null, s, r, t);
+        }
+
         internal AffineTransform(Matrix4x4? m, Vector3? s, Quaternion? r, Vector3? t)
         {
             if (m.HasValue)
@@ -57,6 +67,8 @@ namespace SharpGLTF.Transforms
         #endregion
 
         #region properties
+
+        public static AffineTransform Identity => new AffineTransform { Rotation = Quaternion.Identity, Scale = Vector3.One, Translation = Vector3.Zero };
 
         /// <summary>
         /// Gets the <see cref="Matrix4x4"/> transform of the current <see cref="AffineTransform"/>
