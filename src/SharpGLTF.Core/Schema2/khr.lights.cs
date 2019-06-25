@@ -199,7 +199,7 @@ namespace SharpGLTF.Schema2
             get
             {
                 var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
-                if (ext == null) return new PunctualLight[0];
+                if (ext == null) return Array.Empty<PunctualLight>();
 
                 return ext.Lights;
             }

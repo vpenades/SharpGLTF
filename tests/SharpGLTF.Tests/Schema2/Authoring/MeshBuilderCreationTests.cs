@@ -378,6 +378,10 @@ namespace SharpGLTF.Schema2.Authoring
             // add all meshes (just one in this case) to the model
             model.CreateMeshes(cube);
 
+            var flatx = new Vector3(0, 1, 1);
+            var flaty = new Vector3(1, 0, 1);
+            var flatz = new Vector3(1, 1, 0);
+
             // create a scene, a node, and assign the first mesh (the terrain)
             model.UseScene("Default")
                 .CreateNode()
@@ -392,6 +396,13 @@ namespace SharpGLTF.Schema2.Authoring
                     , (4, -Vector3.One)
                     , (5, -Vector3.One)
                     , (6, Vector3.One)
+                    , (7, flatx)
+                    , (8, flatx)
+                    , (9, flaty)
+                    , (10, flaty)
+                    , (11, flatz)
+                    , (12, flatz)
+                    , (13, Vector3.One)
                 );
 
             // save the model as GLB
