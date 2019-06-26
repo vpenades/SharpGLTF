@@ -30,7 +30,7 @@ namespace SharpGLTF
         [Test]
         public void TestVector3CubicSplineSampling()
         {
-            var hermite = Transforms.AnimationSamplerFactory.Hermite(new Vector3(1, 0, 0), new Vector3(0, 2, 0), new Vector3(3, 0, 0), new Vector3(0, -2, 0), 0.5f);
+            var hermite = Transforms.AnimationSamplerFactory.Hermite(new Vector3(1, 0, 0), new Vector3(1, 2, 0), new Vector3(3, 0, 0), new Vector3(3, -2, 0), 0.5f);
 
             var sampler = Transforms.AnimationSamplerFactory.CreateCubicSamplerFunc(_TransAnim);
 

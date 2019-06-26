@@ -13,6 +13,24 @@ namespace SharpGLTF.Animations
         T GetSample(float offset);
     }
 
+    public interface ICurveWriter<T>
+        where T : struct
+    {
+        void RemoveKey(float key);
+
+        void SetControlPoint(float key, T value);
+    }
+
+    public interface ICubicCurveWriter<T> : ICurveWriter<T>
+        where T : struct
+    {
+        void SetControlPointIn(float key, T value);
+        void SetControlPointOut(float key, T value);
+
+        void SetTangentIn(float key, T value);
+        void SetTangentOut(float key, T value);
+    }
+
     public abstract class Curve<Tin, Tout> : ICurveSampler<Tout>
         where Tin : struct
         where Tout : struct
@@ -30,6 +48,12 @@ namespace SharpGLTF.Animations
         #endregion
 
         #region API
+
+        public void RemoveKey(float key) { _Keys.Remove(key); }
+
+        protected Tin? GetKey(float key) { return _Keys.TryGetValue(key, out Tin value) ? value : (Tin?)null; }
+
+        protected void SetKey(float key, Tin value) { _Keys[key] = value; }
 
         protected (Tin, Tin, float) FindSample(float offset)
         {
@@ -89,18 +113,29 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    class Vector3LinearCurve : Curve<Vector3, Vector3>
+    class Vector3LinearCurve : Curve<Vector3, Vector3>, ICurveWriter<Vector3>
     {
+        #region API
+
         public override Vector3 GetSample(float offset)
         {
             var sample = FindSample(offset);
 
             return Vector3.Lerp(sample.Item1, sample.Item2, sample.Item3);
         }
+
+        public void SetControlPoint(float offset, Vector3 value)
+        {
+            SetKey(offset, value);
+        }
+
+        #endregion
     }
 
-    class Vector3CubicCurve : Curve<(Vector3, Vector3, Vector3), Vector3>
+    class Vector3CubicCurve : Curve<(Vector3, Vector3, Vector3), Vector3>, ICubicCurveWriter<Vector3>
     {
+        #region API
+
         public override Vector3 GetSample(float offset)
         {
             var sample = FindSample(offset);
@@ -122,16 +157,62 @@ namespace SharpGLTF.Animations
 
             return (value1 * part1) + (value2 * part2) + (tangent1 * part3) + (tangent2 * part4);
         }
+
+        public void SetControlPoint(float key, Vector3 value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item2 = value;
+            SetKey(key, val);
+        }
+
+        public void SetControlPointIn(float key, Vector3 value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item1 = value - val.Item2;
+            SetKey(key, val);
+        }
+
+        public void SetControlPointOut(float key, Vector3 value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item3 = value + val.Item2;
+            SetKey(key, val);
+        }
+
+        public void SetTangentIn(float key, Vector3 value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item1 = value;
+            SetKey(key, val);
+        }
+
+        public void SetTangentOut(float key, Vector3 value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item3 = value;
+            SetKey(key, val);
+        }
+
+        #endregion
     }
 
-    class QuaternionLinearCurve : Curve<Quaternion, Quaternion>
+    class QuaternionLinearCurve : Curve<Quaternion, Quaternion>, ICurveWriter<Quaternion>
     {
+        #region API
+
         public override Quaternion GetSample(float offset)
         {
             var sample = FindSample(offset);
 
             return Quaternion.Slerp(sample.Item1, sample.Item2, sample.Item3);
         }
+
+        public void SetControlPoint(float offset, Quaternion value)
+        {
+            SetKey(offset, value);
+        }
+
+        #endregion
     }
 
     class QuaternionCubicCurve : Curve<(Quaternion, Quaternion, Quaternion), Quaternion>
