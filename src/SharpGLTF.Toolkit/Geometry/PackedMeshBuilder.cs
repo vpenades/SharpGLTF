@@ -71,6 +71,55 @@ namespace SharpGLTF.Geometry
             }
         }
 
+        /// <summary>
+        /// Converts a collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/>
+        /// to a collection of <see cref="PackedMeshBuilder{TMaterial}"/>, trying to use
+        /// a single vertex buffer and a single index buffer shared by all meshes.
+        /// </summary>
+        /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> instances.</param>
+        /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
+        {
+            try
+            {
+                foreach (var m in meshBuilders) m.Validate();
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
+            }
+
+            var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
+                (
+                meshBuilders
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Vertices)
+                ).ToList();
+
+            var indexBlocks = VertexTypes.VertexUtils.CreateIndexMemoryAccessors
+                (
+                meshBuilders
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Indices)
+                ).ToList();
+
+            int idx = 0;
+
+            foreach (var meshBuilder in meshBuilders)
+            {
+                var dstMesh = new PackedMeshBuilder<TMaterial>(meshBuilder.Name);
+
+                foreach (var primitiveBuilder in meshBuilder.Primitives)
+                {
+                    dstMesh.AddPrimitive(primitiveBuilder.Material, primitiveBuilder.VerticesPerPrimitive, vertexBlocks[idx], indexBlocks[idx]);
+
+                    ++idx;
+                }
+
+                yield return dstMesh;
+            }
+        }
+
         private PackedMeshBuilder(string name) { _MeshName = name; }
 
         #endregion

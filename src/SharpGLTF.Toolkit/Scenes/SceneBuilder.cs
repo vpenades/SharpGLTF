@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGLTF.Scenes
 {
-    public class SceneBuilder
+    public partial class SceneBuilder
     {
         #region data
 

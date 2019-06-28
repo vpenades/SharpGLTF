@@ -49,6 +49,49 @@ namespace SharpGLTF.Geometry.VertexTypes
             return true;
         }
 
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors(this IEnumerable<IReadOnlyList<IVertexBuilder>> vertexBlocks)
+        {
+            // total number of vertices
+            var totalCount = vertexBlocks.Sum(item => item.Count);
+
+            var firstVertex = vertexBlocks.First().First();
+
+            var tvg = firstVertex.GetGeometry().GetType();
+            var tvm = firstVertex.GetMaterial().GetType();
+            var tvs = firstVertex.GetSkinning().GetType();
+
+            // vertex attributes
+            var attributes = GetVertexAttributes(tvg, tvm, tvs, totalCount);
+
+            // create master vertex buffer
+            int byteStride = attributes[0].ByteStride;
+            var vbuffer = new ArraySegment<byte>(new Byte[byteStride * totalCount]);
+
+            var baseVertexIndex = 0;
+
+            foreach (var block in vertexBlocks)
+            {
+                var accessors = MemoryAccessInfo
+                    .Slice(attributes, baseVertexIndex, block.Count)
+                    .Select(item => new MemoryAccessor(vbuffer, item))
+                    .ToArray();
+
+                foreach (var accessor in accessors)
+                {
+                    var columnFunc = GetVertexBuilderAttributeFunc(accessor.Attribute.Name);
+
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetColumn<float>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetColumn<Vector2>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block.GetColumn<Vector3>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block.GetColumn<Vector4>(columnFunc));
+                }
+
+                yield return accessors;
+
+                baseVertexIndex += block.Count;
+            }
+        }
+
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvG, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvG, TvM, TvS>>> vertexBlocks)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
@@ -75,7 +118,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 foreach (var accessor in accessors)
                 {
-                    var columnFunc = GetItemValueFunc<TvG, TvM, TvS>(accessor.Attribute.Name);
+                    var columnFunc = GetVertexBuilderAttributeFunc<TvG, TvM, TvS>(accessor.Attribute.Name);
 
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetScalarColumn(columnFunc));
                     if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetVector2Column(columnFunc));
@@ -179,7 +222,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<VertexBuilder<TvG, TvM, TvS>, Object> GetItemValueFunc<TvG, TvM, TvS>(string attributeName)
+        private static Func<VertexBuilder<TvG, TvM, TvS>, Object> GetVertexBuilderAttributeFunc<TvG, TvM, TvS>(string attributeName)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -192,6 +235,31 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             finfo = GetVertexField(typeof(TvS), attributeName);
             if (finfo != null) return vertex => finfo.GetValue(vertex.Skinning);
+
+            throw new NotImplementedException();
+        }
+
+        private static Func<IVertexBuilder, Object> GetVertexBuilderAttributeFunc(string attributeName)
+        {
+            if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
+            if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
+            if (attributeName == "TANGENT") return v => { return v.GetGeometry().TryGetTangent(out Vector4 n) ? n : Vector4.Zero; };
+
+            if (attributeName == "COLOR_0") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.One : m.GetColor(0); };
+            if (attributeName == "COLOR_1") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.One : m.GetColor(1); };
+            if (attributeName == "COLOR_2") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.One : m.GetColor(2); };
+            if (attributeName == "COLOR_3") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.One : m.GetColor(3); };
+
+            if (attributeName == "TEXCOORD_0") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
+            if (attributeName == "TEXCOORD_1") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
+            if (attributeName == "TEXCOORD_2") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
+            if (attributeName == "TEXCOORD_3") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
+
+            if (attributeName == "JOINTS_0") return v => v.GetSkinning().JointsLow;
+            if (attributeName == "JOINTS_1") return v => v.GetSkinning().JointsHigh;
+
+            if (attributeName == "WEIGHTS_0") return v => v.GetSkinning().WeightsLow;
+            if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().Weightshigh;
 
             throw new NotImplementedException();
         }
@@ -232,6 +300,20 @@ namespace SharpGLTF.Geometry.VertexTypes
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
+        {
+            var dst = new TColumn[vertices.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                var v = vertices[i];
+
+                dst[i] = (TColumn)func(v);
+            }
+
+            return dst;
+        }
+
+        private static TColumn[] GetColumn<TColumn>(this IReadOnlyList<IVertexBuilder> vertices, Func<IVertexBuilder, Object> func)
         {
             var dst = new TColumn[vertices.Count];
 
@@ -337,6 +419,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
 
             return dst;
-        }
+        }        
     }
 }

@@ -22,5 +22,14 @@ namespace SharpGLTF.Scenes
         private IContentRoot _Content;
 
         #endregion
+
+        #region API
+
+        internal Geometry.IMeshBuilder<Materials.MaterialBuilder> GetMesh()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

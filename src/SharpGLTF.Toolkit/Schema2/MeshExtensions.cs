@@ -14,50 +14,50 @@ namespace SharpGLTF.Schema2
     {
         #region meshes
 
-        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS> meshBuilder)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS> meshBuilder)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return root.CreateMeshes(meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, Geometry.MeshBuilder<Material, TvP, TvM, TvS> meshBuilder)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static Mesh CreateMesh<TvP, TvM, TvS>(this ModelRoot root, MeshBuilder<Material, TvP, TvM, TvS> meshBuilder)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return root.CreateMeshes(meshBuilder).First();
         }
 
-        public static Mesh CreateMesh<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS> meshBuilder)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static Mesh CreateMesh<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, MeshBuilder<TMaterial, TvP, TvM, TvS> meshBuilder)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return root.CreateMeshes(materialEvaluator, meshBuilder).First();
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params Geometry.MeshBuilder<Material, TvP, TvM, TvS>[] meshBuilders)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params MeshBuilder<Material, TvP, TvM, TvS>[] meshBuilders)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return root.CreateMeshes(m => m, meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params Geometry.MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS>[] meshBuilders)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IReadOnlyList<Mesh> CreateMeshes<TvP, TvM, TvS>(this ModelRoot root, params MeshBuilder<Materials.MaterialBuilder, TvP, TvM, TvS>[] meshBuilders)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             return root.CreateMeshes(mb => root.CreateMaterial(mb), meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params Geometry.MeshBuilder<TMaterial, TvP, TvM, TvS>[] meshBuilders)
-            where TvP : struct, Geometry.VertexTypes.IVertexGeometry
-            where TvM : struct, Geometry.VertexTypes.IVertexMaterial
-            where TvS : struct, Geometry.VertexTypes.IVertexSkinning
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial, TvP, TvM, TvS>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params MeshBuilder<TMaterial, TvP, TvM, TvS>[] meshBuilders)
+            where TvP : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
         {
             Guard.NotNull(root, nameof(root));
             Guard.NotNull(materialEvaluator, nameof(materialEvaluator));
@@ -73,7 +73,44 @@ namespace SharpGLTF.Schema2
                 .ToDictionary(m => m, m => materialEvaluator(m));
 
             // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
-            var srcMeshes = Geometry.PackedMeshBuilder<TMaterial>
+            var srcMeshes = PackedMeshBuilder<TMaterial>
+                .PackMeshes(meshBuilders)
+                .ToList();
+
+            var dstMeshes = new List<Mesh>();
+
+            foreach (var srcMesh in srcMeshes)
+            {
+                var dstMesh = srcMesh.CreateSchema2Mesh(root, m => mapMaterials[m]);
+
+                dstMeshes.Add(dstMesh);
+            }
+
+            return dstMeshes;
+        }
+
+        public static IReadOnlyList<Mesh> CreateMeshes(this ModelRoot root, params IMeshBuilder<Materials.MaterialBuilder>[] meshBuilders)
+        {
+            return root.CreateMeshes(mb => root.CreateMaterial(mb), meshBuilders);
+        }
+
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params IMeshBuilder<TMaterial>[] meshBuilders)
+        {
+            Guard.NotNull(root, nameof(root));
+            Guard.NotNull(materialEvaluator, nameof(materialEvaluator));
+            Guard.NotNull(meshBuilders, nameof(meshBuilders));
+
+            foreach (var m in meshBuilders) m.Validate();
+
+            // create a new material for every unique material in the mesh builders.
+            var mapMaterials = meshBuilders
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Material)
+                .Distinct()
+                .ToDictionary(m => m, m => materialEvaluator(m));
+
+            // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
+            var srcMeshes = PackedMeshBuilder<TMaterial>
                 .PackMeshes(meshBuilders)
                 .ToList();
 

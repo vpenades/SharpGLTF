@@ -7,6 +7,17 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
+    public interface IVertexBuilder
+    {
+        IVertexGeometry GetGeometry();
+        IVertexMaterial GetMaterial();
+        IVertexSkinning GetSkinning();
+
+        // void SetGeometry(IVertexGeometry);
+        // void SetMaterial(IVertexMaterial);
+        // void SetSkinning(IVertexSkinning);
+    }
+
     /// <summary>
     /// Represents an individual vertex object.
     /// </summary>
@@ -37,7 +48,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Vertex 𝐏:{Position} {_GetDebugWarnings()}")]
-    public partial struct VertexBuilder<TvG, TvM, TvS>
+    public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -295,6 +306,12 @@ namespace SharpGLTF.Geometry
 
             return sb.ToString();
         }
+
+        IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
+
+        IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
+
+        IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
 
         #endregion
     }

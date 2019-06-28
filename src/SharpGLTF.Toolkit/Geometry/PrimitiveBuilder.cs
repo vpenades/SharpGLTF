@@ -13,6 +13,8 @@ namespace SharpGLTF.Geometry
     {
         TMaterial Material { get; }
 
+        int VerticesPerPrimitive { get; }
+
         int VertexCount { get; }
 
         VertexBuilder<TvGG, TvMM, TvSS> GetVertex<TvGG, TvMM, TvSS>(int index)
@@ -21,6 +23,8 @@ namespace SharpGLTF.Geometry
             where TvSS : struct, IVertexSkinning;
 
         IReadOnlyList<int> Indices { get; }
+
+        IReadOnlyList<IVertexBuilder> Vertices { get; }
 
         IEnumerable<int> Points { get; }
 
@@ -97,7 +101,17 @@ namespace SharpGLTF.Geometry
 
         private readonly int _PrimitiveVertexCount;
 
-        private readonly VertexList<VertexBuilder<TvG, TvM, TvS>> _Vertices = new VertexList<VertexBuilder<TvG, TvM, TvS>>();
+        class PrimitiveVertexList : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
+        {
+            IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
+
+            IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private readonly PrimitiveVertexList _Vertices = new PrimitiveVertexList();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
@@ -119,6 +133,8 @@ namespace SharpGLTF.Geometry
         public int VertexCount => Vertices.Count;
 
         public IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> Vertices => _Vertices;
+
+        IReadOnlyList<IVertexBuilder> IPrimitive<TMaterial>.Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 

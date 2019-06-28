@@ -30,5 +30,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         JointBinding IVertexSkinning.GetJointBinding(int index) { throw new NotSupportedException(); }
 
         public IEnumerable<JointBinding> JointBindings => Enumerable.Empty<JointBinding>();
+
+        public Vector4 JointsLow => Vector4.Zero;
+
+        public Vector4 JointsHigh => Vector4.Zero;
+
+        public Vector4 WeightsLow => Vector4.Zero;
+
+        public Vector4 Weightshigh => Vector4.Zero;
     }
 }
