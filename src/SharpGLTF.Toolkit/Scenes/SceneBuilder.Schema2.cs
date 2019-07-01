@@ -7,37 +7,96 @@ namespace SharpGLTF.Scenes
 {
     using Schema2;
 
-    public partial class SceneBuilder
+    using MESHBUILDER = Geometry.IMeshBuilder<Materials.MaterialBuilder>;
+
+    class Schema2SceneBuilder
     {
+        #region data
 
-        public ModelRoot ToSchema2()
+        private readonly Dictionary<MESHBUILDER, Mesh> _Meshes = new Dictionary<MESHBUILDER, Mesh>();
+
+        private readonly Dictionary<NodeBuilder, Node> _Nodes = new Dictionary<NodeBuilder, Node>();
+
+        #endregion
+
+        #region API
+
+        public Mesh GetMesh(MESHBUILDER key) { return key == null ? null : _Meshes.TryGetValue(key, out Mesh val) ? val : null; }
+
+        public Node GetNode(NodeBuilder key) { return key == null ? null : _Nodes.TryGetValue(key, out Node val) ? val : null; }
+
+        public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
-            var dstModel = ModelRoot.CreateModel();
-
             // gather all meshes and group them by their attribute layout.
 
-            var meshGroups = _Instances
-                .Select(item => item.GetMesh())
+            var meshGroups = srcScene.Instances
+                .Select(item => item.GetGeometryAsset())
                 .Where(item => item != null)
                 .Distinct()
                 .ToList()
                 .GroupBy(item => item.GetType());
 
-            // create schema2.mesh collections for every gathered group.
-
-            var meshMap = new Dictionary<Geometry.IMeshBuilder<Materials.MaterialBuilder>, Mesh>();
+            // create Schema2.Mesh collections for every gathered group.
 
             foreach (var meshGroup in meshGroups)
             {
                 var meshArray = meshGroup.ToArray();
 
-                var meshDst = dstModel.CreateMeshes(meshArray);
+                var meshDst = dstScene.LogicalParent.CreateMeshes(meshArray);
 
                 for (int i = 0; i < meshArray.Length; ++i)
                 {
-                    meshMap[meshArray[i]] = meshDst[i];
+                    _Meshes[meshArray[i]] = meshDst[i];
                 }
             }
+
+            // gather all armatures
+
+            var armatures = srcScene.Instances
+                .Select(item => item.GetArmatureAsset())
+                .Where(item => item != null)
+                .Select(item => item.Root)
+                .Distinct()
+                .ToList();
+
+            // create Schema2.Node trees for every armature
+
+            foreach (var armature in armatures)
+            {
+                CreateNodeTree(dstScene,  armature);
+            }
+
+            // process instances
+
+            foreach (var inst in srcScene.Instances)
+            {
+                inst.Setup(dstScene, this);
+            }
+        }
+
+        private void CreateNodeTree(IVisualNodeContainer container, NodeBuilder srcNode)
+        {
+            var dstNode = container.CreateNode(srcNode.Name);
+            _Nodes[srcNode] = dstNode;
+
+            // assign animation here
+
+            foreach (var c in srcNode.Children) CreateNodeTree(dstNode, c);
+        }
+
+        #endregion
+    }
+
+    public partial class SceneBuilder
+    {
+        public ModelRoot ToSchema2()
+        {
+            var dstModel = ModelRoot.CreateModel();
+
+            var dstScene = dstModel.UseScene(0);
+
+            var context = new Schema2SceneBuilder();
+            context.AddScene(dstScene, this);
 
             return dstModel;
         }

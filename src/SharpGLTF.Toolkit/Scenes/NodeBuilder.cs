@@ -40,6 +40,8 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder Parent => _Parent;
 
+        public NodeBuilder Root => _Parent == null ? this : _Parent.Root;
+
         public IReadOnlyList<NodeBuilder> Children => _Children;
 
         #endregion
