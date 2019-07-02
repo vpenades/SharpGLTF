@@ -23,18 +23,26 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
+        #region public
+
+        internal IContentRoot Content
+        {
+            get => _Content;
+            set => _Content = value;
+        }
+
+        #endregion
+
         #region API
 
         internal Geometry.IMeshBuilder<Materials.MaterialBuilder> GetGeometryAsset()
         {
-            if (_Content is IRenderableContent renderable) return renderable.GeometryAsset;
-
-            return null;
+            return _Content?.GetGeometryAsset();
         }
 
         internal NodeBuilder GetArmatureAsset()
         {
-            throw new NotImplementedException();
+            return _Content?.GetArmatureAsset();
         }
 
         internal void Setup(Schema2.Scene dstScene, Schema2SceneBuilder context)

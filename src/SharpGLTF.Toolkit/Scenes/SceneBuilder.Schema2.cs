@@ -63,7 +63,7 @@ namespace SharpGLTF.Scenes
 
             foreach (var armature in armatures)
             {
-                CreateNodeTree(dstScene,  armature);
+                CreateArmature(dstScene,  armature);
             }
 
             // process instances
@@ -74,14 +74,14 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private void CreateNodeTree(IVisualNodeContainer container, NodeBuilder srcNode)
+        private void CreateArmature(IVisualNodeContainer container, NodeBuilder srcNode)
         {
             var dstNode = container.CreateNode(srcNode.Name);
             _Nodes[srcNode] = dstNode;
 
             // assign animation here
 
-            foreach (var c in srcNode.Children) CreateNodeTree(dstNode, c);
+            foreach (var c in srcNode.Children) CreateArmature(dstNode, c);
         }
 
         #endregion

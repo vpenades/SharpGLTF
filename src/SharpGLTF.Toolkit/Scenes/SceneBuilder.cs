@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace SharpGLTF.Scenes
 {
+    using MESHBUILDER = Geometry.IMeshBuilder<Materials.MaterialBuilder>;
+
     public partial class SceneBuilder
     {
         #region data
@@ -20,11 +23,28 @@ namespace SharpGLTF.Scenes
 
         #region API
 
-        public InstanceBuilder CreateInstance()
+        public void AddMesh(MESHBUILDER mesh, Matrix4x4 transform)
         {
-            var inst = new InstanceBuilder(this);
-            _Instances.Add(inst);
-            return inst;
+            var instance = new InstanceBuilder(this);
+            instance.Content = new StaticTransformer(mesh, transform);
+
+            _Instances.Add(instance);
+        }
+
+        public void AddMesh(MESHBUILDER mesh, NodeBuilder node)
+        {
+            var instance = new InstanceBuilder(this);
+            instance.Content = new NodeTransformer(mesh, node);
+
+            _Instances.Add(instance);
+        }
+
+        public void AddSkinnedMesh(MESHBUILDER mesh, params NodeBuilder[] joints)
+        {
+            var instance = new InstanceBuilder(this);
+            instance.Content = new SkinTransformer(mesh, joints);
+
+            _Instances.Add(instance);
         }
 
         #endregion

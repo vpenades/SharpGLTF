@@ -13,6 +13,10 @@ namespace SharpGLTF.Scenes
 
     interface IContentRoot
     {
+        MESHBUILDER GetGeometryAsset();
+
+        NodeBuilder GetArmatureAsset();
+
         void Setup(Scene dstScene, Schema2SceneBuilder context);
     }
 
@@ -23,29 +27,71 @@ namespace SharpGLTF.Scenes
 
     interface IRenderableContent : IContent
     {
-        MESHBUILDER GeometryAsset { get; }
+        MESHBUILDER GetGeometryAsset();
     }
 
-    class StaticController : IContentRoot
+    class StaticTransformer : IContentRoot
     {
-        private IContent _target;// Can be either a morphController or a mesh, or light or camera
+        #region lifecycle
+
+        public StaticTransformer(MESHBUILDER mesh, Matrix4x4 xform)
+        {
+            _Transform = xform;
+            _Target = new MeshContent(mesh);
+        }
+
+        #endregion
+
+        #region data
+
+        private IContent _Target;// Can be either a morphController or a mesh, or light or camera
 
         private Matrix4x4 _Transform;
+
+        #endregion
+
+        #region API
+
+        public NodeBuilder GetArmatureAsset() { return null; }
+
+        public MESHBUILDER GetGeometryAsset() { return (_Target as IRenderableContent)?.GetGeometryAsset(); }
 
         public void Setup(Scene dstScene, Schema2SceneBuilder context)
         {
             var node = dstScene.CreateNode();
             node.LocalMatrix = _Transform;
 
-            _target.Setup(node, context);
+            _Target.Setup(node, context);
         }
+
+        #endregion
     }
 
-    class TransformController : IContentRoot
+    class NodeTransformer : IContentRoot
     {
-        private IContent _target;// Can be either a morphController or a mesh, or light or camera
+        #region lifecycle
+
+        public NodeTransformer(MESHBUILDER mesh, NodeBuilder node)
+        {
+            _Node = node;
+            _Target = new MeshContent(mesh);
+        }
+
+        #endregion
+
+        #region data
+
+        private IContent _Target; // Can be either a morphController or a mesh, or light or camera
 
         private NodeBuilder _Node;
+
+        #endregion
+
+        #region API
+
+        public NodeBuilder GetArmatureAsset() { return _Node.Root; }
+
+        public MESHBUILDER GetGeometryAsset() { return (_Target as IRenderableContent)?.GetGeometryAsset(); }
 
         public void Setup(Schema2.Scene dstScene, Schema2SceneBuilder context)
         {
@@ -53,16 +99,38 @@ namespace SharpGLTF.Scenes
 
             if (node == null) dstScene.CreateNode();
 
-            _target.Setup(node, context);
+            _Target.Setup(node, context);
         }
+
+        #endregion
     }
 
-    class SkinController : IContentRoot
+    class SkinTransformer : IContentRoot
     {
+        #region lifecycle
+
+        public SkinTransformer(MESHBUILDER mesh, NodeBuilder[] joints)
+        {
+            _Target = new MeshContent(mesh);
+            _Joints.AddRange(joints);
+        }
+
+        #endregion
+
+        #region data
+
         private IRenderableContent _Target; // Can be either a morphController or a mesh
 
         // condition: all NodeBuilder objects must have the same root.
         private readonly List<NodeBuilder> _Joints = new List<NodeBuilder>();
+
+        #endregion
+
+        #region API
+
+        public MESHBUILDER GetGeometryAsset() { return (_Target as IRenderableContent)?.GetGeometryAsset(); }
+
+        public NodeBuilder GetArmatureAsset() { return _Joints.Select(item => item.Root).Distinct().FirstOrDefault(); }
 
         public void Setup(Scene dstScene, Schema2SceneBuilder context)
         {
@@ -74,20 +142,25 @@ namespace SharpGLTF.Scenes
 
             _Target.Setup(skinnedMeshNode, context);
         }
-    }
 
+        #endregion
+    }
 
     // We really have two options here: Either implement this here, or as a derived of IMeshBuilder<MaterialBuilder>
 
     class MorphModifier : IRenderableContent // must be a child of a controller, and the parent of a mesh
     {
-        private IRenderableContent _Target; // must be a mesh
+        #region data
 
-        // morph targets here
+        private IRenderableContent _Target;
 
-        private readonly Animations.Animatable<Vector4> _MorphWeights = new Animations.Animatable<Vector4>();
+        private readonly List<Animations.Animatable<float>> _MorphWeights = new List<Animations.Animatable<float>>();
 
-        public MESHBUILDER GeometryAsset => _Target?.GeometryAsset;
+        #endregion
+
+        #region API
+
+        public MESHBUILDER GetGeometryAsset() => _Target?.GetGeometryAsset();
 
         public void Setup(Node dstNode, Schema2SceneBuilder context)
         {
@@ -95,22 +168,37 @@ namespace SharpGLTF.Scenes
 
             // setup morphs here!
         }
+
+        #endregion
     }
 
     class MeshContent : IRenderableContent
     {
-        private MESHBUILDER _Geometry;
+        #region lifecycle
 
-        public MESHBUILDER GeometryAsset
+        public MeshContent(MESHBUILDER mesh)
         {
-            get => _Geometry;
-            set => _Geometry = value;
+            _Mesh = mesh;
         }
+
+        #endregion
+
+        #region data
+
+        private MESHBUILDER _Mesh;
+
+        #endregion
+
+        #region API
+
+        public MESHBUILDER GetGeometryAsset() => _Mesh;
 
         public void Setup(Node dstNode, Schema2SceneBuilder context)
         {
-            dstNode.Mesh = context.GetMesh(_Geometry);
+            dstNode.Mesh = context.GetMesh(_Mesh);
         }
+
+        #endregion
     }
 
     class LightContent : IContent

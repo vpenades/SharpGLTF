@@ -113,6 +113,89 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
+    class SingleLinearCurve : Curve<Single, Single>, ICurveWriter<Single>
+    {
+        #region API
+
+        public override Single GetSample(float offset)
+        {
+            var sample = FindSample(offset);
+
+            return sample.Item1 * (1-sample.Item3) + (sample.Item2 * sample.Item3);
+        }
+
+        public void SetControlPoint(float offset, Single value)
+        {
+            SetKey(offset, value);
+        }
+
+        #endregion
+    }
+
+    class SingleCubicCurve : Curve<(Single, Single, Single), Single>, ICubicCurveWriter<Single>
+    {
+        #region API
+
+        public override Single GetSample(float offset)
+        {
+            var sample = FindSample(offset);
+
+            return Hermite(sample.Item1.Item2, sample.Item1.Item3, sample.Item2.Item2, sample.Item2.Item1, sample.Item3);
+        }
+
+        private static Single Hermite(Single value1, Single tangent1, Single value2, Single tangent2, float amount)
+        {
+            // http://mathworld.wolfram.com/HermitePolynomial.html
+
+            var squared = amount * amount;
+            var cubed = amount * squared;
+
+            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
+            var part2 = (-2.0f * cubed) + (3.0f * squared);
+            var part3 = (cubed - (2.0f * squared)) + amount;
+            var part4 = cubed - squared;
+
+            return (value1 * part1) + (value2 * part2) + (tangent1 * part3) + (tangent2 * part4);
+        }
+
+        public void SetControlPoint(float key, Single value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item2 = value;
+            SetKey(key, val);
+        }
+
+        public void SetControlPointIn(float key, Single value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item1 = value - val.Item2;
+            SetKey(key, val);
+        }
+
+        public void SetControlPointOut(float key, Single value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item3 = value + val.Item2;
+            SetKey(key, val);
+        }
+
+        public void SetTangentIn(float key, Single value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item1 = value;
+            SetKey(key, val);
+        }
+
+        public void SetTangentOut(float key, Single value)
+        {
+            var val = GetKey(key) ?? default;
+            val.Item3 = value;
+            SetKey(key, val);
+        }
+
+        #endregion
+    }
+
     class Vector3LinearCurve : Curve<Vector3, Vector3>, ICurveWriter<Vector3>
     {
         #region API
