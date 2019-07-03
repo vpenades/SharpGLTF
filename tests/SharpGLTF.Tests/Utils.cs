@@ -66,6 +66,13 @@ namespace SharpGLTF
             TestContext.AddTestAttachment(fileName);
         }
 
+        public static void AttachToCurrentTest(this Scenes.SceneBuilder scene, string fileName)
+        {
+            var model = scene.ToSchema2();
+
+            model.AttachToCurrentTest(fileName);
+        }
+
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, Schema2.Animation animation, float time)
         {
             fileName = fileName.Replace(" ", "_");

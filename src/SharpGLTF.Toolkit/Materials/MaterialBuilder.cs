@@ -18,6 +18,11 @@ namespace SharpGLTF.Materials
             Name = name;
         }
 
+        public static MaterialBuilder CreateDefault()
+        {
+            return new MaterialBuilder("Default");
+        }
+
         #endregion
 
         #region data

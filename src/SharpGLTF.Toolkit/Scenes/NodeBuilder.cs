@@ -136,6 +136,39 @@ namespace SharpGLTF.Scenes
             return c;
         }
 
+        public Animations.Animatable<Vector3> UseScale()
+        {
+            if (_Scale == null)
+            {
+                _Scale = new Animations.Animatable<Vector3>();
+                _Scale.Default = Vector3.One;
+            }
+
+            return _Scale;
+        }
+
+        public Animations.Animatable<Quaternion> UseRotation()
+        {
+            if (_Rotation == null)
+            {
+                _Rotation = new Animations.Animatable<Quaternion>();
+                _Rotation.Default = Quaternion.Identity;
+            }
+
+            return _Rotation;
+        }
+
+        public Animations.Animatable<Vector3> UseTranslation()
+        {
+            if (_Translation == null)
+            {
+                _Translation = new Animations.Animatable<Vector3>();
+                _Translation.Default = Vector3.One;
+            }
+
+            return _Translation;
+        }
+
         public Transforms.AffineTransform GetLocalTransform(string animationTrack, float time)
         {
             if (animationTrack == null) return this.LocalTransform;

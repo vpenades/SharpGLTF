@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -11,11 +12,72 @@ namespace SharpGLTF
     [Category("Core")]
     public class AnimationSamplingTests
     {
+        [Test]
+        public void TestHermiteInterpolation1()
+        {
+            var p1 = new Vector2(0, 0);
+            var p2 = new Vector2(0, 1);
+            var p3 = new Vector2(1, 1);
+            var p4 = new Vector2(1, 0);
+
+            var ppp = new List<Vector2>();
+
+            for (float amount = 0; amount <= 1; amount += 0.01f)
+            {
+                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteWeights(amount);
+
+                var p = Vector2.Zero;
+
+                p += p1 * hermite.Item1;
+                p += p4 * hermite.Item2;
+                p += (p2 - p1) * 4 * hermite.Item3;
+                p += (p4 - p3) * 4 * hermite.Item4;
+
+                ppp.Add(p);
+            }
+
+            var series1 = ppp.ToPointSeries();
+            var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries();
+
+            new[] { series1, series2 }.AttachToCurrentTest("plot.png");
+        }
+
+        [Test]
+        public void TestHermiteInterpolation2()
+        {
+            var p1 = new Vector2(0, 0);
+            var p2 = new Vector2(0.1f, 5);
+            var p3 = new Vector2(0.7f, 3);
+            var p4 = new Vector2(1, 0);            
+
+            var ppp = new List<Vector2>();
+
+            for (float amount = 0; amount <= 1; amount += 0.01f)
+            {
+                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteWeights(amount);
+
+                var p = Vector2.Zero;
+
+                p += p1 * hermite.Item1;
+                p += p4 * hermite.Item2;
+                p += (p2-p1) * 4 * hermite.Item3;
+                p += (p4-p3) * 4 * hermite.Item4;
+
+                ppp.Add(p);
+            }
+
+            var series1 = ppp.ToPointSeries();
+            var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries();
+
+            new[] { series1, series2 }.AttachToCurrentTest("plot.png");
+        }
+
         private static (float, (Vector3, Vector3, Vector3))[] _TransAnim = new []
         {
-            (0.0f, (new Vector3(0, 0, 0), new Vector3(-1, 0, 0),new Vector3(0, 0, 0))),
-            (1.0f, (new Vector3(0, 0, 0), new Vector3(+1, 0, 0),new Vector3(0, 3, 0))),
-            (2.0f, (new Vector3(0, 0, 0), new Vector3(-1, 0, 0),new Vector3(0, 0, 0)))
+            (0.0f, (        Vector3.Zero, new Vector3(0, 0, 0),new Vector3(0, 0, 0))),
+            (1.0f, (new Vector3(0, 0, 0), new Vector3(1, 0, 0),new Vector3(0, 1, 0))),
+            (2.0f, (new Vector3(0, -1, 0), new Vector3(2, 0, 0),new Vector3(0, 0, 0))),
+            (3.0f, (new Vector3(0, 0, 0), new Vector3(3, 0, 0),       Vector3.Zero ))
         };
 
         private static (float, (Quaternion, Quaternion, Quaternion))[] _RotAnim = new[]
@@ -30,20 +92,26 @@ namespace SharpGLTF
         [Test]
         public void TestVector3CubicSplineSampling()
         {
-            var hermite = Transforms.AnimationSamplerFactory.Hermite(new Vector3(1, 0, 0), new Vector3(1, 2, 0), new Vector3(3, 0, 0), new Vector3(3, -2, 0), 0.5f);
+            var sampler = Transforms.AnimationSamplerFactory.CreateSplineSamplerFunc(_TransAnim);
 
-            var sampler = Transforms.AnimationSamplerFactory.CreateCubicSamplerFunc(_TransAnim);
+            var points = new List<Vector3>();
 
-            var a = sampler(0);
-            var b = sampler(1);
-            var bc = sampler(1.5f);
-            var c = sampler(2);
+            for(int i=0; i < 300; ++i)
+            {
+                var sample = sampler(((float)i) / 100.0f);
+                points.Add( sample );
+            }
+
+            points
+                .Select(p => new Vector2(p.X, p.Y))
+                .ToPointSeries()                
+                .AttachToCurrentTest("plot.png");            
         }
 
         [Test]
         public void TestQuaternionCubicSplineSampling()
         {
-            var sampler = Transforms.AnimationSamplerFactory.CreateCubicSamplerFunc(_RotAnim);
+            var sampler = Transforms.AnimationSamplerFactory.CreateSplineSamplerFunc(_RotAnim);
 
             var a = sampler(0);
             var b = sampler(1);

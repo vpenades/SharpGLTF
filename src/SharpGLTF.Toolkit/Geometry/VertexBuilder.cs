@@ -13,6 +13,11 @@ namespace SharpGLTF.Geometry
         IVertexMaterial GetMaterial();
         IVertexSkinning GetSkinning();
 
+        VertexBuilder<TvPP, TvMM, TvSS> ConvertTo<TvPP, TvMM, TvSS>()
+            where TvPP : struct, IVertexGeometry
+            where TvMM : struct, IVertexMaterial
+            where TvSS : struct, IVertexSkinning;
+
         // void SetGeometry(IVertexGeometry);
         // void SetMaterial(IVertexMaterial);
         // void SetSkinning(IVertexSkinning);

@@ -17,10 +17,7 @@ namespace SharpGLTF.Geometry
 
         int VertexCount { get; }
 
-        VertexBuilder<TvGG, TvMM, TvSS> GetVertex<TvGG, TvMM, TvSS>(int index)
-            where TvGG : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning;
+        IVertexBuilder GetVertex(int index);
 
         IReadOnlyList<int> Indices { get; }
 
@@ -35,15 +32,7 @@ namespace SharpGLTF.Geometry
 
     public interface IPrimitiveBuilder
     {
-        void AddTriangle<TvGG, TvMM, TvSS>
-            (
-            VertexBuilder<TvGG, TvMM, TvSS> a,
-            VertexBuilder<TvGG, TvMM, TvSS> b,
-            VertexBuilder<TvGG, TvMM, TvSS> c
-            )
-            where TvGG : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning;
+        void AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
     }
 
     /// <summary>
@@ -103,11 +92,13 @@ namespace SharpGLTF.Geometry
 
         class PrimitiveVertexList : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
         {
+            #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
             IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
+            #pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
 
             IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
             {
-                throw new NotImplementedException();
+                foreach (var item in this) yield return item;
             }
         }
 
@@ -212,6 +203,27 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the triangle.</param>
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
+        public void AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
+        {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+            Guard.NotNull(c, nameof(c));
+
+            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+
+            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
+            var bb = b.GetType() != expectedType ? b.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)b;
+            var cc = c.GetType() != expectedType ? c.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)c;
+
+            AddTriangle(aa, bb, cc);
+        }
+
+        /// <summary>
+        /// Adds a triangle.
+        /// </summary>
+        /// <param name="a">First corner of the triangle.</param>
+        /// <param name="b">Second corner of the triangle.</param>
+        /// <param name="c">Third corner of the triangle.</param>
         public void AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
@@ -291,27 +303,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void AddTriangle<TvPP, TvMM, TvSS>(VertexBuilder<TvPP, TvMM, TvSS> a, VertexBuilder<TvPP, TvMM, TvSS> b, VertexBuilder<TvPP, TvMM, TvSS> c)
-            where TvPP : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning
-        {
-            var aa = a.ConvertTo<TvG, TvM, TvS>();
-            var bb = b.ConvertTo<TvG, TvM, TvS>();
-            var cc = c.ConvertTo<TvG, TvM, TvS>();
-
-            AddTriangle(aa, bb, cc);
-        }
-
-        public VertexBuilder<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
-            where TvPP : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning
-        {
-            var v = _Vertices[index];
-
-            return new VertexBuilder<TvPP, TvMM, TvSS>(v.Geometry.ConvertTo<TvPP>(), v.Material.ConvertTo<TvMM>(), v.Skinning.ConvertTo<TvSS>());
-        }
+        IVertexBuilder IPrimitive<TMaterial>.GetVertex(int index) { return _Vertices[index]; }
 
         private IEnumerable<int> _GetPointIndices()
         {

@@ -16,17 +16,19 @@ namespace SharpGLTF.Schema2.Authoring
     {
         public static void AddCube<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Matrix4x4 xform)
         {
-            meshBuilder._AddCubeFace(material, Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ, xform);
-            meshBuilder._AddCubeFace(material, -Vector3.UnitX, Vector3.UnitZ, Vector3.UnitY, xform);
+            var p = meshBuilder.UsePrimitive(material);
 
-            meshBuilder._AddCubeFace(material, Vector3.UnitY, Vector3.UnitZ, Vector3.UnitX, xform);
-            meshBuilder._AddCubeFace(material, -Vector3.UnitY, Vector3.UnitX, Vector3.UnitZ, xform);
+            p._AddCubeFace(Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ, xform);
+            p._AddCubeFace(-Vector3.UnitX, Vector3.UnitZ, Vector3.UnitY, xform);
 
-            meshBuilder._AddCubeFace(material, Vector3.UnitZ, Vector3.UnitX, Vector3.UnitY, xform);
-            meshBuilder._AddCubeFace(material, -Vector3.UnitZ, Vector3.UnitY, Vector3.UnitX, xform);
+            p._AddCubeFace(Vector3.UnitY, Vector3.UnitZ, Vector3.UnitX, xform);
+            p._AddCubeFace(-Vector3.UnitY, Vector3.UnitX, Vector3.UnitZ, xform);
+
+            p._AddCubeFace(Vector3.UnitZ, Vector3.UnitX, Vector3.UnitY, xform);
+            p._AddCubeFace(-Vector3.UnitZ, Vector3.UnitY, Vector3.UnitX, xform);
         }
 
-        private static void _AddCubeFace<TMaterial>(this MeshBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> meshBuilder, TMaterial material, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
+        private static void _AddCubeFace<TMaterial>(this PrimitiveBuilder<TMaterial, VPOSNRM, VEMPTY, VEMPTY> primitiveBuilder, Vector3 origin, Vector3 axisX, Vector3 axisY, Matrix4x4 xform)
         {
             var p1 = Vector3.Transform(origin - axisX - axisY, xform);
             var p2 = Vector3.Transform(origin + axisX - axisY, xform);
@@ -34,8 +36,7 @@ namespace SharpGLTF.Schema2.Authoring
             var p4 = Vector3.Transform(origin - axisX + axisY, xform);
             var n = Vector3.Normalize(Vector3.TransformNormal(origin, xform));
 
-            meshBuilder.UsePrimitive(material)
-                .AddConvexPolygon
+            primitiveBuilder.AddConvexPolygon
                 (
                 new VPOSNRM(p1, n),
                 new VPOSNRM(p2, n),

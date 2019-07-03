@@ -54,7 +54,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
-            var firstVertex = vertexBlocks.First().First();
+            var firstVertex = vertexBlocks
+                .First(item => item.Count > 0)
+                .First();
 
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();

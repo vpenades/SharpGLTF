@@ -116,22 +116,22 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static CurveSampler<Vector3> CreateCubicSamplerFunc(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
+        internal static CurveSampler<Vector3> CreateSplineSamplerFunc(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
         {
-            return CreateCubicSamplerFunc<Vector3>(collection, Hermite);
+            return CreateSplineSamplerFunc<Vector3>(collection, Hermite);
         }
 
-        internal static CurveSampler<Quaternion> CreateCubicSamplerFunc(this IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> collection)
+        internal static CurveSampler<Quaternion> CreateSplineSamplerFunc(this IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> collection)
         {
-            return CreateCubicSamplerFunc<Quaternion>(collection, Hermite);
+            return CreateSplineSamplerFunc<Quaternion>(collection, Hermite);
         }
 
-        internal static CurveSampler<float[]> CreateCubicSamplerFunc(this IEnumerable<(float, (float[], float[], float[]))> collection)
+        internal static CurveSampler<float[]> CreateSplineSamplerFunc(this IEnumerable<(float, (float[], float[], float[]))> collection)
         {
-            return CreateCubicSamplerFunc<float[]>(collection, Hermite);
+            return CreateSplineSamplerFunc<float[]>(collection, Hermite);
         }
 
-        internal static CurveSampler<T> CreateCubicSamplerFunc<T>(this IEnumerable<(float, (T, T, T))> collection, Func<T, T, T, T, float, T> hermiteFunc)
+        internal static CurveSampler<T> CreateSplineSamplerFunc<T>(this IEnumerable<(float, (T, T, T))> collection, Func<T, T, T, T, float, T> hermiteFunc)
         {
             if (collection == null) return null;
 
@@ -145,56 +145,66 @@ namespace SharpGLTF.Transforms
             return _sampler;
         }
 
-        internal static Vector3 Hermite(Vector3 value1, Vector3 tangent1, Vector3 value2, Vector3 tangent2, float amount)
+        internal static Vector3 Hermite(Vector3 start, Vector3 tangentOut, Vector3 end, Vector3 tangentIn, float amount)
         {
-            // http://mathworld.wolfram.com/HermitePolynomial.html
+            var hermite = CalculateHermiteWeights(amount);
 
-            var squared = amount * amount;
-            var cubed = amount * squared;
-
-            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
-            var part2 = (-2.0f * cubed) + (3.0f * squared);
-            var part3 = (cubed - (2.0f * squared)) + amount;
-            var part4 = cubed - squared;
-
-            return (value1 * part1) + (value2 * part2) + (tangent1 * part3) + (tangent2 * part4);
+            return (start * hermite.Item1) + (end * hermite.Item2) + (tangentOut * hermite.Item3) + (tangentIn * hermite.Item4);
         }
 
         internal static Quaternion Hermite(Quaternion value1, Quaternion tangent1, Quaternion value2, Quaternion tangent2, float amount)
         {
-            // http://mathworld.wolfram.com/HermitePolynomial.html
+            var hermite = CalculateHermiteWeights(amount);
 
-            var squared = amount * amount;
-            var cubed = amount * squared;
-
-            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
-            var part2 = (-2.0f * cubed) + (3.0f * squared);
-            var part3 = (cubed - (2.0f * squared)) + amount;
-            var part4 = cubed - squared;
-
-            return Quaternion.Normalize((value1 * part1) + (value2 * part2) + (tangent1 * part3) + (tangent2 * part4));
+            return Quaternion.Normalize((value1 * hermite.Item1) + (value2 * hermite.Item2) + (tangent1 * hermite.Item3) + (tangent2 * hermite.Item4));
         }
 
         internal static float[] Hermite(float[] value1, float[] tangent1, float[] value2, float[] tangent2, float amount)
         {
-            // http://mathworld.wolfram.com/HermitePolynomial.html
-
-            var squared = amount * amount;
-            var cubed = amount * squared;
-
-            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
-            var part2 = (-2.0f * cubed) + (3.0f * squared);
-            var part3 = (cubed - (2.0f * squared)) + amount;
-            var part4 = cubed - squared;
+            var hermite = CalculateHermiteWeights(amount);
 
             var result = new float[value1.Length];
 
             for (int i = 0; i < result.Length; ++i)
             {
-                result[i] = (value1[i] * part1) + (value2[i] * part2) + (tangent1[i] * part3) + (tangent2[i] * part4);
+                result[i] = (value1[i] * hermite.Item1) + (value2[i] * hermite.Item2) + (tangent1[i] * hermite.Item3) + (tangent2[i] * hermite.Item4);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// for a given cubic interpolation <paramref name="amount"/>, it calculates
+        /// the weights to multiply each component:
+        /// 1: Weight for Start point
+        /// 2: Weight for End Tangent
+        /// 3: Weight for Out Tangent
+        /// 4: Weight for In Tangent
+        /// </summary>
+        /// <param name="amount">the input amount</param>
+        /// <returns>the output weights</returns>
+        public static (float, float, float, float) CalculateHermiteWeights(float amount)
+        {
+            // http://mathworld.wolfram.com/HermitePolynomial.html
+
+            // https://www.cubic.org/docs/hermite.htm
+
+            var squared = amount * amount;
+            var cubed = amount * squared;
+
+            /*
+            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
+            var part2 = (-2.0f * cubed) + (3.0f * squared);
+            var part3 = cubed - (2.0f * squared) + amount;
+            var part4 = cubed - squared;
+            */
+
+            var part2 = (3.0f * squared) - (2.0f * cubed);
+            var part1 = 1 - part2;
+            var part4 = cubed - squared;
+            var part3 = part4 - squared + amount;
+
+            return (part1, part2, part3, part4);
         }
     }
 }

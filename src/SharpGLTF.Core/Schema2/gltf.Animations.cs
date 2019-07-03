@@ -517,7 +517,7 @@ namespace SharpGLTF.Schema2
             {
                 case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
                 case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateCubicSamplerFunc();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
             }
 
             throw new NotImplementedException();
@@ -531,7 +531,7 @@ namespace SharpGLTF.Schema2
             {
                 case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
                 case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateCubicSamplerFunc();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
             }
 
             throw new NotImplementedException();
@@ -545,7 +545,7 @@ namespace SharpGLTF.Schema2
             {
                 case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
                 case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateCubicSamplerFunc();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
             }
 
             throw new NotImplementedException();
