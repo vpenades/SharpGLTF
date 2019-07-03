@@ -11,6 +11,16 @@ namespace SharpGLTF.Schema2.Authoring
     [Category("Model Authoring")]
     public class ExtensionsCreationTests
     {
+        #region setup
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            TestFiles.DownloadReferenceModels();
+        }
+
+        #endregion
+
         [Test(Description = "Creates a scene with lights")]
         public void CreateSceneWithWithLightsExtension()
         {
