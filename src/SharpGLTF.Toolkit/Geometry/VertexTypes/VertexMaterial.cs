@@ -156,6 +156,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
+        public static implicit operator VertexColor1Texture1((Vector4,Vector2) coloruv)
+        {
+            return new VertexColor1Texture1(coloruv.Item1, coloruv.Item2);
+        }
+
         #endregion
 
         #region data

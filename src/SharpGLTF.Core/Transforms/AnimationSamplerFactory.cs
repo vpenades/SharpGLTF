@@ -147,21 +147,21 @@ namespace SharpGLTF.Transforms
 
         internal static Vector3 Hermite(Vector3 start, Vector3 tangentOut, Vector3 end, Vector3 tangentIn, float amount)
         {
-            var hermite = CalculateHermiteWeights(amount);
+            var hermite = CalculateHermiteBasis(amount);
 
             return (start * hermite.Item1) + (end * hermite.Item2) + (tangentOut * hermite.Item3) + (tangentIn * hermite.Item4);
         }
 
         internal static Quaternion Hermite(Quaternion value1, Quaternion tangent1, Quaternion value2, Quaternion tangent2, float amount)
         {
-            var hermite = CalculateHermiteWeights(amount);
+            var hermite = CalculateHermiteBasis(amount);
 
             return Quaternion.Normalize((value1 * hermite.Item1) + (value2 * hermite.Item2) + (tangent1 * hermite.Item3) + (tangent2 * hermite.Item4));
         }
 
         internal static float[] Hermite(float[] value1, float[] tangent1, float[] value2, float[] tangent2, float amount)
         {
-            var hermite = CalculateHermiteWeights(amount);
+            var hermite = CalculateHermiteBasis(amount);
 
             var result = new float[value1.Length];
 
@@ -183,7 +183,7 @@ namespace SharpGLTF.Transforms
         /// </summary>
         /// <param name="amount">the input amount</param>
         /// <returns>the output weights</returns>
-        public static (float, float, float, float) CalculateHermiteWeights(float amount)
+        public static (float, float, float, float) CalculateHermiteBasis(float amount)
         {
             // http://mathworld.wolfram.com/HermitePolynomial.html
 
@@ -203,6 +203,27 @@ namespace SharpGLTF.Transforms
             var part1 = 1 - part2;
             var part4 = cubed - squared;
             var part3 = part4 - squared + amount;
+
+            return (part1, part2, part3, part4);
+        }
+
+        public static (float, float, float, float) CalculateHermiteTangent(float amount)
+        {
+            // https://math.stackexchange.com/questions/1270776/how-to-find-tangent-at-any-point-along-a-cubic-hermite-spline
+
+            var squared = amount * amount;
+
+            /*
+            var part1 = (6 * squared) - (6 * amount);
+            var part2 = -(6 * squared) + (6 * amount);
+            var part3 = (3 * squared) - (4 * amount) + 1;
+            var part4 = (3 * squared) - (2 * amount);
+            */
+
+            var part1 = (6 * squared) - (6 * amount);
+            var part2 = -part1;
+            var part3 = (3 * squared) - (4 * amount) + 1;
+            var part4 = (3 * squared) - (2 * amount);
 
             return (part1, part2, part3, part4);
         }

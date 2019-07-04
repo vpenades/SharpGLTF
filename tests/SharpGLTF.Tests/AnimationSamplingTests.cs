@@ -24,7 +24,7 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.01f)
             {
-                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteWeights(amount);
+                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteBasis(amount);
 
                 var p = Vector2.Zero;
 
@@ -36,10 +36,23 @@ namespace SharpGLTF
                 ppp.Add(p);
             }
 
+            // now lets calculate an arbitrary point and tangent
+
+            float k = 0.3f;
+
+            var hb = Transforms.AnimationSamplerFactory.CalculateHermiteBasis(k);
+            var ht = Transforms.AnimationSamplerFactory.CalculateHermiteTangent(k);
+
+            var pp = p1 * hb.Item1 + p4 * hb.Item2 + (p2 - p1) * 4 * hb.Item3 + (p4 - p3) * 4 * hb.Item4;
+            var pt = p1 * ht.Item1 + p4 * ht.Item2 + (p2 - p1) * 4 * ht.Item3 + (p4 - p3) * 4 * ht.Item4;
+
+            // plotting
+
             var series1 = ppp.ToPointSeries();
             var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries();
+            var series3 = new[] { pp, pp + pt }.ToLineSeries();
 
-            new[] { series1, series2 }.AttachToCurrentTest("plot.png");
+            new[] { series1, series2, series3 }.AttachToCurrentTest("plot.png");
         }
 
         [Test]
@@ -54,7 +67,7 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.01f)
             {
-                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteWeights(amount);
+                var hermite = Transforms.AnimationSamplerFactory.CalculateHermiteBasis(amount);
 
                 var p = Vector2.Zero;
 
@@ -70,7 +83,7 @@ namespace SharpGLTF
             var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries();
 
             new[] { series1, series2 }.AttachToCurrentTest("plot.png");
-        }
+        }        
 
         private static (float, (Vector3, Vector3, Vector3))[] _TransAnim = new []
         {

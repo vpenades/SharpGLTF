@@ -14,7 +14,7 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder() { }
 
-        internal NodeBuilder(NodeBuilder parent)
+        private NodeBuilder(NodeBuilder parent)
         {
             _Parent = parent;
         }
@@ -28,9 +28,6 @@ namespace SharpGLTF.Scenes
         private readonly List<NodeBuilder> _Children = new List<NodeBuilder>();
 
         private Matrix4x4? _Matrix;
-        private Animations.Animatable<Vector3> _Scale;
-        private Animations.Animatable<Quaternion> _Rotation;
-        private Animations.Animatable<Vector3> _Translation;
 
         #endregion
 
@@ -48,12 +45,20 @@ namespace SharpGLTF.Scenes
 
         #region properties - transform
 
+        public bool HasAnimations => Scale?.Tracks.Count > 0 || Rotation?.Tracks.Count > 0 || Translation?.Tracks.Count > 0;
+
+        public Animations.Animatable<Vector3> Scale { get; private set; }
+
+        public Animations.Animatable<Quaternion> Rotation { get; private set; }
+
+        public Animations.Animatable<Vector3> Translation { get; private set; }
+
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.
         /// </summary>
         public Matrix4x4 LocalMatrix
         {
-            get => Transforms.AffineTransform.Evaluate(_Matrix, _Scale?.Default, _Rotation?.Default, _Translation?.Default);
+            get => Transforms.AffineTransform.Evaluate(_Matrix, Scale?.Default, Rotation?.Default, Translation?.Default);
             set
             {
                 if (value == Matrix4x4.Identity)
@@ -65,9 +70,9 @@ namespace SharpGLTF.Scenes
                     _Matrix = value;
                 }
 
-                _Scale = null;
-                _Rotation = null;
-                _Translation = null;
+                Scale = null;
+                Rotation = null;
+                Translation = null;
             }
         }
 
@@ -80,7 +85,7 @@ namespace SharpGLTF.Scenes
                 ?
                 Transforms.AffineTransform.Create(_Matrix.Value)
                 :
-                Transforms.AffineTransform.Create(_Scale?.Default, _Rotation?.Default, _Translation?.Default);
+                Transforms.AffineTransform.Create(Scale?.Default, Rotation?.Default, Translation?.Default);
             set
             {
                 Guard.IsTrue(value.IsValid, nameof(value));
@@ -89,20 +94,20 @@ namespace SharpGLTF.Scenes
 
                 if (value.Scale != Vector3.One)
                 {
-                    if (_Scale == null) _Scale = new Animations.Animatable<Vector3>();
-                    _Scale.Default = value.Scale;
+                    if (Scale == null) Scale = new Animations.Animatable<Vector3>();
+                    Scale.Default = value.Scale;
                 }
 
                 if (value.Rotation != Quaternion.Identity)
                 {
-                    if (_Rotation == null) _Rotation = new Animations.Animatable<Quaternion>();
-                    _Rotation.Default = value.Rotation;
+                    if (Rotation == null) Rotation = new Animations.Animatable<Quaternion>();
+                    Rotation.Default = value.Rotation;
                 }
 
                 if (value.Translation != Vector3.Zero)
                 {
-                    if (_Translation == null) _Translation = new Animations.Animatable<Vector3>();
-                    _Translation.Default = value.Scale;
+                    if (Translation == null) Translation = new Animations.Animatable<Vector3>();
+                    Translation.Default = value.Scale;
                 }
             }
         }
@@ -138,44 +143,44 @@ namespace SharpGLTF.Scenes
 
         public Animations.Animatable<Vector3> UseScale()
         {
-            if (_Scale == null)
+            if (Scale == null)
             {
-                _Scale = new Animations.Animatable<Vector3>();
-                _Scale.Default = Vector3.One;
+                Scale = new Animations.Animatable<Vector3>();
+                Scale.Default = Vector3.One;
             }
 
-            return _Scale;
+            return Scale;
         }
 
         public Animations.Animatable<Quaternion> UseRotation()
         {
-            if (_Rotation == null)
+            if (Rotation == null)
             {
-                _Rotation = new Animations.Animatable<Quaternion>();
-                _Rotation.Default = Quaternion.Identity;
+                Rotation = new Animations.Animatable<Quaternion>();
+                Rotation.Default = Quaternion.Identity;
             }
 
-            return _Rotation;
+            return Rotation;
         }
 
         public Animations.Animatable<Vector3> UseTranslation()
         {
-            if (_Translation == null)
+            if (Translation == null)
             {
-                _Translation = new Animations.Animatable<Vector3>();
-                _Translation.Default = Vector3.One;
+                Translation = new Animations.Animatable<Vector3>();
+                Translation.Default = Vector3.One;
             }
 
-            return _Translation;
+            return Translation;
         }
 
         public Transforms.AffineTransform GetLocalTransform(string animationTrack, float time)
         {
             if (animationTrack == null) return this.LocalTransform;
 
-            var scale = _Scale?.GetValueAt(animationTrack, time);
-            var rotation = _Rotation?.GetValueAt(animationTrack, time);
-            var translation = _Translation?.GetValueAt(animationTrack, time);
+            var scale = Scale?.GetValueAt(animationTrack, time);
+            var rotation = Rotation?.GetValueAt(animationTrack, time);
+            var translation = Translation?.GetValueAt(animationTrack, time);
 
             return Transforms.AffineTransform.Create(scale, rotation, translation);
         }

@@ -54,6 +54,11 @@ namespace SharpGLTF.Geometry
 
     public interface IPrimitiveBuilder
     {
+        /// <summary>
+        /// Gets the type of vertex used by this <see cref="IVertexBuilder"/>.
+        /// </summary>
+        Type VertexType { get; }
+
         (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
     }
 
@@ -156,6 +161,8 @@ namespace SharpGLTF.Geometry
         public IEnumerable<(int, int)> Lines => _GetLineIndices();
 
         public IEnumerable<(int, int, int)> Triangles => _GetTriangleIndices();
+
+        public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
         #endregion
 

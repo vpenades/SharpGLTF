@@ -2,13 +2,28 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Linq;
 
 namespace SharpGLTF.Animations
 {
     public interface ICurveSampler<T>
         where T : struct
     {
-        T GetSample(float offset);
+        T GetPoint(float offset);
+
+        T GetTangent(float offset);
+    }
+
+    [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
+    public struct CurvePoint<T>
+        where T : struct
+    {
+        private readonly ICurveSampler<T> _Curve;
+        private readonly float _Offset;
+
+        public T Point => _Curve.GetPoint(_Offset);
+
+        public T Tangent => _Curve.GetTangent(_Offset);
     }
 
     public interface ILinearCurve<T> : ICurveSampler<T>
@@ -21,16 +36,28 @@ namespace SharpGLTF.Animations
         T GetControlPoint(float key);
 
         void SetControlPoint(float key, T value);
+
+        Dictionary<float, T> ToDictionary();
     }
 
-    public interface ISplineCurve<T> : ILinearCurve<T>
+    public interface ISplineCurve<T> : ICurveSampler<T>
         where T : struct
     {
-        void SetControlPointIn(float key, T value);
-        void SetControlPointOut(float key, T value);
+        IReadOnlyCollection<float> Keys { get; }
+
+        void RemoveKey(float key);
+
+        T GetControlPoint(float key);
+
+        void SetControlPoint(float key, T value);
+
+        void SetCardinalPointIn(float key, T value);
+        void SetCardinalPointOut(float key, T value);
 
         void SetTangentIn(float key, T value);
         void SetTangentOut(float key, T value);
+
+        Dictionary<float, (T, T, T)> ToDictionary();
     }
 
     public static class CurveFactory
@@ -67,7 +94,7 @@ namespace SharpGLTF.Animations
         /// </summary>
         /// <param name="amount">the input amount</param>
         /// <returns>the output weights</returns>
-        public static (float, float, float, float) CalculateHermiteWeights(float amount)
+        public static (float, float, float, float) CalculateHermiteBasis(float amount)
         {
             // http://mathworld.wolfram.com/HermitePolynomial.html
 
@@ -88,9 +115,30 @@ namespace SharpGLTF.Animations
 
             return (part1, part2, part3, part4);
         }
+
+        public static (float, float, float, float) CalculateHermiteTangent(float amount)
+        {
+            // https://math.stackexchange.com/questions/1270776/how-to-find-tangent-at-any-point-along-a-cubic-hermite-spline
+
+            var squared = amount * amount;
+
+            /*
+            var part1 = (6 * squared) - (6 * amount);
+            var part2 = -(6 * squared) + (6 * amount);
+            var part3 = (3 * squared) - (4 * amount) + 1;
+            var part4 = (3 * squared) - (2 * amount);
+            */
+
+            var part1 = (6 * squared) - (6 * amount);
+            var part2 = -part1;
+            var part3 = (3 * squared) - (4 * amount) + 1;
+            var part4 = (3 * squared) - (2 * amount);
+
+            return (part1, part2, part3, part4);
+        }
     }
 
-    abstract class Curve<Tin, Tout> : ICurveSampler<Tout>
+    abstract class Curve<Tin, Tout>
         where Tin : struct
         where Tout : struct
     {
@@ -110,7 +158,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private SortedDictionary<float, Tin> _Keys = new SortedDictionary<float, Tin>();
+        protected SortedDictionary<float, Tin> _Keys = new SortedDictionary<float, Tin>();
 
         #endregion
 
@@ -132,8 +180,6 @@ namespace SharpGLTF.Animations
         {
             return _FindSample(_Keys, offset);
         }
-
-        public abstract Tout GetSample(float offset);
 
         /// <summary>
         /// Given a <paramref name="sequence"/> of float+<typeparamref name="T"/> pairs and a <paramref name="offset"/> time,
@@ -186,6 +232,7 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
+    // Hermite Point
     struct _SplinePoint<T>
         where T : struct
     {
@@ -206,11 +253,17 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Single GetSample(float offset)
+        public Single GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
-            return sample.Item1 * (1 - sample.Item3) + (sample.Item2 * sample.Item3);
+            return (sample.Item1 * (1 - sample.Item3)) + (sample.Item2 * sample.Item3);
+        }
+
+        public Single GetTangent(float offset)
+        {
+            var sample = FindSample(offset);
+            return sample.Item2 - sample.Item1;
         }
 
         public float GetControlPoint(float key)
@@ -222,6 +275,11 @@ namespace SharpGLTF.Animations
         public void SetControlPoint(float offset, Single value)
         {
             SetKey(offset, value);
+        }
+
+        public Dictionary<float, float> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => v.Value);
         }
 
         #endregion
@@ -239,18 +297,30 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Single GetSample(float offset)
+        public float GetPoint(float offset)
         {
             var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return Hermite(sample.Item1.Point, sample.Item1.OutTangent, sample.Item2.Point, sample.Item2.InTangent, sample.Item3);
+            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+
+            return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        private static Single Hermite(Single value1, Single tangent1, Single value2, Single tangent2, float amount)
+        public float GetTangent(float offset)
         {
-            var hermite = CurveFactory.CalculateHermiteWeights(amount);
+            var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return (value1 * hermite.Item1) + (value2 * hermite.Item2) + (tangent1 * hermite.Item3) + (tangent2 * hermite.Item4);
+            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+
+            return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
         public float GetControlPoint(float key)
@@ -266,17 +336,17 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetControlPointIn(float key, Single value)
+        public void SetCardinalPointIn(float key, Single value)
         {
             var val = GetKey(key) ?? default;
-            val.InTangent = val.Point - value;
+            val.InTangent = (val.Point - value) * 4;
             SetKey(key, val);
         }
 
-        public void SetControlPointOut(float key, Single value)
+        public void SetCardinalPointOut(float key, Single value)
         {
             var val = GetKey(key) ?? default;
-            val.OutTangent = value - val.Point;
+            val.OutTangent = (value - val.Point) * 4;
             SetKey(key, val);
         }
 
@@ -294,6 +364,11 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
+        public Dictionary<float, (float, float, float)> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => (v.Value.InTangent, v.Value.Point, v.Value.OutTangent));
+        }
+
         #endregion
     }
 
@@ -309,11 +384,18 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Vector3 GetSample(float offset)
+        public Vector3 GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
             return Vector3.Lerp(sample.Item1, sample.Item2, sample.Item3);
+        }
+
+        public Vector3 GetTangent(float offset)
+        {
+            var sample = FindSample(offset);
+
+            return sample.Item2 - sample.Item1;
         }
 
         public Vector3 GetControlPoint(float key)
@@ -325,6 +407,11 @@ namespace SharpGLTF.Animations
         public void SetControlPoint(float offset, Vector3 value)
         {
             SetKey(offset, value);
+        }
+
+        public Dictionary<float, Vector3> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => v.Value);
         }
 
         #endregion
@@ -342,18 +429,30 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Vector3 GetSample(float offset)
+        public Vector3 GetPoint(float offset)
         {
             var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return Hermite(sample.Item1.Point, sample.Item1.OutTangent, sample.Item2.Point, sample.Item2.InTangent, sample.Item3);
+            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+
+            return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        private static Vector3 Hermite(Vector3 pointStart, Vector3 tangentOut, Vector3 pointEnd, Vector3 tangentIn, float amount)
+        public Vector3 GetTangent(float offset)
         {
-            var hermite = CurveFactory.CalculateHermiteWeights(amount);
+            var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return (pointStart * hermite.Item1) + (pointEnd * hermite.Item2) + (tangentOut * hermite.Item3) + (tangentIn * hermite.Item4);
+            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+
+            return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
         public Vector3 GetControlPoint(float key)
@@ -369,17 +468,17 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetControlPointIn(float key, Vector3 value)
+        public void SetCardinalPointIn(float key, Vector3 value)
         {
             var val = GetKey(key) ?? default;
-            val.InTangent = val.Point - value;
+            val.InTangent = (val.Point - value) * 4;
             SetKey(key, val);
         }
 
-        public void SetControlPointOut(float key, Vector3 value)
+        public void SetCardinalPointOut(float key, Vector3 value)
         {
             var val = GetKey(key) ?? default;
-            val.OutTangent = value - val.Point;
+            val.OutTangent = (value - val.Point) * 4;
             SetKey(key, val);
         }
 
@@ -397,6 +496,11 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
+        public Dictionary<float, (Vector3, Vector3, Vector3)> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => (v.Value.InTangent, v.Value.Point, v.Value.OutTangent));
+        }
+
         #endregion
     }
 
@@ -412,11 +516,16 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Quaternion GetSample(float offset)
+        public Quaternion GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
             return Quaternion.Slerp(sample.Item1, sample.Item2, sample.Item3);
+        }
+
+        public Quaternion GetTangent(float offset)
+        {
+            throw new NotImplementedException();
         }
 
         public Quaternion GetControlPoint(float key)
@@ -428,6 +537,11 @@ namespace SharpGLTF.Animations
         public void SetControlPoint(float offset, Quaternion value)
         {
             SetKey(offset, value);
+        }
+
+        public Dictionary<float, Quaternion> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => v.Value);
         }
 
         #endregion
@@ -445,18 +559,34 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public override Quaternion GetSample(float offset)
+        public Quaternion GetPoint(float offset)
         {
             var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return Hermite(sample.Item1.Point, sample.Item1.OutTangent, sample.Item2.Point, sample.Item2.InTangent, sample.Item3);
+            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+
+            var q = (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
+
+            return Quaternion.Normalize(q);
         }
 
-        private static Quaternion Hermite(Quaternion value1, Quaternion tangent1, Quaternion value2, Quaternion tangent2, float amount)
+        public Quaternion GetTangent(float offset)
         {
-            var hermite = CurveFactory.CalculateHermiteWeights(amount);
+            var sample = FindSample(offset);
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.InTangent;
 
-            return Quaternion.Normalize((value1 * hermite.Item1) + (value2 * hermite.Item2) + (tangent1 * hermite.Item3) + (tangent2 * hermite.Item4));
+            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+
+            var q = (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
+
+            return Quaternion.Normalize(q);
         }
 
         public Quaternion GetControlPoint(float key)
@@ -472,24 +602,24 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetControlPointIn(float key, Quaternion value)
+        public void SetCardinalPointIn(float key, Quaternion value)
         {
             var val = GetKey(key) ?? default;
 
             var inv = Quaternion.Inverse(value);
-            value = Quaternion.Concatenate(val.Point, inv);
+            value = Quaternion.Concatenate(val.Point, inv); // *4? => convert to axisradians; angle * 4, back to Q
             value = Quaternion.Normalize(value);
 
             val.InTangent = value;
             SetKey(key, val);
         }
 
-        public void SetControlPointOut(float key, Quaternion value)
+        public void SetCardinalPointOut(float key, Quaternion value)
         {
             var val = GetKey(key) ?? default;
 
             var inv = Quaternion.Inverse(val.Point);
-            value = Quaternion.Concatenate(value, inv);
+            value = Quaternion.Concatenate(value, inv); // *4? => convert to axisradians; angle * 4, back to Q
             value = Quaternion.Normalize(value);
 
             val.OutTangent = value;
@@ -508,6 +638,11 @@ namespace SharpGLTF.Animations
             var val = GetKey(key) ?? default;
             val.OutTangent = Quaternion.Normalize(value);
             SetKey(key, val);
+        }
+
+        public Dictionary<float, (Quaternion, Quaternion, Quaternion)> ToDictionary()
+        {
+            return _Keys.ToDictionary(k => k.Key, v => (v.Value.InTangent, v.Value.Point, v.Value.OutTangent));
         }
 
         #endregion

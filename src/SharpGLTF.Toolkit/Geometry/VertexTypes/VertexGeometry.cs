@@ -107,6 +107,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetNormal(out this.Normal);
         }
 
+        public static implicit operator VertexPositionNormal((Vector3, Vector3) posnrm)
+        {
+            return new VertexPositionNormal(posnrm.Item1, posnrm.Item2);
+        }
+
         #endregion
 
         #region data

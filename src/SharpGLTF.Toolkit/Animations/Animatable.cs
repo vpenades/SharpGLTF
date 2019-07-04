@@ -16,18 +16,24 @@ namespace SharpGLTF.Animations
 
         #endregion
 
+        #region properties
+
+        public IReadOnlyDictionary<string, ICurveSampler<T>> Tracks => _Tracks;
+
+        #endregion
+
         #region API
 
         public T GetValueAt(string track, float value)
         {
-            return _Tracks.TryGetValue(track, out ICurveSampler<T> sampler) ? sampler.GetSample(value) : this.Default;
+            return _Tracks.TryGetValue(track, out ICurveSampler<T> sampler) ? sampler.GetPoint(value) : this.Default;
         }
 
         public ILinearCurve<T> UseLinearCurve(string track)
         {
             if (!_Tracks.TryGetValue(track, out ICurveSampler<T> curve))
             {
-                _Tracks[track] = CurveFactory.CreateLinearCurve<T>();
+                _Tracks[track] = curve = CurveFactory.CreateLinearCurve<T>();
             }
 
             if (curve is ILinearCurve<T> editableCurve) return editableCurve;
@@ -39,7 +45,7 @@ namespace SharpGLTF.Animations
         {
             if (!_Tracks.TryGetValue(track, out ICurveSampler<T> curve))
             {
-                _Tracks[track] = CurveFactory.CreateSplineCurve<T>();
+                _Tracks[track] = curve = CurveFactory.CreateSplineCurve<T>();
             }
 
             if (curve is ISplineCurve<T> editableCurve) return editableCurve;

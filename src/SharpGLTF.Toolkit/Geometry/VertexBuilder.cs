@@ -13,14 +13,14 @@ namespace SharpGLTF.Geometry
         IVertexMaterial GetMaterial();
         IVertexSkinning GetSkinning();
 
+        void SetGeometry(IVertexGeometry geometry);
+        void SetMaterial(IVertexMaterial material);
+        void SetSkinning(IVertexSkinning skinning);
+
         VertexBuilder<TvPP, TvMM, TvSS> ConvertTo<TvPP, TvMM, TvSS>()
             where TvPP : struct, IVertexGeometry
             where TvMM : struct, IVertexMaterial
             where TvSS : struct, IVertexSkinning;
-
-        // void SetGeometry(IVertexGeometry);
-        // void SetMaterial(IVertexMaterial);
-        // void SetSkinning(IVertexSkinning);
     }
 
     /// <summary>
@@ -318,6 +318,23 @@ namespace SharpGLTF.Geometry
 
         IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
 
+        void IVertexBuilder.SetGeometry(IVertexGeometry geometry)
+        {
+            Guard.NotNull(geometry, nameof(geometry));
+            this.Geometry = geometry.GetType() == typeof(TvG) ? (TvG)geometry : geometry.ConvertTo<TvG>();
+        }
+
+        void IVertexBuilder.SetMaterial(IVertexMaterial material)
+        {
+            Guard.NotNull(material, nameof(material));
+            this.Material = material.GetType() == typeof(TvM) ? (TvM)material : material.ConvertTo<TvM>();
+        }
+
+        void IVertexBuilder.SetSkinning(IVertexSkinning skinning)
+        {
+            Guard.NotNull(skinning, nameof(skinning));
+            this.Skinning = skinning.GetType() == typeof(TvS) ? (TvS)skinning : skinning.ConvertTo<TvS>();
+        }
         #endregion
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Numerics;
 
 namespace SharpGLTF.Scenes
 {
@@ -79,7 +80,21 @@ namespace SharpGLTF.Scenes
             var dstNode = container.CreateNode(srcNode.Name);
             _Nodes[srcNode] = dstNode;
 
-            // assign animation here
+            if (srcNode.HasAnimations)
+            {
+                dstNode.LocalTransform = srcNode.LocalTransform;
+
+                if (srcNode.Scale != null) foreach (var t in srcNode.Scale.Tracks) dstNode.WithScaleAnimation(t.Key, t.Value);
+
+                if (srcNode.Rotation != null) foreach (var t in srcNode.Rotation.Tracks) dstNode.WithRotationAnimation(t.Key, t.Value);
+
+                if (srcNode.Translation != null) foreach (var t in srcNode.Translation.Tracks) dstNode.WithTranslationAnimation(t.Key, t.Value);
+
+            }
+            else
+            {
+                dstNode.LocalMatrix = srcNode.LocalMatrix;
+            }
 
             foreach (var c in srcNode.Children) CreateArmature(dstNode, c);
         }
