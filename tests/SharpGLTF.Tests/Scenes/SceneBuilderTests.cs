@@ -46,17 +46,14 @@ namespace SharpGLTF.Scenes
             var pivot = new NodeBuilder();
 
             var tcurve = pivot.UseTranslation().UseSplineCurve("default");
-            tcurve.SetControlPoint(0, Vector3.Zero);
 
-            tcurve.SetControlPoint(1, new Vector3(10, 0, 0));
-            tcurve.SetCardinalPointOut(1, new Vector3(10, 10, 0));
-            
-            tcurve.SetControlPoint(2, new Vector3(10, 0, 0));
-            tcurve.SetCardinalPointIn(2, new Vector3(20, 10, 0));
+            var c = new Animations.CurvePoint<Vector3>(tcurve, 0);
 
-            tcurve.SetControlPoint(3, new Vector3(20, 0, 0));
-
-            tcurve.SetControlPoint(4, new Vector3(10, -10, 0));
+            c.GetAt(0).MovePointTo(Vector3.Zero).MoveOutgoingTangentTo(Vector3.Zero);
+            c.GetAt(1).MovePointTo(new Vector3(10, 0, 0)).MoveIncomingTangentTo(Vector3.Zero).MoveOutgoingTangentTo(new Vector3(0, 40, 0));
+            c.GetAt(2).MovePointTo(new Vector3(20, 0, 0)).MoveIncomingTangentTo(new Vector3(0, -40, 0)).MoveOutgoingTangentTo(Vector3.Zero);
+            c.GetAt(3).MovePointTo(new Vector3(30, 0, 0));
+            c.GetAt(4).MovePointTo(new Vector3(10, -10, 0));
 
             var scene = new SceneBuilder();
 

@@ -6,9 +6,17 @@ using System.Linq;
 
 namespace SharpGLTF.Animations
 {
+    // TODO: define just ONE kind of curve: spline with flags, where a flag might indicate if the current segment is linear or spline.
+    // when converting to gltf, check if all segments are linear, and use the appropiate encoding.
+
+
     public interface ICurveSampler<T>
         where T : struct
     {
+        IReadOnlyCollection<float> Keys { get; }
+
+        (float, float, float) FindLerp(float offset);
+
         T GetPoint(float offset);
 
         T GetTangent(float offset);
@@ -18,19 +26,131 @@ namespace SharpGLTF.Animations
     public struct CurvePoint<T>
         where T : struct
     {
+        #region lifecycle
+
+        public CurvePoint(ICurveSampler<T> curve, float offset)
+        {
+            _Curve = curve;
+            _Offset = offset;
+        }
+
+        #endregion
+
+        #region data
+
         private readonly ICurveSampler<T> _Curve;
         private readonly float _Offset;
+
+        #endregion
+
+        #region properties
 
         public T Point => _Curve.GetPoint(_Offset);
 
         public T Tangent => _Curve.GetTangent(_Offset);
+
+        public float LerpAmount => _Curve.FindLerp(_Offset).Item3;
+
+        #endregion
+
+        #region API
+
+        public CurvePoint<T> Split()
+        {
+            var c = GetCurrent();
+
+            if (c.HasValue && c.Value._Offset == this._Offset) return this;
+
+            if (_Curve is ILinearCurve<T> linear)
+            {
+                linear.SetControlPoint(_Offset, _Curve.GetPoint(_Offset));
+                return this;
+            }
+
+            if (_Curve is ISplineCurve<T> spline)
+            {
+                var p = _Curve.GetPoint(_Offset);
+                var t = _Curve.GetTangent(_Offset);
+
+                spline.SetControlPoint(_Offset, p);
+                spline.SetTangentIn(_Offset, t, -1);
+                spline.SetTangentOut(_Offset, t, 1);
+            }
+
+            return this;
+        }
+
+        public CurvePoint<T> GetAt(float offset) { return new CurvePoint<T>(_Curve, offset); }
+
+        public CurvePoint<T>? GetCurrent()
+        {
+            var offsets = _Curve.FindLerp(_Offset);
+
+            if (_Offset < offsets.Item1) return null;
+
+            return new CurvePoint<T>(_Curve, offsets.Item1);
+        }
+
+        public CurvePoint<T>? GetNext()
+        {
+            var offsets = _Curve.FindLerp(_Offset);
+
+            if (_Offset >= offsets.Item2) return null;
+
+            return new CurvePoint<T>(_Curve, offsets.Item2);
+        }
+
+        public CurvePoint<T> MovePointTo(T value)
+        {
+            Split();
+
+            if (_Curve is ILinearCurve<T> linear)
+            {
+                linear.SetControlPoint(_Offset, value);
+                return this;
+            }
+
+            if (_Curve is ISplineCurve<T> spline)
+            {
+                spline.SetControlPoint(_Offset, value);
+                return this;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public CurvePoint<T> MoveIncomingTangentTo(T value)
+        {
+            Split();
+
+            if (_Curve is ISplineCurve<T> spline)
+            {
+                spline.SetTangentIn(_Offset, value, 1);
+                return this;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        public CurvePoint<T> MoveOutgoingTangentTo(T value)
+        {
+            Split();
+
+            if (_Curve is ISplineCurve<T> spline)
+            {
+                spline.SetTangentOut(_Offset, value, 1);
+                return this;
+            }
+
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 
-    public interface ILinearCurve<T> : ICurveSampler<T>
+    interface ILinearCurve<T> : ICurveSampler<T>
         where T : struct
     {
-        IReadOnlyCollection<float> Keys { get; }
-
         void RemoveKey(float key);
 
         T GetControlPoint(float key);
@@ -40,7 +160,7 @@ namespace SharpGLTF.Animations
         Dictionary<float, T> ToDictionary();
     }
 
-    public interface ISplineCurve<T> : ICurveSampler<T>
+    interface ISplineCurve<T> : ICurveSampler<T>
         where T : struct
     {
         IReadOnlyCollection<float> Keys { get; }
@@ -51,11 +171,8 @@ namespace SharpGLTF.Animations
 
         void SetControlPoint(float key, T value);
 
-        void SetCardinalPointIn(float key, T value);
-        void SetCardinalPointOut(float key, T value);
-
-        void SetTangentIn(float key, T value);
-        void SetTangentOut(float key, T value);
+        void SetTangentIn(float key, T value, float scale);
+        void SetTangentOut(float key, T value, float scale);
 
         Dictionary<float, (T, T, T)> ToDictionary();
     }
@@ -138,6 +255,11 @@ namespace SharpGLTF.Animations
         }
     }
 
+    /// <summary>
+    /// Represents a collection of consecutive nodes that can be sampled into a continuous curve.
+    /// </summary>
+    /// <typeparam name="Tin">The type of a node in the sequence.</typeparam>
+    /// <typeparam name="Tout">The type of value evaluated at any point in the curve.</typeparam>
     abstract class Curve<Tin, Tout>
         where Tin : struct
         where Tout : struct
@@ -178,33 +300,43 @@ namespace SharpGLTF.Animations
 
         protected (Tin, Tin, float) FindSample(float offset)
         {
-            return _FindSample(_Keys, offset);
+            if (_Keys.Count == 0) return (default(Tin), default(Tin), 0);
+
+            var offsets = _FindPairContainingOffset(_Keys.Keys, offset);
+
+            return (_Keys[offsets.Item1], _Keys[offsets.Item2], offsets.Item3);
         }
 
-        /// <summary>
-        /// Given a <paramref name="sequence"/> of float+<typeparamref name="T"/> pairs and a <paramref name="offset"/> time,
-        /// it finds two consecutive values and the LERP amout.
-        /// </summary>
-        /// <typeparam name="T">The value type</typeparam>
-        /// <param name="sequence">A sequence of float+<typeparamref name="T"/> pairs</param>
-        /// <param name="offset">the time point within the sequence</param>
-        /// <returns>Two consecutive <typeparamref name="T"/> values and a float amount to LERP them.</returns>
-        private static (T, T, float) _FindSample<T>(IEnumerable<KeyValuePair<float, T>> sequence, float offset)
-        {
-            KeyValuePair<float, T>? left = null;
-            KeyValuePair<float, T>? right = null;
-            KeyValuePair<float, T>? prev = null;
+        public (float, float, float) FindLerp(float offset) { return _FindPairContainingOffset(_Keys.Keys, offset); }
 
-            if (offset < 0) offset = 0;
+        /// <summary>
+        /// Given a <paramref name="sequence"/> of offsets and an <paramref name="offset"/>,
+        /// it finds two consecutive offsets that contain <paramref name="offset"/> between them.
+        /// </summary>
+        /// <param name="sequence">A sequence of offsets.</param>
+        /// <param name="offset">the offset to look for in the sequence.</param>
+        /// <returns>Two consecutive offsets and a LERP value.</returns>
+        private static (float, float, float) _FindPairContainingOffset(IEnumerable<float> sequence, float offset)
+        {
+            if (!sequence.Any()) return (0, 0, 0);
+
+            float? left = null;
+            float? right = null;
+            float? prev = null;
+
+            var first = sequence.First();
+            if (offset < first) offset = first;
 
             foreach (var item in sequence)
             {
-                if (item.Key == offset)
+                System.Diagnostics.Debug.Assert(!prev.HasValue || prev.Value < item, "Values in the sequence must be sorted ascending.");
+
+                if (item == offset)
                 {
                     left = item; continue;
                 }
 
-                if (item.Key > offset)
+                if (item > offset)
                 {
                     if (left == null) left = prev;
                     right = item;
@@ -214,19 +346,19 @@ namespace SharpGLTF.Animations
                 prev = item;
             }
 
-            if (left == null && right == null) return (default(T), default(T), 0);
-            if (left == null) return (right.Value.Value, right.Value.Value, 0);
-            if (right == null) return (left.Value.Value, left.Value.Value, 0);
+            if (left == null && right == null) return (0, 0, 0);
+            if (left == null) return (right.Value, right.Value, 0);
+            if (right == null) return (left.Value, left.Value, 0);
 
-            var delta = right.Value.Key - left.Value.Key;
+            var delta = right.Value - left.Value;
 
             System.Diagnostics.Debug.Assert(delta > 0);
 
-            var amount = (offset - left.Value.Key) / delta;
+            var amount = (offset - left.Value) / delta;
 
             System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1);
 
-            return (left.Value.Value, right.Value.Value, amount);
+            return (left.Value, right.Value, amount);
         }
 
         #endregion
@@ -350,17 +482,17 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetTangentIn(float key, Single value)
+        public void SetTangentIn(float key, Single value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.InTangent = value;
+            val.InTangent = value * scale;
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Single value)
+        public void SetTangentOut(float key, Single value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.OutTangent = value;
+            val.OutTangent = value * scale;
             SetKey(key, val);
         }
 
@@ -482,17 +614,17 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetTangentIn(float key, Vector3 value)
+        public void SetTangentIn(float key, Vector3 value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.InTangent = value;
+            val.InTangent = value * scale;
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Vector3 value)
+        public void SetTangentOut(float key, Vector3 value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.OutTangent = value;
+            val.OutTangent = value * scale;
             SetKey(key, val);
         }
 
@@ -626,18 +758,26 @@ namespace SharpGLTF.Animations
             SetKey(key, val);
         }
 
-        public void SetTangentIn(float key, Quaternion value)
+        public void SetTangentIn(float key, Quaternion value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.InTangent = Quaternion.Normalize(value);
+            val.InTangent = _Scale(value, scale);
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Quaternion value)
+        public void SetTangentOut(float key, Quaternion value, float scale)
         {
             var val = GetKey(key) ?? default;
-            val.OutTangent = Quaternion.Normalize(value);
+            val.OutTangent = _Scale(value, scale);
             SetKey(key, val);
+        }
+
+        internal Quaternion _Scale(Quaternion q, float scale)
+        {
+            var axis = Vector3.Normalize(new Vector3(q.X, q.Y, q.Z));
+            var angle = Math.Acos(q.W) * 2 * scale;
+
+            return Quaternion.CreateFromAxisAngle(axis, (float)angle);
         }
 
         public Dictionary<float, (Quaternion, Quaternion, Quaternion)> ToDictionary()
