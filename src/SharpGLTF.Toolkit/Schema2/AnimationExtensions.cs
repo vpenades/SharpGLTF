@@ -27,12 +27,6 @@ namespace SharpGLTF.Schema2
                 return node;
             }
 
-            if (curve is Animations.ILinearCurve<Vector3> linear)
-            {
-                animation.CreateScaleChannel(node, linear.ToDictionary());
-                return node;
-            }
-
             throw new ArgumentException("Not supported", nameof(curve));
         }
 
@@ -48,12 +42,6 @@ namespace SharpGLTF.Schema2
                 return node;
             }
 
-            if (curve is Animations.ILinearCurve<Vector3> linear)
-            {
-                animation.CreateTranslationChannel(node, linear.ToDictionary());
-                return node;
-            }
-
             throw new ArgumentException("Not supported", nameof(curve));
         }
 
@@ -66,12 +54,6 @@ namespace SharpGLTF.Schema2
             if (curve is Animations.ISplineCurve<Quaternion> spline)
             {
                 animation.CreateRotationChannel(node, spline.ToDictionary());
-                return node;
-            }
-
-            if (curve is Animations.ILinearCurve<Quaternion> linear)
-            {
-                animation.CreateRotationChannel(node, linear.ToDictionary());
                 return node;
             }
 

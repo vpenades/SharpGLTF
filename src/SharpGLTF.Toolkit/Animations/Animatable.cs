@@ -29,19 +29,7 @@ namespace SharpGLTF.Animations
             return _Tracks.TryGetValue(track, out ICurveSampler<T> sampler) ? sampler.GetPoint(value) : this.Default;
         }
 
-        public ICurveSampler<T> UseLinearCurve(string track)
-        {
-            if (!_Tracks.TryGetValue(track, out ICurveSampler<T> curve))
-            {
-                _Tracks[track] = curve = CurveFactory.CreateLinearCurve<T>();
-            }
-
-            if (curve is ILinearCurve<T> editableCurve) return editableCurve;
-
-            throw new ArgumentException(nameof(T), "Generic argument not supported");
-        }
-
-        public ICurveSampler<T> UseSplineCurve(string track)
+        public ICurveSampler<T> UseCurve(string track)
         {
             if (!_Tracks.TryGetValue(track, out ICurveSampler<T> curve))
             {
