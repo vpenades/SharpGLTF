@@ -10,7 +10,7 @@ namespace SharpGLTF.Animations
     {
         #region data
 
-        private Dictionary<string, ICurveSampler<T>> _Tracks = new Dictionary<string, ICurveSampler<T>>();
+        private Dictionary<string, Curve<T>> _Tracks = new Dictionary<string, Curve<T>>();
 
         public T Default { get; set; }
 
@@ -18,7 +18,7 @@ namespace SharpGLTF.Animations
 
         #region properties
 
-        public IReadOnlyDictionary<string, ICurveSampler<T>> Tracks => _Tracks;
+        public IReadOnlyDictionary<string, Curve<T>> Tracks => _Tracks;
 
         #endregion
 
@@ -26,19 +26,16 @@ namespace SharpGLTF.Animations
 
         public T GetValueAt(string track, float value)
         {
-            return _Tracks.TryGetValue(track, out ICurveSampler<T> sampler) ? sampler.GetPoint(value) : this.Default;
+            return _Tracks.TryGetValue(track, out Curve<T> sampler) ? sampler.GetPoint(value) : this.Default;
         }
 
-        public ICurveSampler<T> UseCurve(string track)
+        public Curve<T> UseCurve(string track)
         {
-            if (!_Tracks.TryGetValue(track, out ICurveSampler<T> curve))
-            {
-                _Tracks[track] = curve = CurveFactory.CreateSplineCurve<T>();
-            }
+            if (_Tracks.TryGetValue(track, out Curve<T> curve)) return curve;
 
-            if (curve is ISplineCurve<T> editableCurve) return editableCurve;
+            _Tracks[track] = curve = CurveFactory.CreateSplineCurve<T>();
 
-            throw new ArgumentException(nameof(T), "Generic argument not supported");
+            return curve;
         }
 
         #endregion

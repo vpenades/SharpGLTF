@@ -9,40 +9,13 @@ namespace SharpGLTF.Animations
     // TODO: define just ONE kind of curve: spline with flags, where a flag might indicate if the current segment is linear or spline.
     // when converting to gltf, check if all segments are linear, and use the appropiate encoding.
 
-    public interface ICurveSampler<T>
-        where T : struct
-    {
-        IReadOnlyCollection<float> Keys { get; }
-
-        (float, float, float) FindLerp(float offset);
-
-        T GetPoint(float offset);
-
-        T GetTangent(float offset);
-    }
-
-    interface ISplineCurve<T> : ICurveSampler<T>
-        where T : struct
-    {
-        void RemoveKey(float key);
-
-        T GetControlPoint(float key);
-
-        void SetControlPoint(float key, T value);
-
-        void SetTangentIn(float key, T value, float scale);
-        void SetTangentOut(float key, T value, float scale);
-
-        Dictionary<float, (T, T, T)> ToDictionary();
-    }
-
     [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
     public struct CurvePoint<T>
         where T : struct
     {
         #region lifecycle
 
-        public CurvePoint(ICurveSampler<T> curve, float offset)
+        public CurvePoint(Curve<T> curve, float offset)
         {
             _Curve = curve;
             _Offset = offset;
@@ -52,7 +25,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private readonly ICurveSampler<T> _Curve;
+        private readonly Curve<T> _Curve;
         private readonly float _Offset;
 
         #endregion
@@ -71,19 +44,9 @@ namespace SharpGLTF.Animations
 
         public CurvePoint<T> Split()
         {
-            var c = GetCurrent();
+            // https://pomax.github.io/bezierinfo/#splitting
 
-            if (c.HasValue && c.Value._Offset == this._Offset) return this;
-
-            if (_Curve is ISplineCurve<T> spline)
-            {
-                var p = _Curve.GetPoint(_Offset);
-                var t = _Curve.GetTangent(_Offset);
-
-                spline.SetControlPoint(_Offset, p);
-                spline.SetTangentIn(_Offset, t, -1);
-                spline.SetTangentOut(_Offset, t, 1);
-            }
+            _Curve.SplitAt(_Offset);
 
             return this;
         }
@@ -112,56 +75,39 @@ namespace SharpGLTF.Animations
         {
             Split();
 
-            if (_Curve is ISplineCurve<T> spline)
-            {
-                spline.SetControlPoint(_Offset, value);
-                return this;
-            }
-
-            throw new NotImplementedException();
+            _Curve.SetPoint(_Offset, value);
+            return this;
         }
 
         public CurvePoint<T> MoveIncomingTangentTo(T value)
         {
             Split();
 
-            if (_Curve is ISplineCurve<T> spline)
-            {
-                spline.SetTangentIn(_Offset, value, 1);
-                return this;
-            }
-
-            throw new NotImplementedException();
+            _Curve.SetTangentIn(_Offset, value, 1);
+            return this;
         }
 
         public CurvePoint<T> MoveOutgoingTangentTo(T value)
         {
             Split();
 
-            if (_Curve is ISplineCurve<T> spline)
-            {
-                spline.SetTangentOut(_Offset, value, 1);
-                return this;
-            }
-
-            throw new NotImplementedException();
+            _Curve.SetTangentOut(_Offset, value, 1);
+            return this;
         }
 
         #endregion
     }
 
-    
-
     public static class CurveFactory
     {
         // TODO: we could support conversions between linear and cubic (with hermite regression)
 
-        public static ICurveSampler<T> CreateSplineCurve<T>()
+        public static Curve<T> CreateSplineCurve<T>()
             where T : struct
         {
-            if (typeof(T) == typeof(Single)) return new ScalarSplineCurve() as ISplineCurve<T>;
-            if (typeof(T) == typeof(Vector3)) return new Vector3SplineCurve() as ISplineCurve<T>;
-            if (typeof(T) == typeof(Quaternion)) return new QuaternionSplineCurve() as ISplineCurve<T>;
+            if (typeof(T) == typeof(Single)) return new ScalarSplineCurve() as Curve<T>;
+            if (typeof(T) == typeof(Vector3)) return new Vector3SplineCurve() as Curve<T>;
+            if (typeof(T) == typeof(Quaternion)) return new QuaternionSplineCurve() as Curve<T>;
 
             throw new ArgumentException(nameof(T), "Generic argument not supported");
         }
@@ -220,11 +166,20 @@ namespace SharpGLTF.Animations
         }
     }
 
+    struct _SplineNode<T>
+        where T : struct
+    {
+        public T IncomingTangent;
+        public T Point;
+        public T OutgoingTangent;
+        public int OutgoingMode;
+    }
+
     /// <summary>
     /// Represents a collection of consecutive nodes that can be sampled into a continuous curve.
     /// </summary>
     /// <typeparam name="Tout">The type of value evaluated at any point in the curve.</typeparam>
-    abstract class Curve<Tout>
+    public abstract class Curve<Tout>
         where Tout : struct
     {
         #region lifecycle
@@ -243,12 +198,19 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        protected SortedDictionary<float, _SplinePoint<Tout>> _Keys = new SortedDictionary<float, _SplinePoint<Tout>>();
+        internal SortedDictionary<float, _SplineNode<Tout>> _Keys = new SortedDictionary<float, _SplineNode<Tout>>();
 
         #endregion
 
         #region properties
+
         public IReadOnlyCollection<float> Keys => _Keys.Keys;
+
+        public bool IsStepInterpolation => _Keys.Values.All(item => item.OutgoingMode == 0);
+
+        public bool IsLinearInterpolation =>  _Keys.Values.Any(item => item.OutgoingMode == 1) && !IsSplineInterpolation;
+
+        public bool IsSplineInterpolation => _Keys.Values.Any(item => item.OutgoingMode == 2);
 
         #endregion
 
@@ -256,13 +218,13 @@ namespace SharpGLTF.Animations
 
         public void RemoveKey(float key) { _Keys.Remove(key); }
 
-        protected _SplinePoint<Tout>? GetKey(float key) { return _Keys.TryGetValue(key, out _SplinePoint<Tout> value) ? value : (_SplinePoint<Tout>?)null; }
+        internal _SplineNode<Tout>? GetKey(float key) { return _Keys.TryGetValue(key, out _SplineNode<Tout> value) ? value : (_SplineNode<Tout>?)null; }
 
-        protected void SetKey(float key, _SplinePoint<Tout> value) { _Keys[key] = value; }
+        internal void SetKey(float key, _SplineNode<Tout> value) { _Keys[key] = value; }
 
-        protected (_SplinePoint<Tout>, _SplinePoint<Tout>, float) FindSample(float offset)
+        internal (_SplineNode<Tout>, _SplineNode<Tout>, float) FindSample(float offset)
         {
-            if (_Keys.Count == 0) return (default(_SplinePoint<Tout>), default(_SplinePoint<Tout>), 0);
+            if (_Keys.Count == 0) return (default(_SplineNode<Tout>), default(_SplineNode<Tout>), 0);
 
             var offsets = _FindPairContainingOffset(_Keys.Keys, offset);
 
@@ -323,20 +285,91 @@ namespace SharpGLTF.Animations
             return (left.Value, right.Value, amount);
         }
 
+        public abstract Tout GetPoint(float offset);
+
+        public abstract void SetPoint(float offset, Tout value);
+
+        public abstract Tout GetTangent(float offset);
+
+        public abstract void SetTangentIn(float key, Tout value, float scale);
+
+        public abstract void SetTangentOut(float key, Tout value, float scale);
+
+        public bool SplitAt(float offset)
+        {
+            // https://pomax.github.io/bezierinfo/#splitting
+
+            var lerp = FindLerp(offset);
+
+            if (offset == lerp.Item1) return false;
+
+            var v0 = _Keys[lerp.Item1];
+            var v1 = _Keys[lerp.Item2];
+
+            var p = GetPoint(offset);
+            var t = GetTangent(offset);
+
+            // v0.OutgoingTangent *= lerp.Item3;
+
+            SetTangentIn(offset, t, -lerp.Item3);
+            SetPoint(offset, p);
+            SetTangentOut(offset, t, 1 - lerp.Item3);
+
+            // v1.IncomingTangent *= (1 - lerp.Item3);
+
+            return true;
+        }
+
+        public IReadOnlyDictionary<float, Tout> ToStepCurve()
+        {
+            Guard.IsTrue(IsStepInterpolation, nameof(IsStepInterpolation));
+            return _Keys.ToDictionary(item => item.Key, item => item.Value.Point);
+        }
+
+        public IReadOnlyDictionary<float, Tout> ToLinearCurve()
+        {
+            Guard.IsTrue(IsStepInterpolation, nameof(IsStepInterpolation));
+
+            var d = new Dictionary<float, Tout>();
+
+            if (_Keys.Count == 0) return d;
+
+            var v0 = _Keys.First();
+            d[v0.Key] = v0.Value.Point;
+
+            foreach (var v1 in _Keys.Skip(1))
+            {
+                d[v1.Key] = v1.Value.Point;
+
+                if (v0.Value.OutgoingMode == 0)
+                {
+                    d[v1.Key - float.Epsilon] = v0.Value.Point;
+                }
+
+                if (v0.Value.OutgoingMode == 2)
+                {
+                    var ll = v1.Key - v0.Key;
+
+                    var l = 1 + (int)Math.Ceiling( ll *  15);
+
+                    for (int i = 1; i < l; ++i)
+                    {
+                        var k = v0.Key + (ll * (float)l / (float)i);
+
+                        d[k] = GetPoint(k);
+                    }
+                }
+
+                v0 = v1;
+            }
+
+            return d;
+        }
+
         #endregion
     }
 
-    // Hermite Point
-    struct _SplinePoint<T>
-        where T : struct
-    {
-        public T IncomingTangent;
-        public T Point;
-        public T OutgoingTangent;
-        public int OutgoingMode;
-    }
-
-    class ScalarSplineCurve : Curve<Single>, ISplineCurve<Single>
+    sealed class ScalarSplineCurve : Curve<Single>
     {
         #region lifecycle
 
@@ -348,7 +381,7 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public float GetPoint(float offset)
+        public override float GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
@@ -369,7 +402,7 @@ namespace SharpGLTF.Animations
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        public float GetTangent(float offset)
+        public override float GetTangent(float offset)
         {
             var sample = FindSample(offset);
 
@@ -387,56 +420,31 @@ namespace SharpGLTF.Animations
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        public float GetControlPoint(float key)
-        {
-            var sample = FindSample(key);
-            return sample.Item3 <= 0.5f ? sample.Item1.Point : sample.Item2.Point;
-        }
-
-        public void SetControlPoint(float key, Single value)
+        public override void SetPoint(float key, Single value)
         {
             var val = GetKey(key) ?? default;
             val.Point = value;
             SetKey(key, val);
         }
 
-        public void SetCardinalPointIn(float key, Single value)
-        {
-            var val = GetKey(key) ?? default;
-            val.IncomingTangent = (val.Point - value) * 4;
-            SetKey(key, val);
-        }
-
-        public void SetCardinalPointOut(float key, Single value)
-        {
-            var val = GetKey(key) ?? default;
-            val.OutgoingTangent = (value - val.Point) * 4;
-            SetKey(key, val);
-        }
-
-        public void SetTangentIn(float key, Single value, float scale)
+        public override void SetTangentIn(float key, Single value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.IncomingTangent = value * scale;
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Single value, float scale)
+        public override void SetTangentOut(float key, Single value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.OutgoingTangent = value * scale;
             SetKey(key, val);
         }
 
-        public Dictionary<float, (float, float, float)> ToDictionary()
-        {
-            return _Keys.ToDictionary(k => k.Key, v => (v.Value.IncomingTangent, v.Value.Point, v.Value.OutgoingTangent));
-        }
-
         #endregion
     }
 
-    class Vector3SplineCurve : Curve<Vector3>, ISplineCurve<Vector3>
+    sealed class Vector3SplineCurve : Curve<Vector3>
     {
         #region lifecycle
 
@@ -448,7 +456,7 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public Vector3 GetPoint(float offset)
+        public override Vector3 GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
@@ -469,7 +477,7 @@ namespace SharpGLTF.Animations
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        public Vector3 GetTangent(float offset)
+        public override Vector3 GetTangent(float offset)
         {
             var sample = FindSample(offset);
 
@@ -487,56 +495,31 @@ namespace SharpGLTF.Animations
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
 
-        public Vector3 GetControlPoint(float key)
-        {
-            var sample = FindSample(key);
-            return sample.Item3 <= 0.5f ? sample.Item1.Point : sample.Item2.Point;
-        }
-
-        public void SetControlPoint(float key, Vector3 value)
+        public override void SetPoint(float key, Vector3 value)
         {
             var val = GetKey(key) ?? default;
             val.Point = value;
             SetKey(key, val);
         }
 
-        public void SetCardinalPointIn(float key, Vector3 value)
-        {
-            var val = GetKey(key) ?? default;
-            val.IncomingTangent = (val.Point - value) * 4;
-            SetKey(key, val);
-        }
-
-        public void SetCardinalPointOut(float key, Vector3 value)
-        {
-            var val = GetKey(key) ?? default;
-            val.OutgoingTangent = (value - val.Point) * 4;
-            SetKey(key, val);
-        }
-
-        public void SetTangentIn(float key, Vector3 value, float scale)
+        public override void SetTangentIn(float key, Vector3 value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.IncomingTangent = value * scale;
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Vector3 value, float scale)
+        public override void SetTangentOut(float key, Vector3 value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.OutgoingTangent = value * scale;
             SetKey(key, val);
         }
 
-        public Dictionary<float, (Vector3, Vector3, Vector3)> ToDictionary()
-        {
-            return _Keys.ToDictionary(k => k.Key, v => (v.Value.IncomingTangent, v.Value.Point, v.Value.OutgoingTangent));
-        }
-
         #endregion
     }
 
-    class QuaternionSplineCurve : Curve<Quaternion> , ISplineCurve<Quaternion>
+    sealed class QuaternionSplineCurve : Curve<Quaternion>
     {
         #region lifecycle
 
@@ -548,7 +531,7 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        public Quaternion GetPoint(float offset)
+        public override Quaternion GetPoint(float offset)
         {
             var sample = FindSample(offset);
 
@@ -571,7 +554,7 @@ namespace SharpGLTF.Animations
             return Quaternion.Normalize(q);
         }
 
-        public Quaternion GetTangent(float offset)
+        public override Quaternion GetTangent(float offset)
         {
             var sample = FindSample(offset);
 
@@ -594,19 +577,14 @@ namespace SharpGLTF.Animations
             return Quaternion.Normalize(q);
         }
 
-        public Quaternion GetControlPoint(float key)
-        {
-            var sample = FindSample(key);
-            return sample.Item3 <= 0.5f ? sample.Item1.Point : sample.Item2.Point;
-        }
-
-        public void SetControlPoint(float key, Quaternion value)
+        public override void SetPoint(float key, Quaternion value)
         {
             var val = GetKey(key) ?? default;
             val.Point = Quaternion.Normalize(value);
             SetKey(key, val);
         }
 
+        /*
         public void SetCardinalPointIn(float key, Quaternion value)
         {
             var val = GetKey(key) ?? default;
@@ -629,16 +607,16 @@ namespace SharpGLTF.Animations
 
             val.OutgoingTangent = value;
             SetKey(key, val);
-        }
+        }*/
 
-        public void SetTangentIn(float key, Quaternion value, float scale)
+        public override void SetTangentIn(float key, Quaternion value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.IncomingTangent = _Scale(value, scale);
             SetKey(key, val);
         }
 
-        public void SetTangentOut(float key, Quaternion value, float scale)
+        public override void SetTangentOut(float key, Quaternion value, float scale)
         {
             var val = GetKey(key) ?? default;
             val.OutgoingTangent = _Scale(value, scale);
@@ -651,11 +629,6 @@ namespace SharpGLTF.Animations
             var angle = Math.Acos(q.W) * 2 * scale;
 
             return Quaternion.CreateFromAxisAngle(axis, (float)angle);
-        }
-
-        public Dictionary<float, (Quaternion, Quaternion, Quaternion)> ToDictionary()
-        {
-            return _Keys.ToDictionary(k => k.Key, v => (v.Value.IncomingTangent, v.Value.Point, v.Value.OutgoingTangent));
         }
 
         #endregion
