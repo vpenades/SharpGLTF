@@ -45,7 +45,7 @@ namespace SharpGLTF.Scenes
 
             var pivot = new NodeBuilder();
 
-            var tcurve = pivot.UseTranslation().UseCurve("default");
+            var tcurve = pivot.UseTranslation().UseCurve("default") as Animations.Curve<Vector3>;
 
             var c = new Animations.CurvePoint<Vector3>(tcurve, 0);
 

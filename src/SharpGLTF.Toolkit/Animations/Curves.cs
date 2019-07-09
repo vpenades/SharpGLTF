@@ -6,8 +6,36 @@ using System.Linq;
 
 namespace SharpGLTF.Animations
 {
-    // TODO: define just ONE kind of curve: spline with flags, where a flag might indicate if the current segment is linear or spline.
-    // when converting to gltf, check if all segments are linear, and use the appropiate encoding.
+    /// <summary>
+    /// Defines a curve that can be sampled at specific points.
+    /// </summary>
+    /// <typeparam name="T">The type of a point in the curve.</typeparam>
+    public interface ICurveSampler<T>
+    {
+        T GetPoint(float offset);
+    }
+
+    /// <summary>
+    /// Defines methods that convert the current curve to a Step, Linear or Spline curve.
+    /// </summary>
+    /// <typeparam name="T">The type of a point of the curve</typeparam>
+    public interface IConvertibleCurve<T>
+        where T : struct
+    {
+        /// <summary>
+        /// Gets a value indicating the maximum degree of the curve, values are:
+        /// 0: all elements use STEP interpolation.
+        /// 1: some elements use LINEAR interpolation.
+        /// 2: some elements use CUBIC interpolation
+        /// </summary>
+        int Degree { get; }
+
+        IReadOnlyDictionary<float, T> ToStepCurve();
+        IReadOnlyDictionary<float, T> ToLinearCurve();
+        IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve();
+    }
+
+    
 
     [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
     public struct CurvePoint<T>
@@ -166,7 +194,7 @@ namespace SharpGLTF.Animations
         }
     }
 
-    struct _SplineNode<T>
+    struct _CurveNode<T>
         where T : struct
     {
         public T IncomingTangent;
@@ -178,15 +206,15 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Represents a collection of consecutive nodes that can be sampled into a continuous curve.
     /// </summary>
-    /// <typeparam name="Tout">The type of value evaluated at any point in the curve.</typeparam>
-    public abstract class Curve<Tout>
-        where Tout : struct
+    /// <typeparam name="T">The type of value evaluated at any point in the curve.</typeparam>
+    public abstract class Curve<T> : IConvertibleCurve<T>, ICurveSampler<T>
+        where T : struct
     {
         #region lifecycle
 
         public Curve() { }
 
-        protected Curve(Curve<Tout> other)
+        protected Curve(Curve<T> other)
         {
             foreach (var kvp in other._Keys)
             {
@@ -198,7 +226,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        internal SortedDictionary<float, _SplineNode<Tout>> _Keys = new SortedDictionary<float, _SplineNode<Tout>>();
+        internal SortedDictionary<float, _CurveNode<T>> _Keys = new SortedDictionary<float, _CurveNode<T>>();
 
         #endregion
 
@@ -206,11 +234,10 @@ namespace SharpGLTF.Animations
 
         public IReadOnlyCollection<float> Keys => _Keys.Keys;
 
-        public bool IsStepInterpolation => _Keys.Values.All(item => item.OutgoingMode == 0);
-
-        public bool IsLinearInterpolation =>  _Keys.Values.Any(item => item.OutgoingMode == 1) && !IsSplineInterpolation;
-
-        public bool IsSplineInterpolation => _Keys.Values.Any(item => item.OutgoingMode == 2);
+        /// <summary>
+        /// Gets a value indicating if the keys of this curve are at least Step, Linear, or Spline.
+        /// </summary>
+        public int Degree => _Keys.Values.Select(item => item.OutgoingMode).Max();
 
         #endregion
 
@@ -218,13 +245,13 @@ namespace SharpGLTF.Animations
 
         public void RemoveKey(float key) { _Keys.Remove(key); }
 
-        internal _SplineNode<Tout>? GetKey(float key) { return _Keys.TryGetValue(key, out _SplineNode<Tout> value) ? value : (_SplineNode<Tout>?)null; }
+        internal _CurveNode<T>? GetKey(float key) { return _Keys.TryGetValue(key, out _CurveNode<T> value) ? value : (_CurveNode<T>?)null; }
 
-        internal void SetKey(float key, _SplineNode<Tout> value) { _Keys[key] = value; }
+        internal void SetKey(float key, _CurveNode<T> value) { _Keys[key] = value; }
 
-        internal (_SplineNode<Tout>, _SplineNode<Tout>, float) FindSample(float offset)
+        internal (_CurveNode<T>, _CurveNode<T>, float) FindSample(float offset)
         {
-            if (_Keys.Count == 0) return (default(_SplineNode<Tout>), default(_SplineNode<Tout>), 0);
+            if (_Keys.Count == 0) return (default(_CurveNode<T>), default(_CurveNode<T>), 0);
 
             var offsets = _FindPairContainingOffset(_Keys.Keys, offset);
 
@@ -285,15 +312,15 @@ namespace SharpGLTF.Animations
             return (left.Value, right.Value, amount);
         }
 
-        public abstract Tout GetPoint(float offset);
+        public abstract T GetPoint(float offset);
 
-        public abstract void SetPoint(float offset, Tout value);
+        public abstract void SetPoint(float offset, T value);
 
-        public abstract Tout GetTangent(float offset);
+        public abstract T GetTangent(float offset);
 
-        public abstract void SetTangentIn(float key, Tout value, float scale);
+        public abstract void SetTangentIn(float key, T value, float scale);
 
-        public abstract void SetTangentOut(float key, Tout value, float scale);
+        public abstract void SetTangentOut(float key, T value, float scale);
 
         public bool SplitAt(float offset)
         {
@@ -320,17 +347,18 @@ namespace SharpGLTF.Animations
             return true;
         }
 
-        public IReadOnlyDictionary<float, Tout> ToStepCurve()
+        public IReadOnlyDictionary<float, T> ToStepCurve()
         {
-            Guard.IsTrue(IsStepInterpolation, nameof(IsStepInterpolation));
+            Guard.IsTrue(Degree == 0, nameof(Degree));
+
+            // todo: if Degree is not zero we might export sampled data at 60FPS
+
             return _Keys.ToDictionary(item => item.Key, item => item.Value.Point);
         }
 
-        public IReadOnlyDictionary<float, Tout> ToLinearCurve()
+        public IReadOnlyDictionary<float, T> ToLinearCurve()
         {
-            Guard.IsTrue(IsStepInterpolation, nameof(IsStepInterpolation));
-
-            var d = new Dictionary<float, Tout>();
+            var d = new Dictionary<float, T>();
 
             if (_Keys.Count == 0) return d;
 
@@ -362,6 +390,15 @@ namespace SharpGLTF.Animations
 
                 v0 = v1;
             }
+
+            return d;
+        }
+
+        public IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve()
+        {
+            throw new NotImplementedException();
+
+            var d = new Dictionary<float, (T, T, T)>();
 
             return d;
         }
