@@ -174,6 +174,12 @@ namespace SharpGLTF.Scenes
             return Translation;
         }
 
+        public void SetScaleTrack(string track, Animations.ICurveSampler<Vector3> curve) { UseScale().SetTrack(track, curve); }
+
+        public void SetTranslationTrack(string track, Animations.ICurveSampler<Vector3> curve) { UseTranslation().SetTrack(track, curve); }
+
+        public void SetRotationTrack(string track, Animations.ICurveSampler<Quaternion> curve) { UseRotation().SetTrack(track, curve); }
+
         public Transforms.AffineTransform GetLocalTransform(string animationTrack, float time)
         {
             if (animationTrack == null) return this.LocalTransform;

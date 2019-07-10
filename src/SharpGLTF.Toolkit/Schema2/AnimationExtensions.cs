@@ -24,7 +24,7 @@ namespace SharpGLTF.Schema2
                 var degree = curve.Degree;
                 if (degree == 0) animation.CreateScaleChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateScaleChannel(node, curve.ToLinearCurve(), true);
-                if (degree == 2) animation.CreateScaleChannel(node, curve.ToSplineCurve());
+                if (degree == 3) animation.CreateScaleChannel(node, curve.ToSplineCurve());
             }
 
             return node;
@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
                 var degree = curve.Degree;
                 if (degree == 0) animation.CreateTranslationChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateTranslationChannel(node, curve.ToLinearCurve(), true);
-                if (degree == 2) animation.CreateTranslationChannel(node, curve.ToSplineCurve());
+                if (degree == 3) animation.CreateTranslationChannel(node, curve.ToSplineCurve());
             }
 
             return node;
@@ -54,7 +54,7 @@ namespace SharpGLTF.Schema2
                 var degree = curve.Degree;
                 if (degree == 0) animation.CreateRotationChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateRotationChannel(node, curve.ToLinearCurve(), true);
-                if (degree == 2) animation.CreateRotationChannel(node, curve.ToSplineCurve());
+                if (degree == 3) animation.CreateRotationChannel(node, curve.ToSplineCurve());
             }
 
             return node;

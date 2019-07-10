@@ -6,39 +6,9 @@ using System.Linq;
 
 namespace SharpGLTF.Animations
 {
-    /// <summary>
-    /// Defines a curve that can be sampled at specific points.
-    /// </summary>
-    /// <typeparam name="T">The type of a point in the curve.</typeparam>
-    public interface ICurveSampler<T>
-    {
-        T GetPoint(float offset);
-    }
-
-    /// <summary>
-    /// Defines methods that convert the current curve to a Step, Linear or Spline curve.
-    /// </summary>
-    /// <typeparam name="T">The type of a point of the curve</typeparam>
-    public interface IConvertibleCurve<T>
-        where T : struct
-    {
-        /// <summary>
-        /// Gets a value indicating the maximum degree of the curve, values are:
-        /// 0: all elements use STEP interpolation.
-        /// 1: some elements use LINEAR interpolation.
-        /// 2: some elements use CUBIC interpolation
-        /// </summary>
-        int Degree { get; }
-
-        IReadOnlyDictionary<float, T> ToStepCurve();
-        IReadOnlyDictionary<float, T> ToLinearCurve();
-        IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve();
-    }
-
-    
 
     [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
-    public struct CurvePoint<T>
+    struct CurvePoint<T>
         where T : struct
     {
         #region lifecycle
@@ -126,7 +96,7 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    public static class CurveFactory
+    static class CurveFactory
     {
         // TODO: we could support conversions between linear and cubic (with hermite regression)
 
@@ -138,59 +108,6 @@ namespace SharpGLTF.Animations
             if (typeof(T) == typeof(Quaternion)) return new QuaternionSplineCurve() as Curve<T>;
 
             throw new ArgumentException(nameof(T), "Generic argument not supported");
-        }
-
-        /// <summary>
-        /// for a given cubic interpolation <paramref name="amount"/>, it calculates
-        /// the weights to multiply each component:
-        /// 1: Weight for Start point
-        /// 2: Weight for End Tangent
-        /// 3: Weight for Out Tangent
-        /// 4: Weight for In Tangent
-        /// </summary>
-        /// <param name="amount">the input amount</param>
-        /// <returns>the output weights</returns>
-        public static (float, float, float, float) CalculateHermiteBasis(float amount)
-        {
-            // http://mathworld.wolfram.com/HermitePolynomial.html
-
-            var squared = amount * amount;
-            var cubed = amount * squared;
-
-            /*
-            var part1 = (2.0f * cubed) - (3.0f * squared) + 1.0f;
-            var part2 = (-2.0f * cubed) + (3.0f * squared);
-            var part3 = cubed - (2.0f * squared) + amount;
-            var part4 = cubed - squared;
-            */
-
-            var part2 = (3.0f * squared) - (2.0f * cubed);
-            var part1 = 1 - part2;
-            var part4 = cubed - squared;
-            var part3 = part4 - squared + amount;
-
-            return (part1, part2, part3, part4);
-        }
-
-        public static (float, float, float, float) CalculateHermiteTangent(float amount)
-        {
-            // https://math.stackexchange.com/questions/1270776/how-to-find-tangent-at-any-point-along-a-cubic-hermite-spline
-
-            var squared = amount * amount;
-
-            /*
-            var part1 = (6 * squared) - (6 * amount);
-            var part2 = -(6 * squared) + (6 * amount);
-            var part3 = (3 * squared) - (4 * amount) + 1;
-            var part4 = (3 * squared) - (2 * amount);
-            */
-
-            var part1 = (6 * squared) - (6 * amount);
-            var part2 = -part1;
-            var part3 = (3 * squared) - (4 * amount) + 1;
-            var part4 = (3 * squared) - (2 * amount);
-
-            return (part1, part2, part3, part4);
         }
     }
 
@@ -207,7 +124,7 @@ namespace SharpGLTF.Animations
     /// Represents a collection of consecutive nodes that can be sampled into a continuous curve.
     /// </summary>
     /// <typeparam name="T">The type of value evaluated at any point in the curve.</typeparam>
-    public abstract class Curve<T> : IConvertibleCurve<T>, ICurveSampler<T>
+    abstract class Curve<T> : IConvertibleCurve<T>, ICurveSampler<T>
         where T : struct
     {
         #region lifecycle
@@ -253,64 +170,12 @@ namespace SharpGLTF.Animations
         {
             if (_Keys.Count == 0) return (default(_CurveNode<T>), default(_CurveNode<T>), 0);
 
-            var offsets = _FindPairContainingOffset(_Keys.Keys, offset);
+            var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
             return (_Keys[offsets.Item1], _Keys[offsets.Item2], offsets.Item3);
         }
 
-        public (float, float, float) FindLerp(float offset) { return _FindPairContainingOffset(_Keys.Keys, offset); }
-
-        /// <summary>
-        /// Given a <paramref name="sequence"/> of offsets and an <paramref name="offset"/>,
-        /// it finds two consecutive offsets that contain <paramref name="offset"/> between them.
-        /// </summary>
-        /// <param name="sequence">A sequence of offsets.</param>
-        /// <param name="offset">the offset to look for in the sequence.</param>
-        /// <returns>Two consecutive offsets and a LERP value.</returns>
-        private static (float, float, float) _FindPairContainingOffset(IEnumerable<float> sequence, float offset)
-        {
-            if (!sequence.Any()) return (0, 0, 0);
-
-            float? left = null;
-            float? right = null;
-            float? prev = null;
-
-            var first = sequence.First();
-            if (offset < first) offset = first;
-
-            foreach (var item in sequence)
-            {
-                System.Diagnostics.Debug.Assert(!prev.HasValue || prev.Value < item, "Values in the sequence must be sorted ascending.");
-
-                if (item == offset)
-                {
-                    left = item; continue;
-                }
-
-                if (item > offset)
-                {
-                    if (left == null) left = prev;
-                    right = item;
-                    break;
-                }
-
-                prev = item;
-            }
-
-            if (left == null && right == null) return (0, 0, 0);
-            if (left == null) return (right.Value, right.Value, 0);
-            if (right == null) return (left.Value, left.Value, 0);
-
-            var delta = right.Value - left.Value;
-
-            System.Diagnostics.Debug.Assert(delta > 0);
-
-            var amount = (offset - left.Value) / delta;
-
-            System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1);
-
-            return (left.Value, right.Value, amount);
-        }
+        public (float, float, float) FindLerp(float offset) { return SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset); }
 
         public abstract T GetPoint(float offset);
 
@@ -429,12 +294,14 @@ namespace SharpGLTF.Animations
                 return (sample.Item1.Point * (1 - sample.Item3)) + (sample.Item2.Point * sample.Item3);
             }
 
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+            var basis = SamplerFactory.CreateHermitePointWeights(sample.Item3);
 
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
@@ -447,12 +314,14 @@ namespace SharpGLTF.Animations
 
             if (sample.Item1.OutgoingMode == 1) return sample.Item2.Point - sample.Item1.Point;
 
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+            var basis = SamplerFactory.CreateHermiteTangentWeights(sample.Item3);
 
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
@@ -504,12 +373,14 @@ namespace SharpGLTF.Animations
                 return Vector3.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
             }
 
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+            var basis = SamplerFactory.CreateHermitePointWeights(sample.Item3);
 
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
@@ -522,12 +393,14 @@ namespace SharpGLTF.Animations
 
             if (sample.Item1.OutgoingMode == 1) return sample.Item2.Point - sample.Item1.Point;
 
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+            var basis = SamplerFactory.CreateHermiteTangentWeights(sample.Item3);
 
             return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
         }
@@ -574,17 +447,16 @@ namespace SharpGLTF.Animations
 
             if (sample.Item1.OutgoingMode == 0) return sample.Item1.Point;
 
-            if (sample.Item1.OutgoingMode == 1)
-            {
-                return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
-            }
+            if (sample.Item1.OutgoingMode == 1) return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteBasis(sample.Item3);
+            var basis = SamplerFactory.CreateHermitePointWeights(sample.Item3);
 
             var q = (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
 
@@ -597,17 +469,16 @@ namespace SharpGLTF.Animations
 
             if (sample.Item1.OutgoingMode == 0) return Quaternion.Identity;
 
-            if (sample.Item1.OutgoingMode == 1)
-            {
-                throw new NotImplementedException();
-            }
+            if (sample.Item1.OutgoingMode == 1) throw new NotImplementedException();
+
+            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
             var pointEnd = sample.Item2.Point;
             var tangentIn = sample.Item2.IncomingTangent;
 
-            var basis = CurveFactory.CalculateHermiteTangent(sample.Item3);
+            var basis = SamplerFactory.CreateHermiteTangentWeights(sample.Item3);
 
             var q = (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
 

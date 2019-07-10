@@ -6,6 +6,7 @@ using System.Numerics;
 
 using SharpGLTF.Collections;
 using SharpGLTF.Transforms;
+using SharpGLTF.Animations;
 
 namespace SharpGLTF.Schema2
 {
@@ -159,9 +160,9 @@ namespace SharpGLTF.Schema2
             var rfunc = FindRotationSampler(node)?.CreateCurveSampler();
             var tfunc = FindTranslationSampler(node)?.CreateCurveSampler();
 
-            if (sfunc != null) xform.Scale = sfunc(time);
-            if (rfunc != null) xform.Rotation = rfunc(time);
-            if (tfunc != null) xform.Translation = tfunc(time);
+            if (sfunc != null) xform.Scale = sfunc.GetPoint(time);
+            if (rfunc != null) xform.Rotation = rfunc.GetPoint(time);
+            if (tfunc != null) xform.Translation = tfunc.GetPoint(time);
 
             return xform;
         }
@@ -176,7 +177,7 @@ namespace SharpGLTF.Schema2
             var mfunc = FindMorphSampler(node)?.CreateCurveSampler();
             if (mfunc == null) return morphWeights;
 
-            return mfunc(time);
+            return mfunc.GetPoint(time);
         }
 
         #endregion
@@ -509,43 +510,43 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        CurveSampler<Vector3> IAnimationSampler<Vector3>.CreateCurveSampler()
+        ICurveSampler<Vector3> IAnimationSampler<Vector3>.CreateCurveSampler()
         {
             var xsampler = this as IAnimationSampler<Vector3>;
 
             switch (this.InterpolationMode)
             {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler();
             }
 
             throw new NotImplementedException();
         }
 
-        CurveSampler<Quaternion> IAnimationSampler<Quaternion>.CreateCurveSampler()
+        ICurveSampler<Quaternion> IAnimationSampler<Quaternion>.CreateCurveSampler()
         {
             var xsampler = this as IAnimationSampler<Quaternion>;
 
             switch (this.InterpolationMode)
             {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler();
             }
 
             throw new NotImplementedException();
         }
 
-        CurveSampler<Single[]> IAnimationSampler<Single[]>.CreateCurveSampler()
+        ICurveSampler<Single[]> IAnimationSampler<Single[]>.CreateCurveSampler()
         {
             var xsampler = this as IAnimationSampler<Single[]>;
 
             switch (this.InterpolationMode)
             {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateStepSamplerFunc();
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateLinearSamplerFunc();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSplineSamplerFunc();
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler();
             }
 
             throw new NotImplementedException();
@@ -562,7 +563,7 @@ namespace SharpGLTF.Schema2
 
         IEnumerable<(Single, (T, T, T))> GetCubicKeys();
 
-        CurveSampler<T> CreateCurveSampler();
+        ICurveSampler<T> CreateCurveSampler();
     }
 
     public sealed partial class ModelRoot

@@ -8,6 +8,8 @@ using NUnit.Framework;
 
 using SharpGLTF.Schema2.Authoring;
 
+using SharpGLTF.Animations;
+
 namespace SharpGLTF.Scenes
 {
     using Geometry;
@@ -45,15 +47,9 @@ namespace SharpGLTF.Scenes
 
             var pivot = new NodeBuilder();
 
-            var tcurve = pivot.UseTranslation().UseCurve("default") as Animations.Curve<Vector3>;
+            var curve = new[] { (0.0f, Vector3.Zero), (1.0f, Vector3.One) };            
 
-            var c = new Animations.CurvePoint<Vector3>(tcurve, 0);
-
-            c.GetAt(0).MovePointTo(Vector3.Zero).MoveOutgoingTangentTo(Vector3.Zero);
-            c.GetAt(1).MovePointTo(new Vector3(10, 0, 0)).MoveIncomingTangentTo(Vector3.Zero).MoveOutgoingTangentTo(new Vector3(0, 40, 0));
-            c.GetAt(2).MovePointTo(new Vector3(20, 0, 0)).MoveIncomingTangentTo(new Vector3(0, -40, 0)).MoveOutgoingTangentTo(Vector3.Zero);
-            c.GetAt(3).MovePointTo(new Vector3(30, 0, 0));
-            c.GetAt(4).MovePointTo(new Vector3(10, -10, 0));
+            pivot.SetTranslationTrack("default", curve.CreateSampler());
 
             var scene = new SceneBuilder();
 

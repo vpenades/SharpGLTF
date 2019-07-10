@@ -75,6 +75,11 @@ namespace SharpGLTF.Scenes
             }
         }
 
+        /// <summary>
+        /// Recursively converts all the <see cref="NodeBuilder"/> instances into <see cref="Schema2.Node"/> instances.
+        /// </summary>
+        /// <param name="container">The target <see cref="Schema2.Scene"/> or <see cref="Schema2.Node"/>.</param>
+        /// <param name="srcNode">The source <see cref="NodeBuilder"/> instance.</param>
         private void CreateArmature(IVisualNodeContainer container, NodeBuilder srcNode)
         {
             var dstNode = container.CreateNode(srcNode.Name);
@@ -84,12 +89,10 @@ namespace SharpGLTF.Scenes
             {
                 dstNode.LocalTransform = srcNode.LocalTransform;
 
+                // Copies all the animations to the target node.
                 if (srcNode.Scale != null) foreach (var t in srcNode.Scale.Tracks) dstNode.WithScaleAnimation(t.Key, t.Value);
-
                 if (srcNode.Rotation != null) foreach (var t in srcNode.Rotation.Tracks) dstNode.WithRotationAnimation(t.Key, t.Value);
-
                 if (srcNode.Translation != null) foreach (var t in srcNode.Translation.Tracks) dstNode.WithTranslationAnimation(t.Key, t.Value);
-
             }
             else
             {
