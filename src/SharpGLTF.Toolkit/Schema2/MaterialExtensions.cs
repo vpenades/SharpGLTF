@@ -163,13 +163,35 @@ namespace SharpGLTF.Schema2
 
         #region transfer API
 
+        public static Schema2.AlphaMode ToSchema2(this Materials.AlphaMode alpha)
+        {
+            switch (alpha)
+            {
+                case Materials.AlphaMode.BLEND: return Schema2.AlphaMode.BLEND;
+                case Materials.AlphaMode.MASK: return Schema2.AlphaMode.MASK;
+                case Materials.AlphaMode.OPAQUE: return Schema2.AlphaMode.OPAQUE;
+                default: throw new NotImplementedException(alpha.ToString());
+            }
+        }
+
+        public static Materials.AlphaMode ToToolkit(this Schema2.AlphaMode alpha)
+        {
+            switch (alpha)
+            {
+                case Schema2.AlphaMode.BLEND: return Materials.AlphaMode.BLEND;
+                case Schema2.AlphaMode.MASK: return Materials.AlphaMode.MASK;
+                case Schema2.AlphaMode.OPAQUE: return Materials.AlphaMode.OPAQUE;
+                default: throw new NotImplementedException(alpha.ToString());
+            }
+        }
+
         public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
 
             dstMaterial.Name = srcMaterial.Name;
-            dstMaterial.AlphaMode = srcMaterial.Alpha;
+            dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 
@@ -188,7 +210,7 @@ namespace SharpGLTF.Schema2
                 dstMaterial = new Materials.MaterialBuilder(srcMaterial.Name).WithFallback(dstMaterial);
 
                 dstMaterial.Name = srcMaterial.Name;
-                dstMaterial.AlphaMode = srcMaterial.Alpha;
+                dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
                 dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
                 dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 
@@ -254,7 +276,7 @@ namespace SharpGLTF.Schema2
 
             srcMaterial.ValidateForSchema2();
 
-            dstMaterial.Alpha = srcMaterial.AlphaMode;
+            dstMaterial.Alpha = srcMaterial.AlphaMode.ToSchema2();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 

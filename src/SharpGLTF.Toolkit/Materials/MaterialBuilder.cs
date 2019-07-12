@@ -4,8 +4,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-using ALPHA = SharpGLTF.Schema2.AlphaMode;
-
 namespace SharpGLTF.Materials
 {
     [System.Diagnostics.DebuggerDisplay("{Name} {ShaderStyle}")]
@@ -35,21 +33,72 @@ namespace SharpGLTF.Materials
 
         private MaterialBuilder _CompatibilityFallbackMaterial;
 
+        /// <summary>
+        /// Gets or sets the name of this <see cref="MaterialBuilder"/> instance.
+        /// </summary>
+        public string Name { get; set; }
+
+        public AlphaMode AlphaMode { get; set; } = AlphaMode.OPAQUE;
+
+        public Single AlphaCutoff { get; set; } = 0.5f;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether triangles must be rendered from both sides.
+        /// </summary>
+        public Boolean DoubleSided { get; set; } = false;
+
+        public String ShaderStyle { get; set; } = SHADERPBRMETALLICROUGHNESS;
+
+        public static bool AreEqual(MaterialBuilder x, MaterialBuilder y)
+        {
+            #pragma warning disable IDE0041 // Use 'is null' check
+            if (Object.ReferenceEquals(x, y)) return true;
+            if (Object.ReferenceEquals(x, null)) return false;
+            if (Object.ReferenceEquals(y, null)) return false;
+            #pragma warning restore IDE0041 // Use 'is null' check
+
+            // Although .Name is not strictly a material property,
+            // it identifies a specific material during Runtime that
+            // might be relevant and needs to be preserved.
+            // If an author needs materials to be merged, it's better
+            // to keep the Name as null, or to use a common name like "Default".
+
+            if (x.Name != y.Name) return false;
+            if (x.AlphaMode != y.AlphaMode) return false;
+            if (x.AlphaCutoff != y.AlphaCutoff) return false;
+            if (x.DoubleSided != y.DoubleSided) return false;
+            if (x.ShaderStyle != y.ShaderStyle) return false;
+
+            if (!AreEqual(x._CompatibilityFallbackMaterial, y._CompatibilityFallbackMaterial)) return false;
+
+            return Enumerable.SequenceEqual(x._Channels, y._Channels, ChannelBuilder.ContentComparer);
+        }
+
+        public static int GetContentHashCode(MaterialBuilder x)
+        {
+            if (x == null) return 0;
+
+            var h = x.Name == null ? 0 : x.Name.GetHashCode();
+
+            h ^= x.AlphaMode.GetHashCode();
+            h ^= x.AlphaCutoff.GetHashCode();
+            h ^= x.DoubleSided.GetHashCode();
+            h ^= x.ShaderStyle.GetHashCode();
+
+            h ^= x._Channels
+                .Select(item => ChannelBuilder.GetContentHashCode(item))
+                .GetContentHashCode();
+
+            h ^= GetContentHashCode(x._CompatibilityFallbackMaterial);
+
+            return h;
+        }
+
         #endregion
 
         #region properties
 
-        public string Name { get; set; }
-
         public IReadOnlyCollection<ChannelBuilder> Channels => _Channels;
-
-        public ALPHA AlphaMode { get; set; } = ALPHA.OPAQUE;
-
-        public Single AlphaCutoff { get; set; } = 0.5f;
-
-        public Boolean DoubleSided { get; set; } = false;
-
-        public String ShaderStyle { get; set; } = SHADERPBRMETALLICROUGHNESS;
 
         public MaterialBuilder CompatibilityFallback
         {
@@ -60,6 +109,8 @@ namespace SharpGLTF.Materials
                 _CompatibilityFallbackMaterial = value;
             }
         }
+
+        public static IEqualityComparer<MaterialBuilder> ContentComparer => _ContentComparer.Default;
 
         #endregion
 
@@ -131,7 +182,7 @@ namespace SharpGLTF.Materials
             return ch;
         }
 
-        public MaterialBuilder WithAlpha(ALPHA alphaMode = ALPHA.OPAQUE, Single alphaCutoff = 0.5f)
+        public MaterialBuilder WithAlpha(AlphaMode alphaMode = AlphaMode.OPAQUE, Single alphaCutoff = 0.5f)
         {
             this.AlphaMode = alphaMode;
             this.AlphaCutoff = alphaCutoff;
@@ -237,6 +288,25 @@ namespace SharpGLTF.Materials
         public MaterialBuilder WithEmissive(string imageFilePath) { return WithChannelImage("Emissive", imageFilePath); }
 
         public MaterialBuilder WithEmissive(Vector3 emissiveFactor) { return WithChannelParam("Emissive", new Vector4(emissiveFactor, 0)); }
+
+        #endregion
+
+        #region support types
+
+        sealed class _ContentComparer : IEqualityComparer<MaterialBuilder>
+        {
+            public static readonly _ContentComparer Default = new _ContentComparer();
+
+            public bool Equals(MaterialBuilder x, MaterialBuilder y)
+            {
+                return MaterialBuilder.AreEqual(x, y);
+            }
+
+            public int GetHashCode(MaterialBuilder obj)
+            {
+                return MaterialBuilder.GetContentHashCode(obj);
+            }
+        }
 
         #endregion
     }

@@ -328,7 +328,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             var materials = Enumerable
                 .Range(0, 10)
-                .Select(idx => new MaterialBuilder()
+                .Select(idx => MaterialBuilder.CreateDefault()
                 .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(),1)))
                 .ToList();
 
@@ -369,7 +369,7 @@ namespace SharpGLTF.Schema2.Authoring
             // create a mesh
             var cube = new MeshBuilder<VPOSNRM>("cube");
             cube.VertexPreprocessor.SetDebugPreprocessors();
-            cube.AddCube(new MaterialBuilder(), Matrix4x4.Identity);
+            cube.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
             cube.Validate();
 
             // create a new gltf model

@@ -47,18 +47,18 @@ namespace SharpGLTF.Scenes
 
         public bool HasAnimations => Scale?.Tracks.Count > 0 || Rotation?.Tracks.Count > 0 || Translation?.Tracks.Count > 0;
 
-        public Animations.Animatable<Vector3> Scale { get; private set; }
+        public Animations.AnimatableProperty<Vector3> Scale { get; private set; }
 
-        public Animations.Animatable<Quaternion> Rotation { get; private set; }
+        public Animations.AnimatableProperty<Quaternion> Rotation { get; private set; }
 
-        public Animations.Animatable<Vector3> Translation { get; private set; }
+        public Animations.AnimatableProperty<Vector3> Translation { get; private set; }
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.
         /// </summary>
         public Matrix4x4 LocalMatrix
         {
-            get => Transforms.AffineTransform.Evaluate(_Matrix, Scale?.Default, Rotation?.Default, Translation?.Default);
+            get => Transforms.AffineTransform.Evaluate(_Matrix, Scale?.Value, Rotation?.Value, Translation?.Value);
             set
             {
                 if (value == Matrix4x4.Identity)
@@ -85,7 +85,7 @@ namespace SharpGLTF.Scenes
                 ?
                 Transforms.AffineTransform.Create(_Matrix.Value)
                 :
-                Transforms.AffineTransform.Create(Scale?.Default, Rotation?.Default, Translation?.Default);
+                Transforms.AffineTransform.Create(Translation?.Value, Rotation?.Value, Scale?.Value);
             set
             {
                 Guard.IsTrue(value.IsValid, nameof(value));
@@ -94,20 +94,20 @@ namespace SharpGLTF.Scenes
 
                 if (value.Scale != Vector3.One)
                 {
-                    if (Scale == null) Scale = new Animations.Animatable<Vector3>();
-                    Scale.Default = value.Scale;
+                    if (Scale == null) Scale = new Animations.AnimatableProperty<Vector3>();
+                    Scale.Value = value.Scale;
                 }
 
                 if (value.Rotation != Quaternion.Identity)
                 {
-                    if (Rotation == null) Rotation = new Animations.Animatable<Quaternion>();
-                    Rotation.Default = value.Rotation;
+                    if (Rotation == null) Rotation = new Animations.AnimatableProperty<Quaternion>();
+                    Rotation.Value = value.Rotation;
                 }
 
                 if (value.Translation != Vector3.Zero)
                 {
-                    if (Translation == null) Translation = new Animations.Animatable<Vector3>();
-                    Translation.Default = value.Scale;
+                    if (Translation == null) Translation = new Animations.AnimatableProperty<Vector3>();
+                    Translation.Value = value.Scale;
                 }
             }
         }
@@ -141,37 +141,52 @@ namespace SharpGLTF.Scenes
             return c;
         }
 
-        public Animations.Animatable<Vector3> UseScale()
+        public Animations.AnimatableProperty<Vector3> UseScale()
         {
             if (Scale == null)
             {
-                Scale = new Animations.Animatable<Vector3>();
-                Scale.Default = Vector3.One;
+                Scale = new Animations.AnimatableProperty<Vector3>();
+                Scale.Value = Vector3.One;
             }
 
             return Scale;
         }
 
-        public Animations.Animatable<Quaternion> UseRotation()
+        public Animations.CurveBuilder<Vector3> UseScale(string animationTrack)
+        {
+            return UseScale().UseTrackBuilder(animationTrack);
+        }
+
+        public Animations.AnimatableProperty<Quaternion> UseRotation()
         {
             if (Rotation == null)
             {
-                Rotation = new Animations.Animatable<Quaternion>();
-                Rotation.Default = Quaternion.Identity;
+                Rotation = new Animations.AnimatableProperty<Quaternion>();
+                Rotation.Value = Quaternion.Identity;
             }
 
             return Rotation;
         }
 
-        public Animations.Animatable<Vector3> UseTranslation()
+        public Animations.CurveBuilder<Quaternion> UseRotation(string animationTrack)
+        {
+            return UseRotation().UseTrackBuilder(animationTrack);
+        }
+
+        public Animations.AnimatableProperty<Vector3> UseTranslation()
         {
             if (Translation == null)
             {
-                Translation = new Animations.Animatable<Vector3>();
-                Translation.Default = Vector3.One;
+                Translation = new Animations.AnimatableProperty<Vector3>();
+                Translation.Value = Vector3.One;
             }
 
             return Translation;
+        }
+
+        public Animations.CurveBuilder<Vector3> UseTranslation(string animationTrack)
+        {
+            return UseTranslation().UseTrackBuilder(animationTrack);
         }
 
         public void SetScaleTrack(string track, Animations.ICurveSampler<Vector3> curve) { UseScale().SetTrack(track, curve); }
@@ -188,7 +203,7 @@ namespace SharpGLTF.Scenes
             var rotation = Rotation?.GetValueAt(animationTrack, time);
             var translation = Translation?.GetValueAt(animationTrack, time);
 
-            return Transforms.AffineTransform.Create(scale, rotation, translation);
+            return Transforms.AffineTransform.Create(translation, rotation, scale);
         }
 
         public Matrix4x4 GetWorldMatrix(string animationTrack, float time)

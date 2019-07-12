@@ -41,6 +41,19 @@ namespace SharpGLTF.Animations
     {
         #region sampler utils
 
+        public static Quaternion CreateTangent(this Quaternion fromValue, Quaternion toValue, float scale = 1)
+        {
+            var tangent = Quaternion.Concatenate(toValue, Quaternion.Inverse(fromValue));
+
+            if (scale == 1) return tangent;
+
+            // decompose into Axis - Angle pair
+            var axis = Vector3.Normalize(new Vector3(tangent.X, tangent.Y, tangent.Z));
+            var angle = Math.Acos(tangent.W) * 2;
+
+            return Quaternion.CreateFromAxisAngle(axis, scale * (float)angle);
+        }
+
         /// <summary>
         /// Calculates the Hermite point weights for a given <paramref name="amount"/>
         /// </summary>

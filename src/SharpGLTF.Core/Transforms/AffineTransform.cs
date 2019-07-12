@@ -21,22 +21,22 @@ namespace SharpGLTF.Transforms
             return new AffineTransform(matrix, null, null, null);
         }
 
-        public static AffineTransform Create(Vector3? s, Quaternion? r, Vector3? t)
+        public static AffineTransform Create(Vector3? translation, Quaternion? rotation, Vector3? scale)
         {
-            return new AffineTransform(null, s, r, t);
+            return new AffineTransform(null, translation, rotation, scale);
         }
 
-        internal AffineTransform(Matrix4x4? m, Vector3? s, Quaternion? r, Vector3? t)
+        internal AffineTransform(Matrix4x4? matrix, Vector3? translation, Quaternion? rotation, Vector3? scale)
         {
-            if (m.HasValue)
+            if (matrix.HasValue)
             {
-                Matrix4x4.Decompose(m.Value, out Scale, out Rotation, out Translation);
+                Matrix4x4.Decompose(matrix.Value, out Scale, out Rotation, out Translation);
             }
             else
             {
-                Rotation = r ?? Quaternion.Identity;
-                Scale = s ?? Vector3.One;
-                Translation = t ?? Vector3.Zero;
+                Rotation = rotation ?? Quaternion.Identity;
+                Scale = scale ?? Vector3.One;
+                Translation = translation ?? Vector3.Zero;
             }
         }
 
@@ -125,7 +125,7 @@ namespace SharpGLTF.Transforms
         {
             if (transform.HasValue) return transform.Value;
 
-            return new AffineTransform(null, scale, rotation, translation).Matrix;
+            return new AffineTransform(null, translation, rotation, scale).Matrix;
         }
 
         public static Matrix4x4 LocalToWorld(Matrix4x4 parentWorld, Matrix4x4 childLocal)

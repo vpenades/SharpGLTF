@@ -164,6 +164,21 @@ namespace SharpGLTF
 
         #region linq
 
+        internal static int GetContentHashCode<T>(this IEnumerable<T> collection, int count = int.MaxValue)
+        {
+            if (collection == null) return 0;
+
+            int h = 0;
+
+            foreach (var element in collection.Take(count))
+            {
+                h ^= element == null ? 0 : element.GetHashCode();
+                h *= 17;
+            }
+
+            return h;
+        }
+
         internal static ArraySegment<T> Slice<T>(this T[] array, int offset)
         {
             return new ArraySegment<T>(array, offset, array.Length - offset);

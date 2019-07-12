@@ -6,6 +6,50 @@ using System.Linq;
 
 namespace SharpGLTF.Animations
 {
+    //------------------------------------------------------
+    // this code is in hibernation mode - DO NOT USE
+    //------------------------------------------------------
+
+    // the idea is that depending on the calls we do to this interface, it upgrades the data under the hood.
+    public abstract class CurveBuilder<T>
+    {
+        #region data
+
+        internal SortedDictionary<float, _CurveNode<T>> _Keys = new SortedDictionary<float, _CurveNode<T>>();
+
+        #endregion
+
+        public IReadOnlyCollection<float> Keys => _Keys.Keys;
+
+        public void RemoveKey(float offset) { _Keys.Remove(offset); }
+
+        public void SetKey(float offset, T value, bool isLinear = true)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetKey(float offset, T value, T incomingTangent, int outgoingTangent)
+        {
+            throw new NotImplementedException();
+        }
+
+        public CurveBuilder<T> WithKey(float offset, T value, bool isLinear = true)
+        {
+            SetKey(offset, value, isLinear);
+            return this;
+        }
+
+        public CurveBuilder<T> WithKey(float offset, T value, T incomingTangent, int outgoingTangent)
+        {
+            SetKey(offset, value, incomingTangent, outgoingTangent);
+            return this;
+        }
+    }
+
+    public sealed class Vector3CurveBuilder : CurveBuilder<Vector3>
+    {
+
+    }
 
     [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
     struct CurvePoint<T>
@@ -112,7 +156,6 @@ namespace SharpGLTF.Animations
     }
 
     struct _CurveNode<T>
-        where T : struct
     {
         public T IncomingTangent;
         public T Point;

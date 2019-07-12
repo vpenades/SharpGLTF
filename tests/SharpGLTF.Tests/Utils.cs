@@ -236,7 +236,7 @@ namespace SharpGLTF
         }        
     }
 
-    static class VectorUtils
+    static class VectorsUtils
     {
         public static Single NextSingle(this Random rnd)
         {
@@ -258,12 +258,100 @@ namespace SharpGLTF
             return new Vector4(rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle());
         }
 
-        public static void AreEqual(Vector4 a, Vector4 b, double delta = 0)
+        public static float GetAngle(Quaternion a, Quaternion b)
         {
-            Assert.AreEqual(a.X, b.X, delta);
-            Assert.AreEqual(a.Y, b.Y, delta);
-            Assert.AreEqual(a.Z, b.Z, delta);
-            Assert.AreEqual(a.W, b.W, delta);
+            var w = Quaternion.Concatenate(b, Quaternion.Inverse(a)).W;
+
+            if (w < -1) w = -1;
+            if (w > 1) w = 1;
+
+            return (float)Math.Acos(w) * 2;
+        }
+
+        public static float GetAngle(Vector3 a, Vector3 b)
+        {
+            a = Vector3.Normalize(a);
+            b = Vector3.Normalize(b);
+
+            var c = Vector3.Dot(a, b);
+            if (c > 1) c = 1;
+            if (c < -1) c = -1;
+
+            return (float)Math.Acos(c);
+        }
+    }
+
+    static class NumericsAssert
+    {
+        public static void AreEqual(Vector2 expected, Vector2 actual, double delta = 0)
+        {
+            Assert.AreEqual(expected.X, actual.X, delta, "X");
+            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
+        }
+
+        public static void AreEqual(Vector3 expected, Vector3 actual, double delta = 0)
+        {
+            Assert.AreEqual(expected.X, actual.X, delta, "X");
+            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
+        }
+
+        public static void AreEqual(Vector4 expected, Vector4 actual, double delta = 0)
+        {
+            Assert.AreEqual(expected.X, actual.X, delta, "X");
+            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
+            Assert.AreEqual(expected.W, actual.W, delta, "W");
+        }
+
+        public static void AreEqual(Quaternion expected, Quaternion actual, double delta = 0)
+        {
+            Assert.AreEqual(expected.X, actual.X, delta, "X");
+            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
+            Assert.AreEqual(expected.W, actual.W, delta, "W");
+        }
+
+        public static void IsNormal(Vector2 vector, double delta = 0)
+        {
+            var lenSquared = vector.X * vector.X + vector.Y * vector.Y;
+
+            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        }
+
+        public static void IsNormal(Vector3 vector, double delta = 0)
+        {
+            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z;
+
+            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        }
+
+        public static void IsNormal(Vector4 vector, double delta = 0)
+        {
+            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
+
+            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        }
+
+        public static void IsNormal(Quaternion vector, double delta = 0)
+        {
+            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
+
+            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        }        
+
+        public static void AngleLessOrEqual(Vector3 a, Vector3 b, float radians)
+        {
+            var angle = VectorsUtils.GetAngle(a, b);
+
+            Assert.LessOrEqual(angle, radians, "Angle");
+        }
+
+        public static void AngleLessOrEqual(Quaternion a, Quaternion b, float radians)
+        {
+            var angle = VectorsUtils.GetAngle(a, b);
+
+            Assert.LessOrEqual(angle, radians, "Angle");
         }
     }
 }

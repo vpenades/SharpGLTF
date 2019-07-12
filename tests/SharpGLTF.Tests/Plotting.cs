@@ -23,13 +23,18 @@ namespace SharpGLTF
             Cross = 2,
             Star = 3,
             Circle = 4,
-            X = 5,
+            X = 5,            
             Square2 = 6,
             Triangle = 7,
             CircleWithCross = 8,
             CircleWithDot = 9,
 
-            Continuous = 65536
+            CHAR_X = 88,
+            CHAR_Y = 89,
+            CHAR_Z = 90,
+            CHAR_W = 87,
+
+            Continuous = 65536                
         }
 
         public struct Point2
@@ -99,6 +104,8 @@ namespace SharpGLTF
             #endregion
 
             #region API
+
+            public Point2Series WithLineType(LineType t) { LineType = t; return this; }
 
             public void DrawToFile(string filePath)
             {

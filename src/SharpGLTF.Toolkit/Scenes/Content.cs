@@ -154,7 +154,7 @@ namespace SharpGLTF.Scenes
 
         private IRenderableContent _Target;
 
-        private readonly List<Animations.Animatable<float>> _MorphWeights = new List<Animations.Animatable<float>>();
+        private readonly List<Animations.AnimatableProperty<float>> _MorphWeights = new List<Animations.AnimatableProperty<float>>();
 
         #endregion
 

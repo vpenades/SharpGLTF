@@ -42,18 +42,17 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var mesh = new Cube<Materials.MaterialBuilder>(new Materials.MaterialBuilder())
-                .ToMesh(Matrix4x4.Identity);
+            var cube = new Cube<Materials.MaterialBuilder>(Materials.MaterialBuilder.CreateDefault());
 
             var pivot = new NodeBuilder();
 
-            var curve = new[] { (0.0f, Vector3.Zero), (1.0f, Vector3.One) };            
+            pivot.UseTranslation("track1")
+                .WithKey(0, Vector3.Zero)
+                .WithKey(1, Vector3.One);
 
-            pivot.SetTranslationTrack("default", curve.CreateSampler());
+            var scene = new SceneBuilder();            
 
-            var scene = new SceneBuilder();
-
-            scene.AddMesh(mesh, pivot);
+            scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), pivot);
 
             scene.AttachToCurrentTest("animated.glb");
             scene.AttachToCurrentTest("animated.gltf");
