@@ -279,108 +279,19 @@ namespace SharpGLTF
 
             return (float)Math.Acos(c);
         }
-    }
 
-    static class NumericsAssert
-    {
-        public static void IsFinite(Vector2 vector)
+        public static float GetAngle(Vector2 a, Vector2 b)
         {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");            
-        }
+            a = Vector2.Normalize(a);
+            b = Vector2.Normalize(b);
 
-        public static void IsFinite(Vector3 vector)
-        {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
-            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
-        }
+            var c = Vector2.Dot(a, b);
+            if (c > 1) c = 1;
+            if (c < -1) c = -1;
 
-        public static void IsFinite(Vector4 vector)
-        {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
-            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
-            Assert.IsTrue(float.IsFinite(vector.W), "W");
-        }
-
-        public static void IsFinite(Quaternion quaternion)
-        {
-            Assert.IsTrue(float.IsFinite(quaternion.X), "X");
-            Assert.IsTrue(float.IsFinite(quaternion.Y), "Y");
-            Assert.IsTrue(float.IsFinite(quaternion.Z), "Z");
-            Assert.IsTrue(float.IsFinite(quaternion.W), "W");
-        }
-
-        public static void AreEqual(Vector2 expected, Vector2 actual, double delta = 0)
-        {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-        }
-
-        public static void AreEqual(Vector3 expected, Vector3 actual, double delta = 0)
-        {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
-        }
-
-        public static void AreEqual(Vector4 expected, Vector4 actual, double delta = 0)
-        {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
-            Assert.AreEqual(expected.W, actual.W, delta, "W");
-        }
-
-        public static void AreEqual(Quaternion expected, Quaternion actual, double delta = 0)
-        {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
-            Assert.AreEqual(expected.W, actual.W, delta, "W");
-        }
-
-        public static void IsNormal(Vector2 vector, double delta = 0)
-        {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
-        }
-
-        public static void IsNormal(Vector3 vector, double delta = 0)
-        {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
-        }
-
-        public static void IsNormal(Vector4 vector, double delta = 0)
-        {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
-        }
-
-        public static void IsNormal(Quaternion vector, double delta = 0)
-        {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
-        }        
-
-        public static void AngleLessOrEqual(Vector3 a, Vector3 b, float radians)
-        {
-            var angle = VectorsUtils.GetAngle(a, b);
-
-            Assert.LessOrEqual(angle, radians, "Angle");
-        }
-
-        public static void AngleLessOrEqual(Quaternion a, Quaternion b, float radians)
-        {
-            var angle = VectorsUtils.GetAngle(a, b);
-
-            Assert.LessOrEqual(angle, radians, "Angle");
+            return (float)Math.Acos(c);
         }
     }
+
+    
 }
