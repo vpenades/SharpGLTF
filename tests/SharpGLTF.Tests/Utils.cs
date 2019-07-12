@@ -283,6 +283,35 @@ namespace SharpGLTF
 
     static class NumericsAssert
     {
+        public static void IsFinite(Vector2 vector)
+        {
+            Assert.IsTrue(float.IsFinite(vector.X), "X");
+            Assert.IsTrue(float.IsFinite(vector.Y), "Y");            
+        }
+
+        public static void IsFinite(Vector3 vector)
+        {
+            Assert.IsTrue(float.IsFinite(vector.X), "X");
+            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
+            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
+        }
+
+        public static void IsFinite(Vector4 vector)
+        {
+            Assert.IsTrue(float.IsFinite(vector.X), "X");
+            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
+            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
+            Assert.IsTrue(float.IsFinite(vector.W), "W");
+        }
+
+        public static void IsFinite(Quaternion quaternion)
+        {
+            Assert.IsTrue(float.IsFinite(quaternion.X), "X");
+            Assert.IsTrue(float.IsFinite(quaternion.Y), "Y");
+            Assert.IsTrue(float.IsFinite(quaternion.Z), "Z");
+            Assert.IsTrue(float.IsFinite(quaternion.W), "W");
+        }
+
         public static void AreEqual(Vector2 expected, Vector2 actual, double delta = 0)
         {
             Assert.AreEqual(expected.X, actual.X, delta, "X");
