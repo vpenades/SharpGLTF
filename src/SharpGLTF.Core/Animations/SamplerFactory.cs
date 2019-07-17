@@ -27,7 +27,7 @@ namespace SharpGLTF.Animations
         /// 1: LINEAR.
         /// 3: CUBIC.
         /// </summary>
-        int Degree { get; }
+        int MaxDegree { get; }
 
         IReadOnlyDictionary<float, T> ToStepCurve();
         IReadOnlyDictionary<float, T> ToLinearCurve();
@@ -293,7 +293,7 @@ namespace SharpGLTF.Animations
         private readonly IEnumerable<(float, Vector3)> _Sequence;
         private readonly Boolean _Linear;
 
-        public int Degree => _Linear ? 1 : 0;
+        public int MaxDegree => _Linear ? 1 : 0;
 
         public Vector3 GetPoint(float offset)
         {
@@ -336,7 +336,7 @@ namespace SharpGLTF.Animations
         private readonly IEnumerable<(float, Quaternion)> _Sequence;
         private readonly Boolean _Linear;
 
-        public int Degree => _Linear ? 1 : 0;
+        public int MaxDegree => _Linear ? 1 : 0;
 
         public Quaternion GetPoint(float offset)
         {
@@ -379,7 +379,7 @@ namespace SharpGLTF.Animations
         private readonly IEnumerable<(float, float[])> _Sequence;
         private readonly Boolean _Linear;
 
-        public int Degree => _Linear ? 1 : 0;
+        public int MaxDegree => _Linear ? 1 : 0;
 
         public float[] GetPoint(float offset)
         {
@@ -427,7 +427,7 @@ namespace SharpGLTF.Animations
 
         private readonly IEnumerable<(float, (Vector3, Vector3, Vector3))> _Sequence;
 
-        public int Degree => 3;
+        public int MaxDegree => 3;
 
         public Vector3 GetPoint(float offset)
         {
@@ -471,7 +471,7 @@ namespace SharpGLTF.Animations
 
         private readonly IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> _Sequence;
 
-        public int Degree => 3;
+        public int MaxDegree => 3;
 
         public Quaternion GetPoint(float offset)
         {
@@ -515,7 +515,7 @@ namespace SharpGLTF.Animations
 
         private readonly IEnumerable<(float, (float[], float[], float[]))> _Sequence;
 
-        public int Degree => 3;
+        public int MaxDegree => 3;
 
         public float[] GetPoint(float offset)
         {

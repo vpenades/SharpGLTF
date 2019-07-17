@@ -6,12 +6,32 @@ using System.Linq;
 
 namespace SharpGLTF.Animations
 {
-    //------------------------------------------------------
-    // this code is in hibernation mode - DO NOT USE
-    //------------------------------------------------------
+    struct _CurveNode<T>
+    {
+        public _CurveNode(T value, bool isLinear)
+        {
+            IncomingTangent = default;
+            Point = value;
+            OutgoingTangent = default;
+            Degree = isLinear ? 1 : 0;
+        }
+
+        public _CurveNode(T incoming, T value, T outgoing)
+        {
+            IncomingTangent = incoming;
+            Point = value;
+            OutgoingTangent = outgoing;
+            Degree = 3;
+        }
+
+        public T IncomingTangent;
+        public T Point;
+        public T OutgoingTangent;
+        public int Degree;
+    }
 
     // the idea is that depending on the calls we do to this interface, it upgrades the data under the hood.
-    public abstract class CurveBuilder<T>
+    public abstract class CurveBuilder<T> : IConvertibleCurve<T>
     {
         #region data
 
@@ -19,18 +39,26 @@ namespace SharpGLTF.Animations
 
         #endregion
 
+        #region properties
+
         public IReadOnlyCollection<float> Keys => _Keys.Keys;
+
+        public int MaxDegree => _Keys.Values.Max(item => item.Degree);
+
+        #endregion
+
+        #region API
 
         public void RemoveKey(float offset) { _Keys.Remove(offset); }
 
         public void SetKey(float offset, T value, bool isLinear = true)
         {
-            throw new NotImplementedException();
+            _Keys[offset] = new _CurveNode<T>(value, isLinear);
         }
 
-        public void SetKey(float offset, T value, T incomingTangent, int outgoingTangent)
+        public void SetKey(float offset, T value, T incomingTangent, T outgoingTangent)
         {
-            throw new NotImplementedException();
+            _Keys[offset] = new _CurveNode<T>(incomingTangent, value, outgoingTangent);
         }
 
         public CurveBuilder<T> WithKey(float offset, T value, bool isLinear = true)
@@ -39,17 +67,206 @@ namespace SharpGLTF.Animations
             return this;
         }
 
-        public CurveBuilder<T> WithKey(float offset, T value, T incomingTangent, int outgoingTangent)
+        public CurveBuilder<T> WithKey(float offset, T value, T incomingTangent, T outgoingTangent)
         {
             SetKey(offset, value, incomingTangent, outgoingTangent);
             return this;
         }
+
+        private protected (_CurveNode<T>, _CurveNode<T>, float) FindSample(float offset)
+        {
+            if (_Keys.Count == 0) return (default(_CurveNode<T>), default(_CurveNode<T>), 0);
+
+            var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+
+            return (_Keys[offsets.Item1], _Keys[offsets.Item2], offsets.Item3);
+        }
+
+        public abstract T GetPoint(float offset);
+
+        protected abstract T GetTangent(T fromValue, T toValue);
+
+        IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToStepCurve()
+        {
+            if (MaxDegree != 0) throw new NotSupportedException();
+
+            return _Keys.ToDictionary(item => item.Key, item => item.Value.Point);
+        }
+
+        IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToLinearCurve()
+        {
+            var d = new Dictionary<float, T>();
+
+            var orderedKeys = _Keys.Keys.ToList();
+
+            for (int i = 0; i < orderedKeys.Count - 1; ++i)
+            {
+                var a = orderedKeys[i + 0];
+                var b = orderedKeys[i + 1];
+
+                var sa = _Keys[a];
+                var sb = _Keys[b];
+
+                switch (sa.Degree)
+                {
+                    case 0: // simulate a step with an extra key
+                        d[a] = sa.Point;
+                        d[b - float.Epsilon] = sa.Point;
+                        d[b] = sb.Point;
+                        break;
+
+                    case 1:
+                        d[a] = sa.Point;
+                        d[b] = sb.Point;
+                        break;
+
+                    case 3:
+                        var t = a;
+                        while (t < b)
+                        {
+                            d[t] = this.GetPoint(t);
+                            t += 1.0f / 30.0f;
+                        }
+
+                        break;
+
+                    default: throw new NotImplementedException();
+                }
+            }
+
+            return d;
+        }
+
+        IReadOnlyDictionary<float, (T, T, T)> IConvertibleCurve<T>.ToSplineCurve()
+        {
+            var d = new Dictionary<float, (T, T, T)>();
+
+            var orderedKeys = _Keys.Keys.ToList();
+
+            for (int i = 0; i < orderedKeys.Count - 1; ++i)
+            {
+                var a = orderedKeys[i + 0];
+                var b = orderedKeys[i + 1];
+
+                var sa = _Keys[a];
+                var sb = _Keys[b];
+
+                if (!d.TryGetValue(a, out (T, T, T) da)) da = default;
+                if (!d.TryGetValue(b, out (T, T, T) db)) db = default;
+
+                da.Item2 = sa.Point;
+                db.Item2 = sb.Point;
+
+                var delta = GetTangent(da.Item2, da.Item2);
+
+                switch (sa.Degree)
+                {
+                    case 0: // simulate a step with an extra key
+                        da.Item3 = default;
+                        d[b - float.Epsilon] = (default, sa.Point, delta);
+                        db.Item1 = delta;
+                        break;
+
+                    case 1: // tangents are the delta between points
+                        da.Item3 = db.Item1 = delta;
+                        break;
+
+                    case 3: // actual tangents
+                        da.Item3 = sa.OutgoingTangent;
+                        db.Item1 = sb.IncomingTangent;
+                        break;
+
+                    default: throw new NotImplementedException();
+                }
+
+                d[a] = da;
+                d[b] = db;
+            }
+
+            return d;
+        }
+
+        #endregion
     }
 
-    public sealed class Vector3CurveBuilder : CurveBuilder<Vector3>
+    static class CurveFactory
     {
+        // TODO: we could support conversions between linear and cubic (with hermite regression)
 
+        public static CurveBuilder<T> CreateCurveBuilder<T>()
+        {
+            if (typeof(T) == typeof(Vector3)) return new Vector3CurveBuilder() as CurveBuilder<T>;
+            if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
+            if (typeof(T) == typeof(float[])) throw new NotImplementedException();
+
+            throw new ArgumentException(nameof(T), "Generic argument not supported");
+        }
     }
+
+    sealed class Vector3CurveBuilder : CurveBuilder<Vector3>, ICurveSampler<Vector3>
+    {
+        protected override Vector3 GetTangent(Vector3 fromValue, Vector3 toValue)
+        {
+            return toValue - fromValue;
+        }
+
+        public override Vector3 GetPoint(float offset)
+        {
+            var sample = FindSample(offset);
+
+            if (sample.Item1.Degree == 0) return sample.Item1.Point;
+
+            if (sample.Item1.Degree == 1)
+            {
+                return Vector3.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+            }
+
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
+
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutgoingTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.IncomingTangent;
+
+            var basis = SamplerFactory.CreateHermitePointWeights(sample.Item3);
+
+            return (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
+        }
+    }
+
+    sealed class QuaternionCurveBuilder : CurveBuilder<Quaternion>, ICurveSampler<Quaternion>
+    {
+        protected override Quaternion GetTangent(Quaternion fromValue, Quaternion toValue)
+        {
+            return SamplerFactory.CreateTangent(fromValue, toValue, 1);
+        }
+
+        public override Quaternion GetPoint(float offset)
+        {
+            var sample = FindSample(offset);
+
+            if (sample.Item1.Degree == 0) return sample.Item1.Point;
+
+            if (sample.Item1.Degree == 1) return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
+
+            var pointStart = sample.Item1.Point;
+            var tangentOut = sample.Item1.OutgoingTangent;
+            var pointEnd = sample.Item2.Point;
+            var tangentIn = sample.Item2.IncomingTangent;
+
+            var basis = SamplerFactory.CreateHermitePointWeights(sample.Item3);
+
+            var q = (pointStart * basis.Item1) + (pointEnd * basis.Item2) + (tangentOut * basis.Item3) + (tangentIn * basis.Item4);
+
+            return Quaternion.Normalize(q);
+        }
+    }
+
+    //--------------------------------
+    // unused code
+    //--------------------------------
 
     [System.Diagnostics.DebuggerDisplay("[{_Offset}] = {Sample}")]
     struct CurvePoint<T>
@@ -140,29 +357,6 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    static class CurveFactory
-    {
-        // TODO: we could support conversions between linear and cubic (with hermite regression)
-
-        public static Curve<T> CreateSplineCurve<T>()
-            where T : struct
-        {
-            if (typeof(T) == typeof(Single)) return new ScalarSplineCurve() as Curve<T>;
-            if (typeof(T) == typeof(Vector3)) return new Vector3SplineCurve() as Curve<T>;
-            if (typeof(T) == typeof(Quaternion)) return new QuaternionSplineCurve() as Curve<T>;
-
-            throw new ArgumentException(nameof(T), "Generic argument not supported");
-        }
-    }
-
-    struct _CurveNode<T>
-    {
-        public T IncomingTangent;
-        public T Point;
-        public T OutgoingTangent;
-        public int OutgoingMode;
-    }
-
     /// <summary>
     /// Represents a collection of consecutive nodes that can be sampled into a continuous curve.
     /// </summary>
@@ -197,7 +391,7 @@ namespace SharpGLTF.Animations
         /// <summary>
         /// Gets a value indicating if the keys of this curve are at least Step, Linear, or Spline.
         /// </summary>
-        public int Degree => _Keys.Values.Select(item => item.OutgoingMode).Max();
+        public int MaxDegree => _Keys.Values.Select(item => item.Degree).Max();
 
         #endregion
 
@@ -257,7 +451,7 @@ namespace SharpGLTF.Animations
 
         public IReadOnlyDictionary<float, T> ToStepCurve()
         {
-            Guard.IsTrue(Degree == 0, nameof(Degree));
+            Guard.IsTrue(MaxDegree == 0, nameof(MaxDegree));
 
             // todo: if Degree is not zero we might export sampled data at 60FPS
 
@@ -277,12 +471,12 @@ namespace SharpGLTF.Animations
             {
                 d[v1.Key] = v1.Value.Point;
 
-                if (v0.Value.OutgoingMode == 0)
+                if (v0.Value.Degree == 0)
                 {
                     d[v1.Key - float.Epsilon] = v0.Value.Point;
                 }
 
-                if (v0.Value.OutgoingMode == 2)
+                if (v0.Value.Degree == 2)
                 {
                     var ll = v1.Key - v0.Key;
 
@@ -330,14 +524,14 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return sample.Item1.Point;
+            if (sample.Item1.Degree == 0) return sample.Item1.Point;
 
-            if (sample.Item1.OutgoingMode == 1)
+            if (sample.Item1.Degree == 1)
             {
                 return (sample.Item1.Point * (1 - sample.Item3)) + (sample.Item2.Point * sample.Item3);
             }
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
@@ -353,11 +547,11 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return 0;
+            if (sample.Item1.Degree == 0) return 0;
 
-            if (sample.Item1.OutgoingMode == 1) return sample.Item2.Point - sample.Item1.Point;
+            if (sample.Item1.Degree == 1) return sample.Item2.Point - sample.Item1.Point;
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
@@ -409,14 +603,14 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return sample.Item1.Point;
+            if (sample.Item1.Degree == 0) return sample.Item1.Point;
 
-            if (sample.Item1.OutgoingMode == 1)
+            if (sample.Item1.Degree == 1)
             {
                 return Vector3.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
             }
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
@@ -432,11 +626,11 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return Vector3.Zero;
+            if (sample.Item1.Degree == 0) return Vector3.Zero;
 
-            if (sample.Item1.OutgoingMode == 1) return sample.Item2.Point - sample.Item1.Point;
+            if (sample.Item1.Degree == 1) return sample.Item2.Point - sample.Item1.Point;
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
@@ -488,11 +682,11 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return sample.Item1.Point;
+            if (sample.Item1.Degree == 0) return sample.Item1.Point;
 
-            if (sample.Item1.OutgoingMode == 1) return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+            if (sample.Item1.Degree == 1) return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;
@@ -510,11 +704,11 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            if (sample.Item1.OutgoingMode == 0) return Quaternion.Identity;
+            if (sample.Item1.Degree == 0) return Quaternion.Identity;
 
-            if (sample.Item1.OutgoingMode == 1) throw new NotImplementedException();
+            if (sample.Item1.Degree == 1) throw new NotImplementedException();
 
-            System.Diagnostics.Debug.Assert(sample.Item1.OutgoingMode == 3, "invalid interpolation mode");
+            System.Diagnostics.Debug.Assert(sample.Item1.Degree == 3, "invalid interpolation mode");
 
             var pointStart = sample.Item1.Point;
             var tangentOut = sample.Item1.OutgoingTangent;

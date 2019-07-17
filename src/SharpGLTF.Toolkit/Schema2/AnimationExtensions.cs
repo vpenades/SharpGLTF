@@ -21,7 +21,7 @@ namespace SharpGLTF.Schema2
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
 
-                var degree = curve.Degree;
+                var degree = curve.MaxDegree;
                 if (degree == 0) animation.CreateScaleChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateScaleChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateScaleChannel(node, curve.ToSplineCurve());
@@ -36,7 +36,7 @@ namespace SharpGLTF.Schema2
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
 
-                var degree = curve.Degree;
+                var degree = curve.MaxDegree;
                 if (degree == 0) animation.CreateTranslationChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateTranslationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateTranslationChannel(node, curve.ToSplineCurve());
@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
 
-                var degree = curve.Degree;
+                var degree = curve.MaxDegree;
                 if (degree == 0) animation.CreateRotationChannel(node, curve.ToStepCurve(), false);
                 if (degree == 1) animation.CreateRotationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateRotationChannel(node, curve.ToSplineCurve());

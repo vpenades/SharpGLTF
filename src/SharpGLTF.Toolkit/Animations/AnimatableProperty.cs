@@ -78,7 +78,19 @@ namespace SharpGLTF.Animations
 
         public CurveBuilder<T> UseTrackBuilder(string track)
         {
+            Guard.NotNullOrEmpty(track, nameof(track));
+
+            if (_Tracks == null || !_Tracks.TryGetValue(track, out ICurveSampler<T> sampler))
+            {
+                sampler = CurveFactory.CreateCurveBuilder<T>() as ICurveSampler<T>;
+                SetTrack(track, sampler);
+            }
+
+            if (sampler is CurveBuilder<T> builder) return builder;
+
             throw new NotImplementedException();
+
+            // TODO: CurveFactory.CreateCurveBuilder(sampler);
         }
 
         #endregion
