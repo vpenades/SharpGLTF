@@ -49,11 +49,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             return true;
         }
 
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors(this IEnumerable<IReadOnlyList<IVertexBuilder>> vertexBlocks)
+        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex>(this IEnumerable<IReadOnlyList<TVertex>> vertexBlocks)
+            where TVertex : IVertexBuilder
         {
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
+            // determine the vertex attributes from the first vertex.
             var firstVertex = vertexBlocks
                 .First(item => item.Count > 0)
                 .First();
@@ -61,53 +63,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
-
-            // vertex attributes
-            var attributes = GetVertexAttributes(tvg, tvm, tvs, totalCount);
+            var attributes = _GetVertexAttributes(tvg, tvm, tvs, totalCount);
 
             // create master vertex buffer
             int byteStride = attributes[0].ByteStride;
             var vbuffer = new ArraySegment<byte>(new Byte[byteStride * totalCount]);
 
-            var baseVertexIndex = 0;
-
-            foreach (var block in vertexBlocks)
-            {
-                var accessors = MemoryAccessInfo
-                    .Slice(attributes, baseVertexIndex, block.Count)
-                    .Select(item => new MemoryAccessor(vbuffer, item))
-                    .ToArray();
-
-                foreach (var accessor in accessors)
-                {
-                    var columnFunc = GetVertexBuilderAttributeFunc(accessor.Attribute.Name);
-
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetColumn<float>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetColumn<Vector2>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block.GetColumn<Vector3>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block.GetColumn<Vector4>(columnFunc));
-                }
-
-                yield return accessors;
-
-                baseVertexIndex += block.Count;
-            }
-        }
-
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TvG, TvM, TvS>(this IEnumerable<IReadOnlyList<VertexBuilder<TvG, TvM, TvS>>> vertexBlocks)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            // total number of vertices
-            var totalCount = vertexBlocks.Sum(item => item.Count);
-
-            // vertex attributes
-            var attributes = GetVertexAttributes(typeof(TvG), typeof(TvM), typeof(TvS), totalCount);
-
-            // create master vertex buffer
-            int byteStride = attributes[0].ByteStride;
-            var vbuffer = new ArraySegment<byte>( new Byte[byteStride * totalCount] );
+            // fill the buffer with the vertex blocks.
 
             var baseVertexIndex = 0;
 
@@ -120,12 +82,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
                 foreach (var accessor in accessors)
                 {
-                    var columnFunc = GetVertexBuilderAttributeFunc<TvG, TvM, TvS>(accessor.Attribute.Name);
+                    var columnFunc = _GetVertexBuilderAttributeFunc(accessor.Attribute.Name);
 
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block.GetScalarColumn(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block.GetVector2Column(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block.GetVector3Column(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block.GetVector4Column(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block._GetColumn<TVertex, float>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block._GetColumn<TVertex, Vector2>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block._GetColumn<TVertex, Vector3>(columnFunc));
+                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block._GetColumn<TVertex, Vector4>(columnFunc));
                 }
 
                 yield return accessors;
@@ -158,22 +120,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        private static System.Reflection.FieldInfo GetVertexField(Type vertexType, string attributeName)
-        {
-            foreach (var finfo in vertexType.GetFields())
-            {
-                var attribute = _GetMemoryAccessInfo(finfo);
-
-                if (attribute.HasValue)
-                {
-                    if (attribute.Value.Name == attributeName) return finfo;
-                }
-            }
-
-            return null;
-        }
-
-        private static MemoryAccessInfo[] GetVertexAttributes(Type vertexType, Type valuesType, Type jointsType, int itemsCount)
+        private static MemoryAccessInfo[] _GetVertexAttributes(Type vertexType, Type valuesType, Type jointsType, int itemsCount)
         {
             var attributes = new List<MemoryAccessInfo>();
 
@@ -224,24 +171,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<VertexBuilder<TvG, TvM, TvS>, Object> GetVertexBuilderAttributeFunc<TvG, TvM, TvS>(string attributeName)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            var finfo = GetVertexField(typeof(TvG), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Geometry);
-
-            finfo = GetVertexField(typeof(TvM), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Material);
-
-            finfo = GetVertexField(typeof(TvS), attributeName);
-            if (finfo != null) return vertex => finfo.GetValue(vertex.Skinning);
-
-            throw new NotImplementedException();
-        }
-
-        private static Func<IVertexBuilder, Object> GetVertexBuilderAttributeFunc(string attributeName)
+        private static Func<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
         {
             if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
             if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
@@ -266,56 +196,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new NotImplementedException();
         }
 
-        private static Single[] GetScalarColumn<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            return GetColumn<TvG, TvM, TvS, Single>(vertices, func);
-        }
-
-        private static Vector2[] GetVector2Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            return GetColumn<TvG, TvM, TvS, Vector2>(vertices, func);
-        }
-
-        private static Vector3[] GetVector3Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            return GetColumn<TvG, TvM, TvS, Vector3>(vertices, func);
-        }
-
-        private static Vector4[] GetVector4Column<TvG, TvM, TvS>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            return GetColumn<TvG, TvM, TvS, Vector4>(vertices, func);
-        }
-
-        private static TColumn[] GetColumn<TvG, TvM, TvS, TColumn>(this IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> vertices, Func<VertexBuilder<TvG, TvM, TvS>, Object> func)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            var dst = new TColumn[vertices.Count];
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                var v = vertices[i];
-
-                dst[i] = (TColumn)func(v);
-            }
-
-            return dst;
-        }
-
-        private static TColumn[] GetColumn<TColumn>(this IReadOnlyList<IVertexBuilder> vertices, Func<IVertexBuilder, Object> func)
+        private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Func<IVertexBuilder, Object> func)
+            where TVertex : IVertexBuilder
         {
             var dst = new TColumn[vertices.Count];
 
@@ -421,6 +303,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
 
             return dst;
-        }        
+        }
     }
 }
