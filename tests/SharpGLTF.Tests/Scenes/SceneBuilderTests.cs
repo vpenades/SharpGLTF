@@ -47,8 +47,8 @@ namespace SharpGLTF.Scenes
             var pivot = new NodeBuilder();
 
             pivot.UseTranslation("track1")
-                .WithKey(0, Vector3.Zero)
-                .WithKey(1, Vector3.One);
+                .WithPoint(0, Vector3.Zero)
+                .WithPoint(1, Vector3.One);
 
             var scene = new SceneBuilder();            
 

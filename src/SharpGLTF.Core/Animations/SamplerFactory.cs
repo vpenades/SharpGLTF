@@ -2,46 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Animations
 {
     /// <summary>
-    /// Defines a curve that can be sampled at specific points.
-    /// </summary>
-    /// <typeparam name="T">The type of a point in the curve.</typeparam>
-    public interface ICurveSampler<T>
-    {
-        T GetPoint(float offset);
-    }
-
-    /// <summary>
-    /// Defines methods that convert the current curve to a Step, Linear or Spline curve.
-    /// </summary>
-    /// <typeparam name="T">The type of a point of the curve</typeparam>
-    public interface IConvertibleCurve<T>
-    {
-        /// <summary>
-        /// Gets a value indicating the maximum degree of the curve, current values are:
-        /// 0: STEP.
-        /// 1: LINEAR.
-        /// 3: CUBIC.
-        /// </summary>
-        int MaxDegree { get; }
-
-        IReadOnlyDictionary<float, T> ToStepCurve();
-        IReadOnlyDictionary<float, T> ToLinearCurve();
-        IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve();
-    }
-
-    /// <summary>
-    /// Utility class to convert curve objects to curve samplers.
+    /// Utility class to create samplers from curve collections.
     /// </summary>
     public static class SamplerFactory
     {
         #region sampler utils
 
-        public static Quaternion CreateTangent(this Quaternion fromValue, Quaternion toValue, float scale = 1)
+        public static Vector3 CreateTangent(Vector3 fromValue, Vector3 toValue, Single scale = 1)
+        {
+            return (toValue - fromValue) * scale;
+        }
+
+        public static Quaternion CreateTangent(Quaternion fromValue, Quaternion toValue, Single scale = 1)
         {
             var tangent = Quaternion.Concatenate(toValue, Quaternion.Inverse(fromValue));
 
@@ -52,6 +28,18 @@ namespace SharpGLTF.Animations
             var angle = Math.Acos(tangent.W) * 2;
 
             return Quaternion.CreateFromAxisAngle(axis, scale * (float)angle);
+        }
+
+        public static Single[] CreateTangent(Single[] fromValue, Single[] toValue, Single scale = 1)
+        {
+            var r = new float[fromValue.Length];
+
+            for (int i = 0; i < r.Length; ++i)
+            {
+                r[i] = (toValue[i] - fromValue[i]) * scale;
+            }
+
+            return r;
         }
 
         /// <summary>
@@ -232,44 +220,91 @@ namespace SharpGLTF.Animations
 
         #endregion
 
-        #region Extensions
+        #region interpolation utils
 
-        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(float, Vector3)> collection, bool isLinear = true)
+        public static Single[] Lerp(Single[] start, Single[] end, Single amount)
+        {
+            var startW = 1 - amount;
+            var endW = amount;
+
+            var result = new float[start.Length];
+
+            for (int i = 0; i < result.Length; ++i)
+            {
+                result[i] = (start[i] * startW) + (end[i] * endW);
+            }
+
+            return result;
+        }
+
+        public static Vector3 CubicLerp(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
+        {
+            var hermite = SamplerFactory.CreateHermitePointWeights(amount);
+
+            return (start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4);
+        }
+
+        public static Quaternion CubicLerp(Quaternion start, Quaternion outgoingTangent, Quaternion end, Quaternion incomingTangent, Single amount)
+        {
+            var hermite = CreateHermitePointWeights(amount);
+
+            return Quaternion.Normalize((start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4));
+        }
+
+        public static Single[] CubicLerp(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
+        {
+            var hermite = CreateHermitePointWeights(amount);
+
+            var result = new float[start.Length];
+
+            for (int i = 0; i < result.Length; ++i)
+            {
+                result[i] = (start[i] * hermite.Item1) + (end[i] * hermite.Item2) + (outgoingTangent[i] * hermite.Item3) + (incomingTangent[i] * hermite.Item4);
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region sampler creation
+
+        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true)
         {
             if (collection == null) return null;
 
             return new Vector3LinearSampler(collection, isLinear);
         }
 
-        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(float, Quaternion)> collection, bool isLinear = true)
+        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, Quaternion)> collection, bool isLinear = true)
         {
             if (collection == null) return null;
 
             return new QuaternionLinearSampler(collection, isLinear);
         }
 
-        public static ICurveSampler<float[]> CreateSampler(this IEnumerable<(float, float[])> collection, bool isLinear = true)
+        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true)
         {
             if (collection == null) return null;
 
             return new ArrayLinearSampler(collection, isLinear);
         }
 
-        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(float, (Vector3, Vector3, Vector3))> collection)
+        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection)
         {
             if (collection == null) return null;
 
             return new Vector3CubicSampler(collection);
         }
 
-        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> collection)
+        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> collection)
         {
             if (collection == null) return null;
 
             return new QuaternionCubicSampler(collection);
         }
 
-        public static ICurveSampler<float[]> CreateSampler(this IEnumerable<(float, (float[], float[], float[]))> collection)
+        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection)
         {
             if (collection == null) return null;
 
@@ -277,280 +312,5 @@ namespace SharpGLTF.Animations
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Defines a <see cref="Vector3"/> curve sampler that can be sampled with STEP or LINEAR interpolations.
-    /// </summary>
-    struct Vector3LinearSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
-    {
-        public Vector3LinearSampler(IEnumerable<(float, Vector3)> sequence, bool isLinear)
-        {
-            _Sequence = sequence;
-            _Linear = isLinear;
-        }
-
-        private readonly IEnumerable<(float, Vector3)> _Sequence;
-        private readonly Boolean _Linear;
-
-        public int MaxDegree => _Linear ? 1 : 0;
-
-        public Vector3 GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            if (!_Linear) return segment.Item1;
-
-            return Vector3.Lerp(segment.Item1, segment.Item2, segment.Item3);
-        }
-
-        public IReadOnlyDictionary<float, Vector3> ToStepCurve()
-        {
-            Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, Vector3> ToLinearCurve()
-        {
-            Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, (Vector3, Vector3, Vector3)> ToSplineCurve()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    /// <summary>
-    /// Defines a <see cref="Quaternion"/> curve sampler that can be sampled with STEP or LINEAR interpolations.
-    /// </summary>
-    struct QuaternionLinearSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
-    {
-        public QuaternionLinearSampler(IEnumerable<(float, Quaternion)> sequence, bool isLinear)
-        {
-            _Sequence = sequence;
-            _Linear = isLinear;
-        }
-
-        private readonly IEnumerable<(float, Quaternion)> _Sequence;
-        private readonly Boolean _Linear;
-
-        public int MaxDegree => _Linear ? 1 : 0;
-
-        public Quaternion GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            if (!_Linear) return segment.Item1;
-
-            return Quaternion.Slerp(segment.Item1, segment.Item2, segment.Item3);
-        }
-
-        public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
-        {
-            Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, Quaternion> ToLinearCurve()
-        {
-            Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    /// <summary>
-    /// Defines a <see cref="float"/>[] curve sampler that can be sampled with STEP or LINEAR interpolations.
-    /// </summary>
-    struct ArrayLinearSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
-    {
-        public ArrayLinearSampler(IEnumerable<(float, float[])> sequence, bool isLinear)
-        {
-            _Sequence = sequence;
-            _Linear = isLinear;
-        }
-
-        private readonly IEnumerable<(float, float[])> _Sequence;
-        private readonly Boolean _Linear;
-
-        public int MaxDegree => _Linear ? 1 : 0;
-
-        public float[] GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            if (!_Linear) return segment.Item1;
-
-            var result = new float[segment.Item1.Length];
-
-            for (int i = 0; i < result.Length; ++i)
-            {
-                result[i] = (segment.Item1[i] * (1 - segment.Item3)) + (segment.Item2[i] * segment.Item3);
-            }
-
-            return result;
-        }
-
-        public IReadOnlyDictionary<float, float[]> ToStepCurve()
-        {
-            Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, float[]> ToLinearCurve()
-        {
-            Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-
-        public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()
-        {
-            throw new NotImplementedException();
-        }
-    }
-
-    /// <summary>
-    /// Defines a <see cref="Vector3"/> curve sampler that can be sampled with CUBIC interpolation.
-    /// </summary>
-    struct Vector3CubicSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
-    {
-        public Vector3CubicSampler(IEnumerable<(float, (Vector3, Vector3, Vector3))> sequence)
-        {
-            _Sequence = sequence;
-        }
-
-        private readonly IEnumerable<(float, (Vector3, Vector3, Vector3))> _Sequence;
-
-        public int MaxDegree => 3;
-
-        public Vector3 GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            var hermite = SamplerFactory.CreateHermitePointWeights(segment.Item3);
-
-            var start = segment.Item1.Item2;
-            var tangentOut = segment.Item1.Item3;
-            var tangentIn = segment.Item2.Item1;
-            var end = segment.Item2.Item2;
-
-            return (start * hermite.Item1) + (end * hermite.Item2) + (tangentOut * hermite.Item3) + (tangentIn * hermite.Item4);
-        }
-
-        public IReadOnlyDictionary<float, Vector3> ToStepCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, Vector3> ToLinearCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, (Vector3, Vector3, Vector3)> ToSplineCurve()
-        {
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-    }
-
-    /// <summary>
-    /// Defines a <see cref="Quaternion"/> curve sampler that can be sampled with CUBIC interpolation.
-    /// </summary>
-    struct QuaternionCubicSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
-    {
-        public QuaternionCubicSampler(IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> sequence)
-        {
-            _Sequence = sequence;
-        }
-
-        private readonly IEnumerable<(float, (Quaternion, Quaternion, Quaternion))> _Sequence;
-
-        public int MaxDegree => 3;
-
-        public Quaternion GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            var hermite = SamplerFactory.CreateHermitePointWeights(segment.Item3);
-
-            var start = segment.Item1.Item2;
-            var tangentOut = segment.Item1.Item3;
-            var tangentIn = segment.Item2.Item1;
-            var end = segment.Item2.Item2;
-
-            return Quaternion.Normalize((start * hermite.Item1) + (end * hermite.Item2) + (tangentOut * hermite.Item3) + (tangentIn * hermite.Item4));
-        }
-
-        public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, Quaternion> ToLinearCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
-        {
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
-    }
-
-    /// <summary>
-    /// Defines a <see cref="float"/>[] curve sampler that can be sampled with CUBIC interpolation.
-    /// </summary>
-    struct ArrayCubicSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
-    {
-        public ArrayCubicSampler(IEnumerable<(float, (float[], float[], float[]))> sequence)
-        {
-            _Sequence = sequence;
-        }
-
-        private readonly IEnumerable<(float, (float[], float[], float[]))> _Sequence;
-
-        public int MaxDegree => 3;
-
-        public float[] GetPoint(float offset)
-        {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
-
-            var hermite = SamplerFactory.CreateHermitePointWeights(segment.Item3);
-
-            var start = segment.Item1.Item2;
-            var tangentOut = segment.Item1.Item3;
-            var tangentIn = segment.Item2.Item1;
-            var end = segment.Item2.Item2;
-
-            var result = new float[start.Length];
-
-            for (int i = 0; i < result.Length; ++i)
-            {
-                result[i] = (start[i] * hermite.Item1) + (end[i] * hermite.Item2) + (tangentOut[i] * hermite.Item3) + (tangentIn[i] * hermite.Item4);
-            }
-
-            return result;
-        }
-
-        public IReadOnlyDictionary<float, float[]> ToStepCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, float[]> ToLinearCurve()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()
-        {
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
-        }
     }
 }

@@ -38,61 +38,130 @@ namespace SharpGLTF
             Assert.IsTrue(float.IsFinite(quaternion.W), "W");
         }
 
-        public static void AreEqual(Vector2 expected, Vector2 actual, double delta = 0)
+        public static void IsFinite(Matrix4x4 matrix)
         {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
+            Assert.IsTrue(float.IsFinite(matrix.M11), "M11");
+            Assert.IsTrue(float.IsFinite(matrix.M12), "M12");
+            Assert.IsTrue(float.IsFinite(matrix.M13), "M13");
+            Assert.IsTrue(float.IsFinite(matrix.M14), "M14");
+
+            Assert.IsTrue(float.IsFinite(matrix.M21), "M21");
+            Assert.IsTrue(float.IsFinite(matrix.M22), "M22");
+            Assert.IsTrue(float.IsFinite(matrix.M23), "M23");
+            Assert.IsTrue(float.IsFinite(matrix.M24), "M24");
+
+            Assert.IsTrue(float.IsFinite(matrix.M31), "M31");
+            Assert.IsTrue(float.IsFinite(matrix.M32), "M32");
+            Assert.IsTrue(float.IsFinite(matrix.M33), "M33");
+            Assert.IsTrue(float.IsFinite(matrix.M34), "M34");
+
+            Assert.IsTrue(float.IsFinite(matrix.M41), "M41");
+            Assert.IsTrue(float.IsFinite(matrix.M42), "M42");
+            Assert.IsTrue(float.IsFinite(matrix.M43), "M43");
+            Assert.IsTrue(float.IsFinite(matrix.M44), "M44");
         }
 
-        public static void AreEqual(Vector3 expected, Vector3 actual, double delta = 0)
+        public static void AreEqual(Vector2 expected, Vector2 actual, double tolerance = 0)
         {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
+            Assert.AreEqual(expected.X, actual.X, tolerance, "X");
+            Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
         }
 
-        public static void AreEqual(Vector4 expected, Vector4 actual, double delta = 0)
+        public static void AreEqual(Vector3 expected, Vector3 actual, double tolerance = 0)
         {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
-            Assert.AreEqual(expected.W, actual.W, delta, "W");
+            Assert.AreEqual(expected.X, actual.X, tolerance, "X");
+            Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, tolerance, "Z");
         }
 
-        public static void AreEqual(Quaternion expected, Quaternion actual, double delta = 0)
+        public static void AreEqual(Vector4 expected, Vector4 actual, double tolerance = 0)
         {
-            Assert.AreEqual(expected.X, actual.X, delta, "X");
-            Assert.AreEqual(expected.Y, actual.Y, delta, "Y");
-            Assert.AreEqual(expected.Z, actual.Z, delta, "Z");
-            Assert.AreEqual(expected.W, actual.W, delta, "W");
+            Assert.AreEqual(expected.X, actual.X, tolerance, "X");
+            Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, tolerance, "Z");
+            Assert.AreEqual(expected.W, actual.W, tolerance, "W");
         }
 
-        public static void LengthIsOne(Vector2 vector, double delta = 0)
+        public static void AreEqual(Quaternion expected, Quaternion actual, double tolerance = 0)
+        {
+            Assert.AreEqual(expected.X, actual.X, tolerance, "X");
+            Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
+            Assert.AreEqual(expected.Z, actual.Z, tolerance, "Z");
+            Assert.AreEqual(expected.W, actual.W, tolerance, "W");
+        }
+
+        public static void AreEqual(Matrix4x4 expected, Matrix4x4 actual, double delta = 0)
+        {
+            Assert.AreEqual(expected.M11, actual.M11, delta, "M11");
+            Assert.AreEqual(expected.M12, actual.M12, delta, "M12");
+            Assert.AreEqual(expected.M13, actual.M13, delta, "M13");
+            Assert.AreEqual(expected.M14, actual.M14, delta, "M14");
+
+            Assert.AreEqual(expected.M21, actual.M21, delta, "M21");
+            Assert.AreEqual(expected.M22, actual.M22, delta, "M22");
+            Assert.AreEqual(expected.M23, actual.M23, delta, "M23");
+            Assert.AreEqual(expected.M24, actual.M24, delta, "M24");
+
+            Assert.AreEqual(expected.M31, actual.M31, delta, "M31");
+            Assert.AreEqual(expected.M32, actual.M32, delta, "M32");
+            Assert.AreEqual(expected.M33, actual.M33, delta, "M33");
+            Assert.AreEqual(expected.M34, actual.M34, delta, "M34");
+
+            Assert.AreEqual(expected.M41, actual.M41, delta, "M41");
+            Assert.AreEqual(expected.M42, actual.M42, delta, "M42");
+            Assert.AreEqual(expected.M43, actual.M43, delta, "M43");
+            Assert.AreEqual(expected.M44, actual.M44, delta, "M44");
+        }
+
+        public static void IsInvertible(Matrix4x4 matrix)
+        {
+            Assert.IsTrue(Matrix4x4.Invert(matrix, out Matrix4x4 inverted));
+        }
+
+        public static void IsNormalized(Vector2 vector, double delta = 0)
         {
             var lenSquared = vector.X * vector.X + vector.Y * vector.Y;
 
             Assert.AreEqual(1, lenSquared, delta * delta, "Length");
         }
 
-        public static void LengthIsOne(Vector3 vector, double delta = 0)
+        public static void IsNormalized(Vector3 vector, double delta = 0)
         {
             var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z;
 
             Assert.AreEqual(1, lenSquared, delta * delta, "Length");
         }
 
-        public static void LengthIsOne(Vector4 vector, double delta = 0)
+        public static void IsNormalized(Vector4 vector, double delta = 0)
         {
             var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
 
             Assert.AreEqual(1, lenSquared, delta * delta, "Length");
         }
 
-        public static void LengthIsOne(Quaternion vector, double delta = 0)
+        public static void IsNormalized(Quaternion vector, double delta = 0)
         {
             var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
 
             Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        }
+
+        public static void InRange(Vector2 value, Vector2 min, Vector2 max)
+        {
+            GreaterOrEqual(value, min);
+            LessOrEqual(value, max);
+        }
+
+        public static void InRange(Vector3 value, Vector3 min, Vector3 max)
+        {
+            GreaterOrEqual(value, min);
+            LessOrEqual(value, max);
+        }
+
+        public static void InRange(Vector4 value, Vector4 min, Vector4 max)
+        {
+            GreaterOrEqual(value, min);
+            LessOrEqual(value, max);
         }
 
         public static void Less(Vector2 arg1, Vector2 arg2)

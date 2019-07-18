@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace SharpGLTF
 {
     [TestFixture]
-    [Category("Core")]
+    [Category("Core.Animations")]
     public class AnimationSamplingTests
     {
         [TestCase(0, 0, 0, 1, 1, 1, 1, 0)]
