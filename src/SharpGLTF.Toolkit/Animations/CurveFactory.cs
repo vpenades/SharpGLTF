@@ -20,9 +20,9 @@ namespace SharpGLTF.Animations
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyVector3))]
     sealed class Vector3CurveBuilder : CurveBuilder<Vector3>, ICurveSampler<Vector3>
     {
-        protected override bool CheckValue(Vector3 value)
+        protected override Vector3 IsolateValue(Vector3 value)
         {
-            return true;
+            return value;
         }
 
         protected override Vector3 CreateValue(params float[] values)
@@ -66,9 +66,9 @@ namespace SharpGLTF.Animations
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyQuaternion))]
     sealed class QuaternionCurveBuilder : CurveBuilder<Quaternion>, ICurveSampler<Quaternion>
     {
-        protected override bool CheckValue(Quaternion value)
+        protected override Quaternion IsolateValue(Quaternion value)
         {
-            return true;
+            return value;
         }
 
         protected override Quaternion CreateValue(params float[] values)
@@ -115,13 +115,19 @@ namespace SharpGLTF.Animations
         // the first "CheckValue" will fix any further calls to this value.
         private int _ValueLength = 0;
 
-        protected override bool CheckValue(Single[] value)
+        protected override Single[] IsolateValue(Single[] value)
         {
-            if (value == null || value.Length == 0) return false;
+            Guard.NotNull(value, nameof(value));
+            Guard.MustBeGreaterThan(value.Length, 0, nameof(value));
 
             if (_ValueLength == 0) _ValueLength = value.Length;
 
-            return value.Length == _ValueLength;
+            Guard.MustBeBetweenOrEqualTo(value.Length, _ValueLength, _ValueLength, nameof(value));
+
+            var clone = new Single[_ValueLength];
+            value.CopyTo(clone, 0);
+
+            return clone;
         }
 
         protected override Single[] CreateValue(params Single[] values)

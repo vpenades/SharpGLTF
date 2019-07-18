@@ -32,10 +32,31 @@ namespace SharpGLTF.Animations
 
         #region abstract API
 
-        protected abstract bool CheckValue(T value);
-
+        /// <summary>
+        /// Creates a <typeparamref name="T"/> instance from an <see cref="Single"/>[] array.
+        /// </summary>
+        /// <param name="values">An array of floats.</param>
+        /// <returns>A <typeparamref name="T"/> instance.</returns>
         protected abstract T CreateValue(params float[] values);
 
+        /// <summary>
+        /// Ensures that the reference value is only referenced internally.
+        /// </summary>
+        /// <param name="value">A value.</param>
+        /// <returns>A copy of <paramref name="value"/>.</returns>
+        /// <remarks>
+        /// This is required for reference types like float[], where the user
+        /// can add a point using and array, and then reuse the same array to
+        /// define another point, so it can inadvertently overwrite previous
+        /// points already stored in the curve.
+        /// </remarks>
+        protected abstract T IsolateValue(T value);
+
+        /// <summary>
+        /// Samples the curve at a given <paramref name="offset"/>
+        /// </summary>
+        /// <param name="offset">The curve offset to sample.</param>
+        /// <returns>A curve <typeparamref name="T"/> point.</returns>
         public abstract T GetPoint(float offset);
 
         protected abstract T GetTangent(T fromValue, T toValue);
@@ -48,9 +69,18 @@ namespace SharpGLTF.Animations
 
         public void SetPoint(float offset, T value, bool isLinear = true)
         {
-            Guard.IsTrue(CheckValue(value), nameof(value));
+            value = IsolateValue(value);
 
-            _Keys[offset] = new _CurveNode<T>(value, isLinear);
+            if (_Keys.TryGetValue(offset, out _CurveNode<T> existing))
+            {
+                existing.Point = value;
+            }
+            else
+            {
+                existing = new _CurveNode<T>(value, isLinear);
+            }
+
+            _Keys[offset] = existing;
         }
 
         /// <summary>
@@ -61,7 +91,7 @@ namespace SharpGLTF.Animations
         public void SetIncomingTangent(float offset, T tangent)
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
-            Guard.IsTrue(CheckValue(tangent), nameof(tangent));
+            tangent = IsolateValue(tangent);
 
             offset -= float.Epsilon;
 
@@ -87,7 +117,7 @@ namespace SharpGLTF.Animations
         public void SetOutgoingTangent(float offset, T tangent)
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
-            Guard.IsTrue(CheckValue(tangent), nameof(tangent));
+            tangent = IsolateValue(tangent);
 
             var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
