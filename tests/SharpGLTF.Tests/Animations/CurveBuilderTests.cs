@@ -157,7 +157,7 @@ namespace SharpGLTF.Animations
 
             convertible
                 .ToLinearCurve()
-                .Select(kvp => new Vector2(kvp.Key, kvp.Value[1]))
+                .Select(kvp => new Vector2(kvp.Value[0], kvp.Value[1]))
                 .ToPointSeries()
                 .WithLineType(Plotting.LineType.Continuous)
                 .AttachToCurrentTest("plot.png");
