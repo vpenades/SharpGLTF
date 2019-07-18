@@ -41,9 +41,12 @@ namespace SharpGLTF.Animations
 
             for (float t=0; t < 2; t+=0.01f)
             {
+                var cc = curve.GetPoint(t);
                 var ls = linear.GetPoint(t);
                 var ss = spline.GetPoint(t);
 
+                NumericsAssert.AreEqual(cc, ls, 0.002f);
+                NumericsAssert.AreEqual(cc, ss, 0.002f);
                 NumericsAssert.AreEqual(ls, ss, 0.002f);
             }
 
@@ -87,9 +90,12 @@ namespace SharpGLTF.Animations
 
             for (float t = 0; t < 2; t += 0.01f)
             {
+                var cc = curve.GetPoint(t);
                 var ls = linear.GetPoint(t);
                 var ss = spline.GetPoint(t);
 
+                NumericsAssert.AreEqual(cc, ss, 0.05f);
+                NumericsAssert.AreEqual(cc, ls, 0.05f);
                 NumericsAssert.AreEqual(ls, ss, 0.05f);
             }
 
@@ -133,8 +139,15 @@ namespace SharpGLTF.Animations
 
             for (float t = 0; t < 2; t += 0.01f)
             {
+                var cc = curve.GetPoint(t);
                 var ls = linear.GetPoint(t);
                 var ss = spline.GetPoint(t);
+
+                Assert.AreEqual(cc[0], ls[0], 0.02f);
+                Assert.AreEqual(cc[1], ls[1], 0.02f);
+
+                Assert.AreEqual(cc[0], ss[0], 0.02f);
+                Assert.AreEqual(cc[1], ss[1], 0.02f);
 
                 Assert.AreEqual(ls[0], ss[0], 0.02f);
                 Assert.AreEqual(ls[1], ss[1], 0.02f);
