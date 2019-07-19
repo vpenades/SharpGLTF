@@ -21,15 +21,9 @@ namespace SharpGLTF.Geometry
         /// to a collection of <see cref="PackedMeshBuilder{TMaterial}"/>, trying to use
         /// a single vertex buffer and a single index buffer shared by all meshes.
         /// </summary>
-        /// <typeparam name="TvP">The vertex fragment type with Position, Normal and Tangent.</typeparam>
-        /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <typeparam name="TvS">The vertex fragment type with Skin Joint Weights.</typeparam>
         /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> instances.</param>
         /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes<TvP, TvM, TvS>(IEnumerable<MeshBuilder<TMaterial, TvP, TvM, TvS>> meshBuilders)
-            where TvP : struct, VertexTypes.IVertexGeometry
-            where TvM : struct, VertexTypes.IVertexMaterial
-            where TvS : struct, VertexTypes.IVertexSkinning
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
         {
             try
             {

@@ -126,6 +126,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         void SetJointBinding(int index, int joint, float weight);
 
         IEnumerable<JointBinding> JointBindings { get; }
+
+        Vector4 JointsLow { get; }
+        Vector4 JointsHigh { get; }
+
+        Vector4 WeightsLow { get; }
+        Vector4 Weightshigh { get; }
     }
 
     /// <summary>
@@ -167,6 +173,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexJoints8x4(params (int, float)[] bindings)
         {
+            Guard.NotNull(bindings, nameof(bindings));
+            Guard.MustBeBetweenOrEqualTo(bindings.Length, 1, 4, nameof(bindings));
+
             Joints = Vector4.Zero;
             Weights = Vector4.Zero;
 
@@ -187,6 +196,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Weights;
 
         public int MaxBindings => 4;
+
+        #endregion
+
+        #region properties
+
+        public Vector4 JointsLow => this.Joints;
+        public Vector4 JointsHigh => Vector4.Zero;
+
+        public Vector4 WeightsLow => this.Weights;
+        public Vector4 Weightshigh => Vector4.Zero;
 
         #endregion
 
@@ -289,6 +308,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #endregion
 
+        #region properties
+
+        public Vector4 JointsLow => this.Joints;
+        public Vector4 JointsHigh => Vector4.Zero;
+
+        public Vector4 WeightsLow => this.Weights;
+        public Vector4 Weightshigh => Vector4.Zero;
+
+        #endregion
+
         #region API
 
         public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
@@ -380,6 +409,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #endregion
 
+        #region properties
+
+        public Vector4 JointsLow => this.Joints0;
+        public Vector4 JointsHigh => this.Joints1;
+
+        public Vector4 WeightsLow => this.Weights0;
+        public Vector4 Weightshigh => this.Joints1;
+
+        #endregion
+
         #region API
 
         public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
@@ -461,6 +500,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Weights1;
 
         public int MaxBindings => 8;
+
+        #endregion
+
+        #region properties
+
+        public Vector4 JointsLow => this.Joints0;
+        public Vector4 JointsHigh => this.Joints1;
+
+        public Vector4 WeightsLow => this.Weights0;
+        public Vector4 Weightshigh => this.Joints1;
 
         #endregion
 

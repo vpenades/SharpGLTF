@@ -2,6 +2,8 @@
 
 using NUnit.Framework;
 
+using SharpGLTF.Geometry.Parametric;
+
 namespace SharpGLTF.Schema2.Authoring
 {
     using VPOSNRM = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal,Geometry.VertexTypes.VertexEmpty,Geometry.VertexTypes.VertexEmpty>;

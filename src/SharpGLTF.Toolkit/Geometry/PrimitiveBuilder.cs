@@ -11,35 +11,55 @@ namespace SharpGLTF.Geometry
 {
     public interface IPrimitive<TMaterial>
     {
+        /// <summary>
+        /// Gets the current <typeparamref name="TMaterial"/> instance used by this primitive.
+        /// </summary>
         TMaterial Material { get; }
 
+        /// <summary>
+        /// Gets the number of vertices used by each primitive shape.
+        /// </summary>
+        int VerticesPerPrimitive { get; }
+
+        /// <summary>
+        /// Gets the total number of vertices
+        /// </summary>
         int VertexCount { get; }
 
-        VertexBuilder<TvGG, TvMM, TvSS> GetVertex<TvGG, TvMM, TvSS>(int index)
-            where TvGG : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning;
+        /// <summary>
+        /// Gets the list of <see cref="IVertexBuilder"/> vertices.
+        /// </summary>
+        IReadOnlyList<IVertexBuilder> Vertices { get; }
 
+        /// <summary>
+        /// Gets the plain list of indices.
+        /// </summary>
         IReadOnlyList<int> Indices { get; }
 
+        /// <summary>
+        /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
+        /// </summary>
         IEnumerable<int> Points { get; }
 
+        /// <summary>
+        /// Gets the indices of all lines, given that <see cref="VerticesPerPrimitive"/> is 2.
+        /// </summary>
         IEnumerable<(int, int)> Lines { get; }
 
+        /// <summary>
+        /// Gets the indices of all triangles, given that <see cref="VerticesPerPrimitive"/> is 3.
+        /// </summary>
         IEnumerable<(int, int, int)> Triangles { get; }
     }
 
     public interface IPrimitiveBuilder
     {
-        void AddTriangle<TvGG, TvMM, TvSS>
-            (
-            VertexBuilder<TvGG, TvMM, TvSS> a,
-            VertexBuilder<TvGG, TvMM, TvSS> b,
-            VertexBuilder<TvGG, TvMM, TvSS> c
-            )
-            where TvGG : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning;
+        /// <summary>
+        /// Gets the type of vertex used by this <see cref="IVertexBuilder"/>.
+        /// </summary>
+        Type VertexType { get; }
+
+        (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
     }
 
     /// <summary>
@@ -97,7 +117,19 @@ namespace SharpGLTF.Geometry
 
         private readonly int _PrimitiveVertexCount;
 
-        private readonly VertexList<VertexBuilder<TvG, TvM, TvS>> _Vertices = new VertexList<VertexBuilder<TvG, TvM, TvS>>();
+        class PrimitiveVertexList : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
+        {
+            #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
+            IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
+            #pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
+
+            IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
+            {
+                foreach (var item in this) yield return item;
+            }
+        }
+
+        private readonly PrimitiveVertexList _Vertices = new PrimitiveVertexList();
         private readonly List<int> _Indices = new List<int>();
 
         #endregion
@@ -120,6 +152,8 @@ namespace SharpGLTF.Geometry
 
         public IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> Vertices => _Vertices;
 
+        IReadOnlyList<IVertexBuilder> IPrimitive<TMaterial>.Vertices => _Vertices;
+
         public IReadOnlyList<int> Indices => _Indices;
 
         public IEnumerable<int> Points => _GetPointIndices();
@@ -127,6 +161,8 @@ namespace SharpGLTF.Geometry
         public IEnumerable<(int, int)> Lines => _GetLineIndices();
 
         public IEnumerable<(int, int, int)> Triangles => _GetTriangleIndices();
+
+        public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
         #endregion
 
@@ -156,11 +192,12 @@ namespace SharpGLTF.Geometry
         /// Adds a point.
         /// </summary>
         /// <param name="a">vertex for this point.</param>
-        public void AddPoint(VertexBuilder<TvG, TvM, TvS> a)
+        /// <returns>The index of the vertex.</returns>
+        public int AddPoint(VertexBuilder<TvG, TvM, TvS> a)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 1, nameof(VerticesPerPrimitive), "Points are not supported for this primitive");
 
-            UseVertex(a);
+            return UseVertex(a);
         }
 
         /// <summary>
@@ -168,26 +205,29 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
-        public void AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
+        /// <returns>The indices of the vertices.</returns>
+        public (int, int) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 2, nameof(VerticesPerPrimitive), "Lines are not supported for this primitive");
 
             if (_Mesh.VertexPreprocessor != null)
             {
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return;
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return (-1,-1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return (-1, -1);
             }
 
             var aa = _Vertices.Use(a);
             var bb = _Vertices.Use(b);
 
             // check for degenerated line
-            if (aa == bb) return;
+            if (aa == bb) return (-1, -1);
 
             // TODO: check if a triangle with indices aa-bb-cc already exists.
 
             _Indices.Add(aa);
             _Indices.Add(bb);
+
+            return (aa, bb);
         }
 
         /// <summary>
@@ -196,19 +236,42 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the triangle.</param>
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
-        public void AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        /// <returns>The indices of the vertices.</returns>
+        public (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
+        {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+            Guard.NotNull(c, nameof(c));
+
+            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+
+            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
+            var bb = b.GetType() != expectedType ? b.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)b;
+            var cc = c.GetType() != expectedType ? c.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)c;
+
+            return AddTriangle(aa, bb, cc);
+        }
+
+        /// <summary>
+        /// Adds a triangle.
+        /// </summary>
+        /// <param name="a">First corner of the triangle.</param>
+        /// <param name="b">Second corner of the triangle.</param>
+        /// <param name="c">Third corner of the triangle.</param>
+        /// <returns>The indices of the vertices.</returns>
+        public (int, int, int) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
 
             if (_Mesh.VertexPreprocessor != null)
             {
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return;
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return;
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref c)) return;
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return (-1, -1, -1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return (-1, -1, -1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref c)) return (-1, -1, -1);
             }
 
             // check for degenerated triangle
-            if (a.Equals(b) || a.Equals(c) || b.Equals(c)) return;
+            if (a.Equals(b) || a.Equals(c) || b.Equals(c)) return (-1, -1, -1);
 
             var aa = _Vertices.Use(a);
             var bb = _Vertices.Use(b);
@@ -221,6 +284,8 @@ namespace SharpGLTF.Geometry
             _Indices.Add(aa);
             _Indices.Add(bb);
             _Indices.Add(cc);
+
+            return (aa, bb, cc);
         }
 
         internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
@@ -273,28 +338,6 @@ namespace SharpGLTF.Geometry
             {
                 v.Validate();
             }
-        }
-
-        public void AddTriangle<TvPP, TvMM, TvSS>(VertexBuilder<TvPP, TvMM, TvSS> a, VertexBuilder<TvPP, TvMM, TvSS> b, VertexBuilder<TvPP, TvMM, TvSS> c)
-            where TvPP : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning
-        {
-            var aa = a.ConvertTo<TvG, TvM, TvS>();
-            var bb = b.ConvertTo<TvG, TvM, TvS>();
-            var cc = c.ConvertTo<TvG, TvM, TvS>();
-
-            AddTriangle(aa, bb, cc);
-        }
-
-        public VertexBuilder<TvPP, TvMM, TvSS> GetVertex<TvPP, TvMM, TvSS>(int index)
-            where TvPP : struct, IVertexGeometry
-            where TvMM : struct, IVertexMaterial
-            where TvSS : struct, IVertexSkinning
-        {
-            var v = _Vertices[index];
-
-            return new VertexBuilder<TvPP, TvMM, TvSS>(v.Geometry.ConvertTo<TvPP>(), v.Material.ConvertTo<TvMM>(), v.Skinning.ConvertTo<TvSS>());
         }
 
         private IEnumerable<int> _GetPointIndices()

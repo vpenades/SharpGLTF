@@ -66,6 +66,13 @@ namespace SharpGLTF
             TestContext.AddTestAttachment(fileName);
         }
 
+        public static void AttachToCurrentTest(this Scenes.SceneBuilder scene, string fileName)
+        {
+            var model = scene.ToSchema2();
+
+            model.AttachToCurrentTest(fileName);
+        }
+
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, Schema2.Animation animation, float time)
         {
             fileName = fileName.Replace(" ", "_");
@@ -229,7 +236,7 @@ namespace SharpGLTF
         }        
     }
 
-    static class VectorUtils
+    static class VectorsUtils
     {
         public static Single NextSingle(this Random rnd)
         {
@@ -251,12 +258,40 @@ namespace SharpGLTF
             return new Vector4(rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle());
         }
 
-        public static void AreEqual(Vector4 a, Vector4 b, double delta = 0)
+        public static float GetAngle(Quaternion a, Quaternion b)
         {
-            Assert.AreEqual(a.X, b.X, delta);
-            Assert.AreEqual(a.Y, b.Y, delta);
-            Assert.AreEqual(a.Z, b.Z, delta);
-            Assert.AreEqual(a.W, b.W, delta);
+            var w = Quaternion.Concatenate(b, Quaternion.Inverse(a)).W;
+
+            if (w < -1) w = -1;
+            if (w > 1) w = 1;
+
+            return (float)Math.Acos(w) * 2;
+        }
+
+        public static float GetAngle(Vector3 a, Vector3 b)
+        {
+            a = Vector3.Normalize(a);
+            b = Vector3.Normalize(b);
+
+            var c = Vector3.Dot(a, b);
+            if (c > 1) c = 1;
+            if (c < -1) c = -1;
+
+            return (float)Math.Acos(c);
+        }
+
+        public static float GetAngle(Vector2 a, Vector2 b)
+        {
+            a = Vector2.Normalize(a);
+            b = Vector2.Normalize(b);
+
+            var c = Vector2.Dot(a, b);
+            if (c > 1) c = 1;
+            if (c < -1) c = -1;
+
+            return (float)Math.Acos(c);
         }
     }
+
+    
 }

@@ -149,7 +149,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (vertex.TryGetNormal(out Vector3 n))
             {
-                if (!n._IsReal()) return null;
+                if (!n._IsReal()) n = p;
                 if (n == Vector3.Zero) n = p;
                 if (n == Vector3.Zero) return null;
 

@@ -24,5 +24,17 @@ namespace SharpGLTF
                 primitive.AddTriangle(a, b, c);
             }
         }
+
+        public static void AddConvexPolygon(this IPrimitiveBuilder primitive, params IVertexBuilder[] vertices)
+        {
+            for (int i = 2; i < vertices.Length; ++i)
+            {
+                var a = vertices[0];
+                var b = vertices[i - 1];
+                var c = vertices[i];
+
+                primitive.AddTriangle(a, b, c);
+            }
+        }
     }
 }

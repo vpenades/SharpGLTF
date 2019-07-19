@@ -7,6 +7,22 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
+    public interface IVertexBuilder
+    {
+        IVertexGeometry GetGeometry();
+        IVertexMaterial GetMaterial();
+        IVertexSkinning GetSkinning();
+
+        void SetGeometry(IVertexGeometry geometry);
+        void SetMaterial(IVertexMaterial material);
+        void SetSkinning(IVertexSkinning skinning);
+
+        VertexBuilder<TvPP, TvMM, TvSS> ConvertTo<TvPP, TvMM, TvSS>()
+            where TvPP : struct, IVertexGeometry
+            where TvMM : struct, IVertexMaterial
+            where TvSS : struct, IVertexSkinning;
+    }
+
     /// <summary>
     /// Represents an individual vertex object.
     /// </summary>
@@ -37,7 +53,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Vertex 𝐏:{Position} {_GetDebugWarnings()}")]
-    public partial struct VertexBuilder<TvG, TvM, TvS>
+    public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -296,6 +312,29 @@ namespace SharpGLTF.Geometry
             return sb.ToString();
         }
 
+        IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
+
+        IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
+
+        IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
+
+        void IVertexBuilder.SetGeometry(IVertexGeometry geometry)
+        {
+            Guard.NotNull(geometry, nameof(geometry));
+            this.Geometry = geometry.GetType() == typeof(TvG) ? (TvG)geometry : geometry.ConvertTo<TvG>();
+        }
+
+        void IVertexBuilder.SetMaterial(IVertexMaterial material)
+        {
+            Guard.NotNull(material, nameof(material));
+            this.Material = material.GetType() == typeof(TvM) ? (TvM)material : material.ConvertTo<TvM>();
+        }
+
+        void IVertexBuilder.SetSkinning(IVertexSkinning skinning)
+        {
+            Guard.NotNull(skinning, nameof(skinning));
+            this.Skinning = skinning.GetType() == typeof(TvS) ? (TvS)skinning : skinning.ConvertTo<TvS>();
+        }
         #endregion
     }
 }
