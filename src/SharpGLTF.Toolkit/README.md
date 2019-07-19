@@ -3,8 +3,9 @@
 #### Features
 
 - Scene Evaluation.
-- Mesh Building utilities.
-- Material Building utilities
+- Mesh building utilities.
+- Material building utilities
+- Scene building utilities.
 - Animation extension helpers.
 - Skinning helpers.
 

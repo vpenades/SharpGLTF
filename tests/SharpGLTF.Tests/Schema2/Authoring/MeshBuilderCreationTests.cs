@@ -5,11 +5,12 @@ using System.Linq;
 
 using NUnit.Framework;
 
+using SharpGLTF.Geometry;
+using SharpGLTF.Materials;
+using SharpGLTF.Geometry.Parametric;
+
 namespace SharpGLTF.Schema2.Authoring
 {
-    using Geometry;
-    using Materials;
-
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
@@ -59,8 +60,11 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create materials
-            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1));
-            var material2 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1));            
+            var material1 = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1));
+
+            var material2 = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1));            
 
             // create several meshes
             var meshBuilder1 = new MeshBuilder<VPOSNRM>("mesh1");
@@ -161,27 +165,41 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create two materials
-            var pink = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1)).WithDoubleSide(true);
-            var yellow = new MaterialBuilder("material2").WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1)).WithDoubleSide(true);
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithDoubleSide(true);
+
+            var yellow = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithDoubleSide(true);
 
             // create the mesh
             var meshBuilder = new MeshBuilder<VPOS, VEMPTY, VSKIN4>("mesh1");
+
+            #if DEBUG
             meshBuilder.VertexPreprocessor.SetDebugPreprocessors();
+            #else
+            meshBuilder.VertexPreprocessor.SetSanitizerPreprocessors();
+            #endif
 
-            var v1 = (new VPOS(-10, 0, +10), new VSKIN4(0));
-            var v2 = (new VPOS(+10, 0, +10), new VSKIN4(0));
-            var v3 = (new VPOS(+10, 0, -10), new VSKIN4(0));
-            var v4 = (new VPOS(-10, 0, -10), new VSKIN4(0));
+            const int jointIdx0 = 0;
+            const int jointIdx1 = 1;
+            const int jointIdx2 = 2;
 
-            var v5 = (new VPOS(-10, 40, +10), new VSKIN4((0,0.5f), (1, 0.5f)));
-            var v6 = (new VPOS(+10, 40, +10), new VSKIN4((0, 0.5f), (1, 0.5f)));
-            var v7 = (new VPOS(+10, 40, -10), new VSKIN4((0, 0.5f), (1, 0.5f)));
-            var v8 = (new VPOS(-10, 40, -10), new VSKIN4((0, 0.5f), (1, 0.5f)));
+            var v1 = (new VPOS(-10, 0, +10), new VSKIN4(jointIdx0));
+            var v2 = (new VPOS(+10, 0, +10), new VSKIN4(jointIdx0));
+            var v3 = (new VPOS(+10, 0, -10), new VSKIN4(jointIdx0));
+            var v4 = (new VPOS(-10, 0, -10), new VSKIN4(jointIdx0));
 
-            var v9  = (new VPOS(-5, 80, +5), new VSKIN4(2));
-            var v10 = (new VPOS(+5, 80, +5), new VSKIN4(2));
-            var v11 = (new VPOS(+5, 80, -5), new VSKIN4(2));
-            var v12 = (new VPOS(-5, 80, -5), new VSKIN4(2));
+            var v5 = (new VPOS(-10, 40, +10), new VSKIN4((jointIdx0, 0.5f), (jointIdx1, 0.5f)));
+            var v6 = (new VPOS(+10, 40, +10), new VSKIN4((jointIdx0, 0.5f), (jointIdx1, 0.5f)));
+            var v7 = (new VPOS(+10, 40, -10), new VSKIN4((jointIdx0, 0.5f), (jointIdx1, 0.5f)));
+            var v8 = (new VPOS(-10, 40, -10), new VSKIN4((jointIdx0, 0.5f), (jointIdx1, 0.5f)));
+
+            var v9  = (new VPOS(-5, 80, +5), new VSKIN4(jointIdx2));
+            var v10 = (new VPOS(+5, 80, +5), new VSKIN4(jointIdx2));
+            var v11 = (new VPOS(+5, 80, -5), new VSKIN4(jointIdx2));
+            var v12 = (new VPOS(-5, 80, -5), new VSKIN4(jointIdx2));
 
             meshBuilder.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
             meshBuilder.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
@@ -201,14 +219,14 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create the three joints that will affect the mesh
             var skelet = scene.CreateNode("Skeleton");
-            var joint1 = skelet.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 0, 0));
-            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
-            var joint3 = joint2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 40, 0));
+            var joint0 = skelet.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0));
+            var joint1 = joint0.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 40, 0)).WithRotationAnimation("Base Track", keyframes);
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));
 
             // setup skin
             var snode = scene.CreateNode("Skeleton Node");
             snode.Skin = model.CreateSkin();            
-            snode.Skin.BindJoints(joint1, joint2, joint3);
+            snode.Skin.BindJoints(joint0, joint1, joint2);
 
             snode.WithMesh( model.CreateMesh(meshBuilder) );
 

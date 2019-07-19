@@ -6,7 +6,7 @@ using System.Text;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 
-namespace SharpGLTF.Schema2.Authoring
+namespace SharpGLTF.Geometry.Parametric
 {
     using VERTEX = VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>;
 

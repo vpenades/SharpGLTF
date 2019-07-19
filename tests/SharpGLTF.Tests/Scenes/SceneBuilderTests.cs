@@ -1,20 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Numerics;
 
 using NUnit.Framework;
 
-using SharpGLTF.Schema2.Authoring;
-
-using SharpGLTF.Animations;
+using SharpGLTF.Geometry;
+using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Geometry.Parametric;
+using SharpGLTF.Materials;
 
 namespace SharpGLTF.Scenes
 {
-    using Geometry;
-    
-    using VPOSNRM = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexEmpty, Geometry.VertexTypes.VertexEmpty>;
+    using VPOSNRM = VertexBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty>;
+
+    using SKINNEDVERTEX = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8x4>;
 
 
     [Category("Toolkit.Scenes")]
@@ -26,14 +25,14 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var mesh = new Cube<Materials.MaterialBuilder>(new Materials.MaterialBuilder())
+            var mesh = new Cube<MaterialBuilder>(new MaterialBuilder())
                 .ToMesh(Matrix4x4.Identity);
 
             var scene = new SceneBuilder();
 
             scene.AddMesh(mesh, Matrix4x4.Identity);
 
-            scene.AttachToCurrentTest("cubes.glb");
+            scene.AttachToCurrentTest("cube.glb");
         }
 
         [Test]
@@ -42,7 +41,8 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var cube = new Cube<Materials.MaterialBuilder>(Materials.MaterialBuilder.CreateDefault());
+            var mesh = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault())
+                .ToMesh(Matrix4x4.Identity);
 
             var pivot = new NodeBuilder();
 
@@ -50,9 +50,17 @@ namespace SharpGLTF.Scenes
                 .WithPoint(0, Vector3.Zero)
                 .WithPoint(1, Vector3.One);
 
+            pivot.UseRotation("track1")
+                .WithPoint(0, Quaternion.Identity)
+                .WithPoint(1, Quaternion.CreateFromAxisAngle(Vector3.UnitY, 1.5f));
+
+            pivot.UseScale("track1")
+                .WithPoint(0, Vector3.One)
+                .WithPoint(1, new Vector3(0.5f));            
+
             var scene = new SceneBuilder();            
 
-            scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), pivot);
+            scene.AddMesh(mesh, pivot);
 
             scene.AttachToCurrentTest("animated.glb");
             scene.AttachToCurrentTest("animated.gltf");
@@ -80,25 +88,116 @@ namespace SharpGLTF.Scenes
             for (int i = 0; i < 100; ++i)
             {
                 // create mesh
-                var m = materials[rnd.Next(0, 10)];
-                var s = VPOSNRM.CreateCompatibleMesh("shape");
-                s.VertexPreprocessor.SetDebugPreprocessors();
+                var mat = materials[rnd.Next(0, 10)];
+                var mesh = VPOSNRM.CreateCompatibleMesh("shape");
 
-                if ((i & 1) == 0) s.AddCube(m, Matrix4x4.Identity);
-                else s.AddSphere(m, 0.5f, Matrix4x4.Identity);
+                #if DEBUG
+                mesh.VertexPreprocessor.SetDebugPreprocessors();
+                #else
+                s.VertexPreprocessor.SetSanitizerPreprocessors();
+                #endif
 
-                s.Validate();
+                if ((i & 1) == 0) mesh.AddCube(mat, Matrix4x4.Identity);
+                else mesh.AddSphere(mat, 0.5f, Matrix4x4.Identity);
+
+                mesh.Validate();
 
                 // create random transform
                 var r = rnd.NextVector3() * 5;
                 var xform = Matrix4x4.CreateFromYawPitchRoll(r.X, r.Y, r.Z) * Matrix4x4.CreateTranslation(rnd.NextVector3() * 25);
 
-                scene.AddMesh(s, xform);                
+                scene.AddMesh(mesh, xform);                
             }
 
             // save the model as GLB
 
             scene.AttachToCurrentTest("shapes.glb");
+        }
+
+        [Test]
+        public void CreateSkinnedScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+            
+            // create two materials
+
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithDoubleSide(true);
+
+            var yellow = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithDoubleSide(true);
+
+            // create the mesh            
+
+            const int jointIdx0 = 0; // index of joint node 0
+            const int jointIdx1 = 1; // index of joint node 1
+            const int jointIdx2 = 2; // index of joint node 2
+
+            var v1 = new SKINNEDVERTEX(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX(new Vector3(+10, 0, +10), (jointIdx0, 1));
+            var v3 = new SKINNEDVERTEX(new Vector3(+10, 0, -10), (jointIdx0, 1));
+            var v4 = new SKINNEDVERTEX(new Vector3(-10, 0, -10), (jointIdx0, 1));
+
+            var v5 = new SKINNEDVERTEX(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v6 = new SKINNEDVERTEX(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v7 = new SKINNEDVERTEX(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v8 = new SKINNEDVERTEX(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+
+            var v9  = new SKINNEDVERTEX(new Vector3(-5, 80, +5), (jointIdx2, 1));
+            var v10 = new SKINNEDVERTEX(new Vector3(+5, 80, +5), (jointIdx2, 1));
+            var v11 = new SKINNEDVERTEX(new Vector3(+5, 80, -5), (jointIdx2, 1));
+            var v12 = new SKINNEDVERTEX(new Vector3(-5, 80, -5), (jointIdx2, 1));
+
+            var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
+
+            #if DEBUG
+            mesh.VertexPreprocessor.SetDebugPreprocessors();
+            #else
+            mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+            #endif
+
+            mesh.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v3, v4, v8, v7);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v4, v1, v5, v8);
+
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v5, v6, v10, v9);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v6, v7, v11, v10);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v7, v8, v12, v11);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v8, v5, v9, v12);
+
+            mesh.Validate();
+            
+            // create the skeleton armature for the skinned mesh.
+
+            var armature = new NodeBuilder("Skeleton");
+            var joint0 = armature.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
+            var joint1 = joint0.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
+
+            joint1.UseRotation("Base Track")
+                .WithPoint(1, Quaternion.Identity)
+                .WithPoint(2, Quaternion.CreateFromYawPitchRoll(0, 1, 0))
+                .WithPoint(3, Quaternion.CreateFromYawPitchRoll(0, 0, 1))
+                .WithPoint(4, Quaternion.Identity);
+
+            // create scene
+
+            var scene = new SceneBuilder();
+
+            scene.AddSkinnedMesh
+                (
+                mesh,
+                joint0, // joint used for skinning joint index 0
+                joint1, // joint used for skinning joint index 1
+                joint2  // joint used for skinning joint index 2
+                );
+
+            scene.AttachToCurrentTest("skinned.glb");
+            scene.AttachToCurrentTest("skinned.gltf");
         }
     }
 }

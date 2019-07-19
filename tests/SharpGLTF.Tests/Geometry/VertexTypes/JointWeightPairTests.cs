@@ -11,7 +11,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     public class JointWeightPairTests
     {
         [Test]
-        public void TestSorting()
+        public void TestJointWeightSorting()
         {
             var pairs = new[]
             {

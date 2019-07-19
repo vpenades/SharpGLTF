@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 using NUnit.Framework;
+
 using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
@@ -96,6 +95,31 @@ namespace SharpGLTF.Geometry
 
             Assert.Throws(typeof(ArgumentOutOfRangeException), () => prim.AddTriangle(a.WithSkinning((0,0)), b, c));
             Assert.AreEqual(1, TriangleCounter());
+        }
+
+        [Test]
+        public void CreateMeshInSanitizedMode()
+        {
+            var mesh = VERTEX2.CreateCompatibleMesh();
+
+            mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+
+            var prim = mesh.UsePrimitive(Materials.MaterialBuilder.CreateDefault(), 1);
+
+            var p = new VertexPositionNormal(Vector3.UnitX, new Vector3(float.NaN));
+            var m = new VertexColor1Texture1(Vector4.One * 7, new Vector2(float.NaN));
+            var s = new VertexJoints8x4((0, 2), (1, 7), (2, 6), (3, 5));
+
+            var v1 = new VERTEX2(p, m, s);
+            var v1Idx = prim.AddPoint(new VERTEX2(p, m, s));
+            var v1Bis = prim.Vertices[v1Idx];
+
+            NumericsAssert.AreEqual(v1Bis.Geometry.Position, Vector3.UnitX);
+            NumericsAssert.AreEqual(v1Bis.Geometry.Normal, Vector3.UnitX);
+            NumericsAssert.AreEqual(v1Bis.Material.Color, Vector4.One);
+            NumericsAssert.AreEqual(v1Bis.Material.TexCoord, Vector2.Zero);
+            NumericsAssert.AreEqual(v1Bis.Skinning.Joints, new Vector4(1, 2, 3, 0));
+            NumericsAssert.AreEqual(v1Bis.Skinning.Weights, new Vector4(7, 6, 5, 2) / (7f + 6f + 5f + 2f));
         }
 
     }

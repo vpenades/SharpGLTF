@@ -173,6 +173,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexJoints8x4(params (int, float)[] bindings)
         {
+            Guard.NotNull(bindings, nameof(bindings));
+            Guard.MustBeBetweenOrEqualTo(bindings.Length, 1, 4, nameof(bindings));
+
             Joints = Vector4.Zero;
             Weights = Vector4.Zero;
 

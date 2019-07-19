@@ -28,7 +28,8 @@ namespace SharpGLTF.Scenes
 
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
-            // gather all meshes and group them by their attribute layout.
+            // gather all MeshBuilder unique instances
+            // and group them by their vertex attribute layout.
 
             var meshGroups = srcScene.Instances
                 .Select(item => item.GetGeometryAsset())
@@ -51,7 +52,7 @@ namespace SharpGLTF.Scenes
                 }
             }
 
-            // gather all armatures
+            // gather all NodeBuilder unique armatures
 
             var armatures = srcScene.Instances
                 .Select(item => item.GetArmatureAsset())

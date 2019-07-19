@@ -14,6 +14,8 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder() { }
 
+        public NodeBuilder(string name) { Name = name; }
+
         private NodeBuilder(NodeBuilder parent)
         {
             _Parent = parent;
@@ -133,7 +135,7 @@ namespace SharpGLTF.Scenes
 
         #region API
 
-        public NodeBuilder AddNode(string name = null)
+        public NodeBuilder CreateNode(string name = null)
         {
             var c = new NodeBuilder(this);
             _Children.Add(c);
@@ -213,6 +215,16 @@ namespace SharpGLTF.Scenes
             var vs = Parent;
             var lm = GetLocalTransform(animationTrack, time).Matrix;
             return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
+        }
+
+        #endregion
+
+        #region With* API
+
+        public NodeBuilder WithLocalTranslation(Vector3 translation)
+        {
+            this.UseTranslation().Value = translation;
+            return this;
         }
 
         #endregion
