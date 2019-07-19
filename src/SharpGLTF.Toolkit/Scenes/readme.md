@@ -41,3 +41,6 @@ and a scene is just a collection of instances to be rendered.
 When you save the scene, all assets are gathered and matched, including meshes, materials
 and nodes, and the appropiate glTF Schema2 Scenes and Nodes are created under the hood to
 match the SceneBuilder rendering intent.
+
+Additionally, `NodeBuilder` instances support defining animation curves, which are contained
+internally inside every `NodeBuilder` instance.
