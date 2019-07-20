@@ -4,15 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Numerics;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Scenes
 {
-    using Schema2;
-
     using MESHBUILDER = Geometry.IMeshBuilder<Materials.MaterialBuilder>;
 
     class Schema2SceneBuilder
     {
         #region data
+
+        private readonly Dictionary<Materials.MaterialBuilder, Material> _Materials = new Dictionary<Materials.MaterialBuilder, Material>();
 
         private readonly Dictionary<MESHBUILDER, Mesh> _Meshes = new Dictionary<MESHBUILDER, Mesh>();
 
@@ -28,15 +30,38 @@ namespace SharpGLTF.Scenes
 
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
+            // gather all MaterialBuilder unique instances
+            // find and group materials that have the same content.
+
+            var materialGroups = srcScene.Instances
+                .Select(item => item.GetGeometryAsset())
+                .Where(item => item != null)
+                .SelectMany(item => item.Primitives)
+                .Select(item => item.Material)
+                .Where(item => item != null)
+                .Distinct()
+                .ToList()
+                .GroupBy(item => item, Materials.MaterialBuilder.ContentComparer);
+
+            foreach (var mg in materialGroups)
+            {
+                var val = dstScene.LogicalParent.CreateMaterial(mg.Key);
+
+                foreach (var key in mg)
+                {
+                    _Materials[key] = val;
+                }
+            }
+
             // gather all MeshBuilder unique instances
             // and group them by their vertex attribute layout.
 
             var meshGroups = srcScene.Instances
-                .Select(item => item.GetGeometryAsset())
-                .Where(item => item != null)
-                .Distinct()
-                .ToList()
-                .GroupBy(item => item.GetType());
+            .Select(item => item.GetGeometryAsset())
+            .Where(item => item != null)
+            .Distinct()
+            .ToList()
+            .GroupBy(item => item.GetType());
 
             // create Schema2.Mesh collections for every gathered group.
 
@@ -44,7 +69,7 @@ namespace SharpGLTF.Scenes
             {
                 var meshArray = meshGroup.ToArray();
 
-                var meshDst = dstScene.LogicalParent.CreateMeshes(meshArray);
+                var meshDst = dstScene.LogicalParent.CreateMeshes(mat => _Materials[mat], meshArray);
 
                 for (int i = 0; i < meshArray.Length; ++i)
                 {
@@ -108,6 +133,10 @@ namespace SharpGLTF.Scenes
 
     public partial class SceneBuilder
     {
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public ModelRoot ToSchema2()
         {
             var dstModel = ModelRoot.CreateModel();

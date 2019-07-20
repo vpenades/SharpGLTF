@@ -71,7 +71,22 @@ namespace SharpGLTF.Materials
 
             if (!AreEqual(x._CompatibilityFallbackMaterial, y._CompatibilityFallbackMaterial)) return false;
 
-            return Enumerable.SequenceEqual(x._Channels, y._Channels, ChannelBuilder.ContentComparer);
+            // gather all unique channel keys used by both materials.
+
+            var channelKeys = x._Channels
+                .Concat(y._Channels)
+                .Select(item => item.Key)
+                .Distinct();
+
+            foreach (var ckey in channelKeys)
+            {
+                var xc = x.GetChannel(ckey);
+                var yc = y.GetChannel(ckey);
+
+                if (!ChannelBuilder.AreEqual(xc, yc)) return false;
+            }
+
+            return true;
         }
 
         public static int GetContentHashCode(MaterialBuilder x)
