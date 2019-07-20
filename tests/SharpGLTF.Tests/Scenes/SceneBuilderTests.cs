@@ -199,5 +199,113 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("skinned.glb");
             scene.AttachToCurrentTest("skinned.gltf");
         }
+
+        [Test]
+        public void CreateDoubleSkinnedScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            // create two materials
+
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithDoubleSide(true);
+
+            var yellow = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithDoubleSide(true);
+
+            // create the mesh            
+
+            const int jointIdx0 = 0; // index of joint node 0
+            const int jointIdx1 = 1; // index of joint node 1
+            const int jointIdx2 = 2; // index of joint node 2
+
+            var v1 = new SKINNEDVERTEX(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX(new Vector3(+10, 0, +10), (jointIdx0, 1));
+            var v3 = new SKINNEDVERTEX(new Vector3(+10, 0, -10), (jointIdx0, 1));
+            var v4 = new SKINNEDVERTEX(new Vector3(-10, 0, -10), (jointIdx0, 1));
+
+            var v5 = new SKINNEDVERTEX(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v6 = new SKINNEDVERTEX(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v7 = new SKINNEDVERTEX(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v8 = new SKINNEDVERTEX(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+
+            var v9 = new SKINNEDVERTEX(new Vector3(-5, 80, +5), (jointIdx2, 1));
+            var v10 = new SKINNEDVERTEX(new Vector3(+5, 80, +5), (jointIdx2, 1));
+            var v11 = new SKINNEDVERTEX(new Vector3(+5, 80, -5), (jointIdx2, 1));
+            var v12 = new SKINNEDVERTEX(new Vector3(-5, 80, -5), (jointIdx2, 1));
+
+            var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
+
+            #if DEBUG
+            mesh.VertexPreprocessor.SetDebugPreprocessors();
+            #else
+            mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+            #endif
+
+            mesh.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v3, v4, v8, v7);
+            mesh.UsePrimitive(pink).AddConvexPolygon(v4, v1, v5, v8);
+
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v5, v6, v10, v9);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v6, v7, v11, v10);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v7, v8, v12, v11);
+            mesh.UsePrimitive(yellow).AddConvexPolygon(v8, v5, v9, v12);
+
+            mesh.Validate();
+
+            // create the skeleton armature 1 for the skinned mesh.
+
+            var armature1 = new NodeBuilder("Skeleton1");
+            var joint0 = armature1.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
+            var joint1 = joint0.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
+
+            joint1.UseRotation("Base Track")
+                .WithPoint(1, Quaternion.Identity)
+                .WithPoint(2, Quaternion.CreateFromYawPitchRoll(0, 1, 0))
+                .WithPoint(3, Quaternion.CreateFromYawPitchRoll(0, 0, 1))
+                .WithPoint(4, Quaternion.Identity);
+
+            // create the skeleton armature 2 for the skinned mesh.
+
+            var armature2 = new NodeBuilder("Skeleton2").WithLocalTranslation(new Vector3(100,0,0));
+            var joint3 = armature2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
+            var joint4 = joint3.CreateNode("Joint 4").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
+            var joint5 = joint4.CreateNode("Joint 5").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
+
+            joint4.UseRotation("Base Track")
+                .WithPoint(1, Quaternion.Identity)
+                .WithPoint(2, Quaternion.CreateFromYawPitchRoll(0, 1, 0))
+                .WithPoint(3, Quaternion.CreateFromYawPitchRoll(0, 0, 1))
+                .WithPoint(4, Quaternion.Identity);
+
+            // create scene
+
+            var scene = new SceneBuilder();
+
+            scene.AddSkinnedMesh
+                (
+                mesh,
+                joint0, // joint used for skinning joint index 0
+                joint1, // joint used for skinning joint index 1
+                joint2  // joint used for skinning joint index 2
+                );
+
+            scene.AddSkinnedMesh
+                (
+                mesh,
+                armature2.WorldMatrix,
+                joint3, // joint used for skinning joint index 0
+                joint4, // joint used for skinning joint index 1
+                joint5  // joint used for skinning joint index 2
+                );
+
+            scene.AttachToCurrentTest("skinned.glb");
+            scene.AttachToCurrentTest("skinned.gltf");
+        }
     }
 }

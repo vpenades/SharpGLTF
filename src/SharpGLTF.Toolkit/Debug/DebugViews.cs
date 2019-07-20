@@ -21,7 +21,7 @@ namespace SharpGLTF.Debug
         {
             Animations._CurveNode<T>? prev = null;
 
-            foreach (var kvp in curve._Keys)
+            foreach (var kvp in curve._DebugKeys)
             {
                 if (prev.HasValue)
                 {

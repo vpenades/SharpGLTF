@@ -112,6 +112,14 @@ namespace SharpGLTF.Scenes
         public SkinTransformer(MESHBUILDER mesh, NodeBuilder[] joints)
         {
             _Target = new MeshContent(mesh);
+            _TargetBindMatrix = null;
+            _Joints.AddRange(joints);
+        }
+
+        public SkinTransformer(MESHBUILDER mesh, Matrix4x4 meshBindMatrix, NodeBuilder[] joints)
+        {
+            _Target = new MeshContent(mesh);
+            _TargetBindMatrix = meshBindMatrix;
             _Joints.AddRange(joints);
         }
 
@@ -120,6 +128,7 @@ namespace SharpGLTF.Scenes
         #region data
 
         private IRenderableContent _Target; // Can be either a morphController or a mesh
+        private Matrix4x4? _TargetBindMatrix;
 
         // condition: all NodeBuilder objects must have the same root.
         private readonly List<NodeBuilder> _Joints = new List<NodeBuilder>();
@@ -136,9 +145,11 @@ namespace SharpGLTF.Scenes
         {
             var skinnedMeshNode = dstScene.CreateNode();
 
-            var skinnedJoints = _Joints.Select(j => context.GetNode(j)).ToArray();
+            var skinnedJoints = _Joints
+                .Select(j => context.GetNode(j))
+                .ToArray();
 
-            skinnedMeshNode.WithSkinBinding(skinnedJoints);
+            skinnedMeshNode.WithSkinBinding(_TargetBindMatrix ?? Matrix4x4.Identity, skinnedJoints);
 
             _Target.Setup(skinnedMeshNode, context);
         }

@@ -47,6 +47,14 @@ namespace SharpGLTF.Scenes
             _Instances.Add(instance);
         }
 
+        public void AddSkinnedMesh(MESHBUILDER mesh, Matrix4x4 meshBindMatrix, params NodeBuilder[] joints)
+        {
+            var instance = new InstanceBuilder(this);
+            instance.Content = new SkinTransformer(mesh, meshBindMatrix, joints);
+
+            _Instances.Add(instance);
+        }
+
         #endregion
     }
 }

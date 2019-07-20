@@ -20,6 +20,18 @@ namespace SharpGLTF.Animations
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyVector3))]
     sealed class Vector3CurveBuilder : CurveBuilder<Vector3>, ICurveSampler<Vector3>
     {
+        #region lifecycle
+        public Vector3CurveBuilder() { }
+
+        private Vector3CurveBuilder(Vector3CurveBuilder other)
+            : base(other) { }
+
+        public override CurveBuilder<Vector3> Clone() { return new Vector3CurveBuilder(this); }
+
+        #endregion
+
+        #region API
+
         protected override Vector3 IsolateValue(Vector3 value)
         {
             return value;
@@ -61,11 +73,26 @@ namespace SharpGLTF.Animations
                     throw new NotSupportedException();
             }
         }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyQuaternion))]
     sealed class QuaternionCurveBuilder : CurveBuilder<Quaternion>, ICurveSampler<Quaternion>
     {
+        #region lifecycle
+
+        public QuaternionCurveBuilder() { }
+
+        private QuaternionCurveBuilder(QuaternionCurveBuilder other)
+            : base(other) { }
+
+        public override CurveBuilder<Quaternion> Clone() { return new QuaternionCurveBuilder(this); }
+
+        #endregion
+
+        #region API
+
         protected override Quaternion IsolateValue(Quaternion value)
         {
             return value;
@@ -107,13 +134,35 @@ namespace SharpGLTF.Animations
                     throw new NotSupportedException();
             }
         }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyArray))]
     sealed class ArrayCurveBuilder : CurveBuilder<Single[]>, ICurveSampler<Single[]>
     {
+        #region lifecycle
+
+        public ArrayCurveBuilder() { }
+
+        private ArrayCurveBuilder(ArrayCurveBuilder other)
+            : base(other)
+        {
+            System.Diagnostics.Debug.Assert(other._ValueLength == this._ValueLength);
+        }
+
+        public override CurveBuilder<Single[]> Clone() { return new ArrayCurveBuilder(this); }
+
+        #endregion
+
+        #region data
+
         // the first "CheckValue" will fix any further calls to this value.
         private int _ValueLength = 0;
+
+        #endregion
+
+        #region API
 
         protected override Single[] IsolateValue(Single[] value)
         {
@@ -164,5 +213,7 @@ namespace SharpGLTF.Animations
                     throw new NotSupportedException();
             }
         }
+
+        #endregion
     }
 }

@@ -14,14 +14,34 @@ namespace SharpGLTF.Animations
         : ICurveSampler<T>,
         IConvertibleCurve<T>
     {
+        #region lifecycle
+
+        protected CurveBuilder() { }
+
+        protected CurveBuilder(CurveBuilder<T> other)
+        {
+            foreach (var kvp in other._Keys)
+            {
+                var key = kvp.Key;
+                var val = new _CurveNode<T>(kvp.Value, IsolateValue);
+                this._Keys[key] = val;
+            }
+        }
+
+        public abstract CurveBuilder<T> Clone();
+
+        #endregion
+
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal SortedDictionary<float, _CurveNode<T>> _Keys = new SortedDictionary<float, _CurveNode<T>>();
+        private SortedDictionary<float, _CurveNode<T>> _Keys = new SortedDictionary<float, _CurveNode<T>>();
 
         #endregion
 
         #region properties
+
+        internal IReadOnlyDictionary<float, _CurveNode<T>> _DebugKeys => _Keys;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public IReadOnlyCollection<float> Keys => _Keys.Keys;
@@ -292,6 +312,13 @@ namespace SharpGLTF.Animations
     [System.Diagnostics.DebuggerDisplay("{IncomingTangent} -> {Point}[{Degree}] -> {OutgoingTangent}")]
     struct _CurveNode<T>
     {
+        public _CurveNode(_CurveNode<T> other, Func<T,T> isolateFunc)
+        {
+            IncomingTangent = isolateFunc(other.IncomingTangent);
+            Point = isolateFunc(other.Point);
+            OutgoingTangent = isolateFunc(other.OutgoingTangent);
+            Degree = other.Degree;
+        }
         public _CurveNode(T value, bool isLinear)
         {
             IncomingTangent = default;
