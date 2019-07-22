@@ -176,7 +176,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
         public Transforms.ITransform GetMeshWorldTransform(Animation animation, float time)
         {
-            var weights = animation == null ? this.MorphWeights : animation.GetMorphWeights(this, time);
+            var weights = animation == null ? Transforms.SparseWeight8.Create(this.MorphWeights) : animation.GetSparseMorphWeights(this, time);
 
             if (this.Skin == null) return new Transforms.StaticTransform(this.GetWorldMatrix(animation, time), weights);
 

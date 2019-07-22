@@ -222,7 +222,7 @@ namespace SharpGLTF.Animations
 
         #region interpolation utils
 
-        public static Single[] Lerp(Single[] start, Single[] end, Single amount)
+        public static Single[] InterpolateLinear(Single[] start, Single[] end, Single amount)
         {
             var startW = 1 - amount;
             var endW = amount;
@@ -237,21 +237,21 @@ namespace SharpGLTF.Animations
             return result;
         }
 
-        public static Vector3 CubicLerp(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
+        public static Vector3 InterpolateCubic(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
         {
             var hermite = SamplerFactory.CreateHermitePointWeights(amount);
 
             return (start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4);
         }
 
-        public static Quaternion CubicLerp(Quaternion start, Quaternion outgoingTangent, Quaternion end, Quaternion incomingTangent, Single amount)
+        public static Quaternion InterpolateCubic(Quaternion start, Quaternion outgoingTangent, Quaternion end, Quaternion incomingTangent, Single amount)
         {
             var hermite = CreateHermitePointWeights(amount);
 
             return Quaternion.Normalize((start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4));
         }
 
-        public static Single[] CubicLerp(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
+        public static Single[] InterpolateCubic(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
         {
             var hermite = CreateHermitePointWeights(amount);
 
@@ -283,6 +283,13 @@ namespace SharpGLTF.Animations
             return new QuaternionLinearSampler(collection, isLinear);
         }
 
+        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, Transforms.SparseWeight8)> collection, bool isLinear = true)
+        {
+            if (collection == null) return null;
+
+            return new SparseLinearSampler(collection, isLinear);
+        }
+
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true)
         {
             if (collection == null) return null;
@@ -304,13 +311,20 @@ namespace SharpGLTF.Animations
             return new QuaternionCubicSampler(collection);
         }
 
+        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> collection)
+        {
+            if (collection == null) return null;
+
+            return new SparseCubicSampler(collection);
+        }
+
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection)
         {
             if (collection == null) return null;
 
             return new ArrayCubicSampler(collection);
         }
-
+        
         #endregion
     }
 }

@@ -62,7 +62,7 @@ namespace SharpGLTF.Animations
                     return Vector3.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
 
                 case 3:
-                    return SamplerFactory.CubicLerp
+                    return SamplerFactory.InterpolateCubic
                             (
                             sample.Item1.Point, sample.Item1.OutgoingTangent,
                             sample.Item2.Point, sample.Item2.IncomingTangent,
@@ -123,7 +123,7 @@ namespace SharpGLTF.Animations
                     return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
 
                 case 3:
-                    return SamplerFactory.CubicLerp
+                    return SamplerFactory.InterpolateCubic
                             (
                             sample.Item1.Point, sample.Item1.OutgoingTangent,
                             sample.Item2.Point, sample.Item2.IncomingTangent,
@@ -199,10 +199,10 @@ namespace SharpGLTF.Animations
                     return sample.Item1.Point;
 
                 case 1:
-                    return SamplerFactory.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+                    return SamplerFactory.InterpolateLinear(sample.Item1.Point, sample.Item2.Point, sample.Item3);
 
                 case 3:
-                    return SamplerFactory.CubicLerp
+                    return SamplerFactory.InterpolateCubic
                             (
                             sample.Item1.Point, sample.Item1.OutgoingTangent,
                             sample.Item2.Point, sample.Item2.IncomingTangent,

@@ -117,6 +117,62 @@ namespace SharpGLTF.Animations
     }
 
     /// <summary>
+    /// Defines a <see cref="Transforms.SparseWeight8"/> curve sampler that can be sampled with STEP or LINEAR interpolation.
+    /// </summary>
+    struct SparseLinearSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
+    {
+        #region lifecycle
+
+        public SparseLinearSampler(IEnumerable<(float, Transforms.SparseWeight8)> sequence, bool isLinear)
+        {
+            _Sequence = sequence;
+            _Linear = isLinear;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly IEnumerable<(float, Transforms.SparseWeight8)> _Sequence;
+        private readonly Boolean _Linear;
+
+        #endregion
+
+        #region API
+
+        public int MaxDegree => _Linear ? 1 : 0;
+
+        public Transforms.SparseWeight8 GetPoint(float offset)
+        {
+            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+
+            if (!_Linear) return segment.Item1;
+
+            var weights = Transforms.SparseWeight8.InterpolateLinear(segment.Item1, segment.Item2, segment.Item3);
+
+            return weights;
+        }
+
+        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToStepCurve()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToLinearCurve()
+        {
+            Guard.IsTrue(_Linear, nameof(_Linear));
+            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+        }
+
+        public IReadOnlyDictionary<float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8)> ToSplineCurve()
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
+    }
+
+    /// <summary>
     /// Defines a <see cref="float"/>[] curve sampler that can be sampled with STEP or LINEAR interpolations.
     /// </summary>
     struct ArrayLinearSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
@@ -148,7 +204,7 @@ namespace SharpGLTF.Animations
 
             if (!_Linear) return segment.Item1;
 
-            return SamplerFactory.Lerp(segment.Item1, segment.Item2, segment.Item3);
+            return SamplerFactory.InterpolateLinear(segment.Item1, segment.Item2, segment.Item3);
         }
 
         public IReadOnlyDictionary<float, float[]> ToStepCurve()

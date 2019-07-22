@@ -132,9 +132,14 @@ namespace SharpGLTF.Schema2
                 .SetSampler(sampler);
         }
 
-        public void CreateMorphChannel(Node node, AnimationInterpolationMode mode, IReadOnlyDictionary<Single, Single[]> keyframes)
+        public void CreateMorphChannel(Node node, AnimationInterpolationMode mode, IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount, bool linear = true)
         {
-            throw new NotImplementedException();
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetKeys(keyframes, morphCount);
+
+            this._UseChannel(node, PropertyPath.weights)
+                .SetSampler(sampler);
         }
 
         private AnimationChannel FindChannel(Node node, PropertyPath path)
@@ -149,6 +154,8 @@ namespace SharpGLTF.Schema2
         public IAnimationSampler<Vector3> FindTranslationSampler(Node node) { return FindChannel(node, PropertyPath.translation)?.Sampler; }
 
         public IAnimationSampler<Single[]> FindMorphSampler(Node node) { return FindChannel(node, PropertyPath.weights)?.Sampler; }
+
+        public IAnimationSampler<SparseWeight8> FindSparseMorphSampler(Node node) { return FindChannel(node, PropertyPath.weights)?.Sampler; }
 
         public AffineTransform GetLocalTransform(Node node, float time)
         {
@@ -169,6 +176,8 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<float> GetMorphWeights(Node node, float time)
         {
+            Guard.NotNull(node, nameof(node));
+
             var morphWeights = node.MorphWeights;
             if (morphWeights == null || morphWeights.Count == 0) return morphWeights;
 
@@ -176,6 +185,21 @@ namespace SharpGLTF.Schema2
 
             var mfunc = FindMorphSampler(node)?.CreateCurveSampler();
             if (mfunc == null) return morphWeights;
+
+            return mfunc.GetPoint(time);
+        }
+
+        public SparseWeight8 GetSparseMorphWeights(Node node, float time)
+        {
+            Guard.NotNull(node, nameof(node));
+
+            var morphWeights = node.MorphWeights;
+            if (morphWeights == null || morphWeights.Count == 0) return default;
+
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            var mfunc = FindSparseMorphSampler(node)?.CreateCurveSampler();
+            if (mfunc == null) return default;
 
             return mfunc.GetPoint(time);
         }
@@ -260,6 +284,7 @@ namespace SharpGLTF.Schema2
     sealed partial class AnimationSampler : IChildOf<Animation>,
         IAnimationSampler<Vector3>,
         IAnimationSampler<Quaternion>,
+        IAnimationSampler<SparseWeight8>,
         IAnimationSampler<Single[]>
     {
         #region lifecycle
@@ -354,6 +379,32 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
+        private Accessor _CreateOutputAccessor(IReadOnlyList<SparseWeight8> output, int expandedCount)
+        {
+            var root = LogicalParent.LogicalParent;
+
+            var buffer = root.UseBufferView(new Byte[output.Count * 4 * expandedCount]);
+            var accessor = root.CreateAccessor("Animation.Output");
+
+            accessor.SetData(buffer, 0, output.Count * expandedCount, DimensionType.SCALAR, EncodingType.FLOAT, false);
+
+            var dst = accessor.AsScalarArray();
+
+            for (int i = 0; i < output.Count; ++i)
+            {
+                var src = output[i];
+
+                for (int j = 0; j < expandedCount; ++j)
+                {
+                    dst[(i * expandedCount) + j] = src[j];
+                }
+            }
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
         private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
         {
             var sorted = keyframes
@@ -406,6 +457,13 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
         }
 
+        internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int expandedCount)
+        {
+            var kv = _Split(keyframes);
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2, expandedCount).LogicalIndex;
+        }
+
         internal void SetKeys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
             var kv = _Split(keyframes);
@@ -446,6 +504,18 @@ namespace SharpGLTF.Schema2
             var frames = this.Output.AsQuaternionArray();
 
             return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        IEnumerable<(Single, SparseWeight8)> IAnimationSampler<SparseWeight8>.GetLinearKeys()
+        {
+            Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / this.Input.Count;
+
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsMultiArray(dimensions);
+
+            return keys.Zip(frames, (key, val) => (key, SparseWeight8.Create(val)));
         }
 
         IEnumerable<(Single, Single[])> IAnimationSampler<Single[]>.GetLinearKeys()
@@ -490,6 +560,18 @@ namespace SharpGLTF.Schema2
             var frames = _GroupByThree(this.Output.AsMultiArray(dimensions));
 
             return keys.Zip(frames, (key, val) => (key, val));
+        }
+
+        IEnumerable<(Single, (SparseWeight8, SparseWeight8, SparseWeight8))> IAnimationSampler<SparseWeight8>.GetCubicKeys()
+        {
+            Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / (this.Input.Count * 3);
+
+            var keys = this.Input.AsScalarArray();
+            var frames = _GroupByThree(this.Output.AsMultiArray(dimensions));
+
+            return keys.Zip(frames, (key, val) => (key, (SparseWeight8.Create(val.Item1), SparseWeight8.Create(val.Item2), SparseWeight8.Create(val.Item3))));
         }
 
         private static IEnumerable<(T, T, T)> _GroupByThree<T>(IEnumerable<T> collection)
@@ -541,6 +623,20 @@ namespace SharpGLTF.Schema2
         ICurveSampler<Single[]> IAnimationSampler<Single[]>.CreateCurveSampler()
         {
             var xsampler = this as IAnimationSampler<Single[]>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler();
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler();
+            }
+
+            throw new NotImplementedException();
+        }
+
+        ICurveSampler<SparseWeight8> IAnimationSampler<SparseWeight8>.CreateCurveSampler()
+        {
+            var xsampler = this as IAnimationSampler<SparseWeight8>;
 
             switch (this.InterpolationMode)
             {

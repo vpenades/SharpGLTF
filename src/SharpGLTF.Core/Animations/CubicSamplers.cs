@@ -34,7 +34,7 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.CubicLerp
+            return SamplerFactory.InterpolateCubic
                 (
                 segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
                 segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
@@ -88,7 +88,7 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.CubicLerp
+            return SamplerFactory.InterpolateCubic
                 (
                 segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
                 segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
@@ -107,6 +107,60 @@ namespace SharpGLTF.Animations
         }
 
         public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
+        {
+            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines a <see cref="Transforms.SparseWeight8"/> curve sampler that can be sampled with CUBIC interpolation.
+    /// </summary>
+    struct SparseCubicSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
+    {
+        #region lifecycle
+
+        public SparseCubicSampler(IEnumerable<(float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> sequence)
+        {
+            _Sequence = sequence;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly IEnumerable<(float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> _Sequence;
+
+        #endregion
+
+        #region API
+
+        public int MaxDegree => 3;
+
+        public Transforms.SparseWeight8 GetPoint(float offset)
+        {
+            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+
+            return Transforms.SparseWeight8.InterpolateCubic
+                (
+                segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
+                segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
+                segment.Item3                               // amount
+                );
+        }
+
+        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToStepCurve()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToLinearCurve()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IReadOnlyDictionary<float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }
@@ -142,7 +196,7 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.CubicLerp
+            return SamplerFactory.InterpolateCubic
                 (
                 segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
                 segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn

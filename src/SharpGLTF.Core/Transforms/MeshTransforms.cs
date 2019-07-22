@@ -36,66 +36,91 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        protected MorphTransform(IReadOnlyList<float> morphWeights)
+        protected MorphTransform(SparseWeight8 morphWeights)
         {
-            if (morphWeights == null || morphWeights.Count == 0)
+            if (morphWeights.IsZero)
             {
-                _InvWeight = 1;
+                _Weights = new SparseWeight8((0, 1));
                 return;
             }
 
-            var sum = morphWeights.Sum();
-
-            if (sum == 0)
-            {
-                _InvWeight = 1;
-                return;
-            }
-
-            _MorphWeights = new float[morphWeights.Count];
-            for (int i = 0; i < morphWeights.Count; ++i) _MorphWeights[i] = morphWeights[i];
-
-            if (sum <= 1)
-            {
-                _InvWeight = 1 - sum;
-            }
-            else
-            {
-                _InvWeight = 0;
-                for (int i = 0; i < morphWeights.Count; ++i) _MorphWeights[i] = _MorphWeights[i] / sum;
-            }
+            _Weights = Normalize(morphWeights);
         }
 
         #endregion
 
         #region data
 
-        private readonly float _InvWeight;
-        private readonly float[] _MorphWeights;
-
-        #endregion
-
-        #region properties
-
-        public float InverseWeight => _InvWeight;
-
-        public IReadOnlyList<float> MorphWeights => _MorphWeights;
+        /// <summary>
+        /// Represents a normalized sparse collection of weights where:
+        /// - Indices with value zero point to the master mesh
+        /// - Indices with value over zero point to MorphTarget[index-1].
+        /// </summary>
+        private readonly SparseWeight8 _Weights;
 
         #endregion
 
         #region API
 
+        /// <summary>
+        /// Increments all indices and adds a new Index[0] with a weight that makes the sum of all weights equal to 1
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        internal static SparseWeight8 Normalize(SparseWeight8 r)
+        {
+            int i = -1;
+            float w = float.MaxValue;
+            float ww = 0;
+
+            ww += r.Weight0; if (r.Weight0 < w) { i = 0; w = r.Weight0; }
+            ww += r.Weight1; if (r.Weight1 < w) { i = 1; w = r.Weight1; }
+            ww += r.Weight2; if (r.Weight2 < w) { i = 2; w = r.Weight2; }
+            ww += r.Weight3; if (r.Weight3 < w) { i = 3; w = r.Weight3; }
+            ww += r.Weight4; if (r.Weight4 < w) { i = 4; w = r.Weight4; }
+            ww += r.Weight5; if (r.Weight5 < w) { i = 5; w = r.Weight5; }
+            ww += r.Weight6; if (r.Weight6 < w) { i = 6; w = r.Weight6; }
+            ww += r.Weight7; if (r.Weight7 < w) { i = 7; w = r.Weight7; }
+
+            r.Index0 += 1;
+            r.Index1 += 1;
+            r.Index2 += 1;
+            r.Index3 += 1;
+            r.Index4 += 1;
+            r.Index5 += 1;
+            r.Index6 += 1;
+            r.Index7 += 1;
+
+            ww -= w;
+            var iw = 1 - ww;
+
+            switch (i)
+            {
+                case 0: r.Index0 = 0; r.Weight0 = iw; break;
+                case 1: r.Index1 = 0; r.Weight1 = iw; break;
+                case 2: r.Index2 = 0; r.Weight2 = iw; break;
+                case 3: r.Index3 = 0; r.Weight3 = iw; break;
+                case 4: r.Index4 = 0; r.Weight4 = iw; break;
+                case 5: r.Index5 = 0; r.Weight5 = iw; break;
+                case 6: r.Index6 = 0; r.Weight6 = iw; break;
+                case 7: r.Index7 = 0; r.Weight7 = iw; break;
+            }
+
+            return r;
+        }
+
         protected V3 MorphVectors(V3 value, V3[] morphTargets)
         {
-            if (_InvWeight == 1 || morphTargets == null || morphTargets.Length == 0) return value;
+            if (morphTargets == null) return value;
 
-            Guard.IsTrue(_MorphWeights.Length == morphTargets.Length, nameof(morphTargets));
+            if (_Weights.Index0 == 0 && _Weights.Weight0 == 1) return value;
 
-            var p = value * _InvWeight;
+            var p = V3.Zero;
 
-            for (int i = 0; i < _MorphWeights.Length; ++i)
+            foreach (var pair in _Weights.GetPairs())
             {
-                p += morphTargets[i] * _MorphWeights[i];
+                var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                p += val * pair.Item2;
             }
 
             return p;
@@ -103,15 +128,16 @@ namespace SharpGLTF.Transforms
 
         protected V4 MorphVectors(V4 value, V4[] morphTargets)
         {
-            if (_InvWeight == 1 || morphTargets == null || morphTargets.Length == 0) return value;
+            if (morphTargets == null) return value;
 
-            Guard.IsTrue(_MorphWeights.Length == morphTargets.Length, nameof(morphTargets));
+            if (_Weights.Index0 == 0 && _Weights.Weight0 == 1) return value;
 
-            var p = value * _InvWeight;
+            var p = V4.Zero;
 
-            for (int i = 0; i < _MorphWeights.Length; ++i)
+            foreach (var pair in _Weights.GetPairs())
             {
-                p += morphTargets[i] * _MorphWeights[i];
+                var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                p += val * pair.Item2;
             }
 
             return p;
@@ -124,31 +150,46 @@ namespace SharpGLTF.Transforms
 
     public class StaticTransform : MorphTransform, ITransform
     {
-        public StaticTransform(TRANSFORM xform, IReadOnlyList<float> morphWeights = null)
+        #region constructor
+
+        public StaticTransform(TRANSFORM xform, SparseWeight8 morphWeights)
             : base(morphWeights)
         {
             _Transform = xform;
 
             // http://m-hikari.com/ija/ija-password-2009/ija-password5-8-2009/hajrizajIJA5-8-2009.pdf
-            var determinant3x3 =
+
+            float determinant3x3 =
                 +(xform.M13 * xform.M21 * xform.M32)
-                +(xform.M11 * xform.M22 * xform.M33)
-                +(xform.M12 * xform.M23 * xform.M31)
-                -(xform.M12 * xform.M21 * xform.M33)
-                -(xform.M13 * xform.M22 * xform.M31)
-                -(xform.M11 * xform.M23 * xform.M32);
+                + (xform.M11 * xform.M22 * xform.M33)
+                + (xform.M12 * xform.M23 * xform.M31)
+                - (xform.M12 * xform.M21 * xform.M33)
+                - (xform.M13 * xform.M22 * xform.M31)
+                - (xform.M11 * xform.M23 * xform.M32);
 
             _Visible = Math.Abs(determinant3x3) > float.Epsilon;
             _FlipFaces = determinant3x3 < 0;
         }
 
+        #endregion
+
+        #region data
+
         private readonly TRANSFORM _Transform;
         private readonly Boolean _Visible;
         private readonly Boolean _FlipFaces;
 
+        #endregion
+
+        #region properties
+
         public Boolean Visible => _Visible;
 
         public Boolean FlipFaces => _FlipFaces;
+
+        #endregion
+
+        #region API
 
         public V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights)
         {
@@ -172,11 +213,15 @@ namespace SharpGLTF.Transforms
 
             return new V4(n, tangent.W);
         }
+
+        #endregion
     }
 
     public class SkinTransform : MorphTransform, ITransform
     {
-        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, IReadOnlyList<float> morphWeights = null)
+        #region constructor
+
+        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights)
             : base(morphWeights)
         {
             Guard.NotNull(invBindings, nameof(invBindings));
@@ -191,7 +236,15 @@ namespace SharpGLTF.Transforms
             }
         }
 
+        #endregion
+
+        #region data
+
         private readonly TRANSFORM[] _JointTransforms;
+
+        #endregion
+
+        #region API
 
         public bool Visible => true;
 
@@ -242,5 +295,7 @@ namespace SharpGLTF.Transforms
 
             return new V4(worldTangent, localTangent.W);
         }
+
+        #endregion
     }
 }
