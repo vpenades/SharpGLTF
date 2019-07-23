@@ -58,6 +58,12 @@ namespace SharpGLTF.Transforms
         /// </summary>
         private readonly SparseWeight8 _Weights;
 
+        /// <summary>
+        /// True if morph targets represent absolute values.
+        /// False if morph targets represent values relative to master value.
+        /// </summary>
+        private readonly bool _AbsoluteMorphs;
+
         #endregion
 
         #region API
@@ -65,8 +71,8 @@ namespace SharpGLTF.Transforms
         /// <summary>
         /// Increments all indices and adds a new Index[0] with a weight that makes the sum of all weights equal to 1
         /// </summary>
-        /// <param name="r"></param>
-        /// <returns></returns>
+        /// <param name="r">A <see cref="SparseWeight8"/> object representing the weights of the morph targets.</param>
+        /// <returns>A <see cref="SparseWeight8"/> representing the morph target weights, compensated with the weight of the master values.</returns>
         internal static SparseWeight8 Normalize(SparseWeight8 r)
         {
             int i = -1;
@@ -117,10 +123,21 @@ namespace SharpGLTF.Transforms
 
             var p = V3.Zero;
 
-            foreach (var pair in _Weights.GetPairs())
+            if (_AbsoluteMorphs)
             {
-                var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
-                p += val * pair.Item2;
+                foreach (var pair in _Weights.GetPairs())
+                {
+                    var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                    p += val * pair.Item2;
+                }
+            }
+            else
+            {
+                foreach (var pair in _Weights.GetPairs())
+                {
+                    var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
+                    p += val * pair.Item2;
+                }
             }
 
             return p;
@@ -134,16 +151,30 @@ namespace SharpGLTF.Transforms
 
             var p = V4.Zero;
 
-            foreach (var pair in _Weights.GetPairs())
+            if (_AbsoluteMorphs)
             {
-                var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
-                p += val * pair.Item2;
+                foreach (var pair in _Weights.GetPairs())
+                {
+                    var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                    p += val * pair.Item2;
+                }
+            }
+            else
+            {
+                foreach (var pair in _Weights.GetPairs())
+                {
+                    var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
+                    p += val * pair.Item2;
+                }
             }
 
             return p;
         }
 
-        public V4 MorphColors(V4 color, V4[] morphTargets) { return MorphVectors(color, morphTargets); }
+        public V4 MorphColors(V4 color, V4[] morphTargets)
+        {
+            return MorphVectors(color, morphTargets);
+        }
 
         #endregion
     }

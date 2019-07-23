@@ -273,7 +273,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var acc_morph0 = node.Mesh.Primitives[0].GetMorphTargetAccessors(0)["POSITION"];
             var acc_morph1 = node.Mesh.Primitives[0].GetMorphTargetAccessors(1)["POSITION"];
 
-            acc_morph0.AsVector3Array();
+            var pos_master = acc_master.AsVector3Array();
+            var pos_morph0 = acc_morph0.AsVector3Array();
+            var pos_morph1 = acc_morph1.AsVector3Array();
 
             // pos_master
 
