@@ -259,7 +259,7 @@ namespace SharpGLTF.Schema2
             set
             {
                 _weights.Clear();
-                _weights.AddRange(value.Select(item => (Double)item));
+                if (value != null) _weights.AddRange(value.Select(item => (Double)item));
             }
         }
 

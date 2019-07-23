@@ -84,6 +84,21 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public bool IsWebp => GetImageContent()._IsWebpImage();
 
+        /// <summary>
+        /// Gets the filename extension of the image that can be retrieved with <see cref="GetImageContent"/>
+        /// </summary>
+        public string FileExtension
+        {
+            get
+            {
+                if (IsPng) return "png";
+                if (IsJpeg) return "jpg";
+                if (IsDds) return "dds";
+                if (IsWebp) return "webp";
+                return "raw";
+            }
+        }
+
         #endregion
 
         #region API

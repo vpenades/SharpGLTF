@@ -333,7 +333,8 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < primitive.MorphTargetsCount; ++i)
             {
-                _CopyTo(primitive.GetMorphTargetAccessors(i), columns.AddMorphTarget());
+                var morphTarget = primitive.GetMorphTargetAccessors(i);
+                _CopyTo(morphTarget, columns.AddMorphTarget());
             }
 
             return columns;

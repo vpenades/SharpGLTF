@@ -238,7 +238,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest(path + ".glb");
 
             var triangles = model.DefaultScene
-                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>()
                 .ToArray();            
 
             var anim = model.LogicalAnimations[0];
@@ -266,12 +266,49 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var model = ModelRoot.Load(path);
             Assert.NotNull(model);
 
-            path = System.IO.Path.GetFileNameWithoutExtension(path);
-            model.AttachToCurrentTest(path + ".glb");
+            var anim = model.LogicalAnimations[0];
+            var node = model.LogicalNodes[0];
 
-            var triangles = model.DefaultScene
-                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
-                .ToArray();
+            var acc_master = node.Mesh.Primitives[0].GetVertexAccessor("POSITION");
+            var acc_morph0 = node.Mesh.Primitives[0].GetMorphTargetAccessors(0)["POSITION"];
+            var acc_morph1 = node.Mesh.Primitives[0].GetMorphTargetAccessors(1)["POSITION"];
+
+            acc_morph0.AsVector3Array();
+
+            // pos_master
+
+            var pvrt = node.Mesh.Primitives[0].GetVertexColumns();
+
+            for (float t = 0; t < 5; t+=0.25f)
+            {
+                var nodexform = node.GetMeshWorldTransform(anim, t);
+
+                TestContext.WriteLine($"Animation at {t}");
+
+                if (t < anim.Duration)
+                {
+                    var mw = anim.GetMorphWeights(node, t);
+                    TestContext.WriteLine($"    Morph Weights: {mw[0]} {mw[1]}");
+                }
+
+                var msw = anim.GetSparseMorphWeights(node, t);
+                TestContext.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
+
+                var triangles = model.DefaultScene
+                    .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(anim, t)
+                    .ToList();
+
+                var vertices = triangles
+                    .SelectMany(item => new[] { item.Item1.Position, item.Item2.Position, item.Item3.Position })
+                    .Distinct()
+                    .ToList();
+
+                foreach (var v in vertices) TestContext.WriteLine($"{v}");
+
+                TestContext.WriteLine();
+            }
+
+
         }
     }
 }
