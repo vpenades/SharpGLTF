@@ -235,7 +235,6 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
 
             path = System.IO.Path.GetFileNameWithoutExtension(path);
-
             model.AttachToCurrentTest(path + ".glb");
 
             var triangles = model.DefaultScene
@@ -252,9 +251,27 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 int tt = (int)(t * 1000.0f);
 
                 model.AttachToCurrentTest($"{path} at {tt}.obj",anim, t);
-            }
+            }            
+        }
 
-            
+        [Test]
+        public void LoadAnimatedMorphCube()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains("AnimatedMorphCube.glb"));
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            path = System.IO.Path.GetFileNameWithoutExtension(path);
+            model.AttachToCurrentTest(path + ".glb");
+
+            var triangles = model.DefaultScene
+                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .ToArray();
         }
     }
 }
