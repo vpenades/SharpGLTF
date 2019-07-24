@@ -143,6 +143,8 @@ namespace SharpGLTF.Schema2
 
         public void SetIndexData(MemoryAccessor src)
         {
+            Guard.NotNull(src, nameof(src));
+
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ELEMENT_ARRAY_BUFFER);
             SetIndexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Encoding.ToIndex());
         }
@@ -178,6 +180,8 @@ namespace SharpGLTF.Schema2
 
         public void SetVertexData(MemoryAccessor src)
         {
+            Guard.NotNull(src, nameof(src));
+
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ARRAY_BUFFER);
 
             SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);

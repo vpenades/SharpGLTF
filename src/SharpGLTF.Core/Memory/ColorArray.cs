@@ -114,9 +114,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Vector4 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Vector4[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Vector4[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Vector4> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Vector4> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Vector4>.Insert(int index, Vector4 item) { throw new NotSupportedException(); }
 

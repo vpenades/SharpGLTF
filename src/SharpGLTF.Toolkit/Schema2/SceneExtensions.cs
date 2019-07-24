@@ -157,7 +157,9 @@ namespace SharpGLTF.Schema2
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            return Node.Flatten(scene).SelectMany(item => item.Triangulate<TvG, TvM>(animation, time));
+            return Node
+                .Flatten(scene)
+                .SelectMany(item => item.Triangulate<TvG, TvM>(animation, time));
         }
 
         /// <summary>
@@ -173,9 +175,9 @@ namespace SharpGLTF.Schema2
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            var mesh = node.Mesh;
+            var mesh = node?.Mesh;
 
-            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
+            if (node == null || mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
             var xform = node.GetMeshWorldTransform(animation, time);
 

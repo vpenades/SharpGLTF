@@ -53,4 +53,12 @@
     <Rule Id="CA1710" Action="Info" />
     <Rule Id="CA2225" Action="Info" />
   </Rules>
+  <Rules AnalyzerId="Microsoft.NetCore.Analyzers" RuleNamespace="Microsoft.NetCore.Analyzers">
+    <Rule Id="CA1816" Action="Error" />
+    <Rule Id="CA2000" Action="Error" />
+    <Rule Id="CA2213" Action="Error" />
+    <Rule Id="CA2216" Action="Error" />
+    <Rule Id="CA2242" Action="Error" />
+    <Rule Id="CA1303" Action="Info" />
+  </Rules>
 </RuleSet>

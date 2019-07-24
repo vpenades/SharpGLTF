@@ -9,6 +9,7 @@ namespace SharpGLTF.Schema2
     {
         public static Accessor CreateVertexAccessor(this ModelRoot root, Memory.MemoryAccessor memAccessor)
         {
+            Guard.NotNull(root, nameof(root));
             Guard.NotNull(memAccessor, nameof(memAccessor));
 
             var accessor = root.CreateAccessor(memAccessor.Attribute.Name);

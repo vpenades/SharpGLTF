@@ -75,6 +75,8 @@ namespace SharpGLTF.Schema2
 
         protected static IEnumerable<ExtraProperties> Flatten(ExtraProperties container)
         {
+            if (container == null) yield break;
+
             yield return container;
 
             foreach (var c in container.GetLogicalChildren())

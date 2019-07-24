@@ -300,9 +300,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Single item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Single[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Single[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Single> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Single> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Single>.Insert(int index, Single item) { throw new NotSupportedException(); }
 
@@ -411,9 +419,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Vector2 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Vector2[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Vector2[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Vector2> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Vector2> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Vector2>.Insert(int index, Vector2 item) { throw new NotSupportedException(); }
 
@@ -523,9 +539,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Vector3 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Vector3[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Vector3[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Vector3> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Vector3> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Vector3>.Insert(int index, Vector3 item) { throw new NotSupportedException(); }
 
@@ -636,9 +660,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Vector4 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Vector4[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Vector4[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Vector4> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Vector4> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Vector4>.Insert(int index, Vector4 item) { throw new NotSupportedException(); }
 
@@ -715,9 +747,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Quaternion item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Quaternion[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Quaternion[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Quaternion> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Quaternion> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Quaternion>.Insert(int index, Quaternion item) { throw new NotSupportedException(); }
 
@@ -812,9 +852,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Matrix4x4 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Matrix4x4[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Matrix4x4[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Matrix4x4> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Matrix4x4> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Matrix4x4>.Insert(int index, Matrix4x4 item) { throw new NotSupportedException(); }
 
@@ -894,6 +942,8 @@ namespace SharpGLTF.Memory
 
         public void CopyItemTo(int index, Single[] dstItem)
         {
+            Guard.NotNull(dstItem, nameof(dstItem));
+
             var count = _Dimensions;
 
             for (int i = 0; i < count; ++i) dstItem[i] = _Accessor[index, i];
@@ -907,9 +957,17 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(Single[] item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(Single[][] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(Single[][] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
 
-        public void Fill(IEnumerable<Single[]> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Single[]> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
 
         void IList<Single[]>.Insert(int index, Single[] item) { throw new NotSupportedException(); }
 

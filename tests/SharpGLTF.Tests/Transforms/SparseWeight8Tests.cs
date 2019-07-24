@@ -10,7 +10,7 @@ namespace SharpGLTF.Transforms
     public class SparseWeight8Tests
     {
         [Test]
-        public void CreateSparse()
+        public void CreateSparseWeights()
         {
             var sparse1 = SparseWeight8.Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f);
             Assert.AreEqual(6, sparse1.Index0);
@@ -33,10 +33,26 @@ namespace SharpGLTF.Transforms
             Assert.AreEqual(0.1f, sparse1Nrm.Weight2);
             Assert.AreEqual(0.1f, sparse1Nrm.Weight3, 0.00001f); // funny enough, 0.8f + 0.1f = 0.90000036f
             Assert.AreEqual(0, sparse1Nrm.Weight4);
+
+            // we must also support negative values.
+            var sparseNegative = SparseWeight8.Create(0, 1, -1);
+            Assert.AreEqual(1, sparseNegative.Index0);
+            Assert.AreEqual(2, sparseNegative.Index1);
+            Assert.AreEqual( 1, sparseNegative.Weight0);
+            Assert.AreEqual(-1, sparseNegative.Weight1);
         }
 
         [Test]
-        public void TestLinearInterpolation1()
+        public void TestSparseEquality()
+        {
+            Assert.IsTrue(SparseWeight8.AreWeightsEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1)));
+
+            Assert.IsFalse(SparseWeight8.AreWeightsEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1, 0.25f)));
+            Assert.IsFalse(SparseWeight8.AreWeightsEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(1, 0)));
+        }
+
+        [Test]
+        public void TestSparseWeightsLinearInterpolation1()
         {
             var x = new SparseWeight8((0,0f));
             var y = new SparseWeight8((0,1f));
@@ -45,27 +61,42 @@ namespace SharpGLTF.Transforms
         }
 
         [Test]
-        public void TestLinearInterpolation2()
+        public void TestSparseWeightsLinearInterpolation2()
         {
-            var ax = new float[] { 0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f };
-            var ay = new float[] { 0, 0, 0.2f, 0, 0.1f, 0, 0, 0, 0, 0, 0 };
+            var ax = new float[] { 0, 0,    0, 0,    0, 0.1f, 0.7f, 0, 0, 0, 0.1f };
+            var ay = new float[] { 0, 0, 0.2f, 0, 0.1f,    0,    0, 0, 0, 0,    0, 0, 0.2f };
+            var cc = Math.Min(ax.Length, ay.Length);
 
             var x = SparseWeight8.Create(ax); CollectionAssert.AreEqual(ax, x.Expand(ax.Length));
             var y = SparseWeight8.Create(ay); CollectionAssert.AreEqual(ay, y.Expand(ay.Length));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
-            Assert.AreEqual(6, z.Index0);
-            Assert.AreEqual(2, z.Index1);
-            Assert.AreEqual(5, z.Index2);
-            Assert.AreEqual(10, z.Index3);
-            Assert.AreEqual(4, z.Index4);
 
-            Assert.AreEqual(0.35f, z.Weight0);
-            Assert.AreEqual(0.1f, z.Weight1);
-            Assert.AreEqual(0.05f, z.Weight2);
-            Assert.AreEqual(0.05f, z.Weight3);
-            Assert.AreEqual(0.05f, z.Weight4);
-            Assert.AreEqual(0, z.Weight5);
+            for (int i=0; i < cc; ++i)
+            {
+                var w = (ax[i] + ay[i]) / 2;
+                Assert.AreEqual(w, z[i]);
+            }
+        }
+
+        [Test]
+        public void TestSparseWeightsCubicInterpolation()
+        {
+            var a = SparseWeight8.Create(0, 0, 0.2f, 0, 0, 0, 1);
+            var b = SparseWeight8.Create(1, 1, 0.4f, 0, 0, 1, 0);
+            var t = SparseWeight8.Subtract(b, a);
+
+            var lr = SparseWeight8.InterpolateLinear(a, b, 0.4f);
+            var cr = SparseWeight8.InterpolateCubic(a, t, b, t, 0.4f);
+
+            Assert.AreEqual(lr[0], cr[0], 0.000001f);
+            Assert.AreEqual(lr[1], cr[1], 0.000001f);
+            Assert.AreEqual(lr[2], cr[2], 0.000001f);
+            Assert.AreEqual(lr[3], cr[3], 0.000001f);
+            Assert.AreEqual(lr[4], cr[4], 0.000001f);
+            Assert.AreEqual(lr[5], cr[5], 0.000001f);
+            Assert.AreEqual(lr[6], cr[6], 0.000001f);
+            Assert.AreEqual(lr[7], cr[7], 0.000001f);
         }
     }
 }

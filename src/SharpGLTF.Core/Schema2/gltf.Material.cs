@@ -72,7 +72,18 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Finds an instance of <see cref="MaterialChannel"/>
         /// </summary>
-        /// <param name="channelKey">the channel key</param>
+        /// <param name="channelKey">
+        /// The channel key. Currently, these values are used:
+        /// - "Normal"
+        /// - "Occlusion"
+        /// - "Emissive"
+        /// - When material is <see cref="MaterialPBRMetallicRoughness"/>:
+        ///   - "BaseColor"
+        ///   - "MetallicRoughness"
+        /// - When material is <see cref="MaterialPBRSpecularGlossiness"/>:
+        ///   - "Diffuse"
+        ///   - "SpecularGlossiness"
+        /// </param>
         /// <returns>A <see cref="MaterialChannel"/> structure. or null if it does not exist</returns>
         public MaterialChannel? FindChannel(string channelKey)
         {

@@ -12,6 +12,7 @@ namespace SharpGLTF.Animations
     /// </summary>
     /// <typeparam name="T">The type of the value.</typeparam>
     public class AnimatableProperty<T>
+        where T : struct
     {
         #region data
 
@@ -50,7 +51,7 @@ namespace SharpGLTF.Animations
         /// Assigns an animation curve to a given track.
         /// </summary>
         /// <param name="track">The name of the track.</param>
-        /// <param name="curve">A <see cref="ICurveSampler{T}"/> instance, or null to remove a track./param>
+        /// <param name="curve">A <see cref="ICurveSampler{T}"/> instance, or null to remove a track.</param>
         public void SetTrack(string track, ICurveSampler<T> curve)
         {
             Guard.NotNullOrEmpty(track, nameof(track));

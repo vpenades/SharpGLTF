@@ -36,15 +36,14 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        protected MorphTransform(SparseWeight8 morphWeights)
+        protected MorphTransform()
         {
-            if (morphWeights.IsZero)
-            {
-                _Weights = new SparseWeight8((0, 1));
-                return;
-            }
+            Update(new SparseWeight8((0, 1)), false);
+        }
 
-            _Weights = Normalize(morphWeights);
+        protected MorphTransform(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        {
+            Update(morphWeights, useAbsoluteMorphTargets);
         }
 
         #endregion
@@ -56,17 +55,30 @@ namespace SharpGLTF.Transforms
         /// - Indices with value zero point to the master mesh
         /// - Indices with value over zero point to MorphTarget[index-1].
         /// </summary>
-        private readonly SparseWeight8 _Weights;
+        private SparseWeight8 _Weights;
 
         /// <summary>
         /// True if morph targets represent absolute values.
         /// False if morph targets represent values relative to master value.
         /// </summary>
-        private readonly bool _AbsoluteMorphs;
+        private bool _AbsoluteMorphTargets;
 
         #endregion
 
         #region API
+
+        public void Update(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets = false)
+        {
+            _AbsoluteMorphTargets = useAbsoluteMorphTargets;
+
+            if (morphWeights.IsZero)
+            {
+                _Weights = new SparseWeight8((0, 1));
+                return;
+            }
+
+            _Weights = Normalize(morphWeights);
+        }
 
         /// <summary>
         /// Increments all indices and adds a new Index[0] with a weight that makes the sum of all weights equal to 1
@@ -123,7 +135,7 @@ namespace SharpGLTF.Transforms
 
             var p = V3.Zero;
 
-            if (_AbsoluteMorphs)
+            if (_AbsoluteMorphTargets)
             {
                 foreach (var pair in _Weights.GetPairs())
                 {
@@ -151,7 +163,7 @@ namespace SharpGLTF.Transforms
 
             var p = V4.Zero;
 
-            if (_AbsoluteMorphs)
+            if (_AbsoluteMorphTargets)
             {
                 foreach (var pair in _Weights.GetPairs())
                 {
@@ -183,9 +195,35 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        public StaticTransform(TRANSFORM xform, SparseWeight8 morphWeights)
-            : base(morphWeights)
+        public StaticTransform(TRANSFORM xform, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
         {
+            Update(xform, morphWeights, useAbsoluteMorphs);
+        }
+
+        #endregion
+
+        #region data
+
+        private TRANSFORM _Transform;
+        private Boolean _Visible;
+        private Boolean _FlipFaces;
+
+        #endregion
+
+        #region properties
+
+        public Boolean Visible => _Visible;
+
+        public Boolean FlipFaces => _FlipFaces;
+
+        #endregion
+
+        #region API
+
+        public void Update(TRANSFORM xform, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
+        {
+            Update(morphWeights, useAbsoluteMorphs);
+
             _Transform = xform;
 
             // http://m-hikari.com/ija/ija-password-2009/ija-password5-8-2009/hajrizajIJA5-8-2009.pdf
@@ -201,26 +239,6 @@ namespace SharpGLTF.Transforms
             _Visible = Math.Abs(determinant3x3) > float.Epsilon;
             _FlipFaces = determinant3x3 < 0;
         }
-
-        #endregion
-
-        #region data
-
-        private readonly TRANSFORM _Transform;
-        private readonly Boolean _Visible;
-        private readonly Boolean _FlipFaces;
-
-        #endregion
-
-        #region properties
-
-        public Boolean Visible => _Visible;
-
-        public Boolean FlipFaces => _FlipFaces;
-
-        #endregion
-
-        #region API
 
         public V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights)
         {
@@ -252,30 +270,36 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights)
-            : base(morphWeights)
+        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
-            Guard.NotNull(invBindings, nameof(invBindings));
-            Guard.NotNull(xforms, nameof(xforms));
-            Guard.IsTrue(invBindings.Length == xforms.Length, nameof(xforms), $"{invBindings} and {xforms} length mismatch.");
-
-            _JointTransforms = new TRANSFORM[invBindings.Length];
-
-            for (int i = 0; i < _JointTransforms.Length; ++i)
-            {
-                _JointTransforms[i] = invBindings[i] * xforms[i];
-            }
+            Update(invBindings, xforms, morphWeights, useAbsoluteMorphTargets);
         }
 
         #endregion
 
         #region data
 
-        private readonly TRANSFORM[] _JointTransforms;
+        private TRANSFORM[] _JointTransforms;
 
         #endregion
 
         #region API
+
+        public void Update(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        {
+            Guard.NotNull(invBindings, nameof(invBindings));
+            Guard.NotNull(xforms, nameof(xforms));
+            Guard.IsTrue(invBindings.Length == xforms.Length, nameof(xforms), $"{invBindings} and {xforms} length mismatch.");
+
+            Update(morphWeights, useAbsoluteMorphTargets);
+
+            if (_JointTransforms == null || _JointTransforms.Length != invBindings.Length) _JointTransforms = new TRANSFORM[invBindings.Length];
+
+            for (int i = 0; i < _JointTransforms.Length; ++i)
+            {
+                _JointTransforms[i] = invBindings[i] * xforms[i];
+            }
+        }
 
         public bool Visible => true;
 

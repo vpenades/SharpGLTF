@@ -8,6 +8,7 @@ using System.Text;
 namespace SharpGLTF.Debug
 {
     internal abstract class _CurveBuilderDebugProxy<T>
+        where T : struct
     {
         #region lifecycle
 
@@ -104,14 +105,14 @@ namespace SharpGLTF.Debug
         }
     }
 
-    sealed class _CurveBuilderDebugProxyArray : _CurveBuilderDebugProxy<float[]>
+    sealed class _CurveBuilderDebugProxySparse : _CurveBuilderDebugProxy<Transforms.SparseWeight8>
     {
-        public _CurveBuilderDebugProxyArray(Animations.CurveBuilder<float[]> curve)
+        public _CurveBuilderDebugProxySparse(Animations.CurveBuilder<Transforms.SparseWeight8> curve)
             : base(curve) { }
 
-        protected override float[] GetTangent(float[] a, float[] b)
+        protected override Transforms.SparseWeight8 GetTangent(Transforms.SparseWeight8 a, Transforms.SparseWeight8 b)
         {
-            return Animations.SamplerFactory.CreateTangent(a, b);
+            return Transforms.SparseWeight8.Subtract(b, a);
         }
     }
 }

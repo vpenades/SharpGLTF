@@ -44,7 +44,7 @@ namespace SharpGLTF.Scenes
 
         #region data
 
-        private IContent _Target;// Can be either a morphController or a mesh, or light or camera
+        private IContent _Target; // Can be either a morphController or a mesh, or light or camera
 
         private Matrix4x4 _Transform;
 

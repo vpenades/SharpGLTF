@@ -5,13 +5,16 @@ using System.Text;
 
 namespace SharpGLTF.Animations
 {
+    using SPARSE = Transforms.SparseWeight8;
+
     static class CurveFactory
     {
         public static CurveBuilder<T> CreateCurveBuilder<T>()
+            where T : struct
         {
             if (typeof(T) == typeof(Vector3)) return new Vector3CurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
-            if (typeof(T) == typeof(Single[])) return new ArrayCurveBuilder() as CurveBuilder<T>;
+            if (typeof(T) == typeof(SPARSE)) return new SparseCurveBuilder() as CurveBuilder<T>;
 
             throw new ArgumentException(nameof(T), "Generic argument not supported");
         }
@@ -31,11 +34,6 @@ namespace SharpGLTF.Animations
         #endregion
 
         #region API
-
-        protected override Vector3 IsolateValue(Vector3 value)
-        {
-            return value;
-        }
 
         protected override Vector3 CreateValue(params float[] values)
         {
@@ -93,11 +91,6 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        protected override Quaternion IsolateValue(Quaternion value)
-        {
-            return value;
-        }
-
         protected override Quaternion CreateValue(params float[] values)
         {
             Guard.NotNull(values, nameof(values));
@@ -138,58 +131,35 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyArray))]
-    sealed class ArrayCurveBuilder : CurveBuilder<Single[]>, ICurveSampler<Single[]>
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxySparse))]
+    sealed class SparseCurveBuilder : CurveBuilder<SPARSE>, ICurveSampler<SPARSE>
     {
         #region lifecycle
 
-        public ArrayCurveBuilder() { }
+        public SparseCurveBuilder() { }
 
-        private ArrayCurveBuilder(ArrayCurveBuilder other)
+        private SparseCurveBuilder(SparseCurveBuilder other)
             : base(other)
         {
-            System.Diagnostics.Debug.Assert(other._ValueLength == this._ValueLength);
         }
 
-        public override CurveBuilder<Single[]> Clone() { return new ArrayCurveBuilder(this); }
-
-        #endregion
-
-        #region data
-
-        // the first "CheckValue" will fix any further calls to this value.
-        private int _ValueLength = 0;
+        public override CurveBuilder<SPARSE> Clone() { return new SparseCurveBuilder(this); }
 
         #endregion
 
         #region API
 
-        protected override Single[] IsolateValue(Single[] value)
+        protected override SPARSE CreateValue(params Single[] values)
         {
-            Guard.NotNull(value, nameof(value));
-            Guard.MustBeGreaterThan(value.Length, 0, nameof(value));
-
-            if (_ValueLength == 0) _ValueLength = value.Length;
-
-            Guard.MustBeBetweenOrEqualTo(value.Length, _ValueLength, _ValueLength, nameof(value));
-
-            var clone = new Single[_ValueLength];
-            value.CopyTo(clone, 0);
-
-            return clone;
+            return SPARSE.Create(values);
         }
 
-        protected override Single[] CreateValue(params Single[] values)
+        protected override SPARSE GetTangent(SPARSE fromValue, SPARSE toValue)
         {
-            return values;
+            return SPARSE.Subtract(toValue, fromValue);
         }
 
-        protected override Single[] GetTangent(Single[] fromValue, Single[] toValue)
-        {
-            return SamplerFactory.CreateTangent(fromValue, toValue);
-        }
-
-        public override Single[] GetPoint(Single offset)
+        public override SPARSE GetPoint(Single offset)
         {
             var sample = FindSample(offset);
 
@@ -199,10 +169,10 @@ namespace SharpGLTF.Animations
                     return sample.Item1.Point;
 
                 case 1:
-                    return SamplerFactory.InterpolateLinear(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+                    return SPARSE.InterpolateLinear(sample.Item1.Point, sample.Item2.Point, sample.Item3);
 
                 case 3:
-                    return SamplerFactory.InterpolateCubic
+                    return SPARSE.InterpolateCubic
                             (
                             sample.Item1.Point, sample.Item1.OutgoingTangent,
                             sample.Item2.Point, sample.Item2.IncomingTangent,

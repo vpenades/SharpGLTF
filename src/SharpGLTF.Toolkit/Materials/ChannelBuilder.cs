@@ -135,5 +135,4 @@ namespace SharpGLTF.Materials
 
         #endregion
     }
-
 }

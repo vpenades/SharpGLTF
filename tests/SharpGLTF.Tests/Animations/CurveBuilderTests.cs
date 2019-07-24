@@ -112,9 +112,9 @@ namespace SharpGLTF.Animations
         [Test]
         public void CreateMorphCurve1()
         {
-            // Create a Quaternion curve
+            // Create a Transforms.SparseWeight8 curve
 
-            var curve = CurveFactory.CreateCurveBuilder<Single[]>();
+            var curve = CurveFactory.CreateCurveBuilder<Transforms.SparseWeight8>();
 
             curve
                 .WithPoint(0, 0f, 0f);
@@ -129,7 +129,7 @@ namespace SharpGLTF.Animations
 
             // convert and resample the curve to a linear and cubic curves.
 
-            var convertible = curve as IConvertibleCurve<Single[]>;
+            var convertible = curve as IConvertibleCurve<Transforms.SparseWeight8>;
             Assert.NotNull(convertible);
 
             var linear = convertible.ToLinearCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();

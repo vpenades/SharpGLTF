@@ -10,6 +10,8 @@ namespace SharpGLTF.Schema2
     {
         public static Animation UseAnimation(this ModelRoot root, string name)
         {
+            Guard.NotNull(root, nameof(root));
+
             var animation = root.LogicalAnimations.FirstOrDefault(item => item.Name == name);
 
             return animation ?? root.CreateAnimation(name);
@@ -17,6 +19,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithScaleAnimation(this Node node, string animationName, Animations.ICurveSampler<Vector3> sampler)
         {
+            Guard.NotNull(node, nameof(node));
+
             if (sampler is Animations.IConvertibleCurve<Vector3> curve)
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
@@ -32,6 +36,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithTranslationAnimation(this Node node, string animationName, Animations.ICurveSampler<Vector3> sampler)
         {
+            Guard.NotNull(node, nameof(node));
+
             if (sampler is Animations.IConvertibleCurve<Vector3> curve)
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
@@ -47,6 +53,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithRotationAnimation(this Node node, string animationName, Animations.ICurveSampler<Quaternion> sampler)
         {
+            Guard.NotNull(node, nameof(node));
+
             if (sampler is Animations.IConvertibleCurve<Quaternion> curve)
             {
                 var animation = node.LogicalParent.UseAnimation(animationName);
@@ -83,6 +91,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithScaleAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Vector3> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+
             var root = node.LogicalParent;
 
             var animation = root.UseAnimation(animationName);
@@ -94,6 +104,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithRotationAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+
             var root = node.LogicalParent;
 
             var animation = root.UseAnimation(animationName);
@@ -105,6 +117,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithTranslationAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Vector3> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+
             var root = node.LogicalParent;
 
             var animation = root.UseAnimation(animationName);

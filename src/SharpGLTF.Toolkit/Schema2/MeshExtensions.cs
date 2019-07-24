@@ -420,6 +420,12 @@ namespace SharpGLTF.Schema2
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
+            Guard.NotNull(meshBuilder, nameof(meshBuilder));
+
+            if (srcMesh == null) return;
+
+            Guard.NotNull(materialFunc, nameof(materialFunc));
+
             foreach (var srcPrim in srcMesh.Primitives)
             {
                 var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
@@ -431,8 +437,66 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Evaluates the current <paramref name="srcScene"/> at a given <paramref name="animation"/> and <paramref name="time"/>
+        /// and creates a static <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}"/>
+        /// </summary>
+        /// <typeparam name="TMaterial">Any material type</typeparam>
+        /// <typeparam name="TvG">A subtype of <see cref="IVertexGeometry"/></typeparam>
+        /// <typeparam name="TvM">A subtype of <see cref="IVertexMaterial"/></typeparam>
+        /// <param name="srcScene">The source <see cref="Scene"/> to evaluate.</param>
+        /// <param name="animation">The source <see cref="Animation"/> to evaluate.</param>
+        /// <param name="time">A time point, in seconds, within <paramref name="animation"/>.</param>
+        /// <param name="materialFunc">A function to convert <see cref="Material"/> into <typeparamref name="TMaterial"/>.</param>
+        /// <returns>A new <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}"/> containing the evaluated geometry.</returns>
+        public static MeshBuilder<TMaterial, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TMaterial, TvG, TvM>(this Scene srcScene, Animation animation, float time, Func<Material, TMaterial> materialFunc)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+        {
+            var mesh = new MeshBuilder<TMaterial, TvG, TvM, VertexEmpty>();
+
+            if (srcScene == null) return mesh;
+
+            if (animation != null) Guard.MustShareLogicalParent(srcScene, animation, nameof(animation));
+
+            Guard.NotNull(materialFunc, nameof(materialFunc));
+
+            foreach (var tri in srcScene.Triangulate<VertexPositionNormal, VertexColor1Texture1>(animation, time))
+            {
+                var material = materialFunc(tri.Item4);
+
+                mesh.UsePrimitive(material).AddTriangle(tri.Item1, tri.Item2, tri.Item3);
+            }
+
+            return mesh;
+        }
+
+        public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TvG, TvM>(this Scene srcScene, Animation animation, float time)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+        {
+            var materials = new Dictionary<Material, Materials.MaterialBuilder>();
+
+            Materials.MaterialBuilder convertMaterial(Material srcMaterial)
+            {
+                if (materials.TryGetValue(srcMaterial, out Materials.MaterialBuilder dstMaterial)) return dstMaterial;
+
+                dstMaterial = new Materials.MaterialBuilder();
+                srcMaterial.CopyTo(dstMaterial);
+
+                // if we find an exiting match, we will use it instead.
+                var oldMaterial = materials.Values.FirstOrDefault(item => Materials.MaterialBuilder.AreEqual(dstMaterial, item));
+                if (oldMaterial != null) dstMaterial = oldMaterial;
+
+                return materials[srcMaterial] = dstMaterial;
+            }
+
+            return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(animation, time, convertMaterial);
+        }
+
         public static void SaveAsWavefront(this ModelRoot model, string filePath)
         {
+            Guard.NotNull(model, nameof(model));
             Guard.NotNullOrEmpty(filePath, nameof(filePath));
             Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
 
@@ -443,6 +507,7 @@ namespace SharpGLTF.Schema2
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath, Animation animation, float time)
         {
+            Guard.NotNull(model, nameof(model));
             Guard.NotNullOrEmpty(filePath, nameof(filePath));
             Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
 
