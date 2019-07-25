@@ -66,7 +66,7 @@ namespace SharpGLTF.Schema2
             return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
         }
 
-        public KeyValuePair<Node, Matrix4x4> GetJoint(int idx)
+        public (Node, Matrix4x4) GetJoint(int idx)
         {
             var nodeIdx = _joints[idx];
 
@@ -76,7 +76,7 @@ namespace SharpGLTF.Schema2
 
             var matrix = accessor == null ? Matrix4x4.Identity : accessor.AsMatrix4x4Array()[idx];
 
-            return new KeyValuePair<Node, Matrix4x4>(node, matrix);
+            return (node, matrix);
         }
 
         public void BindJoints(params Node[] joints)
@@ -87,42 +87,53 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Binds the tree of bones to the associated skinned mesh.
+        /// Binds a bone armature of <see cref="Node"/> to the associated skinned mesh.
         /// </summary>
         /// <param name="meshBindTransform">The world transform matrix of the mesh at the time of binding.</param>
         /// <param name="joints">A collection of <see cref="Node"/> joints.</param>
+        /// <remarks>
+        /// This method uses the <see cref="Node.WorldMatrix"/> value of each joint to computer the inverse bind matrix.
+        /// </remarks>
         public void BindJoints(Matrix4x4 meshBindTransform, params Node[] joints)
         {
-            var meshBingInverse = meshBindTransform.Inverse();
+            Guard.NotNull(joints, nameof(joints));
 
-            var pairs = new KeyValuePair<Node, Matrix4x4>[joints.Length];
+            var pairs = new (Node, Matrix4x4)[joints.Length];
 
             for (int i = 0; i < pairs.Length; ++i)
             {
-                var xform = (joints[i].WorldMatrix * meshBingInverse).Inverse();
+                Guard.NotNull(joints[i], nameof(joints));
 
-                pairs[i] = new KeyValuePair<Node, Matrix4x4>(joints[i], xform);
+                var xform = Transforms.SkinTransform.CalculateInverseBinding(meshBindTransform, joints[i].WorldMatrix);
+
+                pairs[i] = (joints[i], xform);
             }
 
             BindJoints(pairs);
         }
 
-        public void BindJoints(KeyValuePair<Node, Matrix4x4>[] joints)
+        /// <summary>
+        /// Binds a bone armature of <see cref="Node"/> to the associated skinned mesh.
+        /// </summary>
+        /// <param name="joints">
+        /// A collection of <see cref="Node"/> joints,
+        /// where each joint has an Inverse Bind Matrix.
+        /// </param>
+        public void BindJoints((Node, Matrix4x4)[] joints)
         {
-            _FindCommonAncestor(joints.Select(item => item.Key));
+            Guard.NotNull(joints, nameof(joints));
 
-            foreach (var j in joints) { Guard.IsTrue(j.Value._IsReal(), nameof(joints)); }
+            _FindCommonAncestor(joints.Select(item => item.Item1));
+
+            foreach (var j in joints) { Guard.IsTrue(j.Item2._IsReal(), nameof(joints)); }
 
             // inverse bind matrices accessor
 
             var data = new Byte[joints.Length * 16 * 4];
-
             var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
-
-            matrices.Fill(joints.Select(item => item.Value));
+            matrices.Fill(joints.Select(item => item.Item2));
 
             var accessor = LogicalParent.CreateAccessor("Bind Matrices");
-
             accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
 
             this._inverseBindMatrices = accessor.LogicalIndex;
@@ -130,7 +141,7 @@ namespace SharpGLTF.Schema2
             // joints
 
             _joints.Clear();
-            _joints.AddRange(joints.Select(item => item.Key.LogicalIndex));
+            _joints.AddRange(joints.Select(item => item.Item1.LogicalIndex));
         }
 
         #endregion
@@ -154,8 +165,8 @@ namespace SharpGLTF.Schema2
                 var src = joints[i];
                 var dst = GetJoint(i);
 
-                if (!ReferenceEquals(src.Key, dst.Key)) return false;
-                if (src.Value != dst.Value) return false;
+                if (!ReferenceEquals(src.Key, dst.Item1)) return false;
+                if (src.Value != dst.Item2) return false;
             }
 
             return true;
@@ -198,7 +209,13 @@ namespace SharpGLTF.Schema2
         /// <returns>The <see cref="Node"/> root of the tree.</returns>
         private Node _FindCommonAncestor(IEnumerable<Node> nodes)
         {
-            foreach (var j in nodes) Guard.MustShareLogicalParent(this, j, nameof(nodes));
+            if (nodes == null) return null;
+
+            foreach (var j in nodes)
+            {
+                Guard.NotNull(j, nameof(nodes));
+                Guard.MustShareLogicalParent(this, j, nameof(nodes));
+            }
 
             var workingNodes = nodes.ToList();
 
@@ -256,7 +273,7 @@ namespace SharpGLTF.Schema2
 
                 for (int i = 0; i < this.JointsCount; ++i)
                 {
-                    var jointNode = GetJoint(i).Key;
+                    var jointNode = GetJoint(i).Item1;
 
                     if (skeletonNode == jointNode) continue;
                     if (skeletonNode._ContainsVisualNode(jointNode, true)) continue;

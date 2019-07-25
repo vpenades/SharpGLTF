@@ -6,10 +6,13 @@ using System.Numerics;
 
 using SharpGLTF.Schema2;
 
+using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
+
 namespace SharpGLTF.Scenes
 {
-    using MESHBUILDER = Geometry.IMeshBuilder<Materials.MaterialBuilder>;
-
+    /// <summary>
+    /// Helper class to create a Schema2.Scene from a Scene Builder
+    /// </summary>
     class Schema2SceneBuilder
     {
         #region data
@@ -31,7 +34,6 @@ namespace SharpGLTF.Scenes
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
             // gather all MaterialBuilder unique instances
-            // find and group materials that have the same content.
 
             var materialGroups = srcScene.Instances
                 .Select(item => item.GetGeometryAsset())
@@ -41,6 +43,7 @@ namespace SharpGLTF.Scenes
                 .Where(item => item != null)
                 .Distinct()
                 .ToList()
+                // group by equal content, to reduce material splitting whenever possible.
                 .GroupBy(item => item, Materials.MaterialBuilder.ContentComparer);
 
             foreach (var mg in materialGroups)

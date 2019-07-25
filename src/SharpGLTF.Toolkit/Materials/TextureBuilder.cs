@@ -140,7 +140,7 @@ namespace SharpGLTF.Materials
         {
             if (image.Count > 0)
             {
-                Guard.IsTrue(image._IsJpgImage() || image._IsPngImage() || image._IsDdsImage() || image._IsWebpImage(), nameof(image), "Must be JPG, PNG, DDS or WEBP");
+                Guard.IsTrue(image._IsImage(), nameof(image), "Must be JPG, PNG, DDS or WEBP");
             }
             else
             {

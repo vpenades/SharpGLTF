@@ -11,6 +11,72 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
     {
+        public static Type GetVertexGeometryType(params string[] vertexAttributes)
+        {
+            var t = typeof(VertexPosition);
+            if (vertexAttributes.Contains("NORMAL")) t = typeof(VertexPositionNormal);
+            if (vertexAttributes.Contains("TANGENT")) t = typeof(VertexPositionNormalTangent);
+            return t;
+        }
+
+        public static Type GetVertexMaterialType(params string[] vertexAttributes)
+        {
+            var colors = vertexAttributes.Contains("COLOR_0") ? 1 : 0;
+            colors = vertexAttributes.Contains("COLOR_1") ? 2 : colors;
+            colors = vertexAttributes.Contains("COLOR_2") ? 3 : colors;
+            colors = vertexAttributes.Contains("COLOR_3") ? 4 : colors;
+
+            var uvcoords = vertexAttributes.Contains("TEXCOORD_0") ? 1 : 0;
+            uvcoords = vertexAttributes.Contains("TEXCOORD_1") ? 2 : uvcoords;
+            uvcoords = vertexAttributes.Contains("TEXCOORD_2") ? 3 : uvcoords;
+            uvcoords = vertexAttributes.Contains("TEXCOORD_3") ? 4 : uvcoords;
+
+            if (colors == 0)
+            {
+                if (uvcoords == 0) return typeof(VertexEmpty);
+                if (uvcoords == 1) return typeof(VertexTexture1);
+                if (uvcoords >= 2) return typeof(VertexTexture2);
+            }
+
+            if (colors == 1)
+            {
+                if (uvcoords == 0) return typeof(VertexColor1);
+                if (uvcoords == 1) return typeof(VertexColor1Texture1);
+                if (uvcoords >= 2) return typeof(VertexColor1Texture2);
+            }
+
+            if (colors >= 2)
+            {
+                if (uvcoords == 0) return typeof(VertexColor2);
+                if (uvcoords == 1) return typeof(VertexColor2Texture2);
+                if (uvcoords >= 2) return typeof(VertexColor2Texture2);
+            }
+
+            return typeof(VertexEmpty);
+        }
+
+        public static Type GetVertexSkinningType(params string[] vertexAttributes)
+        {
+            var joints = vertexAttributes.Contains("JOINTS_0") && vertexAttributes.Contains("WEIGHTS_0") ? 4 : 0;
+            joints = vertexAttributes.Contains("JOINTS_1") && vertexAttributes.Contains("WEIGHTS_1") ? 8 : joints;
+
+            if (joints == 4) return typeof(VertexJoints16x4);
+            if (joints == 8) return typeof(VertexJoints16x8);
+
+            return typeof(VertexEmpty);
+        }
+
+        public static Type GetVertexBuilderType(params string[] vertexAttributes)
+        {
+            var tvg = GetVertexGeometryType(vertexAttributes);
+            var tvm = GetVertexMaterialType(vertexAttributes);
+            var tvs = GetVertexSkinningType(vertexAttributes);
+
+            var vtype = typeof(VertexBuilder<,,>);
+
+            return vtype.MakeGenericType(tvg, tvm, tvs);
+        }
+
         public static bool SanitizeVertex<TvG>(this TvG inVertex, out TvG outVertex)
             where TvG : struct, IVertexGeometry
         {
@@ -57,8 +123,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // determine the vertex attributes from the first vertex.
             var firstVertex = vertexBlocks
-                .First(item => item.Count > 0)
-                .First();
+                .First(item => item.Count > 0)[0];
 
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
@@ -217,10 +282,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (src.GetType() == typeof(TvP)) return (TvP)src;
 
             var dst = default(TvP);
+            src.CopyTo(dst);
 
-            dst.SetPosition(src.GetPosition());
-            if (src.TryGetNormal(out Vector3 nrm)) dst.SetNormal(nrm);
-            if (src.TryGetTangent(out Vector4 tgt)) dst.SetTangent(tgt);
+            System.Diagnostics.Debug.Assert(src.GetPosition() == dst.GetPosition());
 
             return dst;
         }
@@ -231,7 +295,51 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (src.GetType() == typeof(TvM)) return (TvM)src;
 
             var dst = default(TvM);
+            src.CopyTo(dst);
 
+            #if DEBUG
+            for (int i = 0; i < Math.Min(src.MaxColors, dst.MaxColors); ++i)
+            {
+                System.Diagnostics.Debug.Assert(src.GetColor(i) == dst.GetColor(i));
+            }
+
+            for (int i = 0; i < Math.Min(src.MaxTextCoords, dst.MaxTextCoords); ++i)
+            {
+                System.Diagnostics.Debug.Assert(src.GetTexCoord(i) == dst.GetTexCoord(i));
+            }
+            #endif
+            return dst;
+        }
+
+        public static TvS ConvertTo<TvS>(this IVertexSkinning src)
+            where TvS : struct, IVertexSkinning
+        {
+            if (src.GetType() == typeof(TvS)) return (TvS)src;
+
+            var dst = default(TvS);
+            src.CopyTo(dst);
+
+            #if DEBUG
+
+            if (src.JointBindings == dst.JointBindings)
+            {
+                // todo, check bindings are the same.
+            }
+
+            #endif
+
+            return dst;
+        }
+
+        public static void CopyTo(this IVertexGeometry src, IVertexGeometry dst)
+        {
+            dst.SetPosition(src.GetPosition());
+            if (src.TryGetNormal(out Vector3 nrm)) dst.SetNormal(nrm);
+            if (src.TryGetTangent(out Vector4 tgt)) dst.SetTangent(tgt);
+        }
+
+        public static void CopyTo(this IVertexMaterial src, IVertexMaterial dst)
+        {
             int i = 0;
 
             while (i < Math.Min(src.MaxColors, dst.MaxColors))
@@ -259,29 +367,29 @@ namespace SharpGLTF.Geometry.VertexTypes
                 dst.SetTexCoord(i, Vector2.Zero);
                 ++i;
             }
-
-            return dst;
         }
 
-        public static unsafe TvS ConvertTo<TvS>(this IVertexSkinning src)
-            where TvS : struct, IVertexSkinning
+        public static unsafe void CopyTo(this IVertexSkinning src, IVertexSkinning dst)
         {
-            if (src.GetType() == typeof(TvS)) return (TvS)src;
-
             // create copy
-
-            var dst = default(TvS);
 
             if (dst.MaxBindings >= src.MaxBindings)
             {
-                for (int i = 0; i < src.MaxBindings; ++i)
+                int i = 0;
+
+                for (i = 0; i < src.MaxBindings; ++i)
                 {
                     var jw = src.GetJointBinding(i);
 
                     dst.SetJointBinding(i, jw.Joint, jw.Weight);
                 }
 
-                return dst;
+                while (i < dst.MaxBindings)
+                {
+                    dst.SetJointBinding(i++, 0, 0);
+                }
+
+                return;
             }
 
             // if there's more source joints than destination joints, transfer with scale
@@ -301,8 +409,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 dst.SetJointBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
             }
-
-            return dst;
         }
     }
 }

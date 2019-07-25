@@ -17,6 +17,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithDefault(this Material material)
         {
+            Guard.NotNull(material, nameof(material));
+
             return material.WithPBRMetallicRoughness();
         }
 
@@ -28,6 +30,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithDefault(this Material material, Vector4 diffuseColor)
         {
+            Guard.NotNull(material, nameof(material));
+
             var ch = material.WithPBRMetallicRoughness().FindChannel("BaseColor").Value;
 
             ch.Parameter = diffuseColor;
@@ -37,12 +41,16 @@ namespace SharpGLTF.Schema2
 
         public static Material WithDoubleSide(this Material material, bool enabled)
         {
+            Guard.NotNull(material, nameof(material));
+
             material.DoubleSided = enabled;
             return material;
         }
 
         public static Material WithChannelParameter(this Material material, string channelName, Vector4 parameter)
         {
+            Guard.NotNull(material, nameof(material));
+
             var channel = material.FindChannel(channelName).Value;
 
             channel.Parameter = parameter;
@@ -52,6 +60,8 @@ namespace SharpGLTF.Schema2
 
         public static Material WithChannelTexture(this Material material, string channelName, int textureSet, string imageFilePath)
         {
+            Guard.NotNull(material, nameof(material));
+
             var image = material.LogicalParent.UseImageWithFile(imageFilePath);
 
             return material.WithChannelTexture(channelName, textureSet, image);
@@ -59,6 +69,8 @@ namespace SharpGLTF.Schema2
 
         public static Material WithChannelTexture(this Material material, string channelName, int textureSet, Image image)
         {
+            Guard.NotNull(material, nameof(material));
+
             var channel = material.FindChannel(channelName).Value;
 
             channel.SetTexture(textureSet, image);
@@ -73,6 +85,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithPBRMetallicRoughness(this Material material)
         {
+            Guard.NotNull(material, nameof(material));
+
             material.InitializePBRMetallicRoughness();
             return material;
         }
@@ -104,6 +118,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithPBRSpecularGlossiness(this Material material)
         {
+            Guard.NotNull(material, nameof(material));
+
             material.InitializePBRSpecularGlossiness();
             return material;
         }
@@ -115,6 +131,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="Material"/> instance.</returns>
         public static Material WithUnlit(this Material material)
         {
+            Guard.NotNull(material, nameof(material));
+
             material.InitializeUnlit();
             return material;
         }
@@ -140,6 +158,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Image"/> instance.</returns>
         public static Image UseImageWithContent(this ModelRoot root, Byte[] imageContent)
         {
+            Guard.NotNull(root, nameof(root));
+
             return root.UseImage(new ArraySegment<byte>(imageContent));
         }
 
@@ -225,11 +245,14 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
+            Guard.NotNull(channelKeys, nameof(channelKeys));
 
             foreach (var k in channelKeys)
             {
                 var src = srcMaterial.FindChannel(k);
-                if (src == null) continue;
+                if (!src.HasValue) continue;
+
+                if (src.Value.HasDefaultContent) continue;
 
                 var dst = dstMaterial.UseChannel(k);
 

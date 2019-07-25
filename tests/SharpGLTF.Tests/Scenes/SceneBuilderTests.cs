@@ -191,6 +191,7 @@ namespace SharpGLTF.Scenes
             scene.AddSkinnedMesh
                 (
                 mesh,
+                Matrix4x4.Identity,
                 joint0, // joint used for skinning joint index 0
                 joint1, // joint used for skinning joint index 1
                 joint2  // joint used for skinning joint index 2
@@ -290,6 +291,7 @@ namespace SharpGLTF.Scenes
             scene.AddSkinnedMesh
                 (
                 mesh,
+                armature1.WorldMatrix,
                 joint0, // joint used for skinning joint index 0
                 joint1, // joint used for skinning joint index 1
                 joint2  // joint used for skinning joint index 2
@@ -307,5 +309,42 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("skinned.glb");
             scene.AttachToCurrentTest("skinned.gltf");
         }
+
+
+        [TestCase("RiggedFigure.glb")]
+        [TestCase("RiggedSimple.glb")]
+        [TestCase("BoxAnimated.glb")]
+        [TestCase("AnimatedMorphCube.glb")]
+        [TestCase("AnimatedMorphSphere.glb")]
+        [TestCase("CesiumMan.glb")]
+        [TestCase("Monster.glb")]
+        [TestCase("BrainStem.glb")]
+        public void TestRoundTrip(string path)
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains(path));
+
+            var modelSrc = Schema2.ModelRoot.Load(path);
+            Assert.NotNull(modelSrc);
+
+            // perform roundtrip
+
+            var scene = Schema2.Schema2Toolkit.ToSceneBuilder(modelSrc.DefaultScene);
+
+            var modelBis = scene.ToSchema2();
+
+            // save file
+
+            path = System.IO.Path.GetFileNameWithoutExtension(path);
+            modelSrc.AttachToCurrentTest(path +"_src" + ".glb");
+            modelBis.AttachToCurrentTest(path +"_bis" + ".glb");
+
+            modelSrc.AttachToCurrentTest(path + "_src" + ".gltf");
+            modelBis.AttachToCurrentTest(path + "_bis" + ".gltf");
+        }
+
     }
 }

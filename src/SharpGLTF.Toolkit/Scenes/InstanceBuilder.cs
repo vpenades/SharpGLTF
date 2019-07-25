@@ -17,8 +17,10 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly SceneBuilder _Parent;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private IContentRoot _Content;
 
         #endregion

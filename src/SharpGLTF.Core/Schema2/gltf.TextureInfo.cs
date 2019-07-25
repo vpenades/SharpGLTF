@@ -107,6 +107,8 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
+        public static Single ScaleDefault => (float)_scaleDefault;
+
         public Single Scale
         {
             get => (Single)this._scale.AsValue(_scaleDefault);
@@ -120,6 +122,8 @@ namespace SharpGLTF.Schema2
     internal sealed partial class MaterialOcclusionTextureInfo
     {
         #region properties
+
+        public static Single StrengthDefault => (float)_strengthDefault;
 
         public Single Strength
         {

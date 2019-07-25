@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -109,7 +110,7 @@ namespace SharpGLTF.Scenes
                 if (value.Translation != Vector3.Zero)
                 {
                     if (Translation == null) Translation = new Animations.AnimatableProperty<Vector3>();
-                    Translation.Value = value.Scale;
+                    Translation.Value = value.Translation;
                 }
             }
         }
@@ -180,7 +181,7 @@ namespace SharpGLTF.Scenes
             if (Translation == null)
             {
                 Translation = new Animations.AnimatableProperty<Vector3>();
-                Translation.Value = Vector3.One;
+                Translation.Value = Vector3.Zero;
             }
 
             return Translation;
@@ -215,6 +216,17 @@ namespace SharpGLTF.Scenes
             var vs = Parent;
             var lm = GetLocalTransform(animationTrack, time).Matrix;
             return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
+        }
+
+        public static bool IsValidArmature(IEnumerable<NodeBuilder> joints)
+        {
+            if (joints == null) return false;
+            if (!joints.Any()) return false;
+            if (joints.Any(item => item == null)) return false;
+
+            var root = joints.First().Root;
+
+            return joints.All(item => Object.ReferenceEquals(item.Root, root));
         }
 
         #endregion

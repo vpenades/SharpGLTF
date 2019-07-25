@@ -208,7 +208,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
 
             var triangles = model.DefaultScene
-                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
                 .ToArray();
 
             model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".obj"));
@@ -238,7 +238,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest(path + ".glb");
 
             var triangles = model.DefaultScene
-                .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>()
+                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>()
                 .ToArray();            
 
             var anim = model.LogicalAnimations[0];
@@ -297,7 +297,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 TestContext.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
 
                 var triangles = model.DefaultScene
-                    .Triangulate<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(anim, t)
+                    .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(anim, t)
                     .ToList();
 
                 var vertices = triangles

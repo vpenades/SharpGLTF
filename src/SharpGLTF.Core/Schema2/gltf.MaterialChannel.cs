@@ -16,22 +16,24 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Single> cgetter, Action<Single> csetter)
+        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Single defval, Func<Single> cgetter, Action<Single> csetter)
             : this(m, key, texInfo)
         {
             Guard.NotNull(cgetter, nameof(cgetter));
             Guard.NotNull(csetter, nameof(csetter));
 
+            _ParameterDefVal = new Vector4(defval, 0, 0, 0);
             _ParameterGetter = () => new Vector4(cgetter(), 0, 0, 0);
             _ParameterSetter = value => csetter(value.X);
         }
 
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Func<Vector4> cgetter, Action<Vector4> csetter)
+        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Vector4 defval, Func<Vector4> cgetter, Action<Vector4> csetter)
             : this(m, key, texInfo)
         {
             Guard.NotNull(cgetter, nameof(cgetter));
             Guard.NotNull(csetter, nameof(csetter));
 
+            _ParameterDefVal = defval;
             _ParameterGetter = cgetter;
             _ParameterSetter = csetter;
         }
@@ -48,6 +50,7 @@ namespace SharpGLTF.Schema2
 
             _TextureInfo = texInfo;
 
+            _ParameterDefVal = Vector4.Zero;
             _ParameterGetter = null;
             _ParameterSetter = null;
         }
@@ -61,6 +64,7 @@ namespace SharpGLTF.Schema2
 
         private readonly Func<Boolean, TextureInfo> _TextureInfo;
 
+        private readonly Vector4 _ParameterDefVal;
         private readonly Func<Vector4> _ParameterGetter;
         private readonly Action<Vector4> _ParameterSetter;
 
@@ -71,6 +75,8 @@ namespace SharpGLTF.Schema2
         public Material LogicalParent => _Material;
 
         public String Key => _Key;
+
+        public Boolean HasDefaultContent => _CheckHasDefaultContent();
 
         /// <summary>
         /// Gets or sets the <see cref="Vector4"/> parameter of this channel.
@@ -148,6 +154,16 @@ namespace SharpGLTF.Schema2
             var texInfo = _TextureInfo(true);
 
             texInfo.SetTransform(offset, scale, rotation, texCoordOverride);
+        }
+
+        private bool _CheckHasDefaultContent()
+        {
+            if (this.Parameter != _ParameterDefVal) return false;
+            if (this.Texture != null) return false;
+
+            // there's no point in keep checking because if there's no texture, all other elements are irrelevant.
+
+            return true;
         }
 
         #endregion

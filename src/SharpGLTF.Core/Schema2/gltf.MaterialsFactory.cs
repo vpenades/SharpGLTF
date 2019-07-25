@@ -66,11 +66,32 @@ namespace SharpGLTF.Schema2
                 foreach (var c in channels) yield return c;
             }
 
-            yield return new MaterialChannel(this, "Normal", _GetNormalTexture, () => _GetNormalTexture(false)?.Scale ?? 0, value => _GetNormalTexture(true).Scale = value);
+            yield return new MaterialChannel
+                (
+                this, "Normal",
+                _GetNormalTexture,
+                MaterialNormalTextureInfo.ScaleDefault,
+                () => _GetNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
+                value => _GetNormalTexture(true).Scale = value
+                );
 
-            yield return new MaterialChannel(this, "Occlusion", _GetOcclusionTexture, () => _GetOcclusionTexture(false)?.Strength ?? 0, value => _GetOcclusionTexture(true).Strength = value);
+            yield return new MaterialChannel
+                (
+                this, "Occlusion",
+                _GetOcclusionTexture,
+                MaterialOcclusionTextureInfo.StrengthDefault,
+                () => _GetOcclusionTexture(false)?.Strength ?? MaterialOcclusionTextureInfo.StrengthDefault,
+                value => _GetOcclusionTexture(true).Strength = value
+                );
 
-            yield return new MaterialChannel(this, "Emissive", _GetEmissiveTexture, () => this._EmissiveColor, value => this._EmissiveColor = value );
+            yield return new MaterialChannel
+                (
+                this, "Emissive",
+                _GetEmissiveTexture,
+                Vector4.Zero,
+                () => this._EmissiveColor,
+                value => this._EmissiveColor = value
+                );
         }
 
         private Vector4 _EmissiveColor
@@ -144,6 +165,8 @@ namespace SharpGLTF.Schema2
             set => _baseColorFactor = value.AsNullable(_baseColorFactorDefault);
         }
 
+        public static Vector4 ParameterDefault => new Vector4((float)_metallicFactorDefault, (float)_roughnessFactorDefault,0,0);
+
         public Vector4 Parameter
         {
             get
@@ -165,9 +188,24 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannel(material, "BaseColor", _GetBaseTexture, () => this.Color, value => this.Color = value);
+            yield return new MaterialChannel
+                (
+                material, "BaseColor",
+                _GetBaseTexture,
+                _baseColorFactorDefault,
+                () => this.Color,
+                value => this.Color = value
+                );
 
-            yield return new MaterialChannel(material, "MetallicRoughness", _GetMetallicTexture, () => this.Parameter, value => this.Parameter = value);
+            yield return new MaterialChannel
+                (
+                material,
+                "MetallicRoughness",
+                _GetMetallicTexture,
+                ParameterDefault,
+                () => this.Parameter,
+                value => this.Parameter = value
+                );
         }
     }
 
@@ -199,6 +237,8 @@ namespace SharpGLTF.Schema2
             set => _diffuseFactor = value.AsNullable(_diffuseFactorDefault);
         }
 
+        public static Vector4 ParameterDefault => new Vector4(_specularFactorDefault, (float)_glossinessFactorDefault);
+
         public Vector4 Parameter
         {
             get
@@ -218,9 +258,23 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannel(material, "Diffuse", _GetDiffuseTexture, () => this.Color, value => this.Color = value);
+            yield return new MaterialChannel
+                (
+                material, "Diffuse",
+                _GetDiffuseTexture,
+                _diffuseFactorDefault,
+                () => this.Color,
+                value => this.Color = value
+                );
 
-            yield return new MaterialChannel(material, "SpecularGlossiness", _GetGlossinessTexture, () => this.Parameter, value => this.Parameter = value);
+            yield return new MaterialChannel
+                (
+                material, "SpecularGlossiness",
+                _GetGlossinessTexture,
+                ParameterDefault,
+                () => this.Parameter,
+                value => this.Parameter = value
+                );
         }
     }
 

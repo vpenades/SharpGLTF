@@ -223,86 +223,6 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public TvG GetVertexGeometry<TvG>(int index)
-            where TvG : struct, IVertexGeometry
-        {
-            var pnt = default(TvG);
-
-            if (Positions != null) pnt.SetPosition(Positions[index]);
-            if (Normals != null) pnt.SetNormal(Normals[index]);
-            if (Tangents != null) pnt.SetTangent(Tangents[index]);
-
-            return pnt;
-        }
-
-        public TvM GetVertexMaterial<TvM>(int index)
-            where TvM : struct, IVertexMaterial
-        {
-            var cctt = default(TvM);
-
-            if (Colors0 != null && cctt.MaxColors > 0) cctt.SetColor(0, Colors0[index]);
-            if (Colors1 != null && cctt.MaxColors > 1) cctt.SetColor(1, Colors1[index]);
-
-            if (TexCoords0 != null && cctt.MaxTextCoords > 0) cctt.SetTexCoord(0, TexCoords0[index]);
-            if (TexCoords1 != null && cctt.MaxTextCoords > 1) cctt.SetTexCoord(1, TexCoords1[index]);
-
-            return cctt;
-        }
-
-        public TvS GetVertexSkinning<TvS>(int index)
-            where TvS : struct, IVertexSkinning
-        {
-            var jjjj = default(TvS);
-
-            if (Joints0 != null && Weights0 != null)
-            {
-                var j = Joints0[index];
-                var w = Weights0[index];
-
-                jjjj.SetJointBinding(0, (int)j.X, w.X);
-                jjjj.SetJointBinding(1, (int)j.Y, w.Y);
-                jjjj.SetJointBinding(2, (int)j.Z, w.Z);
-                jjjj.SetJointBinding(3, (int)j.W, w.W);
-            }
-
-            if (Joints1 != null && Weights1 != null)
-            {
-                var j = Joints1[index];
-                var w = Weights1[index];
-
-                jjjj.SetJointBinding(4, (int)j.X, w.X);
-                jjjj.SetJointBinding(5, (int)j.Y, w.Y);
-                jjjj.SetJointBinding(6, (int)j.Z, w.Z);
-                jjjj.SetJointBinding(7, (int)j.W, w.W);
-            }
-
-            return jjjj;
-        }
-
-        public VertexBuilder<TvG, TvM, VertexEmpty> GetVertex<TvG, TvM>(int index)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-        {
-            return new VertexBuilder<TvG, TvM, VertexEmpty>
-                (
-                GetVertexGeometry<TvG>(index),
-                GetVertexMaterial<TvM>(index)
-                );
-        }
-
-        public VertexBuilder<TvG, TvM, TvS> GetVertex<TvG, TvM, TvS>(int index)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            return new VertexBuilder<TvG, TvM, TvS>
-                (
-                GetVertexGeometry<TvG>(index),
-                GetVertexMaterial<TvM>(index),
-                GetVertexSkinning<TvS>(index)
-                );
-        }
-
         public MorphTargetColumns AddMorphTarget()
         {
             if (_MorphTargets == null) _MorphTargets = new List<MorphTargetColumns>();
@@ -310,6 +230,92 @@ namespace SharpGLTF.Geometry
             _MorphTargets.Add(mt);
 
             return mt;
+        }
+        
+        #endregion
+
+        #region API - Vertex indexing
+
+        private void CopyTo(int index, IVertexGeometry v)
+        {
+            if (Positions != null) v.SetPosition(Positions[index]);
+            if (Normals != null) v.SetNormal(Normals[index]);
+            if (Tangents != null) v.SetTangent(Tangents[index]);
+        }
+
+        private void CopyTo(int index, IVertexMaterial v)
+        {
+            if (Colors0 != null && v.MaxColors > 0) v.SetColor(0, Colors0[index]);
+            if (Colors1 != null && v.MaxColors > 1) v.SetColor(1, Colors1[index]);
+
+            if (TexCoords0 != null && v.MaxTextCoords > 0) v.SetTexCoord(0, TexCoords0[index]);
+            if (TexCoords1 != null && v.MaxTextCoords > 1) v.SetTexCoord(1, TexCoords1[index]);
+        }
+
+        private void CopyTo(int index, IVertexSkinning v)
+        {
+            if (Joints0 != null && Weights0 != null)
+            {
+                var j = Joints0[index];
+                var w = Weights0[index];
+
+                v.SetJointBinding(0, (int)j.X, w.X);
+                v.SetJointBinding(1, (int)j.Y, w.Y);
+                v.SetJointBinding(2, (int)j.Z, w.Z);
+                v.SetJointBinding(3, (int)j.W, w.W);
+            }
+
+            if (Joints1 != null && Weights1 != null)
+            {
+                var j = Joints1[index];
+                var w = Weights1[index];
+
+                v.SetJointBinding(4, (int)j.X, w.X);
+                v.SetJointBinding(5, (int)j.Y, w.Y);
+                v.SetJointBinding(6, (int)j.Z, w.Z);
+                v.SetJointBinding(7, (int)j.W, w.W);
+            }
+        }
+
+        public IVertexBuilder GetVertex(Type vertexType, int index)
+        {
+            var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
+
+            var g = v.GetGeometry();
+            CopyTo(index, g);
+            v.SetGeometry(g);
+
+            var m = v.GetMaterial();
+            CopyTo(index, m);
+            v.SetMaterial(m);
+
+            var s = v.GetSkinning();
+            CopyTo(index, s);
+            v.SetSkinning(s);
+
+            return v;
+        }
+
+        public VertexBuilder<TvG, TvM, VertexEmpty> GetVertex<TvG, TvM>(int index)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+        {
+            var g = default(TvG); CopyTo(index, g);
+            var m = default(TvM); CopyTo(index, m);
+
+            return new VertexBuilder<TvG, TvM, VertexEmpty>(g, m);
+        }
+
+        public VertexBuilder<TvG, TvM, TvS> GetVertex<TvG, TvM, TvS>(int index)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            var g = default(TvG); CopyTo(index, g);
+            var m = default(TvM); CopyTo(index, m);
+            var s = default(TvS); CopyTo(index, s);
+
+            return new VertexBuilder<TvG, TvM, TvS>(g, m, s);
         }
 
         #endregion

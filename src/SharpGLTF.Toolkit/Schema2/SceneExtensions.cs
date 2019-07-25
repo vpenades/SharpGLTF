@@ -15,12 +15,16 @@ namespace SharpGLTF.Schema2
 
         public static Node WithLocalTransform(this Node node, Transforms.AffineTransform xform)
         {
+            Guard.NotNull(node, nameof(node));
+
             node.LocalTransform = xform;
             return node;
         }
 
         public static Node WithLocalTranslation(this Node node, Vector3 translation)
         {
+            Guard.NotNull(node, nameof(node));
+
             var xform = node.LocalTransform;
             xform.Translation = translation;
             node.LocalTransform = xform;
@@ -30,6 +34,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithLocalRotation(this Node node, Quaternion rotation)
         {
+            Guard.NotNull(node, nameof(node));
+
             var xform = node.LocalTransform;
             xform.Rotation = rotation;
             node.LocalTransform = xform;
@@ -39,6 +45,8 @@ namespace SharpGLTF.Schema2
 
         public static Node WithLocalScale(this Node node, Vector3 scale)
         {
+            Guard.NotNull(node, nameof(node));
+
             var xform = node.LocalTransform;
             xform.Scale = scale;
             node.LocalTransform = xform;
@@ -48,23 +56,24 @@ namespace SharpGLTF.Schema2
 
         public static Node WithMesh(this Node node, Mesh mesh)
         {
+            Guard.NotNull(node, nameof(node));
+
             node.Mesh = mesh;
             return node;
         }
 
         public static Node WithSkin(this Node node, Skin skin)
         {
+            Guard.NotNull(node, nameof(node));
+
             node.Skin = skin;
             return node;
         }
 
-        public static Node WithSkinBinding(this Node node, params Node[] joints)
-        {
-            return node.WithSkinBinding(node.WorldMatrix, joints);
-        }
-
         public static Node WithSkinBinding(this Node node, Matrix4x4 meshPoseTransform, params Node[] joints)
         {
+            Guard.NotNull(node, nameof(node));
+
             var skin = node.LogicalParent.CreateSkin();
             skin.BindJoints(meshPoseTransform, joints);
 
@@ -72,12 +81,41 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
-        public static Node WithSkinnedMesh(this Node node, Mesh mesh, params Node[] joints)
+        public static Node WithSkinBinding(this Node node, params (Node, Matrix4x4)[] joints)
         {
             Guard.NotNull(node, nameof(node));
+
+            var skin = node.LogicalParent.CreateSkin();
+            skin.BindJoints(joints);
+
+            node.Skin = skin;
+            return node;
+        }
+
+        public static Node WithSkinnedMesh(this Node node, Mesh mesh, Matrix4x4 meshPoseTransform, params Node[] joints)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(joints, nameof(joints));
             Guard.MustShareLogicalParent(node, mesh, nameof(mesh));
 
             foreach (var j in joints) Guard.MustShareLogicalParent(node, j, nameof(joints));
+
+            // TODO: the joints must be visible in the visual tree that contains node.
+
+            return node
+                .WithMesh(mesh)
+                .WithSkinBinding(meshPoseTransform, joints);
+        }
+
+        public static Node WithSkinnedMesh(this Node node, Mesh mesh, params (Node, Matrix4x4)[] joints)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(joints, nameof(joints));
+            Guard.MustShareLogicalParent(node, mesh, nameof(mesh));
+
+            foreach (var j in joints) Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
 
             // TODO: the joints must be visible in the visual tree that contains node.
 
@@ -118,6 +156,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Node"/> instance, or Null.</returns>
         public static Node FindNode(this Scene scene, Predicate<Node> predicate)
         {
+            Guard.NotNull(scene, nameof(scene));
             Guard.NotNull(predicate, nameof(predicate));
 
             return scene.VisualChildren.FirstOrDefault(n => predicate(n));
@@ -131,6 +170,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Node"/> instance, or Null.</returns>
         public static Node FindNode(this Node node, Predicate<Node> predicate)
         {
+            Guard.NotNull(node, nameof(node));
             Guard.NotNull(predicate, nameof(predicate));
 
             if (predicate(node)) return node;
@@ -153,13 +193,13 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
             return Node
                 .Flatten(scene)
-                .SelectMany(item => item.Triangulate<TvG, TvM>(animation, time));
+                .SelectMany(item => item.EvaluateTriangles<TvG, TvM>(animation, time));
         }
 
         /// <summary>
@@ -171,7 +211,7 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -181,7 +221,90 @@ namespace SharpGLTF.Schema2
 
             var xform = node.GetMeshWorldTransform(animation, time);
 
-            return mesh.Triangulate<TvG, TvM>(xform);
+            return mesh.EvaluateTriangles<TvG, TvM>(xform);
+        }
+
+        public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)
+        {
+            if (srcScene == null) return null;
+
+            var dstNodes = new Dictionary<Node, Scenes.NodeBuilder>();
+
+            foreach (var srcArmature in srcScene.VisualChildren)
+            {
+                var dstArmature = new Scenes.NodeBuilder();
+                srcArmature.CopyToNodeBuilder(dstArmature, dstNodes);
+            }
+
+            var srcInstances = Node.Flatten(srcScene).Where(item => item.Mesh != null).ToList();
+
+            // TODO: we must process the armatures of the skin, in case the joints are outside the scene.
+
+            var dstMeshes = srcInstances
+                .Select(item => item.Mesh)
+                .Distinct()
+                .ToDictionary(item => item, item => item.ToMeshBuilder());
+
+            var dstScene = new Scenes.SceneBuilder();
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstMesh = dstMeshes[srcInstance.Mesh];
+
+                if (srcInstance.Skin == null)
+                {
+                    var dstNode = dstNodes[srcInstance];
+                    dstScene.AddMesh(dstMesh, dstNode);
+                }
+                else
+                {
+                    var joints = new (Scenes.NodeBuilder, Matrix4x4)[srcInstance.Skin.JointsCount];
+
+                    for (int i = 0; i < joints.Length; ++i)
+                    {
+                        var j = srcInstance.Skin.GetJoint(i);
+                        joints[i] = (dstNodes[j.Item1], j.Item2);
+                    }
+
+                    dstScene.AddSkinnedMesh(dstMesh, joints);
+                }
+            }
+
+            return dstScene;
+        }
+
+        public static void CopyToNodeBuilder(this Node srcNode, Scenes.NodeBuilder dstNode,  IDictionary<Node, Scenes.NodeBuilder> nodeMapping)
+        {
+            Guard.NotNull(srcNode, nameof(srcNode));
+            Guard.NotNull(dstNode, nameof(dstNode));
+
+            dstNode.Name = srcNode.Name;
+            dstNode.LocalTransform = srcNode.LocalTransform;
+
+            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
+            {
+                var name = anim.Name;
+                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler();
+                if (scaAnim != null) dstNode.UseScale(name).SetCurve(scaAnim);
+
+                var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler();
+                if (rotAnim != null) dstNode.UseRotation(name).SetCurve(rotAnim);
+
+                var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler();
+                if (traAnim != null) dstNode.UseTranslation(name).SetCurve(traAnim);
+            }
+
+            if (nodeMapping == null) return;
+
+            nodeMapping[srcNode] = dstNode;
+
+            foreach (var srcChild in srcNode.VisualChildren)
+            {
+                var dstChild = dstNode.CreateNode();
+                srcChild.CopyToNodeBuilder(dstChild, nodeMapping);
+            }
         }
 
         #endregion

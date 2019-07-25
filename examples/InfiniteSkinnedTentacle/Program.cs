@@ -106,7 +106,7 @@ namespace InfiniteSkinnedTentacle
 
             scene
                 .CreateNode()
-                .WithSkinnedMesh(mesh, bindings.ToArray());
+                .WithSkinnedMesh(mesh, skeleton.WorldMatrix, bindings.ToArray());
 
             return bindings.Last();
         }

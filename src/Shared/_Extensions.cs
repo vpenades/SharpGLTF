@@ -360,6 +360,19 @@ namespace SharpGLTF
             return true;
         }
 
+        internal static bool _IsImage(this IReadOnlyList<Byte> data)
+        {
+            if (data == null) return false;
+            if (data.Count < 12) return false;
+
+            if (data._IsDdsImage()) return true;
+            if (data._IsJpgImage()) return true;
+            if (data._IsPngImage()) return true;
+            if (data._IsWebpImage()) return true;
+
+            return false;
+        }
+        
         #endregion
 
         #region vertex & index accessors

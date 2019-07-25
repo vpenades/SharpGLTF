@@ -257,19 +257,61 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> Triangulate<TvG, TvM, TvS>(this Mesh mesh)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Mesh mesh)
         {
-            return mesh.Primitives.SelectMany(item => item.Triangulate<TvG, TvM, TvS>());
+            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles());
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> Triangulate<TvG, TvM, TvS>(this MeshPrimitive prim)
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this MeshPrimitive prim)
+        {
+            if (prim == null) yield break;
+
+            var vertices = prim.GetVertexColumns();
+            var triangles = prim.GetTriangleIndices();
+
+            bool hasNormals = vertices.Normals != null;
+
+            var vtype = VertexUtils.GetVertexBuilderType(prim.VertexAccessors.Keys.ToArray());
+
+            foreach (var t in triangles)
+            {
+                var a = vertices.GetVertex(vtype, t.Item1);
+                var b = vertices.GetVertex(vtype, t.Item2);
+                var c = vertices.GetVertex(vtype, t.Item3);
+
+                /*
+                if (!hasNormals)
+                {
+                    var n = Vector3.Cross(b.Position - a.Position, c.Position - a.Position);
+                    n = Vector3.Normalize(n);
+                    a.Geometry.SetNormal(n);
+                    b.Geometry.SetNormal(n);
+                    c.Geometry.SetNormal(n);
+                }*/
+
+                yield return (a, b, c, prim.Material);
+            }
+        }
+
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
+            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM, TvS>());
+        }
+
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            if (prim == null) yield break;
+
             var vertices = prim.GetVertexColumns();
             var triangles = prim.GetTriangleIndices();
 
@@ -294,18 +336,20 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this Mesh mesh, Transforms.ITransform xform)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Mesh mesh, Transforms.ITransform xform)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            return mesh.Primitives.SelectMany(item => item.Triangulate<TvG, TvM>(xform));
+            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM>(xform));
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> Triangulate<TvG, TvM>(this MeshPrimitive prim, Transforms.ITransform xform)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this MeshPrimitive prim, Transforms.ITransform xform)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            if (!xform.Visible) yield break;
+            if (xform == null || !xform.Visible) yield break;
 
             var vertices = prim.GetVertexColumns();
 
@@ -327,20 +371,22 @@ namespace SharpGLTF.Schema2
 
         public static VertexBufferColumns GetVertexColumns(this MeshPrimitive primitive)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+
             var columns = new VertexBufferColumns();
 
-            _CopyTo(primitive.VertexAccessors, columns);
+            _Initialize(primitive.VertexAccessors, columns);
 
             for (int i = 0; i < primitive.MorphTargetsCount; ++i)
             {
                 var morphTarget = primitive.GetMorphTargetAccessors(i);
-                _CopyTo(morphTarget, columns.AddMorphTarget());
+                _Initialize(morphTarget, columns.AddMorphTarget());
             }
 
             return columns;
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexBufferColumns dstColumns)
+        private static void _Initialize(IReadOnlyDictionary<string, Accessor> vertexAccessors, VertexBufferColumns dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
@@ -359,7 +405,7 @@ namespace SharpGLTF.Schema2
             if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
         }
 
-        private static void _CopyTo(IReadOnlyDictionary<string, Accessor> vertexAccessors, MorphTargetColumns dstColumns)
+        private static void _Initialize(IReadOnlyDictionary<string, Accessor> vertexAccessors, MorphTargetColumns dstColumns)
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
@@ -370,6 +416,8 @@ namespace SharpGLTF.Schema2
 
         public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)
         {
+            if (primitive == null) return Enumerable.Empty<(int, int, int)>();
+
             if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.GetVertexAccessor("POSITION").Count);
 
             return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
@@ -430,7 +478,7 @@ namespace SharpGLTF.Schema2
             {
                 var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
 
-                foreach (var tri in srcPrim.Triangulate<TvG, TvM, TvS>())
+                foreach (var tri in srcPrim.EvaluateTriangles<TvG, TvM, TvS>())
                 {
                     dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
                 }
@@ -461,7 +509,7 @@ namespace SharpGLTF.Schema2
 
             Guard.NotNull(materialFunc, nameof(materialFunc));
 
-            foreach (var tri in srcScene.Triangulate<VertexPositionNormal, VertexColor1Texture1>(animation, time))
+            foreach (var tri in srcScene.EvaluateTriangles<VertexPositionNormal, VertexColor1Texture1>(animation, time))
             {
                 var material = materialFunc(tri.Item4);
 
@@ -492,6 +540,48 @@ namespace SharpGLTF.Schema2
             }
 
             return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(animation, time, convertMaterial);
+        }
+
+        public static IMeshBuilder<Materials.MaterialBuilder> ToMeshBuilder(this Mesh srcMesh)
+        {
+            if (srcMesh == null) return null;
+
+            var vertexAttributes = srcMesh.Primitives
+                .SelectMany(item => item.VertexAccessors.Keys)
+                .Distinct()
+                .ToArray();
+
+            Materials.MaterialBuilder defMat = null;
+
+            var dstMaterials = new Dictionary<Material, Materials.MaterialBuilder>();
+
+            var dstMesh = MeshBuilderToolkit.CreateMeshBuilderFromVertexAttributes<Materials.MaterialBuilder>(vertexAttributes);
+
+            foreach (var srcTri in srcMesh.EvaluateTriangles())
+            {
+                IPrimitiveBuilder dstPrim = null;
+
+                if (srcTri.Item4 == null)
+                {
+                    if (defMat == null) defMat = Materials.MaterialBuilder.CreateDefault();
+                    dstPrim = dstMesh.UsePrimitive(defMat);
+                }
+                else
+                {
+                    if (!dstMaterials.TryGetValue(srcTri.Item4, out Materials.MaterialBuilder dstMat))
+                    {
+                        dstMat = new Materials.MaterialBuilder();
+                        srcTri.Item4.CopyTo(dstMat);
+                        dstMaterials[srcTri.Item4] = dstMat;
+                    }
+
+                    dstPrim = dstMesh.UsePrimitive(dstMat);
+                }
+
+                dstPrim.AddTriangle(srcTri.Item1, srcTri.Item2, srcTri.Item3);
+            }
+
+            return dstMesh;
         }
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath)

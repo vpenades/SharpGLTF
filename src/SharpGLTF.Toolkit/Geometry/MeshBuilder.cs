@@ -9,19 +9,6 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    public interface IMeshBuilder<TMaterial>
-    {
-        string Name { get; set; }
-
-        IEnumerable<TMaterial> Materials { get; }
-
-        IReadOnlyCollection<IPrimitive<TMaterial>> Primitives { get; }
-
-        IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
-
-        void Validate();
-    }
-
     /// <summary>
     /// Represents an utility class to help build meshes by adding primitives associated with a given material.
     /// </summary>

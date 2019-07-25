@@ -348,6 +348,7 @@ namespace SharpGLTF.Schema2
         public Image UseImage(BYTES imageContent)
         {
             Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
+            Guard.IsTrue(imageContent._IsImage(), nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
 
             foreach (var img in this.LogicalImages)
             {

@@ -109,18 +109,26 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        public SkinTransformer(MESHBUILDER mesh, NodeBuilder[] joints)
-        {
-            _Target = new MeshContent(mesh);
-            _TargetBindMatrix = null;
-            _Joints.AddRange(joints);
-        }
-
         public SkinTransformer(MESHBUILDER mesh, Matrix4x4 meshBindMatrix, NodeBuilder[] joints)
         {
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(joints, nameof(joints));
+            Guard.IsTrue(NodeBuilder.IsValidArmature(joints), nameof(joints));
+
             _Target = new MeshContent(mesh);
             _TargetBindMatrix = meshBindMatrix;
-            _Joints.AddRange(joints);
+            _Joints.AddRange(joints.Select(item => (item, (Matrix4x4?)null)));
+        }
+
+        public SkinTransformer(MESHBUILDER mesh, (NodeBuilder, Matrix4x4)[] joints)
+        {
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(joints, nameof(joints));
+            Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Item1)), nameof(joints));
+
+            _Target = new MeshContent(mesh);
+            _TargetBindMatrix = null;
+            _Joints.AddRange(joints.Select(item => (item.Item1, (Matrix4x4?)item.Item2)));
         }
 
         #endregion
@@ -131,7 +139,7 @@ namespace SharpGLTF.Scenes
         private Matrix4x4? _TargetBindMatrix;
 
         // condition: all NodeBuilder objects must have the same root.
-        private readonly List<NodeBuilder> _Joints = new List<NodeBuilder>();
+        private readonly List<(NodeBuilder, Matrix4x4?)> _Joints = new List<(NodeBuilder, Matrix4x4?)>();
 
         #endregion
 
@@ -139,17 +147,43 @@ namespace SharpGLTF.Scenes
 
         public MESHBUILDER GetGeometryAsset() { return (_Target as IRenderableContent)?.GetGeometryAsset(); }
 
-        public NodeBuilder GetArmatureAsset() { return _Joints.Select(item => item.Root).Distinct().FirstOrDefault(); }
+        public NodeBuilder GetArmatureAsset() { return _Joints.Select(item => item.Item1.Root).Distinct().FirstOrDefault(); }
 
         public void Setup(Scene dstScene, Schema2SceneBuilder context)
         {
             var skinnedMeshNode = dstScene.CreateNode();
 
-            var skinnedJoints = _Joints
-                .Select(j => context.GetNode(j))
+            if (_TargetBindMatrix.HasValue)
+            {
+                var dstNodes = new Node[_Joints.Count];
+
+                for (int i = 0; i < dstNodes.Length; ++i)
+                {
+                    var srcNode = _Joints[i];
+
+                    System.Diagnostics.Debug.Assert(!srcNode.Item2.HasValue);
+
+                    dstNodes[i] = context.GetNode(srcNode.Item1);
+                }
+
+                #if DEBUG
+                for (int i = 0; i < dstNodes.Length; ++i)
+                {
+                    var srcNode = _Joints[i];
+                    System.Diagnostics.Debug.Assert(dstNodes[i].WorldMatrix == srcNode.Item1.WorldMatrix);
+                }
+                #endif
+
+                skinnedMeshNode.WithSkinBinding(_TargetBindMatrix.Value, dstNodes);
+            }
+            else
+            {
+                var skinnedJoints = _Joints
+                .Select(j => (context.GetNode(j.Item1), j.Item2.Value) )
                 .ToArray();
 
-            skinnedMeshNode.WithSkinBinding(_TargetBindMatrix ?? Matrix4x4.Identity, skinnedJoints);
+                skinnedMeshNode.WithSkinBinding(skinnedJoints);
+            }
 
             _Target.Setup(skinnedMeshNode, context);
         }

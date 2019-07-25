@@ -188,8 +188,8 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < this.Skin.JointsCount; ++i)
             {
                 var j = this.Skin.GetJoint(i);
-                jointXforms[i] = j.Key.GetWorldMatrix(animation, time);
-                invBindings[i] = j.Value;
+                jointXforms[i] = j.Item1.GetWorldMatrix(animation, time);
+                invBindings[i] = j.Item2;
             }
 
             return new Transforms.SkinTransform(invBindings, jointXforms, weights, false);
@@ -290,6 +290,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A collection of <see cref="Node"/> instances.</returns>
         public static IEnumerable<Node> Flatten(IVisualNodeContainer container)
         {
+            if (container == null) yield break;
+
             if (container is Node n) yield return n;
 
             foreach (var c in container.VisualChildren)

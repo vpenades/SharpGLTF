@@ -73,6 +73,8 @@ namespace SharpGLTF.Animations
 
         #region API
 
+        public void Clear() { _Keys.Clear(); }
+
         public void RemoveKey(float offset) { _Keys.Remove(offset); }
 
         public void SetPoint(float offset, T value, bool isLinear = true)
@@ -147,6 +149,35 @@ namespace SharpGLTF.Animations
             var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
             return (_Keys[offsets.Item1], _Keys[offsets.Item2], offsets.Item3);
+        }
+
+        public void SetCurve(ICurveSampler<T> curve)
+        {
+            if (curve is IConvertibleCurve<T> convertible)
+            {
+                if (convertible.MaxDegree == 0)
+                {
+                    var linear = convertible.ToStepCurve();
+                    foreach (var p in linear) this.SetPoint(p.Key, p.Value, false);
+                    return;
+                }
+
+                if (convertible.MaxDegree == 1)
+                {
+                    var linear = convertible.ToLinearCurve();
+                    foreach (var p in linear) this.SetPoint(p.Key, p.Value);
+                    return;
+                }
+
+                if (convertible.MaxDegree > 1)
+                {
+                    var linear = convertible.ToLinearCurve();
+                    foreach (var p in linear) this.SetPoint(p.Key, p.Value);
+                    return;
+                }
+            }
+
+            throw new NotImplementedException();
         }
 
         #endregion

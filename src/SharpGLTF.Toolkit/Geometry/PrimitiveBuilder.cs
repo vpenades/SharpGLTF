@@ -59,6 +59,10 @@ namespace SharpGLTF.Geometry
         /// </summary>
         Type VertexType { get; }
 
+        int AddPoint(IVertexBuilder a);
+
+        (int, int) AddLine(IVertexBuilder a, IVertexBuilder b);
+
         (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
     }
 
@@ -192,12 +196,47 @@ namespace SharpGLTF.Geometry
         /// Adds a point.
         /// </summary>
         /// <param name="a">vertex for this point.</param>
+        /// <returns>The indices of the vertices.</returns>
+        public int AddPoint(IVertexBuilder a)
+        {
+            Guard.NotNull(a, nameof(a));
+
+            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+
+            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
+
+            return AddPoint(aa);
+        }
+
+        /// <summary>
+        /// Adds a point.
+        /// </summary>
+        /// <param name="a">vertex for this point.</param>
         /// <returns>The index of the vertex.</returns>
         public int AddPoint(VertexBuilder<TvG, TvM, TvS> a)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 1, nameof(VerticesPerPrimitive), "Points are not supported for this primitive");
 
             return UseVertex(a);
+        }
+
+        /// <summary>
+        /// Adds a line.
+        /// </summary>
+        /// <param name="a">First corner of the line.</param>
+        /// <param name="b">Second corner of the line.</param>
+        /// <returns>The indices of the vertices.</returns>
+        public (int, int) AddLine(IVertexBuilder a, IVertexBuilder b)
+        {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+
+            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+
+            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
+            var bb = b.GetType() != expectedType ? b.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)b;
+
+            return AddLine(aa, bb);
         }
 
         /// <summary>

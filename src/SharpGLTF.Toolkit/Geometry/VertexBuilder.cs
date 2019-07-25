@@ -335,6 +335,7 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(skinning, nameof(skinning));
             this.Skinning = skinning.GetType() == typeof(TvS) ? (TvS)skinning : skinning.ConvertTo<TvS>();
         }
+
         #endregion
     }
 }
