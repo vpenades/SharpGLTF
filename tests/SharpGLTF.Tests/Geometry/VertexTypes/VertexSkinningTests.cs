@@ -22,7 +22,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             v8.SetJointBinding(4, 5, 0.30f);
 
             // we downgrade to 4 bindings; remaining bindings should be interpolated to keep weighting 1.
-            var v4 = v8.ConvertTo<VertexJoints8x4>();
+            var v4 = v8.ConvertToSkinning<VertexJoints8x4>();
 
             Assert.AreEqual(5, v4.GetJointBinding(0).Joint);
             Assert.AreEqual(3, v4.GetJointBinding(1).Joint);

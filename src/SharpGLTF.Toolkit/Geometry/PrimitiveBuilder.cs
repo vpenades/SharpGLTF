@@ -201,9 +201,9 @@ namespace SharpGLTF.Geometry
         {
             Guard.NotNull(a, nameof(a));
 
-            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+            var aa = a.ConvertTo<TvG, TvM, TvS>();
 
-            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
+            System.Diagnostics.Debug.Assert(aa.Position == a.GetGeometry().GetPosition());
 
             return AddPoint(aa);
         }
@@ -231,10 +231,11 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(a, nameof(a));
             Guard.NotNull(b, nameof(b));
 
-            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+            var aa = a.ConvertTo<TvG, TvM, TvS>();
+            var bb = b.ConvertTo<TvG, TvM, TvS>();
 
-            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
-            var bb = b.GetType() != expectedType ? b.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)b;
+            System.Diagnostics.Debug.Assert(aa.Position == a.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(bb.Position == b.GetGeometry().GetPosition());
 
             return AddLine(aa, bb);
         }
@@ -282,11 +283,13 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(b, nameof(b));
             Guard.NotNull(c, nameof(c));
 
-            var expectedType = typeof(VertexBuilder<TvG, TvM, TvS>);
+            var aa = a.ConvertTo<TvG, TvM, TvS>();
+            var bb = b.ConvertTo<TvG, TvM, TvS>();
+            var cc = c.ConvertTo<TvG, TvM, TvS>();
 
-            var aa = a.GetType() != expectedType ? a.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)a;
-            var bb = b.GetType() != expectedType ? b.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)b;
-            var cc = c.GetType() != expectedType ? c.ConvertTo<TvG, TvM, TvS>() : (VertexBuilder<TvG, TvM, TvS>)c;
+            System.Diagnostics.Debug.Assert(aa.Position == a.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(bb.Position == b.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(cc.Position == c.GetGeometry().GetPosition());
 
             return AddTriangle(aa, bb, cc);
         }

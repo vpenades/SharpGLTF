@@ -231,29 +231,42 @@ namespace SharpGLTF.Geometry
 
             return mt;
         }
-        
+
         #endregion
 
         #region API - Vertex indexing
 
-        private void CopyTo(int index, IVertexGeometry v)
+        private TvG GetVertexGeometry<TvG>(int index)
+            where TvG : struct, IVertexGeometry
         {
+            var v = default(TvG);
+
             if (Positions != null) v.SetPosition(Positions[index]);
             if (Normals != null) v.SetNormal(Normals[index]);
             if (Tangents != null) v.SetTangent(Tangents[index]);
+
+            return v;
         }
 
-        private void CopyTo(int index, IVertexMaterial v)
+        private TvM GetVertexMaterial<TvM>(int index)
+            where TvM : struct, IVertexMaterial
         {
+            var v = default(TvM);
+
             if (Colors0 != null && v.MaxColors > 0) v.SetColor(0, Colors0[index]);
             if (Colors1 != null && v.MaxColors > 1) v.SetColor(1, Colors1[index]);
 
             if (TexCoords0 != null && v.MaxTextCoords > 0) v.SetTexCoord(0, TexCoords0[index]);
             if (TexCoords1 != null && v.MaxTextCoords > 1) v.SetTexCoord(1, TexCoords1[index]);
+
+            return v;
         }
 
-        private void CopyTo(int index, IVertexSkinning v)
+        private TvS GetVertexSkinning<TvS>(int index)
+            where TvS : struct, IVertexSkinning
         {
+            IVertexSkinning v = default(VertexTypes.VertexJoints16x8);
+
             if (Joints0 != null && Weights0 != null)
             {
                 var j = Joints0[index];
@@ -275,24 +288,20 @@ namespace SharpGLTF.Geometry
                 v.SetJointBinding(6, (int)j.Z, w.Z);
                 v.SetJointBinding(7, (int)j.W, w.W);
             }
+
+            return VertexUtils.ConvertToSkinning<TvS>(v);
         }
 
         public IVertexBuilder GetVertex(Type vertexType, int index)
         {
+            var g = GetVertexGeometry<VertexPositionNormalTangent>(index);
+            var m = GetVertexMaterial<VertexColor2Texture2>(index);
+            var s = GetVertexSkinning<VertexJoints16x8>(index);
+
             var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
-
-            var g = v.GetGeometry();
-            CopyTo(index, g);
             v.SetGeometry(g);
-
-            var m = v.GetMaterial();
-            CopyTo(index, m);
             v.SetMaterial(m);
-
-            var s = v.GetSkinning();
-            CopyTo(index, s);
             v.SetSkinning(s);
-
             return v;
         }
 
@@ -300,8 +309,8 @@ namespace SharpGLTF.Geometry
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            var g = default(TvG); CopyTo(index, g);
-            var m = default(TvM); CopyTo(index, m);
+            var g = GetVertexGeometry<TvG>(index);
+            var m = GetVertexMaterial<TvM>(index);
 
             return new VertexBuilder<TvG, TvM, VertexEmpty>(g, m);
         }
@@ -311,9 +320,9 @@ namespace SharpGLTF.Geometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            var g = default(TvG); CopyTo(index, g);
-            var m = default(TvM); CopyTo(index, m);
-            var s = default(TvS); CopyTo(index, s);
+            var g = GetVertexGeometry<TvG>(index);
+            var m = GetVertexMaterial<TvM>(index);
+            var s = GetVertexSkinning<TvS>(index);
 
             return new VertexBuilder<TvG, TvM, TvS>(g, m, s);
         }

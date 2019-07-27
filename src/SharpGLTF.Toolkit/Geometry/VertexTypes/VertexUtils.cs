@@ -11,6 +11,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
     {
+        #region vertex builder
+
         public static Type GetVertexGeometryType(params string[] vertexAttributes)
         {
             var t = typeof(VertexPosition);
@@ -114,6 +116,111 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             return true;
         }
+
+        public static TvP ConvertToGeometry<TvP>(this IVertexGeometry src)
+            where TvP : struct, IVertexGeometry
+        {
+            if (src.GetType() == typeof(TvP)) return (TvP)src;
+
+            var dst = default(TvP);
+
+            dst.SetPosition(src.GetPosition());
+            if (src.TryGetNormal(out Vector3 nrm)) dst.SetNormal(nrm);
+            if (src.TryGetTangent(out Vector4 tgt)) dst.SetTangent(tgt);
+
+            return dst;
+        }
+
+        public static TvM ConvertToMaterial<TvM>(this IVertexMaterial src)
+            where TvM : struct, IVertexMaterial
+        {
+            if (src.GetType() == typeof(TvM)) return (TvM)src;
+
+            var dst = default(TvM);
+
+            int i = 0;
+
+            while (i < Math.Min(src.MaxColors, dst.MaxColors))
+            {
+                dst.SetColor(i, src.GetColor(i));
+                ++i;
+            }
+
+            while (i < dst.MaxColors)
+            {
+                dst.SetColor(i, Vector4.One);
+                ++i;
+            }
+
+            i = 0;
+
+            while (i < Math.Min(src.MaxTextCoords, dst.MaxTextCoords))
+            {
+                dst.SetTexCoord(i, src.GetTexCoord(i));
+                ++i;
+            }
+
+            while (i < dst.MaxColors)
+            {
+                dst.SetTexCoord(i, Vector2.Zero);
+                ++i;
+            }
+
+            return dst;
+        }
+
+        public static TvS ConvertToSkinning<TvS>(this IVertexSkinning src)
+            where TvS : struct, IVertexSkinning
+        {
+            if (src.GetType() == typeof(TvS)) return (TvS)src;
+
+            var dst = default(TvS);
+
+            // if there's enough room for all bindings, just fill it up.
+            if (dst.MaxBindings >= src.MaxBindings)
+            {
+                int i;
+
+                for (i = 0; i < src.MaxBindings; ++i)
+                {
+                    var jw = src.GetJointBinding(i);
+
+                    dst.SetJointBinding(i, jw.Joint, jw.Weight);
+                }
+
+                while (i < dst.MaxBindings)
+                {
+                    dst.SetJointBinding(i++, 0, 0);
+                }
+
+                return dst;
+            }
+
+            // if there's more source joints than destination joints,
+            // transfer only the most representative joints, and renormalize.
+
+            Span<JointBinding> srcjw = stackalloc JointBinding[src.MaxBindings];
+
+            for (int i = 0; i < src.MaxBindings; ++i)
+            {
+                srcjw[i] = src.GetJointBinding(i);
+            }
+
+            JointBinding.InPlaceReverseBubbleSort(srcjw);
+
+            var w = JointBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
+
+            for (int i = 0; i < dst.MaxBindings; ++i)
+            {
+                dst.SetJointBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
+            }
+
+            return dst;
+        }
+
+        #endregion
+
+        #region memory buffers API
 
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex>(this IEnumerable<IReadOnlyList<TVertex>> vertexBlocks)
             where TVertex : IVertexBuilder
@@ -276,139 +383,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return dst;
         }
 
-        public static TvP ConvertTo<TvP>(this IVertexGeometry src)
-            where TvP : struct, IVertexGeometry
-        {
-            if (src.GetType() == typeof(TvP)) return (TvP)src;
-
-            var dst = default(TvP);
-            src.CopyTo(dst);
-
-            System.Diagnostics.Debug.Assert(src.GetPosition() == dst.GetPosition());
-
-            return dst;
-        }
-
-        public static TvM ConvertTo<TvM>(this IVertexMaterial src)
-            where TvM : struct, IVertexMaterial
-        {
-            if (src.GetType() == typeof(TvM)) return (TvM)src;
-
-            var dst = default(TvM);
-            src.CopyTo(dst);
-
-            #if DEBUG
-            for (int i = 0; i < Math.Min(src.MaxColors, dst.MaxColors); ++i)
-            {
-                System.Diagnostics.Debug.Assert(src.GetColor(i) == dst.GetColor(i));
-            }
-
-            for (int i = 0; i < Math.Min(src.MaxTextCoords, dst.MaxTextCoords); ++i)
-            {
-                System.Diagnostics.Debug.Assert(src.GetTexCoord(i) == dst.GetTexCoord(i));
-            }
-            #endif
-            return dst;
-        }
-
-        public static TvS ConvertTo<TvS>(this IVertexSkinning src)
-            where TvS : struct, IVertexSkinning
-        {
-            if (src.GetType() == typeof(TvS)) return (TvS)src;
-
-            var dst = default(TvS);
-            src.CopyTo(dst);
-
-            #if DEBUG
-
-            if (src.JointBindings == dst.JointBindings)
-            {
-                // todo, check bindings are the same.
-            }
-
-            #endif
-
-            return dst;
-        }
-
-        public static void CopyTo(this IVertexGeometry src, IVertexGeometry dst)
-        {
-            dst.SetPosition(src.GetPosition());
-            if (src.TryGetNormal(out Vector3 nrm)) dst.SetNormal(nrm);
-            if (src.TryGetTangent(out Vector4 tgt)) dst.SetTangent(tgt);
-        }
-
-        public static void CopyTo(this IVertexMaterial src, IVertexMaterial dst)
-        {
-            int i = 0;
-
-            while (i < Math.Min(src.MaxColors, dst.MaxColors))
-            {
-                dst.SetColor(i, src.GetColor(i));
-                ++i;
-            }
-
-            while (i < dst.MaxColors)
-            {
-                dst.SetColor(i, Vector4.One);
-                ++i;
-            }
-
-            i = 0;
-
-            while (i < Math.Min(src.MaxTextCoords, dst.MaxTextCoords))
-            {
-                dst.SetTexCoord(i, src.GetTexCoord(i));
-                ++i;
-            }
-
-            while (i < dst.MaxColors)
-            {
-                dst.SetTexCoord(i, Vector2.Zero);
-                ++i;
-            }
-        }
-
-        public static unsafe void CopyTo(this IVertexSkinning src, IVertexSkinning dst)
-        {
-            // create copy
-
-            if (dst.MaxBindings >= src.MaxBindings)
-            {
-                int i = 0;
-
-                for (i = 0; i < src.MaxBindings; ++i)
-                {
-                    var jw = src.GetJointBinding(i);
-
-                    dst.SetJointBinding(i, jw.Joint, jw.Weight);
-                }
-
-                while (i < dst.MaxBindings)
-                {
-                    dst.SetJointBinding(i++, 0, 0);
-                }
-
-                return;
-            }
-
-            // if there's more source joints than destination joints, transfer with scale
-
-            Span<JointBinding> srcjw = stackalloc JointBinding[src.MaxBindings];
-
-            for (int i = 0; i < src.MaxBindings; ++i)
-            {
-                srcjw[i] = src.GetJointBinding(i);
-            }
-
-            JointBinding.InPlaceReverseBubbleSort(srcjw);
-
-            var w = JointBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
-
-            for (int i = 0; i < dst.MaxBindings; ++i)
-            {
-                dst.SetJointBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
-            }
-        }
+        #endregion
     }
 }

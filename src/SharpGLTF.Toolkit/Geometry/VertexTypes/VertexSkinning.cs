@@ -184,7 +184,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 this.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
             }
         }
-
+        
         #endregion
 
         #region data
@@ -481,6 +481,41 @@ namespace SharpGLTF.Geometry.VertexTypes
             Joints1 = Vector4.Zero;
             Weights0 = new Vector4(0.5f, 0.5f, 0, 0);
             Weights1 = Vector4.Zero;
+        }
+
+        public VertexJoints16x8(in Transforms.SparseWeight8 weights)
+        {
+            Joints0 = new Vector4
+                (
+                weights.Index0,
+                weights.Index1,
+                weights.Index2,
+                weights.Index3
+                );
+
+            Joints1 = new Vector4
+                (
+                weights.Index4,
+                weights.Index5,
+                weights.Index6,
+                weights.Index7
+                );
+
+            Weights0 = new Vector4
+                (
+                weights.Weight0,
+                weights.Weight1,
+                weights.Weight2,
+                weights.Weight3
+                );
+
+            Weights1 = new Vector4
+                (
+                weights.Weight4,
+                weights.Weight5,
+                weights.Weight6,
+                weights.Weight7
+                );
         }
 
         #endregion

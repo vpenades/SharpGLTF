@@ -185,6 +185,10 @@ namespace SharpGLTF.Scenes
                 skinnedMeshNode.WithSkinBinding(skinnedJoints);
             }
 
+            // set skeleton
+            // var root = _Joints[0].Item1.Root;
+            // skinnedMeshNode.Skin.Skeleton = context.GetNode(root);
+
             _Target.Setup(skinnedMeshNode, context);
         }
 

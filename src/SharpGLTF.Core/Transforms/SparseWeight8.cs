@@ -10,7 +10,7 @@ namespace SharpGLTF.Transforms
     /// Represents a sparse collection of non zero weight values, with a maximum of 8 weights.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("[{Index0}]={Weight0}  [{Index1}]={Weight1}  [{Index2}]={Weight2}  [{Index3}]={Weight3}  [{Index4}]={Weight4}  [{Index5}]={Weight5}  [{Index6}]={Weight6}  [{Index7}]={Weight7}")]
-    public struct SparseWeight8 : IReadOnlyList<float>, IReadOnlyDictionary<int, float>
+    public struct SparseWeight8 : IReadOnlyList<float>
     {
         #region lifecycle
 
@@ -36,6 +36,7 @@ namespace SharpGLTF.Transforms
         public SparseWeight8(params (int, float)[] items)
         {
             Guard.NotNull(items, nameof(items));
+            Guard.MustBeLessThanOrEqualTo(items.Length, 8, nameof(items));
 
             this.Index0 = items.Length > 0 ? items[0].Item1 : 0;
             this.Index1 = items.Length > 1 ? items[1].Item1 : 0;
@@ -58,7 +59,8 @@ namespace SharpGLTF.Transforms
 
         private SparseWeight8(ReadOnlySpan<int> indices, ReadOnlySpan<float> weights)
         {
-            System.Diagnostics.Debug.Assert(indices.Length == weights.Length);
+            System.Diagnostics.Debug.Assert(indices.Length <= 8, nameof(indices));
+            System.Diagnostics.Debug.Assert(indices.Length == weights.Length, nameof(weights));
 
             this.Index0 = indices.Length > 0 ? indices[0] : 0;
             this.Index1 = indices.Length > 1 ? indices[1] : 0;
@@ -146,16 +148,43 @@ namespace SharpGLTF.Transforms
 
         public float this[int index] => GetExpandedAt(index);
 
+        /// <summary>
+        /// Gets a value indicating whether all the weights in this <see cref="SparseWeight8"/> are zero.
+        /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public bool IsZero => Weight0 == 0 & Weight1 == 0 & Weight2 == 0 & Weight3 == 0 & Weight4 == 0 & Weight5 == 0 & Weight6 == 0 & Weight7 == 0;
-
-        public IEnumerable<int> Keys => GetPairs().Select(item => item.Item1);
-
-        public IEnumerable<float> Values => GetPairs().Select(item => item.Item2);
+        public bool IsWeightless => Weight0 == 0 & Weight1 == 0 & Weight2 == 0 & Weight3 == 0 & Weight4 == 0 & Weight5 == 0 & Weight6 == 0 & Weight7 == 0;
 
         #endregion
 
         #region API
+
+        public static SparseWeight8 OrderedByWeight(in SparseWeight8 sparse)
+        {
+            Span<int> indices = stackalloc int[8];
+            Span<float> weights = stackalloc float[8];
+
+            var c = CopyTo(sparse, indices, weights, 0);
+            BubbleSortByWeight(indices, weights, c);
+
+            indices = indices.Slice(0, c);
+            weights = weights.Slice(0, c);
+
+            return new SparseWeight8(indices, weights);
+        }
+
+        public static SparseWeight8 OrderedByIndex(in SparseWeight8 sparse)
+        {
+            Span<int> indices = stackalloc int[8];
+            Span<float> weights = stackalloc float[8];
+
+            var c = CopyTo(sparse, indices, weights, 0);
+            BubbleSortByIndex(indices, weights, c);
+
+            indices = indices.Slice(0, c);
+            weights = weights.Slice(0, c);
+
+            return new SparseWeight8(indices, weights);
+        }
 
         public static SparseWeight8 Add(in SparseWeight8 x, in SparseWeight8 y)
         {
@@ -177,7 +206,7 @@ namespace SharpGLTF.Transforms
             return _OperateLinear(x, y, (xx, yy) => xx / yy);
         }
 
-        public static SparseWeight8 InterpolateLinear(SparseWeight8 x, SparseWeight8 y, float amount)
+        public static SparseWeight8 InterpolateLinear(in SparseWeight8 x, in SparseWeight8 y, float amount)
         {
             var xAmount = 1.0f - amount;
             var yAmount = amount;
@@ -185,7 +214,7 @@ namespace SharpGLTF.Transforms
             return _OperateLinear(x, y, (xx, yy) => (xx * xAmount) + (yy * yAmount));
         }
 
-        public static SparseWeight8 InterpolateCubic(SparseWeight8 x, SparseWeight8 xt, SparseWeight8 y, SparseWeight8 yt, float amount)
+        public static SparseWeight8 InterpolateCubic(in SparseWeight8 x, in SparseWeight8 xt, in SparseWeight8 y, in SparseWeight8 yt, float amount)
         {
             var basis = Animations.SamplerFactory.CreateHermitePointWeights(amount);
 
@@ -223,11 +252,6 @@ namespace SharpGLTF.Transforms
             return false;
         }
 
-        IEnumerator<KeyValuePair<int, float>> IEnumerable<KeyValuePair<int, float>>.GetEnumerator()
-        {
-            return GetPairs().Select(item => new KeyValuePair<int, float>(item.Item1, item.Item2)).GetEnumerator();
-        }
-
         public override string ToString()
         {
             var sb = new StringBuilder();
@@ -247,31 +271,41 @@ namespace SharpGLTF.Transforms
 
         #region code
 
-        private static int CopyTo(SparseWeight8 p, Span<int> indices, Span<float> weights, int offset)
+        /// <summary>
+        /// Copies the current index-weight pairs to available slots in destination <paramref name="dstIndices"/> and <paramref name="dstWeights"/>
+        /// </summary>
+        /// <param name="src">The source <see cref="SparseWeight8"/>.</param>
+        /// <param name="dstIndices">The destination index array.</param>
+        /// <param name="dstWeights">The destination weight array.</param>
+        /// <param name="dstLength">The explicit length of both <paramref name="dstIndices"/> and <paramref name="dstWeights"/></param>
+        /// <returns>The new length of the destination arrays.</returns>
+        private static int CopyTo(SparseWeight8 src, Span<int> dstIndices, Span<float> dstWeights, int dstLength)
         {
-            System.Diagnostics.Debug.Assert(indices.Length == weights.Length);
+            System.Diagnostics.Debug.Assert(dstIndices.Length == dstWeights.Length);
+            System.Diagnostics.Debug.Assert(dstIndices.Length >= dstLength, $"{nameof(dstIndices)}.Length must be at least {nameof(dstLength)}");
+            System.Diagnostics.Debug.Assert(dstWeights.Length >= dstLength, $"{nameof(dstWeights)}.Length must be at least {nameof(dstLength)}");
 
             for (int i = 0; i < 8; ++i)
             {
-                var pair = p.GetPair(i);
+                var pair = src.GetPair(i);
                 if (pair.Item2 == 0) continue;
-                var idx = indices
-                    .Slice(0, offset)
+                var idx = dstIndices
+                    .Slice(0, dstLength)
                     .IndexOf(pair.Item1);
 
                 if (idx < 0)
                 {
-                    indices[offset] = pair.Item1;
-                    weights[offset] = pair.Item2;
-                    ++offset;
+                    dstIndices[dstLength] = pair.Item1;
+                    dstWeights[dstLength] = pair.Item2;
+                    ++dstLength;
                 }
                 else
                 {
-                    weights[idx] = pair.Item2; // should perform ADD (in case there's more than one element?)
+                    dstWeights[idx] = pair.Item2; // should perform ADD (in case there's more than one element?)
                 }
             }
 
-            return offset;
+            return dstLength;
         }
 
         /// <summary>
@@ -298,7 +332,7 @@ namespace SharpGLTF.Transforms
             {
                 xxx[i] = operationFunc(xxx[i], yyy[i]);
             }
-            
+
             // sort results by relevance, so they can fit
             // in a new structure in case there's more than
             // 8 results
@@ -330,11 +364,11 @@ namespace SharpGLTF.Transforms
             )
         {
             // prepare buffers in the stack
-            Span<int> indices = stackalloc int[16];
-            Span<float> xxx = stackalloc float[16];
-            Span<float> yyy = stackalloc float[16];
-            Span<float> zzz = stackalloc float[16];
-            Span<float> www = stackalloc float[16];
+            Span<int> indices = stackalloc int[32];
+            Span<float> xxx = stackalloc float[32];
+            Span<float> yyy = stackalloc float[32];
+            Span<float> zzz = stackalloc float[32];
+            Span<float> www = stackalloc float[32];
 
             // fill the buffers so all the elements are aligned by column
             int offset = 0;

@@ -334,6 +334,9 @@ namespace SharpGLTF.Scenes
 
             var scene = Schema2.Schema2Toolkit.ToSceneBuilder(modelSrc.DefaultScene);
 
+            var cube = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault(), 1, 0.01f, 1);
+            scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), Matrix4x4.Identity);
+
             var modelBis = scene.ToSchema2();
 
             // save file
@@ -344,6 +347,14 @@ namespace SharpGLTF.Scenes
 
             modelSrc.AttachToCurrentTest(path + "_src" + ".gltf");
             modelBis.AttachToCurrentTest(path + "_bis" + ".gltf");
+
+            modelSrc.AttachToCurrentTest(path + "_src" + ".obj");
+            modelBis.AttachToCurrentTest(path + "_bis" + ".obj");
+
+            modelSrc.AttachToCurrentTest(path + "_src_at01" + ".obj", modelSrc.LogicalAnimations[0], 0.1f);
+
+            if (modelBis.LogicalAnimations.Count > 0)
+                modelBis.AttachToCurrentTest(path + "_bis_at01" + ".obj", modelBis.LogicalAnimations[0], 0.1f);
         }
 
     }

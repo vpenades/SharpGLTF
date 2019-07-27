@@ -71,7 +71,7 @@ namespace SharpGLTF.Transforms
         {
             _AbsoluteMorphTargets = useAbsoluteMorphTargets;
 
-            if (morphWeights.IsZero)
+            if (morphWeights.IsWeightless)
             {
                 _Weights = new SparseWeight8((0, 1));
                 return;

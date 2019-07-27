@@ -24,6 +24,12 @@ namespace SharpGLTF.Geometry.Parametric
             _Front = _Back = _Left = _Right = _Top = _Bottom = material;
         }
 
+        public Cube(TMaterial material, float width, float height, float length)
+        {
+            _Front = _Back = _Left = _Right = _Top = _Bottom = material;
+            _Size = new Vector3(width, height, length);
+        }
+
         #endregion
 
         #region data
