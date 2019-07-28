@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using SharpGLTF.Transforms;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
@@ -44,50 +45,6 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        internal static void InPlaceReverseBubbleSort(Span<JointBinding> span)
-        {
-            for (int i = 1; i < span.Length; ++i)
-            {
-                bool completed = true;
-
-                for (int j = 0; j < span.Length - 1; ++j)
-                {
-                    if (_DefaultWeightComparer.Compare(span[j], span[j + 1]) < 0)
-                    {
-                        var tmp = span[j];
-                        span[j] = span[j + 1];
-                        span[j + 1] = tmp;
-                        completed = false;
-                    }
-                }
-
-                if (completed) return;
-            }
-        }
-
-        /// <summary>
-        /// Calculates the scale to use on the first <paramref name="count"/> weights.
-        /// </summary>
-        /// <param name="span">A collection of <see cref="JointBinding"/>.</param>
-        /// <param name="count">The number of items to take from the beginning of <paramref name="span"/>.</param>
-        /// <returns>A Scale factor.</returns>
-        internal static float CalculateScaleFor(Span<JointBinding> span, int count)
-        {
-            System.Diagnostics.Debug.Assert(count < span.Length, nameof(count));
-
-            float ww = 0;
-
-            int i = 0;
-
-            while (i < count) { ww += span[i++].Weight; }
-
-            float w = ww;
-
-            while (i < span.Length) { ww += span[i++].Weight; }
-
-            return ww / w;
-        }
-
         public static IEnumerable<JointBinding> GetBindings(IVertexSkinning vs)
         {
             for (int i = 0; i < vs.MaxBindings; ++i)
@@ -125,7 +82,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void SetJointBinding(int index, int joint, float weight);
 
+        void SetWeights(in SparseWeight8 weights);
+
         IEnumerable<JointBinding> JointBindings { get; }
+
+        SparseWeight8 SparseWeights { get; }
 
         Vector4 JointsLow { get; }
         Vector4 JointsHigh { get; }
@@ -173,6 +134,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexJoints8x4(params (int, float)[] bindings)
         {
+            // var sparse = new Transforms.SparseWeight8(bindings);
+
             Guard.NotNull(bindings, nameof(bindings));
             Guard.MustBeBetweenOrEqualTo(bindings.Length, 1, 4, nameof(bindings));
 
@@ -184,7 +147,32 @@ namespace SharpGLTF.Geometry.VertexTypes
                 this.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
             }
         }
-        
+
+        public VertexJoints8x4(in Transforms.SparseWeight8 weights)
+        {
+            var w4 = Transforms.SparseWeight8.OrderedByWeight(weights);
+
+            Joints = new Vector4
+                (
+                w4.Index0,
+                w4.Index1,
+                w4.Index2,
+                w4.Index3
+                );
+
+            Weights = new Vector4
+                (
+                w4.Weight0,
+                w4.Weight1,
+                w4.Weight2,
+                w4.Weight3
+                );
+
+            // renormalize
+            var w = Vector4.Dot(Weights, Vector4.One);
+            if (w != 0) Weights /= w;
+        }
+
         #endregion
 
         #region data
@@ -201,11 +189,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsLow => this.Joints;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsHigh => Vector4.Zero;
-
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 WeightsLow => this.Weights;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 Weightshigh => Vector4.Zero;
+
+        public Transforms.SparseWeight8 SparseWeights => new Transforms.SparseWeight8(this.Joints, this.Weights);
 
         #endregion
 
@@ -239,18 +232,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void InPlaceSort()
         {
-            Span<JointBinding> pairs = stackalloc JointBinding[4];
-
-            pairs[0] = new JointBinding((int)Joints.X, Weights.X);
-            pairs[1] = new JointBinding((int)Joints.Y, Weights.Y);
-            pairs[2] = new JointBinding((int)Joints.Z, Weights.Z);
-            pairs[3] = new JointBinding((int)Joints.W, Weights.W);
-
-            JointBinding.InPlaceReverseBubbleSort(pairs);
-
-            Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
-            Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
+            var sparse = new Transforms.SparseWeight8(this.Joints, this.Weights);
+            this = new VertexJoints8x4(sparse);
         }
+
+        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints8x4(weights); }
 
         public IEnumerable<JointBinding> JointBindings => JointBinding.GetBindings(this);
 
@@ -294,6 +280,31 @@ namespace SharpGLTF.Geometry.VertexTypes
             InPlaceSort();
         }
 
+        public VertexJoints16x4(in Transforms.SparseWeight8 weights)
+        {
+            var w4 = Transforms.SparseWeight8.OrderedByWeight(weights);
+
+            Joints = new Vector4
+                (
+                w4.Index0,
+                w4.Index1,
+                w4.Index2,
+                w4.Index3
+                );
+
+            Weights = new Vector4
+                (
+                w4.Weight0,
+                w4.Weight1,
+                w4.Weight2,
+                w4.Weight3
+                );
+
+            // renormalize
+            var w = Vector4.Dot(Weights, Vector4.One);
+            if (w != 0) Weights /= w;
+        }
+
         #endregion
 
         #region data
@@ -310,11 +321,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsLow => this.Joints;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsHigh => Vector4.Zero;
-
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 WeightsLow => this.Weights;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 Weightshigh => Vector4.Zero;
+
+        public SparseWeight8 SparseWeights => new SparseWeight8(this.Joints, this.Weights);
 
         #endregion
 
@@ -346,19 +362,12 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints16x4(weights); }
+
         public void InPlaceSort()
         {
-            Span<JointBinding> pairs = stackalloc JointBinding[4];
-
-            pairs[0] = new JointBinding((int)Joints.X, Weights.X);
-            pairs[1] = new JointBinding((int)Joints.Y, Weights.Y);
-            pairs[2] = new JointBinding((int)Joints.Z, Weights.Z);
-            pairs[3] = new JointBinding((int)Joints.W, Weights.W);
-
-            JointBinding.InPlaceReverseBubbleSort(pairs);
-
-            Joints = new Vector4(pairs[0].Joint, pairs[1].Joint, pairs[2].Joint, pairs[3].Joint);
-            Weights = new Vector4(pairs[0].Weight, pairs[1].Weight, pairs[2].Weight, pairs[3].Weight);
+            var sparse = new Transforms.SparseWeight8(this.Joints, this.Weights);
+            this = new VertexJoints16x4(sparse);
         }
 
         public IEnumerable<JointBinding> JointBindings => JointBinding.GetBindings(this);
@@ -389,6 +398,41 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights1 = Vector4.Zero;
         }
 
+        public VertexJoints8x8(in SparseWeight8 weights)
+        {
+            Joints0 = new Vector4
+                (
+                weights.Index0,
+                weights.Index1,
+                weights.Index2,
+                weights.Index3
+                );
+
+            Joints1 = new Vector4
+                (
+                weights.Index4,
+                weights.Index5,
+                weights.Index6,
+                weights.Index7
+                );
+
+            Weights0 = new Vector4
+                (
+                weights.Weight0,
+                weights.Weight1,
+                weights.Weight2,
+                weights.Weight3
+                );
+
+            Weights1 = new Vector4
+                (
+                weights.Weight4,
+                weights.Weight5,
+                weights.Weight6,
+                weights.Weight7
+                );
+        }
+
         #endregion
 
         #region data
@@ -411,17 +455,24 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsLow => this.Joints0;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsHigh => this.Joints1;
-
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 WeightsLow => this.Weights0;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 Weightshigh => this.Joints1;
+
+        public SparseWeight8 SparseWeights => new SparseWeight8(this.Joints0, this.Joints1, this.Weights0, this.Weights1);
 
         #endregion
 
         #region API
 
         public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
+
+        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints8x8(weights); }
 
         public JointBinding GetJointBinding(int index)
         {
@@ -540,17 +591,24 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsLow => this.Joints0;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 JointsHigh => this.Joints1;
-
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 WeightsLow => this.Weights0;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 Weightshigh => this.Joints1;
+
+        public SparseWeight8 SparseWeights => new SparseWeight8(this.Joints0, this.Joints1, this.Weights0, this.Weights1);
 
         #endregion
 
         #region API
 
         public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
+
+        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints16x8(weights); }
 
         public JointBinding GetJointBinding(int index)
         {

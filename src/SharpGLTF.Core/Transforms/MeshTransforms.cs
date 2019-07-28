@@ -38,7 +38,7 @@ namespace SharpGLTF.Transforms
 
         protected MorphTransform()
         {
-            Update(new SparseWeight8((0, 1)), false);
+            Update(SparseWeight8.Create((0, 1)), false);
         }
 
         protected MorphTransform(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
@@ -73,7 +73,7 @@ namespace SharpGLTF.Transforms
 
             if (morphWeights.IsWeightless)
             {
-                _Weights = new SparseWeight8((0, 1));
+                _Weights = SparseWeight8.Create((0, 1));
                 return;
             }
 

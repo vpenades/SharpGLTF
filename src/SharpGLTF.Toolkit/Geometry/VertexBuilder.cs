@@ -88,12 +88,11 @@ namespace SharpGLTF.Geometry
         {
             Geometry = g;
             Material = m;
-            Skinning = default;
 
-            for (int i = 0; i < bindings.Length; ++i)
-            {
-                Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
-            }
+            var sparse = Transforms.SparseWeight8.Create(bindings);
+
+            Skinning = default;
+            Skinning.SetWeights(sparse);
         }
 
         public VertexBuilder(TvG g, TvM m)
@@ -121,12 +120,11 @@ namespace SharpGLTF.Geometry
         {
             Geometry = g;
             Material = default;
-            Skinning = default;
 
-            for (int i = 0; i < bindings.Length; ++i)
-            {
-                Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
-            }
+            var sparse = Transforms.SparseWeight8.Create(bindings);
+
+            Skinning = default;
+            Skinning.SetWeights(sparse);
         }
 
         public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM, TvS) tuple)

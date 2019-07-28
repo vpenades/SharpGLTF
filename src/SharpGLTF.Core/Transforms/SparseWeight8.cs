@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 namespace SharpGLTF.Transforms
@@ -9,6 +10,11 @@ namespace SharpGLTF.Transforms
     /// <summary>
     /// Represents a sparse collection of non zero weight values, with a maximum of 8 weights.
     /// </summary>
+    /// <remarks>
+    /// <see cref="SparseWeight8"/> is being used in two different contexts:
+    /// - As an utility class to define per vertex joint weights in mesh skinning.
+    /// - As an animation key in morph targets; a mesh can have many morph targets, but realistically and due to GPU limitations, only up to 8 morph targets can be blended at the same time.
+    /// </remarks>
     [System.Diagnostics.DebuggerDisplay("[{Index0}]={Weight0}  [{Index1}]={Weight1}  [{Index2}]={Weight2}  [{Index3}]={Weight3}  [{Index4}]={Weight4}  [{Index5}]={Weight5}  [{Index6}]={Weight6}  [{Index7}]={Weight7}")]
     public struct SparseWeight8 : IReadOnlyList<float>
     {
@@ -16,7 +22,7 @@ namespace SharpGLTF.Transforms
 
         public static SparseWeight8 Create(params float[] weights)
         {
-            return Create(weights as IEnumerable<float>);
+            return Create((IEnumerable<float>)weights);
         }
 
         public static SparseWeight8 Create(IEnumerable<float> weights)
@@ -30,31 +36,76 @@ namespace SharpGLTF.Transforms
                 .Take(8)
                 .ToArray();
 
-            return new SparseWeight8(indexedWeights);
+            return Create(indexedWeights);
         }
 
-        public SparseWeight8(params (int, float)[] items)
+        public static SparseWeight8 Create(params (int, float)[] pairs)
         {
-            Guard.NotNull(items, nameof(items));
-            Guard.MustBeLessThanOrEqualTo(items.Length, 8, nameof(items));
+            if (pairs == null) return default;
 
-            this.Index0 = items.Length > 0 ? items[0].Item1 : 0;
-            this.Index1 = items.Length > 1 ? items[1].Item1 : 0;
-            this.Index2 = items.Length > 2 ? items[2].Item1 : 0;
-            this.Index3 = items.Length > 3 ? items[3].Item1 : 0;
-            this.Index4 = items.Length > 4 ? items[4].Item1 : 0;
-            this.Index5 = items.Length > 5 ? items[5].Item1 : 0;
-            this.Index6 = items.Length > 6 ? items[6].Item1 : 0;
-            this.Index7 = items.Length > 7 ? items[7].Item1 : 0;
+            Span<int> indices = stackalloc int[pairs.Length];
+            Span<float> weights = stackalloc float[pairs.Length];
 
-            this.Weight0 = items.Length > 0 ? items[0].Item2 : 0;
-            this.Weight1 = items.Length > 1 ? items[1].Item2 : 0;
-            this.Weight2 = items.Length > 2 ? items[2].Item2 : 0;
-            this.Weight3 = items.Length > 3 ? items[3].Item2 : 0;
-            this.Weight4 = items.Length > 4 ? items[4].Item2 : 0;
-            this.Weight5 = items.Length > 5 ? items[5].Item2 : 0;
-            this.Weight6 = items.Length > 6 ? items[6].Item2 : 0;
-            this.Weight7 = items.Length > 7 ? items[7].Item2 : 0;
+            for (int i = 0; i < pairs.Length; ++i)
+            {
+                indices[i] = pairs[i].Item1;
+                weights[i] = pairs[i].Item2;
+            }
+
+            if (pairs.Length > 8)
+            {
+                BubbleSortByWeight(indices, weights, indices.Length);
+                indices = indices.Slice(0, 8);
+                weights = weights.Slice(0, 8);
+            }
+
+            return new SparseWeight8(indices, weights);
+        }
+
+        public SparseWeight8(in Vector4 idx0123, in Vector4 wgt0123)
+        {
+            Index0 = (int)idx0123.X;
+            Index1 = (int)idx0123.Y;
+            Index2 = (int)idx0123.Z;
+            Index3 = (int)idx0123.W;
+
+            Index4 = 0;
+            Index5 = 0;
+            Index6 = 0;
+            Index7 = 0;
+
+            Weight0 = wgt0123.X;
+            Weight1 = wgt0123.Y;
+            Weight2 = wgt0123.Z;
+            Weight3 = wgt0123.W;
+
+            Weight4 = 0;
+            Weight5 = 0;
+            Weight6 = 0;
+            Weight7 = 0;
+        }
+
+        public SparseWeight8(in Vector4 idx0123, in Vector4 idx4567, in Vector4 wgt0123, in Vector4 wgt4567)
+        {
+            Index0 = (int)idx0123.X;
+            Index1 = (int)idx0123.Y;
+            Index2 = (int)idx0123.Z;
+            Index3 = (int)idx0123.W;
+
+            Index4 = (int)idx4567.X;
+            Index5 = (int)idx4567.Y;
+            Index6 = (int)idx4567.Z;
+            Index7 = (int)idx4567.W;
+
+            Weight0 = wgt0123.X;
+            Weight1 = wgt0123.Y;
+            Weight2 = wgt0123.Z;
+            Weight3 = wgt0123.W;
+
+            Weight4 = wgt4567.X;
+            Weight5 = wgt4567.Y;
+            Weight6 = wgt4567.Z;
+            Weight7 = wgt4567.W;
         }
 
         private SparseWeight8(ReadOnlySpan<int> indices, ReadOnlySpan<float> weights)
@@ -154,6 +205,8 @@ namespace SharpGLTF.Transforms
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool IsWeightless => Weight0 == 0 & Weight1 == 0 & Weight2 == 0 & Weight3 == 0 & Weight4 == 0 & Weight5 == 0 & Weight6 == 0 & Weight7 == 0;
 
+        public float WeightSum => Weight0 + Weight1+ Weight2 + Weight3 + Weight4 + Weight5 + Weight6 + Weight7;
+
         #endregion
 
         #region API
@@ -199,6 +252,29 @@ namespace SharpGLTF.Transforms
         public static SparseWeight8 Multiply(in SparseWeight8 x, in SparseWeight8 y)
         {
             return _OperateLinear(x, y, (xx, yy) => xx * yy);
+        }
+
+        public static SparseWeight8 Multiply(in SparseWeight8 x, Single y)
+        {
+            return new SparseWeight8
+            {
+                Index0 = x.Index0,
+                Index1 = x.Index1,
+                Index2 = x.Index2,
+                Index3 = x.Index3,
+                Index4 = x.Index4,
+                Index5 = x.Index5,
+                Index6 = x.Index6,
+                Index7 = x.Index7,
+                Weight0 = x.Weight0 * y,
+                Weight1 = x.Weight1 * y,
+                Weight2 = x.Weight2 * y,
+                Weight3 = x.Weight3 * y,
+                Weight4 = x.Weight4 * y,
+                Weight5 = x.Weight5 * y,
+                Weight6 = x.Weight6 * y,
+                Weight7 = x.Weight7 * y
+            };
         }
 
         public static SparseWeight8 Divide(in SparseWeight8 x, in SparseWeight8 y)
@@ -279,11 +355,12 @@ namespace SharpGLTF.Transforms
         /// <param name="dstWeights">The destination weight array.</param>
         /// <param name="dstLength">The explicit length of both <paramref name="dstIndices"/> and <paramref name="dstWeights"/></param>
         /// <returns>The new length of the destination arrays.</returns>
-        private static int CopyTo(SparseWeight8 src, Span<int> dstIndices, Span<float> dstWeights, int dstLength)
+        private static int CopyTo(in SparseWeight8 src, Span<int> dstIndices, Span<float> dstWeights, int dstLength)
         {
             System.Diagnostics.Debug.Assert(dstIndices.Length == dstWeights.Length);
             System.Diagnostics.Debug.Assert(dstIndices.Length >= dstLength, $"{nameof(dstIndices)}.Length must be at least {nameof(dstLength)}");
             System.Diagnostics.Debug.Assert(dstWeights.Length >= dstLength, $"{nameof(dstWeights)}.Length must be at least {nameof(dstLength)}");
+            System.Diagnostics.Debug.Assert(dstWeights.Slice(0, dstLength).ToArray().All(item => item == 0), "All weights must be zero");
 
             for (int i = 0; i < 8; ++i)
             {
@@ -295,13 +372,15 @@ namespace SharpGLTF.Transforms
 
                 if (idx < 0)
                 {
+                    // the index doesn't exist, insert it to the list.
                     dstIndices[dstLength] = pair.Item1;
                     dstWeights[dstLength] = pair.Item2;
                     ++dstLength;
                 }
                 else
                 {
-                    dstWeights[idx] = pair.Item2; // should perform ADD (in case there's more than one element?)
+                    // the index already exists, so we aggregate the weights
+                    dstWeights[idx] += pair.Item2;
                 }
             }
 
@@ -405,16 +484,16 @@ namespace SharpGLTF.Transforms
             {
                 for (int j = i + 1; j < count; ++j)
                 {
-                    if (weights[j - 1] > weights[j]) continue;
+                    if (weights[i] > weights[j]) continue;
 
-                    if (weights[j - 1] == weights[j] && indices[j - 1] < indices[j]) continue;
+                    if (weights[i] == weights[j] && indices[i] < indices[j]) continue;
 
-                    var index = indices[j - 1];
-                    indices[j - 1] = indices[j];
+                    var index = indices[i];
+                    indices[i] = indices[j];
                     indices[j] = index;
 
-                    var weight = weights[j - 1];
-                    weights[j - 1] = weights[j];
+                    var weight = weights[i];
+                    weights[i] = weights[j];
                     weights[j] = weight;
                 }
             }
@@ -430,16 +509,16 @@ namespace SharpGLTF.Transforms
             {
                 for (int j = i + 1; j < count; ++j)
                 {
-                    if (indices[j - 1] < indices[j]) continue;
+                    if (indices[i] < indices[j]) continue;
 
-                    if (indices[j - 1] == indices[j] && weights[j - 1] > weights[j]) continue;
+                    if (indices[i] == indices[j] && weights[i] > weights[j]) continue;
 
-                    var index = indices[j - 1];
-                    indices[j - 1] = indices[j];
+                    var index = indices[i];
+                    indices[i] = indices[j];
                     indices[j] = index;
 
-                    var weight = weights[j - 1];
-                    weights[j - 1] = weights[j];
+                    var weight = weights[i];
+                    weights[i] = weights[j];
                     weights[j] = weight;
                 }
             }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using SharpGLTF.Transforms;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
@@ -29,6 +30,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         JointBinding IVertexSkinning.GetJointBinding(int index) { throw new NotSupportedException(); }
 
+        public void SetWeights(in SparseWeight8 weights) { }
+
         public IEnumerable<JointBinding> JointBindings => Enumerable.Empty<JointBinding>();
 
         public Vector4 JointsLow => Vector4.Zero;
@@ -38,5 +41,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 WeightsLow => Vector4.Zero;
 
         public Vector4 Weightshigh => Vector4.Zero;
+
+        public SparseWeight8 SparseWeights => default(SparseWeight8);
     }
 }

@@ -17,6 +17,26 @@ namespace SharpGLTF.Transforms
             Assert.AreEqual(5, sparse1.Index1);
             Assert.AreEqual(10, sparse1.Index2);
 
+            var sparse9to2 = SparseWeight8.Create(0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f);
+            Assert.AreEqual(9, sparse9to2.Index0);
+            Assert.AreEqual(8, sparse9to2.Index1);
+            Assert.AreEqual(7, sparse9to2.Index2);
+            Assert.AreEqual(6, sparse9to2.Index3);
+            Assert.AreEqual(5, sparse9to2.Index4);
+            Assert.AreEqual(4, sparse9to2.Index5);
+            Assert.AreEqual(3, sparse9to2.Index6);
+            Assert.AreEqual(2, sparse9to2.Index7);
+            Assert.AreEqual(0.9f, sparse9to2.Weight0);
+            Assert.AreEqual(0.8f, sparse9to2.Weight1);
+            Assert.AreEqual(0.7f, sparse9to2.Weight2);
+            Assert.AreEqual(0.6f, sparse9to2.Weight3);
+            Assert.AreEqual(0.5f, sparse9to2.Weight4);
+            Assert.AreEqual(0.4f, sparse9to2.Weight5);
+            Assert.AreEqual(0.3f, sparse9to2.Weight6);
+            Assert.AreEqual(0.2f, sparse9to2.Weight7);
+
+
+
             Assert.AreEqual(0.7f, sparse1.Weight0);
             Assert.AreEqual(0.1f, sparse1.Weight1);
             Assert.AreEqual(0.1f, sparse1.Weight2);
@@ -43,6 +63,44 @@ namespace SharpGLTF.Transforms
         }
 
         [Test]
+        public void TestSparseOrdering()
+        {
+            var array1 = new float[] { 0.2f, 0.15f, 0.25f, 0.10f, 0.30f };
+
+            var s5 = SparseWeight8.Create(array1);
+            CollectionAssert.AreEqual(array1, s5.Expand(5));
+
+            var s5byWeights = SparseWeight8.OrderedByWeight(s5);
+            CollectionAssert.AreEqual(array1, s5byWeights.Expand(5));
+            CheckWeightOrdered(s5byWeights);
+            var s5byIndices = SparseWeight8.OrderedByIndex(s5byWeights);
+            CollectionAssert.AreEqual(array1, s5byIndices.Expand(5));
+            CheckIndexOrdered(s5byWeights);
+        }
+
+        static void CheckWeightOrdered(SparseWeight8 sparse)
+        {
+            Assert.GreaterOrEqual(sparse.Weight0, sparse.Weight1);
+            Assert.GreaterOrEqual(sparse.Weight1, sparse.Weight2);
+            Assert.GreaterOrEqual(sparse.Weight2, sparse.Weight3);
+            Assert.GreaterOrEqual(sparse.Weight3, sparse.Weight4);
+            Assert.GreaterOrEqual(sparse.Weight4, sparse.Weight5);
+            Assert.GreaterOrEqual(sparse.Weight5, sparse.Weight6);
+            Assert.GreaterOrEqual(sparse.Weight6, sparse.Weight7);
+        }
+
+        static void CheckIndexOrdered(SparseWeight8 sparse)
+        {
+            Assert.LessOrEqual(sparse.Index0, sparse.Index0);
+            Assert.LessOrEqual(sparse.Index1, sparse.Index1);
+            Assert.LessOrEqual(sparse.Index2, sparse.Index2);
+            Assert.LessOrEqual(sparse.Index3, sparse.Index3);
+            Assert.LessOrEqual(sparse.Index4, sparse.Index4);
+            Assert.LessOrEqual(sparse.Index5, sparse.Index5);
+            Assert.LessOrEqual(sparse.Index6, sparse.Index6);
+        }
+
+        [Test]
         public void TestSparseEquality()
         {
             Assert.IsTrue(SparseWeight8.AreWeightsEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1)));
@@ -54,8 +112,8 @@ namespace SharpGLTF.Transforms
         [Test]
         public void TestSparseWeightsLinearInterpolation1()
         {
-            var x = new SparseWeight8((0,0f));
-            var y = new SparseWeight8((0,1f));
+            var x = SparseWeight8.Create((0,0f));
+            var y = SparseWeight8.Create((0,1f));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
         }

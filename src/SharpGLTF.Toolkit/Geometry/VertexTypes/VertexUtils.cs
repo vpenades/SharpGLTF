@@ -176,44 +176,14 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var dst = default(TvS);
 
-            // if there's enough room for all bindings, just fill it up.
-            if (dst.MaxBindings >= src.MaxBindings)
-            {
-                int i;
+            var sparse = Transforms.SparseWeight8.OrderedByWeight(src.SparseWeights);
 
-                for (i = 0; i < src.MaxBindings; ++i)
-                {
-                    var jw = src.GetJointBinding(i);
+            var sum = sparse.WeightSum;
+            if (sum == 0) return default(TvS);
 
-                    dst.SetJointBinding(i, jw.Joint, jw.Weight);
-                }
+            sparse = Transforms.SparseWeight8.Multiply(sparse, 1.0f / sum);
 
-                while (i < dst.MaxBindings)
-                {
-                    dst.SetJointBinding(i++, 0, 0);
-                }
-
-                return dst;
-            }
-
-            // if there's more source joints than destination joints,
-            // transfer only the most representative joints, and renormalize.
-
-            Span<JointBinding> srcjw = stackalloc JointBinding[src.MaxBindings];
-
-            for (int i = 0; i < src.MaxBindings; ++i)
-            {
-                srcjw[i] = src.GetJointBinding(i);
-            }
-
-            JointBinding.InPlaceReverseBubbleSort(srcjw);
-
-            var w = JointBinding.CalculateScaleFor(srcjw, dst.MaxBindings);
-
-            for (int i = 0; i < dst.MaxBindings; ++i)
-            {
-                dst.SetJointBinding(i, srcjw[i].Joint, srcjw[i].Weight * w);
-            }
+            dst.SetWeights(sparse);
 
             return dst;
         }

@@ -229,32 +229,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (vertex.MaxBindings == 0) return vertex;
 
-            Span<JointBinding> pairs = stackalloc JointBinding[vertex.MaxBindings];
-
             // Apparently the consensus is that weights are required to be normalized.
             // More here: https://github.com/KhronosGroup/glTF/issues/1213
 
-            float weightsSum = 0;
+            var sparse = Transforms.SparseWeight8.OrderedByWeight(vertex.SparseWeights);
 
-            for (int i = 0; i < pairs.Length; ++i)
-            {
-                var pair = vertex.GetJointBinding(i);
+            var sum = sparse.WeightSum;
+            if (sum == 0) return default(TvS);
 
-                pairs[i] = pair.Weight == 0 ? default : pair;
+            sparse = Transforms.SparseWeight8.Multiply(sparse, 1.0f / sum);
 
-                weightsSum += pair.Weight;
-            }
-
-            // TODO: check that joints are unique, and if not, do a merge.
-
-            if (weightsSum == 0) weightsSum = 1;
-
-            JointBinding.InPlaceReverseBubbleSort(pairs);
-
-            for (int i = 0; i < pairs.Length; ++i)
-            {
-                vertex.SetJointBinding(i, pairs[i].Joint, pairs[i].Weight / weightsSum);
-            }
+            vertex.SetWeights(sparse);
 
             return vertex;
         }
