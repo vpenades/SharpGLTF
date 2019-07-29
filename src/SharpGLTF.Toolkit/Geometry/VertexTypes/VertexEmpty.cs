@@ -18,30 +18,29 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 0;
 
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
+        void IVertexMaterial.SetColor(int index, Vector4 color) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
+        void IVertexMaterial.SetTexCoord(int index, Vector2 coord) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        Vector4 IVertexMaterial.GetColor(int index) { throw new NotSupportedException(); }
+        Vector4 IVertexMaterial.GetColor(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        Vector2 IVertexMaterial.GetTexCoord(int index) { throw new NotSupportedException(); }
+        Vector2 IVertexMaterial.GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        void IVertexSkinning.SetJointBinding(int index, int joint, float weight) { }
+        public SparseWeight8 GetWeights() { throw new NotSupportedException(); }
 
-        JointBinding IVertexSkinning.GetJointBinding(int index) { throw new NotSupportedException(); }
+        public void SetWeights(in SparseWeight8 weights) { throw new NotSupportedException(); }
 
-        public void SetWeights(in SparseWeight8 weights) { }
+        void IVertexSkinning.SetJointBinding(int index, int joint, float weight) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        public IEnumerable<JointBinding> JointBindings => Enumerable.Empty<JointBinding>();
+        (int, float) IVertexSkinning.GetJointBinding(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        public Vector4 JointsLow => Vector4.Zero;
-
-        public Vector4 JointsHigh => Vector4.Zero;
-
-        public Vector4 WeightsLow => Vector4.Zero;
-
-        public Vector4 Weightshigh => Vector4.Zero;
-
-        public SparseWeight8 SparseWeights => default(SparseWeight8);
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector4 IVertexSkinning.JointsLow => Vector4.Zero;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector4 IVertexSkinning.JointsHigh => Vector4.Zero;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector4 IVertexSkinning.WeightsLow => Vector4.Zero;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        Vector4 IVertexSkinning.Weightshigh => Vector4.Zero;
     }
 }

@@ -77,54 +77,7 @@ namespace SharpGLTF.Transforms
                 return;
             }
 
-            _Weights = Normalize(morphWeights);
-        }
-
-        /// <summary>
-        /// Increments all indices and adds a new Index[0] with a weight that makes the sum of all weights equal to 1
-        /// </summary>
-        /// <param name="r">A <see cref="SparseWeight8"/> object representing the weights of the morph targets.</param>
-        /// <returns>A <see cref="SparseWeight8"/> representing the morph target weights, compensated with the weight of the master values.</returns>
-        internal static SparseWeight8 Normalize(SparseWeight8 r)
-        {
-            int i = -1;
-            float w = float.MaxValue;
-            float ww = 0;
-
-            ww += r.Weight0; if (r.Weight0 < w) { i = 0; w = r.Weight0; }
-            ww += r.Weight1; if (r.Weight1 < w) { i = 1; w = r.Weight1; }
-            ww += r.Weight2; if (r.Weight2 < w) { i = 2; w = r.Weight2; }
-            ww += r.Weight3; if (r.Weight3 < w) { i = 3; w = r.Weight3; }
-            ww += r.Weight4; if (r.Weight4 < w) { i = 4; w = r.Weight4; }
-            ww += r.Weight5; if (r.Weight5 < w) { i = 5; w = r.Weight5; }
-            ww += r.Weight6; if (r.Weight6 < w) { i = 6; w = r.Weight6; }
-            ww += r.Weight7; if (r.Weight7 < w) { i = 7; w = r.Weight7; }
-
-            r.Index0 += 1;
-            r.Index1 += 1;
-            r.Index2 += 1;
-            r.Index3 += 1;
-            r.Index4 += 1;
-            r.Index5 += 1;
-            r.Index6 += 1;
-            r.Index7 += 1;
-
-            ww -= w;
-            var iw = 1 - ww;
-
-            switch (i)
-            {
-                case 0: r.Index0 = 0; r.Weight0 = iw; break;
-                case 1: r.Index1 = 0; r.Weight1 = iw; break;
-                case 2: r.Index2 = 0; r.Weight2 = iw; break;
-                case 3: r.Index3 = 0; r.Weight3 = iw; break;
-                case 4: r.Index4 = 0; r.Weight4 = iw; break;
-                case 5: r.Index5 = 0; r.Weight5 = iw; break;
-                case 6: r.Index6 = 0; r.Weight6 = iw; break;
-                case 7: r.Index7 = 0; r.Weight7 = iw; break;
-            }
-
-            return r;
+            _Weights = morphWeights.GetNormalizedWithComplement();
         }
 
         protected V3 MorphVectors(V3 value, V3[] morphTargets)
@@ -137,7 +90,7 @@ namespace SharpGLTF.Transforms
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetSparseWeights())
+                foreach (var pair in _Weights.GetNonZeroWeights())
                 {
                     var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -145,7 +98,7 @@ namespace SharpGLTF.Transforms
             }
             else
             {
-                foreach (var pair in _Weights.GetSparseWeights())
+                foreach (var pair in _Weights.GetNonZeroWeights())
                 {
                     var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -165,7 +118,7 @@ namespace SharpGLTF.Transforms
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetSparseWeights())
+                foreach (var pair in _Weights.GetNonZeroWeights())
                 {
                     var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -173,7 +126,7 @@ namespace SharpGLTF.Transforms
             }
             else
             {
-                foreach (var pair in _Weights.GetSparseWeights())
+                foreach (var pair in _Weights.GetNonZeroWeights())
                 {
                     var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;

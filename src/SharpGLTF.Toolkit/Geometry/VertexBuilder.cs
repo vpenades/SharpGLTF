@@ -337,7 +337,7 @@ namespace SharpGLTF.Geometry
             for (int i = 0; i < Skinning.MaxBindings; ++i)
             {
                 var jw = Skinning.GetJointBinding(i);
-                if (!jw.Weight._IsReal() || jw.Weight < 0 || jw.Joint < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Joint}:{jw.Weight}");
+                if (!jw.Item2._IsReal() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
             }
 
             return sb.ToString();

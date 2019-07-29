@@ -16,15 +16,27 @@ namespace SharpGLTF.Transforms
     /// - As an animation key in morph targets; a mesh can have many morph targets, but realistically and due to GPU limitations, only up to 8 morph targets can be blended at the same time.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("[{Index0}]={Weight0}  [{Index1}]={Weight1}  [{Index2}]={Weight2}  [{Index3}]={Weight3}  [{Index4}]={Weight4}  [{Index5}]={Weight5}  [{Index6}]={Weight6}  [{Index7}]={Weight7}")]
-    public struct SparseWeight8 : IReadOnlyList<float>
+    public readonly struct SparseWeight8 : IReadOnlyList<float>
     {
-        #region lifecycle
+        #region constructors
 
+        /// <summary>
+        /// Creates a new <see cref="SparseWeight8"/> from a weights collection.
+        /// If there's more than 8 non zero values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="weights">A sequence of weight values.</param>
+        /// <returns>A <see cref="SparseWeight8"/> instance.</returns>
         public static SparseWeight8 Create(params float[] weights)
         {
             return Create((IEnumerable<float>)weights);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="SparseWeight8"/> from a weights collection.
+        /// If there's more than 8 non zero values, the 8 most representative values are taken
+        /// </summary>
+        /// <param name="weights">A sequence of weight values.</param>
+        /// <returns>A <see cref="SparseWeight8"/> instance.</returns>
         public static SparseWeight8 Create(IEnumerable<float> weights)
         {
             if (weights == null) return default;
@@ -39,29 +51,37 @@ namespace SharpGLTF.Transforms
             return Create(indexedWeights);
         }
 
+        /// <summary>
+        /// Creates a new <see cref="SparseWeight8"/> from an indexed weight collection.
+        /// If there's more than 8 non zero values, the 8 most representative values are taken
+        /// </summary>
+        /// <param name="pairs">A sequence of indexed weight values.</param>
+        /// <returns>A <see cref="SparseWeight8"/> instance.</returns>
         public static SparseWeight8 Create(params (int, float)[] pairs)
         {
             if (pairs == null) return default;
 
-            Span<int> indices = stackalloc int[pairs.Length];
-            Span<float> weights = stackalloc float[pairs.Length];
+            Span<IndexWeight> sparse = stackalloc IndexWeight[pairs.Length];
 
             for (int i = 0; i < pairs.Length; ++i)
             {
-                indices[i] = pairs[i].Item1;
-                weights[i] = pairs[i].Item2;
+                sparse[i] = pairs[i];
             }
 
             if (pairs.Length > 8)
             {
-                BubbleSortByWeight(indices, weights, indices.Length);
-                indices = indices.Slice(0, 8);
-                weights = weights.Slice(0, 8);
+                IndexWeight.BubbleSortByWeight(sparse);
+                sparse = sparse.Slice(0, 8);
             }
 
-            return new SparseWeight8(indices, weights);
+            return new SparseWeight8(sparse);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SparseWeight8"/> struct.
+        /// </summary>
+        /// <param name="idx0123">The indices of weights 0 to 3.</param>
+        /// <param name="wgt0123">The weights of indices 0 to 3.</param>
         public SparseWeight8(in Vector4 idx0123, in Vector4 wgt0123)
         {
             Index0 = (int)idx0123.X;
@@ -85,6 +105,13 @@ namespace SharpGLTF.Transforms
             Weight7 = 0;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SparseWeight8"/> struct.
+        /// </summary>
+        /// <param name="idx0123">The indices of weights 0 to 3.</param>
+        /// <param name="idx4567">The indices of weights 4 to 7.</param>
+        /// <param name="wgt0123">The weights of indices 0 to 3.</param>
+        /// <param name="wgt4567">The weights of indices 4 to 7.</param>
         public SparseWeight8(in Vector4 idx0123, in Vector4 idx4567, in Vector4 wgt0123, in Vector4 wgt4567)
         {
             Index0 = (int)idx0123.X;
@@ -108,82 +135,120 @@ namespace SharpGLTF.Transforms
             Weight7 = wgt4567.W;
         }
 
-        private SparseWeight8(ReadOnlySpan<int> indices, ReadOnlySpan<float> weights)
+        private SparseWeight8(ReadOnlySpan<IndexWeight> pairs)
         {
-            System.Diagnostics.Debug.Assert(indices.Length <= 8, nameof(indices));
-            System.Diagnostics.Debug.Assert(indices.Length == weights.Length, nameof(weights));
+            System.Diagnostics.Debug.Assert(pairs.Length <= 8, nameof(pairs));
 
-            this.Index0 = indices.Length > 0 ? indices[0] : 0;
-            this.Index1 = indices.Length > 1 ? indices[1] : 0;
-            this.Index2 = indices.Length > 2 ? indices[2] : 0;
-            this.Index3 = indices.Length > 3 ? indices[3] : 0;
-            this.Index4 = indices.Length > 4 ? indices[4] : 0;
-            this.Index5 = indices.Length > 5 ? indices[5] : 0;
-            this.Index6 = indices.Length > 6 ? indices[6] : 0;
-            this.Index7 = indices.Length > 7 ? indices[7] : 0;
+            this = default;
 
-            this.Weight0 = weights.Length > 0 ? weights[0] : 0;
-            this.Weight1 = weights.Length > 1 ? weights[1] : 0;
-            this.Weight2 = weights.Length > 2 ? weights[2] : 0;
-            this.Weight3 = weights.Length > 3 ? weights[3] : 0;
-            this.Weight4 = weights.Length > 4 ? weights[4] : 0;
-            this.Weight5 = weights.Length > 5 ? weights[5] : 0;
-            this.Weight6 = weights.Length > 6 ? weights[6] : 0;
-            this.Weight7 = weights.Length > 7 ? weights[7] : 0;
+            if (pairs.Length < 1) return;
+            this.Index0 = pairs[0].Index;
+            this.Weight0 = pairs[0].Weight;
+
+            if (pairs.Length < 2) return;
+            this.Index1 = pairs[1].Index;
+            this.Weight1 = pairs[1].Weight;
+
+            if (pairs.Length < 3) return;
+            this.Index2 = pairs[2].Index;
+            this.Weight2 = pairs[2].Weight;
+
+            if (pairs.Length < 4) return;
+            this.Index3 = pairs[3].Index;
+            this.Weight3 = pairs[3].Weight;
+
+            if (pairs.Length < 5) return;
+            this.Index4 = pairs[4].Index;
+            this.Weight4 = pairs[4].Weight;
+
+            if (pairs.Length < 6) return;
+            this.Index5 = pairs[5].Index;
+            this.Weight5 = pairs[5].Weight;
+
+            if (pairs.Length < 7) return;
+            this.Index6 = pairs[6].Index;
+            this.Weight6 = pairs[6].Weight;
+
+            if (pairs.Length < 8) return;
+            this.Index7 = pairs[7].Index;
+            this.Weight7 = pairs[7].Weight;
+        }
+
+        private SparseWeight8(in SparseWeight8 sparse, float scale)
+        {
+            Index0 = sparse.Index0;
+            Index1 = sparse.Index1;
+            Index2 = sparse.Index2;
+            Index3 = sparse.Index3;
+            Index4 = sparse.Index4;
+            Index5 = sparse.Index5;
+            Index6 = sparse.Index6;
+            Index7 = sparse.Index7;
+            Weight0 = sparse.Weight0 * scale;
+            Weight1 = sparse.Weight1 * scale;
+            Weight2 = sparse.Weight2 * scale;
+            Weight3 = sparse.Weight3 * scale;
+            Weight4 = sparse.Weight4 * scale;
+            Weight5 = sparse.Weight5 * scale;
+            Weight6 = sparse.Weight6 * scale;
+            Weight7 = sparse.Weight7 * scale;
         }
 
         #endregion
 
         #region data
 
-        public int Index0;
-        public int Index1;
-        public int Index2;
-        public int Index3;
-        public int Index4;
-        public int Index5;
-        public int Index6;
-        public int Index7;
+        public readonly int Index0;
+        public readonly int Index1;
+        public readonly int Index2;
+        public readonly int Index3;
+        public readonly int Index4;
+        public readonly int Index5;
+        public readonly int Index6;
+        public readonly int Index7;
 
-        public float Weight0;
-        public float Weight1;
-        public float Weight2;
-        public float Weight3;
-        public float Weight4;
-        public float Weight5;
-        public float Weight6;
-        public float Weight7;
+        public readonly float Weight0;
+        public readonly float Weight1;
+        public readonly float Weight2;
+        public readonly float Weight3;
+        public readonly float Weight4;
+        public readonly float Weight5;
+        public readonly float Weight6;
+        public readonly float Weight7;
 
         public static bool AreWeightsEqual(in SparseWeight8 x, in SparseWeight8 y)
         {
-            Span<int>   indices = stackalloc int[16];
-            Span<float> xWeights = stackalloc float[16];
-            Span<float> yWeights = stackalloc float[16];
+            const int STACKSIZE = 8 * 2;
 
-            int c = 0;
-            c = CopyTo(x, indices, xWeights, c);
-            c = CopyTo(y, indices, yWeights, c);
+            Span<int>   indices = stackalloc int[STACKSIZE];
+            Span<float> xWeights = stackalloc float[STACKSIZE];
+            Span<float> yWeights = stackalloc float[STACKSIZE];
 
-            xWeights = xWeights.Slice(0, c);
-            yWeights = yWeights.Slice(0, c);
+            int offset = 0;
+            offset = IndexWeight.CopyTo(x, indices, xWeights, offset);
+            offset = IndexWeight.CopyTo(y, indices, yWeights, offset);
+
+            xWeights = xWeights.Slice(0, offset);
+            yWeights = yWeights.Slice(0, offset);
 
             return xWeights.SequenceEqual(yWeights);
         }
 
         public int GetWeightsHashCode()
         {
-            Span<int> indices = stackalloc int[8];
-            Span<float> weights = stackalloc float[8];
+            Span<IndexWeight> iw = stackalloc IndexWeight[8];
 
-            var c = CopyTo(this, indices, weights, 0);
+            var c = IndexWeight.CopyTo(this, iw);
 
-            BubbleSortByIndex(indices, weights, c);
+            iw = iw.Slice(0, c);
+
+            IndexWeight.BubbleSortByIndex(iw);
 
             int h = 0;
 
-            for (int i = 0; i < c; ++i)
+            for (int i = 0; i < iw.Length; ++i)
             {
-                h += indices[i].GetHashCode() ^ weights[i].GetHashCode();
+                h += iw[i].GetHashCode();
                 h *= 17;
             }
 
@@ -211,77 +276,100 @@ namespace SharpGLTF.Transforms
 
         #region API
 
+        /// <summary>
+        /// Returns a copy of this <see cref="SparseWeight8"/> where all the
+        /// indices have been reordered by weight in descending order.
+        /// </summary>
+        /// <param name="sparse">The <see cref="SparseWeight8"/> to get ordered.</param>
+        /// <returns>A weight ordered <see cref="SparseWeight8"/>.</returns>
         public static SparseWeight8 OrderedByWeight(in SparseWeight8 sparse)
         {
-            Span<int> indices = stackalloc int[8];
-            Span<float> weights = stackalloc float[8];
+            Span<IndexWeight> iw = stackalloc IndexWeight[8];
 
-            var c = CopyTo(sparse, indices, weights, 0);
-            BubbleSortByWeight(indices, weights, c);
+            var c = IndexWeight.CopyTo(sparse, iw);
 
-            indices = indices.Slice(0, c);
-            weights = weights.Slice(0, c);
+            iw = iw.Slice(0, c);
 
-            return new SparseWeight8(indices, weights);
+            IndexWeight.BubbleSortByWeight(iw);
+
+            return new SparseWeight8(iw);
         }
 
+        /// <summary>
+        /// Returns a copy of this <see cref="SparseWeight8"/> where all the
+        /// indices have been reordered by index in ascending order.
+        /// </summary>
+        /// <param name="sparse">The <see cref="SparseWeight8"/> to get ordered.</param>
+        /// <returns>An index ordered <see cref="SparseWeight8"/>.</returns>
         public static SparseWeight8 OrderedByIndex(in SparseWeight8 sparse)
         {
-            Span<int> indices = stackalloc int[8];
-            Span<float> weights = stackalloc float[8];
+            Span<IndexWeight> iw = stackalloc IndexWeight[8];
 
-            var c = CopyTo(sparse, indices, weights, 0);
-            BubbleSortByIndex(indices, weights, c);
+            var c = IndexWeight.CopyTo(sparse, iw);
 
-            indices = indices.Slice(0, c);
-            weights = weights.Slice(0, c);
+            iw = iw.Slice(0, c);
 
-            return new SparseWeight8(indices, weights);
+            IndexWeight.BubbleSortByIndex(iw);
+
+            return new SparseWeight8(iw);
         }
 
+        /// <summary>
+        /// Adds <paramref name="x"/> with <paramref name="y"/> element wise.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first operand.</param>
+        /// <param name="y">The second operand.</param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 Add(in SparseWeight8 x, in SparseWeight8 y)
         {
             return _OperateLinear(x, y, (xx, yy) => xx + yy);
         }
 
+        /// <summary>
+        /// Subtracts <paramref name="y"/> from <paramref name="x"/> element wise.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first operand.</param>
+        /// <param name="y">The second operand.</param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 Subtract(in SparseWeight8 x, in SparseWeight8 y)
         {
             return _OperateLinear(x, y, (xx, yy) => xx - yy);
         }
 
+        /// <summary>
+        /// Multiplies <paramref name="x"/> with <paramref name="y"/> element wise.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first operand.</param>
+        /// <param name="y">The second operand.</param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 Multiply(in SparseWeight8 x, in SparseWeight8 y)
         {
             return _OperateLinear(x, y, (xx, yy) => xx * yy);
         }
 
+        /// <summary>
+        /// Multiplies <paramref name="x"/> with <paramref name="y"/> element wise.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first operand.</param>
+        /// <param name="y">The second operand.</param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 Multiply(in SparseWeight8 x, Single y)
         {
-            return new SparseWeight8
-            {
-                Index0 = x.Index0,
-                Index1 = x.Index1,
-                Index2 = x.Index2,
-                Index3 = x.Index3,
-                Index4 = x.Index4,
-                Index5 = x.Index5,
-                Index6 = x.Index6,
-                Index7 = x.Index7,
-                Weight0 = x.Weight0 * y,
-                Weight1 = x.Weight1 * y,
-                Weight2 = x.Weight2 * y,
-                Weight3 = x.Weight3 * y,
-                Weight4 = x.Weight4 * y,
-                Weight5 = x.Weight5 * y,
-                Weight6 = x.Weight6 * y,
-                Weight7 = x.Weight7 * y
-            };
+            return new SparseWeight8(x, y);
         }
 
-        public static SparseWeight8 Divide(in SparseWeight8 x, in SparseWeight8 y)
-        {
-            return _OperateLinear(x, y, (xx, yy) => xx / yy);
-        }
-
+        /// <summary>
+        /// Interpolates Linearly <paramref name="x"/> with <paramref name="y"/> an <paramref name="amount"/>.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first operand.</param>
+        /// <param name="y">The second operand.</param>
+        /// <param name="amount">The amount of <paramref name="y"/></param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 InterpolateLinear(in SparseWeight8 x, in SparseWeight8 y, float amount)
         {
             var xAmount = 1.0f - amount;
@@ -290,6 +378,16 @@ namespace SharpGLTF.Transforms
             return _OperateLinear(x, y, (xx, yy) => (xx * xAmount) + (yy * yAmount));
         }
 
+        /// <summary>
+        /// Interpolates (<paramref name="x"/> , <paramref name="xt"/>) with (<paramref name="y"/> , <paramref name="yt"/>) an <paramref name="amount"/>.
+        /// If there's more than 8 non zero result values, the 8 most representative values are taken.
+        /// </summary>
+        /// <param name="x">The first value operand.</param>
+        /// <param name="xt">The first tangent operand.</param>
+        /// <param name="y">The second value operand.</param>
+        /// <param name="yt">The second tangent operand.</param>
+        /// <param name="amount">The amount of <paramref name="y"/></param>
+        /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 InterpolateCubic(in SparseWeight8 x, in SparseWeight8 xt, in SparseWeight8 y, in SparseWeight8 yt, float amount)
         {
             var basis = Animations.SamplerFactory.CreateHermitePointWeights(amount);
@@ -308,25 +406,6 @@ namespace SharpGLTF.Transforms
         public IEnumerator<float> GetEnumerator() { return Expand(GetExpandedCount()).GetEnumerator(); }
 
         IEnumerator IEnumerable.GetEnumerator() { return Expand(GetExpandedCount()).GetEnumerator(); }
-
-        public bool ContainsKey(int key)
-        {
-            return GetSparseWeights().Select(item => item.Item1).Contains(key);
-        }
-
-        public bool TryGetValue(int key, out float value)
-        {
-            if (key == Index0) { value = Weight0; return true; }
-            if (key == Index1) { value = Weight1; return true; }
-            if (key == Index2) { value = Weight2; return true; }
-            if (key == Index3) { value = Weight3; return true; }
-            if (key == Index4) { value = Weight4; return true; }
-            if (key == Index5) { value = Weight5; return true; }
-            if (key == Index6) { value = Weight6; return true; }
-            if (key == Index7) { value = Weight7; return true; }
-            value = 0;
-            return false;
-        }
 
         public override string ToString()
         {
@@ -348,46 +427,6 @@ namespace SharpGLTF.Transforms
         #region code
 
         /// <summary>
-        /// Copies the current index-weight pairs to available slots in destination <paramref name="dstIndices"/> and <paramref name="dstWeights"/>
-        /// </summary>
-        /// <param name="src">The source <see cref="SparseWeight8"/>.</param>
-        /// <param name="dstIndices">The destination index array.</param>
-        /// <param name="dstWeights">The destination weight array.</param>
-        /// <param name="dstLength">The explicit length of both <paramref name="dstIndices"/> and <paramref name="dstWeights"/></param>
-        /// <returns>The new length of the destination arrays.</returns>
-        private static int CopyTo(in SparseWeight8 src, Span<int> dstIndices, Span<float> dstWeights, int dstLength)
-        {
-            System.Diagnostics.Debug.Assert(dstIndices.Length == dstWeights.Length);
-            System.Diagnostics.Debug.Assert(dstIndices.Length >= dstLength, $"{nameof(dstIndices)}.Length must be at least {nameof(dstLength)}");
-            System.Diagnostics.Debug.Assert(dstWeights.Length >= dstLength, $"{nameof(dstWeights)}.Length must be at least {nameof(dstLength)}");
-            System.Diagnostics.Debug.Assert(dstWeights.Slice(0, dstLength).ToArray().All(item => item == 0), "All weights must be zero");
-
-            for (int i = 0; i < 8; ++i)
-            {
-                var pair = src.GetSparseWeight(i);
-                if (pair.Item2 == 0) continue;
-                var idx = dstIndices
-                    .Slice(0, dstLength)
-                    .IndexOf(pair.Item1);
-
-                if (idx < 0)
-                {
-                    // the index doesn't exist, insert it to the list.
-                    dstIndices[dstLength] = pair.Item1;
-                    dstWeights[dstLength] = pair.Item2;
-                    ++dstLength;
-                }
-                else
-                {
-                    // the index already exists, so we aggregate the weights
-                    dstWeights[idx] += pair.Item2;
-                }
-            }
-
-            return dstLength;
-        }
-
-        /// <summary>
         /// Performs <paramref name="operationFunc"/> over all the elements of the operands.
         /// </summary>
         /// <param name="x">The first <see cref="SparseWeight8"/> operand.</param>
@@ -396,32 +435,41 @@ namespace SharpGLTF.Transforms
         /// <returns>A new <see cref="SparseWeight8"/>.</returns>
         private static SparseWeight8 _OperateLinear(in SparseWeight8 x, in SparseWeight8 y, Func<float, float, float> operationFunc)
         {
+            const int STACKSIZE = 8 * 2;
+
             // prepare buffers in the stack
-            Span<int> indices = stackalloc int[16];
-            Span<float> xxx = stackalloc float[16];
-            Span<float> yyy = stackalloc float[16];
+            Span<int> indices = stackalloc int[STACKSIZE];
+            Span<float> xxx = stackalloc float[STACKSIZE];
+            Span<float> yyy = stackalloc float[STACKSIZE];
 
             // fill the buffers so all the elements are aligned by column
             int offset = 0;
-            offset = CopyTo(x, indices, xxx, offset);
-            offset = CopyTo(y, indices, yyy, offset);
+            offset = IndexWeight.CopyTo(x, indices, xxx, offset);
+            offset = IndexWeight.CopyTo(y, indices, yyy, offset);
 
             // perform operation element by element
+
+            int r = 0;
+            Span<IndexWeight> rrr = stackalloc IndexWeight[STACKSIZE];
+
             for (int i = 0; i < offset; ++i)
             {
-                xxx[i] = operationFunc(xxx[i], yyy[i]);
+                var ww = operationFunc(xxx[i], yyy[i]);
+
+                if (ww == 0) continue;
+
+                rrr[r++] = new IndexWeight(indices[i], ww);
             }
 
-            // sort results by relevance, so they can fit
-            // in a new structure in case there's more than
-            // 8 results
+            rrr = rrr.Slice(0, r);
 
-            indices = indices.Slice(0, offset);
-            xxx = xxx.Slice(0, offset);
+            if (rrr.Length > 8)
+            {
+                IndexWeight.BubbleSortByWeight(rrr);
+                rrr = rrr.Slice(0, 8);
+            }
 
-            BubbleSortByWeight(indices, xxx, offset);
-
-            return new SparseWeight8(indices, xxx);
+            return new SparseWeight8(rrr);
         }
 
         /// <summary>
@@ -442,89 +490,48 @@ namespace SharpGLTF.Transforms
             Func<float, float, float, float, float> operationFunc
             )
         {
+            const int STACKSIZE = 8 * 4;
+
             // prepare buffers in the stack
-            Span<int> indices = stackalloc int[32];
-            Span<float> xxx = stackalloc float[32];
-            Span<float> yyy = stackalloc float[32];
-            Span<float> zzz = stackalloc float[32];
-            Span<float> www = stackalloc float[32];
+            Span<int> indices = stackalloc int[STACKSIZE];
+            Span<float> xxx = stackalloc float[STACKSIZE];
+            Span<float> yyy = stackalloc float[STACKSIZE];
+            Span<float> zzz = stackalloc float[STACKSIZE];
+            Span<float> www = stackalloc float[STACKSIZE];
 
             // fill the buffers so all the elements are aligned by column
             int offset = 0;
-            offset = CopyTo(x, indices, xxx, offset);
-            offset = CopyTo(y, indices, yyy, offset);
-            offset = CopyTo(z, indices, zzz, offset);
-            offset = CopyTo(w, indices, www, offset);
+            offset = IndexWeight.CopyTo(x, indices, xxx, offset);
+            offset = IndexWeight.CopyTo(y, indices, yyy, offset);
+            offset = IndexWeight.CopyTo(z, indices, zzz, offset);
+            offset = IndexWeight.CopyTo(w, indices, www, offset);
 
             // perform operation element by element
+
+            int r = 0;
+            Span<IndexWeight> rrr = stackalloc IndexWeight[STACKSIZE];
+
             for (int i = 0; i < offset; ++i)
             {
-                xxx[i] = operationFunc(xxx[i], yyy[i], zzz[i], www[i]);
+                var ww = operationFunc(xxx[i], yyy[i], zzz[i], www[i]);
+
+                if (ww == 0) continue;
+
+                rrr[r++] = new IndexWeight(indices[i], ww);
             }
 
-            // sort results by relevance, so they can fit
-            // in a new structure in case there's more than
-            // 8 results
+            rrr = rrr.Slice(0, r);
 
-            indices = indices.Slice(0, offset);
-            xxx = xxx.Slice(0, offset);
-
-            BubbleSortByWeight(indices, xxx, offset);
-
-            return new SparseWeight8(indices, xxx);
-        }
-
-        private static void BubbleSortByWeight(Span<int> indices, Span<float> weights, int count = int.MaxValue)
-        {
-            System.Diagnostics.Debug.Assert(indices.Length == weights.Length);
-
-            count = Math.Min(indices.Length, count);
-
-            for (int i = 0; i < count - 1; ++i)
+            if (rrr.Length > 8)
             {
-                for (int j = i + 1; j < count; ++j)
-                {
-                    if (weights[i] > weights[j]) continue;
-
-                    if (weights[i] == weights[j] && indices[i] < indices[j]) continue;
-
-                    var index = indices[i];
-                    indices[i] = indices[j];
-                    indices[j] = index;
-
-                    var weight = weights[i];
-                    weights[i] = weights[j];
-                    weights[j] = weight;
-                }
+                IndexWeight.BubbleSortByWeight(rrr);
+                rrr = rrr.Slice(0, 8);
             }
+
+            return new SparseWeight8(rrr);
         }
 
-        private static void BubbleSortByIndex(Span<int> indices, Span<float> weights, int count = int.MaxValue)
-        {
-            System.Diagnostics.Debug.Assert(indices.Length == weights.Length);
-
-            count = Math.Min(indices.Length, count);
-
-            for (int i = 0; i < count - 1; ++i)
-            {
-                for (int j = i + 1; j < count; ++j)
-                {
-                    if (indices[i] < indices[j]) continue;
-
-                    if (indices[i] == indices[j] && weights[i] > weights[j]) continue;
-
-                    var index = indices[i];
-                    indices[i] = indices[j];
-                    indices[j] = index;
-
-                    var weight = weights[i];
-                    weights[i] = weights[j];
-                    weights[j] = weight;
-                }
-            }
-        }
-
-        internal IEnumerable<(int, float)> GetSparseWeights()
+        internal IEnumerable<(int, float)> GetNonZeroWeights()
         {
             if (Weight0 != 0) yield return (Index0, Weight0);
             if (Weight1 != 0) yield return (Index1, Weight1);
@@ -534,22 +541,6 @@ namespace SharpGLTF.Transforms
             if (Weight5 != 0) yield return (Index5, Weight5);
             if (Weight6 != 0) yield return (Index6, Weight6);
             if (Weight7 != 0) yield return (Index7, Weight7);
-        }
-
-        private (int, float) GetSparseWeight(int sparseIndex)
-        {
-            switch (sparseIndex)
-            {
-                case 0: return (Index0, Weight0);
-                case 1: return (Index1, Weight1);
-                case 2: return (Index2, Weight2);
-                case 3: return (Index3, Weight3);
-                case 4: return (Index4, Weight4);
-                case 5: return (Index5, Weight5);
-                case 6: return (Index6, Weight6);
-                case 7: return (Index7, Weight7);
-                default: throw new ArgumentOutOfRangeException(nameof(sparseIndex));
-            }
         }
 
         private float GetExpandedAt(int idx)
@@ -578,6 +569,41 @@ namespace SharpGLTF.Transforms
             if (Weight7 != 0 && c <= Index7) c = Index7 + 1;
 
             return c;
+        }
+
+        /// <summary>
+        /// Normalizes the current <see cref="SparseWeight8"/> by adding a complement weight
+        /// at index 0 that resolves <see cref="WeightSum"/> to 1.
+        /// </summary>
+        /// <returns>A new <see cref="SparseWeight8"/> with an extra weight.</returns>
+        internal SparseWeight8 GetNormalizedWithComplement()
+        {
+            Span<IndexWeight> weights = stackalloc IndexWeight[8 + 1];
+
+            var offset = IndexWeight.CopyTo(this, weights);
+
+            float ww = 0;
+
+            for (int i = 0; i < offset; ++i)
+            {
+                var w = weights[i].Weight;
+
+                ww += w;
+
+                weights[i] = new IndexWeight(weights[i].Index + 1, w);
+            }
+
+            weights[offset++] = new IndexWeight(0, 1 - ww);
+
+            weights = weights.Slice(0, offset);
+
+            if (offset > 8)
+            {
+                IndexWeight.BubbleSortByWeight(weights);
+                weights = weights.Slice(0, 8);
+            }
+
+            return new SparseWeight8(weights);
         }
 
         #endregion

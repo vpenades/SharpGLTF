@@ -5,8 +5,6 @@ using System.Numerics;
 
 using SharpGLTF.Memory;
 
-using JOINTWEIGHT = System.Collections.Generic.KeyValuePair<int, float>;
-
 namespace SharpGLTF.Geometry.VertexTypes
 {
     static class VertexUtils
@@ -174,16 +172,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (src.GetType() == typeof(TvS)) return (TvS)src;
 
+            var sparse = src.MaxBindings > 0 ? src.GetWeights() : default;
+
             var dst = default(TvS);
 
-            var sparse = Transforms.SparseWeight8.OrderedByWeight(src.SparseWeights);
-
-            var sum = sparse.WeightSum;
-            if (sum == 0) return default(TvS);
-
-            sparse = Transforms.SparseWeight8.Multiply(sparse, 1.0f / sum);
-
-            dst.SetWeights(sparse);
+            if (dst.MaxBindings > 0) dst.SetWeights(sparse);
 
             return dst;
         }

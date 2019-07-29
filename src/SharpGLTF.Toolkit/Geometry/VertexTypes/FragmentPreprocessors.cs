@@ -114,11 +114,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 var pair = vertex.GetJointBinding(i);
 
-                Guard.MustBeGreaterThanOrEqualTo(pair.Joint, 0, $"Joint{i}");
-                Guard.IsTrue(pair.Weight._IsReal(), $"Weight{i}", "Values are not finite.");
-                if (pair.Weight == 0) Guard.IsTrue(pair.Joint == 0, "joints with weight zero must be set to zero");
+                Guard.MustBeGreaterThanOrEqualTo(pair.Item1, 0, $"Joint{i}");
+                Guard.IsTrue(pair.Item2._IsReal(), $"Weight{i}", "Values are not finite.");
+                if (pair.Item2 == 0) Guard.IsTrue(pair.Item1 == 0, "joints with weight zero must be set to zero");
 
-                weightsSum += pair.Weight;
+                weightsSum += pair.Item2;
             }
 
             // TODO: check that joints are unique
@@ -232,7 +232,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             // Apparently the consensus is that weights are required to be normalized.
             // More here: https://github.com/KhronosGroup/glTF/issues/1213
 
-            var sparse = Transforms.SparseWeight8.OrderedByWeight(vertex.SparseWeights);
+            var sparse = Transforms.SparseWeight8.OrderedByWeight(vertex.GetWeights());
 
             var sum = sparse.WeightSum;
             if (sum == 0) return default(TvS);

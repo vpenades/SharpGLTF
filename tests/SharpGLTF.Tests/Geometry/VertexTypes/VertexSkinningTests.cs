@@ -14,25 +14,26 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void TestVertexSkinningDowngradeFrom8To4Joints()
         {
             // vertex with 5 bindings
-            var v8 = new VertexJoints8x8();
-            v8.SetJointBinding(0, 1, 0.2f);
-            v8.SetJointBinding(1, 2, 0.15f);
-            v8.SetJointBinding(2, 3, 0.25f);
-            v8.SetJointBinding(3, 4, 0.10f);
-            v8.SetJointBinding(4, 5, 0.30f);
+            var v8 = new VertexJoints8x8
+                (
+                (1, 0.20f),
+                (2, 0.15f),
+                (3, 0.25f),
+                (4, 0.10f),
+                (5, 0.30f)
+                );
 
             // we downgrade to 4 bindings; remaining bindings should be interpolated to keep weighting 1.
             var v4 = v8.ConvertToSkinning<VertexJoints8x4>();
 
-            Assert.AreEqual(5, v4.GetJointBinding(0).Joint);
-            Assert.AreEqual(3, v4.GetJointBinding(1).Joint);
-            Assert.AreEqual(1, v4.GetJointBinding(2).Joint);
-            Assert.AreEqual(2, v4.GetJointBinding(3).Joint);
+            var sparse = v4.GetWeights();
 
-            Assert.AreEqual(0.333333f, v4.GetJointBinding(0).Weight, 0.0001f);
-            Assert.AreEqual(0.277777f, v4.GetJointBinding(1).Weight, 0.0001f);
-            Assert.AreEqual(0.222222f, v4.GetJointBinding(2).Weight, 0.0001f);
-            Assert.AreEqual(0.166666f, v4.GetJointBinding(3).Weight, 0.0001f);
+            Assert.AreEqual(1, sparse.WeightSum, 0.00001f);
+
+            Assert.AreEqual(0.333333f, sparse[5], 0.00001f);
+            Assert.AreEqual(0.277777f, sparse[3], 0.00001f);
+            Assert.AreEqual(0.222222f, sparse[1], 0.00001f);
+            Assert.AreEqual(0.166666f, sparse[2], 0.00001f);
         }
     }
 }
