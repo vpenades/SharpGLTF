@@ -95,6 +95,14 @@ namespace SharpGLTF.Geometry
             Skinning.SetWeights(sparse);
         }
 
+        public VertexBuilder(TvG g, TvM m, Transforms.SparseWeight8 bindings)
+        {
+            Geometry = g;
+            Material = m;
+            Skinning = default;
+            Skinning.SetWeights(bindings);
+        }
+
         public VertexBuilder(TvG g, TvM m)
         {
             Geometry = g;
@@ -125,6 +133,14 @@ namespace SharpGLTF.Geometry
 
             Skinning = default;
             Skinning.SetWeights(sparse);
+        }
+
+        public VertexBuilder(TvG g, Transforms.SparseWeight8 bindings)
+        {
+            Geometry = g;
+            Material = default;
+            Skinning = default;
+            Skinning.SetWeights(bindings);
         }
 
         public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM, TvS) tuple)

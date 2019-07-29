@@ -311,7 +311,7 @@ namespace SharpGLTF.Transforms
 
         public bool ContainsKey(int key)
         {
-            return GetPairs().Select(item => item.Item1).Contains(key);
+            return GetSparseWeights().Select(item => item.Item1).Contains(key);
         }
 
         public bool TryGetValue(int key, out float value)
@@ -364,7 +364,7 @@ namespace SharpGLTF.Transforms
 
             for (int i = 0; i < 8; ++i)
             {
-                var pair = src.GetPair(i);
+                var pair = src.GetSparseWeight(i);
                 if (pair.Item2 == 0) continue;
                 var idx = dstIndices
                     .Slice(0, dstLength)
@@ -524,7 +524,7 @@ namespace SharpGLTF.Transforms
             }
         }
 
-        internal IEnumerable<(int, float)> GetPairs()
+        internal IEnumerable<(int, float)> GetSparseWeights()
         {
             if (Weight0 != 0) yield return (Index0, Weight0);
             if (Weight1 != 0) yield return (Index1, Weight1);
@@ -536,9 +536,9 @@ namespace SharpGLTF.Transforms
             if (Weight7 != 0) yield return (Index7, Weight7);
         }
 
-        private (int, float) GetPair(int idx)
+        private (int, float) GetSparseWeight(int sparseIndex)
         {
-            switch (idx)
+            switch (sparseIndex)
             {
                 case 0: return (Index0, Weight0);
                 case 1: return (Index1, Weight1);
@@ -548,7 +548,7 @@ namespace SharpGLTF.Transforms
                 case 5: return (Index5, Weight5);
                 case 6: return (Index6, Weight6);
                 case 7: return (Index7, Weight7);
-                default: throw new ArgumentOutOfRangeException(nameof(idx));
+                default: throw new ArgumentOutOfRangeException(nameof(sparseIndex));
             }
         }
 

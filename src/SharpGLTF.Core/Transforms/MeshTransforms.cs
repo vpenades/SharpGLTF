@@ -137,7 +137,7 @@ namespace SharpGLTF.Transforms
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetPairs())
+                foreach (var pair in _Weights.GetSparseWeights())
                 {
                     var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -145,7 +145,7 @@ namespace SharpGLTF.Transforms
             }
             else
             {
-                foreach (var pair in _Weights.GetPairs())
+                foreach (var pair in _Weights.GetSparseWeights())
                 {
                     var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -165,7 +165,7 @@ namespace SharpGLTF.Transforms
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetPairs())
+                foreach (var pair in _Weights.GetSparseWeights())
                 {
                     var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
@@ -173,7 +173,7 @@ namespace SharpGLTF.Transforms
             }
             else
             {
-                foreach (var pair in _Weights.GetPairs())
+                foreach (var pair in _Weights.GetSparseWeights())
                 {
                     var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
                     p += val * pair.Item2;
