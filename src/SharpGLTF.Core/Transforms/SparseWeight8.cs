@@ -44,7 +44,7 @@ namespace SharpGLTF.Transforms
             var indexedWeights = weights
                 .Select((val, idx) => (idx, val))
                 .Where(item => item.val != 0)
-                .OrderByDescending(item => item.val)
+                .OrderByDescending(item => Math.Abs(item.val) )
                 .Take(8)
                 .ToArray();
 
@@ -63,10 +63,19 @@ namespace SharpGLTF.Transforms
 
             Span<IndexWeight> sparse = stackalloc IndexWeight[pairs.Length];
 
+            int o = 0;
+
             for (int i = 0; i < pairs.Length; ++i)
             {
-                sparse[i] = pairs[i];
+                var p = pairs[i];
+                if (p.Item2 == 0) continue;
+
+                Guard.MustBeGreaterThanOrEqualTo(p.Item1, 0, nameof(pairs));
+
+                sparse[o++] = p;
             }
+
+            sparse = sparse.Slice(0, o);
 
             if (pairs.Length > 8)
             {
@@ -573,27 +582,18 @@ namespace SharpGLTF.Transforms
 
         /// <summary>
         /// Normalizes the current <see cref="SparseWeight8"/> by adding a complement weight
-        /// at index 0 that resolves <see cref="WeightSum"/> to 1.
+        /// at index <paramref name="complementIndex"/> that resolves <see cref="WeightSum"/> to 1.
         /// </summary>
         /// <returns>A new <see cref="SparseWeight8"/> with an extra weight.</returns>
-        internal SparseWeight8 GetNormalizedWithComplement()
+        internal SparseWeight8 GetNormalizedWithComplement(int complementIndex)
         {
             Span<IndexWeight> weights = stackalloc IndexWeight[8 + 1];
 
             var offset = IndexWeight.CopyTo(this, weights);
 
-            float ww = 0;
+            float ww = this.WeightSum;
 
-            for (int i = 0; i < offset; ++i)
-            {
-                var w = weights[i].Weight;
-
-                ww += w;
-
-                weights[i] = new IndexWeight(weights[i].Index + 1, w);
-            }
-
-            weights[offset++] = new IndexWeight(0, 1 - ww);
+            if (ww < 1) weights[offset++] = new IndexWeight(complementIndex, 1 - ww);
 
             weights = weights.Slice(0, offset);
 

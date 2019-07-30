@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
@@ -9,101 +10,111 @@ namespace SharpGLTF.Transforms
     [Category("Core.Transforms")]
     public class SparseWeight8Tests
     {
-        [Test]
-        public void CreateSparseWeights()
+        [TestCase(0)]
+        [TestCase(1)]
+        [TestCase(0,0.0001f)]
+        [TestCase(2, -2, 2, -2)]
+        [TestCase(0.2f, 0.15f, 0.25f, 0.10f, 0.30f)]
+        [TestCase(0, 0, 1, 0, 2, 0, 3, 4, 5, 0, 6, 0, 7, 0, 6, 0, 9, 0, 11)]
+        [TestCase(9, -9, 8, -8, 7, -7, 6, -6, 5, -5, 4, -4, 3, -3, 2, -2, 1, -1)]
+        [TestCase(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)]
+        [TestCase(0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)]        
+        public void TestSparseCreation(params float[] array1)
         {
-            var sparse1 = SparseWeight8.Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f);
-            Assert.AreEqual(6, sparse1.Index0);
-            Assert.AreEqual(5, sparse1.Index1);
-            Assert.AreEqual(10, sparse1.Index2);
+            var array2 = CreateSparseCompatibleArray(array1);
+            
+            var array3 = array1
+                .Select((val, idx) => (idx, val))
+                .Where(item => item.val != 0)
+                .Reverse()
+                .ToArray();
 
-            var sparse9to2 = SparseWeight8.Create(0, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f);
-            Assert.AreEqual(9, sparse9to2.Index0);
-            Assert.AreEqual(8, sparse9to2.Index1);
-            Assert.AreEqual(7, sparse9to2.Index2);
-            Assert.AreEqual(6, sparse9to2.Index3);
-            Assert.AreEqual(5, sparse9to2.Index4);
-            Assert.AreEqual(4, sparse9to2.Index5);
-            Assert.AreEqual(3, sparse9to2.Index6);
-            Assert.AreEqual(2, sparse9to2.Index7);
-            Assert.AreEqual(0.9f, sparse9to2.Weight0);
-            Assert.AreEqual(0.8f, sparse9to2.Weight1);
-            Assert.AreEqual(0.7f, sparse9to2.Weight2);
-            Assert.AreEqual(0.6f, sparse9to2.Weight3);
-            Assert.AreEqual(0.5f, sparse9to2.Weight4);
-            Assert.AreEqual(0.4f, sparse9to2.Weight5);
-            Assert.AreEqual(0.3f, sparse9to2.Weight6);
-            Assert.AreEqual(0.2f, sparse9to2.Weight7);
+            // creation mode 1
+            var sparse = SparseWeight8.Create(array1);
+            Assert.AreEqual(array2.Sum(), sparse.WeightSum);
+            CollectionAssert.AreEqual(array2, sparse.Expand(array2.Length));            
 
+            // creation mode 2
+            var indexedSparse = SparseWeight8.Create(array3);
+            Assert.AreEqual(array2.Sum(), indexedSparse.WeightSum, 0.000001f);
+            CollectionAssert.AreEqual(array2, indexedSparse.Expand(array2.Length));
 
+            Assert.IsTrue(SparseWeight8.AreWeightsEqual(sparse, indexedSparse));
 
-            Assert.AreEqual(0.7f, sparse1.Weight0);
-            Assert.AreEqual(0.1f, sparse1.Weight1);
-            Assert.AreEqual(0.1f, sparse1.Weight2);
-            Assert.AreEqual(0, sparse1.Weight3);
+            // sort by weights
+            var sByWeights = SparseWeight8.OrderedByWeight(sparse);
+            Assert.AreEqual(array2.Sum(), sByWeights.WeightSum);
+            CollectionAssert.AreEqual(array2, sByWeights.Expand(array2.Length));
+            CheckWeightOrdered(sByWeights);
 
-            var sparse1Nrm = sparse1.GetNormalizedWithComplement();
-            Assert.AreEqual(7, sparse1Nrm.Index0);
-            Assert.AreEqual(6, sparse1Nrm.Index1);
-            Assert.AreEqual(11, sparse1Nrm.Index2);
-            Assert.AreEqual(0, sparse1Nrm.Index3);
+            // sort by indices
+            var sByIndices = SparseWeight8.OrderedByIndex(sByWeights);
+            Assert.AreEqual(array2.Sum(), sByIndices.WeightSum);
+            CollectionAssert.AreEqual(array2, sByIndices.Expand(array2.Length));
+            CheckIndexOrdered(sByWeights);
 
-            Assert.AreEqual(0.7f, sparse1Nrm.Weight0);
-            Assert.AreEqual(0.1f, sparse1Nrm.Weight1);
-            Assert.AreEqual(0.1f, sparse1Nrm.Weight2);
-            Assert.AreEqual(0.1f, sparse1Nrm.Weight3, 0.00001f); // funny enough, 0.8f + 0.1f = 0.90000036f
-            Assert.AreEqual(0, sparse1Nrm.Weight4);
+            // equality
+            Assert.IsTrue(SparseWeight8.AreWeightsEqual(sByIndices, sByWeights));
+            Assert.AreEqual(sByIndices.GetWeightsHashCode(), sByWeights.GetWeightsHashCode());
 
-            // we must also support negative values.
-            var sparseNegative = SparseWeight8.Create(0, 1, -1);
-            Assert.AreEqual(1, sparseNegative.Index0);
-            Assert.AreEqual(2, sparseNegative.Index1);
-            Assert.AreEqual( 1, sparseNegative.Weight0);
-            Assert.AreEqual(-1, sparseNegative.Weight1);
+            // sum
+            var sum = SparseWeight8.Add(sByIndices, sByWeights);
+            Assert.AreEqual(array2.Sum() * 2, sum.WeightSum);
+
+            // complement normalization
+            if (!array2.Any(item => item<0))
+            {
+                Assert.GreaterOrEqual(sparse.GetNormalizedWithComplement(int.MaxValue).WeightSum, 1);
+            }
         }
 
-        [Test]
-        public void TestSparseOrdering1()
+        /// <summary>
+        /// Creates a new array with only the 8 most relevant weights.
+        /// </summary>
+        /// <param name="array"></param>
+        /// <returns></returns>
+        static float[] CreateSparseCompatibleArray(params float[] array)
         {
-            var array1 = new float[] { 0.2f, 0.15f, 0.25f, 0.10f, 0.30f };
+            const int MAXWEIGHTS = 8;
 
-            var s5 = SparseWeight8.Create(array1);
-            CollectionAssert.AreEqual(array1, s5.Expand(5));
+            if (array == null) return null;
 
-            var s5byWeights = SparseWeight8.OrderedByWeight(s5);
-            CollectionAssert.AreEqual(array1, s5byWeights.Expand(5));
-            CheckWeightOrdered(s5byWeights);
-            var s5byIndices = SparseWeight8.OrderedByIndex(s5byWeights);
-            CollectionAssert.AreEqual(array1, s5byIndices.Expand(5));
-            CheckIndexOrdered(s5byWeights);
-        }
+            var threshold =array
+                .Select(item => Math.Abs(item))
+                .OrderByDescending(item => item)
+                .Take(MAXWEIGHTS)
+                .Min();
 
-        [Test]
-        public void TestSparseOrdering2()
-        {
-            var expanded = new float[] { 0,0,1,0,2,0,3,4,5,0,6,0,7,0,6,0,9,0,11 };
+            var array2 = new float[array.Length];
 
-            var sparse = SparseWeight8.Create(expanded);
+            var c = 0;
 
-            Assert.AreEqual(11, sparse[18]);
-            Assert.AreEqual(9, sparse[16]);
-            Assert.AreEqual(7, sparse[12]);
-            Assert.AreEqual(6, sparse[10]);
-            Assert.AreEqual(6, sparse[14]);
-            Assert.AreEqual(5, sparse[8]);
-            Assert.AreEqual(4, sparse[7]);
-            Assert.AreEqual(3, sparse[6]);
-        }
+            for(int i=0; i < array2.Length; ++i)
+            {
+                var v = array[i];
+                if (v == 0) continue;
+
+                if (Math.Abs(v) >= threshold)
+                {
+                    array2[i] = v;
+                    ++c;
+
+                    if (c >= MAXWEIGHTS) return array2;
+                }
+            }
+
+            return array2;
+        }        
 
         static void CheckWeightOrdered(SparseWeight8 sparse)
         {
-            Assert.GreaterOrEqual(sparse.Weight0, sparse.Weight1);
-            Assert.GreaterOrEqual(sparse.Weight1, sparse.Weight2);
-            Assert.GreaterOrEqual(sparse.Weight2, sparse.Weight3);
-            Assert.GreaterOrEqual(sparse.Weight3, sparse.Weight4);
-            Assert.GreaterOrEqual(sparse.Weight4, sparse.Weight5);
-            Assert.GreaterOrEqual(sparse.Weight5, sparse.Weight6);
-            Assert.GreaterOrEqual(sparse.Weight6, sparse.Weight7);
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight0), Math.Abs(sparse.Weight1));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight1), Math.Abs(sparse.Weight2));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight2), Math.Abs(sparse.Weight3));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight3), Math.Abs(sparse.Weight4));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight4), Math.Abs(sparse.Weight5));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight5), Math.Abs(sparse.Weight6));
+            Assert.GreaterOrEqual(Math.Abs(sparse.Weight6), Math.Abs(sparse.Weight7));
         }
 
         static void CheckIndexOrdered(SparseWeight8 sparse)
@@ -115,6 +126,19 @@ namespace SharpGLTF.Transforms
             Assert.LessOrEqual(sparse.Index4, sparse.Index4);
             Assert.LessOrEqual(sparse.Index5, sparse.Index5);
             Assert.LessOrEqual(sparse.Index6, sparse.Index6);
+        }
+
+        [Test]
+        public void TestSparseNormalization()
+        {
+            var sparse1 = SparseWeight8.Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f);
+
+            var sparse1Nrm = sparse1.GetNormalizedWithComplement(int.MaxValue);            
+            Assert.AreEqual(0.1f, sparse1[5]);
+            Assert.AreEqual(0.7f, sparse1[6]);
+            Assert.AreEqual(0.1f, sparse1[10]);
+            Assert.AreEqual(0.1f, sparse1[int.MaxValue]);
+            Assert.AreEqual(1, sparse1.WeightSum);
         }
 
         [Test]
@@ -132,10 +156,14 @@ namespace SharpGLTF.Transforms
         [Test]
         public void TestSparseWeightsLinearInterpolation1()
         {
-            var x = SparseWeight8.Create((0,0f));
-            var y = SparseWeight8.Create((0,1f));
+            var x = SparseWeight8.Create(0,0,1,2); CollectionAssert.AreEqual(new[] { 0f, 0f, 1f, 2f }, x.Expand(4));
+            var y = SparseWeight8.Create(1,2,0,0); CollectionAssert.AreEqual(new[] { 1f, 2f, 0f, 0f }, x.Expand(4));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
+            Assert.AreEqual(0.5f, z[0]);
+            Assert.AreEqual(1, z[1]);
+            Assert.AreEqual(0.5f, z[2]);
+            Assert.AreEqual(1, z[3]);
         }
 
         [Test]

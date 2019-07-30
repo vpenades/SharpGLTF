@@ -142,8 +142,11 @@ namespace SharpGLTF.Transforms
                     var kk = pairs[k];
                     var jj = pairs[j];
 
-                    if (kk.Weight  > jj.Weight) continue;
-                    if (kk.Weight == jj.Weight && kk.Index < jj.Index) continue;
+                    var kw = Math.Abs(kk.Weight);
+                    var jw = Math.Abs(jj.Weight);
+
+                    if (kw  > jw) continue;
+                    if (kw == jw && kk.Index < jj.Index) continue;
 
                     pairs[k] = jj;
                     pairs[j] = kk;

@@ -6,6 +6,8 @@
     <IsPackable>false</IsPackable>
 
     <RootNamespace>SharpGLTF</RootNamespace>
+
+    <LangVersion>7.1</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -57,6 +57,8 @@ namespace SharpGLTF.Transforms
         /// </summary>
         private SparseWeight8 _Weights;
 
+        private const int _COMPLEMENT_INDEX = 65536;
+
         /// <summary>
         /// True if morph targets represent absolute values.
         /// False if morph targets represent values relative to master value.
@@ -77,14 +79,14 @@ namespace SharpGLTF.Transforms
                 return;
             }
 
-            _Weights = morphWeights.GetNormalizedWithComplement();
+            _Weights = morphWeights.GetNormalizedWithComplement(_COMPLEMENT_INDEX);
         }
 
         protected V3 MorphVectors(V3 value, V3[] morphTargets)
         {
             if (morphTargets == null) return value;
 
-            if (_Weights.Index0 == 0 && _Weights.Weight0 == 1) return value;
+            if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             var p = V3.Zero;
 
@@ -92,7 +94,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -100,7 +102,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
+                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -112,7 +114,7 @@ namespace SharpGLTF.Transforms
         {
             if (morphTargets == null) return value;
 
-            if (_Weights.Index0 == 0 && _Weights.Weight0 == 1) return value;
+            if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             var p = V4.Zero;
 
@@ -120,7 +122,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == 0 ? value : morphTargets[pair.Item1 - 1];
+                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -128,7 +130,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == 0 ? value : value + morphTargets[pair.Item1 - 1];
+                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
