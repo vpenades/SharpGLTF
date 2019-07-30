@@ -31,6 +31,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             uvcoords = vertexAttributes.Contains("TEXCOORD_2") ? 3 : uvcoords;
             uvcoords = vertexAttributes.Contains("TEXCOORD_3") ? 4 : uvcoords;
 
+            return GetVertexMaterialType(colors, uvcoords);
+        }
+
+        public static Type GetVertexMaterialType(int colors, int uvcoords)
+        {
             if (colors == 0)
             {
                 if (uvcoords == 0) return typeof(VertexEmpty);
@@ -71,6 +76,23 @@ namespace SharpGLTF.Geometry.VertexTypes
             var tvg = GetVertexGeometryType(vertexAttributes);
             var tvm = GetVertexMaterialType(vertexAttributes);
             var tvs = GetVertexSkinningType(vertexAttributes);
+
+            var vtype = typeof(VertexBuilder<,,>);
+
+            return vtype.MakeGenericType(tvg, tvm, tvs);
+        }
+
+        public static Type GetVertexBuilderType(bool hasNormals, bool hasTangents, int numCols, int numUV, int numJoints)
+        {
+            var tvg = typeof(VertexPosition);
+            if (hasNormals) tvg = typeof(VertexPositionNormal);
+            if (hasTangents) tvg = typeof(VertexPositionNormalTangent);
+
+            var tvm = GetVertexMaterialType(numCols, numUV);
+
+            var tvs = typeof(VertexEmpty);
+            if (numJoints == 4) tvs = typeof(VertexJoints16x4);
+            if (numJoints >= 8) tvs = typeof(VertexJoints16x8);
 
             var vtype = typeof(VertexBuilder<,,>);
 

@@ -205,6 +205,38 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Yields a collection of triangles representing the geometry in world space.
         /// </summary>
+        /// /// <param name="scene">A <see cref="Scene"/> instance.</param>
+        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
+        /// <param name="time">The animation time.</param>
+        /// <returns>A collection of triangles in world space.</returns>
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Scene scene, Animation animation = null, float time = 0)
+        {
+            return Node
+                .Flatten(scene)
+                .SelectMany(item => item.EvaluateTriangles(animation, time));
+        }
+
+        /// <summary>
+        /// Yields a collection of triangles representing the geometry in world space.
+        /// </summary>
+        /// <param name="node">A <see cref="Node"/> instance.</param>
+        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
+        /// <param name="time">The animation time.</param>
+        /// <returns>A collection of triangles in world space.</returns>
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Node node, Animation animation = null, float time = 0)
+        {
+            var mesh = node?.Mesh;
+
+            if (node == null || mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
+
+            var xform = node.GetMeshWorldTransform(animation, time);
+
+            return mesh.EvaluateTriangles(xform);
+        }
+
+        /// <summary>
+        /// Yields a collection of triangles representing the geometry in world space.
+        /// </summary>
         /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
         /// <param name="scene">A <see cref="Scene"/> instance.</param>

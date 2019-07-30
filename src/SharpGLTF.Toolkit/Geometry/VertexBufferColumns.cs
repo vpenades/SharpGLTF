@@ -236,60 +236,74 @@ namespace SharpGLTF.Geometry
 
         #region API - Vertex indexing
 
+        public Type GetCompatibleVertexType()
+        {
+            var hasNormals = Normals != null;
+            var hasTangents = hasNormals && Tangents != null;
+
+            int numCols = 0;
+            if (Colors0 != null) numCols = 1;
+            if (Colors0 != null && Colors1 != null) numCols = 2;
+
+            int numTexs = 0;
+            if (TexCoords0 != null) numTexs = 1;
+            if (TexCoords0 != null && TexCoords1 != null) numTexs = 2;
+
+            int numJoints = 0;
+            if (Joints0 != null) numJoints = 4;
+            if (Joints0 != null && Joints1 != null) numJoints = 8;
+
+            return VertexUtils.GetVertexBuilderType(hasNormals, hasTangents, numCols, numTexs, numJoints);
+        }
+
         private TvG GetVertexGeometry<TvG>(int index)
             where TvG : struct, IVertexGeometry
         {
-            var v = default(TvG);
+            var g = default(TvG);
 
-            if (Positions != null) v.SetPosition(Positions[index]);
-            if (Normals != null) v.SetNormal(Normals[index]);
-            if (Tangents != null) v.SetTangent(Tangents[index]);
+            if (Positions != null) g.SetPosition(Positions[index]);
+            if (Normals != null) g.SetNormal(Normals[index]);
+            if (Tangents != null) g.SetTangent(Tangents[index]);
 
-            return v;
+            return g;
         }
 
         private TvM GetVertexMaterial<TvM>(int index)
             where TvM : struct, IVertexMaterial
         {
-            var v = default(TvM);
+            var m = default(TvM);
 
-            if (Colors0 != null && v.MaxColors > 0) v.SetColor(0, Colors0[index]);
-            if (Colors1 != null && v.MaxColors > 1) v.SetColor(1, Colors1[index]);
+            if (Colors0 != null && m.MaxColors > 0) m.SetColor(0, Colors0[index]);
+            if (Colors1 != null && m.MaxColors > 1) m.SetColor(1, Colors1[index]);
 
-            if (TexCoords0 != null && v.MaxTextCoords > 0) v.SetTexCoord(0, TexCoords0[index]);
-            if (TexCoords1 != null && v.MaxTextCoords > 1) v.SetTexCoord(1, TexCoords1[index]);
+            if (TexCoords0 != null && m.MaxTextCoords > 0) m.SetTexCoord(0, TexCoords0[index]);
+            if (TexCoords1 != null && m.MaxTextCoords > 1) m.SetTexCoord(1, TexCoords1[index]);
 
-            return v;
+            return m;
         }
 
         private TvS GetVertexSkinning<TvS>(int index)
             where TvS : struct, IVertexSkinning
         {
-            IVertexSkinning v = default(VertexTypes.VertexJoints16x8);
+            var s = default(TvS);
+
+            if (s.MaxBindings == 0) return s;
 
             if (Joints0 != null && Weights0 != null)
             {
-                var j = Joints0[index];
-                var w = Weights0[index];
-
-                v.SetJointBinding(0, (int)j.X, w.X);
-                v.SetJointBinding(1, (int)j.Y, w.Y);
-                v.SetJointBinding(2, (int)j.Z, w.Z);
-                v.SetJointBinding(3, (int)j.W, w.W);
+                if (Joints1 != null && Weights1 != null)
+                {
+                    var sparse = new Transforms.SparseWeight8(Joints0[index], Joints1[index], Weights0[index], Weights1[index]);
+                    s.SetWeights(sparse);
+                }
+                else
+                {
+                    var sparse = new Transforms.SparseWeight8(Joints0[index], Weights0[index]);
+                    s.SetWeights(sparse);
+                }
             }
 
-            if (Joints1 != null && Weights1 != null)
-            {
-                var j = Joints1[index];
-                var w = Weights1[index];
-
-                v.SetJointBinding(4, (int)j.X, w.X);
-                v.SetJointBinding(5, (int)j.Y, w.Y);
-                v.SetJointBinding(6, (int)j.Z, w.Z);
-                v.SetJointBinding(7, (int)j.W, w.W);
-            }
-
-            return VertexUtils.ConvertToSkinning<TvS>(v);
+            return s;
         }
 
         public IVertexBuilder GetVertex(Type vertexType, int index)
@@ -299,9 +313,11 @@ namespace SharpGLTF.Geometry
             var s = GetVertexSkinning<VertexJoints16x8>(index);
 
             var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
+
             v.SetGeometry(g);
             v.SetMaterial(m);
             v.SetSkinning(s);
+
             return v;
         }
 

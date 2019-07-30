@@ -485,6 +485,8 @@ namespace SharpGLTF
 
                         break;
                     }
+
+                default: throw new NotImplementedException();
             }
         }
 
@@ -570,6 +572,8 @@ namespace SharpGLTF
 
                         break;
                     }
+
+                default: throw new NotImplementedException();
             }
         }
 
