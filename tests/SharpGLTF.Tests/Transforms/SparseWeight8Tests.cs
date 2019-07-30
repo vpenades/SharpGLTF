@@ -131,13 +131,14 @@ namespace SharpGLTF.Transforms
         [Test]
         public void TestSparseNormalization()
         {
-            var sparse1 = SparseWeight8.Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f);
-
-            var sparse1Nrm = sparse1.GetNormalizedWithComplement(int.MaxValue);            
+            var sparse1 = SparseWeight8
+                .Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f)
+                .GetNormalizedWithComplement(int.MaxValue);
+            
             Assert.AreEqual(0.1f, sparse1[5]);
             Assert.AreEqual(0.7f, sparse1[6]);
             Assert.AreEqual(0.1f, sparse1[10]);
-            Assert.AreEqual(0.1f, sparse1[int.MaxValue]);
+            Assert.AreEqual(0.1f, sparse1[int.MaxValue], 0.0000001f);
             Assert.AreEqual(1, sparse1.WeightSum);
         }
 
@@ -157,7 +158,7 @@ namespace SharpGLTF.Transforms
         public void TestSparseWeightsLinearInterpolation1()
         {
             var x = SparseWeight8.Create(0,0,1,2); CollectionAssert.AreEqual(new[] { 0f, 0f, 1f, 2f }, x.Expand(4));
-            var y = SparseWeight8.Create(1,2,0,0); CollectionAssert.AreEqual(new[] { 1f, 2f, 0f, 0f }, x.Expand(4));
+            var y = SparseWeight8.Create(1,2,0,0); CollectionAssert.AreEqual(new[] { 1f, 2f, 0f, 0f }, y.Expand(4));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
             Assert.AreEqual(0.5f, z[0]);

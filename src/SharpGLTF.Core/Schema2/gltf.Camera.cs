@@ -64,10 +64,7 @@ namespace SharpGLTF.Schema2
         /// <param name="zfar">Distance to the far plane in the Z axis.</param>
         public void SetOrthographicMode(float xmag, float ymag, float znear, float zfar)
         {
-            Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
-            Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
-            Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
-            Guard.MustBeLessThan(zfar, float.PositiveInfinity, nameof(zfar));
+            CameraOrthographic.CheckParameters(xmag, ymag, znear, zfar);
 
             this._perspective = null;
             this._orthographic = new CameraOrthographic(xmag, ymag, znear, zfar);
@@ -84,13 +81,7 @@ namespace SharpGLTF.Schema2
         /// <param name="zfar">Distance to the far plane in the Z axis.</param>
         public void SetPerspectiveMode(float? aspectRatio, float yfov, float znear, float zfar)
         {
-            if (aspectRatio.HasValue) Guard.MustBeGreaterThanOrEqualTo(aspectRatio.Value, 0, nameof(aspectRatio));
-            Guard.MustBeGreaterThan(yfov, 0, nameof(yfov));
-            Guard.MustBeLessThan(yfov, (float)Math.PI, nameof(yfov));
-
-            Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
-            Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
-            Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
+            CameraPerspective.CheckParameters(aspectRatio, yfov, znear, zfar);
 
             this._orthographic = null;
             this._perspective = new CameraPerspective(aspectRatio, yfov, znear, zfar);
@@ -158,6 +149,18 @@ namespace SharpGLTF.Schema2
         public System.Numerics.Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(XMag, YMag, ZNear, ZFar);
 
         #endregion
+
+        #region API
+
+        public static void CheckParameters(float xmag, float ymag, float znear, float zfar)
+        {
+            Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
+            Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
+            Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
+            Guard.MustBeLessThan(zfar, float.PositiveInfinity, nameof(zfar));
+        }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("Perspective {AspectRatio} {VerticalFOV}   {ZNear} < {ZFar}")]
@@ -169,6 +172,8 @@ namespace SharpGLTF.Schema2
 
         internal CameraPerspective(float? aspectRatio, float yfov, float znear, float zfar)
         {
+            CheckParameters(aspectRatio, yfov, znear, zfar);
+
             this._aspectRatio = aspectRatio ?? null;
             this._yfov = yfov;
             this._znear = znear;
@@ -210,6 +215,21 @@ namespace SharpGLTF.Schema2
         /// Gets the projection matrix for the current settings
         /// </summary>
         public System.Numerics.Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(AspectRatio.AsValue(1), VerticalFOV, ZNear, ZFar);
+
+        #endregion
+
+        #region API
+
+        public static void CheckParameters(float? aspectRatio, float yfov, float znear, float zfar = float.PositiveInfinity)
+        {
+            if (aspectRatio.HasValue) Guard.MustBeGreaterThanOrEqualTo(aspectRatio.Value, 0, nameof(aspectRatio));
+            Guard.MustBeGreaterThan(yfov, 0, nameof(yfov));
+            Guard.MustBeLessThan(yfov, (float)Math.PI, nameof(yfov));
+
+            Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
+            Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
+            Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
+        }
 
         #endregion
     }

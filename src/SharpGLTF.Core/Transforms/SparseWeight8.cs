@@ -581,10 +581,10 @@ namespace SharpGLTF.Transforms
         }
 
         /// <summary>
-        /// Normalizes the current <see cref="SparseWeight8"/> by adding a complement weight
+        /// Normalizes the current <see cref="SparseWeight8"/> by adding a complementary weight
         /// at index <paramref name="complementIndex"/> that resolves <see cref="WeightSum"/> to 1.
         /// </summary>
-        /// <returns>A new <see cref="SparseWeight8"/> with an extra weight.</returns>
+        /// <returns>A new <see cref="SparseWeight8"/> with a complementary weight.</returns>
         internal SparseWeight8 GetNormalizedWithComplement(int complementIndex)
         {
             Span<IndexWeight> weights = stackalloc IndexWeight[8 + 1];

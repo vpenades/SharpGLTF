@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
+using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
+
 namespace SharpGLTF.Scenes
 {
-    using MESHBUILDER = Geometry.IMeshBuilder<Materials.MaterialBuilder>;
-
     public partial class SceneBuilder
     {
         #region data
@@ -62,6 +62,24 @@ namespace SharpGLTF.Scenes
 
             _Instances.Add(instance);
 
+            return instance;
+        }
+
+        public InstanceBuilder AddOrthographicCamera(NodeBuilder node, float xmag, float ymag, float znear, float zfar)
+        {
+            var content = new OrthographicCameraContent(xmag, ymag, znear, zfar);
+            var instance = new InstanceBuilder(this);
+            instance.Content = new NodeTransformer(content, node);
+            _Instances.Add(instance);
+            return instance;
+        }
+
+        public InstanceBuilder AddPerspectiveCamera(NodeBuilder node, float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+        {
+            var content = new PerspectiveCameraContent(aspectRatio, fovy, znear, zfar);
+            var instance = new InstanceBuilder(this);
+            instance.Content = new NodeTransformer(content, node);
+            _Instances.Add(instance);
             return instance;
         }
 

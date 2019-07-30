@@ -136,6 +136,8 @@ namespace SharpGLTF.Scenes
 
     public partial class SceneBuilder
     {
+        #region from SceneBuilder to Schema2
+
         /// <summary>
         /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
         /// </summary>
@@ -151,5 +153,124 @@ namespace SharpGLTF.Scenes
 
             return dstModel;
         }
+
+        #endregion
+
+        #region from Schema2 to SceneBuilder
+
+        internal static SceneBuilder CreateFrom(Scene srcScene)
+        {
+            if (srcScene == null) return null;
+
+            var dstNodes = new Dictionary<Node, NodeBuilder>();
+
+            foreach (var srcArmature in srcScene.VisualChildren)
+            {
+                var dstArmature = new NodeBuilder();
+                CopyToNodeBuilder(srcArmature, dstArmature, dstNodes);
+            }
+
+            // TODO: we must also process the armatures of every skin, in case the joints are outside the scene.
+
+            var dstScene = new SceneBuilder();
+
+            // process meshes
+            var srcMeshInstances = Node.Flatten(srcScene).Where(item => item.Mesh != null).ToList();
+            _AddMeshInstances(dstScene, dstNodes, srcMeshInstances);
+
+            // process cameras
+            var srcCameraInstances = Node.Flatten(srcScene).Where(item => item.Camera != null).ToList();
+            _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
+
+            return dstScene;
+        }
+
+        private static void _AddMeshInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            var dstMeshes = srcInstances
+                            .Select(item => item.Mesh)
+                            .Distinct()
+                            .ToDictionary(item => item, item => item.ToMeshBuilder());
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstMesh = dstMeshes[srcInstance.Mesh];
+
+                if (srcInstance.Skin == null)
+                {
+                    var dstNode = dstNodes[srcInstance];
+                    dstScene.AddMesh(dstMesh, dstNode);
+                }
+                else
+                {
+                    var joints = new (NodeBuilder, Matrix4x4)[srcInstance.Skin.JointsCount];
+
+                    for (int i = 0; i < joints.Length; ++i)
+                    {
+                        var j = srcInstance.Skin.GetJoint(i);
+                        joints[i] = (dstNodes[j.Item1], j.Item2);
+                    }
+
+                    dstScene.AddSkinnedMesh(dstMesh, joints);
+                }
+            }
+        }
+
+        private static void _AddCameraInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            if (srcInstances.Count == 0) return;
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstNode = dstNodes[srcInstance];
+                var cam = srcInstance.Camera;
+
+                if (cam.Settings is CameraPerspective perspective)
+                {
+                    dstScene.AddPerspectiveCamera(dstNode, perspective.AspectRatio, perspective.VerticalFOV, perspective.ZNear, perspective.ZFar);
+                }
+
+                if (cam.Settings is CameraOrthographic orthographic)
+                {
+                    dstScene.AddOrthographicCamera(dstNode, orthographic.XMag, orthographic.YMag, orthographic.ZNear, orthographic.ZFar);
+                }
+            }
+        }
+
+        private static void CopyToNodeBuilder(Node srcNode, NodeBuilder dstNode, IDictionary<Node, NodeBuilder> nodeMapping)
+        {
+            Guard.NotNull(srcNode, nameof(srcNode));
+            Guard.NotNull(dstNode, nameof(dstNode));
+
+            dstNode.Name = srcNode.Name;
+            dstNode.LocalTransform = srcNode.LocalTransform;
+
+            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
+            {
+                var name = anim.Name;
+                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler();
+                if (scaAnim != null) dstNode.UseScale(name).SetCurve(scaAnim);
+
+                var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler();
+                if (rotAnim != null) dstNode.UseRotation(name).SetCurve(rotAnim);
+
+                var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler();
+                if (traAnim != null) dstNode.UseTranslation(name).SetCurve(traAnim);
+            }
+
+            if (nodeMapping == null) return;
+
+            nodeMapping[srcNode] = dstNode;
+
+            foreach (var srcChild in srcNode.VisualChildren)
+            {
+                var dstChild = dstNode.CreateNode();
+                CopyToNodeBuilder(srcChild, dstChild, nodeMapping);
+            }
+        }
+
+        #endregion
     }
 }

@@ -74,6 +74,8 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(node, nameof(node));
 
+            foreach (var j in joints) Guard.MustShareLogicalParent(node, j, nameof(joints));
+
             var skin = node.LogicalParent.CreateSkin();
             skin.BindJoints(meshPoseTransform, joints);
 
@@ -84,6 +86,12 @@ namespace SharpGLTF.Schema2
         public static Node WithSkinBinding(this Node node, params (Node, Matrix4x4)[] joints)
         {
             Guard.NotNull(node, nameof(node));
+
+            foreach (var j in joints)
+            {
+                Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(j.Item2, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+            }
 
             var skin = node.LogicalParent.CreateSkin();
             skin.BindJoints(joints);
@@ -115,7 +123,11 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(joints, nameof(joints));
             Guard.MustShareLogicalParent(node, mesh, nameof(mesh));
 
-            foreach (var j in joints) Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
+            foreach (var j in joints)
+            {
+                Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(j.Item2, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+            }
 
             // TODO: the joints must be visible in the visual tree that contains node.
 
@@ -126,6 +138,9 @@ namespace SharpGLTF.Schema2
 
         public static Node WithPerspectiveCamera(this Node node, float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
         {
+            Guard.NotNull(node, nameof(node));
+            CameraPerspective.CheckParameters(aspectRatio, fovy, znear, zfar);
+
             var camera = node.LogicalParent.CreateCamera();
             camera.SetPerspectiveMode(aspectRatio, fovy, znear, zfar);
 
@@ -136,6 +151,9 @@ namespace SharpGLTF.Schema2
 
         public static Node WithOrthographicCamera(this Node node, float xmag, float ymag, float znear, float zfar)
         {
+            Guard.NotNull(node, nameof(node));
+            CameraOrthographic.CheckParameters(xmag, ymag, znear, zfar);
+
             var camera = node.LogicalParent.CreateCamera();
             camera.SetOrthographicMode(xmag, ymag, znear, zfar);
 
@@ -226,85 +244,7 @@ namespace SharpGLTF.Schema2
 
         public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)
         {
-            if (srcScene == null) return null;
-
-            var dstNodes = new Dictionary<Node, Scenes.NodeBuilder>();
-
-            foreach (var srcArmature in srcScene.VisualChildren)
-            {
-                var dstArmature = new Scenes.NodeBuilder();
-                srcArmature.CopyToNodeBuilder(dstArmature, dstNodes);
-            }
-
-            var srcInstances = Node.Flatten(srcScene).Where(item => item.Mesh != null).ToList();
-
-            // TODO: we must process the armatures of the skin, in case the joints are outside the scene.
-
-            var dstMeshes = srcInstances
-                .Select(item => item.Mesh)
-                .Distinct()
-                .ToDictionary(item => item, item => item.ToMeshBuilder());
-
-            var dstScene = new Scenes.SceneBuilder();
-
-            foreach (var srcInstance in srcInstances)
-            {
-                var dstMesh = dstMeshes[srcInstance.Mesh];
-
-                if (srcInstance.Skin == null)
-                {
-                    var dstNode = dstNodes[srcInstance];
-                    dstScene.AddMesh(dstMesh, dstNode);
-                }
-                else
-                {
-                    var joints = new (Scenes.NodeBuilder, Matrix4x4)[srcInstance.Skin.JointsCount];
-
-                    for (int i = 0; i < joints.Length; ++i)
-                    {
-                        var j = srcInstance.Skin.GetJoint(i);
-                        joints[i] = (dstNodes[j.Item1], j.Item2);
-                    }
-
-                    dstScene.AddSkinnedMesh(dstMesh, joints);
-                }
-            }
-
-            return dstScene;
-        }
-
-        public static void CopyToNodeBuilder(this Node srcNode, Scenes.NodeBuilder dstNode,  IDictionary<Node, Scenes.NodeBuilder> nodeMapping)
-        {
-            Guard.NotNull(srcNode, nameof(srcNode));
-            Guard.NotNull(dstNode, nameof(dstNode));
-
-            dstNode.Name = srcNode.Name;
-            dstNode.LocalTransform = srcNode.LocalTransform;
-
-            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
-            {
-                var name = anim.Name;
-                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-                var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler();
-                if (scaAnim != null) dstNode.UseScale(name).SetCurve(scaAnim);
-
-                var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler();
-                if (rotAnim != null) dstNode.UseRotation(name).SetCurve(rotAnim);
-
-                var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler();
-                if (traAnim != null) dstNode.UseTranslation(name).SetCurve(traAnim);
-            }
-
-            if (nodeMapping == null) return;
-
-            nodeMapping[srcNode] = dstNode;
-
-            foreach (var srcChild in srcNode.VisualChildren)
-            {
-                var dstChild = dstNode.CreateNode();
-                srcChild.CopyToNodeBuilder(dstChild, nodeMapping);
-            }
+            return Scenes.SceneBuilder.CreateFrom(srcScene);
         }
 
         #endregion

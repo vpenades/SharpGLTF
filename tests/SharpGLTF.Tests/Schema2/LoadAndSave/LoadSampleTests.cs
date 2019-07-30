@@ -8,7 +8,7 @@ using NUnit.Framework;
 namespace SharpGLTF.Schema2.LoadAndSave
 {
     /// <summary>
-    /// Test cases for models found in <see href="https://github.com/KhronosGroup/glTF-Sample-Models"/>
+    /// Test cases for models found in <see href="https://github.com/KhronosGroup/glTF-Sample-Models"/> and more....
     /// </summary>
     [TestFixture]
     [Category("Model Load and Save")]
@@ -21,39 +21,10 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             TestFiles.DownloadReferenceModels();
         }
-
+        
         #endregion
 
-        [TestCase("\\glTF\\")]
-        // [TestCase("\\glTF-Draco\\")] // Not supported
-        [TestCase("\\glTF-IBL\\")]
-        [TestCase("\\glTF-Binary\\")]
-        [TestCase("\\glTF-Embedded\\")]
-        [TestCase("\\glTF-pbrSpecularGlossiness\\")]
-        public void LoadSampleModels(string section)
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLinks();
-
-            foreach (var f in TestFiles.GetSampleModelsPaths())
-            {
-                if (!f.Contains(section)) continue;
-
-                _LoadModel(f);
-            }
-        }
-
-        [Test]
-        public void LoadBabylonJsModels()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
-            TestContext.CurrentContext.AttachGltfValidatorLinks();
-
-            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
-            {
-                _LoadModel(f);
-            }
-        }
+        #region helpers
 
         private static void _LoadModel(string f)
         {
@@ -66,14 +37,14 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 model = ModelRoot.Load(f);
                 Assert.NotNull(model);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 TestContext.Progress.WriteLine($"Failed {f.ToShortDisplayPath()}");
 
                 Assert.Fail(ex.Message);
             }
-            
-            
+
+
 
             var perf_load = perf.ElapsedMilliseconds;
 
@@ -106,7 +77,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var aa = a.GetLogicalChildrenFlattened().ToList();
             var bb = b.GetLogicalChildrenFlattened().ToList();
 
-            Assert.AreEqual(aa.Count,bb.Count);
+            Assert.AreEqual(aa.Count, bb.Count);
 
             CollectionAssert.AreEqual
                 (
@@ -115,10 +86,43 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 );
         }
 
+        #endregion
+
+        [TestCase("\\glTF\\")]
+        // [TestCase("\\glTF-Draco\\")] // Not supported
+        [TestCase("\\glTF-IBL\\")]
+        [TestCase("\\glTF-Binary\\")]
+        [TestCase("\\glTF-Embedded\\")]
+        [TestCase("\\glTF-pbrSpecularGlossiness\\")]
+        public void LoadModelsFromKhronosSamples(string section)
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            foreach (var f in TestFiles.GetSampleModelsPaths())
+            {
+                if (!f.Contains(section)) continue;
+
+                _LoadModel(f);
+            }
+        }
+
+        [Test]
+        public void LoadModelsFromBabylonJs()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
+            {
+                _LoadModel(f);
+            }
+        }
+
         [TestCase("SpecGlossVsMetalRough.gltf")]
         [TestCase(@"TextureTransformTest.gltf")]
         [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]        
-        public void LoadExtendedModels(string filePath)
+        public void LoadModelsWithExtensions(string filePath)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -142,7 +146,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void LoadUnlitModel()
+        public void LoadModelWithUnlitMaterial()
         {
             var f = TestFiles
                 .GetSampleModelsPaths()
@@ -161,7 +165,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void LoadLightsModel()
+        public void LoadModelWithLights()
         {
             var f = TestFiles
                 .GetSchemaExtensionsModelsPaths()
@@ -177,7 +181,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void LoadSparseModel()
+        public void LoadModelWithSparseAccessor()
         {
             var path = TestFiles
                 .GetSampleModelsPaths()
@@ -196,7 +200,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         }
 
         [Test]
-        public void LoadMorphTargetModel()
+        public void LoadModelWithMorphTargets()
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
@@ -223,7 +227,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase("CesiumMan.glb")]
         [TestCase("Monster.glb")]
         [TestCase("BrainStem.glb")]
-        public void LoadAnimatedModels(string path)
+        public void LoadModelsWithAnimations(string path)
         {
             TestContext.CurrentContext.AttachShowDirLink();
 

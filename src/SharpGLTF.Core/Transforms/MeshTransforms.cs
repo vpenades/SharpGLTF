@@ -51,9 +51,9 @@ namespace SharpGLTF.Transforms
         #region data
 
         /// <summary>
-        /// Represents a normalized sparse collection of weights where:
-        /// - Indices with value zero point to the master mesh
-        /// - Indices with value over zero point to MorphTarget[index-1].
+        /// Represents a sparse collection of weights where:
+        /// - Index of value <see cref="_COMPLEMENT_INDEX"/> points to the Mesh master positions.
+        /// - All other indices point to Mesh MorphTarget[index] positions.
         /// </summary>
         private SparseWeight8 _Weights;
 

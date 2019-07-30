@@ -34,6 +34,12 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
+        public StaticTransformer(IContent content, Matrix4x4 xform)
+        {
+            _Transform = xform;
+            _Target = content;
+        }
+
         public StaticTransformer(MESHBUILDER mesh, Matrix4x4 xform)
         {
             _Transform = xform;
@@ -70,6 +76,12 @@ namespace SharpGLTF.Scenes
     class NodeTransformer : IContentRoot
     {
         #region lifecycle
+
+        public NodeTransformer(IContent content, NodeBuilder node)
+        {
+            _Node = node;
+            _Target = content;
+        }
 
         public NodeTransformer(MESHBUILDER mesh, NodeBuilder node)
         {
@@ -197,7 +209,7 @@ namespace SharpGLTF.Scenes
 
     // We really have two options here: Either implement this here, or as a derived of IMeshBuilder<MaterialBuilder>
 
-    class MorphModifier : IRenderableContent // must be a child of a controller, and the parent of a mesh
+    class MorphMeshModifier : IRenderableContent // must be a child of a controller, and the parent of a mesh
     {
         #region data
 
@@ -258,11 +270,45 @@ namespace SharpGLTF.Scenes
         }
     }
 
-    class CameraContent : IContent
+    class OrthographicCameraContent : IContent
     {
+        public OrthographicCameraContent(float xmag, float ymag, float znear, float zfar)
+        {
+            _XMag = xmag;
+            _YMag = ymag;
+            _ZNear = znear;
+            _ZFar = zfar;
+        }
+
+        private float _XMag;
+        private float _YMag;
+        private float _ZNear;
+        private float _ZFar;
+
         public void Setup(Node dstNode, Schema2SceneBuilder context)
         {
-            throw new NotImplementedException();
+            dstNode.WithOrthographicCamera(_XMag, _YMag, _ZNear, _ZFar);
+        }
+    }
+
+    class PerspectiveCameraContent : IContent
+    {
+        public PerspectiveCameraContent(float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+        {
+            _AspectRatio = aspectRatio;
+            _FovY = fovy;
+            _ZNear = znear;
+            _ZFar = zfar;
+        }
+
+        float? _AspectRatio;
+        float _FovY;
+        float _ZNear;
+        float _ZFar;
+
+        public void Setup(Node dstNode, Schema2SceneBuilder context)
+        {
+            dstNode.WithPerspectiveCamera(_AspectRatio, _FovY, _ZNear, _ZFar);
         }
     }
 }

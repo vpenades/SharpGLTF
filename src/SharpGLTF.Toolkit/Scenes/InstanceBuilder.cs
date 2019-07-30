@@ -25,7 +25,7 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
-        #region public
+        #region properties
 
         internal IContentRoot Content
         {

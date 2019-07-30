@@ -21,7 +21,8 @@ namespace SharpGLTF
             _SchemaDir = System.IO.Path.Combine(workingDir, "glTF-Schema");
             _SampleModelsDir = System.IO.Path.Combine(workingDir, "glTF-Sample-Models");
             _PollyModelsDir = System.IO.Path.Combine(workingDir, "glTF-Blender-Exporter");
-            _BabylonJsDir = System.IO.Path.Combine(workingDir, "BabylonJS-MeshesLibrary");
+            _BabylonJsMeshesDir = System.IO.Path.Combine(workingDir, "BabylonJS-MeshesLibrary");
+            _BabylonJsPlaygroundDir = System.IO.Path.Combine(workingDir, "BabylonJS-PlaygroundScenes");
         }
 
         public static void DownloadReferenceModels()
@@ -39,7 +40,8 @@ namespace SharpGLTF
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);            
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _SchemaDir);
-            DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsMeshesDir);
+            // DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/Babylon.js.git", _BabylonJsPlaygroundDir);
 
             TestContext.Progress.WriteLine("... Download Completed.");
         }
@@ -53,7 +55,8 @@ namespace SharpGLTF
         private static readonly string _SchemaDir;
         private static readonly string _SampleModelsDir;
         private static readonly string _PollyModelsDir;
-        private static readonly string _BabylonJsDir;
+        private static readonly string _BabylonJsMeshesDir;
+        private static readonly string _BabylonJsPlaygroundDir;
 
         private static string _GeneratedModelsDir;        
 
@@ -115,7 +118,7 @@ namespace SharpGLTF
 
         public static IReadOnlyList<string> GetBabylonJSModelsPaths()
         {
-            var files = GetModelPathsInDirectory(_BabylonJsDir);
+            var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
                 .OrderBy(item => item)
