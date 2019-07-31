@@ -132,7 +132,7 @@ namespace SharpGLTF.Scenes
                 dstNode.LocalMatrix = srcNode.LocalMatrix;
             }
 
-            foreach (var c in srcNode.Children) CreateArmature(dstNode, c);
+            foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode, c);
         }
 
         #endregion

@@ -45,7 +45,7 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder Root => _Parent == null ? this : _Parent.Root;
 
-        public IReadOnlyList<NodeBuilder> Children => _Children;
+        public IReadOnlyList<NodeBuilder> VisualChildren => _Children;
 
         #endregion
 
@@ -143,7 +143,60 @@ namespace SharpGLTF.Scenes
 
             var root = joints.First().Root;
 
-            return joints.All(item => Object.ReferenceEquals(item.Root, root));
+            // check if all joints share the same root
+            if (!joints.All(item => Object.ReferenceEquals(item.Root, root))) return false;
+
+            var nameGroups = Flatten(root)
+                .Where(item => item.Name != null)
+                .GroupBy(item => item.Name);
+
+            if (nameGroups.Any(group => group.Count() > 1)) return false;
+
+            return true;
+        }
+
+        public static IEnumerable<NodeBuilder> Flatten(NodeBuilder container)
+        {
+            if (container == null) yield break;
+
+            yield return container;
+
+            foreach (var c in container.VisualChildren)
+            {
+                var cc = Flatten(c);
+
+                foreach (var ccc in cc) yield return ccc;
+            }
+        }
+
+        public static void SetUniqueNames(NodeBuilder root)
+        {
+            var nodes = Flatten(root).ToList();
+
+            var names = new HashSet<string>();
+
+            var ncount = 0;
+
+            foreach (var n in nodes)
+            {
+                if (!string.IsNullOrWhiteSpace(n.Name) && !names.Contains(n.Name))
+                {
+                    names.Add(n.Name);
+                    continue;
+                }
+
+                while (true)
+                {
+                    var newName = $"Node{ncount++}";
+
+                    if (!names.Contains(newName))
+                    {
+                        n.Name = newName;
+                        names.Add(n.Name);
+                        break;
+                    }
+                }
+            }
         }
 
         #endregion
