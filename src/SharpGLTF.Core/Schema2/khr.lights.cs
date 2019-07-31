@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2
 
         internal PunctualLight(PunctualLightType ltype)
         {
-            _type = ltype.ToString().ToLower();
+            _type = ltype.ToString().ToLowerInvariant();
 
             if (ltype == PunctualLightType.Spot) _spot = new PunctualLightSpot();
         }

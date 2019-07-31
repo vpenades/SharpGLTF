@@ -279,7 +279,7 @@ namespace SharpGLTF.Transforms
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool IsWeightless => Weight0 == 0 & Weight1 == 0 & Weight2 == 0 & Weight3 == 0 & Weight4 == 0 & Weight5 == 0 & Weight6 == 0 & Weight7 == 0;
 
-        public float WeightSum => Weight0 + Weight1+ Weight2 + Weight3 + Weight4 + Weight5 + Weight6 + Weight7;
+        public float WeightSum => Weight0 + Weight1 + Weight2 + Weight3 + Weight4 + Weight5 + Weight6 + Weight7;
 
         #endregion
 

@@ -32,6 +32,10 @@ namespace SharpGLTF.Animations
 
         public static Single[] CreateTangent(Single[] fromValue, Single[] toValue, Single scale = 1)
         {
+            Guard.NotNull(fromValue, nameof(fromValue));
+            Guard.NotNull(toValue, nameof(toValue));
+            Guard.IsTrue(fromValue.Length == toValue.Length, nameof(toValue));
+
             var r = new float[fromValue.Length];
 
             for (int i = 0; i < r.Length; ++i)
@@ -123,6 +127,8 @@ namespace SharpGLTF.Animations
         /// <returns>Two consecutive <typeparamref name="T"/> values and a float amount to LERP amount.</returns>
         public static (T, T, float) FindPairContainingOffset<T>(this IEnumerable<(float, T)> sequence, float offset)
         {
+            Guard.NotNull(sequence, nameof(sequence));
+
             if (!sequence.Any()) return (default(T), default(T), 0);
 
             (float, T)? left = null;
@@ -175,6 +181,8 @@ namespace SharpGLTF.Animations
         /// <returns>Two consecutive offsets and a LERP amount.</returns>
         public static (float, float, float) FindPairContainingOffset(IEnumerable<float> sequence, float offset)
         {
+            Guard.NotNull(sequence, nameof(sequence));
+
             if (!sequence.Any()) return (0, 0, 0);
 
             float? left = null;
@@ -224,6 +232,9 @@ namespace SharpGLTF.Animations
 
         public static Single[] InterpolateLinear(Single[] start, Single[] end, Single amount)
         {
+            Guard.NotNull(start, nameof(start));
+            Guard.NotNull(end, nameof(end));
+
             var startW = 1 - amount;
             var endW = amount;
 
@@ -253,6 +264,11 @@ namespace SharpGLTF.Animations
 
         public static Single[] InterpolateCubic(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
         {
+            Guard.NotNull(start, nameof(start));
+            Guard.NotNull(outgoingTangent, nameof(outgoingTangent));
+            Guard.NotNull(end, nameof(end));
+            Guard.NotNull(incomingTangent, nameof(incomingTangent));
+
             var hermite = CreateHermitePointWeights(amount);
 
             var result = new float[start.Length];
@@ -324,7 +340,7 @@ namespace SharpGLTF.Animations
 
             return new ArrayCubicSampler(collection);
         }
-        
+
         #endregion
     }
 }

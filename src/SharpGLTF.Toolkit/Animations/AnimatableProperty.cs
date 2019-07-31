@@ -14,6 +14,29 @@ namespace SharpGLTF.Animations
     public class AnimatableProperty<T>
         where T : struct
     {
+        #region lifecycle
+
+        internal AnimatableProperty() { }
+
+        internal AnimatableProperty(AnimatableProperty<T> other)
+        {
+            if (other == null) return;
+
+            if (other._Tracks != null)
+            {
+                this._Tracks = new Dictionary<string, ICurveSampler<T>>();
+
+                foreach (var kvp in other._Tracks)
+                {
+                    this._Tracks[kvp.Key] = CurveFactory.CreateCurveBuilder(kvp.Value);
+                }
+            }
+
+            this.Value = other.Value;
+        }
+
+        #endregion
+
         #region data
 
         private Dictionary<string, ICurveSampler<T>> _Tracks;
@@ -28,11 +51,24 @@ namespace SharpGLTF.Animations
 
         #region properties
 
+        public bool IsAnimated => Tracks.Count > 0;
+
         public IReadOnlyDictionary<string, ICurveSampler<T>> Tracks => _Tracks == null ? Collections.EmptyDictionary<string, ICurveSampler<T>>.Instance : _Tracks;
 
         #endregion
 
         #region API
+
+        /// <summary>
+        /// Removes the animation <paramref name="track"/>.
+        /// </summary>
+        /// <param name="track">The name of the track.</param>
+        public void RemoveTrack(string track)
+        {
+            if (_Tracks == null) return;
+            _Tracks.Remove(track);
+            if (_Tracks.Count == 0) _Tracks = null;
+        }
 
         /// <summary>
         /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="track"/>.

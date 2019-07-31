@@ -89,6 +89,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="MODEL"/> instance.</returns>
         public static MODEL Read(Stream stream, ReadSettings settings)
         {
+            Guard.NotNull(stream, nameof(stream));
+
             bool binaryFile = glb._Identify(stream);
 
             if (binaryFile) return ReadGLB(stream, settings);
@@ -158,6 +160,8 @@ namespace SharpGLTF.Schema2
 
         public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
         {
+            Guard.NotNull(files, nameof(files));
+
             var jsonBytes = files[fileName];
 
             var settings = new ReadSettings(fn => files[fn]);

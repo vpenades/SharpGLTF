@@ -18,12 +18,12 @@ namespace SharpGLTF.Schema2
 
         public static Mesh CreateMesh(this ModelRoot root, IMeshBuilder<Materials.MaterialBuilder> mesh)
         {
-            return root.CreateMeshes(mesh).First();
+            return root.CreateMeshes(mesh)[0];
         }
 
         public static Mesh CreateMesh<TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, IMeshBuilder<TMaterial> mesh)
         {
-            return root.CreateMeshes<TMaterial>(materialEvaluator, mesh).First();
+            return root.CreateMeshes<TMaterial>(materialEvaluator, mesh)[0];
         }
 
         public static IReadOnlyList<Mesh> CreateMeshes(this ModelRoot root, params IMeshBuilder<Materials.MaterialBuilder>[] meshBuilders)
@@ -69,6 +69,8 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithIndicesAutomatic(this MeshPrimitive primitive, PrimitiveType primitiveType)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             primitive.DrawPrimitiveType = primitiveType;
@@ -79,6 +81,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, IReadOnlyList<Int32> values)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(values, nameof(values));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             // create an index buffer and fill it
@@ -98,6 +103,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Single> values)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(values, nameof(values));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
@@ -115,6 +123,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector2> values)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(values, nameof(values));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
@@ -132,6 +143,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector3> values)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(values, nameof(values));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
@@ -150,6 +164,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector4> values)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(values, nameof(values));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
@@ -217,6 +234,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<Memory.MemoryAccessor> memAccessors)
         {
+            Guard.NotNull(memAccessors, nameof(memAccessors));
+            Guard.IsTrue(memAccessors.All(item => item != null), nameof(memAccessors));
+
             foreach (var va in memAccessors) primitive.WithVertexAccessor(va);
 
             return primitive;
@@ -224,6 +244,9 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, Memory.MemoryAccessor memAccessor)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.NotNull(memAccessor, nameof(memAccessor));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             primitive.SetVertexAccessor(memAccessor.Attribute.Name, root.CreateVertexAccessor(memAccessor));
@@ -233,6 +256,8 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, Memory.MemoryAccessor memAccessor)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+
             var root = primitive.LogicalParent.LogicalParent;
 
             var accessor = root.CreateAccessor();
@@ -251,6 +276,8 @@ namespace SharpGLTF.Schema2
 
         public static MeshPrimitive WithMaterial(this MeshPrimitive primitive, Material material)
         {
+            Guard.NotNull(primitive, nameof(primitive));
+
             primitive.Material = material;
             return primitive;
         }
@@ -259,157 +286,18 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
+        public static int GetPrimitiveVertexSize(this PrimitiveType ptype)
         {
-            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();
-
-            return mesh.Primitives.SelectMany(item => item.EvaluatePoints(xform));
-        }
-
-        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this MeshPrimitive prim, MESHXFORM xform = null)
-        {
-            if (prim == null) yield break;
-            if (xform != null && !xform.Visible) yield break;
-
-            var points = prim.GetPointIndices();
-            if (!points.Any()) yield break;
-
-            var vertices = prim.GetVertexColumns(xform);
-
-            var vtype = vertices.GetCompatibleVertexType();
-
-            foreach (var t in points)
+            switch (ptype)
             {
-                var a = vertices.GetVertex(vtype, t);
-
-                yield return (a, prim.Material);
-            }
-        }
-
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this Mesh mesh, MESHXFORM xform = null)
-        {
-            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, Material)>();
-
-            return mesh.Primitives.SelectMany(item => item.EvaluateLines(xform));
-        }
-
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this MeshPrimitive prim, MESHXFORM xform = null)
-        {
-            if (prim == null) yield break;
-            if (xform != null && !xform.Visible) yield break;
-
-            var lines = prim.GetLineIndices();
-            if (!lines.Any()) yield break;
-
-            var vertices = prim.GetVertexColumns(xform);
-
-            var vtype = vertices.GetCompatibleVertexType();
-
-            foreach (var t in lines)
-            {
-                var a = vertices.GetVertex(vtype, t.Item1);
-                var b = vertices.GetVertex(vtype, t.Item2);
-
-                yield return (a, b, prim.Material);
-            }
-        }
-
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Mesh mesh, MESHXFORM xform = null)
-        {
-            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
-
-            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles(xform));
-        }
-
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this MeshPrimitive prim, MESHXFORM xform = null)
-        {
-            if (prim == null) yield break;
-            if (xform != null && !xform.Visible) yield break;
-
-            var triangles = prim.GetTriangleIndices();
-            if (!triangles.Any()) yield break;
-
-            var vertices = prim.GetVertexColumns(xform);
-
-            var vtype = vertices.GetCompatibleVertexType();
-
-            foreach (var t in triangles)
-            {
-                var a = vertices.GetVertex(vtype, t.Item1);
-                var b = vertices.GetVertex(vtype, t.Item2);
-                var c = vertices.GetVertex(vtype, t.Item3);
-
-                yield return (a, b, c, prim.Material);
-            }
-        }
-
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
-
-            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM, TvS>());
-        }
-
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            if (prim == null) yield break;
-
-            var vertices = prim.GetVertexColumns();
-            var triangles = prim.GetTriangleIndices();
-
-            bool hasNormals = vertices.Normals != null;
-
-            foreach (var t in triangles)
-            {
-                var a = vertices.GetVertex<TvG, TvM, TvS>(t.Item1);
-                var b = vertices.GetVertex<TvG, TvM, TvS>(t.Item2);
-                var c = vertices.GetVertex<TvG, TvM, TvS>(t.Item3);
-
-                if (!hasNormals)
-                {
-                    var n = Vector3.Cross(b.Position - a.Position, c.Position - a.Position);
-                    n = Vector3.Normalize(n);
-                    a.Geometry.SetNormal(n);
-                    b.Geometry.SetNormal(n);
-                    c.Geometry.SetNormal(n);
-                }
-
-                yield return (a, b, c, prim.Material);
-            }
-        }
-
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Mesh mesh, MESHXFORM xform)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-        {
-            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
-
-            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM>(xform));
-        }
-
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this MeshPrimitive prim, MESHXFORM xform)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-        {
-            if (prim == null) yield break;
-            if (xform == null || !xform.Visible) yield break;
-
-            var vertices = prim.GetVertexColumns(xform);
-            var triangles = prim.GetTriangleIndices();
-
-            foreach (var t in triangles)
-            {
-                var a = vertices.GetVertex<TvG, TvM>(t.Item1);
-                var b = vertices.GetVertex<TvG, TvM>(xform.FlipFaces ? t.Item3 : t.Item2);
-                var c = vertices.GetVertex<TvG, TvM>(xform.FlipFaces ? t.Item2 : t.Item3);
-
-                yield return ((a.Geometry, a.Material), (b.Geometry, b.Material), (c.Geometry, c.Material), prim.Material);
+                case PrimitiveType.POINTS: return 1;
+                case PrimitiveType.LINES: return 2;
+                case PrimitiveType.LINE_LOOP: return 2;
+                case PrimitiveType.LINE_STRIP: return 2;
+                case PrimitiveType.TRIANGLES: return 3;
+                case PrimitiveType.TRIANGLE_FAN: return 3;
+                case PrimitiveType.TRIANGLE_STRIP: return 3;
+                default: throw new NotImplementedException();
             }
         }
 
@@ -440,18 +328,128 @@ namespace SharpGLTF.Schema2
             return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
         }
 
-        public static int GetPrimitiveVertexSize(this PrimitiveType ptype)
+        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
         {
-            switch (ptype)
+            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluatePoints(xform));
+        }
+
+        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this MeshPrimitive prim, MESHXFORM xform = null)
+        {
+            if (prim == null) yield break;
+            if (xform != null && !xform.Visible) yield break;
+
+            var points = prim.GetPointIndices();
+            if (!points.Any()) yield break;
+
+            var vertices = prim.GetVertexColumns(xform);
+            var vtype = vertices.GetCompatibleVertexType();
+
+            foreach (var t in points)
             {
-                case PrimitiveType.POINTS: return 1;
-                case PrimitiveType.LINES: return 2;
-                case PrimitiveType.LINE_LOOP: return 2;
-                case PrimitiveType.LINE_STRIP: return 2;
-                case PrimitiveType.TRIANGLES: return 3;
-                case PrimitiveType.TRIANGLE_FAN: return 3;
-                case PrimitiveType.TRIANGLE_STRIP: return 3;
-                default: throw new NotImplementedException();
+                var a = vertices.GetVertex(vtype, t);
+
+                yield return (a, prim.Material);
+            }
+        }
+
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this Mesh mesh, MESHXFORM xform = null)
+        {
+            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateLines(xform));
+        }
+
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this MeshPrimitive prim, MESHXFORM xform = null)
+        {
+            if (prim == null) yield break;
+            if (xform != null && !xform.Visible) yield break;
+
+            var lines = prim.GetLineIndices();
+            if (!lines.Any()) yield break;
+
+            var vertices = prim.GetVertexColumns(xform);
+            var vtype = vertices.GetCompatibleVertexType();
+
+            foreach (var t in lines)
+            {
+                var a = vertices.GetVertex(vtype, t.Item1);
+                var b = vertices.GetVertex(vtype, t.Item2);
+
+                yield return (a, b, prim.Material);
+            }
+        }
+
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Mesh mesh, MESHXFORM xform = null)
+        {
+            if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles(xform));
+        }
+
+        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this MeshPrimitive prim, MESHXFORM xform = null)
+        {
+            if (prim == null) yield break;
+            if (xform != null && !xform.Visible) yield break;
+
+            var triangles = prim.GetTriangleIndices();
+            if (!triangles.Any()) yield break;
+
+            var vertices = prim.GetVertexColumns(xform);
+            var vtype = vertices.GetCompatibleVertexType();
+
+            foreach (var t in triangles)
+            {
+                var a = vertices.GetVertex(vtype, t.Item1);
+                var b = vertices.GetVertex(vtype, t.Item2);
+                var c = vertices.GetVertex(vtype, t.Item3);
+
+                yield return (a, b, c, prim.Material);
+            }
+        }
+
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh, MESHXFORM xform = null)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
+
+            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM, TvS>(xform));
+        }
+
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim, MESHXFORM xform = null)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            if (prim == null) yield break;
+            if (xform != null && !xform.Visible) yield break;
+
+            var triangles = prim.GetTriangleIndices();
+            if (!triangles.Any()) yield break;
+
+            var vertices = prim.GetVertexColumns(xform);
+
+            bool hasNormals = vertices.Normals != null;
+
+            foreach (var t in triangles)
+            {
+                var a = vertices.GetVertex<TvG, TvM, TvS>(t.Item1);
+                var b = vertices.GetVertex<TvG, TvM, TvS>(t.Item2);
+                var c = vertices.GetVertex<TvG, TvM, TvS>(t.Item3);
+
+                if (!hasNormals)
+                {
+                    var n = Vector3.Cross(b.Position - a.Position, c.Position - a.Position);
+                    n = Vector3.Normalize(n);
+                    a.Geometry.SetNormal(n);
+                    b.Geometry.SetNormal(n);
+                    c.Geometry.SetNormal(n);
+                }
+
+                yield return (a, b, c, prim.Material);
             }
         }
 
@@ -554,16 +552,18 @@ namespace SharpGLTF.Schema2
             where TvS : struct, IVertexSkinning
         {
             Guard.NotNull(meshBuilder, nameof(meshBuilder));
+            Guard.NotNull(materialFunc, nameof(materialFunc));
 
             if (srcMesh == null) return;
 
-            Guard.NotNull(materialFunc, nameof(materialFunc));
-
             foreach (var srcPrim in srcMesh.Primitives)
             {
-                var dstPrim = meshBuilder.UsePrimitive(materialFunc(srcPrim.Material));
+                if (srcPrim != null) continue;
 
-                foreach (var tri in srcPrim.EvaluateTriangles<TvG, TvM, TvS>())
+                var dstMat = materialFunc(srcPrim.Material);
+                var dstPrim = meshBuilder.UsePrimitive(dstMat);
+
+                foreach (var tri in srcPrim.EvaluateTriangles<TvG, TvM, TvS>(null))
                 {
                     dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
                 }
@@ -578,11 +578,11 @@ namespace SharpGLTF.Schema2
         /// <typeparam name="TvG">A subtype of <see cref="IVertexGeometry"/></typeparam>
         /// <typeparam name="TvM">A subtype of <see cref="IVertexMaterial"/></typeparam>
         /// <param name="srcScene">The source <see cref="Scene"/> to evaluate.</param>
+        /// <param name="materialFunc">A function to convert <see cref="Material"/> into <typeparamref name="TMaterial"/>.</param>
         /// <param name="animation">The source <see cref="Animation"/> to evaluate.</param>
         /// <param name="time">A time point, in seconds, within <paramref name="animation"/>.</param>
-        /// <param name="materialFunc">A function to convert <see cref="Material"/> into <typeparamref name="TMaterial"/>.</param>
         /// <returns>A new <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}"/> containing the evaluated geometry.</returns>
-        public static MeshBuilder<TMaterial, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TMaterial, TvG, TvM>(this Scene srcScene, Animation animation, float time, Func<Material, TMaterial> materialFunc)
+        public static MeshBuilder<TMaterial, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TMaterial, TvG, TvM>(this Scene srcScene, Func<Material, TMaterial> materialFunc, Animation animation, float time)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -624,7 +624,7 @@ namespace SharpGLTF.Schema2
                 return materials[srcMaterial] = dstMaterial;
             }
 
-            return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(animation, time, convertMaterial);
+            return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(convertMaterial, animation, time);
         }
 
         public static IMeshBuilder<Materials.MaterialBuilder> ToMeshBuilder(this Mesh srcMesh)
@@ -675,7 +675,7 @@ namespace SharpGLTF.Schema2
             foreach (var srcTri in srcMesh.EvaluateLines())
             {
                 var dstPrim = GetPrimitive(srcTri.Item3, 2);
-                dstPrim.AddLine(srcTri.Item1,srcTri.Item2);
+                dstPrim.AddLine(srcTri.Item1, srcTri.Item2);
             }
 
             foreach (var srcTri in srcMesh.EvaluateTriangles())

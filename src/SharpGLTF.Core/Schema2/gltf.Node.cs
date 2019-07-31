@@ -209,7 +209,7 @@ namespace SharpGLTF.Schema2
             {
                 if (value == null) { this._camera = null; return; }
 
-                Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+                Guard.MustShareLogicalParent(this.LogicalParent, nameof(this.LogicalParent), value, nameof(value));
 
                 this._camera = value.LogicalIndex;
             }
@@ -225,7 +225,7 @@ namespace SharpGLTF.Schema2
             {
                 if (value == null) { this._mesh = null; return; }
 
-                Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+                Guard.MustShareLogicalParent(this.LogicalParent, nameof(this.LogicalParent), value, nameof(value));
 
                 this._mesh = value.LogicalIndex;
             }
@@ -241,7 +241,7 @@ namespace SharpGLTF.Schema2
             {
                 if (value == null) { this._skin = null; return; }
 
-                Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+                Guard.MustShareLogicalParent(this.LogicalParent, nameof(this.LogicalParent), value, nameof(value));
 
                 Guard.IsFalse(_matrix.HasValue, _NOTRANSFORMMESSAGE);
                 Guard.IsFalse(_scale.HasValue, _NOTRANSFORMMESSAGE);

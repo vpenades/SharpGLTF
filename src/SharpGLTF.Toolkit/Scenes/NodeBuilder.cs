@@ -31,6 +31,9 @@ namespace SharpGLTF.Scenes
         private readonly List<NodeBuilder> _Children = new List<NodeBuilder>();
 
         private Matrix4x4? _Matrix;
+        private Animations.AnimatableProperty<Vector3> _Scale;
+        private Animations.AnimatableProperty<Quaternion> _Rotation;
+        private Animations.AnimatableProperty<Vector3> _Translation;
 
         #endregion
 
@@ -48,13 +51,16 @@ namespace SharpGLTF.Scenes
 
         #region properties - transform
 
-        public bool HasAnimations => Scale?.Tracks.Count > 0 || Rotation?.Tracks.Count > 0 || Translation?.Tracks.Count > 0;
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="NodeBuilder"/> has animations.
+        /// </summary>
+        public bool HasAnimations => (_Scale?.IsAnimated ?? false) || (_Rotation?.IsAnimated ?? false) || (_Translation?.IsAnimated ?? false);
 
-        public Animations.AnimatableProperty<Vector3> Scale { get; private set; }
+        public Animations.AnimatableProperty<Vector3> Scale => _Scale;
 
-        public Animations.AnimatableProperty<Quaternion> Rotation { get; private set; }
+        public Animations.AnimatableProperty<Quaternion> Rotation => _Rotation;
 
-        public Animations.AnimatableProperty<Vector3> Translation { get; private set; }
+        public Animations.AnimatableProperty<Vector3> Translation => _Translation;
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.
@@ -64,18 +70,12 @@ namespace SharpGLTF.Scenes
             get => Transforms.AffineTransform.Evaluate(_Matrix, Scale?.Value, Rotation?.Value, Translation?.Value);
             set
             {
-                if (value == Matrix4x4.Identity)
-                {
-                    _Matrix = null;
-                }
-                else
-                {
-                    _Matrix = value;
-                }
+                if (HasAnimations) { _DecomposeMatrix(value); return; }
 
-                Scale = null;
-                Rotation = null;
-                Translation = null;
+                _Matrix = value != Matrix4x4.Identity ? value : (Matrix4x4?)null;
+                _Scale = null;
+                _Rotation = null;
+                _Translation = null;
             }
         }
 
@@ -95,23 +95,9 @@ namespace SharpGLTF.Scenes
 
                 _Matrix = null;
 
-                if (value.Scale != Vector3.One)
-                {
-                    if (Scale == null) Scale = new Animations.AnimatableProperty<Vector3>();
-                    Scale.Value = value.Scale;
-                }
-
-                if (value.Rotation != Quaternion.Identity)
-                {
-                    if (Rotation == null) Rotation = new Animations.AnimatableProperty<Quaternion>();
-                    Rotation.Value = value.Rotation;
-                }
-
-                if (value.Translation != Vector3.Zero)
-                {
-                    if (Translation == null) Translation = new Animations.AnimatableProperty<Vector3>();
-                    Translation.Value = value.Translation;
-                }
+                if (value.Scale != Vector3.One) UseScale().Value = value.Scale;
+                if (value.Rotation != Quaternion.Identity) UseRotation().Value = value.Rotation;
+                if (value.Translation != Vector3.Zero) UseTranslation().Value = value.Translation;
             }
         }
 
@@ -134,7 +120,7 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
-        #region API
+        #region API - hierarchy
 
         public NodeBuilder CreateNode(string name = null)
         {
@@ -144,15 +130,54 @@ namespace SharpGLTF.Scenes
             return c;
         }
 
+        /// <summary>
+        /// Checks if the collection of joints can be used for skinning a mesh.
+        /// </summary>
+        /// <param name="joints">A collection of joints.</param>
+        /// <returns>True if the joints can be used for skinning.</returns>
+        public static bool IsValidArmature(IEnumerable<NodeBuilder> joints)
+        {
+            if (joints == null) return false;
+            if (!joints.Any()) return false;
+            if (joints.Any(item => item == null)) return false;
+
+            var root = joints.First().Root;
+
+            return joints.All(item => Object.ReferenceEquals(item.Root, root));
+        }
+
+        #endregion
+
+        #region API - transform
+
+        private void _DecomposeMatrix()
+        {
+            if (!_Matrix.HasValue) return;
+            if (_Matrix.Value == Matrix4x4.Identity) return;
+            _DecomposeMatrix(_Matrix.Value);
+            _Matrix = null;
+        }
+
+        private void _DecomposeMatrix(Matrix4x4 matrix)
+        {
+            var affine = Transforms.AffineTransform.Create(matrix);
+
+            UseScale().Value = affine.Scale;
+            UseRotation().Value = affine.Rotation;
+            UseTranslation().Value = affine.Translation;
+        }
+
         public Animations.AnimatableProperty<Vector3> UseScale()
         {
-            if (Scale == null)
+            _DecomposeMatrix();
+
+            if (_Scale == null)
             {
-                Scale = new Animations.AnimatableProperty<Vector3>();
-                Scale.Value = Vector3.One;
+                _Scale = new Animations.AnimatableProperty<Vector3>();
+                _Scale.Value = Vector3.One;
             }
 
-            return Scale;
+            return _Scale;
         }
 
         public Animations.CurveBuilder<Vector3> UseScale(string animationTrack)
@@ -162,13 +187,15 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<Quaternion> UseRotation()
         {
-            if (Rotation == null)
+            _DecomposeMatrix();
+
+            if (_Rotation == null)
             {
-                Rotation = new Animations.AnimatableProperty<Quaternion>();
-                Rotation.Value = Quaternion.Identity;
+                _Rotation = new Animations.AnimatableProperty<Quaternion>();
+                _Rotation.Value = Quaternion.Identity;
             }
 
-            return Rotation;
+            return _Rotation;
         }
 
         public Animations.CurveBuilder<Quaternion> UseRotation(string animationTrack)
@@ -178,13 +205,15 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<Vector3> UseTranslation()
         {
-            if (Translation == null)
+            _DecomposeMatrix();
+
+            if (_Translation == null)
             {
-                Translation = new Animations.AnimatableProperty<Vector3>();
-                Translation.Value = Vector3.Zero;
+                _Translation = new Animations.AnimatableProperty<Vector3>();
+                _Translation.Value = Vector3.Zero;
             }
 
-            return Translation;
+            return _Translation;
         }
 
         public Animations.CurveBuilder<Vector3> UseTranslation(string animationTrack)
@@ -218,17 +247,6 @@ namespace SharpGLTF.Scenes
             return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
         }
 
-        public static bool IsValidArmature(IEnumerable<NodeBuilder> joints)
-        {
-            if (joints == null) return false;
-            if (!joints.Any()) return false;
-            if (joints.Any(item => item == null)) return false;
-
-            var root = joints.First().Root;
-
-            return joints.All(item => Object.ReferenceEquals(item.Root, root));
-        }
-
         #endregion
 
         #region With* API
@@ -236,6 +254,18 @@ namespace SharpGLTF.Scenes
         public NodeBuilder WithLocalTranslation(Vector3 translation)
         {
             this.UseTranslation().Value = translation;
+            return this;
+        }
+
+        public NodeBuilder WithLocalScale(Vector3 scale)
+        {
+            this.UseScale().Value = scale;
+            return this;
+        }
+
+        public NodeBuilder WithLocalRotation(Quaternion rotation)
+        {
+            this.UseRotation().Value = rotation;
             return this;
         }
 

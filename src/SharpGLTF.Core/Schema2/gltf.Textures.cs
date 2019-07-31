@@ -83,6 +83,7 @@ namespace SharpGLTF.Schema2
 
         public void SetImage(Image primaryImage)
         {
+            Guard.NotNull(primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
 
             if (primaryImage.IsDds || primaryImage.IsWebp)
@@ -99,6 +100,8 @@ namespace SharpGLTF.Schema2
 
         public void SetImages(Image primaryImage, Image fallbackImage)
         {
+            Guard.NotNull(primaryImage, nameof(primaryImage));
+            Guard.NotNull(fallbackImage, nameof(fallbackImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
             Guard.IsTrue(primaryImage.IsDds || primaryImage.IsWebp, "Primary image must be DDS or WEBP");
@@ -304,9 +307,9 @@ namespace SharpGLTF.Schema2
                 return null;
             }
 
-            if (primary  != null) Guard.MustShareLogicalParent(this, primary, nameof(primary));
-            if (fallback != null) Guard.MustShareLogicalParent(this, fallback, nameof(primary));
-            if (sampler  != null) Guard.MustShareLogicalParent(this, sampler, nameof(sampler));
+            if (primary  != null) Guard.MustShareLogicalParent(this, "this", primary, nameof(primary));
+            if (fallback != null) Guard.MustShareLogicalParent(this, "this", fallback, nameof(primary));
+            if (sampler  != null) Guard.MustShareLogicalParent(this, "this", sampler, nameof(sampler));
 
             // find if we have an equivalent texture
             var tex = _textures.FirstOrDefault(item => item._IsEqualentTo(primary, fallback, sampler));

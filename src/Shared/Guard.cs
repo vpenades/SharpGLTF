@@ -34,8 +34,8 @@ namespace SharpGLTF
 
             bool isDir = false;
 
-            isDir |= filePath.EndsWith(System.IO.Path.DirectorySeparatorChar.ToString());
-            isDir |= filePath.EndsWith(System.IO.Path.AltDirectorySeparatorChar.ToString());
+            isDir |= filePath.EndsWith(new String(System.IO.Path.DirectorySeparatorChar, 1), StringComparison.Ordinal);
+            isDir |= filePath.EndsWith(new String(System.IO.Path.AltDirectorySeparatorChar, 1), StringComparison.Ordinal);
 
             if (!isDir) return;
 
@@ -167,15 +167,15 @@ namespace SharpGLTF
 
         public static void MustShareLogicalParent(Schema2.LogicalChildOfRoot a, Schema2.LogicalChildOfRoot b, string parameterName)
         {
-            MustShareLogicalParent(a?.LogicalParent, b, parameterName);
+            MustShareLogicalParent(a?.LogicalParent, nameof(a.LogicalParent), b, parameterName);
         }
 
-        public static void MustShareLogicalParent(Schema2.ModelRoot a, Schema2.LogicalChildOfRoot b, string parameterName)
+        public static void MustShareLogicalParent(Schema2.ModelRoot a, string aName, Schema2.LogicalChildOfRoot b, string bName)
         {
-            if (a is null) throw new ArgumentNullException("this");
-            if (b is null) throw new ArgumentNullException(parameterName);
+            if (a is null) throw new ArgumentNullException(aName);
+            if (b is null) throw new ArgumentNullException(bName);
 
-            if (a != b.LogicalParent) throw new ArgumentException("LogicalParent mismatch", parameterName);
+            if (a != b.LogicalParent) throw new ArgumentException("LogicalParent mismatch", bName);
         }
 
         #endregion

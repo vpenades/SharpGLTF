@@ -22,6 +22,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="PunctualLight"/> instance.</returns>
         public static PunctualLight WithSpotCone(this PunctualLight light, float innerConeAngle, float outerConeAngle)
         {
+            Guard.NotNull(light, nameof(light));
+
             light.SetSpotCone(innerConeAngle, outerConeAngle);
             return light;
         }
@@ -44,6 +46,8 @@ namespace SharpGLTF.Schema2
         /// <returns>This <see cref="PunctualLight"/> instance.</returns>
         public static PunctualLight WithColor(this PunctualLight light, Vector3 color, float intensity = 1, float range = 0)
         {
+            Guard.NotNull(light, nameof(light));
+
             light.Color = color;
             light.Intensity = intensity;
             light.Range = range;

@@ -36,7 +36,7 @@ namespace SharpGLTF.Scenes
             // gather all MaterialBuilder unique instances
 
             var materialGroups = srcScene.Instances
-                .Select(item => item.GetGeometryAsset())
+                .Select(item => item.Content?.GetGeometryAsset())
                 .Where(item => item != null)
                 .SelectMany(item => item.Primitives)
                 .Select(item => item.Material)
@@ -60,7 +60,7 @@ namespace SharpGLTF.Scenes
             // and group them by their vertex attribute layout.
 
             var meshGroups = srcScene.Instances
-            .Select(item => item.GetGeometryAsset())
+            .Select(item => item.Content?.GetGeometryAsset())
             .Where(item => item != null)
             .Distinct()
             .ToList()
@@ -83,7 +83,7 @@ namespace SharpGLTF.Scenes
             // gather all NodeBuilder unique armatures
 
             var armatures = srcScene.Instances
-                .Select(item => item.GetArmatureAsset())
+                .Select(item => item.Content?.GetArmatureAsset())
                 .Where(item => item != null)
                 .Select(item => item.Root)
                 .Distinct()
@@ -98,7 +98,11 @@ namespace SharpGLTF.Scenes
 
             // process instances
 
-            foreach (var inst in srcScene.Instances)
+            var schema2Instances = srcScene
+                .Instances
+                .OfType<IOperator<Scene>>();
+
+            foreach (var inst in schema2Instances)
             {
                 inst.Setup(dstScene, this);
             }
@@ -129,6 +133,15 @@ namespace SharpGLTF.Scenes
             }
 
             foreach (var c in srcNode.Children) CreateArmature(dstNode, c);
+        }
+
+        #endregion
+
+        #region types
+
+        public interface IOperator<T>
+        {
+            void Setup(T dst, Schema2SceneBuilder context);
         }
 
         #endregion

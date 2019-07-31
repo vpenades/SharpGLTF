@@ -35,6 +35,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexColor1(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
         }
 
@@ -94,6 +96,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexColor2(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
             this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
         }
@@ -153,6 +157,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexTexture1(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
@@ -212,6 +218,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexTexture2(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
@@ -275,11 +283,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexColor1Texture1(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
             this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
-        public static implicit operator VertexColor1Texture1((Vector4,Vector2) coloruv)
+        public static implicit operator VertexColor1Texture1((Vector4, Vector2) coloruv)
         {
             return new VertexColor1Texture1(coloruv.Item1, coloruv.Item2);
         }
@@ -340,6 +350,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexColor1Texture2(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
             this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
@@ -413,6 +425,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexColor2Texture2(IVertexMaterial src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
             this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
             this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;

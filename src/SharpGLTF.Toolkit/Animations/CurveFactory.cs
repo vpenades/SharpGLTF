@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
+using SPARSE = SharpGLTF.Transforms.SparseWeight8;
+
 namespace SharpGLTF.Animations
 {
-    using SPARSE = Transforms.SparseWeight8;
-
     static class CurveFactory
     {
         public static CurveBuilder<T> CreateCurveBuilder<T>()
@@ -16,7 +16,17 @@ namespace SharpGLTF.Animations
             if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(SPARSE)) return new SparseCurveBuilder() as CurveBuilder<T>;
 
-            throw new ArgumentException(nameof(T), "Generic argument not supported");
+            throw new ArgumentException($"{nameof(T)} not supported.", nameof(T));
+        }
+
+        public static CurveBuilder<T> CreateCurveBuilder<T>(ICurveSampler<T> curve)
+            where T : struct
+        {
+            if (curve is Vector3CurveBuilder v3cb) return v3cb.Clone() as CurveBuilder<T>;
+            if (curve is QuaternionCurveBuilder q4cb) return q4cb.Clone() as CurveBuilder<T>;
+            if (curve is SparseCurveBuilder sscb) return sscb.Clone() as CurveBuilder<T>;
+
+            throw new ArgumentException($"{nameof(T)} not supported.", nameof(T));
         }
     }
 

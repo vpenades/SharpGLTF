@@ -184,6 +184,9 @@ namespace SharpGLTF.Schema2
         /// <param name="reader">The source reader.</param>
         protected override void DeserializeProperty(string property, JsonReader reader)
         {
+            Guard.NotNullOrEmpty(property, nameof(property));
+            Guard.NotNull(reader, nameof(reader));
+
             switch (property)
             {
                 case "extensions": _DeserializeExtensions(this, reader, _extensions); break;

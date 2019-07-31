@@ -35,6 +35,12 @@ scene.SaveGLB("scene.glb");
 In order to have a hierarchical tree of nodes, you use the NodeBuilder object, with
 which you can create standalone nodes, or whole skeleton armatures.
 
+```c#
+var root = new NodeBuilder("root");
+var child = root.CreateNode("child");
+
+```
+
 In this way, NodeBuilder armatures become just another asset, like a mesh or a material,
 and a scene is just a collection of instances to be rendered.
 

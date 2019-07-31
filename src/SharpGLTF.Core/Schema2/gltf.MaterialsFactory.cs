@@ -165,7 +165,7 @@ namespace SharpGLTF.Schema2
             set => _baseColorFactor = value.AsNullable(_baseColorFactorDefault);
         }
 
-        public static Vector4 ParameterDefault => new Vector4((float)_metallicFactorDefault, (float)_roughnessFactorDefault,0,0);
+        public static Vector4 ParameterDefault => new Vector4((float)_metallicFactorDefault, (float)_roughnessFactorDefault, 0, 0);
 
         public Vector4 Parameter
         {

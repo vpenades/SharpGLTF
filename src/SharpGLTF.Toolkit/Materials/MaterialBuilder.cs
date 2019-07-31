@@ -120,7 +120,7 @@ namespace SharpGLTF.Materials
             get => _CompatibilityFallbackMaterial;
             set
             {
-                if (_CompatibilityFallbackMaterial == this) throw new ArgumentException(nameof(value));
+                Guard.IsFalse(_CompatibilityFallbackMaterial == this, nameof(value), "Cannot use self as fallback material");
                 _CompatibilityFallbackMaterial = value;
             }
         }
@@ -176,7 +176,7 @@ namespace SharpGLTF.Materials
         {
             Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
 
-            channelKey = channelKey.ToLower();
+            channelKey = channelKey.ToLowerInvariant();
 
             return _Channels.FirstOrDefault(item => string.Equals(channelKey, item.Key, StringComparison.OrdinalIgnoreCase));
         }
@@ -230,7 +230,7 @@ namespace SharpGLTF.Materials
         {
             this.UseChannel(channelKey)
                 .UseTexture()
-                .WithImage(primaryImagePath);
+                .WithPrimaryImage(primaryImagePath);
 
             return this;
         }
@@ -239,7 +239,7 @@ namespace SharpGLTF.Materials
         {
             this.UseChannel(channelKey)
                 .UseTexture()
-                .WithImage(primaryImagePath);
+                .WithPrimaryImage(primaryImagePath);
 
             return this;
         }

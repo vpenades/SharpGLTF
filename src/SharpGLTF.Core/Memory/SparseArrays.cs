@@ -67,7 +67,7 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(T item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(T[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(T[] array, int arrayIndex) { Guard.NotNull(array, nameof(array)); this._CopyTo(array, arrayIndex); }
 
         void IList<T>.Insert(int index, T item) { throw new NotSupportedException(); }
 

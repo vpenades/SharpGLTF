@@ -11,11 +11,13 @@ using static System.FormattableString;
 
 namespace SharpGLTF.IO
 {
+    #pragma warning disable SA1135 // Using directives should be qualified
     using BYTES = ArraySegment<Byte>;
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VERTEX = Geometry.VertexBuilder<Geometry.VertexTypes.VertexPositionNormal, Geometry.VertexTypes.VertexTexture1, Geometry.VertexTypes.VertexEmpty>;
     using VGEOMETRY = Geometry.VertexTypes.VertexPositionNormal;
     using VMATERIAL = Geometry.VertexTypes.VertexTexture1;
+    #pragma warning restore SA1135 // Using directives should be qualified
 
     /// <summary>
     /// Tiny wavefront object writer
@@ -91,7 +93,7 @@ namespace SharpGLTF.IO
             }
         }
 
-        private IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
+        private static IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
             var images = materials

@@ -15,6 +15,8 @@ namespace SharpGLTF.Memory
     /// </summary>
     struct FloatingAccessor
     {
+        private const string ERR_UNSUPPORTEDENCODING = "Unsupported encoding.";
+
         #region constructors
 
         public FloatingAccessor(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)
@@ -72,7 +74,7 @@ namespace SharpGLTF.Memory
                             break;
                         }
 
-                    default: throw new ArgumentException(nameof(encoding));
+                    default: throw new ArgumentException(ERR_UNSUPPORTEDENCODING, nameof(encoding));
                 }
             }
             else
@@ -117,7 +119,7 @@ namespace SharpGLTF.Memory
                     case ENCODING.FLOAT:
                         break;
 
-                    default: throw new ArgumentException(nameof(encoding));
+                    default: throw new ArgumentException("Unsupported encoding.", nameof(encoding));
                 }
             }
         }
@@ -919,7 +921,9 @@ namespace SharpGLTF.Memory
 
         bool ICollection<Single[]>.IsReadOnly => false;
 
+        #pragma warning disable CA1819 // Properties should not return arrays
         public Single[] this[int index]
+        #pragma warning restore CA1819 // Properties should not return arrays
         {
             get
             {

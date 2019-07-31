@@ -372,7 +372,20 @@ namespace SharpGLTF
 
             return false;
         }
-        
+
+        internal static bool _IsImage(this IReadOnlyList<Byte> image, string format)
+        {
+            if (string.IsNullOrWhiteSpace(format)) return image._IsImage();
+
+            if (format.EndsWith("png", StringComparison.OrdinalIgnoreCase)) return image._IsPngImage();
+            if (format.EndsWith("jpg", StringComparison.OrdinalIgnoreCase)) return image._IsJpgImage();
+            if (format.EndsWith("jpeg", StringComparison.OrdinalIgnoreCase)) return image._IsJpgImage();
+            if (format.EndsWith("dds", StringComparison.OrdinalIgnoreCase)) return image._IsDdsImage();
+            if (format.EndsWith("webp", StringComparison.OrdinalIgnoreCase)) return image._IsWebpImage();
+
+            return false;
+        }
+
         #endregion
 
         #region vertex & index accessors

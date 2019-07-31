@@ -225,9 +225,9 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] worldXforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
-            Update(invBindings, xforms, morphWeights, useAbsoluteMorphTargets);
+            Update(invBindings, worldXforms, morphWeights, useAbsoluteMorphTargets);
         }
 
         #endregion
@@ -240,11 +240,11 @@ namespace SharpGLTF.Transforms
 
         #region API
 
-        public void Update(TRANSFORM[] invBindings, TRANSFORM[] xforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public void Update(TRANSFORM[] invBindings, TRANSFORM[] worldXforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
             Guard.NotNull(invBindings, nameof(invBindings));
-            Guard.NotNull(xforms, nameof(xforms));
-            Guard.IsTrue(invBindings.Length == xforms.Length, nameof(xforms), $"{invBindings} and {xforms} length mismatch.");
+            Guard.NotNull(worldXforms, nameof(worldXforms));
+            Guard.IsTrue(invBindings.Length == worldXforms.Length, nameof(worldXforms), $"{invBindings} and {worldXforms} length mismatch.");
 
             Update(morphWeights, useAbsoluteMorphTargets);
 
@@ -252,7 +252,7 @@ namespace SharpGLTF.Transforms
 
             for (int i = 0; i < _JointTransforms.Length; ++i)
             {
-                _JointTransforms[i] = invBindings[i] * xforms[i];
+                _JointTransforms[i] = invBindings[i] * worldXforms[i];
             }
         }
 
@@ -262,6 +262,8 @@ namespace SharpGLTF.Transforms
 
         public V3 TransformPosition(V3 localPosition, V3[] morphTargets, (int, float)[] skinWeights)
         {
+            Guard.NotNull(skinWeights, nameof(skinWeights));
+
             localPosition = MorphVectors(localPosition, morphTargets);
 
             var worldPosition = V3.Zero;
@@ -278,6 +280,8 @@ namespace SharpGLTF.Transforms
 
         public V3 TransformNormal(V3 localNormal, V3[] morphTargets, (int, float)[] skinWeights)
         {
+            Guard.NotNull(skinWeights, nameof(skinWeights));
+
             localNormal = MorphVectors(localNormal, morphTargets);
 
             var worldNormal = V3.Zero;
@@ -292,6 +296,8 @@ namespace SharpGLTF.Transforms
 
         public V4 TransformTangent(V4 localTangent, V3[] morphTargets, (int, float)[] skinWeights)
         {
+            Guard.NotNull(skinWeights, nameof(skinWeights));
+
             var localTangentV = MorphVectors(new V3(localTangent.X, localTangent.Y, localTangent.Z), morphTargets);
 
             var worldTangent = V3.Zero;

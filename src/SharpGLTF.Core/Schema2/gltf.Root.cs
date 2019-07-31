@@ -134,7 +134,7 @@ namespace SharpGLTF.Schema2
                     return;
                 }
 
-                Guard.MustShareLogicalParent(this, value, nameof(value));
+                Guard.MustShareLogicalParent(this, "this", value, nameof(value));
 
                 _scene = value.LogicalIndex;
             }

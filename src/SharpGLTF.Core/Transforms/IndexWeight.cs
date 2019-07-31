@@ -5,7 +5,6 @@ using System.Text;
 
 namespace SharpGLTF.Transforms
 {
-
     [System.Diagnostics.DebuggerDisplay("{Index} = {Weight}")]
     readonly struct IndexWeight
     {
@@ -17,7 +16,7 @@ namespace SharpGLTF.Transforms
             Weight = pair.Item2;
         }
 
-        public static implicit operator IndexWeight((int, float) pair) {return new IndexWeight(pair.Item1, pair.Item2); }
+        public static implicit operator IndexWeight((int, float) pair) { return new IndexWeight(pair.Item1, pair.Item2); }
 
         public IndexWeight(int i, float w)
         {

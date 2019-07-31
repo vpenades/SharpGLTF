@@ -170,7 +170,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position,Vector3 normal)
+        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position, Vector3 normal)
         {
             var v = default(VertexBuilder<TvG, TvM, TvS>);
             v.Geometry.SetPosition(position);

@@ -31,6 +31,8 @@ namespace SharpGLTF.IO
 
         internal void Serialize(JsonWriter writer)
         {
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WriteStartObject();
             SerializeProperties(writer);
             writer.WriteEndObject();
@@ -41,6 +43,9 @@ namespace SharpGLTF.IO
         protected static void SerializeProperty(JsonWriter writer, string name, Object value)
         {
             if (value == null) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value);
         }
@@ -49,6 +54,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             writer.WriteValue(value.Value);
         }
@@ -57,6 +65,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             writer.WriteValue(value.Value);
         }
@@ -65,6 +76,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             writer.WriteValue(value.Value);
         }
@@ -73,6 +87,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             writer.WriteValue(value.Value);
         }
@@ -81,6 +98,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value.Value);
         }
@@ -89,6 +109,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value.Value);
         }
@@ -97,6 +120,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value.Value);
         }
@@ -105,6 +131,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value.Value);
         }
@@ -113,6 +142,9 @@ namespace SharpGLTF.IO
         {
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value.Value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value.Value);
         }
@@ -120,10 +152,12 @@ namespace SharpGLTF.IO
         protected static void SerializePropertyEnumValue<T>(JsonWriter writer, string name, T? value, T? defval = null)
             where T : struct
         {
-            if (!typeof(T).IsEnum) throw new ArgumentException(nameof(value));
+            Guard.IsTrue(typeof(T).IsEnum, nameof(T));
 
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
 
             SerializeProperty(writer, name, (int)(Object)value);
         }
@@ -131,10 +165,12 @@ namespace SharpGLTF.IO
         protected static void SerializePropertyEnumSymbol<T>(JsonWriter writer, string name, T? value, T? defval = null)
             where T : struct
         {
-            if (!typeof(T).IsEnum) throw new ArgumentException(nameof(value));
+            Guard.IsTrue(typeof(T).IsEnum, nameof(T));
 
             if (!value.HasValue) return;
             if (defval.HasValue && defval.Value.Equals(value)) return;
+
+            Guard.NotNull(writer, nameof(writer));
 
             SerializeProperty(writer, name, Enum.GetName(typeof(T), value));
         }
@@ -143,6 +179,9 @@ namespace SharpGLTF.IO
             where T : JsonSerializable
         {
             if (value == null) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
             _Serialize(writer, value);
         }
@@ -151,6 +190,8 @@ namespace SharpGLTF.IO
         {
             if (collection == null) return;
             if (minItems.HasValue && collection.Count < minItems.Value) return;
+
+            Guard.NotNull(writer, nameof(writer));
 
             writer.WritePropertyName(name);
 
@@ -168,6 +209,8 @@ namespace SharpGLTF.IO
             if (collection == null) return;
             if (collection.Count < 1) return;
 
+            Guard.NotNull(writer, nameof(writer));
+
             writer.WritePropertyName(name);
 
             writer.WriteStartObject();
@@ -182,7 +225,8 @@ namespace SharpGLTF.IO
 
         private static void _Serialize(JsonWriter writer, Object value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            Guard.NotNull(writer, nameof(writer));
+            Guard.NotNull(value, nameof(value));
 
             System.Diagnostics.Debug.Assert(!value.GetType().IsEnum, "gltf schema does not define a typed way of serializing enums");
 
@@ -249,6 +293,8 @@ namespace SharpGLTF.IO
 
         internal void Deserialize(JsonReader reader)
         {
+            Guard.NotNull(reader, nameof(reader));
+
             if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartObject)
@@ -275,6 +321,8 @@ namespace SharpGLTF.IO
 
         protected static Object DeserializeUnknownObject(JsonReader reader)
         {
+            Guard.NotNull(reader, nameof(reader));
+
             if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartArray)
@@ -322,6 +370,8 @@ namespace SharpGLTF.IO
 
         protected static T DeserializePropertyValue<T>(JsonReader reader)
         {
+            Guard.NotNull(reader, nameof(reader));
+
             _TryCastValue(reader, typeof(T), out Object v);
 
             System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartArray);
@@ -334,6 +384,9 @@ namespace SharpGLTF.IO
 
         protected static void DeserializePropertyList<T>(JsonReader reader, IList<T> list)
         {
+            Guard.NotNull(reader, nameof(reader));
+            Guard.NotNull(list, nameof(list));
+
             if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType != JsonToken.StartArray) throw new JsonReaderException();
@@ -359,6 +412,9 @@ namespace SharpGLTF.IO
 
         protected static void DeserializePropertyDictionary<T>(JsonReader reader, IDictionary<string, T> dict)
         {
+            Guard.NotNull(reader, nameof(reader));
+            Guard.NotNull(dict, nameof(dict));
+
             if (reader.TokenType == JsonToken.PropertyName) reader.Read();
 
             if (reader.TokenType == JsonToken.StartArray) throw new JsonReaderException();
@@ -385,6 +441,8 @@ namespace SharpGLTF.IO
 
         private static bool _TryCastValue(JsonReader reader, Type vtype, out Object value)
         {
+            Guard.NotNull(reader, nameof(reader));
+
             value = null;
 
             if (reader.TokenType == JsonToken.EndArray) return false;

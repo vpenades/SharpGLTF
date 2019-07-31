@@ -40,6 +40,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexPosition(IVertexGeometry src)
         {
+            Guard.NotNull(src, nameof(src));
             this.Position = src.GetPosition();
         }
 
@@ -103,6 +104,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexPositionNormal(IVertexGeometry src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Position = src.GetPosition();
             src.TryGetNormal(out this.Normal);
         }
@@ -166,6 +169,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public VertexPositionNormalTangent(IVertexGeometry src)
         {
+            Guard.NotNull(src, nameof(src));
+
             this.Position = src.GetPosition();
             src.TryGetNormal(out this.Normal);
             src.TryGetTangent(out this.Tangent);

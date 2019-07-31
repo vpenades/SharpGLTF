@@ -271,7 +271,7 @@ namespace SharpGLTF.Schema2
 
             var xform = node.GetMeshWorldTransform(animation, time);
 
-            return mesh.EvaluateTriangles<TvG, TvM>(xform);
+            return mesh.EvaluateTriangles<TvG, TvM, VertexEmpty>(xform);
         }
 
         public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)

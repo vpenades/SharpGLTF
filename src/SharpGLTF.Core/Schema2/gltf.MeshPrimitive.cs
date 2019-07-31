@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
             get => this._material.HasValue ? LogicalParent.LogicalParent.LogicalMaterials[this._material.Value] : null;
             set
             {
-                if (value != null) Guard.MustShareLogicalParent(LogicalParent.LogicalParent, value, nameof(value));
+                if (value != null) Guard.MustShareLogicalParent(LogicalParent.LogicalParent, nameof(LogicalParent.LogicalParent), value, nameof(value));
 
                 this._material = value == null ? (int?)null : value.LogicalIndex;
             }
@@ -123,7 +123,7 @@ namespace SharpGLTF.Schema2
 
             if (accessor != null)
             {
-                Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, accessor, nameof(accessor));
+                Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, nameof(this.LogicalParent.LogicalParent), accessor, nameof(accessor));
                 _attributes[attributeKey] = accessor.LogicalIndex;
             }
             else
@@ -143,7 +143,7 @@ namespace SharpGLTF.Schema2
         {
             if (accessor == null) { this._indices = null; return; }
 
-            Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, accessor, nameof(accessor));
+            Guard.MustShareLogicalParent(this.LogicalParent.LogicalParent, nameof(this.LogicalParent.LogicalParent), accessor, nameof(accessor));
 
             this._indices = accessor.LogicalIndex;
         }

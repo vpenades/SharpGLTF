@@ -172,7 +172,7 @@ namespace SharpGLTF.Schema2
         public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(buffer, nameof(buffer));
-            Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
+            Guard.MustShareLogicalParent(this, "this", buffer, nameof(buffer));
 
             byteLength = byteLength.AsValue(buffer.Content.Length - byteOffset);
 

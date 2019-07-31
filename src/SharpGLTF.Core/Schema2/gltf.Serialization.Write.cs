@@ -324,6 +324,7 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void Write(WriteSettings settings, string baseName)
         {
+            Guard.NotNull(settings, nameof(settings));
             _Write(settings, baseName, this);
         }
 

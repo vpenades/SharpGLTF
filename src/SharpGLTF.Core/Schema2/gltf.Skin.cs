@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
             get => this._skeleton.HasValue ? this.LogicalParent.LogicalNodes[this._skeleton.Value] : null;
             set
             {
-                if (value != null) Guard.MustShareLogicalParent(this.LogicalParent, value, nameof(value));
+                if (value != null) Guard.MustShareLogicalParent(this.LogicalParent, nameof(this.LogicalParent), value, nameof(value));
                 this._skeleton = value == null ? (int?)null : value.LogicalIndex;
             }
         }

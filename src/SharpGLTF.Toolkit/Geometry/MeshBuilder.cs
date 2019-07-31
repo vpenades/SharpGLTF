@@ -114,6 +114,9 @@ namespace SharpGLTF.Geometry
 
         public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
+            if (mesh == null) return;
+            Guard.NotNull(materialTransform, nameof(materialTransform));
+
             foreach (var p in mesh.Primitives)
             {
                 var materialKey = materialTransform(p.Material);

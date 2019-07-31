@@ -33,7 +33,9 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalBuffers.IndexOfReference(this);
 
+        #pragma warning disable CA1819 // Properties should not return arrays
         public Byte[] Content => _Content;
+        #pragma warning restore CA1819 // Properties should not return arrays
 
         #endregion
 

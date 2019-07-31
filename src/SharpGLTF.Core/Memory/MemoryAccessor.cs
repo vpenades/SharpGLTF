@@ -131,6 +131,8 @@ namespace SharpGLTF.Memory
 
         public static int SetInterleavedInfo(MemoryAccessInfo[] attributes, int byteOffset, int itemsCount)
         {
+            Guard.NotNull(attributes, nameof(attributes));
+
             var byteStride = 0;
 
             for (int i = 0; i < attributes.Length; ++i)
@@ -160,6 +162,8 @@ namespace SharpGLTF.Memory
 
         public static MemoryAccessInfo[] Slice(MemoryAccessInfo[] attributes, int start, int count)
         {
+            Guard.NotNull(attributes, nameof(attributes));
+
             var dst = new MemoryAccessInfo[attributes.Length];
 
             for (int i = 0; i < dst.Length; ++i)
@@ -194,6 +198,8 @@ namespace SharpGLTF.Memory
 
         public static IList<Single> CreateScalarSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
+            Guard.NotNull(bottom, nameof(bottom));
+            Guard.NotNull(topValues, nameof(topValues));
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
@@ -204,6 +210,8 @@ namespace SharpGLTF.Memory
 
         public static IList<Vector2> CreateVector2SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
+            Guard.NotNull(bottom, nameof(bottom));
+            Guard.NotNull(topValues, nameof(topValues));
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
@@ -214,6 +222,8 @@ namespace SharpGLTF.Memory
 
         public static IList<Vector3> CreateVector3SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
+            Guard.NotNull(bottom, nameof(bottom));
+            Guard.NotNull(topValues, nameof(topValues));
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
@@ -224,6 +234,8 @@ namespace SharpGLTF.Memory
 
         public static IList<Vector4> CreateVector4SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
+            Guard.NotNull(bottom, nameof(bottom));
+            Guard.NotNull(topValues, nameof(topValues));
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
@@ -234,6 +246,8 @@ namespace SharpGLTF.Memory
 
         public static IList<Vector4> CreateColorSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
         {
+            Guard.NotNull(bottom, nameof(bottom));
+            Guard.NotNull(topValues, nameof(topValues));
             Guard.IsTrue(bottom._Attribute.Dimensions == topValues._Attribute.Dimensions, nameof(topValues));
             Guard.IsTrue(topKeys.Count <= bottom._Attribute.ItemsCount, nameof(topKeys));
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));

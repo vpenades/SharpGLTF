@@ -45,10 +45,10 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, Matrix4x4 meshBindMatrix, params NodeBuilder[] joints)
+        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
         {
             var instance = new InstanceBuilder(this);
-            instance.Content = new SkinTransformer(mesh, meshBindMatrix, joints);
+            instance.Content = new SkinTransformer(mesh, meshWorldMatrix, joints);
 
             _Instances.Add(instance);
 

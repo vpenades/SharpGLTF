@@ -104,7 +104,7 @@ namespace SharpGLTF.Materials
         public BYTES PrimaryImageContent
         {
             get => _PrimaryImageContent;
-            set => WithImage(value);
+            set => WithPrimaryImage(value);
         }
 
         /// <summary>
@@ -127,16 +127,22 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
 
-        public TextureBuilder WithImage(string imagePath)
+        [Obsolete("Use WithPrimaryImage instead.")]
+        public TextureBuilder WithImage(string imagePath) { return WithPrimaryImage(imagePath); }
+
+        [Obsolete("Use WithPrimaryImage instead,")]
+        public TextureBuilder WithImage(BYTES image) { return WithPrimaryImage(image); }
+
+        public TextureBuilder WithPrimaryImage(string imagePath)
         {
             var primary = System.IO.File
                 .ReadAllBytes(imagePath)
                 .Slice(0);
 
-            return WithImage(primary);
+            return WithPrimaryImage(primary);
         }
 
-        public TextureBuilder WithImage(BYTES image)
+        public TextureBuilder WithPrimaryImage(BYTES image)
         {
             if (image.Count > 0)
             {
@@ -217,6 +223,27 @@ namespace SharpGLTF.Materials
             {
                 return TextureBuilder.GetContentHashCode(obj);
             }
+        }
+
+        #endregion
+
+        #region image utilities
+
+        /// <summary>
+        /// Checks if <paramref name="data"/> represents a stream of an encoded image.
+        /// </summary>
+        /// <param name="data">A stream of bytes.</param>
+        /// <param name="extension">
+        /// An image format, valid values are:
+        /// - PNG
+        /// - JPG
+        /// - DDS
+        /// - WEBP
+        /// </param>
+        /// <returns>True if <paramref name="data"/> is an image.</returns>
+        public static bool IsImage(ArraySegment<Byte> data, string extension)
+        {
+            return data._IsImage(extension);
         }
 
         #endregion

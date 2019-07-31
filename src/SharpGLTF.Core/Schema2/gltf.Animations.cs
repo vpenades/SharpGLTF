@@ -159,6 +159,7 @@ namespace SharpGLTF.Schema2
 
         public AffineTransform GetLocalTransform(Node node, float time)
         {
+            Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             var xform = node.LocalTransform;

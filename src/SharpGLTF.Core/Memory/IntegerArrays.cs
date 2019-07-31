@@ -74,7 +74,7 @@ namespace SharpGLTF.Memory
                         break;
                     }
 
-                default: throw new ArgumentException(nameof(encoding));
+                default: throw new ArgumentException("Unsupported encoding.", nameof(encoding));
             }
         }
 
@@ -145,11 +145,11 @@ namespace SharpGLTF.Memory
 
         public int IndexOf(UInt32 item) { return this._FirstIndexOf(item); }
 
-        public void CopyTo(UInt32[] array, int arrayIndex) { this._CopyTo(array, arrayIndex); }
+        public void CopyTo(UInt32[] array, int arrayIndex) { Guard.NotNull(array, nameof(array)); this._CopyTo(array, arrayIndex); }
 
-        public void Fill(IEnumerable<Int32> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<Int32> values, int dstStart = 0) { Guard.NotNull(values, nameof(values)); values._CopyTo(this, dstStart); }
 
-        public void Fill(IEnumerable<UInt32> values, int dstStart = 0) { values._CopyTo(this, dstStart); }
+        public void Fill(IEnumerable<UInt32> values, int dstStart = 0) { Guard.NotNull(values, nameof(values)); values._CopyTo(this, dstStart); }
 
         void IList<UInt32>.Insert(int index, UInt32 item) { throw new NotSupportedException(); }
 

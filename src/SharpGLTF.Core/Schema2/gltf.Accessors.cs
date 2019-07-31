@@ -116,8 +116,8 @@ namespace SharpGLTF.Schema2
         /// <param name="normalized">The item normalization mode.</param>
         public void SetData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
         {
+            Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-
             Guard.MustBeGreaterThanOrEqualTo(bufferByteOffset, _byteOffsetMinimum, nameof(bufferByteOffset));
             Guard.MustBeGreaterThanOrEqualTo(itemCount, _countMinimum, nameof(itemCount));
 

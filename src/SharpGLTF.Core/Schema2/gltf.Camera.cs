@@ -154,6 +154,9 @@ namespace SharpGLTF.Schema2
 
         public static void CheckParameters(float xmag, float ymag, float znear, float zfar)
         {
+            Guard.MustBeGreaterThan(xmag, 0, nameof(xmag));
+            Guard.MustBeGreaterThan(ymag, 0, nameof(ymag));
+
             Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
             Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));

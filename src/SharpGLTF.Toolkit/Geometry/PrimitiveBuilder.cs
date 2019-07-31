@@ -252,7 +252,7 @@ namespace SharpGLTF.Geometry
 
             if (_Mesh.VertexPreprocessor != null)
             {
-                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return (-1,-1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return (-1, -1);
                 if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return (-1, -1);
             }
 
@@ -332,7 +332,7 @@ namespace SharpGLTF.Geometry
 
         internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
-            if (primitive == null) throw new ArgumentNullException(nameof(primitive));
+            if (primitive == null) return;
 
             if (_PrimitiveVertexCount == 1)
             {
