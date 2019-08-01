@@ -322,13 +322,15 @@ namespace SharpGLTF.Transforms
         /// <param name="meshWorldTransform">The world space <see cref="TRANSFORM"/> of the mesh at the time of binding (POSE).</param>
         /// <param name="jointWorldTransform">The world space <see cref="TRANSFORM"/> of the given bone joint at the time of binding (POSE).</param>
         /// <returns>A <see cref="TRANSFORM"/> representing the inverse bind transform.</returns>
-        public static Matrix4x4 CalculateInverseBinding(Matrix4x4 meshWorldTransform, Matrix4x4 jointWorldTransform)
+        public static TRANSFORM CalculateInverseBinding(TRANSFORM meshWorldTransform, TRANSFORM jointWorldTransform)
         {
-            var xform = meshWorldTransform.Inverse();
+            // var xform = meshWorldTransform.Inverse();
+            // xform = jointWorldTransform * xform;
+            // return xform.Inverse();
 
-            xform = jointWorldTransform * xform;
+            var invJoint = jointWorldTransform.Inverse();
 
-            return xform.Inverse();
+            return meshWorldTransform * invJoint;
         }
 
         #endregion
