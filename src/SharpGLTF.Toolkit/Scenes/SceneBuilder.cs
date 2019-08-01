@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -81,6 +82,18 @@ namespace SharpGLTF.Scenes
             instance.Content = new NodeTransformer(content, node);
             _Instances.Add(instance);
             return instance;
+        }
+
+        public void RenameAllNodes(string namePrefix)
+        {
+            var allNodes = Instances
+                .Select(item => item.Content.GetArmatureAsset())
+                .Where(item => item != null)
+                .SelectMany(item => NodeBuilder.Flatten(item))
+                .Distinct()
+                .ToList();
+
+            NodeBuilder.Rename(allNodes, namePrefix);
         }
 
         #endregion

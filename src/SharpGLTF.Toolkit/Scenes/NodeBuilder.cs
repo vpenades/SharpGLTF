@@ -169,34 +169,49 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        public static void SetUniqueNames(NodeBuilder root)
+        /// <summary>
+        /// Rename all the <see cref="NodeBuilder"/> elements in <paramref name="collection"/>
+        /// so every node has a valid, unique name.
+        /// </summary>
+        /// <param name="collection">A collection of <see cref="NodeBuilder"/> elements.</param>
+        /// <param name="namePrefix">The name prefix.</param>
+        public static void Rename(IEnumerable<NodeBuilder> collection, string namePrefix)
         {
-            var nodes = Flatten(root).ToList();
+            if (collection == null) return;
 
             var names = new HashSet<string>();
+            var index = -1;
 
-            var ncount = 0;
-
-            foreach (var n in nodes)
+            foreach (var item in collection)
             {
-                if (!string.IsNullOrWhiteSpace(n.Name) && !names.Contains(n.Name))
+                ++index;
+
+                // if the current name is already valid, keep it.
+                if (!string.IsNullOrWhiteSpace(item.Name))
                 {
-                    names.Add(n.Name);
-                    continue;
+                    if (item.RenameIfAvailable(item.Name, names)) continue;
                 }
 
-                while (true)
-                {
-                    var newName = $"Node{ncount++}";
+                // try with a default name
+                var newName = $"{namePrefix}{index}";
+                if (item.RenameIfAvailable(newName, names)) continue;
 
-                    if (!names.Contains(newName))
-                    {
-                        n.Name = newName;
-                        names.Add(n.Name);
-                        break;
-                    }
+                // retry with different names until finding a valid name.
+                for (int i = 0; i < int.MaxValue; ++i)
+                {
+                    newName = $"{namePrefix}{index}-{i}";
+
+                    if (item.RenameIfAvailable(newName, names)) break;
                 }
             }
+        }
+
+        private bool RenameIfAvailable(string newName, ISet<string> usedNames)
+        {
+            if (usedNames.Contains(newName)) return false;
+            this.Name = newName;
+            usedNames.Add(newName);
+            return true;
         }
 
         #endregion
