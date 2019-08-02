@@ -125,7 +125,7 @@ namespace SharpGLTF.Schema2
 
             _FindCommonAncestor(joints.Select(item => item.Item1));
 
-            foreach (var j in joints) { Guard.IsTrue(j.Item2._IsReal(), nameof(joints)); }
+            foreach (var j in joints) { Guard.IsTrue(j.Item2._IsFinite(), nameof(joints)); }
 
             // inverse bind matrices accessor
 

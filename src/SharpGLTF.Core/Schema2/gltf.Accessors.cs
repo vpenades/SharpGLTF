@@ -384,7 +384,7 @@ namespace SharpGLTF.Schema2
                 {
                     var v = current[j];
 
-                    if (!v._IsReal()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
+                    if (!v._IsFinite()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
 
                     var min = minimum[j];
                     var max = maximum[j];
@@ -440,7 +440,7 @@ namespace SharpGLTF.Schema2
             {
                 var pos = positions[i];
 
-                if (!pos._IsReal()) result.AddError(this, $"POSITION[{i}] value {pos} has non finite values");
+                if (!pos._IsFinite()) result.AddError(this, $"POSITION[{i}] value {pos} has non finite values");
             }
         }
 
@@ -464,7 +464,7 @@ namespace SharpGLTF.Schema2
             {
                 var tgt = tangents[i];
 
-                if (!tgt._IsReal()) result.AddError(this, $"TANGENT[{i}] value {tgt} has non finite values");
+                if (!tgt._IsFinite()) result.AddError(this, $"TANGENT[{i}] value {tgt} has non finite values");
 
                 var len = new Vector3(tgt.X, tgt.Y, tgt.Z).Length();
 
@@ -480,7 +480,7 @@ namespace SharpGLTF.Schema2
 
             void _CheckJoint(Validation.ValidationContext r, float v, int idx, string n)
             {
-                if (!v._IsReal()) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is not finite");
+                if (!v._IsFinite()) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is not finite");
                 if ((v % 1) != 0) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} should be a round value");
                 if (v < 0 || v >= jointsCount) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is out of range 0-{jointsCount}");
             }
@@ -501,7 +501,7 @@ namespace SharpGLTF.Schema2
 
             void _CheckWeight(Validation.ValidationContext r, float v, int idx, string n)
             {
-                if (!v._IsReal()) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is not finite");
+                if (!v._IsFinite()) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is not finite");
                 if (v < 0 || v > 1) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is out of range 0-1");
             }
 

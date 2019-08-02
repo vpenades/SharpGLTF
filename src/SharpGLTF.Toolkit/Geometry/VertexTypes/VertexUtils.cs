@@ -106,11 +106,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var p = inVertex.GetPosition();
 
-            if (!p._IsReal()) return false;
+            if (!p._IsFinite()) return false;
 
             if (inVertex.TryGetNormal(out Vector3 n))
             {
-                if (!n._IsReal()) return false;
+                if (!n._IsFinite()) return false;
                 if (n == Vector3.Zero) n = p;
                 if (n == Vector3.Zero) return false;
 
@@ -120,7 +120,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (inVertex.TryGetTangent(out Vector4 tw))
             {
-                if (!tw._IsReal()) return false;
+                if (!tw._IsFinite()) return false;
 
                 var t = new Vector3(tw.X, tw.Y, tw.Z);
                 if (t == Vector3.Zero) return false;

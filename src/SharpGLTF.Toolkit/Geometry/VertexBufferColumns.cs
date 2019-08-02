@@ -19,6 +19,12 @@ namespace SharpGLTF.Geometry
     /// </remarks>
     public class VertexBufferColumns
     {
+        #region constants
+
+        private const string ERR_COLUMNLEN = "Column length mismatch.";
+
+        #endregion
+
         #region Data Columns
 
         #pragma warning disable CA2227 // Collection properties should be read only
@@ -97,19 +103,19 @@ namespace SharpGLTF.Geometry
         /// Once it's applied, skinning and morphing columns are removed, since they're baked
         /// into the position, normal and tangent columns.
         /// </remarks>
-        public void ApplyTransform(Transforms.ITransform transform)
+        public void ApplyTransform(Transforms.IGeometryTransform transform)
         {
             Guard.NotNull(this.Positions, nameof(this.Positions), "Missing Positions column");
-            if (this.Normals != null) Guard.IsTrue(this.Positions.Count == this.Normals.Count, nameof(this.Normals), "Column length mismatch.");
-            if (this.Tangents != null) Guard.IsTrue(this.Positions.Count == this.Tangents.Count, nameof(this.Tangents), "Column length mismatch.");
-            if (this.Colors0 != null) Guard.IsTrue(this.Positions.Count == this.Colors0.Count, nameof(this.Colors0), "Column length mismatch.");
-            if (this.Colors1 != null) Guard.IsTrue(this.Positions.Count == this.Colors1.Count, nameof(this.Colors1), "Column length mismatch.");
-            if (this.TexCoords0 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords0.Count, nameof(this.TexCoords0), "Column length mismatch.");
-            if (this.TexCoords1 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords1.Count, nameof(this.TexCoords1), "Column length mismatch.");
-            if (this.Joints0 != null) Guard.IsTrue(this.Positions.Count == this.Joints0.Count, nameof(this.Joints0), "Column length mismatch.");
-            if (this.Joints1 != null) Guard.IsTrue(this.Positions.Count == this.Joints1.Count, nameof(this.Joints1), "Column length mismatch.");
-            if (this.Weights0 != null) Guard.IsTrue(this.Positions.Count == this.Weights0.Count, nameof(this.Weights0), "Column length mismatch.");
-            if (this.Weights1 != null) Guard.IsTrue(this.Positions.Count == this.Weights1.Count, nameof(this.Weights1), "Column length mismatch.");
+            if (this.Normals != null) Guard.IsTrue(this.Positions.Count == this.Normals.Count, nameof(this.Normals), ERR_COLUMNLEN);
+            if (this.Tangents != null) Guard.IsTrue(this.Positions.Count == this.Tangents.Count, nameof(this.Tangents), ERR_COLUMNLEN);
+            if (this.Colors0 != null) Guard.IsTrue(this.Positions.Count == this.Colors0.Count, nameof(this.Colors0), ERR_COLUMNLEN);
+            if (this.Colors1 != null) Guard.IsTrue(this.Positions.Count == this.Colors1.Count, nameof(this.Colors1), ERR_COLUMNLEN);
+            if (this.TexCoords0 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords0.Count, nameof(this.TexCoords0), ERR_COLUMNLEN);
+            if (this.TexCoords1 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords1.Count, nameof(this.TexCoords1), ERR_COLUMNLEN);
+            if (this.Joints0 != null) Guard.IsTrue(this.Positions.Count == this.Joints0.Count, nameof(this.Joints0), ERR_COLUMNLEN);
+            if (this.Joints1 != null) Guard.IsTrue(this.Positions.Count == this.Joints1.Count, nameof(this.Joints1), ERR_COLUMNLEN);
+            if (this.Weights0 != null) Guard.IsTrue(this.Positions.Count == this.Weights0.Count, nameof(this.Weights0), ERR_COLUMNLEN);
+            if (this.Weights1 != null) Guard.IsTrue(this.Positions.Count == this.Weights1.Count, nameof(this.Weights1), ERR_COLUMNLEN);
 
             // since the attributes we want to overwrite might be binded directly to the model's buffer
             // data, and we don't want to modify the source data, we isolate the columns to be overwritten.
@@ -119,7 +125,9 @@ namespace SharpGLTF.Geometry
             this.Tangents = _IsolateColumn(this.Tangents);
             this.Colors0 = _IsolateColumn(this.Colors0);
 
-            // prepare morph data, if available
+            // prepare animation data, if available
+
+            var skinning = default(Transforms.SparseWeight8);
 
             Vector3[] morphPositions = null;
             Vector3[] morphNormals = null;
@@ -134,58 +142,37 @@ namespace SharpGLTF.Geometry
                 if (_MorphTargets.All(item => item.Colors0 != null)) morphColors0 = new Vector4[this.MorphTargets.Count];
             }
 
-            // prepare skinning data, if available
-
-            var jw0 = Joints0 != null && Weights0 != null;
-            var jw1 = Joints1 != null && Weights1 != null;
-
-            var skinning = new (int, float)[(jw0 ? 4 : 0) + (jw1 ? 4 : 0)];
-
             // loop over every vertex
 
-            int vcount = Positions.Count;
+            int vcount = this.Positions.Count;
 
             for (int i = 0; i < vcount; ++i)
             {
-                if (jw0)
+                if (this.Joints0 != null)
                 {
-                    var j = Joints0[i];
-                    var w = Weights0[i];
-                    skinning[0] = ((int)j.X, w.X);
-                    skinning[1] = ((int)j.Y, w.Y);
-                    skinning[2] = ((int)j.Z, w.Z);
-                    skinning[3] = ((int)j.W, w.W);
+                    if (this.Joints1 != null) skinning = new Transforms.SparseWeight8(Joints0[i], Joints1[i], Weights0[i], Weights1[i]);
+                    else skinning = new Transforms.SparseWeight8(Joints0[i], Weights0[i]);
                 }
 
-                if (jw1)
-                {
-                    var j = Joints1[i];
-                    var w = Weights1[i];
-                    skinning[4] = ((int)j.X, w.X);
-                    skinning[5] = ((int)j.Y, w.Y);
-                    skinning[6] = ((int)j.Z, w.Z);
-                    skinning[7] = ((int)j.W, w.W);
-                }
-
-                if (Positions != null)
+                if (this.Positions != null)
                 {
                     _FillMorphData(morphPositions, vc => vc.Positions[i]);
                     Positions[i] = transform.TransformPosition(Positions[i], morphPositions, skinning);
                 }
 
-                if (Normals != null)
+                if (this.Normals != null)
                 {
                     _FillMorphData(morphNormals, vc => vc.Normals[i]);
                     Normals[i] = transform.TransformNormal(Normals[i], morphNormals, skinning);
                 }
 
-                if (Tangents != null)
+                if (this.Tangents != null)
                 {
                     _FillMorphData(morphTangents, vc => vc.Tangents[i]);
                     Tangents[i] = transform.TransformTangent(Tangents[i], morphTangents, skinning);
                 }
 
-                if (Colors0 != null)
+                if (this.Colors0 != null)
                 {
                     _FillMorphData(morphColors0, vc => vc.Colors0[i]);
                     Colors0[i] = transform.MorphColors(Colors0[i], morphColors0);
@@ -193,7 +180,8 @@ namespace SharpGLTF.Geometry
             }
 
             // we've just applied the transform,
-            // so we no longer need these columns.
+            // so we clear animation columns since
+            // they're irrelevant now.
 
             _MorphTargets = null;
 

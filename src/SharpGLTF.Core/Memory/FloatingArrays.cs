@@ -198,7 +198,7 @@ namespace SharpGLTF.Memory
             get => _Getter(index * _ByteStride);
             set
             {
-                if (!value._IsReal()) throw new NotFiniteNumberException(nameof(value), value);
+                if (!value._IsFinite()) throw new NotFiniteNumberException(nameof(value), value);
                 _Setter(index * _ByteStride, value);
             }
         }
@@ -208,7 +208,7 @@ namespace SharpGLTF.Memory
             get => _Getter((rowIndex * _ByteStride) + (subIndex * _EncodedLen));
             set
             {
-                if (!value._IsReal()) throw new NotFiniteNumberException(nameof(value), value);
+                if (!value._IsFinite()) throw new NotFiniteNumberException(nameof(value), value);
                 _Setter((rowIndex * _ByteStride) + (subIndex * _EncodedLen), value);
             }
         }

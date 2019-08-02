@@ -16,7 +16,7 @@ namespace SharpGLTF.Transforms
     /// - As an animation key in morph targets; a mesh can have many morph targets, but realistically and due to GPU limitations, only up to 8 morph targets can be blended at the same time.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("[{Index0}]={Weight0}  [{Index1}]={Weight1}  [{Index2}]={Weight2}  [{Index3}]={Weight3}  [{Index4}]={Weight4}  [{Index5}]={Weight5}  [{Index6}]={Weight6}  [{Index7}]={Weight7}")]
-    public readonly struct SparseWeight8 : IReadOnlyList<float>
+    public readonly struct SparseWeight8
     {
         #region constructors
 
@@ -55,29 +55,29 @@ namespace SharpGLTF.Transforms
         /// Creates a new <see cref="SparseWeight8"/> from an indexed weight collection.
         /// If there's more than 8 non zero values, the 8 most representative values are taken
         /// </summary>
-        /// <param name="pairs">A sequence of indexed weight values.</param>
+        /// <param name="indexedWeights">A sequence of indexed weight values.</param>
         /// <returns>A <see cref="SparseWeight8"/> instance.</returns>
-        public static SparseWeight8 Create(params (int, float)[] pairs)
+        public static SparseWeight8 Create(params (int, float)[] indexedWeights)
         {
-            if (pairs == null) return default;
+            if (indexedWeights == null) return default;
 
-            Span<IndexWeight> sparse = stackalloc IndexWeight[pairs.Length];
+            Span<IndexWeight> sparse = stackalloc IndexWeight[indexedWeights.Length];
 
             int o = 0;
 
-            for (int i = 0; i < pairs.Length; ++i)
+            for (int i = 0; i < indexedWeights.Length; ++i)
             {
-                var p = pairs[i];
+                var p = indexedWeights[i];
                 if (p.Item2 == 0) continue;
 
-                Guard.MustBeGreaterThanOrEqualTo(p.Item1, 0, nameof(pairs));
+                Guard.MustBeGreaterThanOrEqualTo(p.Item1, 0, nameof(indexedWeights));
 
                 sparse[o++] = p;
             }
 
             sparse = sparse.Slice(0, o);
 
-            if (pairs.Length > 8)
+            if (indexedWeights.Length > 8)
             {
                 IndexWeight.BubbleSortByWeight(sparse);
                 sparse = sparse.Slice(0, 8);
@@ -144,43 +144,43 @@ namespace SharpGLTF.Transforms
             Weight7 = wgt4567.W;
         }
 
-        private SparseWeight8(ReadOnlySpan<IndexWeight> pairs)
+        private SparseWeight8(ReadOnlySpan<IndexWeight> iw)
         {
-            System.Diagnostics.Debug.Assert(pairs.Length <= 8, nameof(pairs));
+            System.Diagnostics.Debug.Assert(iw.Length <= 8, nameof(iw));
 
             this = default;
 
-            if (pairs.Length < 1) return;
-            this.Index0 = pairs[0].Index;
-            this.Weight0 = pairs[0].Weight;
+            if (iw.Length < 1) return;
+            this.Index0 = iw[0].Index;
+            this.Weight0 = iw[0].Weight;
 
-            if (pairs.Length < 2) return;
-            this.Index1 = pairs[1].Index;
-            this.Weight1 = pairs[1].Weight;
+            if (iw.Length < 2) return;
+            this.Index1 = iw[1].Index;
+            this.Weight1 = iw[1].Weight;
 
-            if (pairs.Length < 3) return;
-            this.Index2 = pairs[2].Index;
-            this.Weight2 = pairs[2].Weight;
+            if (iw.Length < 3) return;
+            this.Index2 = iw[2].Index;
+            this.Weight2 = iw[2].Weight;
 
-            if (pairs.Length < 4) return;
-            this.Index3 = pairs[3].Index;
-            this.Weight3 = pairs[3].Weight;
+            if (iw.Length < 4) return;
+            this.Index3 = iw[3].Index;
+            this.Weight3 = iw[3].Weight;
 
-            if (pairs.Length < 5) return;
-            this.Index4 = pairs[4].Index;
-            this.Weight4 = pairs[4].Weight;
+            if (iw.Length < 5) return;
+            this.Index4 = iw[4].Index;
+            this.Weight4 = iw[4].Weight;
 
-            if (pairs.Length < 6) return;
-            this.Index5 = pairs[5].Index;
-            this.Weight5 = pairs[5].Weight;
+            if (iw.Length < 6) return;
+            this.Index5 = iw[5].Index;
+            this.Weight5 = iw[5].Weight;
 
-            if (pairs.Length < 7) return;
-            this.Index6 = pairs[6].Index;
-            this.Weight6 = pairs[6].Weight;
+            if (iw.Length < 7) return;
+            this.Index6 = iw[6].Index;
+            this.Weight6 = iw[6].Weight;
 
-            if (pairs.Length < 8) return;
-            this.Index7 = pairs[7].Index;
-            this.Weight7 = pairs[7].Weight;
+            if (iw.Length < 8) return;
+            this.Index7 = iw[7].Index;
+            this.Weight7 = iw[7].Weight;
         }
 
         private SparseWeight8(in SparseWeight8 sparse, float scale)
@@ -412,9 +412,17 @@ namespace SharpGLTF.Transforms
             }
         }
 
-        public IEnumerator<float> GetEnumerator() { return Expand(GetExpandedCount()).GetEnumerator(); }
-
-        IEnumerator IEnumerable.GetEnumerator() { return Expand(GetExpandedCount()).GetEnumerator(); }
+        public IEnumerable<(int, float)> GetIndexedWeights()
+        {
+            yield return (Index0, Weight0);
+            yield return (Index1, Weight1);
+            yield return (Index2, Weight2);
+            yield return (Index3, Weight3);
+            yield return (Index4, Weight4);
+            yield return (Index5, Weight5);
+            yield return (Index6, Weight6);
+            yield return (Index7, Weight7);
+        }
 
         public override string ToString()
         {
@@ -587,14 +595,13 @@ namespace SharpGLTF.Transforms
         /// <returns>A new <see cref="SparseWeight8"/> with a complementary weight.</returns>
         internal SparseWeight8 GetNormalizedWithComplement(int complementIndex)
         {
+            var sum = this.WeightSum;
+            if (sum >= 1) return this;
+
             Span<IndexWeight> weights = stackalloc IndexWeight[8 + 1];
 
             var offset = IndexWeight.CopyTo(this, weights);
-
-            float ww = this.WeightSum;
-
-            if (ww < 1) weights[offset++] = new IndexWeight(complementIndex, 1 - ww);
-
+            weights[offset++] = new IndexWeight(complementIndex, 1 - sum);
             weights = weights.Slice(0, offset);
 
             if (offset > 8)

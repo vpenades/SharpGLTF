@@ -51,9 +51,9 @@ namespace SharpGLTF.Transforms
             return -1;
         }
 
-        private static IndexWeight GetSparseWeight(in SparseWeight8 src, int sparseIndex)
+        private static IndexWeight GetIndexedWeight(in SparseWeight8 src, int offset)
         {
-            switch (sparseIndex)
+            switch (offset)
             {
                 case 0: return new IndexWeight(src.Index0, src.Weight0);
                 case 1: return new IndexWeight(src.Index1, src.Weight1);
@@ -63,7 +63,7 @@ namespace SharpGLTF.Transforms
                 case 5: return new IndexWeight(src.Index5, src.Weight5);
                 case 6: return new IndexWeight(src.Index6, src.Weight6);
                 case 7: return new IndexWeight(src.Index7, src.Weight7);
-                default: throw new ArgumentOutOfRangeException(nameof(sparseIndex));
+                default: throw new ArgumentOutOfRangeException(nameof(offset));
             }
         }
 
@@ -75,7 +75,7 @@ namespace SharpGLTF.Transforms
 
             for (int i = 0; i < 8; ++i)
             {
-                var pair = GetSparseWeight(src, i);
+                var pair = GetIndexedWeight(src, i);
                 if (pair.Weight == 0) continue;
 
                 var idx = IndexOf(dst.Slice(0, offset), pair.Index);
@@ -104,7 +104,7 @@ namespace SharpGLTF.Transforms
 
             for (int i = 0; i < 8; ++i)
             {
-                var pair = GetSparseWeight(src, i);
+                var pair = GetIndexedWeight(src, i);
                 if (pair.Weight == 0) continue;
 
                 var idx = dstIndices

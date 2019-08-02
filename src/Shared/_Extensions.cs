@@ -34,38 +34,38 @@ namespace SharpGLTF
             return length + (padding == 0 ? 0 : 4 - padding);
         }
 
-        internal static bool _IsReal(this float value)
+        internal static bool _IsFinite(this float value)
         {
             return !(float.IsNaN(value) | float.IsInfinity(value));
         }
 
-        internal static bool _IsReal(this Vector2 v)
+        internal static bool _IsFinite(this Vector2 v)
         {
-            return v.X._IsReal() & v.Y._IsReal();
+            return v.X._IsFinite() & v.Y._IsFinite();
         }
 
-        internal static bool _IsReal(this Vector3 v)
+        internal static bool _IsFinite(this Vector3 v)
         {
-            return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal();
+            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite();
         }
 
-        internal static bool _IsReal(this Vector4 v)
+        internal static bool _IsFinite(this Vector4 v)
         {
-            return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
+            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite() & v.W._IsFinite();
         }
 
-        internal static bool _IsReal(this Matrix4x4 v)
+        internal static bool _IsFinite(this Matrix4x4 v)
         {
-            if (!(v.M11._IsReal() & v.M12._IsReal() & v.M13._IsReal() & v.M14._IsReal())) return false;
-            if (!(v.M21._IsReal() & v.M22._IsReal() & v.M23._IsReal() & v.M24._IsReal())) return false;
-            if (!(v.M31._IsReal() & v.M32._IsReal() & v.M33._IsReal() & v.M34._IsReal())) return false;
-            if (!(v.M41._IsReal() & v.M42._IsReal() & v.M43._IsReal() & v.M44._IsReal())) return false;
+            if (!(v.M11._IsFinite() & v.M12._IsFinite() & v.M13._IsFinite() & v.M14._IsFinite())) return false;
+            if (!(v.M21._IsFinite() & v.M22._IsFinite() & v.M23._IsFinite() & v.M24._IsFinite())) return false;
+            if (!(v.M31._IsFinite() & v.M32._IsFinite() & v.M33._IsFinite() & v.M34._IsFinite())) return false;
+            if (!(v.M41._IsFinite() & v.M42._IsFinite() & v.M43._IsFinite() & v.M44._IsFinite())) return false;
             return true;
         }
 
-        internal static bool _IsReal(this Quaternion v)
+        internal static bool _IsFinite(this Quaternion v)
         {
-            return v.X._IsReal() & v.Y._IsReal() & v.Z._IsReal() & v.W._IsReal();
+            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite() & v.W._IsFinite();
         }
 
         internal static Vector3 WithLength(this Vector3 v, float len)
@@ -116,12 +116,12 @@ namespace SharpGLTF
 
         internal static void Validate(this Vector3 vector, string msg)
         {
-            if (!vector._IsReal()) throw new NotFiniteNumberException($"{msg} is invalid.");
+            if (!vector._IsFinite()) throw new NotFiniteNumberException($"{msg} is invalid.");
         }
 
         internal static void ValidateNormal(this Vector3 normal, string msg)
         {
-            if (!normal._IsReal()) throw new NotFiniteNumberException($"{msg} is invalid.");
+            if (!normal._IsFinite()) throw new NotFiniteNumberException($"{msg} is invalid.");
 
             var len = normal.Length();
 
@@ -137,7 +137,7 @@ namespace SharpGLTF
 
         internal static bool IsValidNormal(this Vector3 normal)
         {
-            if (!normal._IsReal()) return false;
+            if (!normal._IsFinite()) return false;
 
             var len = normal.Length();
 

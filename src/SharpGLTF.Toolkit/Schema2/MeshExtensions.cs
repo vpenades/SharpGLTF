@@ -8,7 +8,7 @@ using SharpGLTF.Memory;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 
-using MESHXFORM = SharpGLTF.Transforms.ITransform;
+using MESHXFORM = SharpGLTF.Transforms.IGeometryTransform;
 
 namespace SharpGLTF.Schema2
 {
@@ -517,7 +517,7 @@ namespace SharpGLTF.Schema2
 
             void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
             {
-                if (!dir._IsReal()) return;
+                if (!dir._IsFinite()) return;
                 if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
                 dict[pos] = n + dir;
             }

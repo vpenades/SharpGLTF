@@ -27,17 +27,17 @@ namespace SharpGLTF.Geometry.VertexTypes
             where TvG : struct, IVertexGeometry
         {
             var p = vertex.GetPosition();
-            Guard.IsTrue(p._IsReal(), "Position", "Values are not finite.");
+            Guard.IsTrue(p._IsFinite(), "Position", "Values are not finite.");
 
             if (vertex.TryGetNormal(out Vector3 n))
             {
-                Guard.IsTrue(n._IsReal(), "Normal", "Values are not finite.");
+                Guard.IsTrue(n._IsFinite(), "Normal", "Values are not finite.");
                 Guard.MustBeBetweenOrEqualTo(n.Length(), 0.99f, 1.01f, "Normal.Length");
             }
 
             if (vertex.TryGetTangent(out Vector4 t))
             {
-                Guard.IsTrue(t._IsReal(), "Tangent", "Values are not finite.");
+                Guard.IsTrue(t._IsFinite(), "Tangent", "Values are not finite.");
                 Guard.IsTrue(t.W == 1 || t.W == -1, "Tangent.W", "Invalid value");
                 Guard.MustBeBetweenOrEqualTo(new Vector3(t.X, t.Y, t.Z).Length(), 0.99f, 1.01f, "Tangent.XYZ.Length");
             }
@@ -64,7 +64,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             for (int i = 0; i < vertex.MaxColors; ++i)
             {
                 var c = vertex.GetColor(i);
-                Guard.IsTrue(c._IsReal(), $"Color{i}", "Values are not finite.");
+                Guard.IsTrue(c._IsFinite(), $"Color{i}", "Values are not finite.");
                 Guard.MustBeBetweenOrEqualTo(c.X, 0, 1, $"Color{i}.R");
                 Guard.MustBeBetweenOrEqualTo(c.Y, 0, 1, $"Color{i}.G");
                 Guard.MustBeBetweenOrEqualTo(c.Z, 0, 1, $"Color{i}.B");
@@ -74,7 +74,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             for (int i = 0; i < vertex.MaxTextCoords; ++i)
             {
                 var t = vertex.GetTexCoord(i);
-                Guard.IsTrue(t._IsReal(), $"TexCoord{i}", "Values are not finite.");
+                Guard.IsTrue(t._IsFinite(), $"TexCoord{i}", "Values are not finite.");
             }
 
             return vertex;
@@ -115,7 +115,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var pair = vertex.GetJointBinding(i);
 
                 Guard.MustBeGreaterThanOrEqualTo(pair.Item1, 0, $"Joint{i}");
-                Guard.IsTrue(pair.Item2._IsReal(), $"Weight{i}", "Values are not finite.");
+                Guard.IsTrue(pair.Item2._IsFinite(), $"Weight{i}", "Values are not finite.");
                 if (pair.Item2 == 0) Guard.IsTrue(pair.Item1 == 0, "joints with weight zero must be set to zero");
 
                 weightsSum += pair.Item2;
@@ -145,11 +145,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var p = vertex.GetPosition();
 
-            if (!p._IsReal()) return null;
+            if (!p._IsFinite()) return null;
 
             if (vertex.TryGetNormal(out Vector3 n))
             {
-                if (!n._IsReal()) n = p;
+                if (!n._IsFinite()) n = p;
                 if (n == Vector3.Zero) n = p;
                 if (n == Vector3.Zero) return null;
 
@@ -159,7 +159,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (vertex.TryGetTangent(out Vector4 tw))
             {
-                if (!tw._IsReal()) return null;
+                if (!tw._IsFinite()) return null;
 
                 var t = new Vector3(tw.X, tw.Y, tw.Z);
                 if (t == Vector3.Zero) return null;
@@ -195,7 +195,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             for (int i = 0; i < vertex.MaxColors; ++i)
             {
                 var c = vertex.GetColor(i);
-                if (!c._IsReal()) c = Vector4.Zero;
+                if (!c._IsFinite()) c = Vector4.Zero;
                 c = Vector4.Min(Vector4.One, c);
                 c = Vector4.Max(Vector4.Zero, c);
                 vertex.SetColor(i, c);
@@ -204,7 +204,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             for (int i = 0; i < vertex.MaxTextCoords; ++i)
             {
                 var t = vertex.GetTexCoord(i);
-                if (!t._IsReal()) vertex.SetTexCoord(i, Vector2.Zero);
+                if (!t._IsFinite()) vertex.SetTexCoord(i, Vector2.Zero);
             }
 
             return vertex;

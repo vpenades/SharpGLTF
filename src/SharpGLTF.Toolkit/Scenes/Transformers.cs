@@ -205,14 +205,17 @@ namespace SharpGLTF.Scenes
                 .FirstOrDefault();
         }
 
-        public Transforms.ITransform GetWorldTransformer(string animationTrack, float time)
+        public Transforms.IGeometryTransform GetWorldTransformer(string animationTrack, float time)
         {
             var jb = GetJointBindings();
 
-            var ww = jb.Select(item => item.Item1.GetWorldMatrix(animationTrack, time)).ToArray();
-            var bb = jb.Select(item => item.Item2).ToArray();
-
-            return new Transforms.SkinTransform(bb, ww, default, false);
+            return new Transforms.SkinTransform
+                (
+                jb.Length,
+                idx => jb[idx].Item2,
+                idx => jb[idx].Item1.GetWorldMatrix(animationTrack, time),
+                default, false
+                );
         }
 
         #endregion

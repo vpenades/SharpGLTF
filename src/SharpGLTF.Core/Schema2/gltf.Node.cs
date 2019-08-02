@@ -159,22 +159,22 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates a <see cref="Transforms.ITransform"/> object, based on the current
+        /// Creates a <see cref="Transforms.IGeometryTransform"/> object, based on the current
         /// transform state, that can be used to transform the <see cref="Mesh"/>
         /// vertices to world space.
         /// </summary>
-        /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
-        public Transforms.ITransform GetMeshWorldTransform() { return GetMeshWorldTransform(null, 0); }
+        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
+        public Transforms.IGeometryTransform GetMeshWorldTransform() { return GetMeshWorldTransform(null, 0); }
 
         /// <summary>
-        /// Creates a <see cref="Transforms.ITransform"/> object, based on the current
+        /// Creates a <see cref="Transforms.IGeometryTransform"/> object, based on the current
         /// transform state, and the given <see cref="Animation"/>, that can be used
         /// to transform the <see cref="Mesh"/> vertices to world space.
         /// </summary>
         /// <param name="animation">The <see cref="Animation"/> to use.</param>
         /// <param name="time">The time within <paramref name="animation"/>.</param>
-        /// <returns>A <see cref="Transforms.ITransform"/> object</returns>
-        public Transforms.ITransform GetMeshWorldTransform(Animation animation, float time)
+        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
+        public Transforms.IGeometryTransform GetMeshWorldTransform(Animation animation, float time)
         {
             if (animation != null) Guard.MustShareLogicalParent(this, animation, nameof(animation));
 
@@ -182,17 +182,12 @@ namespace SharpGLTF.Schema2
 
             if (this.Skin == null) return new Transforms.StaticTransform(this.GetWorldMatrix(animation, time), weights, false);
 
-            var jointXforms = new Matrix4x4[this.Skin.JointsCount];
-            var invBindings = new Matrix4x4[this.Skin.JointsCount];
-
-            for (int i = 0; i < this.Skin.JointsCount; ++i)
-            {
-                var j = this.Skin.GetJoint(i);
-                jointXforms[i] = j.Item1.GetWorldMatrix(animation, time);
-                invBindings[i] = j.Item2;
-            }
-
-            return new Transforms.SkinTransform(invBindings, jointXforms, weights, false);
+            return new Transforms.SkinTransform
+                (
+                this.Skin.JointsCount,
+                idx => this.Skin.GetJoint(idx).Item2,
+                idx => this.Skin.GetJoint(idx).Item1.GetWorldMatrix(animation, time),
+                weights, false);
         }
 
         #endregion

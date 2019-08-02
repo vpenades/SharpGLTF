@@ -325,19 +325,19 @@ namespace SharpGLTF.Geometry
             for (int i = 0; i < Material.MaxColors; ++i)
             {
                 var c = Material.GetColor(i);
-                if (!c._IsReal() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
+                if (!c._IsFinite() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
             }
 
             for (int i = 0; i < Material.MaxTextCoords; ++i)
             {
                 var uv = Material.GetTexCoord(i);
-                if (!uv._IsReal()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
+                if (!uv._IsFinite()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
             }
 
             for (int i = 0; i < Skinning.MaxBindings; ++i)
             {
                 var jw = Skinning.GetJointBinding(i);
-                if (!jw.Item2._IsReal() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
+                if (!jw.Item2._IsFinite() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
             }
 
             return sb.ToString();

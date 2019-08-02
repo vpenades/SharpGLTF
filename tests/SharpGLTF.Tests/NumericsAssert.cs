@@ -7,58 +7,81 @@ using NUnit.Framework;
 
 namespace SharpGLTF
 {
-    static class NumericsAssert
+    public static class NumericsAssert
     {
+        public static void IsFinite(Single value, string message = null)
+        {
+            Assert.IsTrue(float.IsFinite(value), message);
+        }
+
+        public static void IsFinite(Double value, string message = null)
+        {
+            Assert.IsTrue(double.IsFinite(value), message);
+        }
+
         public static void IsFinite(Vector2 vector)
         {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
+            IsFinite(vector.X, "X");
+            IsFinite(vector.Y, "Y");
         }
 
         public static void IsFinite(Vector3 vector)
         {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
-            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
+            IsFinite(vector.X, "X");
+            IsFinite(vector.Y, "Y");
+            IsFinite(vector.Z, "Z");
         }
 
         public static void IsFinite(Vector4 vector)
         {
-            Assert.IsTrue(float.IsFinite(vector.X), "X");
-            Assert.IsTrue(float.IsFinite(vector.Y), "Y");
-            Assert.IsTrue(float.IsFinite(vector.Z), "Z");
-            Assert.IsTrue(float.IsFinite(vector.W), "W");
+            IsFinite(vector.X, "X");
+            IsFinite(vector.Y, "Y");
+            IsFinite(vector.Z, "Z");
+            IsFinite(vector.W, "W");
         }
 
         public static void IsFinite(Quaternion quaternion)
         {
-            Assert.IsTrue(float.IsFinite(quaternion.X), "X");
-            Assert.IsTrue(float.IsFinite(quaternion.Y), "Y");
-            Assert.IsTrue(float.IsFinite(quaternion.Z), "Z");
-            Assert.IsTrue(float.IsFinite(quaternion.W), "W");
+            IsFinite(quaternion.X, "X");
+            IsFinite(quaternion.Y, "Y");
+            IsFinite(quaternion.Z, "Z");
+            IsFinite(quaternion.W, "W");
+        }
+
+        public static void IsFinite(Plane plane)
+        {
+            IsFinite(plane.Normal.X, "Normal.X");
+            IsFinite(plane.Normal.Y, "Normal.Y");
+            IsFinite(plane.Normal.Z, "Normal.Z");
+            IsFinite(plane.D, "D");
         }
 
         public static void IsFinite(Matrix4x4 matrix)
         {
-            Assert.IsTrue(float.IsFinite(matrix.M11), "M11");
-            Assert.IsTrue(float.IsFinite(matrix.M12), "M12");
-            Assert.IsTrue(float.IsFinite(matrix.M13), "M13");
-            Assert.IsTrue(float.IsFinite(matrix.M14), "M14");
+            IsFinite(matrix.M11, "M11");
+            IsFinite(matrix.M12, "M12");
+            IsFinite(matrix.M13, "M13");
+            IsFinite(matrix.M14, "M14");
 
-            Assert.IsTrue(float.IsFinite(matrix.M21), "M21");
-            Assert.IsTrue(float.IsFinite(matrix.M22), "M22");
-            Assert.IsTrue(float.IsFinite(matrix.M23), "M23");
-            Assert.IsTrue(float.IsFinite(matrix.M24), "M24");
+            IsFinite(matrix.M21, "M21");
+            IsFinite(matrix.M22, "M22");
+            IsFinite(matrix.M23, "M23");
+            IsFinite(matrix.M24, "M24");
 
-            Assert.IsTrue(float.IsFinite(matrix.M31), "M31");
-            Assert.IsTrue(float.IsFinite(matrix.M32), "M32");
-            Assert.IsTrue(float.IsFinite(matrix.M33), "M33");
-            Assert.IsTrue(float.IsFinite(matrix.M34), "M34");
+            IsFinite(matrix.M31, "M31");
+            IsFinite(matrix.M32, "M32");
+            IsFinite(matrix.M33, "M33");
+            IsFinite(matrix.M34, "M34");
 
-            Assert.IsTrue(float.IsFinite(matrix.M41), "M41");
-            Assert.IsTrue(float.IsFinite(matrix.M42), "M42");
-            Assert.IsTrue(float.IsFinite(matrix.M43), "M43");
-            Assert.IsTrue(float.IsFinite(matrix.M44), "M44");
+            IsFinite(matrix.M41, "M41");
+            IsFinite(matrix.M42, "M42");
+            IsFinite(matrix.M43, "M43");
+            IsFinite(matrix.M44, "M44");
+        }
+
+        public static void AreEqual(BigInteger expected, BigInteger actual, double tolerance = 0)
+        {
+            Assert.AreEqual(0, (double)BigInteger.Abs(actual - expected), tolerance);
         }
 
         public static void AreEqual(Vector2 expected, Vector2 actual, double tolerance = 0)
@@ -115,35 +138,56 @@ namespace SharpGLTF
 
         public static void IsInvertible(Matrix4x4 matrix)
         {
+            IsFinite(matrix);
             Assert.IsTrue(Matrix4x4.Invert(matrix, out Matrix4x4 inverted));
         }
 
-        public static void IsNormalized(Vector2 vector, double delta = 0)
+        public static void IsOrthogonal3x3(Matrix4x4 matrix, double tolerance = 0)
         {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y;
+            IsFinite(matrix);
 
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+            Assert.AreEqual(0, matrix.M41);
+            Assert.AreEqual(0, matrix.M42);
+            Assert.AreEqual(0, matrix.M43);
+            Assert.AreEqual(1, matrix.M44);
+
+            var cx = new Vector3(matrix.M11, matrix.M21, matrix.M31);
+            var cy = new Vector3(matrix.M12, matrix.M22, matrix.M32);
+            var cz = new Vector3(matrix.M13, matrix.M23, matrix.M33);            
+
+            Assert.AreEqual(0, Vector3.Dot(cx, cy), tolerance);
+            Assert.AreEqual(0, Vector3.Dot(cx, cz), tolerance);
+            Assert.AreEqual(0, Vector3.Dot(cy, cz), tolerance);
         }
 
-        public static void IsNormalized(Vector3 vector, double delta = 0)
+        public static void IsNormalized(Vector2 actual, double delta = 0)
         {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+            IsFinite(actual);
+            AreEqual(Vector2.Normalize(actual), actual, delta);
         }
 
-        public static void IsNormalized(Vector4 vector, double delta = 0)
+        public static void IsNormalized(Vector3 actual, double delta = 0)
         {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
-
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+            IsFinite(actual);
+            AreEqual(Vector3.Normalize(actual), actual, delta);
         }
 
-        public static void IsNormalized(Quaternion vector, double delta = 0)
+        public static void IsNormalized(Vector4 actual, double delta = 0)
         {
-            var lenSquared = vector.X * vector.X + vector.Y * vector.Y + vector.Z * vector.Z + vector.W * vector.W;
+            IsFinite(actual);
+            AreEqual(Vector4.Normalize(actual), actual, delta);
+        }
 
-            Assert.AreEqual(1, lenSquared, delta * delta, "Length");
+        public static void IsNormalized(Quaternion actual, double delta = 0)
+        {
+            IsFinite(actual);
+            AreEqual(Quaternion.Normalize(actual), actual, delta);
+        }
+
+        public static void InRange(BigInteger value, BigInteger min, BigInteger max)
+        {
+            GreaterOrEqual(value, min);
+            LessOrEqual(value, max);
         }
 
         public static void InRange(Vector2 value, Vector2 min, Vector2 max)
@@ -162,6 +206,11 @@ namespace SharpGLTF
         {
             GreaterOrEqual(value, min);
             LessOrEqual(value, max);
+        }
+
+        public static void Less(BigInteger arg1, BigInteger arg2)
+        {
+            Assert.Less(arg1.CompareTo(arg2), 0);
         }
 
         public static void Less(Vector2 arg1, Vector2 arg2)
@@ -185,6 +234,11 @@ namespace SharpGLTF
             Assert.Less(arg1.W, arg2.W, "W");
         }
 
+        public static void LessOrEqual(BigInteger arg1, BigInteger arg2)
+        {
+            Assert.LessOrEqual(arg1.CompareTo(arg2), 0);
+        }
+
         public static void LessOrEqual(Vector2 arg1, Vector2 arg2)
         {
             Assert.LessOrEqual(arg1.X, arg2.X, "X");
@@ -204,6 +258,11 @@ namespace SharpGLTF
             Assert.LessOrEqual(arg1.Y, arg2.Y, "Y");
             Assert.LessOrEqual(arg1.Z, arg2.Z, "Z");
             Assert.LessOrEqual(arg1.W, arg2.W, "W");
+        }
+
+        public static void Greater(BigInteger arg1, BigInteger arg2)
+        {
+            Assert.Greater(arg1.CompareTo(arg2), 0);
         }
 
         public static void Greater(Vector2 arg1, Vector2 arg2)
@@ -227,6 +286,11 @@ namespace SharpGLTF
             Assert.Greater(arg1.W, arg2.W, "W");
         }
 
+        public static void GreaterOrEqual(BigInteger arg1, BigInteger arg2)
+        {
+            Assert.GreaterOrEqual(arg1.CompareTo(arg2), 0);
+        }
+
         public static void GreaterOrEqual(Vector2 arg1, Vector2 arg2)
         {
             Assert.GreaterOrEqual(arg1.X, arg2.X, "X");
@@ -248,21 +312,21 @@ namespace SharpGLTF
             Assert.GreaterOrEqual(arg1.W, arg2.W, "W");
         }
 
-        public static void AngleLessOrEqual(Vector2 a, Vector2 b, float radians)
+        public static void AngleLessOrEqual(Vector2 a, Vector2 b, double radians)
         {
             var angle = VectorsUtils.GetAngle(a, b);
 
             Assert.LessOrEqual(angle, radians, "Angle");
         }
 
-        public static void AngleLessOrEqual(Vector3 a, Vector3 b, float radians)
+        public static void AngleLessOrEqual(Vector3 a, Vector3 b, double radians)
         {
             var angle = VectorsUtils.GetAngle(a, b);
 
             Assert.LessOrEqual(angle, radians, "Angle");
         }
 
-        public static void AngleLessOrEqual(Quaternion a, Quaternion b, float radians)
+        public static void AngleLessOrEqual(Quaternion a, Quaternion b, double radians)
         {
             var angle = VectorsUtils.GetAngle(a, b);
 

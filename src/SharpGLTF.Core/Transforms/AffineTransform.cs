@@ -90,9 +90,9 @@ namespace SharpGLTF.Transforms
         {
             get
             {
-                if (!Scale._IsReal()) return false;
-                if (!Rotation._IsReal()) return false;
-                if (!Translation._IsReal()) return false;
+                if (!Scale._IsFinite()) return false;
+                if (!Rotation._IsFinite()) return false;
+                if (!Translation._IsFinite()) return false;
 
                 return true;
             }

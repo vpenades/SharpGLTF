@@ -13,21 +13,28 @@ namespace SharpGLTF.Transforms
     /// <summary>
     /// Interface for a mesh transform object
     /// </summary>
-    public interface ITransform
+    public interface IGeometryTransform
     {
         /// <summary>
-        /// Gets a value indicating whether the current <see cref="ITransform"/> will render visible geometry.
+        /// Gets a value indicating whether the current <see cref="IGeometryTransform"/> will render visible geometry.
         /// </summary>
+        /// <remarks>
+        /// When this value is false, a runtime should skip rendering any geometry using
+        /// this <see cref="IGeometryTransform"/> instance, since it will not be visible anyway.
+        /// </remarks>
         bool Visible { get; }
 
         /// <summary>
         /// Gets a value indicating whether the triangles need to be flipped to render correctly.
         /// </summary>
+        /// <remarks>
+        /// When this value is true, a runtime rendering triangles should inverse the face culling.
+        /// </remarks>
         bool FlipFaces { get; }
 
-        V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights);
-        V3 TransformNormal(V3 normal, V3[] morphTargets, (int, float)[] skinWeights);
-        V4 TransformTangent(V4 tangent, V3[] morphTargets, (int, float)[] skinWeights);
+        V3 TransformPosition(V3 position, V3[] morphTargets, in SparseWeight8 skinWeights);
+        V3 TransformNormal(V3 normal, V3[] morphTargets, in SparseWeight8 skinWeights);
+        V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights);
 
         V4 MorphColors(V4 color, V4[] morphTargets);
     }
@@ -38,7 +45,7 @@ namespace SharpGLTF.Transforms
 
         protected MorphTransform()
         {
-            Update(SparseWeight8.Create((0, 1)), false);
+            Update(default, false);
         }
 
         protected MorphTransform(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
@@ -67,6 +74,15 @@ namespace SharpGLTF.Transforms
 
         #endregion
 
+        #region properties
+
+        /// <summary>
+        /// Gets a value indicating whether morph target values are absolute, and not relative to the master value.
+        /// </summary>
+        public bool AbsoluteMorphTargets => _AbsoluteMorphTargets;
+
+        #endregion
+
         #region API
 
         public void Update(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets = false)
@@ -75,7 +91,7 @@ namespace SharpGLTF.Transforms
 
             if (morphWeights.IsWeightless)
             {
-                _Weights = SparseWeight8.Create((0, 1));
+                _Weights = SparseWeight8.Create((_COMPLEMENT_INDEX, 1));
                 return;
             }
 
@@ -84,9 +100,9 @@ namespace SharpGLTF.Transforms
 
         protected V3 MorphVectors(V3 value, V3[] morphTargets)
         {
-            if (morphTargets == null) return value;
-
             if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+
+            if (morphTargets == null) return value;
 
             var p = V3.Zero;
 
@@ -112,9 +128,9 @@ namespace SharpGLTF.Transforms
 
         protected V4 MorphVectors(V4 value, V4[] morphTargets)
         {
-            if (morphTargets == null) return value;
-
             if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+
+            if (morphTargets == null) return value;
 
             var p = V4.Zero;
 
@@ -146,13 +162,25 @@ namespace SharpGLTF.Transforms
         #endregion
     }
 
-    public class StaticTransform : MorphTransform, ITransform
+    public class StaticTransform : MorphTransform, IGeometryTransform
     {
         #region constructor
 
+        public StaticTransform()
+        {
+            Update(TRANSFORM.Identity);
+        }
+
+        public StaticTransform(TRANSFORM xform)
+        {
+            Update(default, false);
+            Update(xform);
+        }
+
         public StaticTransform(TRANSFORM xform, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
         {
-            Update(xform, morphWeights, useAbsoluteMorphs);
+            Update(morphWeights, useAbsoluteMorphs);
+            Update(xform);
         }
 
         #endregion
@@ -175,10 +203,8 @@ namespace SharpGLTF.Transforms
 
         #region API
 
-        public void Update(TRANSFORM xform, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
+        public void Update(TRANSFORM xform)
         {
-            Update(morphWeights, useAbsoluteMorphs);
-
             _Transform = xform;
 
             // http://m-hikari.com/ija/ija-password-2009/ija-password5-8-2009/hajrizajIJA5-8-2009.pdf
@@ -195,21 +221,21 @@ namespace SharpGLTF.Transforms
             _FlipFaces = determinant3x3 < 0;
         }
 
-        public V3 TransformPosition(V3 position, V3[] morphTargets, (int, float)[] skinWeights)
+        public V3 TransformPosition(V3 position, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             position = MorphVectors(position, morphTargets);
 
             return V3.Transform(position, _Transform);
         }
 
-        public V3 TransformNormal(V3 normal, V3[] morphTargets, (int, float)[] skinWeights)
+        public V3 TransformNormal(V3 normal, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             normal = MorphVectors(normal, morphTargets);
 
             return V3.Normalize(V3.Transform(normal, _Transform));
         }
 
-        public V4 TransformTangent(V4 tangent, V3[] morphTargets, (int, float)[] skinWeights)
+        public V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             var n = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
 
@@ -221,38 +247,58 @@ namespace SharpGLTF.Transforms
         #endregion
     }
 
-    public class SkinTransform : MorphTransform, ITransform
+    public class SkinTransform : MorphTransform, IGeometryTransform
     {
         #region constructor
 
-        public SkinTransform(TRANSFORM[] invBindings, TRANSFORM[] worldXforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public SkinTransform() { }
+
+        public SkinTransform(TRANSFORM[] invBindMatrix, TRANSFORM[] currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
-            Update(invBindings, worldXforms, morphWeights, useAbsoluteMorphTargets);
+            Update(morphWeights, useAbsoluteMorphTargets);
+            Update(invBindMatrix, currWorldMatrix);
+        }
+
+        public SkinTransform(int count, Func<int, TRANSFORM> invBindMatrix, Func<int, TRANSFORM> currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        {
+            Update(morphWeights, useAbsoluteMorphTargets);
+            Update(count, invBindMatrix, currWorldMatrix);
         }
 
         #endregion
 
         #region data
 
-        private TRANSFORM[] _JointTransforms;
+        private IList<TRANSFORM> _JointTransforms;
 
         #endregion
 
         #region API
 
-        public void Update(TRANSFORM[] invBindings, TRANSFORM[] worldXforms, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public void Update(TRANSFORM[] invBindMatrix, TRANSFORM[] currWorldMatrix)
         {
-            Guard.NotNull(invBindings, nameof(invBindings));
-            Guard.NotNull(worldXforms, nameof(worldXforms));
-            Guard.IsTrue(invBindings.Length == worldXforms.Length, nameof(worldXforms), $"{invBindings} and {worldXforms} length mismatch.");
+            Guard.NotNull(invBindMatrix, nameof(invBindMatrix));
+            Guard.NotNull(currWorldMatrix, nameof(currWorldMatrix));
+            Guard.IsTrue(invBindMatrix.Length == currWorldMatrix.Length, nameof(currWorldMatrix), $"{invBindMatrix} and {currWorldMatrix} length mismatch.");
 
-            Update(morphWeights, useAbsoluteMorphTargets);
+            if (_JointTransforms == null || _JointTransforms.Count != invBindMatrix.Length) _JointTransforms = new TRANSFORM[invBindMatrix.Length];
 
-            if (_JointTransforms == null || _JointTransforms.Length != invBindings.Length) _JointTransforms = new TRANSFORM[invBindings.Length];
-
-            for (int i = 0; i < _JointTransforms.Length; ++i)
+            for (int i = 0; i < _JointTransforms.Count; ++i)
             {
-                _JointTransforms[i] = invBindings[i] * worldXforms[i];
+                _JointTransforms[i] = invBindMatrix[i] * currWorldMatrix[i];
+            }
+        }
+
+        public void Update(int count, Func<int, TRANSFORM> invBindMatrix, Func<int, TRANSFORM> currWorldMatrix)
+        {
+            Guard.NotNull(invBindMatrix, nameof(invBindMatrix));
+            Guard.NotNull(currWorldMatrix, nameof(currWorldMatrix));
+
+            if (_JointTransforms == null || _JointTransforms.Count != count) _JointTransforms = new TRANSFORM[count];
+
+            for (int i = 0; i < _JointTransforms.Count; ++i)
+            {
+                _JointTransforms[i] = invBindMatrix(i) * currWorldMatrix(i);
             }
         }
 
@@ -260,7 +306,7 @@ namespace SharpGLTF.Transforms
 
         public bool FlipFaces => false;
 
-        public V3 TransformPosition(V3 localPosition, V3[] morphTargets, (int, float)[] skinWeights)
+        public V3 TransformPosition(V3 localPosition, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -268,9 +314,9 @@ namespace SharpGLTF.Transforms
 
             var worldPosition = V3.Zero;
 
-            var wnrm = 1.0f / skinWeights.Sum(item => item.Item2);
+            var wnrm = 1.0f / skinWeights.WeightSum;
 
-            foreach (var jw in skinWeights)
+            foreach (var jw in skinWeights.GetIndexedWeights())
             {
                 worldPosition += V3.Transform(localPosition, _JointTransforms[jw.Item1]) * jw.Item2 * wnrm;
             }
@@ -278,7 +324,7 @@ namespace SharpGLTF.Transforms
             return worldPosition;
         }
 
-        public V3 TransformNormal(V3 localNormal, V3[] morphTargets, (int, float)[] skinWeights)
+        public V3 TransformNormal(V3 localNormal, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -286,7 +332,7 @@ namespace SharpGLTF.Transforms
 
             var worldNormal = V3.Zero;
 
-            foreach (var jw in skinWeights)
+            foreach (var jw in skinWeights.GetIndexedWeights())
             {
                 worldNormal += V3.TransformNormal(localNormal, _JointTransforms[jw.Item1]) * jw.Item2;
             }
@@ -294,7 +340,7 @@ namespace SharpGLTF.Transforms
             return V3.Normalize(localNormal);
         }
 
-        public V4 TransformTangent(V4 localTangent, V3[] morphTargets, (int, float)[] skinWeights)
+        public V4 TransformTangent(V4 localTangent, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -302,7 +348,7 @@ namespace SharpGLTF.Transforms
 
             var worldTangent = V3.Zero;
 
-            foreach (var jw in skinWeights)
+            foreach (var jw in skinWeights.GetIndexedWeights())
             {
                 worldTangent += V3.TransformNormal(localTangentV, _JointTransforms[jw.Item1]) * jw.Item2;
             }

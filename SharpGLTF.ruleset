@@ -60,7 +60,7 @@
     <Rule Id="CA2213" Action="Error" />
     <Rule Id="CA2216" Action="Error" />
     <Rule Id="CA2242" Action="Error" />
-    <Rule Id="CA1303" Action="Info" />
+    <Rule Id="CA1303" Action="None" />
     <Rule Id="CA1308" Action="None" />
   </Rules>
 </RuleSet>
