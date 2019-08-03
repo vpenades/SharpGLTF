@@ -104,9 +104,9 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Retrieves the image file as a block of bytes.
+        /// Retrieves the image file as a segment of bytes.
         /// </summary>
-        /// <returns>A <see cref="BYTES"/> block containing the image file.</returns>
+        /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS or WEBP format.</returns>
         public BYTES GetImageContent()
         {
             // the image is stored locally in a temporary buffer

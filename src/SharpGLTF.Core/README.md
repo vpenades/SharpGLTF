@@ -3,26 +3,42 @@
 
 #### Namespaces
 
-##### Namespace Schema2
+##### .Animations
+
+Contains classes to help decode and interpolate animation curves.
+
+##### .IO
+
+Code related to JSon serialization.
+
+##### .Schema2
 
 This namespace contains the collection of classes, structures and enumerations that
-represent the bulk of the API to access directly to glTF2 documents.
+represent the bulk of the low level API to access glTF2 documents.
 
 It also contains the main entry point Object that represents a glTF2 model: `ModelRoot`
 
-[Documentation](Schema2/README.md)
 
-##### Namespace IO
+[Additional info](Schema2/README.md)
 
-This namespace contains the helper classes to support JSon serialization.
+##### .Memory
 
-##### Namespace Memory
+glTF2 stores structured arrays as encoded byte buffers that are not easy to read directly.
 
-glTF2 stores array structures as encoded byte buffers that are not easy to handle directly.
+To facilitate buffered array IO, the __.Memory__ namespace provides a number of helper
+classes and structures that let accessing the data seamlessly.
 
-[Documentation](Memory/README.md)
+[Additional info](Memory/README.md)
 
-#### Extensions
+##### .Transforms
+
+A glTF model usually consist of a scene graph of nodes connected as a visual tree.
+The relationship between nodes is defined with transforms, usually with 4x4 matrices.
+
+It also handles the way a mesh is brought from its local space to world space, including skinning and morphing.
+
+
+#### Extensions support
 
 - [x] [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness)
 - [x] [KHR_materials_unlit](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_unlit)

@@ -2,30 +2,24 @@
 
 #### Overview
 
-SharpGLTF.Toolkit is a collection of classes and utilities aimed to help
+__SharpGLTF.Toolkit__ is a collection of classes and utilities aimed to help
 the developer in creating and editing glTF files in the easiest way possible.
 
 Althought the Schema2 namespace API does support some editing capabilities, in
 practice it stands for the word _"The JPEG of 3D"_ , which essentially means
-that its internal structure is not designed to be easily editable.
-
-so, although you can build glTF scenes directly with the Schema2 namespace API,
-doing so is not trivial, and you will need to do a lot of trickery on your own,
-specially for complex scenes and optimizing assets.
+that its internal structure is not designed to be easily editable. In general,
+the Schema2 API can be considered as "_append only_" with very limited modification
+capabilities.
 
 So the Toolkit API comes to cover the gap, and make things a bit easier to
 create glTF assets programatically.
 
-A lof ot the classes in the toolkit follow the `StringBuilder` API paradigm, which
-is, you start from scratch and you keep adding elements to it until you finish.
-
-
 #### Toolkit Namespaces
 
-- [MeshBuilder.](Geometry/readme.md)
-  - [Vertex formats.](Geometry/VertexTypes/readme.md)
-- [MaterialBuilder.](Materials/readme.md)
-- [SceneBuilder](Scenes/readme.md)
+- [.Scenes](Scenes/readme.md)
+- [.Geometry](Geometry/readme.md)
+  - [.VertexTypes](Geometry/VertexTypes/readme.md)
+- [.Materials](Materials/readme.md)
 
 #### Roadmap
 

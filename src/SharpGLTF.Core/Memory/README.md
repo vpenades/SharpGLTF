@@ -27,4 +27,4 @@ But the actual encoding and decoding, can be achieved using these wrappers found
 - `MultiArray`
 - `SparseArray`
 
-You can use any of these structures to wrap any byte array and expose it as the given type.
+You can use any of these helper structs to wrap any byte array and expose it as the given type.
