@@ -94,7 +94,7 @@ namespace SharpGLTF.Scenes
                 #if DEBUG
                 mesh.VertexPreprocessor.SetDebugPreprocessors();
                 #else
-                s.VertexPreprocessor.SetSanitizerPreprocessors();
+                mesh.VertexPreprocessor.SetSanitizerPreprocessors();
                 #endif
 
                 if ((i & 1) == 0) mesh.AddCube(mat, Matrix4x4.Identity);
