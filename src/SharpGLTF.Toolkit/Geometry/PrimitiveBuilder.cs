@@ -6,10 +6,11 @@ using System.Numerics;
 
 using SharpGLTF.Collections;
 using SharpGLTF.Geometry.VertexTypes;
+using System.Collections;
 
 namespace SharpGLTF.Geometry
 {
-    public interface IPrimitive<TMaterial>
+    public interface IPrimitiveReader<TMaterial>
     {
         /// <summary>
         /// Gets the current <typeparamref name="TMaterial"/> instance used by this primitive.
@@ -20,11 +21,6 @@ namespace SharpGLTF.Geometry
         /// Gets the number of vertices used by each primitive shape.
         /// </summary>
         int VerticesPerPrimitive { get; }
-
-        /// <summary>
-        /// Gets the total number of vertices
-        /// </summary>
-        int VertexCount { get; }
 
         /// <summary>
         /// Gets the list of <see cref="IVertexBuilder"/> vertices.
@@ -39,17 +35,17 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
         /// </summary>
-        IEnumerable<int> Points { get; }
+        IReadOnlyList<int> Points { get; }
 
         /// <summary>
         /// Gets the indices of all lines, given that <see cref="VerticesPerPrimitive"/> is 2.
         /// </summary>
-        IEnumerable<(int, int)> Lines { get; }
+        IReadOnlyList<(int, int)> Lines { get; }
 
         /// <summary>
         /// Gets the indices of all triangles, given that <see cref="VerticesPerPrimitive"/> is 3.
         /// </summary>
-        IEnumerable<(int, int, int)> Triangles { get; }
+        IReadOnlyList<(int, int, int)> Triangles { get; }
     }
 
     public interface IPrimitiveBuilder
@@ -97,7 +93,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints16x8"/>.
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("Primitive {_Material}")]
-    public class PrimitiveBuilder<TMaterial, TvG, TvM, TvS> : IPrimitiveBuilder, IPrimitive<TMaterial>
+    public class PrimitiveBuilder<TMaterial, TvG, TvM, TvS> : IPrimitiveBuilder, IPrimitiveReader<TMaterial>
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -109,6 +105,9 @@ namespace SharpGLTF.Geometry
             this._Mesh = mesh;
             this._Material = material;
             this._PrimitiveVertexCount = primitiveVertexCount;
+
+            if (this._PrimitiveVertexCount == 2) _LinesIndices = new LineListWrapper(_Indices);
+            if (this._PrimitiveVertexCount == 3) _TrianglesIndices = new TriangleListWrapper(_Indices);
         }
 
         #endregion
@@ -121,20 +120,11 @@ namespace SharpGLTF.Geometry
 
         private readonly int _PrimitiveVertexCount;
 
-        class PrimitiveVertexList : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
-        {
-            #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
-            IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
-            #pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
+        private readonly VertexListWrapper _Vertices = new VertexListWrapper();
 
-            IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
-            {
-                foreach (var item in this) yield return item;
-            }
-        }
-
-        private readonly PrimitiveVertexList _Vertices = new PrimitiveVertexList();
         private readonly List<int> _Indices = new List<int>();
+        private readonly LineListWrapper _LinesIndices;
+        private readonly TriangleListWrapper _TrianglesIndices;
 
         #endregion
 
@@ -152,19 +142,17 @@ namespace SharpGLTF.Geometry
         /// </summary>
         public int VerticesPerPrimitive => _PrimitiveVertexCount;
 
-        public int VertexCount => Vertices.Count;
-
         public IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> Vertices => _Vertices;
 
-        IReadOnlyList<IVertexBuilder> IPrimitive<TMaterial>.Vertices => _Vertices;
+        IReadOnlyList<IVertexBuilder> IPrimitiveReader<TMaterial>.Vertices => _Vertices;
 
         public IReadOnlyList<int> Indices => _Indices;
 
-        public IEnumerable<int> Points => _GetPointIndices();
+        public IReadOnlyList<int> Points => _GetPointIndices();
 
-        public IEnumerable<(int, int)> Lines => _GetLineIndices();
+        public IReadOnlyList<(int, int)> Lines => _GetLineIndices();
 
-        public IEnumerable<(int, int, int)> Triangles => _GetTriangleIndices();
+        public IReadOnlyList<(int, int, int)> Triangles => _GetTriangleIndices();
 
         public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
@@ -382,30 +370,120 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private IEnumerable<int> _GetPointIndices()
+        private IReadOnlyList<int> _GetPointIndices()
         {
-            if (_PrimitiveVertexCount != 1) return Enumerable.Empty<int>();
+            if (_PrimitiveVertexCount != 1) return Array.Empty<int>();
 
-            return Enumerable.Range(0, _Vertices.Count);
+            return new PointListWrapper(_Vertices);
         }
 
-        private IEnumerable<(int, int)> _GetLineIndices()
+        private IReadOnlyList<(int, int)> _GetLineIndices()
         {
-            if (_PrimitiveVertexCount != 2) return Enumerable.Empty<(int, int)>();
-
-            return Schema2.PrimitiveType.LINES.GetLinesIndices(_Indices.Select(item => (uint)item));
+            return _LinesIndices ?? (IReadOnlyList<(int, int)>)Array.Empty<(int, int)>();
         }
 
-        private IEnumerable<(int, int, int)> _GetTriangleIndices()
+        private IReadOnlyList<(int, int, int)> _GetTriangleIndices()
         {
-            if (_PrimitiveVertexCount != 3) return Enumerable.Empty<(int, int, int)>();
-
-            return Schema2.PrimitiveType.TRIANGLES.GetTrianglesIndices(_Indices.Select(item => (uint)item));
+            return _TrianglesIndices ?? (IReadOnlyList<(int, int, int)>)Array.Empty<(int, int, int)>();
         }
 
         public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> transformFunc)
         {
             _Vertices.TransformVertices(transformFunc);
+        }
+
+        #endregion
+
+        #region helper types
+
+        sealed class VertexListWrapper : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
+        {
+            #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
+            IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
+            #pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
+
+            IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
+            {
+                foreach (var item in this) yield return item;
+            }
+        }
+
+        struct PointListWrapper : IReadOnlyList<int>
+        {
+            public PointListWrapper(IReadOnlyList<IVertexBuilder> vertices)
+            {
+                _Vertices = vertices;
+            }
+
+            private readonly IReadOnlyList<IVertexBuilder> _Vertices;
+
+            public int this[int index] => index;
+
+            public int Count => _Vertices.Count;
+
+            public IEnumerator<int> GetEnumerator() { return Enumerable.Range(0, _Vertices.Count).GetEnumerator(); }
+
+            IEnumerator IEnumerable.GetEnumerator() { return Enumerable.Range(0, _Vertices.Count).GetEnumerator(); }
+        }
+
+        sealed class LineListWrapper : IReadOnlyList<(int, int)>
+        {
+            public LineListWrapper(List<int> source) { _Indices = source; }
+
+            private readonly IList<int> _Indices;
+
+            public (int, int) this[int index]
+            {
+                get
+                {
+                    index *= 2;
+                    return (_Indices[index + 0], _Indices[index + 1]);
+                }
+            }
+
+            public int Count => _Indices.Count / 2;
+
+            public IEnumerator<(int, int)> GetEnumerator()
+            {
+                var c = this.Count;
+                for (int i = 0; i < c; ++i) yield return this[i];
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                var c = this.Count;
+                for (int i = 0; i < c; ++i) yield return this[i];
+            }
+        }
+
+        sealed class TriangleListWrapper : IReadOnlyList<(int, int, int)>
+        {
+            public TriangleListWrapper(List<int> source) { _Indices = source; }
+
+            private readonly List<int> _Indices;
+
+            public (int, int, int) this[int index]
+            {
+                get
+                {
+                    index *= 3;
+                    return (_Indices[index + 0], _Indices[index + 1], _Indices[index + 2]);
+                }
+            }
+
+            public int Count => _Indices.Count / 3;
+
+            public IEnumerator<(int, int, int)> GetEnumerator()
+            {
+                var c = this.Count;
+                for (int i = 0; i < c; ++i) yield return this[i];
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                var c = this.Count;
+                for (int i = 0; i < c; ++i) yield return this[i];
+            }
         }
 
         #endregion

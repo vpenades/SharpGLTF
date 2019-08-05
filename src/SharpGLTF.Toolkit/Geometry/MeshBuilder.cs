@@ -79,7 +79,7 @@ namespace SharpGLTF.Geometry
 
         public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> Primitives => _Primitives.Values;
 
-        IReadOnlyCollection<IPrimitive<TMaterial>> IMeshBuilder<TMaterial>.Primitives => _Primitives.Values;
+        IReadOnlyCollection<IPrimitiveReader<TMaterial>> IMeshBuilder<TMaterial>.Primitives => _Primitives.Values;
 
         #endregion
 

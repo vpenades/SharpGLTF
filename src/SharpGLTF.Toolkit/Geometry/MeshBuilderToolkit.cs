@@ -14,7 +14,7 @@ namespace SharpGLTF.Geometry
 
         IEnumerable<TMaterial> Materials { get; }
 
-        IReadOnlyCollection<IPrimitive<TMaterial>> Primitives { get; }
+        IReadOnlyCollection<IPrimitiveReader<TMaterial>> Primitives { get; }
 
         IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
 

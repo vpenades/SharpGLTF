@@ -175,6 +175,8 @@ namespace SharpGLTF.Scenes
         {
             if (srcScene == null) return null;
 
+            // Process armatures
+
             var dstNodes = new Dictionary<Node, NodeBuilder>();
 
             foreach (var srcArmature in srcScene.VisualChildren)
@@ -187,12 +189,18 @@ namespace SharpGLTF.Scenes
 
             var dstScene = new SceneBuilder();
 
-            // process meshes
-            var srcMeshInstances = Node.Flatten(srcScene).Where(item => item.Mesh != null).ToList();
+            // process mesh instances
+            var srcMeshInstances = Node.Flatten(srcScene)
+                .Where(item => item.Mesh != null)
+                .ToList();
+
             _AddMeshInstances(dstScene, dstNodes, srcMeshInstances);
 
             // process cameras
-            var srcCameraInstances = Node.Flatten(srcScene).Where(item => item.Camera != null).ToList();
+            var srcCameraInstances = Node.Flatten(srcScene)
+                .Where(item => item.Camera != null)
+                .ToList();
+
             _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
 
             return dstScene;
