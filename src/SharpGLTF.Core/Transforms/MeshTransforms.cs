@@ -269,7 +269,16 @@ namespace SharpGLTF.Transforms
 
         #region data
 
-        private IList<TRANSFORM> _JointTransforms;
+        private TRANSFORM[] _SkinTransforms;
+
+        #endregion
+
+        #region properties
+
+        /// <summary>
+        /// Gets the collection of the current, final matrices to use for skinning
+        /// </summary>
+        public IReadOnlyList<TRANSFORM> SkinTransforms => _SkinTransforms;
 
         #endregion
 
@@ -281,11 +290,11 @@ namespace SharpGLTF.Transforms
             Guard.NotNull(currWorldMatrix, nameof(currWorldMatrix));
             Guard.IsTrue(invBindMatrix.Length == currWorldMatrix.Length, nameof(currWorldMatrix), $"{invBindMatrix} and {currWorldMatrix} length mismatch.");
 
-            if (_JointTransforms == null || _JointTransforms.Count != invBindMatrix.Length) _JointTransforms = new TRANSFORM[invBindMatrix.Length];
+            if (_SkinTransforms == null || _SkinTransforms.Length != invBindMatrix.Length) _SkinTransforms = new TRANSFORM[invBindMatrix.Length];
 
-            for (int i = 0; i < _JointTransforms.Count; ++i)
+            for (int i = 0; i < _SkinTransforms.Length; ++i)
             {
-                _JointTransforms[i] = invBindMatrix[i] * currWorldMatrix[i];
+                _SkinTransforms[i] = invBindMatrix[i] * currWorldMatrix[i];
             }
         }
 
@@ -294,11 +303,11 @@ namespace SharpGLTF.Transforms
             Guard.NotNull(invBindMatrix, nameof(invBindMatrix));
             Guard.NotNull(currWorldMatrix, nameof(currWorldMatrix));
 
-            if (_JointTransforms == null || _JointTransforms.Count != count) _JointTransforms = new TRANSFORM[count];
+            if (_SkinTransforms == null || _SkinTransforms.Length != count) _SkinTransforms = new TRANSFORM[count];
 
-            for (int i = 0; i < _JointTransforms.Count; ++i)
+            for (int i = 0; i < _SkinTransforms.Length; ++i)
             {
-                _JointTransforms[i] = invBindMatrix(i) * currWorldMatrix(i);
+                _SkinTransforms[i] = invBindMatrix(i) * currWorldMatrix(i);
             }
         }
 
@@ -318,7 +327,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldPosition += V3.Transform(localPosition, _JointTransforms[jw.Item1]) * jw.Item2 * wnrm;
+                worldPosition += V3.Transform(localPosition, _SkinTransforms[jw.Item1]) * jw.Item2 * wnrm;
             }
 
             return worldPosition;
@@ -334,7 +343,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldNormal += V3.TransformNormal(localNormal, _JointTransforms[jw.Item1]) * jw.Item2;
+                worldNormal += V3.TransformNormal(localNormal, _SkinTransforms[jw.Item1]) * jw.Item2;
             }
 
             return V3.Normalize(localNormal);
@@ -350,7 +359,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldTangent += V3.TransformNormal(localTangentV, _JointTransforms[jw.Item1]) * jw.Item2;
+                worldTangent += V3.TransformNormal(localTangentV, _SkinTransforms[jw.Item1]) * jw.Item2;
             }
 
             worldTangent = V3.Normalize(worldTangent);
