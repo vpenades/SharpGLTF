@@ -80,118 +80,6 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region properties - transform
-
-        /// <summary>
-        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
-        /// </summary>
-        public Matrix4x4 LocalMatrix
-        {
-            get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
-            set
-            {
-                if (value == Matrix4x4.Identity)
-                {
-                    _matrix = null;
-                }
-                else
-                {
-                    Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
-                    _matrix = value;
-                }
-
-                _scale = null;
-                _rotation = null;
-                _translation = null;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
-        /// </summary>
-        public Transforms.AffineTransform LocalTransform
-        {
-            get => new Transforms.AffineTransform(_matrix, _translation, _rotation, _scale);
-            set
-            {
-                Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
-
-                Guard.IsTrue(value.IsValid, nameof(value));
-
-                _matrix = null;
-                _scale = value.Scale.AsNullable(Vector3.One);
-                _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
-                _translation = value.Translation.AsNullable(Vector3.Zero);
-            }
-        }
-
-        public Transforms.AffineTransform GetLocalTransform(Animation animation, float time)
-        {
-            if (animation == null) return this.LocalTransform;
-
-            return animation.GetLocalTransform(this, time);
-        }
-
-        /// <summary>
-        /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
-        /// </summary>
-        public Matrix4x4 WorldMatrix
-        {
-            get
-            {
-                var vs = VisualParent;
-                return vs == null ? LocalMatrix : Transforms.AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
-            }
-            set
-            {
-                var vs = VisualParent;
-                LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
-            }
-        }
-
-        public Matrix4x4 GetWorldMatrix(Animation animation, float time)
-        {
-            if (animation == null) return this.WorldMatrix;
-
-            var vs = VisualParent;
-            var lm = GetLocalTransform(animation, time).Matrix;
-            return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="Transforms.IGeometryTransform"/> object, based on the current
-        /// transform state, that can be used to transform the <see cref="Mesh"/>
-        /// vertices to world space.
-        /// </summary>
-        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
-        public Transforms.IGeometryTransform GetMeshWorldTransform() { return GetMeshWorldTransform(null, 0); }
-
-        /// <summary>
-        /// Creates a <see cref="Transforms.IGeometryTransform"/> object, based on the current
-        /// transform state, and the given <see cref="Animation"/>, that can be used
-        /// to transform the <see cref="Mesh"/> vertices to world space.
-        /// </summary>
-        /// <param name="animation">The <see cref="Animation"/> to use.</param>
-        /// <param name="time">The time within <paramref name="animation"/>.</param>
-        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
-        public Transforms.IGeometryTransform GetMeshWorldTransform(Animation animation, float time)
-        {
-            if (animation != null) Guard.MustShareLogicalParent(this, animation, nameof(animation));
-
-            var weights = animation == null ? Transforms.SparseWeight8.Create(this.MorphWeights) : animation.GetSparseMorphWeights(this, time);
-
-            if (this.Skin == null) return new Transforms.StaticTransform(this.GetWorldMatrix(animation, time), weights, false);
-
-            return new Transforms.SkinTransform
-                (
-                this.Skin.JointsCount,
-                idx => this.Skin.GetJoint(idx).Item2,
-                idx => this.Skin.GetJoint(idx).Item1.GetWorldMatrix(animation, time),
-                weights, false);
-        }
-
-        #endregion
-
         #region properties - content
 
         /// <summary>
@@ -262,7 +150,162 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
+        #region properties - transform
+
+        /// <summary>
+        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
+        /// </summary>
+        public Transforms.AffineTransform LocalTransform
+        {
+            get => new Transforms.AffineTransform(_matrix, _translation, _rotation, _scale);
+            set
+            {
+                Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
+
+                Guard.IsTrue(value.IsValid, nameof(value));
+
+                _matrix = null;
+                _scale = value.Scale.AsNullable(Vector3.One);
+                _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
+                _translation = value.Translation.AsNullable(Vector3.Zero);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// </summary>
+        public Matrix4x4 LocalMatrix
+        {
+            get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
+            set
+            {
+                if (value == Matrix4x4.Identity)
+                {
+                    _matrix = null;
+                }
+                else
+                {
+                    Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
+                    _matrix = value;
+                }
+
+                _scale = null;
+                _rotation = null;
+                _translation = null;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// </summary>
+        public Matrix4x4 WorldMatrix
+        {
+            get
+            {
+                var vs = VisualParent;
+                return vs == null ? LocalMatrix : Transforms.AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
+            }
+            set
+            {
+                var vs = VisualParent;
+                LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+            }
+        }
+
+        #endregion
+
+        #region API - Transforms
+
+        public Transforms.AffineTransform GetLocalTransform(Animation animation, float time)
+        {
+            if (animation == null) return this.LocalTransform;
+
+            return animation.GetLocalTransform(this, time);
+        }
+
+        public Matrix4x4 GetWorldMatrix(Animation animation, float time)
+        {
+            if (animation == null) return this.WorldMatrix;
+
+            var vs = VisualParent;
+            var lm = GetLocalTransform(animation, time).Matrix;
+            return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Transforms.IGeometryTransform"/> object, based on the current
+        /// transform state, that can be used to transform the <see cref="Mesh"/>
+        /// vertices to world space.
+        /// </summary>
+        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
+        public Transforms.IGeometryTransform GetGeometryTransform() { return GetGeometryTransform(null, 0); }
+
+        /// <summary>
+        /// Creates a <see cref="Transforms.IGeometryTransform"/> instance, based on the current
+        /// transform state, and the given <see cref="Animation"/>, that can be used
+        /// to transform the <see cref="Mesh"/> vertices to world space.
+        /// </summary>
+        /// <param name="animation">The <see cref="Animation"/> to use.</param>
+        /// <param name="time">The time within <paramref name="animation"/>.</param>
+        /// <returns>A <see cref="Transforms.IGeometryTransform"/> object</returns>
+        public Transforms.IGeometryTransform GetGeometryTransform(Animation animation, float time)
+        {
+            if (this.Skin == null)
+            {
+                var statXform = new Transforms.StaticTransform();
+                UpdateGeometryTransform(statXform, animation, time);
+                return statXform;
+            }
+            else
+            {
+                var skinXform = new Transforms.SkinTransform();
+                UpdateGeometryTransform(skinXform, animation, time);
+                return skinXform;
+            }
+        }
+
+        /// <summary>
+        /// Updates an existing instance of <see cref="Transforms.IGeometryTransform"/>.
+        /// </summary>
+        /// <param name="transform">The <see cref="Transforms.IGeometryTransform"/> to update.</param>
+        /// <param name="animation">The <see cref="Animation"/> to use.</param>
+        /// <param name="time">The time within <paramref name="animation"/>.</param>
+        public void UpdateGeometryTransform(Transforms.IGeometryTransform transform, Animation animation, float time)
+        {
+            Guard.NotNull(transform, nameof(transform));
+            if (animation != null) Guard.MustShareLogicalParent(this, animation, nameof(animation));
+
+            var weights = animation == null ? Transforms.SparseWeight8.Create(this.MorphWeights) : animation.GetSparseMorphWeights(this, time);
+
+            if (this.Skin == null)
+            {
+                if (transform is Transforms.StaticTransform statXform)
+                {
+                    statXform.Update(weights, false);
+                    statXform.Update(this.GetWorldMatrix(animation, time));
+                    return;
+                }
+            }
+            else
+            {
+                if (transform is Transforms.SkinTransform skinXform)
+                {
+                    skinXform.Update(weights, false);
+                    skinXform.Update(
+                        this.Skin.JointsCount,
+                        idx => this.Skin.GetJoint(idx).Item2,
+                        idx => this.Skin.GetJoint(idx).Item1.GetWorldMatrix(animation, time)
+                        );
+                    return;
+                }
+            }
+
+            throw new ArgumentException($"{nameof(transform)} type mismatch.", nameof(transform));
+        }
+
+        #endregion
+
+        #region API - hierarchy
 
         /// <summary>
         /// Creates a new <see cref="Node"/> instance,

@@ -59,12 +59,12 @@ namespace SharpGLTF.Transforms
 
         /// <summary>
         /// Represents a sparse collection of weights where:
-        /// - Index of value <see cref="_COMPLEMENT_INDEX"/> points to the Mesh master positions.
+        /// - Index of value <see cref="COMPLEMENT_INDEX"/> points to the Mesh master positions.
         /// - All other indices point to Mesh MorphTarget[index] positions.
         /// </summary>
         private SparseWeight8 _Weights;
 
-        private const int _COMPLEMENT_INDEX = 65536;
+        public const int COMPLEMENT_INDEX = 65536;
 
         /// <summary>
         /// True if morph targets represent absolute values.
@@ -75,6 +75,11 @@ namespace SharpGLTF.Transforms
         #endregion
 
         #region properties
+
+        /// <summary>
+        /// Gets the current morph weights to use for morph target blending. <see cref="COMPLEMENT_INDEX"/> represents the index for the base geometry.
+        /// </summary>
+        public SparseWeight8 MorphWeights => _Weights;
 
         /// <summary>
         /// Gets a value indicating whether morph target values are absolute, and not relative to the master value.
@@ -91,16 +96,16 @@ namespace SharpGLTF.Transforms
 
             if (morphWeights.IsWeightless)
             {
-                _Weights = SparseWeight8.Create((_COMPLEMENT_INDEX, 1));
+                _Weights = SparseWeight8.Create((COMPLEMENT_INDEX, 1));
                 return;
             }
 
-            _Weights = morphWeights.GetNormalizedWithComplement(_COMPLEMENT_INDEX);
+            _Weights = morphWeights.GetNormalizedWithComplement(COMPLEMENT_INDEX);
         }
 
         protected V3 MorphVectors(V3 value, V3[] morphTargets)
         {
-            if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             if (morphTargets == null) return value;
 
@@ -110,7 +115,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
+                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -118,7 +123,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
+                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -128,7 +133,7 @@ namespace SharpGLTF.Transforms
 
         protected V4 MorphVectors(V4 value, V4[] morphTargets)
         {
-            if (_Weights.Index0 == _COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             if (morphTargets == null) return value;
 
@@ -138,7 +143,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
+                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -146,7 +151,7 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == _COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
+                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
                     p += val * pair.Item2;
                 }
             }
@@ -171,23 +176,23 @@ namespace SharpGLTF.Transforms
             Update(TRANSFORM.Identity);
         }
 
-        public StaticTransform(TRANSFORM xform)
+        public StaticTransform(TRANSFORM worldMatrix)
         {
             Update(default, false);
-            Update(xform);
+            Update(worldMatrix);
         }
 
-        public StaticTransform(TRANSFORM xform, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
+        public StaticTransform(TRANSFORM worldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
         {
             Update(morphWeights, useAbsoluteMorphs);
-            Update(xform);
+            Update(worldMatrix);
         }
 
         #endregion
 
         #region data
 
-        private TRANSFORM _Transform;
+        private TRANSFORM _WorldMatrix;
         private Boolean _Visible;
         private Boolean _FlipFaces;
 
@@ -199,23 +204,25 @@ namespace SharpGLTF.Transforms
 
         public Boolean FlipFaces => _FlipFaces;
 
+        public Matrix4x4 WorldMatrix => _WorldMatrix;
+
         #endregion
 
         #region API
 
-        public void Update(TRANSFORM xform)
+        public void Update(TRANSFORM worldMatrix)
         {
-            _Transform = xform;
+            _WorldMatrix = worldMatrix;
 
             // http://m-hikari.com/ija/ija-password-2009/ija-password5-8-2009/hajrizajIJA5-8-2009.pdf
 
             float determinant3x3 =
-                +(xform.M13 * xform.M21 * xform.M32)
-                + (xform.M11 * xform.M22 * xform.M33)
-                + (xform.M12 * xform.M23 * xform.M31)
-                - (xform.M12 * xform.M21 * xform.M33)
-                - (xform.M13 * xform.M22 * xform.M31)
-                - (xform.M11 * xform.M23 * xform.M32);
+                +(worldMatrix.M13 * worldMatrix.M21 * worldMatrix.M32)
+                + (worldMatrix.M11 * worldMatrix.M22 * worldMatrix.M33)
+                + (worldMatrix.M12 * worldMatrix.M23 * worldMatrix.M31)
+                - (worldMatrix.M12 * worldMatrix.M21 * worldMatrix.M33)
+                - (worldMatrix.M13 * worldMatrix.M22 * worldMatrix.M31)
+                - (worldMatrix.M11 * worldMatrix.M23 * worldMatrix.M32);
 
             _Visible = Math.Abs(determinant3x3) > float.Epsilon;
             _FlipFaces = determinant3x3 < 0;
@@ -225,21 +232,21 @@ namespace SharpGLTF.Transforms
         {
             position = MorphVectors(position, morphTargets);
 
-            return V3.Transform(position, _Transform);
+            return V3.Transform(position, _WorldMatrix);
         }
 
         public V3 TransformNormal(V3 normal, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             normal = MorphVectors(normal, morphTargets);
 
-            return V3.Normalize(V3.Transform(normal, _Transform));
+            return V3.Normalize(V3.Transform(normal, _WorldMatrix));
         }
 
         public V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
             var n = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
 
-            n = V3.Normalize(V3.Transform(n, _Transform));
+            n = V3.Normalize(V3.Transform(n, _WorldMatrix));
 
             return new V4(n, tangent.W);
         }
@@ -278,7 +285,7 @@ namespace SharpGLTF.Transforms
         /// <summary>
         /// Gets the collection of the current, final matrices to use for skinning
         /// </summary>
-        public IReadOnlyList<TRANSFORM> SkinTransforms => _SkinTransforms;
+        public IReadOnlyList<TRANSFORM> SkinMatrices => _SkinTransforms;
 
         #endregion
 

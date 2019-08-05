@@ -229,7 +229,7 @@ namespace SharpGLTF.Schema2
 
             if (node == null || mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
-            var xform = node.GetMeshWorldTransform(animation, time);
+            var xform = node.GetGeometryTransform(animation, time);
 
             return mesh.EvaluateTriangles(xform);
         }
@@ -269,7 +269,7 @@ namespace SharpGLTF.Schema2
 
             if (node == null || mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
-            var xform = node.GetMeshWorldTransform(animation, time);
+            var xform = node.GetGeometryTransform(animation, time);
 
             return mesh.EvaluateTriangles<TvG, TvM, VertexEmpty>(xform);
         }

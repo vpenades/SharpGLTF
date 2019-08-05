@@ -287,7 +287,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             for (float t = 0; t < 5; t+=0.25f)
             {
-                var nodexform = node.GetMeshWorldTransform(anim, t);
+                var nodexform = node.GetGeometryTransform(anim, t);
 
                 TestContext.WriteLine($"Animation at {t}");
 
