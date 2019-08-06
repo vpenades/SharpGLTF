@@ -272,10 +272,14 @@ namespace SharpGLTF.Schema2
             if (dstChannel.Texture == null) dstChannel.UseTexture();
 
             dstChannel.Texture.CoordinateSet = srcChannel.TextureCoordinate;
-            dstChannel.Texture.MinFilter = srcChannel.TextureSampler.MinFilter;
-            dstChannel.Texture.MagFilter = srcChannel.TextureSampler.MagFilter;
-            dstChannel.Texture.WrapS = srcChannel.TextureSampler.WrapS;
-            dstChannel.Texture.WrapT = srcChannel.TextureSampler.WrapT;
+
+            if (srcChannel.TextureSampler != null)
+            {
+                dstChannel.Texture.MinFilter = srcChannel.TextureSampler.MinFilter;
+                dstChannel.Texture.MagFilter = srcChannel.TextureSampler.MagFilter;
+                dstChannel.Texture.WrapS = srcChannel.TextureSampler.WrapS;
+                dstChannel.Texture.WrapT = srcChannel.TextureSampler.WrapT;
+            }
 
             var srcXform = srcChannel.TextureTransform;
 

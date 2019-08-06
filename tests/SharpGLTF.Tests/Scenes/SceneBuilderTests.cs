@@ -311,6 +311,7 @@ namespace SharpGLTF.Scenes
         }
 
 
+        [TestCase("Avocado.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         [TestCase("BoxAnimated.glb")]
@@ -351,10 +352,13 @@ namespace SharpGLTF.Scenes
             modelSrc.AttachToCurrentTest(path + "_src" + ".obj");
             modelBis.AttachToCurrentTest(path + "_bis" + ".obj");
 
-            modelSrc.AttachToCurrentTest(path + "_src_at01" + ".obj", modelSrc.LogicalAnimations[0], 0.1f);
+            if (modelSrc.LogicalAnimations.Count > 0)
+            {
+                modelSrc.AttachToCurrentTest(path + "_src_at01" + ".obj", modelSrc.LogicalAnimations[0], 0.1f);
 
-            if (modelBis.LogicalAnimations.Count > 0)
-                modelBis.AttachToCurrentTest(path + "_bis_at01" + ".obj", modelBis.LogicalAnimations[0], 0.1f);
+                if (modelBis.LogicalAnimations.Count > 0)
+                    modelBis.AttachToCurrentTest(path + "_bis_at01" + ".obj", modelBis.LogicalAnimations[0], 0.1f);
+            }
         }
 
     }
