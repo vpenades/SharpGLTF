@@ -1,11 +1,10 @@
 ﻿# SharpGLTF.Runtime
 
-This namespace contains some utility classes to help into rendering glTF models with
-client graphics engines typically using hardware resources.
+This namespace contains some utility classes to help rendering glTF models with
+client graphics engines which typically use GPU accelerated resources.
 
 The process is this; first of all we load a glTF model:
 
-Loading a glTF document:
 ```c#
 var model = SharpGLTF.Schema2.ModelRoot.Load("model.gltf");
 ```
