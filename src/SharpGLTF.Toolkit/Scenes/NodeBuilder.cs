@@ -34,6 +34,7 @@ namespace SharpGLTF.Scenes
         private Animations.AnimatableProperty<Vector3> _Scale;
         private Animations.AnimatableProperty<Quaternion> _Rotation;
         private Animations.AnimatableProperty<Vector3> _Translation;
+        private Animations.AnimatableProperty<Transforms.SparseWeight8> _Morphings;
 
         #endregion
 
@@ -54,13 +55,15 @@ namespace SharpGLTF.Scenes
         /// <summary>
         /// Gets a value indicating whether this <see cref="NodeBuilder"/> has animations.
         /// </summary>
-        public bool HasAnimations => (_Scale?.IsAnimated ?? false) || (_Rotation?.IsAnimated ?? false) || (_Translation?.IsAnimated ?? false);
+        public bool HasAnimations => (_Scale?.IsAnimated ?? false) || (_Rotation?.IsAnimated ?? false) || (_Translation?.IsAnimated ?? false) || (_Morphings?.IsAnimated ?? false);
 
         public Animations.AnimatableProperty<Vector3> Scale => _Scale;
 
         public Animations.AnimatableProperty<Quaternion> Rotation => _Rotation;
 
         public Animations.AnimatableProperty<Vector3> Translation => _Translation;
+
+        public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.

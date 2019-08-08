@@ -285,6 +285,12 @@ namespace SharpGLTF.Animations
 
         #region sampler creation
 
+        internal static IEnumerable<T> Isolate<T>(this IEnumerable<T> collection, bool isolateMemory)
+        {
+            if (isolateMemory) collection = collection.ToArray();
+            return collection;
+        }
+
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true)
         {
             if (collection == null) return null;

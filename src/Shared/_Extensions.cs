@@ -170,6 +170,22 @@ namespace SharpGLTF
 
             int h = 0;
 
+            // this will handle default(ArraySegment<T>)
+            if (collection is IReadOnlyList<T> list)
+            {
+                count = Math.Min(count, list.Count);
+
+                for (int i = 0; i < count; ++i)
+                {
+                    var element = list[i];
+
+                    h ^= element == null ? 0 : element.GetHashCode();
+                    h *= 17;
+                }
+
+                return h;
+            }
+
             foreach (var element in collection.Take(count))
             {
                 h ^= element == null ? 0 : element.GetHashCode();
