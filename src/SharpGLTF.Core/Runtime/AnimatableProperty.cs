@@ -26,7 +26,7 @@ namespace SharpGLTF.Runtime
 
         #region data
 
-        private Dictionary<string, ICurveSampler<T>> _Tracks;
+        private Collections.NamedList<ICurveSampler<T>> _Animations;
 
         /// <summary>
         /// Gets the default value of this instance.
@@ -40,29 +40,42 @@ namespace SharpGLTF.Runtime
 
         public bool IsAnimated => Tracks.Count > 0;
 
-        public IReadOnlyDictionary<string, ICurveSampler<T>> Tracks => _Tracks;
+        public IReadOnlyCollection<string> Tracks => _Animations?.Names;
 
         #endregion
 
         #region API
 
         /// <summary>
-        /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="track"/>.
+        /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="trackName"/>.
         /// </summary>
-        /// <param name="track">An animation track name, or null.</param>
+        /// <param name="trackName">An animation track name, or null.</param>
         /// <param name="offset">A time offset within the given animation track.</param>
-        /// <returns>The evaluated value taken from the animation <paramref name="track"/>, or <see cref="Value"/> if a track was not found.</returns>
-        public T GetValueAt(string track, float offset)
+        /// <returns>The evaluated value taken from the animation <paramref name="trackName"/>, or <see cref="Value"/> if a track was not found.</returns>
+        public T GetValueAt(string trackName, float offset)
         {
-            if (_Tracks == null) return this.Value;
+            var idx = _Animations?.IndexOf(trackName) ?? -1;
 
-            return _Tracks.TryGetValue(track, out ICurveSampler<T> sampler) ? sampler.GetPoint(offset) : this.Value;
+            return GetValueAt(idx, offset);
         }
 
-        public void AddCurve(string name, ICurveSampler<T> sampler)
+        public T GetValueAt(int trackLogicalIndex, float offset)
         {
-            if (_Tracks == null) _Tracks = new Dictionary<string, ICurveSampler<T>>();
-            _Tracks[name] = sampler;
+            if (_Animations == null) return this.Value;
+
+            if (trackLogicalIndex < 0 || trackLogicalIndex >= _Animations.Count) return this.Value;
+
+            return _Animations[trackLogicalIndex].GetPoint(offset);
+        }
+
+        public void AddCurve(int logicalIndex, string name, ICurveSampler<T> sampler)
+        {
+            Guard.NotNull(sampler, nameof(sampler));
+            Guard.MustBeGreaterThanOrEqualTo(logicalIndex, 0, nameof(logicalIndex));
+
+            if (_Animations == null) _Animations = new Collections.NamedList<ICurveSampler<T>>();
+
+            _Animations.SetValue(logicalIndex, name, sampler);
         }
 
         #endregion

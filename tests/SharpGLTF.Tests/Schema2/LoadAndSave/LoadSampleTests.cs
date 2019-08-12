@@ -283,11 +283,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             // pos_master
 
+            var instance = Runtime.SceneTemplate
+                .Create(model.DefaultScene, false)
+                .CreateInstance();
+
             var pvrt = node.Mesh.Primitives[0].GetVertexColumns();
 
             for (float t = 0; t < 5; t+=0.25f)
             {
-                var nodexform = node.GetGeometryTransform(anim, t);
+                instance.SetAnimationFrame(anim.LogicalIndex, t);
+
+                var nodexform = instance.GetDrawableReference(0).Item2;
 
                 TestContext.WriteLine($"Animation at {t}");
 

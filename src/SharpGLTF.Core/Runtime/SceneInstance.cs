@@ -101,12 +101,12 @@ namespace SharpGLTF.Runtime
             LocalMatrix = XFORM.Multiply(xform, ipwm);
         }
 
-        public void SetPoseTransform() { SetAnimationFrame(null, 0); }
+        public void SetPoseTransform() { SetAnimationFrame(-1, 0); }
 
-        public void SetAnimationFrame(string trackName, float time)
+        public void SetAnimationFrame(int trackLogicalIndex, float time)
         {
-            this.MorphWeights = _Template.GetMorphWeights(trackName, time);
-            this.LocalMatrix = _Template.GetLocalMatrix(trackName, time);
+            this.MorphWeights = _Template.GetMorphWeights(trackLogicalIndex, time);
+            this.LocalMatrix = _Template.GetLocalMatrix(trackLogicalIndex, time);
         }
 
         #endregion
@@ -119,9 +119,9 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal SceneInstance(NodeTemplate[] nodeTemplates, DrawableReference[] drawables, IReadOnlyDictionary<string, float> tracks)
+        internal SceneInstance(NodeTemplate[] nodeTemplates, DrawableReference[] drawables, Collections.NamedList<float> tracks)
         {
-            AnimationTracks = tracks;
+            _AnimationTracks = tracks;
 
             _NodeTemplates = nodeTemplates;
             _NodeInstances = new NodeInstance[_NodeTemplates.Length];
@@ -157,6 +157,8 @@ namespace SharpGLTF.Runtime
         private readonly DrawableReference[] _DrawableReferences;
         private readonly IGeometryTransform[] _DrawableTransforms;
 
+        private readonly Collections.NamedList<float> _AnimationTracks;
+
         #endregion
 
         #region properties
@@ -165,7 +167,7 @@ namespace SharpGLTF.Runtime
 
         public IEnumerable<NodeInstance> VisualNodes => _NodeInstances.Where(item => item.VisualParent == null);
 
-        public IReadOnlyDictionary<string, float> AnimationTracks { get; private set; }
+        public IEnumerable<String> AnimationTracks => _AnimationTracks.Names;
 
         /// <summary>
         /// Gets the number of drawable references.
@@ -198,9 +200,27 @@ namespace SharpGLTF.Runtime
             foreach (var n in _NodeInstances) n.SetPoseTransform();
         }
 
+        public float GetAnimationDuration(int trackLogicalIndex)
+        {
+            if (trackLogicalIndex < 0) return 0;
+            if (trackLogicalIndex >= _AnimationTracks.Count) return 0;
+
+            return _AnimationTracks[trackLogicalIndex];
+        }
+
+        public float GetAnimationDuration(string trackName)
+        {
+            return GetAnimationDuration(_AnimationTracks.IndexOf(trackName));
+        }
+
+        public void SetAnimationFrame(int trackLogicalIndex, float time)
+        {
+            foreach (var n in _NodeInstances) n.SetAnimationFrame(trackLogicalIndex, time);
+        }
+
         public void SetAnimationFrame(string trackName, float time)
         {
-            foreach (var n in _NodeInstances) n.SetAnimationFrame(trackName, time);
+            SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time);
         }
 
         /// <summary>

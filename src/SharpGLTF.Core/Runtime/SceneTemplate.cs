@@ -15,7 +15,7 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, bool isolateMemory, IDictionary<string, float> animTracks)
+        internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, bool isolateMemory)
         {
             _LogicalSourceIndex = srcNode.LogicalIndex;
 
@@ -36,25 +36,20 @@ namespace SharpGLTF.Runtime
 
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
+                var index = anim.LogicalIndex;
                 var name = anim.Name;
-                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-                if (animTracks.TryGetValue(name, out float duration)) duration = Math.Max(duration, anim.Duration);
-                else duration = anim.Duration;
-
-                animTracks[name] = duration;
 
                 var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (scaAnim != null) _Scale.AddCurve(name, scaAnim);
+                if (scaAnim != null) _Scale.AddCurve(index, name, scaAnim);
 
                 var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (rotAnim != null) _Rotation.AddCurve(name, rotAnim);
+                if (rotAnim != null) _Rotation.AddCurve(index, name, rotAnim);
 
                 var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (traAnim != null) _Translation.AddCurve(name, traAnim);
+                if (traAnim != null) _Translation.AddCurve(index, name, traAnim);
 
                 var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (mrpAnim != null) _Morphing.AddCurve(name, mrpAnim);
+                if (mrpAnim != null) _Morphing.AddCurve(index, name, mrpAnim);
             }
         }
 
@@ -101,27 +96,29 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public Transforms.SparseWeight8 GetMorphWeights(string trackName, float time)
+        public Transforms.SparseWeight8 GetMorphWeights(int trackLogicalIndex, float time)
         {
-            return _Morphing.GetValueAt(trackName, time);
+            if (trackLogicalIndex < 0) return _Morphing.Value;
+
+            return _Morphing.GetValueAt(trackLogicalIndex, time);
         }
 
-        public Transforms.AffineTransform GetLocalTransform(string trackName, float time)
+        public Transforms.AffineTransform GetLocalTransform(int trackLogicalIndex, float time)
         {
-            if (string.IsNullOrEmpty(trackName)) return Transforms.AffineTransform.Create(_LocalMatrix);
+            if (trackLogicalIndex < 0) return Transforms.AffineTransform.Create(_LocalMatrix);
 
-            var s = _Scale?.GetValueAt(trackName, time);
-            var r = _Rotation?.GetValueAt(trackName, time);
-            var t = _Translation?.GetValueAt(trackName, time);
+            var s = _Scale?.GetValueAt(trackLogicalIndex, time);
+            var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
+            var t = _Translation?.GetValueAt(trackLogicalIndex, time);
 
             return Transforms.AffineTransform.Create(t, r, s);
         }
 
-        public Matrix4x4 GetLocalMatrix(string trackName, float time)
+        public Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
         {
-            if (string.IsNullOrEmpty(trackName)) return _LocalMatrix;
+            if (trackLogicalIndex < 0) return _LocalMatrix;
 
-            return GetLocalTransform(trackName, time).Matrix;
+            return GetLocalTransform(trackLogicalIndex, time).Matrix;
         }
 
         #endregion
@@ -268,6 +265,8 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
+            // gather scene nodes.
+
             var srcNodes = Schema2.Node.Flatten(srcScene)
                 .Select((key, idx) => (key, idx))
                 .ToDictionary(pair => pair.key, pair => pair.idx);
@@ -278,7 +277,7 @@ namespace SharpGLTF.Runtime
                 return srcNodes[srcNode];
             }
 
-            var dstTracks = new Dictionary<string, float>();
+            // create bones.
 
             var dstNodes = new NodeTemplate[srcNodes.Count];
 
@@ -295,8 +294,10 @@ namespace SharpGLTF.Runtime
                     .Select(n => indexSolver(n))
                     .ToArray();
 
-                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, isolateMemory, dstTracks);
+                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, isolateMemory);
             }
+
+            // create drawables.
 
             var instances = srcNodes.Keys
                 .Where(item => item.Mesh != null)
@@ -315,10 +316,24 @@ namespace SharpGLTF.Runtime
                     (DrawableReference)new StaticDrawableReference(srcInstance, indexSolver);
             }
 
+            // gather animation durations.
+
+            var dstTracks = new Collections.NamedList<float>();
+
+            foreach (var anim in srcScene.LogicalParent.LogicalAnimations)
+            {
+                var index = anim.LogicalIndex;
+                var name = anim.Name;
+
+                float duration = dstTracks.Count <= index ? 0 : dstTracks[index];
+                duration = Math.Max(duration, anim.Duration);
+                dstTracks.SetValue(index, name, anim.Duration);
+            }
+
             return new SceneTemplate(dstNodes, drawables, dstTracks);
         }
 
-        private SceneTemplate(NodeTemplate[] nodes, DrawableReference[] drawables, IReadOnlyDictionary<string, float> animTracks)
+        private SceneTemplate(NodeTemplate[] nodes, DrawableReference[] drawables, Collections.NamedList<float> animTracks)
         {
             _NodeTemplates = nodes;
             _DrawableReferences = drawables;
@@ -332,7 +347,7 @@ namespace SharpGLTF.Runtime
         private readonly NodeTemplate[] _NodeTemplates;
         private readonly DrawableReference[] _DrawableReferences;
 
-        private readonly IReadOnlyDictionary<string, float> _AnimationTracks;
+        private readonly Collections.NamedList<float> _AnimationTracks;
 
         #endregion
 
@@ -344,9 +359,9 @@ namespace SharpGLTF.Runtime
         public IEnumerable<int> LogicalMeshIds => _DrawableReferences.Select(item => item.LogicalMeshIndex).Distinct();
 
         /// <summary>
-        /// Gets A collection of animation track names, and the time duration of each track, in seconds.
+        /// Gets A collection of animation track names.
         /// </summary>
-        public IReadOnlyDictionary<string, float> AnimationTracks => _AnimationTracks;
+        public IEnumerable<string> AnimationTracks => _AnimationTracks.Names;
 
         #endregion
 

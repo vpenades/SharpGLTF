@@ -211,27 +211,27 @@ namespace SharpGLTF.Schema2
         /// <returns>A collection of triangles in world space.</returns>
         public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Scene scene, Animation animation = null, float time = 0)
         {
-            return Node
-                .Flatten(scene)
-                .SelectMany(item => item.EvaluateTriangles(animation, time));
-        }
+            if (scene == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
-        /// <summary>
-        /// Yields a collection of triangles representing the geometry in world space.
-        /// </summary>
-        /// <param name="node">A <see cref="Node"/> instance.</param>
-        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
-        /// <param name="time">The animation time.</param>
-        /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Node node, Animation animation = null, float time = 0)
-        {
-            var mesh = node?.Mesh;
+            var instance = Runtime.SceneTemplate
+                .Create(scene, false)
+                .CreateInstance();
 
-            if (node == null || mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
+            if (animation == null)
+            {
+                instance.SetPoseTransforms();
+            }
+            else
+            {
+                instance.SetAnimationFrame(animation.Name, time);
+            }
 
-            var xform = node.GetGeometryTransform(animation, time);
+            var meshes = scene.LogicalParent.LogicalMeshes;
 
-            return mesh.EvaluateTriangles(xform);
+            return instance
+                .DrawableReferences
+                .Where(item => item.Item2.Visible)
+                .SelectMany(item => meshes[item.Item1].EvaluateTriangles(item.Item2));
         }
 
         /// <summary>
@@ -247,31 +247,27 @@ namespace SharpGLTF.Schema2
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            return Node
-                .Flatten(scene)
-                .SelectMany(item => item.EvaluateTriangles<TvG, TvM>(animation, time));
-        }
+            if (scene == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
-        /// <summary>
-        /// Yields a collection of triangles representing the geometry in world space.
-        /// </summary>
-        /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
-        /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
-        /// <param name="node">A <see cref="Node"/> instance.</param>
-        /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
-        /// <param name="time">The animation time.</param>
-        /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Node node, Animation animation = null, float time = 0)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-        {
-            var mesh = node?.Mesh;
+            var instance = Runtime.SceneTemplate
+                .Create(scene, false)
+                .CreateInstance();
 
-            if (node == null || mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
+            if (animation == null)
+            {
+                instance.SetPoseTransforms();
+            }
+            else
+            {
+                instance.SetAnimationFrame(animation.Name, time);
+            }
 
-            var xform = node.GetGeometryTransform(animation, time);
+            var meshes = scene.LogicalParent.LogicalMeshes;
 
-            return mesh.EvaluateTriangles<TvG, TvM, VertexEmpty>(xform);
+            return instance
+                .DrawableReferences
+                .Where(item => item.Item2.Visible)
+                .SelectMany(item => meshes[item.Item1].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Item2));
         }
 
         public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)
