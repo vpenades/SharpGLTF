@@ -4,24 +4,17 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>SharpGLTF.Core</AssemblyName>
     <RootNamespace>SharpGLTF</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>    
-    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Authors>Vicente Penades</Authors>
-    <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>
-    <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
-    <PackageTags>C# glTF 3D</PackageTags>
-    <Version>1.0.0-alpha0011</Version>
     <LangVersion>latest</LangVersion>
-    <DebugSymbols>true</DebugSymbols>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>    
-    <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
-  </PropertyGroup>
+    <DebugSymbols>true</DebugSymbols>    
+  </PropertyGroup>  
+  
+  <Import Project="..\Version.props" />
+  
+  <Import Project="..\PackageInfo.props" />
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
-  </ItemGroup>
+  <PropertyGroup>
+    <DocumentationFile>bin\Docs\SharpGLTF.xml</DocumentationFile>
+  </PropertyGroup>  
 
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
@@ -32,11 +25,7 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SharpGLTF.Tests</_Parameter1>
     </AssemblyAttribute>    
-  </ItemGroup>
-
-  <PropertyGroup>
-    <DocumentationFile>bin\Docs\SharpGLTF.xml</DocumentationFile>
-  </PropertyGroup>
+  </ItemGroup>  
   
   <ItemGroup>    
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />

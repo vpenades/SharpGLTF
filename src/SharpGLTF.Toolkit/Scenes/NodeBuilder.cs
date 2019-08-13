@@ -91,7 +91,7 @@ namespace SharpGLTF.Scenes
                 ?
                 Transforms.AffineTransform.Create(_Matrix.Value)
                 :
-                Transforms.AffineTransform.Create(Translation?.Value, Rotation?.Value, Scale?.Value);
+                Transforms.AffineTransform.Create(Scale?.Value, Rotation?.Value, Translation?.Value);
             set
             {
                 Guard.IsTrue(value.IsValid, nameof(value));
@@ -306,7 +306,7 @@ namespace SharpGLTF.Scenes
             var rotation = Rotation?.GetValueAt(animationTrack, time);
             var translation = Translation?.GetValueAt(animationTrack, time);
 
-            return Transforms.AffineTransform.Create(translation, rotation, scale);
+            return Transforms.AffineTransform.Create(scale, rotation, translation);
         }
 
         public Matrix4x4 GetWorldMatrix(string animationTrack, float time)

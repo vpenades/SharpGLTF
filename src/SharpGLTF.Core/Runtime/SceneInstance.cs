@@ -109,6 +109,12 @@ namespace SharpGLTF.Runtime
             this.LocalMatrix = _Template.GetLocalMatrix(trackLogicalIndex, time);
         }
 
+        public void SetAnimationFrame(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            this.MorphWeights = _Template.GetMorphWeights(track, time, weight);
+            this.LocalMatrix = _Template.GetLocalMatrix(track, time, weight);
+        }
+
         #endregion
     }
 
@@ -221,6 +227,33 @@ namespace SharpGLTF.Runtime
         public void SetAnimationFrame(string trackName, float time)
         {
             SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time);
+        }
+
+        public void SetAnimationFrame(params (int, float, float)[] blended)
+        {
+            SetAnimationFrame(_NodeInstances, blended);
+        }
+
+        public static void SetAnimationFrame(IEnumerable<NodeInstance> nodes, params (int, float, float)[] blended)
+        {
+            Guard.NotNull(nodes, nameof(nodes));
+
+            Span<int> tracks = stackalloc int[blended.Length];
+            Span<float> times = stackalloc float[blended.Length];
+            Span<float> weights = stackalloc float[blended.Length];
+
+            float w = blended.Sum(item => item.Item3);
+
+            w = w == 0 ? 1 : 1 / w;
+
+            for (int i = 0; i < blended.Length; ++i)
+            {
+                tracks[i] = blended[i].Item1;
+                times[i] = blended[i].Item2;
+                weights[i] = blended[i].Item3 * w;
+            }
+
+            foreach (var n in nodes) n.SetAnimationFrame(tracks, times, weights);
         }
 
         /// <summary>

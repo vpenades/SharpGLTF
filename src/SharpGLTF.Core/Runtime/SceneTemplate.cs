@@ -25,11 +25,11 @@ namespace SharpGLTF.Runtime
             Name = srcNode.Name;
 
             _LocalMatrix = srcNode.LocalMatrix;
+            _LocalTransform = srcNode.LocalTransform;
 
-            var localXform = srcNode.LocalTransform;
-            _Rotation = new AnimatableProperty<Quaternion>(localXform.Rotation);
-            _Scale = new AnimatableProperty<Vector3>(localXform.Scale);
-            _Translation = new AnimatableProperty<Vector3>(localXform.Translation);
+            _Scale = new AnimatableProperty<Vector3>(_LocalTransform.Scale);
+            _Rotation = new AnimatableProperty<Quaternion>(_LocalTransform.Rotation);
+            _Translation = new AnimatableProperty<Vector3>(_LocalTransform.Translation);
 
             var mw = Transforms.SparseWeight8.Create(srcNode.MorphWeights);
             _Morphing = new AnimatableProperty<Transforms.SparseWeight8>(mw);
@@ -51,6 +51,8 @@ namespace SharpGLTF.Runtime
                 var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler(isolateMemory);
                 if (mrpAnim != null) _Morphing.AddCurve(index, name, mrpAnim);
             }
+
+            _UsePrecomputed = !(_Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated);
         }
 
         #endregion
@@ -62,7 +64,9 @@ namespace SharpGLTF.Runtime
         private readonly int _ParentIndex;
         private readonly int[] _ChildIndices;
 
+        private readonly bool _UsePrecomputed;
         private readonly Matrix4x4 _LocalMatrix;
+        private readonly Transforms.AffineTransform _LocalTransform;
 
         private readonly AnimatableProperty<Vector3> _Scale;
         private readonly AnimatableProperty<Quaternion> _Rotation;
@@ -103,22 +107,57 @@ namespace SharpGLTF.Runtime
             return _Morphing.GetValueAt(trackLogicalIndex, time);
         }
 
+        public Transforms.SparseWeight8 GetMorphWeights(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            if (!_Morphing.IsAnimated) return _Morphing.Value;
+
+            Span<Transforms.SparseWeight8> xforms = stackalloc Transforms.SparseWeight8[track.Length];
+
+            for (int i = 0; i < xforms.Length; ++i)
+            {
+                xforms[i] = GetMorphWeights(track[i], time[i]);
+            }
+
+            return Transforms.SparseWeight8.Blend(xforms, weight);
+        }
+
         public Transforms.AffineTransform GetLocalTransform(int trackLogicalIndex, float time)
         {
-            if (trackLogicalIndex < 0) return Transforms.AffineTransform.Create(_LocalMatrix);
+            if (_UsePrecomputed || trackLogicalIndex < 0) return _LocalTransform;
 
             var s = _Scale?.GetValueAt(trackLogicalIndex, time);
             var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
             var t = _Translation?.GetValueAt(trackLogicalIndex, time);
 
-            return Transforms.AffineTransform.Create(t, r, s);
+            return Transforms.AffineTransform.Create(s, r, t);
+        }
+
+        public Transforms.AffineTransform GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            if (_UsePrecomputed) return _LocalTransform;
+
+            Span<Transforms.AffineTransform> xforms = stackalloc Transforms.AffineTransform[track.Length];
+
+            for (int i = 0; i < xforms.Length; ++i)
+            {
+                xforms[i] = GetLocalTransform(track[i], time[i]);
+            }
+
+            return Transforms.AffineTransform.Blend(xforms, weight);
         }
 
         public Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
         {
-            if (trackLogicalIndex < 0) return _LocalMatrix;
+            if (_UsePrecomputed || trackLogicalIndex < 0) return _LocalMatrix;
 
             return GetLocalTransform(trackLogicalIndex, time).Matrix;
+        }
+
+        public Matrix4x4 GetLocalMatrix(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            if (_UsePrecomputed) return _LocalMatrix;
+
+            return GetLocalTransform(track, time, weight).Matrix;
         }
 
         #endregion

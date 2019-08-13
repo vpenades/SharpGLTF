@@ -21,12 +21,12 @@ namespace SharpGLTF.Transforms
             return new AffineTransform(matrix, null, null, null);
         }
 
-        public static AffineTransform Create(Vector3? translation, Quaternion? rotation, Vector3? scale)
+        public static AffineTransform Create(Vector3? scale, Quaternion? rotation, Vector3? translation)
         {
-            return new AffineTransform(null, translation, rotation, scale);
+            return new AffineTransform(null, scale, rotation, translation);
         }
 
-        internal AffineTransform(Matrix4x4? matrix, Vector3? translation, Quaternion? rotation, Vector3? scale)
+        internal AffineTransform(Matrix4x4? matrix, Vector3? scale, Quaternion? rotation, Vector3? translation)
         {
             if (matrix.HasValue)
             {
@@ -125,7 +125,7 @@ namespace SharpGLTF.Transforms
         {
             if (transform.HasValue) return transform.Value;
 
-            return new AffineTransform(null, translation, rotation, scale).Matrix;
+            return new AffineTransform(null, scale, rotation, translation).Matrix;
         }
 
         public static Matrix4x4 LocalToWorld(Matrix4x4 parentWorld, Matrix4x4 childLocal)
@@ -136,6 +136,26 @@ namespace SharpGLTF.Transforms
         public static Matrix4x4 WorldToLocal(Matrix4x4 parentWorld, Matrix4x4 childWorld)
         {
             return childWorld * parentWorld.Inverse();
+        }
+
+        public static AffineTransform Blend(ReadOnlySpan<AffineTransform> transforms, ReadOnlySpan<float> weights)
+        {
+            var s = Vector3.Zero;
+            var r = default(Quaternion);
+            var t = Vector3.Zero;
+
+            for (int i = 0; i < transforms.Length; ++i)
+            {
+                var w = weights[i];
+
+                s += transforms[i].Scale * w;
+                r += transforms[i].Rotation * w;
+                t += transforms[i].Translation * w;
+            }
+
+            r = Quaternion.Normalize(r);
+
+            return AffineTransform.Create(s, r, t);
         }
 
         #endregion

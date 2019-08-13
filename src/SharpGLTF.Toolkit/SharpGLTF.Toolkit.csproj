@@ -3,39 +3,25 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>SharpGLTF.Toolkit</AssemblyName>
-    <RootNamespace>SharpGLTF</RootNamespace>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <Authors>Vicente Penades</Authors>
-    <Description>SharpGLTF.Toolkit extends SharpGLTF library with useful tools and helper classes.</Description>
-    <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
-    <PackageTags>C# glTF 3D</PackageTags>
-    <Version>1.0.0-alpha0011</Version>
+    <RootNamespace>SharpGLTF</RootNamespace>    
     <LangVersion>latest</LangVersion>
-    <DebugSymbols>true</DebugSymbols>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <DebugSymbols>true</DebugSymbols>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
   </PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
-  </ItemGroup>
+  <Import Project="..\Version.props" />
+
+  <Import Project="..\PackageInfo.props" />
+
+  <PropertyGroup>
+    <DocumentationFile>bin\Docs\SharpGLTF.Toolkit.xml</DocumentationFile>
+  </PropertyGroup>  
   
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SharpGLTF.Tests</_Parameter1>
     </AssemblyAttribute>
-  </ItemGroup>
-
-  <PropertyGroup>
-    <DocumentationFile>bin\Docs\SharpGLTF.Toolkit.xml</DocumentationFile>
-  </PropertyGroup>
-  
-  <PropertyGroup>    
-    <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
-  </PropertyGroup>
+  </ItemGroup>  
   
   <ItemGroup>
     <AdditionalFiles Include="..\..\stylecop.json" />

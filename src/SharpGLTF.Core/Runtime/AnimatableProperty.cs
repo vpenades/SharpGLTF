@@ -38,7 +38,7 @@ namespace SharpGLTF.Runtime
 
         #region properties
 
-        public bool IsAnimated => Tracks.Count > 0;
+        public bool IsAnimated => _Animations == null ? false : _Animations.Count > 0;
 
         public IReadOnlyCollection<string> Tracks => _Animations?.Names;
 

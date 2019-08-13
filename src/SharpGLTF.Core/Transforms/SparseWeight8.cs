@@ -424,6 +424,20 @@ namespace SharpGLTF.Transforms
             yield return (Index7, Weight7);
         }
 
+        public static SparseWeight8 Blend(ReadOnlySpan<SparseWeight8> sparses, ReadOnlySpan<float> weight)
+        {
+            var r = default(SparseWeight8);
+
+            for (int i = 0; i < sparses.Length; ++i)
+            {
+                if (sparses[i].IsWeightless) continue;
+
+                r = Add(r, Multiply(sparses[i], weight[i]));
+            }
+
+            return r;
+        }
+
         public override string ToString()
         {
             var sb = new StringBuilder();
