@@ -122,5 +122,38 @@ namespace SharpGLTF.Geometry
             NumericsAssert.AreEqual(v1Bis.Skinning.Weights, new Vector4(7, 6, 5, 2) / (7f + 6f + 5f + 2f));
         }
 
+        [Test]
+        public void CreatePartiallyEmptyMesh()
+        {
+            var p0 = new Vector3(4403.12831325084f, 5497.3228336684406f, -451.62756590108586f);
+            var p1 = new Vector3(4403.1283132596873f, 5497.3228336591274f, -451.62756593199413f);
+            var p2 = new Vector3(4392.54991199635f, 5483.549242743291f, -450.72132376581396f);
+
+            Assert.AreEqual(p0, p1);
+
+
+
+            /*
+            var triangle = new Triangle(p0, p1, p2);
+            var normal = triangle.GetNormal();
+            var material1 = new MaterialBuilder().WithDoubleSide(true).WithMetallicRoughnessShader().WithChannelParam("BaseColor", new Vector4(1, 1, 1, 1));
+            var mesh = new MeshBuilder<VertexPositionNormal>("mesh");
+            var prim = mesh.UsePrimitive(material1);
+            prim.AddTriangle(
+            new VertexPositionNormal((float)triangle.GetP0().X, (float)triangle.GetP0().Y, (float)triangle.GetP0().Z, normal.X, normal.Y, normal.Z),
+            new VertexPositionNormal((float)triangle.GetP1().X, (float)triangle.GetP1().Y, (float)triangle.GetP1().Z, normal.X, normal.Y, normal.Z),
+            new VertexPositionNormal((float)triangle.GetP2().X, (float)triangle.GetP2().Y, (float)triangle.GetP2().Z, normal.X, normal.Y, normal.Z));
+
+            var model = ModelRoot.CreateModel();
+            try
+            {
+                model.CreateMeshes(mesh);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                Console.WriteLine(e);
+            }*/
+        }
+
     }
 }

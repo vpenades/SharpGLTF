@@ -76,5 +76,18 @@ namespace SharpGLTF.Geometry
 
             return posnrm;
         }
+
+        public static bool IsEmpty<TMaterial>(this IPrimitiveReader<TMaterial> primitive)
+        {
+            if (primitive.Points.Count > 0) return false;
+            if (primitive.Lines.Count > 0) return false;
+            if (primitive.Triangles.Count > 0) return false;
+            return true;
+        }
+
+        public static bool IsEmpty<TMaterial>(this IMeshBuilder<TMaterial> mesh)
+        {
+            return mesh.Primitives.All(prim => prim.IsEmpty());
+        }
     }
 }

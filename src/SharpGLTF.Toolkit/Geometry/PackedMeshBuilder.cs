@@ -34,19 +34,19 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var vertexBlocks = VertexTypes.VertexUtils.CreateVertexMemoryAccessors
-                (
-                meshBuilders
+            var meshPrimitives = meshBuilders
                 .SelectMany(item => item.Primitives)
-                .Select(item => item.Vertices)
-                ).ToList();
+                .Where(item => !item.IsEmpty());
 
-            var indexBlocks = VertexTypes.VertexUtils.CreateIndexMemoryAccessors
-                (
-                meshBuilders
-                .SelectMany(item => item.Primitives)
-                .Select(item => item.Indices)
-                ).ToList();
+            Guard.IsTrue(meshPrimitives.Any(), "No geometry found.");
+
+            var vertexBlocks = VertexTypes.VertexUtils
+                .CreateVertexMemoryAccessors( meshPrimitives.Select(item => item.Vertices) )
+                .ToList();
+
+            var indexBlocks = VertexTypes.VertexUtils
+                .CreateIndexMemoryAccessors( meshPrimitives.Select(item => item.Indices) )
+                .ToList();
 
             int idx = 0;
 
@@ -56,6 +56,8 @@ namespace SharpGLTF.Geometry
 
                 foreach (var primitiveBuilder in meshBuilder.Primitives)
                 {
+                    if (primitiveBuilder.IsEmpty()) continue;
+
                     dstMesh.AddPrimitive(primitiveBuilder.Material, primitiveBuilder.VerticesPerPrimitive, vertexBlocks[idx], indexBlocks[idx]);
 
                     ++idx;

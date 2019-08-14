@@ -213,7 +213,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
-        /// <returns>The indices of the vertices.</returns>
+        /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
         public (int, int) AddLine(IVertexBuilder a, IVertexBuilder b)
         {
             Guard.NotNull(a, nameof(a));
@@ -233,7 +233,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
-        /// <returns>The indices of the vertices.</returns>
+        /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
         public (int, int) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 2, nameof(VerticesPerPrimitive), "Lines are not supported for this primitive");
@@ -264,7 +264,7 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the triangle.</param>
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
-        /// <returns>The indices of the vertices.</returns>
+        /// <returns>The indices of the vertices, or, in case the triangle is degenerated, (-1,-1,-1).</returns>
         public (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
         {
             Guard.NotNull(a, nameof(a));
@@ -288,7 +288,7 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the triangle.</param>
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
-        /// <returns>The indices of the vertices.</returns>
+        /// <returns>The indices of the vertices, or, in case the triangle is degenerated, (-1,-1,-1).</returns>
         public (int, int, int) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Triangles are not supported for this primitive");
