@@ -36,19 +36,16 @@ namespace Example1
 
             prim = mesh.UsePrimitive(material2);
             prim.AddConvexPolygon(new VERTEX(-5, 0, 3), new VERTEX(0, -5, 3), new VERTEX(5, 0, 3), new VERTEX(0, 5, 3));
-            
-            // create a new gltf model
-            var model = ModelRoot.CreateModel();
 
-            // add all meshes (just one in this case) to the model
-            model.CreateMeshes(mesh);
+            // create a scene
 
-            // create a scene, a node, and assign the first mesh
-            model.UseScene("Default")
-                .CreateNode()
-                .WithMesh(model.LogicalMeshes[0]);
+            var scene = new SharpGLTF.Scenes.SceneBuilder();
+
+            scene.AddMesh(mesh, Matrix4x4.Identity);
 
             // save the model in different formats
+
+            var model = scene.ToSchema2();
             model.SaveAsWavefront("mesh.obj");
             model.SaveGLB("mesh.glb");
             model.SaveGLTF("mesh.gltf");

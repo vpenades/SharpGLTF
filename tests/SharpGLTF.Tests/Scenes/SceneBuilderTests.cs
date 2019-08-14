@@ -72,7 +72,7 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var rnd = new Random();
+            var rnd = new Random(177);
 
             // create materials
             var materials = Enumerable
@@ -112,6 +112,62 @@ namespace SharpGLTF.Scenes
             // save the model as GLB
 
             scene.AttachToCurrentTest("shapes.glb");
+        }
+
+        [Test]
+        public void CreateSceneWithEmptyMeshes()
+        {
+            // Schema2 does NOT allow meshes to be empty, or meshes with empty MeshPrimitives.
+            // but MeshBuilder and SceneBuilder should be able to handle them.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var rnd = new Random(177);
+
+            // create materials
+            var materials = Enumerable
+                .Range(0, 10)
+                .Select(idx => new Materials.MaterialBuilder($"material{idx}")
+                .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(), 1)))
+                .ToList();
+
+            // create scene            
+
+            var mesh1 = VPOSNRM.CreateCompatibleMesh("mesh1");
+            mesh1.VertexPreprocessor.SetSanitizerPreprocessors();
+            mesh1.AddCube(materials[0], Matrix4x4.Identity);
+            mesh1.UsePrimitive(materials[1]).AddTriangle(default, default, default); // add degenerated triangle to produce an empty primitive
+            mesh1.AddCube(materials[2], Matrix4x4.CreateTranslation(10,0,0));
+
+            var mesh2 = VPOSNRM.CreateCompatibleMesh("mesh2"); // empty mesh
+
+            var mesh3 = VPOSNRM.CreateCompatibleMesh("mesh3");
+            mesh3.VertexPreprocessor.SetSanitizerPreprocessors();
+            mesh3.AddCube(materials[3], Matrix4x4.Identity);
+
+            var scene = new SceneBuilder();
+
+            scene.AddMesh(mesh1, Matrix4x4.Identity);
+            scene.AddMesh(mesh2, Matrix4x4.Identity);
+            scene.AddMesh(mesh3, Matrix4x4.CreateTranslation(0,10,0));
+
+            var model = scene.ToSchema2();
+
+            Assert.AreEqual(3, model.LogicalMaterials.Count);
+            CollectionAssert.AreEquivalent(new[] { "material0", "material2", "material3" }, model.LogicalMaterials.Select(item => item.Name));
+
+            Assert.AreEqual(2, model.LogicalMeshes.Count);
+
+            Assert.AreEqual("mesh1", model.LogicalMeshes[0].Name);
+            Assert.AreEqual(2, model.LogicalMeshes[0].Primitives.Count);
+
+            Assert.AreEqual("mesh3", model.LogicalMeshes[1].Name);
+            Assert.AreEqual(1, model.LogicalMeshes[1].Primitives.Count);
+
+            // save the model as GLB
+
+            scene.AttachToCurrentTest("scene.glb");
         }
 
         [Test]

@@ -28,7 +28,18 @@ namespace SharpGLTF.Schema2
 
         public static IReadOnlyList<Mesh> CreateMeshes(this ModelRoot root, params IMeshBuilder<Materials.MaterialBuilder>[] meshBuilders)
         {
-            return root.CreateMeshes(mb => root.CreateMaterial(mb), meshBuilders);
+            // MaterialBuilder instances can be grouped by their content, so we use this dictionary
+            // to reduce the number of equal materials. This is specially useful for the default material.
+
+            var materials = new Dictionary<Materials.MaterialBuilder, Material>(Materials.MaterialBuilder.ContentComparer);
+
+            Material matFactory(Materials.MaterialBuilder srcMat)
+            {
+                if (materials.TryGetValue(srcMat, out Schema2.Material dstMat)) return dstMat;
+                return materials[srcMat] = root.CreateMaterial(srcMat);
+            }
+
+            return root.CreateMeshes(matFactory, meshBuilders);
         }
 
         public static IReadOnlyList<Mesh> CreateMeshes<TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, params IMeshBuilder<TMaterial>[] meshBuilders)
@@ -42,6 +53,7 @@ namespace SharpGLTF.Schema2
             // create a new material for every unique material in the mesh builders.
             var mapMaterials = meshBuilders
                 .SelectMany(item => item.Primitives)
+                .Where(item => !item.IsEmpty())
                 .Select(item => item.Material)
                 .Distinct()
                 .ToDictionary(m => m, m => materialEvaluator(m));

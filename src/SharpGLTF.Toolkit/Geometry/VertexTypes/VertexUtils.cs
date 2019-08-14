@@ -213,6 +213,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
 
+            if (totalCount == 0) yield break;
+
             // determine the vertex attributes from the first vertex.
             var firstVertex = vertexBlocks
                 .First(item => item.Count > 0)[0];
@@ -257,6 +259,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             // get attributes
             var totalCount = indexBlocks.Sum(item => item.Count);
+
+            if (totalCount == 0) yield break;
+
             var attribute = new MemoryAccessInfo("INDEX", 0, totalCount, 0, Schema2.DimensionType.SCALAR, Schema2.EncodingType.UNSIGNED_INT);
 
             // create master index buffer

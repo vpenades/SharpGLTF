@@ -39,6 +39,7 @@ namespace SharpGLTF.Scenes
                 .Select(item => item.Content?.GetGeometryAsset())
                 .Where(item => item != null)
                 .SelectMany(item => item.Primitives)
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
                 .Select(item => item.Material)
                 .Where(item => item != null)
                 .Distinct()
@@ -60,11 +61,11 @@ namespace SharpGLTF.Scenes
             // and group them by their vertex attribute layout.
 
             var meshGroups = srcScene.Instances
-            .Select(item => item.Content?.GetGeometryAsset())
-            .Where(item => item != null)
-            .Distinct()
-            .ToList()
-            .GroupBy(item => item.GetType());
+                .Select(item => item.Content?.GetGeometryAsset())
+                .Where(item => item != null)
+                .Distinct()
+                .ToList()
+                .GroupBy(item => item.GetType());
 
             // create Schema2.Mesh collections for every gathered group.
 

@@ -38,8 +38,6 @@ namespace SharpGLTF.Geometry
                 .SelectMany(item => item.Primitives)
                 .Where(item => !item.IsEmpty());
 
-            Guard.IsTrue(meshPrimitives.Any(), "No geometry found.");
-
             var vertexBlocks = VertexTypes.VertexUtils
                 .CreateVertexMemoryAccessors( meshPrimitives.Select(item => item.Vertices) )
                 .ToList();
@@ -89,6 +87,8 @@ namespace SharpGLTF.Geometry
 
         public Mesh CreateSchema2Mesh(ModelRoot root, Func<TMaterial, Material> materialEvaluator)
         {
+            if (_Primitives.Count == 0) return null;
+
             var dstMesh = root.CreateMesh(_MeshName);
 
             foreach (var p in _Primitives)

@@ -5,6 +5,7 @@ using System.Numerics;
 using NUnit.Framework;
 
 using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Schema2;
 
 namespace SharpGLTF.Geometry
 {
@@ -123,37 +124,80 @@ namespace SharpGLTF.Geometry
         }
 
         [Test]
-        public void CreatePartiallyEmptyMesh()
+        public void CreateEmptyMesh()
         {
-            var p0 = new Vector3(4403.12831325084f, 5497.3228336684406f, -451.62756590108586f);
-            var p1 = new Vector3(4403.1283132596873f, 5497.3228336591274f, -451.62756593199413f);
-            var p2 = new Vector3(4392.54991199635f, 5483.549242743291f, -450.72132376581396f);
+            var mesh1 = VERTEX1.CreateCompatibleMesh();
 
-            Assert.AreEqual(p0, p1);
+            var model = Schema2.ModelRoot.CreateModel();
 
+            var mmmmm = model.CreateMeshes(mesh1);
 
-
-            /*
-            var triangle = new Triangle(p0, p1, p2);
-            var normal = triangle.GetNormal();
-            var material1 = new MaterialBuilder().WithDoubleSide(true).WithMetallicRoughnessShader().WithChannelParam("BaseColor", new Vector4(1, 1, 1, 1));
-            var mesh = new MeshBuilder<VertexPositionNormal>("mesh");
-            var prim = mesh.UsePrimitive(material1);
-            prim.AddTriangle(
-            new VertexPositionNormal((float)triangle.GetP0().X, (float)triangle.GetP0().Y, (float)triangle.GetP0().Z, normal.X, normal.Y, normal.Z),
-            new VertexPositionNormal((float)triangle.GetP1().X, (float)triangle.GetP1().Y, (float)triangle.GetP1().Z, normal.X, normal.Y, normal.Z),
-            new VertexPositionNormal((float)triangle.GetP2().X, (float)triangle.GetP2().Y, (float)triangle.GetP2().Z, normal.X, normal.Y, normal.Z));
-
-            var model = ModelRoot.CreateModel();
-            try
-            {
-                model.CreateMeshes(mesh);
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                Console.WriteLine(e);
-            }*/
+            Assert.AreEqual(null, mmmmm[0]);
         }
 
+        [Test]
+        public void CreatePartiallyEmptyMesh()
+        {
+            
+        }
+
+        [Test]
+        public static void CreateWithDegeneratedTriangle()
+        {
+            var validTriangle =
+                (
+                new Vector3(4373.192624189425f, 5522.678275192156f, -359.8238015332605f),
+                new Vector3(4370.978060142137f, 5522.723320999183f, -359.89184701762827f),
+                new Vector3(4364.615741107147f, 5511.510615546256f, -359.08922455413233f)
+                );
+
+            var degeneratedTriangle =
+                (
+                new Vector3(4374.713581837248f, 5519.741978117265f, -360.87014389818034f),
+                new Vector3(4373.187151107471f, 5521.493282925338f, -355.70835120644153f),
+                new Vector3(4373.187151107471f, 5521.493282925338f, -355.70835120644153f)
+                );
+
+            var material1 = new Materials.MaterialBuilder()
+                .WithMetallicRoughnessShader()
+                .WithChannelParam("BaseColor", Vector4.One * 0.5f);
+
+            var material2 = new Materials.MaterialBuilder()
+                .WithMetallicRoughnessShader()
+                .WithChannelParam("BaseColor", Vector4.One * 0.7f);
+
+            var mesh = new MeshBuilder<VertexPosition>("mesh");
+            mesh.VertexPreprocessor.SetDebugPreprocessors();
+
+            var validIndices = mesh.UsePrimitive(material1)
+                .AddTriangle
+                    (
+                    new VertexPosition(validTriangle.Item1),
+                    new VertexPosition(validTriangle.Item2),
+                    new VertexPosition(validTriangle.Item3)
+                    );
+            Assert.GreaterOrEqual(validIndices.Item1, 0);
+            Assert.GreaterOrEqual(validIndices.Item2, 0);
+            Assert.GreaterOrEqual(validIndices.Item3, 0);
+
+            var degenIndices = mesh.UsePrimitive(material2)
+                .AddTriangle
+                    (
+                    new VertexPosition(degeneratedTriangle.Item1),
+                    new VertexPosition(degeneratedTriangle.Item2),
+                    new VertexPosition(degeneratedTriangle.Item3)
+                    );
+            Assert.Less(degenIndices.Item1, 0);
+            Assert.Less(degenIndices.Item2, 0);
+            Assert.Less(degenIndices.Item3, 0);
+
+            // create meshes:
+
+            var model = ModelRoot.CreateModel();            
+
+            var dstMeshes = model.CreateMeshes(mesh);
+
+            Assert.AreEqual(1, dstMeshes[0].Primitives.Count);
+        }
     }
 }
