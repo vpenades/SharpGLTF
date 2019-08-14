@@ -2,8 +2,12 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MSBUILDTHISFILEDIRECTORY)SharpGLTF.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)SharpGLTF.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)stylecop.json" />
+  </ItemGroup>
 
   <ItemGroup>    
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.4" PrivateAssets="all" />

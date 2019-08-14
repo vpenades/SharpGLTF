@@ -11,11 +11,7 @@
   <Import Project="..\Version.props" />
   
   <Import Project="..\PackageInfo.props" />
-
-  <PropertyGroup>
-    <DocumentationFile>bin\Docs\SharpGLTF.xml</DocumentationFile>
-  </PropertyGroup>  
-
+  
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
@@ -38,10 +34,6 @@
     </None>
   </ItemGroup>
   
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\stylecop.json" />
-  </ItemGroup>
-
   <Import Project="..\..\Analyzers.targets" />
 
 </Project>

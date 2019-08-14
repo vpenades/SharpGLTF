@@ -65,7 +65,7 @@ namespace SharpGLTF.Runtime
 
             if (trackLogicalIndex < 0 || trackLogicalIndex >= _Animations.Count) return this.Value;
 
-            return _Animations[trackLogicalIndex].GetPoint(offset);
+            return _Animations[trackLogicalIndex]?.GetPoint(offset) ?? this.Value;
         }
 
         public void AddCurve(int logicalIndex, string name, ICurveSampler<T> sampler)

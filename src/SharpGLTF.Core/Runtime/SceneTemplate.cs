@@ -53,6 +53,13 @@ namespace SharpGLTF.Runtime
             }
 
             _UsePrecomputed = !(_Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated);
+
+            if (_UsePrecomputed)
+            {
+                _Scale = null;
+                _Rotation = null;
+                _Translation = null;
+            }
         }
 
         #endregion

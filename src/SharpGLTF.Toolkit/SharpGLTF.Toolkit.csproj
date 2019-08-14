@@ -12,20 +12,12 @@
   <Import Project="..\Version.props" />
 
   <Import Project="..\PackageInfo.props" />
-
-  <PropertyGroup>
-    <DocumentationFile>bin\Docs\SharpGLTF.Toolkit.xml</DocumentationFile>
-  </PropertyGroup>  
   
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SharpGLTF.Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>  
-  
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\stylecop.json" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
@@ -35,7 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SharpGLTF.Core\SharpGLTF.Core.csproj" />
   </ItemGroup>
-
+  
   <Import Project="..\..\Analyzers.targets" />
   
 </Project>
