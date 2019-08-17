@@ -49,7 +49,7 @@ namespace SharpGLTF.Materials
 
         public String ShaderStyle { get; set; } = SHADERPBRMETALLICROUGHNESS;
 
-        public static bool AreEqual(MaterialBuilder x, MaterialBuilder y)
+        public static bool AreEqualByContent(MaterialBuilder x, MaterialBuilder y)
         {
             #pragma warning disable IDE0041 // Use 'is null' check
             if (Object.ReferenceEquals(x, y)) return true;
@@ -69,7 +69,7 @@ namespace SharpGLTF.Materials
             if (x.DoubleSided != y.DoubleSided) return false;
             if (x.ShaderStyle != y.ShaderStyle) return false;
 
-            if (!AreEqual(x._CompatibilityFallbackMaterial, y._CompatibilityFallbackMaterial)) return false;
+            if (!AreEqualByContent(x._CompatibilityFallbackMaterial, y._CompatibilityFallbackMaterial)) return false;
 
             // gather all unique channel keys used by both materials.
 
@@ -314,7 +314,7 @@ namespace SharpGLTF.Materials
 
             public bool Equals(MaterialBuilder x, MaterialBuilder y)
             {
-                return MaterialBuilder.AreEqual(x, y);
+                return MaterialBuilder.AreEqualByContent(x, y);
             }
 
             public int GetHashCode(MaterialBuilder obj)

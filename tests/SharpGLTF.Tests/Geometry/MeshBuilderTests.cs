@@ -126,6 +126,11 @@ namespace SharpGLTF.Geometry
         [Test]
         public void CreateEmptyMesh()
         {
+            // empty meshes are valid in the toolkit,
+            // but are invalid in glTF schema, so
+            // special measures need to be taken
+            // for empty meshes.
+
             var mesh1 = VERTEX1.CreateCompatibleMesh();
 
             var model = Schema2.ModelRoot.CreateModel();
@@ -198,6 +203,46 @@ namespace SharpGLTF.Geometry
             var dstMeshes = model.CreateMeshes(mesh);
 
             Assert.AreEqual(1, dstMeshes[0].Primitives.Count);
+        }
+
+        [Test]
+        public static void CreateWithMutableSharedMaterial()
+        {
+            var material1 = Materials.MaterialBuilder.CreateDefault();
+            var material2 = Materials.MaterialBuilder.CreateDefault();
+            var material3 = Materials.MaterialBuilder.CreateDefault();            
+
+            Assert.IsTrue(Materials.MaterialBuilder.AreEqualByContent(material1, material2));
+            Assert.IsTrue(Materials.MaterialBuilder.AreEqualByContent(material1, material3));
+
+            Assert.AreNotEqual(material1, material2);
+            Assert.AreNotEqual(material1, material3);
+
+            // MeshBuilder should split primitives by material reference,
+            // because in general, materials will not be immutable.
+            var mesh = new MeshBuilder<VertexPosition>();            
+            mesh.UsePrimitive(material1, 1).AddPoint(default);
+            mesh.UsePrimitive(material2, 1).AddPoint(default);
+            mesh.UsePrimitive(material3, 1).AddPoint(default);
+
+            Assert.AreEqual(3, mesh.Primitives.Count);
+
+            var model = Schema2.ModelRoot.CreateModel();
+
+            // CreateMeshes should identify that, at this point, material1, material2 and material3
+            // represent the same material, and coalesce to a single material.
+            var mesh1 = model.CreateMeshes(mesh)[0];
+            Assert.AreEqual(1, model.LogicalMaterials.Count);
+
+            // since Materials.MaterialBuilder is not immutable we can change the contents,
+            // so now, material1, material2 and material3 no longer represent the same material
+            material1.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.2f);
+            material2.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.4f);
+            material3.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.6f);
+
+            var mesh2 = model.CreateMeshes(mesh)[0];
+            Assert.AreEqual(4, model.LogicalMaterials.Count);
+
         }
     }
 }

@@ -210,10 +210,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex>(this IEnumerable<IReadOnlyList<TVertex>> vertexBlocks)
             where TVertex : IVertexBuilder
         {
+            Guard.IsTrue(vertexBlocks.Any(), nameof(vertexBlocks));
+            Guard.IsTrue(vertexBlocks.All(item => item.Count > 0), nameof(vertexBlocks));
+            Guard.IsTrue(vertexBlocks.Select(item => item[0].GetType()).Distinct().Count() == 1, "multiple vertex types found");
+
             // total number of vertices
             var totalCount = vertexBlocks.Sum(item => item.Count);
-
-            if (totalCount == 0) yield break;
 
             // determine the vertex attributes from the first vertex.
             var firstVertex = vertexBlocks
@@ -257,10 +259,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static IEnumerable<MemoryAccessor> CreateIndexMemoryAccessors(this IEnumerable<IReadOnlyList<Int32>> indexBlocks)
         {
+            Guard.IsTrue(indexBlocks.Any(), nameof(indexBlocks));
+
             // get attributes
             var totalCount = indexBlocks.Sum(item => item.Count);
-
-            if (totalCount == 0) yield break;
 
             var attribute = new MemoryAccessInfo("INDEX", 0, totalCount, 0, Schema2.DimensionType.SCALAR, Schema2.EncodingType.UNSIGNED_INT);
 
@@ -272,6 +274,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             foreach (var block in indexBlocks)
             {
+                if (block.Count == 0)
+                {
+                    yield return null;
+                    continue;
+                }
+
                 var accessor = new MemoryAccessor(ibuffer, attribute.Slice(baseIndicesIndex, block.Count));
 
                 accessor.AsIntegerArray().Fill(block);

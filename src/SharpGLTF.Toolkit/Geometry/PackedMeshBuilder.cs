@@ -38,6 +38,12 @@ namespace SharpGLTF.Geometry
                 .SelectMany(item => item.Primitives)
                 .Where(item => !item.IsEmpty());
 
+            if (!meshPrimitives.Any())
+            {
+                foreach (var mb in meshBuilders) yield return new PackedMeshBuilder<TMaterial>(mb.Name);
+                yield break;
+            }
+
             var vertexBlocks = VertexTypes.VertexUtils
                 .CreateVertexMemoryAccessors( meshPrimitives.Select(item => item.Vertices) )
                 .ToList();
@@ -45,6 +51,8 @@ namespace SharpGLTF.Geometry
             var indexBlocks = VertexTypes.VertexUtils
                 .CreateIndexMemoryAccessors( meshPrimitives.Select(item => item.Indices) )
                 .ToList();
+
+            if (vertexBlocks.Count != indexBlocks.Count) throw new InvalidOperationException("Vertex and index blocks count mismatch");
 
             int idx = 0;
 
@@ -108,10 +116,17 @@ namespace SharpGLTF.Geometry
 
         internal PackedPrimitiveBuilder(TMaterial material, int primitiveVertexCount, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
         {
+            Guard.MustBeBetweenOrEqualTo(primitiveVertexCount, 1, 3, nameof(primitiveVertexCount));
+
+            Guard.NotNull(vrtAccessors, nameof(vrtAccessors));
+
+            if (primitiveVertexCount == 1) Guard.MustBeNull(idxAccessor, nameof(idxAccessor));
+            else                           Guard.NotNull(idxAccessor, nameof(idxAccessor));
+
             _Material = material;
             _VerticesPerPrimitive = primitiveVertexCount;
             _VertexAccessors = vrtAccessors;
-            _IndexAccessors = idxAccessor;
+            _IndexAccessors = idxAccessor; // indices can be null for points
         }
 
         #endregion
