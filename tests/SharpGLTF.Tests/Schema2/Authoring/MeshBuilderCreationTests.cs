@@ -40,7 +40,7 @@ namespace SharpGLTF.Schema2.Authoring
             meshBuilder.VertexPreprocessor.SetDebugPreprocessors();
 
             // add a polygon to the primitive that uses material1 as key.
-            meshBuilder.UsePrimitive(material1).AddConvexPolygon(v1, v2, v3, v4);
+            meshBuilder.UsePrimitive(material1).AddQuadrangle(v1, v2, v3, v4);
 
             // create a gltf scene
             var model = ModelRoot.CreateModel();
@@ -201,15 +201,15 @@ namespace SharpGLTF.Schema2.Authoring
             var v11 = (new VPOS(+5, 80, -5), new VSKIN4(jointIdx2));
             var v12 = (new VPOS(-5, 80, -5), new VSKIN4(jointIdx2));
 
-            meshBuilder.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
-            meshBuilder.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
-            meshBuilder.UsePrimitive(pink).AddConvexPolygon(v3, v4, v8, v7);
-            meshBuilder.UsePrimitive(pink).AddConvexPolygon(v4, v1, v5, v8);
+            meshBuilder.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
+            meshBuilder.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
+            meshBuilder.UsePrimitive(pink).AddQuadrangle(v3, v4, v8, v7);
+            meshBuilder.UsePrimitive(pink).AddQuadrangle(v4, v1, v5, v8);
 
-            meshBuilder.UsePrimitive(yellow).AddConvexPolygon(v5, v6, v10, v9);
-            meshBuilder.UsePrimitive(yellow).AddConvexPolygon(v6, v7, v11, v10);
-            meshBuilder.UsePrimitive(yellow).AddConvexPolygon(v7, v8, v12, v11);
-            meshBuilder.UsePrimitive(yellow).AddConvexPolygon(v8, v5, v9, v12);
+            meshBuilder.UsePrimitive(yellow).AddQuadrangle(v5, v6, v10, v9);
+            meshBuilder.UsePrimitive(yellow).AddQuadrangle(v6, v7, v11, v10);
+            meshBuilder.UsePrimitive(yellow).AddQuadrangle(v7, v8, v12, v11);
+            meshBuilder.UsePrimitive(yellow).AddQuadrangle(v8, v5, v9, v12);
 
             meshBuilder.Validate();
 

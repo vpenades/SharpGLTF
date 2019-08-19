@@ -89,5 +89,22 @@ namespace SharpGLTF.Geometry
         {
             return mesh.Primitives.All(prim => prim.IsEmpty());
         }
+
+        /// <summary>
+        /// Given a set of 4 points defining a quadrangle, it determines which
+        /// is the optimal diagonal to choose to reprensent the quadrangle as two triangles.
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <param name="c"></param>
+        /// <param name="d"></param>
+        /// <returns></returns>
+        public static bool GetQuadrangleDiagonal(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        {
+            var area1 = Vector3.Cross(a - b, c - b).Length() + Vector3.Cross(a - d, c - d).Length();
+            var area2 = Vector3.Cross(b - a, d - a).Length() + Vector3.Cross(b - c, d - c).Length();
+
+            return area1 <= area2;
+        }
     }
 }

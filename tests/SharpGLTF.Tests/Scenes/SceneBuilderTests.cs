@@ -25,8 +25,44 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var mesh = new Cube<MaterialBuilder>(new MaterialBuilder())
+            var mesh = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault())
                 .ToMesh(Matrix4x4.Identity);
+
+            var scene = new SceneBuilder();
+
+            scene.AddMesh(mesh, Matrix4x4.Identity);
+
+            scene.AttachToCurrentTest("cube.glb");
+        }
+
+        [Test]
+        public void CreateQuadsScene()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();            
+
+            // this test checks that non convex quads are created correctly.
+
+            var mesh = new MeshBuilder<VertexPosition>();
+            var prim = mesh.UsePrimitive(MaterialBuilder.CreateDefault());
+
+            var idx = prim.AddQuadrangle(new VertexPosition(0, -1, 0), new VertexPosition(1, 0, 0), new VertexPosition(0, 1, 0), new VertexPosition(-1, 0, 0));
+            Assert.AreEqual((0, 1, 2, 3), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(0, -1, 1), new VertexPosition(1, 0, 1), new VertexPosition(0, 1, 1), new VertexPosition(0.5f, 0, 1));
+            Assert.AreEqual((7,4,5,6), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(0, 0.5f, 2), new VertexPosition(1, 0, 2), new VertexPosition(0, 1, 2), new VertexPosition(-1, 0, 2));
+            Assert.AreEqual((8,9,10,11), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(1, 0, 3), new VertexPosition(0, 1, 3), new VertexPosition(0.5f, 0, 3), new VertexPosition(0, -1, 3));
+            Assert.AreEqual((12,13,14,15), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(-1, 0, 4));
+            Assert.AreEqual((16, -1, 17, 18), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(0, 1, 4));
+            Assert.AreEqual((-1, -1, -1, -1), idx);
 
             var scene = new SceneBuilder();
 
@@ -215,15 +251,15 @@ namespace SharpGLTF.Scenes
             mesh.VertexPreprocessor.SetSanitizerPreprocessors();
             #endif
 
-            mesh.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v3, v4, v8, v7);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v4, v1, v5, v8);
+            mesh.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
+            mesh.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
+            mesh.UsePrimitive(pink).AddQuadrangle(v3, v4, v8, v7);
+            mesh.UsePrimitive(pink).AddQuadrangle(v4, v1, v5, v8);
 
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v5, v6, v10, v9);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v6, v7, v11, v10);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v7, v8, v12, v11);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v8, v5, v9, v12);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v5, v6, v10, v9);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v6, v7, v11, v10);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v7, v8, v12, v11);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v8, v5, v9, v12);
 
             mesh.Validate();
             
@@ -302,15 +338,15 @@ namespace SharpGLTF.Scenes
             mesh.VertexPreprocessor.SetSanitizerPreprocessors();
             #endif
 
-            mesh.UsePrimitive(pink).AddConvexPolygon(v1, v2, v6, v5);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v2, v3, v7, v6);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v3, v4, v8, v7);
-            mesh.UsePrimitive(pink).AddConvexPolygon(v4, v1, v5, v8);
+            mesh.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
+            mesh.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
+            mesh.UsePrimitive(pink).AddQuadrangle(v3, v4, v8, v7);
+            mesh.UsePrimitive(pink).AddQuadrangle(v4, v1, v5, v8);
 
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v5, v6, v10, v9);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v6, v7, v11, v10);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v7, v8, v12, v11);
-            mesh.UsePrimitive(yellow).AddConvexPolygon(v8, v5, v9, v12);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v5, v6, v10, v9);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v6, v7, v11, v10);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v7, v8, v12, v11);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v8, v5, v9, v12);
 
             mesh.Validate();
 

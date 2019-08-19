@@ -35,7 +35,7 @@ namespace Example1
             prim.AddTriangle(new VERTEX(10, 0, 0), new VERTEX(-10, 0, 0), new VERTEX(0, -10, 0));
 
             prim = mesh.UsePrimitive(material2);
-            prim.AddConvexPolygon(new VERTEX(-5, 0, 3), new VERTEX(0, -5, 3), new VERTEX(5, 0, 3), new VERTEX(0, 5, 3));
+            prim.AddQuadrangle(new VERTEX(-5, 0, 3), new VERTEX(0, -5, 3), new VERTEX(5, 0, 3), new VERTEX(0, 5, 3));
 
             // create a scene
 
@@ -49,24 +49,6 @@ namespace Example1
             model.SaveAsWavefront("mesh.obj");
             model.SaveGLB("mesh.glb");
             model.SaveGLTF("mesh.gltf");
-        }
-    }
-
-    static class ToolkitUtils
-    {
-        public static void AddConvexPolygon<TMaterial, TvG, TvM, TvS>(this PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, params VertexBuilder<TvG, TvM, TvS>[] vertices)
-        where TvG : struct, IVertexGeometry
-        where TvM : struct, IVertexMaterial
-        where TvS : struct, IVertexSkinning
-        {
-            for (int i = 2; i < vertices.Length; ++i)
-            {
-                var a = vertices[0];
-                var b = vertices[i - 1];
-                var c = vertices[i];
-
-                primitive.AddTriangle(a, b, c);
-            }
         }
     }
 }

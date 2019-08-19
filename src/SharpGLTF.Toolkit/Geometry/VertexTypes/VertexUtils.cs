@@ -261,13 +261,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             Guard.IsTrue(indexBlocks.Any(), nameof(indexBlocks));
 
-            // get attributes
+            // total number of indices
             var totalCount = indexBlocks.Sum(item => item.Count);
 
-            var attribute = new MemoryAccessInfo("INDEX", 0, totalCount, 0, Schema2.DimensionType.SCALAR, Schema2.EncodingType.UNSIGNED_INT);
+            // determine appropiate encoding
+            var maxIndex = totalCount == 0 ? 0 : indexBlocks.SelectMany(item => item).Max();
+            var encoding = maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
+
+            var attribute = new MemoryAccessInfo("INDEX", 0, totalCount, 0, Schema2.DimensionType.SCALAR, encoding);
 
             // create master index buffer
-            var ibytes = new Byte[4 * totalCount];
+            var ibytes = new Byte[encoding.ByteLength() * totalCount];
             var ibuffer = new ArraySegment<byte>(ibytes);
 
             var baseIndicesIndex = 0;

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
@@ -6,7 +7,7 @@ using System.Numerics;
 
 using SharpGLTF.Collections;
 using SharpGLTF.Geometry.VertexTypes;
-using System.Collections;
+
 
 namespace SharpGLTF.Geometry
 {
@@ -60,6 +61,8 @@ namespace SharpGLTF.Geometry
         (int, int) AddLine(IVertexBuilder a, IVertexBuilder b);
 
         (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
+
+        (int, int, int, int) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d);
     }
 
     /// <summary>
@@ -300,6 +303,94 @@ namespace SharpGLTF.Geometry
                 if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref c)) return (-1, -1, -1);
             }
 
+            return _AddTriangle(a, b, c);
+        }
+
+        /// <summary>
+        /// Adds a quadrangle.
+        /// </summary>
+        /// <param name="a">First corner of the quadrangle.</param>
+        /// <param name="b">Second corner of the quadrangle.</param>
+        /// <param name="c">Third corner of the quadrangle.</param>
+        /// <param name="d">Fourth corner of the quadrangle.</param>
+        /// <returns>The indices of the vertices, or, in case the quadrangle is degenerated, (-1,-1,-1,-1).</returns>
+        /// <remarks>
+        /// If only one of the vertices is degenerated, leading to a single triangle, the resulting indices would
+        /// have just one negative index, like this: (16,-1,17,18)
+        /// </remarks>
+        public (int, int, int, int) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d)
+        {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+            Guard.NotNull(c, nameof(c));
+            Guard.NotNull(d, nameof(d));
+
+            var aa = a.ConvertTo<TvG, TvM, TvS>();
+            var bb = b.ConvertTo<TvG, TvM, TvS>();
+            var cc = c.ConvertTo<TvG, TvM, TvS>();
+            var dd = d.ConvertTo<TvG, TvM, TvS>();
+
+            System.Diagnostics.Debug.Assert(aa.Position == a.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(bb.Position == b.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(cc.Position == c.GetGeometry().GetPosition());
+            System.Diagnostics.Debug.Assert(dd.Position == d.GetGeometry().GetPosition());
+
+            return AddQuadrangle(aa, bb, cc, dd);
+        }
+
+        /// <summary>
+        /// Adds a quadrangle.
+        /// </summary>
+        /// <param name="a">First corner of the quadrangle.</param>
+        /// <param name="b">Second corner of the quadrangle.</param>
+        /// <param name="c">Third corner of the quadrangle.</param>
+        /// <param name="d">Fourth corner of the quadrangle.</param>
+        /// <returns>The indices of the vertices, or, in case the quadrangle is degenerated, (-1,-1,-1,-1).</returns>
+        public (int, int, int, int) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
+        {
+            Guard.IsTrue(_PrimitiveVertexCount == 3, nameof(VerticesPerPrimitive), "Quadrangles are not supported for this primitive");
+
+            if (_Mesh.VertexPreprocessor != null)
+            {
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref a)) return (-1, -1, -1, -1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref b)) return (-1, -1, -1, -1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref c)) return (-1, -1, -1, -1);
+                if (!_Mesh.VertexPreprocessor.PreprocessVertex(ref d)) return (-1, -1, -1, -1);
+            }
+
+            // at some points it could be interesting to comply with https://github.com/KhronosGroup/glTF/pull/1620
+
+            var oddEven = MeshBuilderToolkit.GetQuadrangleDiagonal(a.Position, b.Position, c.Position, d.Position);
+
+            if (oddEven)
+            {
+                var f = _AddTriangle(a, b, c);
+                var s = _AddTriangle(a, c, d);
+                return
+                    (
+                    f.Item1 > s.Item1 ? f.Item1 : s.Item1,
+                    f.Item2,
+                    f.Item3 > s.Item2 ? f.Item3 : s.Item2,
+                    s.Item3
+                    );
+            }
+            else
+            {
+                var f = _AddTriangle(b, c, d);
+                var s = _AddTriangle(b, d, a);
+
+                return
+                    (
+                    s.Item3,
+                    f.Item1 > s.Item1 ? f.Item1 : s.Item1,
+                    f.Item2,
+                    f.Item3 > s.Item2 ? f.Item3 : s.Item2
+                    );
+            }
+        }
+
+        private (int, int, int) _AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        {
             // check for degenerated triangle
             if (a.Equals(b) || a.Equals(c) || b.Equals(c)) return (-1, -1, -1);
 

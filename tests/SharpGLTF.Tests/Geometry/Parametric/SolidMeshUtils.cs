@@ -73,7 +73,7 @@ namespace SharpGLTF.Geometry.Parametric
             var p4 = Vector3.Transform(origin - axisX + axisY, xform);
             var n = Vector3.Normalize(Vector3.TransformNormal(origin, xform));
 
-            primitiveBuilder.AddConvexPolygon
+            primitiveBuilder.AddQuadrangle
                 (
                 new VERTEX( (p1, n), (Vector4.One, Vector2.Zero)  ),
                 new VERTEX( (p2, n), (Vector4.One, Vector2.UnitX) ),
@@ -259,7 +259,7 @@ namespace SharpGLTF.Geometry.Parametric
 
                     terrainMesh
                         .UsePrimitive(material)
-                        .AddConvexPolygon
+                        .AddQuadrangle
                         (
                             (a, at),
                             (b, bt),
