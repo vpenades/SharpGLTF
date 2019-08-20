@@ -135,7 +135,15 @@ namespace SharpGLTF.Schema2
 
             if (chunks.ContainsKey(glb.CHUNKBIN))
             {
-                settings.FileReader = key => string.IsNullOrEmpty(key) ? new BYTES(chunks[glb.CHUNKBIN]) : settings.FileReader.Invoke(key);
+                var sourceReader = settings.FileReader;
+
+                settings.FileReader =
+                    key =>
+                    string.IsNullOrEmpty(key)
+                    ?
+                    new BYTES(chunks[glb.CHUNKBIN])
+                    :
+                    sourceReader.Invoke(key);
             }
 
             return ParseGLTF(dom, settings);

@@ -181,7 +181,7 @@ namespace SharpGLTF.Schema2
         internal Boolean _UpdateSupportedExtensions { get; private set; } = true;
 
         /// <summary>
-        /// Gets a value indicating whether cloning the model upon serialization is not allowed.
+        /// Gets a value indicating whether creating a defensive copy before serialization is not allowed.
         /// </summary>
         internal bool _NoCloneWatchdog { get; private set; } = false;
 
@@ -190,7 +190,7 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Prepares the model for writing with the appropiate settings, cloning it if neccesary.
+        /// Prepares the model for writing with the appropiate settings, creating a defensive copy if neccesary.
         /// </summary>
         /// <param name="model">The source <see cref="MODEL"/> instance.</param>
         /// <returns>The source <see cref="MODEL"/> instance, or a cloned and modified instance if current settings required it.</returns>
@@ -198,13 +198,16 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(model, nameof(model));
 
+            // check if we need to modify the model before saving it,
+            // in order to create a defensive copy.
+
             var needsMergeBuffers = (this.MergeBuffers | this.BinaryMode) && model.LogicalBuffers.Count > 1;
 
             var imagesAsBufferViews = model.LogicalImages.Count > 0 && this.ImageWriting == ImageWriteMode.BufferView;
 
             if (needsMergeBuffers | imagesAsBufferViews)
             {
-                if (_NoCloneWatchdog) throw new InvalidOperationException($"Current settings require a model rewrite, but {nameof(MODEL.DeepClone)} is not allowed in the current context");
+                if (_NoCloneWatchdog) throw new InvalidOperationException($"Current settings require creating a densive copy before model modification, but calling {nameof(MODEL.DeepClone)} is not allowed with the current settings.");
                 model = model.DeepClone();
             }
 
