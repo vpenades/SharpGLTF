@@ -156,7 +156,7 @@ namespace SharpGLTF
 
             tex.GetField("offset")
                 .SetDataType(typeof(System.Numerics.Vector2), true)
-                .SetDefaultValue("Vector2.One")
+                .SetDefaultValue("Vector2.Zero")
                 .SetItemsRange(0);
 
             tex.GetField("scale")

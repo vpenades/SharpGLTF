@@ -31,7 +31,7 @@ namespace SharpGLTF.Schema2
 	partial class TextureTransform : ExtraProperties
 	{
 	
-		private static readonly Vector2 _offsetDefault = Vector2.One;
+		private static readonly Vector2 _offsetDefault = Vector2.Zero;
 		private Vector2? _offset = _offsetDefault;
 		
 		private const Double _rotationDefault = 0;
