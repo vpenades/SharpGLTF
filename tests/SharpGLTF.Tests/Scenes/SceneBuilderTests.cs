@@ -50,7 +50,7 @@ namespace SharpGLTF.Scenes
             Assert.AreEqual((0, 1, 2, 3), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(0, -1, 1), new VertexPosition(1, 0, 1), new VertexPosition(0, 1, 1), new VertexPosition(0.5f, 0, 1));
-            Assert.AreEqual((7,4,5,6), idx);
+            Assert.AreEqual((4, 5, 6, 7), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(0, 0.5f, 2), new VertexPosition(1, 0, 2), new VertexPosition(0, 1, 2), new VertexPosition(-1, 0, 2));
             Assert.AreEqual((8,9,10,11), idx);
@@ -59,10 +59,16 @@ namespace SharpGLTF.Scenes
             Assert.AreEqual((12,13,14,15), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(-1, 0, 4));
-            Assert.AreEqual((16, -1, 17, 18), idx);
+            Assert.AreEqual((-1, 16, 17, 18), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(0, 1, 4));
             Assert.AreEqual((-1, -1, -1, -1), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(0, 0, 5), new VertexPosition(10, -1, 5), new VertexPosition(9, 0, 5), new VertexPosition(10, 1, 5));
+            Assert.AreEqual((19,20,21,22), idx);
+
+            idx = prim.AddQuadrangle(new VertexPosition(10, -1, 6), new VertexPosition(9, 0, 6), new VertexPosition(10, 1, 6), new VertexPosition(0, 0, 6));
+            Assert.AreEqual((23, 24, 25, 26), idx);
 
             var scene = new SceneBuilder();
 

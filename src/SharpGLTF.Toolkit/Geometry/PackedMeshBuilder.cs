@@ -49,7 +49,7 @@ namespace SharpGLTF.Geometry
                 .ToList();
 
             var indexBlocks = VertexTypes.VertexUtils
-                .CreateIndexMemoryAccessors( meshPrimitives.Select(item => item.Indices) )
+                .CreateIndexMemoryAccessors( meshPrimitives.Select(item => item.GetIndices()) )
                 .ToList();
 
             if (vertexBlocks.Count != indexBlocks.Count) throw new InvalidOperationException("Vertex and index blocks count mismatch");

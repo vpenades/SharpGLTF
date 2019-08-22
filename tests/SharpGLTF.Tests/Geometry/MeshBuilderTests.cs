@@ -15,25 +15,6 @@ namespace SharpGLTF.Geometry
     [Category("Toolkit.Geometry")]
     public class MeshBuilderTests
     {
-        [Description("Although a triangle with three corners at zero should be accounted as a degenerated triangle, if it has different skinning per vertex, it should not be discarded.")]
-        [Test]
-        public void CreatePseudoDegeneratedTriangle()
-        {
-            var m = new Materials.MaterialBuilder();
-
-            var mb = VERTEX1.CreateCompatibleMesh();
-
-            var a = new VERTEX1(Vector3.Zero, (0, 1));
-            var b = new VERTEX1(Vector3.Zero, (1, 1));
-            var c = new VERTEX1(Vector3.Zero, (2, 1));
-
-            mb.UsePrimitive(m).AddTriangle(a, b, c);
-
-            var triCount = mb.Primitives.Sum(item => item.Triangles.Count());
-
-            Assert.AreEqual(1, triCount);
-        }
-
         [Test]
         public void CreateInvalidTriangles()
         {
@@ -139,13 +120,7 @@ namespace SharpGLTF.Geometry
 
             Assert.AreEqual(null, mmmmm[0]);
         }
-
-        [Test]
-        public void CreatePartiallyEmptyMesh()
-        {
-            
-        }
-
+        
         [Test]
         public static void CreateWithDegeneratedTriangle()
         {
@@ -243,6 +218,26 @@ namespace SharpGLTF.Geometry
             var mesh2 = model.CreateMeshes(mesh)[0];
             Assert.AreEqual(4, model.LogicalMaterials.Count);
 
+        }
+
+        [Test]
+        public void CreateMeshWithTriangleAndQuad()
+        {
+            var dmat = Materials.MaterialBuilder.CreateDefault();
+            var mesh = VERTEX1.CreateCompatibleMesh();
+            var prim = mesh.UsePrimitive(dmat);
+
+            var triIdx = prim.AddTriangle(new VERTEX1(Vector3.Zero), new VERTEX1(Vector3.UnitX * 2) , new VERTEX1(Vector3.UnitY * 2));
+            var qadIdx = prim.AddQuadrangle(new VERTEX1(-Vector3.UnitX), new VERTEX1(Vector3.UnitY), new VERTEX1(Vector3.UnitX), new VERTEX1(-Vector3.UnitY));
+
+            Assert.AreEqual(7, prim.Vertices.Count);
+            Assert.AreEqual(3, prim.Triangles.Count);
+            Assert.AreEqual(2, prim.Surfaces.Count);
+
+            Assert.AreEqual((0, 1, 2), triIdx);
+            Assert.AreEqual((3, 4, 5, 6), qadIdx);
+
+            CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 4, 5, 3, 5, 6 }, prim.GetIndices());
         }
     }
 }

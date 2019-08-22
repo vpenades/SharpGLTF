@@ -89,7 +89,12 @@ namespace SharpGLTF.Geometry
         {
             if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))
             {
-                primitive = new PrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1, key.Item2);
+                if (key.Item2 == 1) primitive = new PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
+                if (key.Item2 == 2) primitive = new LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
+                if (key.Item2 == 3) primitive = new TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
+
+                Guard.NotNull(primitive, nameof(key));
+
                 _Primitives[key] = primitive;
             }
 
