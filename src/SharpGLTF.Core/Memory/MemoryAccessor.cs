@@ -244,7 +244,7 @@ namespace SharpGLTF.Memory
             return new SparseArray<Vector4>(bottom.AsVector4Array(), topValues.AsVector4Array(), topKeys);
         }
 
-        public static IList<Vector4> CreateColorSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
+        public static IList<Vector4> CreateColorSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues, Single defaultW = 1)
         {
             Guard.NotNull(bottom, nameof(bottom));
             Guard.NotNull(topValues, nameof(topValues));
@@ -253,7 +253,7 @@ namespace SharpGLTF.Memory
             Guard.IsTrue(topKeys.Count == topValues._Attribute.ItemsCount, nameof(topValues));
             Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Attribute.ItemsCount), nameof(topKeys));
 
-            return new SparseArray<Vector4>(bottom.AsColorArray(), topValues.AsColorArray(), topKeys);
+            return new SparseArray<Vector4>(bottom.AsColorArray(defaultW), topValues.AsColorArray(defaultW), topKeys);
         }
 
         #endregion
@@ -310,11 +310,11 @@ namespace SharpGLTF.Memory
             return new Vector4Array(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Encoding, _Attribute.Normalized);
         }
 
-        public ColorArray AsColorArray()
+        public ColorArray AsColorArray(Single defaultW = 1)
         {
             Guard.IsTrue(_Attribute.IsValidVertexAttribute, nameof(_Attribute));
             Guard.IsTrue(_Attribute.Dimensions == DIMENSIONS.VEC3 || _Attribute.Dimensions == DIMENSIONS.VEC4, nameof(_Attribute));
-            return new ColorArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Dimensions.DimCount(), _Attribute.Encoding, _Attribute.Normalized);
+            return new ColorArray(_Data, _Attribute.ByteOffset, _Attribute.ItemsCount, _Attribute.ByteStride, _Attribute.Dimensions.DimCount(), _Attribute.Encoding, _Attribute.Normalized, defaultW);
         }
 
         public QuaternionArray AsQuaternionArray()

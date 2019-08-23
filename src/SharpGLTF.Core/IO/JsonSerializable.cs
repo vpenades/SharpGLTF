@@ -262,8 +262,19 @@ namespace SharpGLTF.IO
                 writer.WriteStartObject();
                 foreach (var key in dict.Keys)
                 {
+                    var val = dict[key];
+                    if (val == null) continue;
+
+                    // if the value is a collection, we need to check if the collection is empty
+                    // to prevent writing the key, without writing the value.
+                    if (!(val is String || val is JsonSerializable))
+                    {
+                        if (val is System.Collections.IList xlist && xlist.Count == 0) continue;
+                        if (val is System.Collections.IDictionary xdict && xdict.Count == 0) continue;
+                    }
+
                     writer.WritePropertyName(key.ToString());
-                    _Serialize(writer, dict[key]);
+                    _Serialize(writer, val);
                 }
 
                 writer.WriteEndObject();

@@ -21,6 +21,7 @@ namespace SharpGLTF
             _SchemaDir = System.IO.Path.Combine(workingDir, "glTF-Schema");
             _SampleModelsDir = System.IO.Path.Combine(workingDir, "glTF-Sample-Models");
             _PollyModelsDir = System.IO.Path.Combine(workingDir, "glTF-Blender-Exporter");
+            _UniVRMModelsDir = System.IO.Path.Combine(workingDir, "UniVRM");
             _BabylonJsMeshesDir = System.IO.Path.Combine(workingDir, "BabylonJS-MeshesLibrary");
             _BabylonJsPlaygroundDir = System.IO.Path.Combine(workingDir, "BabylonJS-PlaygroundScenes");
         }
@@ -34,7 +35,13 @@ namespace SharpGLTF
 
             var dstPath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "GeneratedReferenceModels", "v_0_6_1.zip");
             _GeneratedModelsDir = DownloadUtils.DownloadFile("https://github.com/KhronosGroup/glTF-Asset-Generator/releases/download/v0.6.1/GeneratedAssets-0.6.1.zip", dstPath);
+
+            dstPath = System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
+            DownloadUtils.DownloadFile("https://github.com/vrm-c/UniVRMTest/raw/master/Models/Alicia_vrm-0.40/AliciaSolid_vrm-0.40.vrm", dstPath);
+
+
             
+
             TestContext.Progress.WriteLine("Checking out test files... It might take a while, please, wait...");            
 
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
@@ -55,6 +62,7 @@ namespace SharpGLTF
         private static readonly string _SchemaDir;
         private static readonly string _SampleModelsDir;
         private static readonly string _PollyModelsDir;
+        private static readonly string _UniVRMModelsDir;
         private static readonly string _BabylonJsMeshesDir;
         private static readonly string _BabylonJsPlaygroundDir;
 
@@ -130,6 +138,11 @@ namespace SharpGLTF
         public static string GetPollyFileModelPath()
         {
             return System.IO.Path.Combine(_PollyModelsDir, "polly", "project_polly.glb");
+        }
+
+        public static string GetUniVRMModelPath()
+        {
+            return System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
         }
 
         private static IReadOnlyList<string> GetModelPathsInDirectory(params string[] paths)

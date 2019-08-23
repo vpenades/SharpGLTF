@@ -18,6 +18,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         void SetTangent(Vector4 tangent);
 
         void ApplyTransform(Matrix4x4 xform);
+
+        IVertexGeometry ToAbsoluteMorph(IVertexGeometry baseValue);
+        IVertexGeometry ToDisplaceMorph(IVertexGeometry baseValue);
     }
 
     /// <summary>
@@ -65,6 +68,18 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexGeometry.SetNormal(Vector3 normal) { }
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { }
+
+        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPosition)baseValue;
+            return new VertexPosition(this.Position + bv.Position);
+        }
+
+        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPosition)baseValue;
+            return new VertexPosition(this.Position - bv.Position);
+        }
 
         public Vector3 GetPosition() { return this.Position; }
 
@@ -135,6 +150,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { }
 
+        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPositionNormal)baseValue;
+            return new VertexPositionNormal(this.Position + bv.Position, this.Normal + bv.Normal);
+        }
+
+        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPositionNormal)baseValue;
+            return new VertexPositionNormal(this.Position - bv.Position, this.Normal - bv.Normal);
+        }
+
         public Vector3 GetPosition() { return this.Position; }
 
         public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
@@ -198,6 +225,18 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = tangent; }
+
+        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPositionNormalTangent)baseValue;
+            return new VertexPositionNormalTangent(this.Position + bv.Position, this.Normal + bv.Normal, this.Tangent + bv.Tangent);
+        }
+
+        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        {
+            var bv = (VertexPositionNormalTangent)baseValue;
+            return new VertexPositionNormalTangent(this.Position - bv.Position, this.Normal - bv.Normal, this.Tangent - bv.Tangent);
+        }
 
         public Vector3 GetPosition() { return this.Position; }
 

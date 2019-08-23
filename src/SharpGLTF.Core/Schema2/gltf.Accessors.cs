@@ -247,14 +247,14 @@ namespace SharpGLTF.Schema2
             return MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
         }
 
-        public IList<Vector4> AsColorArray()
+        public IList<Vector4> AsColorArray(Single defaultW = 1)
         {
             var memory = _GetMemoryAccessor();
 
-            if (this._sparse == null) return memory.AsColorArray();
+            if (this._sparse == null) return memory.AsColorArray(defaultW);
 
             var sparseKV = this._sparse._CreateMemoryAccessors(this);
-            return MemoryAccessor.CreateColorSparseArray(memory, sparseKV.Key, sparseKV.Value);
+            return MemoryAccessor.CreateColorSparseArray(memory, sparseKV.Key, sparseKV.Value, defaultW);
         }
 
         public IList<Quaternion> AsQuaternionArray()

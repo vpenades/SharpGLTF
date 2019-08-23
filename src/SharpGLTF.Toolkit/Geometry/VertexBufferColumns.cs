@@ -47,9 +47,9 @@ namespace SharpGLTF.Geometry
 
         #pragma warning restore CA2227 // Collection properties should be read only
 
-        private List<MorphTargetColumns> _MorphTargets;
+        private List<VertexBufferColumns> _MorphTargets;
 
-        public IReadOnlyList<MorphTargetColumns> MorphTargets => _MorphTargets == null ? (IReadOnlyList<MorphTargetColumns>)Array.Empty<MorphTargetColumns>() : _MorphTargets;
+        public IReadOnlyList<VertexBufferColumns> MorphTargets => _MorphTargets == null ? (IReadOnlyList<VertexBufferColumns>)Array.Empty<VertexBufferColumns>() : _MorphTargets;
 
         #endregion
 
@@ -191,7 +191,7 @@ namespace SharpGLTF.Geometry
             Weights1 = null;
         }
 
-        private void _FillMorphData(Vector3[] array, Func<MorphTargetColumns, Vector3> selector)
+        private void _FillMorphData(Vector3[] array, Func<VertexBufferColumns, Vector3> selector)
         {
             if (array == null) return;
 
@@ -201,7 +201,18 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private void _FillMorphData(Vector4[] array, Func<MorphTargetColumns, Vector4> selector)
+        private void _FillMorphData(Vector3[] array, Func<VertexBufferColumns, Vector4> selector)
+        {
+            if (array == null) return;
+
+            for (int i = 0; i < this._MorphTargets.Count; ++i)
+            {
+                var v = selector(this._MorphTargets[i]);
+                array[i] = new Vector3(v.X, v.Y, v.Z);
+            }
+        }
+
+        private void _FillMorphData(Vector4[] array, Func<VertexBufferColumns, Vector4> selector)
         {
             if (array == null) return;
 
@@ -211,10 +222,10 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public MorphTargetColumns AddMorphTarget()
+        public VertexBufferColumns AddMorphTarget()
         {
-            if (_MorphTargets == null) _MorphTargets = new List<MorphTargetColumns>();
-            var mt = new MorphTargetColumns();
+            if (_MorphTargets == null) _MorphTargets = new List<VertexBufferColumns>();
+            var mt = new VertexBufferColumns();
             _MorphTargets.Add(mt);
 
             return mt;

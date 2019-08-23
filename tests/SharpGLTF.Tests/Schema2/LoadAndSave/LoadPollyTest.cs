@@ -71,5 +71,18 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 TestContext.WriteLine($"Triangle {ap} {an} {bp} {bn} {cp} {cn}");
             }
         }
+
+        [Test]
+        public void LoadUniVRM()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var path = TestFiles.GetUniVRMModelPath();
+            
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            model.AttachToCurrentTest("AliceModel.glb");
+        }
     }
 }

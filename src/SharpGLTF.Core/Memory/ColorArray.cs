@@ -31,8 +31,10 @@ namespace SharpGLTF.Memory
         /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
         /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
         /// <param name="normalized">True if values are normalized.</param>
-        public ColorArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized) { }
+        /// <param name="defaultW">If <paramref name="dimensions"/> is 3, the W values are filled with this value</param>
+        public ColorArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false, Single defaultW = 1)
+            : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized)
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorArray"/> struct.
@@ -45,8 +47,10 @@ namespace SharpGLTF.Memory
         /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
         /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
         /// <param name="normalized">True if values are normalized.</param>
-        public ColorArray(BYTES source, int byteStride = 0, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(source, 0, int.MaxValue, byteStride, dimensions, encoding, normalized) { }
+        /// <param name="defaultW">If <paramref name="dimensions"/> is 3, the W values are filled with this value</param>
+        public ColorArray(BYTES source, int byteStride = 0, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false, Single defaultW = 1)
+            : this(source, 0, int.MaxValue, byteStride, dimensions, encoding, normalized, defaultW)
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorArray"/> struct.
@@ -61,12 +65,15 @@ namespace SharpGLTF.Memory
         /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
         /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
         /// <param name="normalized">True if values are normalized.</param>
-        public ColorArray(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+        /// <param name="defaultW">If <paramref name="dimensions"/> is 3, the W values are filled with this value</param>
+        public ColorArray(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false, Single defaultW = 1)
         {
             Guard.MustBeBetweenOrEqualTo(dimensions, 3, 4, nameof(dimensions));
 
             _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, dimensions, encoding, normalized);
             _Dimensions = dimensions;
+
+            _DefaultW = defaultW;
         }
 
         #endregion
@@ -81,6 +88,8 @@ namespace SharpGLTF.Memory
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector4[] _DebugItems => this.ToArray();
 
+        private readonly float _DefaultW;
+
         #endregion
 
         #region API
@@ -94,7 +103,7 @@ namespace SharpGLTF.Memory
         {
             get
             {
-                return new Vector4(_Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], _Dimensions < 4 ? 1 : _Accessor[index, 3]);
+                return new Vector4(_Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], _Dimensions < 4 ? _DefaultW : _Accessor[index, 3]);
             }
 
             set

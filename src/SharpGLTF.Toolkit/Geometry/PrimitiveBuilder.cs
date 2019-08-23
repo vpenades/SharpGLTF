@@ -27,6 +27,8 @@ namespace SharpGLTF.Geometry
         /// </summary>
         IReadOnlyList<IVertexBuilder> Vertices { get; }
 
+        IMorphTargetReader MorphTargets { get; }
+
         /// <summary>
         /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
         /// </summary>
@@ -60,6 +62,8 @@ namespace SharpGLTF.Geometry
         /// Gets the type of vertex used by this <see cref="IVertexBuilder"/>.
         /// </summary>
         Type VertexType { get; }
+
+        void SetVertexDisplacement(int morphTargetIndex, int vertexIndex, IVertexGeometry vertex);
 
         int AddPoint(IVertexBuilder a);
 
@@ -159,22 +163,23 @@ namespace SharpGLTF.Geometry
 
         public MorphTargetBuilder<TvG> MorphTargets => _MorphTargets;
 
+        IMorphTargetReader IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
+
         #endregion
 
         #region API
 
         /// <summary>
-        /// Checks if <paramref name="v"/> is a compatible vertex and casts it, or converts it if it is not.
+        /// Checks if <paramref name="vertex"/> is a compatible vertex and casts it, or converts it if it is not.
         /// </summary>
-        /// <param name="v">Any vertex</param>
+        /// <param name="vertex">Any vertex</param>
         /// <returns>A vertex compatible with this primitive.</returns>
-        private static VertexBuilder<TvG, TvM, TvS> ConvertVertex(IVertexBuilder v)
+        private static VertexBuilder<TvG, TvM, TvS> ConvertVertex(IVertexBuilder vertex)
         {
-            Guard.NotNull(v, nameof(v));
+            Guard.NotNull(vertex, nameof(vertex));
 
-            var vv = v.ConvertTo<TvG, TvM, TvS>();
-
-            System.Diagnostics.Debug.Assert(vv.Position == v.GetGeometry().GetPosition());
+            var vv = vertex.ConvertTo<TvG, TvM, TvS>();
+            System.Diagnostics.Debug.Assert(vv.Position == vertex.GetGeometry().GetPosition());
 
             return vv;
         }
@@ -192,6 +197,16 @@ namespace SharpGLTF.Geometry
         protected int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
         {
             return _Vertices.Use(vertex);
+        }
+
+        void IPrimitiveBuilder.SetVertexDisplacement(int morphTargetIndex, int vertexIndex, IVertexGeometry vertex)
+        {
+            Guard.NotNull(vertex, nameof(vertex));
+
+            var v = vertex.ConvertToGeometry<TvG>();
+            System.Diagnostics.Debug.Assert(v.GetPosition() == vertex.GetPosition());
+
+            this._MorphTargets.SetVertexDisplacement(morphTargetIndex, vertexIndex, v);
         }
 
         /// <summary>
@@ -244,63 +259,6 @@ namespace SharpGLTF.Geometry
             return AddQuadrangle(ConvertVertex(a), ConvertVertex(b), ConvertVertex(c), ConvertVertex(d));
         }
 
-        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
-        {
-            if (primitive == null) return;
-
-            if (this.VerticesPerPrimitive == 1)
-            {
-                foreach (var p in primitive.Points)
-                {
-                    var a = vertexTransform(primitive.Vertices[p]);
-
-                    AddPoint(a);
-                }
-
-                return;
-            }
-
-            if (this.VerticesPerPrimitive == 2)
-            {
-                foreach (var l in primitive.Lines)
-                {
-                    var a = vertexTransform(primitive.Vertices[l.Item1]);
-                    var b = vertexTransform(primitive.Vertices[l.Item2]);
-
-                    AddLine(a, b);
-                }
-
-                return;
-            }
-
-            if (this.VerticesPerPrimitive == 3)
-            {
-                foreach (var s in primitive.Surfaces)
-                {
-                    var a = vertexTransform(primitive.Vertices[s.Item1]);
-                    var b = vertexTransform(primitive.Vertices[s.Item2]);
-                    var c = vertexTransform(primitive.Vertices[s.Item3]);
-
-                    if (s.Item4.HasValue)
-                    {
-                        var d = vertexTransform(primitive.Vertices[s.Item4.Value]);
-                        AddQuadrangle(a, b, c, d);
-                    }
-                    else
-                    {
-                        AddTriangle(a, b, c);
-                    }
-                }
-
-                return;
-            }
-
-            for (int i = 0; i < primitive._MorphTargets.Count; ++i)
-            {
-                this._MorphTargets.AddAbsoluteVertices<TvM, TvS>(i, primitive._MorphTargets.GetTarget(i), vertexTransform);
-            }
-        }
-
         public void Validate()
         {
             foreach (var v in _Vertices)
@@ -309,9 +267,80 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> transformFunc)
+        public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
         {
-            _Vertices.TransformVertices(transformFunc);
+            _Vertices.TransformVertices(vertexTransformFunc);
+
+            TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
+
+            _MorphTargets.TransformVertices(geoFunc);
+        }
+
+        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
+        {
+            if (primitive == null) return;
+
+            // vertex-vertex map so we can know where to set the morph targets.
+            var vmap = new Dictionary<int, int>();
+
+            if (this.VerticesPerPrimitive == 1)
+            {
+                foreach (var p in primitive.Points)
+                {
+                    var a = vertexTransformFunc(primitive.Vertices[p]);
+
+                    var idx = AddPoint(a);
+
+                    vmap[p] = idx;
+                }
+            }
+
+            if (this.VerticesPerPrimitive == 2)
+            {
+                foreach (var l in primitive.Lines)
+                {
+                    var a = vertexTransformFunc(primitive.Vertices[l.Item1]);
+                    var b = vertexTransformFunc(primitive.Vertices[l.Item2]);
+
+                    var indices = AddLine(a, b);
+
+                    vmap[l.Item1] = indices.Item1;
+                    vmap[l.Item2] = indices.Item2;
+                }
+            }
+
+            if (this.VerticesPerPrimitive == 3)
+            {
+                foreach (var s in primitive.Surfaces)
+                {
+                    var a = vertexTransformFunc(primitive.Vertices[s.Item1]);
+                    var b = vertexTransformFunc(primitive.Vertices[s.Item2]);
+                    var c = vertexTransformFunc(primitive.Vertices[s.Item3]);
+
+                    if (s.Item4.HasValue)
+                    {
+                        var d = vertexTransformFunc(primitive.Vertices[s.Item4.Value]);
+                        var indices = AddQuadrangle(a, b, c, d);
+
+                        vmap[s.Item1] = indices.Item1;
+                        vmap[s.Item2] = indices.Item2;
+                        vmap[s.Item3] = indices.Item3;
+                        vmap[s.Item4.Value] = indices.Item4;
+                    }
+                    else
+                    {
+                        var indices = AddTriangle(a, b, c);
+
+                        vmap[s.Item1] = indices.Item1;
+                        vmap[s.Item2] = indices.Item2;
+                        vmap[s.Item3] = indices.Item3;
+                    }
+                }
+            }
+
+            TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
+
+            _MorphTargets.SetMorphTargets(primitive._MorphTargets, vmap, geoFunc);
         }
 
         #endregion
@@ -365,7 +394,7 @@ namespace SharpGLTF.Geometry
         {
             throw new NotSupportedException("Quadrangles are not supported for this primitive");
         }
-
+        
         #endregion
 
         #region helper types

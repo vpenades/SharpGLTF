@@ -501,10 +501,10 @@ namespace SharpGLTF.Schema2
         {
             if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
             if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsVector4Array();
+            if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsColorArray(0);
 
-            if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray();
-            if (vertexAccessors.ContainsKey("COLOR_1")) dstColumns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray();
+            if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsColorArray(1);
+            if (vertexAccessors.ContainsKey("COLOR_1")) dstColumns.Colors1 = vertexAccessors["COLOR_1"].AsColorArray(1);
 
             if (vertexAccessors.ContainsKey("TEXCOORD_0")) dstColumns.TexCoords0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
             if (vertexAccessors.ContainsKey("TEXCOORD_1")) dstColumns.TexCoords1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
@@ -514,15 +514,6 @@ namespace SharpGLTF.Schema2
 
             if (vertexAccessors.ContainsKey("WEIGHTS_0")) dstColumns.Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
             if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
-        }
-
-        private static void _Initialize(IReadOnlyDictionary<string, Accessor> vertexAccessors, MorphTargetColumns dstColumns)
-        {
-            if (vertexAccessors.ContainsKey("POSITION")) dstColumns.Positions = vertexAccessors["POSITION"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("NORMAL")) dstColumns.Normals = vertexAccessors["NORMAL"].AsVector3Array();
-            if (vertexAccessors.ContainsKey("TANGENT")) dstColumns.Tangents = vertexAccessors["TANGENT"].AsVector3Array();
-
-            if (vertexAccessors.ContainsKey("COLOR_0")) dstColumns.Colors0 = vertexAccessors["COLOR_0"].AsVector4Array();
         }
 
         /// <summary>
@@ -657,9 +648,9 @@ namespace SharpGLTF.Schema2
                 .Distinct()
                 .ToArray();
 
-            Materials.MaterialBuilder defMat = null;
-
             var dstMesh = MeshBuilderToolkit.CreateMeshBuilderFromVertexAttributes<Materials.MaterialBuilder>(vertexAttributes);
+
+            Materials.MaterialBuilder defMat = null;
 
             var dstMaterials = new Dictionary<Material, Materials.MaterialBuilder>();
 
@@ -687,25 +678,75 @@ namespace SharpGLTF.Schema2
                 return dstPrim;
             }
 
-            foreach (var srcTri in srcMesh.EvaluatePoints())
+            foreach (var srcPrim in srcMesh.Primitives)
             {
-                var dstPrim = GetPrimitive(srcTri.Item2, 1);
-                dstPrim.AddPoint(srcTri.Item1);
-            }
+                int vcount = 0;
+                if (srcPrim.GetPointIndices().Any()) vcount = 1;
+                if (srcPrim.GetLineIndices().Any()) vcount = 2;
+                if (srcPrim.GetTriangleIndices().Any()) vcount = 3;
 
-            foreach (var srcTri in srcMesh.EvaluateLines())
-            {
-                var dstPrim = GetPrimitive(srcTri.Item3, 2);
-                dstPrim.AddLine(srcTri.Item1, srcTri.Item2);
-            }
+                var dstPrim = GetPrimitive(srcPrim.Material, vcount);
 
-            foreach (var srcTri in srcMesh.EvaluateTriangles())
-            {
-                var dstPrim = GetPrimitive(srcTri.Item4, 3);
-                dstPrim.AddTriangle(srcTri.Item1, srcTri.Item2, srcTri.Item3);
+                dstPrim.AddPrimitiveGeometry(srcPrim);
             }
 
             return dstMesh;
+        }
+
+        private static void AddPrimitiveGeometry(this IPrimitiveBuilder dstPrim, MeshPrimitive srcPrim)
+        {
+            Guard.NotNull(dstPrim, nameof(dstPrim));
+
+            var vertices = srcPrim.GetVertexColumns();
+            var vmap = new Dictionary<int, int>();
+
+            foreach (var srcPoint in srcPrim.GetPointIndices())
+            {
+                var v = vertices.GetVertex(dstPrim.VertexType, srcPoint);
+
+                var idx = dstPrim.AddPoint(v);
+
+                vmap[srcPoint] = idx;
+            }
+
+            foreach (var srcLine in srcPrim.GetLineIndices())
+            {
+                var v1 = vertices.GetVertex(dstPrim.VertexType, srcLine.Item1);
+                var v2 = vertices.GetVertex(dstPrim.VertexType, srcLine.Item2);
+
+                var indices = dstPrim.AddLine(v1, v2);
+
+                vmap[srcLine.Item1] = indices.Item1;
+                vmap[srcLine.Item2] = indices.Item2;
+
+            }
+
+            foreach (var srcTri in srcPrim.GetTriangleIndices())
+            {
+                var v1 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item1);
+                var v2 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item2);
+                var v3 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item3);
+
+                var indices = dstPrim.AddTriangle(v1, v2, v3);
+
+                vmap[srcTri.Item1] = indices.Item1;
+                vmap[srcTri.Item2] = indices.Item2;
+                vmap[srcTri.Item3] = indices.Item3;
+            }
+
+            for (int tidx = 0; tidx < vertices.MorphTargets.Count; ++tidx)
+            {
+                var srcTarget = vertices.MorphTargets[tidx];
+
+                foreach (var kvp in vmap)
+                {
+                    if (kvp.Value < 0) continue;
+
+                    var v = srcTarget.GetVertex(dstPrim.VertexType, kvp.Key);
+
+                    dstPrim.SetVertexDisplacement(tidx, kvp.Value, v.GetGeometry());
+                }
+            }
         }
 
         public static void SaveAsWavefront(this ModelRoot model, string filePath)

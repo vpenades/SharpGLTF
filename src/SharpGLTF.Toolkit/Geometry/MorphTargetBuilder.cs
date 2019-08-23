@@ -6,7 +6,16 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    public class MorphTargetBuilder<TvG>
+    public interface IMorphTargetReader
+    {
+        int TargetsCount { get; }
+
+        IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex);
+
+        IVertexGeometry GetVertexDisplacement(int morphTargetIndex, int vertexIndex);
+    }
+
+    public class MorphTargetBuilder<TvG> : IMorphTargetReader
         where TvG : struct, IVertexGeometry
     {
         #region lifecycle
@@ -27,7 +36,7 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
-        public int Count => _Targets.Count;
+        public int TargetsCount => _Targets.Count;
 
         public Boolean AbsoluteMode => true;
 
@@ -35,27 +44,76 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public IReadOnlyDictionary<int, TvG> GetTarget(int idx) { return _Targets[idx]; }
-
-        public void SetRelativeVertex(int morphTargetIndex, int vertexIndex, TvG value)
+        public IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex)
         {
-            if (AbsoluteMode)
-            {
-                // value = value.ToAbsoluteMorph(_BaseVertexFunc(vertexIndex));
+            return morphTargetIndex < _Targets.Count ? _Targets[morphTargetIndex].Keys : (IReadOnlyCollection<int>)Array.Empty<int>();
+        }
 
-                throw new NotImplementedException();
+        IVertexGeometry IMorphTargetReader.GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
+        {
+            return _GetVertexDisplacement(morphTargetIndex, vertexIndex);
+        }
+
+        TvG GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
+        {
+            return _GetVertexDisplacement(morphTargetIndex, vertexIndex);
+        }
+
+        private TvG _GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
+        {
+            var target = _Targets[morphTargetIndex];
+
+            if (target.TryGetValue(vertexIndex, out TvG value))
+            {
+                if (this.AbsoluteMode) value = (TvG)value.ToDisplaceMorph(_BaseVertexFunc(vertexIndex));
+
+                return value;
+            }
+
+            return default;
+        }
+
+        public TvG GetVertex(int morphTargetIndex, int vertexIndex)
+        {
+            var target = _Targets[morphTargetIndex];
+
+            if (target.TryGetValue(vertexIndex, out TvG value))
+            {
+                if (!this.AbsoluteMode) value = (TvG)value.ToAbsoluteMorph(_BaseVertexFunc(vertexIndex));
+
+                return value;
+            }
+
+            return _BaseVertexFunc(vertexIndex);
+        }
+
+        public void SetVertexDisplacement(int morphTargetIndex, int vertexIndex, TvG value)
+        {
+            if (object.Equals(value, default(TvG)))
+            {
+                _RemoveVertex(morphTargetIndex, vertexIndex);
+                return;
+            }
+
+            if (this.AbsoluteMode)
+            {
+                value = (TvG)value.ToAbsoluteMorph(_BaseVertexFunc(vertexIndex));
             }
 
             _SetVertex(morphTargetIndex, vertexIndex, value);
         }
 
-        public void SetAbsoluteVertex(int morphTargetIndex, int vertexIndex, TvG value)
+        public void SetVertex(int morphTargetIndex, int vertexIndex, TvG value)
         {
-            if (!AbsoluteMode)
+            if (object.Equals(value, _BaseVertexFunc(vertexIndex)))
             {
-                // value = value.ToRelativeMorph(_BaseVertexFunc(vertexIndex));
+                _RemoveVertex(morphTargetIndex, vertexIndex);
+                return;
+            }
 
-                throw new NotImplementedException();
+            if (!this.AbsoluteMode)
+            {
+                value = (TvG)value.ToDisplaceMorph(_BaseVertexFunc(vertexIndex));
             }
 
             _SetVertex(morphTargetIndex, vertexIndex, value);
@@ -71,25 +129,58 @@ namespace SharpGLTF.Geometry
             _Targets[morphTargetIndex][vertexIndex] = value;
         }
 
-        public void AddAbsoluteVertices<TvM, TvS>(int morphTargetIndex, IReadOnlyDictionary<int, TvG> vertices, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
+        private void _RemoveVertex(int morphTargetIndex, int vertexIndex)
         {
-            foreach (var kvp in vertices)
+            if (morphTargetIndex >= _Targets.Count) return;
+
+            _Targets[morphTargetIndex].Remove(vertexIndex);
+        }
+
+        #endregion
+
+        #region internals
+
+        internal void TransformVertices(Func<TvG, TvG> vertexFunc)
+        {
+            for (int tidx = 0; tidx < _Targets.Count; ++tidx)
             {
-                if (!AbsoluteMode)
+                var target = _Targets[tidx];
+
+                foreach (var vidx in target.Keys)
                 {
-                    throw new NotImplementedException();
-                    // TODO: if vertices are in RELATIVE MODE, we must convert them to absolute mode, transform, and back to RELATIVE
+                    var g = GetVertex(tidx, vidx);
+
+                    g = vertexFunc(g);
+
+                    SetVertex(tidx, vidx, g);
                 }
-
-                var v = new VertexBuilder<TvG, TvM, TvS>(kvp.Value, default(TvM), default(TvS));
-                v = vertexTransform(v);
-
-                this.SetAbsoluteVertex(morphTargetIndex, kvp.Key, v.Geometry);
             }
         }
 
+        internal void SetMorphTargets(MorphTargetBuilder<TvG> other, IReadOnlyDictionary<int, int> vertexMap, Func<TvG, TvG> vertexFunc)
+        {
+            for (int tidx = 0; tidx < other.TargetsCount; ++tidx)
+            {
+                var indices = other.GetTargetIndices(tidx);
+
+                foreach (var srcVidx in indices)
+                {
+                    var g = other.GetVertex(tidx, srcVidx);
+
+                    if (vertexFunc != null) g = vertexFunc(g);
+
+                    var dstVidx = srcVidx;
+
+                    if (vertexMap != null)
+                    {
+                        if (!vertexMap.TryGetValue(srcVidx, out dstVidx)) dstVidx = -1;
+                    }
+
+                    if (dstVidx >= 0) this.SetVertex(tidx, dstVidx, g);
+                }
+            }
+        }
+        
         #endregion
     }
 }
