@@ -111,6 +111,8 @@ namespace SharpGLTF.Geometry
         {
             this._Mesh = mesh;
             this._Material = material;
+
+            this._MorphTargets = new MorphTargetBuilder<TvG>( idx => _Vertices[idx].Geometry );
         }
 
         #endregion
@@ -122,6 +124,8 @@ namespace SharpGLTF.Geometry
         private readonly TMaterial _Material;
 
         private readonly VertexListWrapper _Vertices = new VertexListWrapper();
+
+        private readonly MorphTargetBuilder<TvG> _MorphTargets;
 
         #endregion
 
@@ -152,6 +156,8 @@ namespace SharpGLTF.Geometry
         public virtual IReadOnlyList<(int, int, int)> Triangles => Array.Empty<(int, int, int)>();
 
         public virtual IReadOnlyList<(int, int, int, int?)> Surfaces => Array.Empty<(int, int, int, int?)>();
+
+        public MorphTargetBuilder<TvG> MorphTargets => _MorphTargets;
 
         #endregion
 
@@ -287,6 +293,11 @@ namespace SharpGLTF.Geometry
                 }
 
                 return;
+            }
+
+            for (int i = 0; i < primitive._MorphTargets.Count; ++i)
+            {
+                this._MorphTargets.AddAbsoluteVertices<TvM, TvS>(i, primitive._MorphTargets.GetTarget(i), vertexTransform);
             }
         }
 
