@@ -207,91 +207,98 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region memory buffers API
 
-        public static IEnumerable<MemoryAccessor[]> CreateVertexMemoryAccessors<TVertex>(this IEnumerable<IReadOnlyList<TVertex>> vertexBlocks)
+        public static MemoryAccessor CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices, string attributeName)
             where TVertex : IVertexBuilder
         {
-            Guard.IsTrue(vertexBlocks.Any(), nameof(vertexBlocks));
-            Guard.IsTrue(vertexBlocks.All(item => item.Count > 0), nameof(vertexBlocks));
-            Guard.IsTrue(vertexBlocks.Select(item => item[0].GetType()).Distinct().Count() == 1, "multiple vertex types found");
-
-            // total number of vertices
-            var totalCount = vertexBlocks.Sum(item => item.Count);
+            if (vertices == null || vertices.Count == 0) return null;
 
             // determine the vertex attributes from the first vertex.
-            var firstVertex = vertexBlocks
-                .First(item => item.Count > 0)[0];
+            var firstVertex = vertices[0];
 
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
-            var attributes = _GetVertexAttributes(tvg, tvm, tvs, totalCount);
+            var attributes = _GetVertexAttributes(tvg, tvm, tvs, vertices.Count);
 
-            // create master vertex buffer
-            int byteStride = attributes[0].ByteStride;
-            var vbuffer = new ArraySegment<byte>(new Byte[byteStride * totalCount]);
+            var attribute = attributes.FirstOrDefault(item => item.Name == attributeName);
+            if (attribute.Name == null) return null;
+            attribute.ByteOffset = 0;
+            attribute.ByteStride = 0;
+
+            // create a buffer
+            var vbuffer = new ArraySegment<byte>(new Byte[attribute.PaddedByteLength * vertices.Count]);
 
             // fill the buffer with the vertex blocks.
 
-            var baseVertexIndex = 0;
+            var accessor = new MemoryAccessor(vbuffer, attribute);
 
-            foreach (var block in vertexBlocks)
-            {
-                var accessors = MemoryAccessInfo
-                    .Slice(attributes, baseVertexIndex, block.Count)
-                    .Select(item => new MemoryAccessor(vbuffer, item))
-                    .ToArray();
+            accessor.FillAccessor(vertices);
 
-                foreach (var accessor in accessors)
-                {
-                    var columnFunc = _GetVertexBuilderAttributeFunc(accessor.Attribute.Name);
-
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) accessor.AsScalarArray().Fill(block._GetColumn<TVertex, float>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) accessor.AsVector2Array().Fill(block._GetColumn<TVertex, Vector2>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) accessor.AsVector3Array().Fill(block._GetColumn<TVertex, Vector3>(columnFunc));
-                    if (accessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) accessor.AsVector4Array().Fill(block._GetColumn<TVertex, Vector4>(columnFunc));
-                }
-
-                yield return accessors;
-
-                baseVertexIndex += block.Count;
-            }
+            return accessor;
         }
 
-        public static IEnumerable<MemoryAccessor> CreateIndexMemoryAccessors(this IEnumerable<IReadOnlyList<Int32>> indexBlocks)
+        public static MemoryAccessor[] CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices)
+            where TVertex : IVertexBuilder
         {
-            Guard.IsTrue(indexBlocks.Any(), nameof(indexBlocks));
+            if (vertices == null || vertices.Count == 0) return null;
 
-            // total number of indices
-            var totalCount = indexBlocks.Sum(item => item.Count);
+            // determine the vertex attributes from the first vertex.
+            var firstVertex = vertices[0];
+
+            var tvg = firstVertex.GetGeometry().GetType();
+            var tvm = firstVertex.GetMaterial().GetType();
+            var tvs = firstVertex.GetSkinning().GetType();
+            var attributes = _GetVertexAttributes(tvg, tvm, tvs, vertices.Count);
+
+            // create a buffer
+            int byteStride = attributes[0].ByteStride;
+            var vbuffer = new ArraySegment<byte>(new Byte[byteStride * vertices.Count]);
+
+            // fill the buffer with the vertex blocks.
+
+            var accessors = MemoryAccessInfo
+                .Slice(attributes, 0, vertices.Count)
+                .Select(item => new MemoryAccessor(vbuffer, item))
+                .ToArray();
+
+            foreach (var accessor in accessors)
+            {
+                accessor.FillAccessor(vertices);
+            }
+
+            return accessors;
+        }
+
+        private static void FillAccessor<TVertex>(this MemoryAccessor dstAccessor, IReadOnlyList<TVertex> srcVertices)
+            where TVertex : IVertexBuilder
+        {
+            var columnFunc = _GetVertexBuilderAttributeFunc(dstAccessor.Attribute.Name);
+
+            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) dstAccessor.AsScalarArray().Fill(srcVertices._GetColumn<TVertex, Single>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) dstAccessor.AsVector2Array().Fill(srcVertices._GetColumn<TVertex, Vector2>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) dstAccessor.AsVector3Array().Fill(srcVertices._GetColumn<TVertex, Vector3>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) dstAccessor.AsVector4Array().Fill(srcVertices._GetColumn<TVertex, Vector4>(columnFunc));
+        }
+
+        public static MemoryAccessor CreateIndexMemoryAccessor(this IReadOnlyList<Int32> indices, Schema2.EncodingType encoding)
+        {
+            if (indices == null || indices.Count == 0) return null;
 
             // determine appropiate encoding
-            var maxIndex = totalCount == 0 ? 0 : indexBlocks.SelectMany(item => item).Max();
-            var encoding = maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
+            // var maxIndex = indices.Max();
+            // var encoding = maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
 
-            var attribute = new MemoryAccessInfo("INDEX", 0, totalCount, 0, Schema2.DimensionType.SCALAR, encoding);
+            var attribute = new MemoryAccessInfo("INDEX", 0, indices.Count, 0, Schema2.DimensionType.SCALAR, encoding);
 
-            // create master index buffer
-            var ibytes = new Byte[encoding.ByteLength() * totalCount];
+            // create buffer
+            var ibytes = new Byte[encoding.ByteLength() * indices.Count];
             var ibuffer = new ArraySegment<byte>(ibytes);
 
-            var baseIndicesIndex = 0;
+            var accessor = new MemoryAccessor(ibuffer, attribute.Slice(0, indices.Count));
 
-            foreach (var block in indexBlocks)
-            {
-                if (block.Count == 0)
-                {
-                    yield return null;
-                    continue;
-                }
+            accessor.AsIntegerArray().Fill(indices);
 
-                var accessor = new MemoryAccessor(ibuffer, attribute.Slice(baseIndicesIndex, block.Count));
-
-                accessor.AsIntegerArray().Fill(block);
-
-                yield return accessor;
-
-                baseIndicesIndex += block.Count;
-            }
+            return accessor;
         }
 
         private static MemoryAccessInfo[] _GetVertexAttributes(Type vertexType, Type valuesType, Type jointsType, int itemsCount)

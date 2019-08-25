@@ -16,14 +16,7 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        /// <summary>
-        /// Converts a collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/>
-        /// to a collection of <see cref="PackedMeshBuilder{TMaterial}"/>, trying to use
-        /// a single vertex buffer and a single index buffer shared by all meshes.
-        /// </summary>
-        /// <param name="meshBuilders">A collection of <see cref="MeshBuilder{TMaterial, TvP, TvM, TvS}"/> instances.</param>
-        /// <returns>A collection of <see cref="PackedMeshBuilder{TMaterial}"/> instances.</returns>
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshesColumnVertices(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
         {
             try
             {
@@ -34,43 +27,95 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var meshPrimitives = meshBuilders
-                .SelectMany(item => item.Primitives)
-                .Where(item => !item.IsEmpty());
+            var encoding = meshBuilders.GetOptimalIndexEncoding();
 
-            if (!meshPrimitives.Any())
+            var vertexBuffers = new Dictionary<string, PackedBuffer>();
+            var indexBuffer = new PackedBuffer();
+
+            var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
+
+            foreach (var srcMesh in meshBuilders)
             {
-                foreach (var mb in meshBuilders) yield return new PackedMeshBuilder<TMaterial>(mb.Name);
-                yield break;
-            }
+                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name);
 
-            var vertexBlocks = VertexTypes.VertexUtils
-                .CreateVertexMemoryAccessors( meshPrimitives.Select(item => item.Vertices) )
-                .ToList();
-
-            var indexBlocks = VertexTypes.VertexUtils
-                .CreateIndexMemoryAccessors( meshPrimitives.Select(item => item.GetIndices()) )
-                .ToList();
-
-            if (vertexBlocks.Count != indexBlocks.Count) throw new InvalidOperationException("Vertex and index blocks count mismatch");
-
-            int idx = 0;
-
-            foreach (var meshBuilder in meshBuilders)
-            {
-                var dstMesh = new PackedMeshBuilder<TMaterial>(meshBuilder.Name);
-
-                foreach (var primitiveBuilder in meshBuilder.Primitives)
+                foreach (var srcPrim in srcMesh.Primitives)
                 {
-                    if (primitiveBuilder.IsEmpty()) continue;
+                    if (srcPrim.Vertices.Count == 0) continue;
 
-                    dstMesh.AddPrimitive(primitiveBuilder.Material, primitiveBuilder.VerticesPerPrimitive, vertexBlocks[idx], indexBlocks[idx]);
+                    var vAccessors = new List<Memory.MemoryAccessor>();
 
-                    ++idx;
+                    foreach (var an in new[] { "POSITION", "NORMAL" })
+                    {
+                        var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, an);
+                        if (vAccessor == null) continue;
+
+                        vAccessors.Add(vAccessor);
+
+                        if (!vertexBuffers.TryGetValue(an, out PackedBuffer packed))
+                        {
+                            vertexBuffers[an] = packed = new PackedBuffer();
+                        }
+
+                        packed.AddAccessors(vAccessor);
+                    }
+
+                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), encoding);
+                    if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
+
+                    dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors.ToArray(), iAccessor);
                 }
 
-                yield return dstMesh;
+                dstMeshes.Add(dstMesh);
             }
+
+            // vertexBuffer.MergeBuffers();
+            indexBuffer.MergeBuffers();
+
+            return dstMeshes;
+
+        }
+
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshesRowVertices(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
+        {
+            try
+            {
+                foreach (var m in meshBuilders) m.Validate();
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
+            }
+
+            var encoding = meshBuilders.GetOptimalIndexEncoding();
+
+            var vertexBuffer = new PackedBuffer();
+            var indexBuffer = new PackedBuffer();
+
+            var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
+
+            foreach (var srcMesh in meshBuilders)
+            {
+                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name);
+
+                foreach (var srcPrim in srcMesh.Primitives)
+                {
+                    var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices);
+                    if (vAccessors == null) continue;
+                    vertexBuffer.AddAccessors(vAccessors);
+
+                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), encoding);
+                    if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
+
+                    dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors, iAccessor);
+                }
+
+                dstMeshes.Add(dstMesh);
+            }
+
+            vertexBuffer.MergeBuffers();
+            indexBuffer.MergeBuffers();
+
+            return dstMeshes;
         }
 
         private PackedMeshBuilder(string name) { _MeshName = name; }

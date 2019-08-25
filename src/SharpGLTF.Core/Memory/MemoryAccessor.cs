@@ -62,13 +62,13 @@ namespace SharpGLTF.Memory
             this.Normalized = normalized;
         }
 
-        public MemoryAccessInfo Slice(int start, int count)
+        public MemoryAccessInfo Slice(int itemStart, int itemCount)
         {
-            var stride = Math.Max(this.ByteStride, this.Dimensions.DimCount() * this.Encoding.ByteLength());
+            var stride = GetRowByteLength();
 
             var clone = this;
-            clone.ByteOffset += start * stride;
-            clone.ItemsCount = Math.Min(clone.ItemsCount, count);
+            clone.ByteOffset += itemStart * stride;
+            clone.ItemsCount = Math.Min(clone.ItemsCount, itemCount);
 
             return clone;
         }
@@ -92,7 +92,20 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.
         /// </summary>
-        public int PaddedByteLength => (this.Dimensions.DimCount() * this.Encoding.ByteLength()).WordPadded();
+        public int PaddedByteLength => GetRowByteLength();
+
+        public int GetRowByteLength()
+        {
+            var xlen = Encoding.ByteLength();
+
+            if (Dimensions != Schema2.DimensionType.SCALAR || Name != "INDEX")
+            {
+                xlen *= this.Dimensions.DimCount();
+                xlen = xlen.WordPadded();
+            }
+
+            return Math.Max(ByteStride, xlen);
+        }
 
         public Boolean IsValidVertexAttribute
         {
@@ -274,6 +287,12 @@ namespace SharpGLTF.Memory
         #endregion
 
         #region API
+
+        public void Update(ArraySegment<Byte> data, MemoryAccessInfo info)
+        {
+            this._Attribute = info;
+            this._Data = data;
+        }
 
         public IntegerArray AsIntegerArray()
         {

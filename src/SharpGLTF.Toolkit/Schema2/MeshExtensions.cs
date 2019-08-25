@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
 
             // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
             var srcMeshes = PackedMeshBuilder<TMaterial>
-                .PackMeshes(meshBuilders)
+                .PackMeshesRowVertices(meshBuilders)
                 .ToList();
 
             var dstMeshes = new List<Mesh>();
@@ -248,7 +248,7 @@ namespace SharpGLTF.Schema2
         public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
             where TVertex : IVertexBuilder
         {
-            var memAccessors = VertexUtils.CreateVertexMemoryAccessors(new[] { vertices }).First();
+            var memAccessors = VertexUtils.CreateVertexMemoryAccessors( vertices );
 
             return primitive.WithVertexAccessors(memAccessors);
         }

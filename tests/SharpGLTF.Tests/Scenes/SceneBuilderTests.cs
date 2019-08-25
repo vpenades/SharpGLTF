@@ -157,6 +157,26 @@ namespace SharpGLTF.Scenes
         }
 
         [Test]
+        public void CreateSceneWithMixedVertexFormats()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var scene = new SceneBuilder();
+
+            var mesh1 = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>();
+            var mesh2 = new MeshBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty>();
+
+            mesh1.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
+            mesh2.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
+
+            scene.AddMesh(mesh1, Matrix4x4.CreateTranslation(-2, 0, 0));
+            scene.AddMesh(mesh2, Matrix4x4.CreateTranslation(2, 0, 0));
+
+            scene.AttachToCurrentTest("scene.glb");
+        }
+
+        [Test]
         public void CreateSceneWithEmptyMeshes()
         {
             // Schema2 does NOT allow meshes to be empty, or meshes with empty MeshPrimitives.
@@ -410,6 +430,7 @@ namespace SharpGLTF.Scenes
 
 
         [TestCase("Avocado.glb")]
+        [TestCase("GearboxAssy.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         [TestCase("BoxAnimated.glb")]
