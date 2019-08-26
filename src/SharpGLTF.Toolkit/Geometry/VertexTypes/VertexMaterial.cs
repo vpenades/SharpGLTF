@@ -18,6 +18,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void SetColor(int setIndex, Vector4 color);
         void SetTexCoord(int setIndex, Vector2 coord);
+
+        Object GetCustomAttribute(string attributeName);
     }
 
     /// <summary>
@@ -64,6 +66,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
+
         public Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
@@ -102,6 +106,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
         }
 
+        public static implicit operator VertexColor2((Vector4, Vector4) tuple)
+        {
+            return new VertexColor2(tuple.Item1, tuple.Item2);
+        }
+
         #endregion
 
         #region data
@@ -127,6 +136,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
+
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
 
         public Vector4 GetColor(int index)
         {
@@ -186,6 +197,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
+
         public Vector4 GetColor(int index)
         {
             throw new NotSupportedException();
@@ -224,6 +237,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
+        public static implicit operator VertexTexture2((Vector2, Vector2) tuple)
+        {
+            return new VertexTexture2(tuple.Item1, tuple.Item2);
+        }
+
         #endregion
 
         #region data
@@ -249,6 +267,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 0) this.TexCoord0 = coord;
             if (setIndex == 1) this.TexCoord1 = coord;
         }
+
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
 
         public Vector4 GetColor(int index)
         {
@@ -289,9 +309,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
-        public static implicit operator VertexColor1Texture1((Vector4, Vector2) coloruv)
+        public static implicit operator VertexColor1Texture1((Vector4, Vector2) tuple)
         {
-            return new VertexColor1Texture1(coloruv.Item1, coloruv.Item2);
+            return new VertexColor1Texture1(tuple.Item1, tuple.Item2);
         }
 
         #endregion
@@ -315,6 +335,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
+
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
 
         public Vector4 GetColor(int index)
         {
@@ -357,6 +379,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
+        public static implicit operator VertexColor1Texture2((Vector4, Vector2, Vector2) tuple)
+        {
+            return new VertexColor1Texture2(tuple.Item1, tuple.Item2, tuple.Item3);
+        }
+
         #endregion
 
         #region data
@@ -385,6 +412,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 0) this.TexCoord0 = coord;
             if (setIndex == 1) this.TexCoord1 = coord;
         }
+
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
 
         public Vector4 GetColor(int index)
         {
@@ -433,6 +462,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
+        public static implicit operator VertexColor2Texture2((Vector4, Vector4, Vector2, Vector2) tuple)
+        {
+            return new VertexColor2Texture2(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+        }
+
         #endregion
 
         #region data
@@ -468,6 +502,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 0) this.TexCoord0 = coord;
             if (setIndex == 1) this.TexCoord1 = coord;
         }
+
+        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
 
         public Vector4 GetColor(int index)
         {

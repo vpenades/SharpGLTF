@@ -125,9 +125,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetNormal(out this.Normal);
         }
 
-        public static implicit operator VertexPositionNormal((Vector3, Vector3) posnrm)
+        public static implicit operator VertexPositionNormal((Vector3, Vector3) tuple)
         {
-            return new VertexPositionNormal(posnrm.Item1, posnrm.Item2);
+            return new VertexPositionNormal(tuple.Item1, tuple.Item2);
         }
 
         #endregion
@@ -201,6 +201,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Position = src.GetPosition();
             src.TryGetNormal(out this.Normal);
             src.TryGetTangent(out this.Tangent);
+        }
+
+        public static implicit operator VertexPositionNormalTangent((Vector3, Vector3, Vector4) tuple)
+        {
+            return new VertexPositionNormalTangent(tuple.Item1, tuple.Item2, tuple.Item3);
         }
 
         #endregion

@@ -34,6 +34,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         (int, float) IVertexSkinning.GetJointBinding(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
+        public object GetCustomAttribute(string attributeName) { return null; }
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         Vector4 IVertexSkinning.JointsLow => Vector4.Zero;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]

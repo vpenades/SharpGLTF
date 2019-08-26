@@ -374,7 +374,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (attributeName == "WEIGHTS_0") return v => v.GetSkinning().WeightsLow;
             if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().Weightshigh;
 
-            throw new NotImplementedException();
+            return v => v.GetMaterial().GetCustomAttribute(attributeName);
         }
 
         private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Func<IVertexBuilder, Object> func)

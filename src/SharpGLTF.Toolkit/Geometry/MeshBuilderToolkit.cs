@@ -25,14 +25,16 @@ namespace SharpGLTF.Geometry
     {
         public static Schema2.EncodingType GetOptimalIndexEncoding<TMaterial>(this IEnumerable<IMeshBuilder<TMaterial>> meshes)
         {
-            var maxIndex = meshes
+            var indices = meshes
                 .SelectMany(item => item.Primitives)
                 .Where(item => item.VerticesPerPrimitive >= 2) // points will never use index buffers
-                .SelectMany(prim => prim.GetIndices())
-                .Max();
+                .SelectMany(prim => prim.GetIndices());
+
+            var maxIndex = indices.Any() ? indices.Max() : 0;
 
             return maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
         }
+
         public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes<TMaterial>(params string[] vertexAttributes)
         {
             Type meshType = GetMeshBuilderType(typeof(TMaterial), vertexAttributes);

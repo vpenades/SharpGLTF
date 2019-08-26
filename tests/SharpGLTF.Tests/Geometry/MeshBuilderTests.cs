@@ -239,5 +239,28 @@ namespace SharpGLTF.Geometry
 
             CollectionAssert.AreEqual(new[] { 0, 1, 2, 3, 4, 5, 3, 5, 6 }, prim.GetIndices());
         }
+
+        [Test]
+        public void CreateMeshWithCustomVertexAttribute()
+        {
+            var dmat = Materials.MaterialBuilder.CreateDefault();
+            var mesh = new MeshBuilder<VertexPosition, VertexColor1Texture1Custom1, VertexEmpty>();
+            var prim = mesh.UsePrimitive(dmat);
+
+            prim.AddTriangle
+                (
+                (Vector3.UnitX, (Vector4.One, Vector2.Zero, 1)),
+                (Vector3.UnitY, (Vector4.One, Vector2.Zero, 2)),
+                (Vector3.UnitZ, (Vector4.One, Vector2.Zero, 3))
+                );
+
+            var dstScene = new Schema2.ModelRoot();
+
+            var dstMesh = dstScene.CreateMesh(mesh);
+
+            var batchId = dstMesh.Primitives[0].GetVertexAccessor(VertexColor1Texture1Custom1.CUSTOMATTRIBUTENAME).AsScalarArray();
+
+            CollectionAssert.AreEqual(new float[] { 1, 2, 3 }, batchId);
+        }
     }
 }
