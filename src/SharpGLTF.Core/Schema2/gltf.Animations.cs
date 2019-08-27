@@ -132,9 +132,19 @@ namespace SharpGLTF.Schema2
                 .SetSampler(sampler);
         }
 
-        public void CreateMorphChannel(Node node, AnimationInterpolationMode mode, IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount, bool linear = true)
+        public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount, bool linear = true)
         {
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetKeys(keyframes, morphCount);
+
+            this._UseChannel(node, PropertyPath.weights)
+                .SetSampler(sampler);
+        }
+
+        public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, (SparseWeight8, SparseWeight8, SparseWeight8)> keyframes, int morphCount)
+        {
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
             sampler.SetKeys(keyframes, morphCount);
 
@@ -480,11 +490,22 @@ namespace SharpGLTF.Schema2
         {
             var kv = _Split(keyframes);
 
-            kv.Item2[0] = new Quaternion(0, 0, 0, 0);
-            kv.Item2[kv.Item2.Length - 1] = new Quaternion(0, 0, 0, 0);
+            kv.Item2[0] = default(Quaternion);
+            kv.Item2[kv.Item2.Length - 1] = default(Quaternion);
 
             _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
             _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+        }
+
+        internal void SetKeys(IReadOnlyDictionary<Single, (SparseWeight8, SparseWeight8, SparseWeight8)> keyframes, int expandedCount)
+        {
+            var kv = _Split(keyframes);
+
+            kv.Item2[0] = default(SparseWeight8);
+            kv.Item2[kv.Item2.Length - 1] = default(SparseWeight8);
+
+            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Item2, expandedCount).LogicalIndex;
         }
 
         IEnumerable<(Single, Vector3)> IAnimationSampler<Vector3>.GetLinearKeys(bool isolateMemory)

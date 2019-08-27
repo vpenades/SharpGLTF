@@ -86,7 +86,7 @@ namespace SharpGLTF.Geometry
                 p.CopyToMesh(dstMesh, materialEvaluator);
             }
 
-            // TODO: set default morph target weights.
+            dstMesh.SetMorphWeights(default);
 
             return dstMesh;
         }

@@ -36,6 +36,19 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        public void SetMorphWeights(Transforms.SparseWeight8 weights)
+        {
+            int count = _primitives.Max(item => item.MorphTargetsCount);
+
+            while (_weights.Count > count) _weights.RemoveAt(_weights.Count - 1);
+            while (_weights.Count < count) _weights.Add(0);
+
+            foreach (var kw in weights.GetIndexedWeights())
+            {
+                _weights[kw.Item1] = kw.Item2;
+            }
+        }
+
         /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {

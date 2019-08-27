@@ -34,11 +34,15 @@ namespace SharpGLTF.Scenes
 
         private Object _Content;
 
+        private Animations.AnimatableProperty<Transforms.SparseWeight8> _Morphings; // maybe it should be moved to transformers!!
+
         #endregion
 
         #region properties
 
         public Object Content => _Content;
+
+        public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
 
         #endregion
 
@@ -47,6 +51,22 @@ namespace SharpGLTF.Scenes
         public virtual MESHBUILDER GetGeometryAsset() { return (_Content as IRenderableContent)?.GetGeometryAsset(); }
 
         public abstract NodeBuilder GetArmatureAsset();
+
+        public Animations.AnimatableProperty<Transforms.SparseWeight8> UseMorphing()
+        {
+            if (_Morphings == null)
+            {
+                _Morphings = new Animations.AnimatableProperty<Transforms.SparseWeight8>();
+                _Morphings.Value = default;
+            }
+
+            return _Morphings;
+        }
+
+        public Animations.CurveBuilder<Transforms.SparseWeight8> UseMorphing(string animationTrack)
+        {
+            return UseMorphing().UseTrackBuilder(animationTrack);
+        }
 
         #endregion
     }

@@ -51,6 +51,25 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        public static Node WithMorphingAnimation(this Node node, string animationName, Animations.ICurveSampler<Transforms.SparseWeight8> sampler)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNull(node.MorphWeights, nameof(node.MorphWeights), "Set node.MorphWeights before setting morphing animation");
+            Guard.MustBeGreaterThanOrEqualTo(node.MorphWeights.Count, 0, nameof(node.MorphWeights));
+
+            if (sampler is Animations.IConvertibleCurve<Transforms.SparseWeight8> curve)
+            {
+                var animation = node.LogicalParent.UseAnimation(animationName);
+
+                var degree = curve.MaxDegree;
+                if (degree == 0) animation.CreateMorphChannel(node, curve.ToStepCurve(), node.MorphWeights.Count, false);
+                if (degree == 1) animation.CreateMorphChannel(node, curve.ToLinearCurve(), node.MorphWeights.Count, true);
+                if (degree == 3) animation.CreateMorphChannel(node, curve.ToSplineCurve(), node.MorphWeights.Count);
+            }
+
+            return node;
+        }
+
         public static Node WithRotationAnimation(this Node node, string animationName, Animations.ICurveSampler<Quaternion> sampler)
         {
             Guard.NotNull(node, nameof(node));

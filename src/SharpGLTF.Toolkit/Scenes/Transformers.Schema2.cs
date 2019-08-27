@@ -16,10 +16,11 @@ namespace SharpGLTF.Scenes
         {
             if (!(Content is SCHEMA2NODE schema2Target)) return;
 
-            var node = dstScene.CreateNode();
-            node.LocalMatrix = _WorldTransform;
+            var dstNode = dstScene.CreateNode();
 
-            schema2Target.Setup(node, context);
+            dstNode.LocalMatrix = _WorldTransform;
+
+            schema2Target.Setup(dstNode, context);
         }
     }
 
@@ -29,11 +30,11 @@ namespace SharpGLTF.Scenes
         {
             if (!(Content is SCHEMA2NODE schema2Target)) return;
 
-            var node = context.GetNode(_Node);
+            var dstNode = context.GetNode(_Node);
 
-            if (node == null) dstScene.CreateNode();
+            schema2Target.Setup(dstNode, context);
 
-            schema2Target.Setup(node, context);
+            context.SetMorphAnimation(dstNode, this.Morphings);
         }
     }
 
@@ -82,6 +83,8 @@ namespace SharpGLTF.Scenes
             // skinnedMeshNode.Skin.Skeleton = context.GetNode(root);
 
             schema2Target.Setup(skinnedMeshNode, context);
+
+            context.SetMorphAnimation(skinnedMeshNode, this.Morphings);
         }
     }
 }

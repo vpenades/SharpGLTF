@@ -116,7 +116,7 @@ namespace SharpGLTF.Scenes
                 // Copies all the animations to the target node.
                 if (srcNode.Scale != null) foreach (var t in srcNode.Scale.Tracks) dstNode.WithScaleAnimation(t.Key, t.Value);
                 if (srcNode.Rotation != null) foreach (var t in srcNode.Rotation.Tracks) dstNode.WithRotationAnimation(t.Key, t.Value);
-                if (srcNode.Translation != null) foreach (var t in srcNode.Translation.Tracks) dstNode.WithTranslationAnimation(t.Key, t.Value);
+                if (srcNode.Translation != null) foreach (var t in srcNode.Translation.Tracks) dstNode.WithTranslationAnimation(t.Key, t.Value);                
             }
             else
             {
@@ -124,6 +124,16 @@ namespace SharpGLTF.Scenes
             }
 
             foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode, c);
+        }
+
+        public void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
+        {
+            if (animation == null) return;
+
+            var dstMesh = dstNode.Mesh;
+            dstMesh.SetMorphWeights(default);
+
+            foreach (var t in animation.Tracks) dstNode.WithMorphingAnimation(t.Key, t.Value);
         }
 
         #endregion
@@ -174,7 +184,7 @@ namespace SharpGLTF.Scenes
             foreach (var srcArmature in srcScene.VisualChildren)
             {
                 var dstArmature = new NodeBuilder();
-                CopyToNodeBuilder(srcArmature, dstArmature, dstNodes);
+                CopyToNodeBuilder(dstArmature, srcArmature, dstNodes);
             }
 
             // TODO: we must also process the armatures of every skin, in case the joints are outside the scene.
@@ -212,7 +222,9 @@ namespace SharpGLTF.Scenes
                 if (srcInstance.Skin == null)
                 {
                     var dstNode = dstNodes[srcInstance];
-                    dstScene.AddMesh(dstMesh, dstNode);
+                    var dstInst = dstScene.AddMesh(dstMesh, dstNode);
+
+                    CopyMorphingAnimation(dstInst, srcInstance);
                 }
                 else
                 {
@@ -224,7 +236,9 @@ namespace SharpGLTF.Scenes
                         joints[i] = (dstNodes[j.Item1], j.Item2);
                     }
 
-                    dstScene.AddSkinnedMesh(dstMesh, joints);
+                    var dstInst = dstScene.AddSkinnedMesh(dstMesh, joints);
+
+                    CopyMorphingAnimation(dstInst, srcInstance);
                 }
             }
         }
@@ -250,7 +264,7 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private static void CopyToNodeBuilder(Node srcNode, NodeBuilder dstNode, IDictionary<Node, NodeBuilder> nodeMapping)
+        private static void CopyToNodeBuilder(NodeBuilder dstNode, Node srcNode, IDictionary<Node, NodeBuilder> nodeMapping)
         {
             Guard.NotNull(srcNode, nameof(srcNode));
             Guard.NotNull(dstNode, nameof(dstNode));
@@ -258,6 +272,21 @@ namespace SharpGLTF.Scenes
             dstNode.Name = srcNode.Name;
             dstNode.LocalTransform = srcNode.LocalTransform;
 
+            CopyTransformAnimation(dstNode, srcNode);
+
+            if (nodeMapping == null) return;
+
+            nodeMapping[srcNode] = dstNode;
+
+            foreach (var srcChild in srcNode.VisualChildren)
+            {
+                var dstChild = dstNode.CreateNode();
+                CopyToNodeBuilder(dstChild, srcChild, nodeMapping);
+            }
+        }
+
+        private static void CopyTransformAnimation(NodeBuilder dstNode, Node srcNode)
+        {
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
                 var name = anim.Name;
@@ -272,15 +301,17 @@ namespace SharpGLTF.Scenes
                 var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler();
                 if (traAnim != null) dstNode.UseTranslation(name).SetCurve(traAnim);
             }
+        }
 
-            if (nodeMapping == null) return;
-
-            nodeMapping[srcNode] = dstNode;
-
-            foreach (var srcChild in srcNode.VisualChildren)
+        private static void CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
+        {
+            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
-                var dstChild = dstNode.CreateNode();
-                CopyToNodeBuilder(srcChild, dstChild, nodeMapping);
+                var name = anim.Name;
+                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler();
+                if (mrpAnim != null) dstInst.Content.UseMorphing(name).SetCurve(mrpAnim);
             }
         }
 
