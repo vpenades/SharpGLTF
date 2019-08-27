@@ -3,7 +3,7 @@
 </p>
 
 ![GitHub](https://img.shields.io/github/license/vpenades/SharpGLTF)
-![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Core)
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Core)](https://www.nuget.org/packages?q=sharpgltf)
 ---
 
 ### Overview
