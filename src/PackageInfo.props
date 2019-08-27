@@ -2,23 +2,35 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
+    
     <Authors>Vicente Penades</Authors>
     <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>
-    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
+    
     <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    
     <PackageTags>C# glTF 3D</PackageTags>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
     <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
+    
+    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    
   </PropertyGroup>
+  
+  <!-- https://github.com/NuGet/Home/wiki/Packaging-License-within-the-nupkg#project-properties -->
 
   <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
-
+  
+  <!--
+  <PropertyGroup>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+  </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MsBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="" />
+    <None Include="$(MsBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="$(PackageLicenseFile)" />
   </ItemGroup>
+  -->
 	
 </Project>
