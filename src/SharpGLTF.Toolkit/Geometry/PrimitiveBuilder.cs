@@ -13,6 +13,11 @@ namespace SharpGLTF.Geometry
     public interface IPrimitiveReader<TMaterial>
     {
         /// <summary>
+        /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
+        /// </summary>
+        Type VertexType { get; }
+
+        /// <summary>
         /// Gets the current <typeparamref name="TMaterial"/> instance used by this primitive.
         /// </summary>
         TMaterial Material { get; }
@@ -59,7 +64,7 @@ namespace SharpGLTF.Geometry
     public interface IPrimitiveBuilder
     {
         /// <summary>
-        /// Gets the type of vertex used by this <see cref="IVertexBuilder"/>.
+        /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
         /// </summary>
         Type VertexType { get; }
 

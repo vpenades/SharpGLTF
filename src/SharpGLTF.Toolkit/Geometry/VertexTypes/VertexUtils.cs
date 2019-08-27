@@ -223,8 +223,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             // create a buffer
             var vbuffer = new ArraySegment<byte>(new Byte[attribute.PaddedByteLength * vertices.Count]);
 
-            // fill the buffer with the vertex blocks.
-
+            // fill the buffer with the vertex attributes.
             var accessor = new MemoryAccessor(vbuffer, attribute);
 
             accessor.FillAccessor(vertices);
@@ -244,8 +243,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             int byteStride = attributes[0].ByteStride;
             var vbuffer = new ArraySegment<byte>(new Byte[byteStride * vertices.Count]);
 
-            // fill the buffer with the vertex blocks.
-
+            // fill the buffer with the vertex attributes.
             var accessors = MemoryAccessInfo
                 .Slice(attributes, 0, vertices.Count)
                 .Select(item => new MemoryAccessor(vbuffer, item))
@@ -274,23 +272,19 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (indices == null || indices.Count == 0) return null;
 
-            // determine appropiate encoding
-            // var maxIndex = indices.Max();
-            // var encoding = maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
-
             var attribute = new MemoryAccessInfo("INDEX", 0, indices.Count, 0, Schema2.DimensionType.SCALAR, encoding);
 
             // create buffer
             var ibytes = new Byte[encoding.ByteLength() * indices.Count];
             var ibuffer = new ArraySegment<byte>(ibytes);
 
+            // fill the buffer with indices.
             var accessor = new MemoryAccessor(ibuffer, attribute.Slice(0, indices.Count));
 
             accessor.AsIntegerArray().Fill(indices);
 
             return accessor;
         }
-
 
         public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount)
         {

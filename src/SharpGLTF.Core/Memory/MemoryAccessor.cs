@@ -11,7 +11,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Defines the pattern in which a <see cref="ArraySegment{Byte}"/> is accessed and decoded to meaningful values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{Name} {Dimensions}.{Encoding}.{Normalized} {ByteStride}   {ByteOffset} [{ItemsCount}]")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct MemoryAccessInfo
     {
         #region constructor
@@ -88,6 +88,16 @@ namespace SharpGLTF.Memory
         #endregion
 
         #region API
+
+        internal String _GetDebuggerDisplay()
+        {
+            var txt = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name);
+            if (ByteOffset != 0) txt += $" Offs:{ByteOffset}ᴮʸᵗᵉˢ";
+            if (ByteStride != 0) txt += $" Strd:{ByteStride}ᴮʸᵗᵉˢ";
+            txt += $" {Encoding.ToDebugString(Dimensions, Normalized)}[{ItemsCount}]";
+
+            return txt;
+        }
 
         /// <summary>
         /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.
@@ -193,6 +203,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps a <see cref="ArraySegment{Byte}"/> decoding it and exposing its content as arrays of different types.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{Attribute._GetDebuggerDisplay(),nq}")]
     public sealed class MemoryAccessor
     {
         #region constructor
@@ -273,7 +284,10 @@ namespace SharpGLTF.Memory
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private MemoryAccessInfo _Attribute;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private ArraySegment<Byte> _Data;
 
         #endregion

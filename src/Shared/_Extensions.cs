@@ -406,6 +406,36 @@ namespace SharpGLTF
 
         #region vertex & index accessors
 
+        public static String ToDebugString(this EncodingType encoding, DimensionType dimensions, bool normalized)
+        {
+            var txt = string.Empty;
+
+            switch (encoding)
+            {
+                case EncodingType.BYTE: txt += "SByte"; break;
+                case EncodingType.FLOAT: txt += "Float"; break;
+                case EncodingType.SHORT: txt += "SShort"; break;
+                case EncodingType.UNSIGNED_BYTE: txt += "UByte"; break;
+                case EncodingType.UNSIGNED_INT: txt += "UInt"; break;
+                case EncodingType.UNSIGNED_SHORT: txt += "UShort"; break;
+            }
+
+            switch (dimensions)
+            {
+                case DimensionType.SCALAR: break;
+                case DimensionType.VEC2: txt += "2"; break;
+                case DimensionType.VEC3: txt += "3"; break;
+                case DimensionType.VEC4: txt += "4"; break;
+                case DimensionType.MAT2: txt += "2x2"; break;
+                case DimensionType.MAT3: txt += "3x3"; break;
+                case DimensionType.MAT4: txt += "4x4"; break;
+            }
+
+            if (normalized) txt = "Norm" + txt;
+
+            return txt;
+        }
+
         public static int ByteLength(this IndexEncodingType encoding)
         {
             switch (encoding)

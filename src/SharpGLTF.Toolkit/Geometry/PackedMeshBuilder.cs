@@ -16,7 +16,7 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshesColumnVertices(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> CreatePackedMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders, bool prefferStrided)
         {
             try
             {
@@ -27,11 +27,7 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var vertexBuffers = new Dictionary<string, PackedBuffer>();
-            var indexBuffer = new PackedBuffer();
             var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
-
-            var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
 
             foreach (var srcMesh in meshBuilders)
             {
@@ -41,83 +37,20 @@ namespace SharpGLTF.Geometry
                 {
                     if (srcPrim.Vertices.Count == 0) continue;
 
-                    var attributeNames = VertexTypes.VertexUtils
-                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count)
-                        .Select(item => item.Name)
-                        .ToList();
+                    var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
-                    var vAccessors = new List<Memory.MemoryAccessor>();
+                    bool useStrided = prefferStrided;
+                    if (srcPrim.MorphTargets.TargetsCount > 0) useStrided = false;
 
-                    foreach (var an in attributeNames)
-                    {
-                        var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, an);
-                        if (vAccessor == null) continue;
+                    if (useStrided) dstPrim.SetStridedVertices(srcPrim);
+                    else dstPrim.SetStreamedVertices(srcPrim);
 
-                        vAccessors.Add(vAccessor);
-
-                        if (!vertexBuffers.TryGetValue(an, out PackedBuffer packed))
-                        {
-                            vertexBuffers[an] = packed = new PackedBuffer();
-                        }
-
-                        packed.AddAccessors(vAccessor);
-                    }
-
-                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), indexEncoding);
-                    if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
-
-                    dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors.ToArray(), iAccessor);
+                    dstPrim.SetIndices(srcPrim, indexEncoding);
+                    dstPrim.SetMorphTargets(srcPrim);
                 }
 
-                dstMeshes.Add(dstMesh);
+                yield return dstMesh;
             }
-
-            foreach (var vb in vertexBuffers.Values) vb.MergeBuffers();
-            indexBuffer.MergeBuffers();
-
-            return dstMeshes;
-        }
-
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshesRowVertices(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
-        {
-            try
-            {
-                foreach (var m in meshBuilders) m.Validate();
-            }
-            catch (Exception ex)
-            {
-                throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
-            }
-
-            var vertexBuffer = new PackedBuffer();
-            var indexBuffer = new PackedBuffer();
-            var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
-
-            var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
-
-            foreach (var srcMesh in meshBuilders)
-            {
-                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name);
-
-                foreach (var srcPrim in srcMesh.Primitives)
-                {
-                    var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices);
-                    if (vAccessors == null) continue;
-                    vertexBuffer.AddAccessors(vAccessors);
-
-                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), indexEncoding);
-                    if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
-
-                    dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors, iAccessor);
-                }
-
-                dstMeshes.Add(dstMesh);
-            }
-
-            vertexBuffer.MergeBuffers();
-            indexBuffer.MergeBuffers();
-
-            return dstMeshes;
         }
 
         private PackedMeshBuilder(string name) { _MeshName = name; }
@@ -134,10 +67,12 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void AddPrimitive(TMaterial material, int primitiveVertexCount, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
+        public PackedPrimitiveBuilder<TMaterial> AddPrimitive(TMaterial material, int primitiveVertexCount)
         {
-            var p = new PackedPrimitiveBuilder<TMaterial>(material, primitiveVertexCount, vrtAccessors, idxAccessor);
+            var p = new PackedPrimitiveBuilder<TMaterial>(material, primitiveVertexCount);
             _Primitives.Add(p);
+
+            return p;
         }
 
         public Mesh CreateSchema2Mesh(ModelRoot root, Func<TMaterial, Material> materialEvaluator)
@@ -151,67 +86,14 @@ namespace SharpGLTF.Geometry
                 p.CopyToMesh(dstMesh, materialEvaluator);
             }
 
+            // TODO: set default morph target weights.
+
             return dstMesh;
         }
 
-        #endregion
-    }
-
-    class PackedPrimitiveBuilder<TMaterial>
-    {
-        #region lifecycle
-
-        internal PackedPrimitiveBuilder(TMaterial material, int primitiveVertexCount, Memory.MemoryAccessor[] vrtAccessors, Memory.MemoryAccessor idxAccessor)
+        public static void MergeBuffers(IEnumerable<PackedMeshBuilder<TMaterial>> meshes)
         {
-            Guard.MustBeBetweenOrEqualTo(primitiveVertexCount, 1, 3, nameof(primitiveVertexCount));
-
-            Guard.NotNull(vrtAccessors, nameof(vrtAccessors));
-
-            if (primitiveVertexCount == 1) Guard.MustBeNull(idxAccessor, nameof(idxAccessor));
-            else                           Guard.NotNull(idxAccessor, nameof(idxAccessor));
-
-            _Material = material;
-            _VerticesPerPrimitive = primitiveVertexCount;
-            _VertexAccessors = vrtAccessors;
-            _IndexAccessors = idxAccessor; // indices can be null for points
-        }
-
-        #endregion
-
-        #region data
-
-        private readonly TMaterial _Material;
-        private readonly int _VerticesPerPrimitive;
-
-        private readonly Memory.MemoryAccessor[] _VertexAccessors;
-
-        private readonly Memory.MemoryAccessor _IndexAccessors;
-
-        #endregion
-
-        #region API
-
-        internal void CopyToMesh(Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
-        {
-            if (_VerticesPerPrimitive < 1 || _VerticesPerPrimitive > 3) return;
-
-            if (_VerticesPerPrimitive == 1)
-            {
-                dstMesh.CreatePrimitive()
-                        .WithMaterial(materialEvaluator(_Material))
-                        .WithVertexAccessors(_VertexAccessors)
-                        .WithIndicesAutomatic(PrimitiveType.POINTS);
-
-                return;
-            }
-
-            var pt = PrimitiveType.LINES;
-            if (_VerticesPerPrimitive == 3) pt = PrimitiveType.TRIANGLES;
-
-            dstMesh.CreatePrimitive()
-                        .WithMaterial(materialEvaluator(_Material))
-                        .WithVertexAccessors(_VertexAccessors)
-                        .WithIndicesAccessor(pt, _IndexAccessors);
+            PackedPrimitiveBuilder<TMaterial>.MergeBuffers(meshes.SelectMany(m => m._Primitives));
         }
 
         #endregion

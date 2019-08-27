@@ -23,6 +23,18 @@ namespace SharpGLTF.Geometry
 
     static class MeshBuilderToolkit
     {
+        public static IReadOnlyList<IVertexBuilder> GetMorphTargetVertices(this IMorphTargetReader morphTarget, int targetIndex, int vertexCount)
+        {
+            var c = new IVertexBuilder[vertexCount];
+
+            for (int i = 0; i < vertexCount; ++i)
+            {
+                c[i] = morphTarget.GetVertexDisplacement(targetIndex, i);
+            }
+
+            return c;
+        }
+
         public static Schema2.EncodingType GetOptimalIndexEncoding<TMaterial>(this IEnumerable<IMeshBuilder<TMaterial>> meshes)
         {
             var indices = meshes

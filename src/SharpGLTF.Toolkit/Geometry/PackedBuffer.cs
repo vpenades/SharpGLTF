@@ -24,6 +24,8 @@ namespace SharpGLTF.Geometry
         {
             foreach (var a in accessors)
             {
+                if (a == null) continue;
+
                 // ensure that all accessors have the same byte stride
                 if (this.ByteStride.HasValue)
                 {

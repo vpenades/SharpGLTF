@@ -6,7 +6,8 @@ using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferDebugProxy))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferViewDebugProxy))]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public sealed partial class BufferView
     {
         #region lifecycle
@@ -72,6 +73,24 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
+
+        internal string _GetDebuggerDisplay()
+        {
+            var path = string.Empty;
+
+            path = $"Buffer[{this._buffer}ᴵᵈˣ] ⇨";
+
+            if (this.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) path += " VertexBuffer";
+            else if (this.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER) path += " IndexBuffer";
+            else path += " BufferView";
+
+            path += $"[{this.LogicalIndex}ᴵᵈˣ]";
+            path += $"[{this._byteLength}ᴮʸᵗᵉˢ]";
+
+            if (ByteStride > 0) path += $" Stride:{ByteStride}ᴮʸᵗᵉˢ";
+
+            return path;
+        }
 
         /// <summary>
         /// Finds all the accessors using this BufferView

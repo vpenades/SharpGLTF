@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
 {
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
-    [System.Diagnostics.DebuggerDisplay("Accessor[{LogicalIndex}] BufferView[{SourceBufferView.LogicalIndex}][{ByteOffset}...] => 0 => {Dimensions}x{Encoding}x{Normalized} => [{Count}]")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._AccessorDebugProxy))]
     public sealed partial class Accessor
     {
@@ -84,6 +84,26 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
+
+        internal string _GetDebuggerDisplay()
+        {
+            var path = string.Empty;
+
+            var bv = SourceBufferView;
+
+            if (bv.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) path += "VertexBuffer";
+            else if (bv.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER) path += "IndexBuffer";
+            else path += "BufferView";
+            path += $"[{bv.LogicalIndex}ᴵᵈˣ] ⇨";
+
+            path += $" Accessor[{LogicalIndex}ᴵᵈˣ] Offset:{ByteOffset}ᴮʸᵗᵉˢ ⇨";
+
+            path += $" {Encoding.ToDebugString(Dimensions, Normalized)}[{Count}ᴵᵗᵉᵐˢ]";
+
+            if (IsSparse) path += " SPARSE";
+
+            return path;
+        }
 
         internal MemoryAccessor _GetMemoryAccessor()
         {

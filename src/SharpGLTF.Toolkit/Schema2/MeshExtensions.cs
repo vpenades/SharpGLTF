@@ -79,21 +79,11 @@ namespace SharpGLTF.Schema2
 
             // create Schema2.Mesh collections for every gathered group.
 
-            List<PackedMeshBuilder<TMaterial>> srcMeshes = null;
+            var srcMeshes = PackedMeshBuilder<TMaterial>
+                .CreatePackedMeshes(meshBuilders, strided)
+                .ToList();
 
-            if (strided)
-            {
-                var meshGroups = meshBuilders.GroupBy(item => item.GetType());
-
-                srcMeshes = meshGroups
-                    .SelectMany(grp => PackedMeshBuilder<TMaterial>.PackMeshesRowVertices(grp.ToArray()))
-                    .ToList();
-            }
-            else
-            {
-                srcMeshes = PackedMeshBuilder<TMaterial>.PackMeshesColumnVertices(meshBuilders)
-                    .ToList();
-            }
+            PackedMeshBuilder<TMaterial>.MergeBuffers(srcMeshes);
 
             // create schema2 meshes
 
@@ -312,6 +302,21 @@ namespace SharpGLTF.Schema2
 
             primitive.DrawPrimitiveType = primitiveType;
             primitive.SetIndexAccessor(accessor);
+
+            return primitive;
+        }
+
+        public static MeshPrimitive WithMorphTargetAccessors(this MeshPrimitive primitive, int targetIndex, IEnumerable<Memory.MemoryAccessor> memAccessors)
+        {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.MustBeGreaterThanOrEqualTo(targetIndex, 0, nameof(targetIndex));
+            Guard.NotNull(memAccessors, nameof(memAccessors));
+
+            var root = primitive.LogicalParent.LogicalParent;
+
+            var accessors = memAccessors.ToDictionary(item => item.Attribute.Name, item => root.CreateVertexAccessor(item));
+
+            primitive.SetMorphTargetAccessors(targetIndex, accessors);
 
             return primitive;
         }

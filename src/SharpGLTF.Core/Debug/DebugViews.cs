@@ -29,9 +29,9 @@ namespace SharpGLTF.Debug
         }
     }
 
-    internal sealed class _BufferDebugProxy
+    internal sealed class _BufferViewDebugProxy
     {
-        public _BufferDebugProxy(Schema2.BufferView value) { _Value = value; }
+        public _BufferViewDebugProxy(Schema2.BufferView value) { _Value = value; }
 
         public int LogicalIndex => _Value.LogicalParent.LogicalBufferViews.IndexOfReference(_Value);
 

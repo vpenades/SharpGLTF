@@ -448,52 +448,57 @@ namespace SharpGLTF.Scenes
                 .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.Contains(path));
 
-            var modelSrc = Schema2.ModelRoot.Load(path);
-            Assert.NotNull(modelSrc);
+            var srcModel = Schema2.ModelRoot.Load(path);
+            Assert.NotNull(srcModel);
 
             // perform roundtrip
 
-            var sceneSrc = Schema2.Schema2Toolkit.ToSceneBuilder(modelSrc.DefaultScene);            
+            var srcScene = Schema2Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
 
-            // var cube = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault(), 1, 0.01f, 1);
-            // scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), Matrix4x4.Identity);
+            var rowModel = srcScene.ToSchema2();
+            var colModel = srcScene.ToSchema2(false);
 
-            var modelBis = sceneSrc.ToSchema2();
-
-            var sceneBis = Schema2.Schema2Toolkit.ToSceneBuilder(modelBis.DefaultScene);
+            var rowScene = Schema2Toolkit.ToSceneBuilder(rowModel.DefaultScene);
+            var colScene = Schema2Toolkit.ToSceneBuilder(colModel.DefaultScene);
 
             // compare files
 
-            var srcTris = modelSrc.DefaultScene.EvaluateTriangles().ToList();
-            var bisTris = modelBis.DefaultScene.EvaluateTriangles().ToList();
+            var srcTris = srcModel.DefaultScene.EvaluateTriangles().ToList();
+            var rowTris = rowModel.DefaultScene.EvaluateTriangles().ToList();
+            var colTris = colModel.DefaultScene.EvaluateTriangles().ToList();
 
-            Assert.AreEqual(srcTris.Count, bisTris.Count);
+            Assert.AreEqual(srcTris.Count, rowTris.Count);
+            Assert.AreEqual(srcTris.Count, colTris.Count);
 
-            var srcRep = Reporting.ModelReport.CreateReportFrom(modelSrc);
-            var bisRep = Reporting.ModelReport.CreateReportFrom(modelBis);
+            var srcRep = Reporting.ModelReport.CreateReportFrom(srcModel);
+            var rowRep = Reporting.ModelReport.CreateReportFrom(rowModel);
+            var colRep = Reporting.ModelReport.CreateReportFrom(colModel);
 
-            Assert.AreEqual(srcRep.NumTriangles, bisRep.NumTriangles);
-            NumericsAssert.AreEqual(srcRep.Bounds.Item1, bisRep.Bounds.Item1, 0.0001f);
-            NumericsAssert.AreEqual(srcRep.Bounds.Item2, bisRep.Bounds.Item2, 0.0001f);
+            Assert.AreEqual(srcRep.NumTriangles, rowRep.NumTriangles);
+            NumericsAssert.AreEqual(srcRep.Bounds.Item1, rowRep.Bounds.Item1, 0.0001f);
+            NumericsAssert.AreEqual(srcRep.Bounds.Item2, rowRep.Bounds.Item2, 0.0001f);
 
             // save file
 
             path = System.IO.Path.GetFileNameWithoutExtension(path);
-            modelSrc.AttachToCurrentTest(path +"_src" + ".glb");
-            modelBis.AttachToCurrentTest(path +"_bis" + ".glb");
+            srcModel.AttachToCurrentTest(path +"_src" + ".glb");
+            rowModel.AttachToCurrentTest(path +"_row" + ".glb");
+            colModel.AttachToCurrentTest(path + "_col" + ".glb");
 
-            modelSrc.AttachToCurrentTest(path + "_src" + ".gltf");
-            modelBis.AttachToCurrentTest(path + "_bis" + ".gltf");
+            srcModel.AttachToCurrentTest(path + "_src" + ".gltf");
+            rowModel.AttachToCurrentTest(path + "_row" + ".gltf");
+            colModel.AttachToCurrentTest(path + "_col" + ".gltf");
 
-            modelSrc.AttachToCurrentTest(path + "_src" + ".obj");
-            modelBis.AttachToCurrentTest(path + "_bis" + ".obj");
+            srcModel.AttachToCurrentTest(path + "_src" + ".obj");
+            rowModel.AttachToCurrentTest(path + "_row" + ".obj");
+            colModel.AttachToCurrentTest(path + "_col" + ".obj");
 
-            if (modelSrc.LogicalAnimations.Count > 0)
+            if (srcModel.LogicalAnimations.Count > 0)
             {
-                modelSrc.AttachToCurrentTest(path + "_src_at01" + ".obj", modelSrc.LogicalAnimations[0], 0.1f);
+                srcModel.AttachToCurrentTest(path + "_src_at01" + ".obj", srcModel.LogicalAnimations[0], 0.1f);
 
-                if (modelBis.LogicalAnimations.Count > 0)
-                    modelBis.AttachToCurrentTest(path + "_bis_at01" + ".obj", modelBis.LogicalAnimations[0], 0.1f);
+                if (rowModel.LogicalAnimations.Count > 0)
+                    rowModel.AttachToCurrentTest(path + "_bis_at01" + ".obj", rowModel.LogicalAnimations[0], 0.1f);
             }
         }
 

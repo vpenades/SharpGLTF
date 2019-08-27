@@ -12,7 +12,7 @@ namespace SharpGLTF.Geometry
 
         IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex);
 
-        IVertexGeometry GetVertexDisplacement(int morphTargetIndex, int vertexIndex);
+        IVertexBuilder GetVertexDisplacement(int morphTargetIndex, int vertexIndex);
     }
 
     public class MorphTargetBuilder<TvG> : IMorphTargetReader
@@ -49,9 +49,11 @@ namespace SharpGLTF.Geometry
             return morphTargetIndex < _Targets.Count ? _Targets[morphTargetIndex].Keys : (IReadOnlyCollection<int>)Array.Empty<int>();
         }
 
-        IVertexGeometry IMorphTargetReader.GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
+        IVertexBuilder IMorphTargetReader.GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
         {
-            return _GetVertexDisplacement(morphTargetIndex, vertexIndex);
+            var g = _GetVertexDisplacement(morphTargetIndex, vertexIndex);
+
+            return new VertexBuilder<TvG, VertexEmpty, VertexEmpty>(g);
         }
 
         TvG GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
