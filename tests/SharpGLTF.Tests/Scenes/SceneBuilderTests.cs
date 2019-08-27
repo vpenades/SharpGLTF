@@ -8,6 +8,7 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
+using SharpGLTF.Schema2;
 
 namespace SharpGLTF.Scenes
 {
@@ -452,12 +453,28 @@ namespace SharpGLTF.Scenes
 
             // perform roundtrip
 
-            var scene = Schema2.Schema2Toolkit.ToSceneBuilder(modelSrc.DefaultScene);
+            var sceneSrc = Schema2.Schema2Toolkit.ToSceneBuilder(modelSrc.DefaultScene);            
 
-            var cube = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault(), 1, 0.01f, 1);
-            scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), Matrix4x4.Identity);
+            // var cube = new Cube<MaterialBuilder>(MaterialBuilder.CreateDefault(), 1, 0.01f, 1);
+            // scene.AddMesh(cube.ToMesh(Matrix4x4.Identity), Matrix4x4.Identity);
 
-            var modelBis = scene.ToSchema2();
+            var modelBis = sceneSrc.ToSchema2();
+
+            var sceneBis = Schema2.Schema2Toolkit.ToSceneBuilder(modelBis.DefaultScene);
+
+            // compare files
+
+            var srcTris = modelSrc.DefaultScene.EvaluateTriangles().ToList();
+            var bisTris = modelBis.DefaultScene.EvaluateTriangles().ToList();
+
+            Assert.AreEqual(srcTris.Count, bisTris.Count);
+
+            var srcRep = Reporting.ModelReport.CreateReportFrom(modelSrc);
+            var bisRep = Reporting.ModelReport.CreateReportFrom(modelBis);
+
+            Assert.AreEqual(srcRep.NumTriangles, bisRep.NumTriangles);
+            NumericsAssert.AreEqual(srcRep.Bounds.Item1, bisRep.Bounds.Item1, 0.0001f);
+            NumericsAssert.AreEqual(srcRep.Bounds.Item2, bisRep.Bounds.Item2, 0.0001f);
 
             // save file
 

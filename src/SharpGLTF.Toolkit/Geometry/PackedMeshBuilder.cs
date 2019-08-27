@@ -27,10 +27,9 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var encoding = meshBuilders.GetOptimalIndexEncoding();
-
             var vertexBuffers = new Dictionary<string, PackedBuffer>();
             var indexBuffer = new PackedBuffer();
+            var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
 
             var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
 
@@ -42,9 +41,14 @@ namespace SharpGLTF.Geometry
                 {
                     if (srcPrim.Vertices.Count == 0) continue;
 
+                    var attributeNames = VertexTypes.VertexUtils
+                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count)
+                        .Select(item => item.Name)
+                        .ToList();
+
                     var vAccessors = new List<Memory.MemoryAccessor>();
 
-                    foreach (var an in new[] { "POSITION", "NORMAL" })
+                    foreach (var an in attributeNames)
                     {
                         var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, an);
                         if (vAccessor == null) continue;
@@ -59,7 +63,7 @@ namespace SharpGLTF.Geometry
                         packed.AddAccessors(vAccessor);
                     }
 
-                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), encoding);
+                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), indexEncoding);
                     if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
 
                     dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors.ToArray(), iAccessor);
@@ -68,11 +72,10 @@ namespace SharpGLTF.Geometry
                 dstMeshes.Add(dstMesh);
             }
 
-            // vertexBuffer.MergeBuffers();
+            foreach (var vb in vertexBuffers.Values) vb.MergeBuffers();
             indexBuffer.MergeBuffers();
 
             return dstMeshes;
-
         }
 
         internal static IEnumerable<PackedMeshBuilder<TMaterial>> PackMeshesRowVertices(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders)
@@ -86,10 +89,9 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var encoding = meshBuilders.GetOptimalIndexEncoding();
-
             var vertexBuffer = new PackedBuffer();
             var indexBuffer = new PackedBuffer();
+            var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
 
             var dstMeshes = new List<PackedMeshBuilder<TMaterial>>();
 
@@ -103,7 +105,7 @@ namespace SharpGLTF.Geometry
                     if (vAccessors == null) continue;
                     vertexBuffer.AddAccessors(vAccessors);
 
-                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), encoding);
+                    var iAccessor = VertexTypes.VertexUtils.CreateIndexMemoryAccessor(srcPrim.GetIndices(), indexEncoding);
                     if (iAccessor != null) indexBuffer.AddAccessors(iAccessor);
 
                     dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive, vAccessors, iAccessor);

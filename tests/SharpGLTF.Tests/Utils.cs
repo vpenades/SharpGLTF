@@ -291,6 +291,44 @@ namespace SharpGLTF
 
             return (float)Math.Acos(c);
         }
+
+        public static (Vector3, Vector3) GetBounds(this IEnumerable<Vector3> collection)
+        {
+            var min = new Vector3(float.MaxValue);
+            var max = new Vector3(float.MinValue);
+
+            foreach (var v in collection)
+            {
+                min = Vector3.Min(v, min);
+                max = Vector3.Max(v, max);
+            }
+
+            return (min, max);
+        }
+
+        public static Vector3 GetMin(this IEnumerable<Vector3> collection)
+        {
+            var min = new Vector3(float.MaxValue);            
+
+            foreach (var v in collection)
+            {
+                min = Vector3.Min(v, min);                
+            }
+
+            return min;
+        }
+
+        public static Vector3 GetMax(this IEnumerable<Vector3> collection)
+        {            
+            var max = new Vector3(float.MinValue);
+
+            foreach (var v in collection)
+            {
+                max = Vector3.Max(v, max);
+            }
+
+            return max;
+        }
     }
 
     

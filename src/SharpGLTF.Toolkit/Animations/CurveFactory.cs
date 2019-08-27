@@ -16,7 +16,7 @@ namespace SharpGLTF.Animations
             if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(SPARSE)) return new SparseCurveBuilder() as CurveBuilder<T>;
 
-            throw new ArgumentException($"{nameof(T)} not supported.", nameof(T));
+            throw new InvalidOperationException($"{nameof(T)} not supported.");
         }
 
         public static CurveBuilder<T> CreateCurveBuilder<T>(ICurveSampler<T> curve)
@@ -26,7 +26,7 @@ namespace SharpGLTF.Animations
             if (curve is QuaternionCurveBuilder q4cb) return q4cb.Clone() as CurveBuilder<T>;
             if (curve is SparseCurveBuilder sscb) return sscb.Clone() as CurveBuilder<T>;
 
-            throw new ArgumentException($"{nameof(T)} not supported.", nameof(T));
+            throw new InvalidOperationException($"{nameof(T)} not supported.");
         }
     }
 

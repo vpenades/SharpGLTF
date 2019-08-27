@@ -31,6 +31,10 @@ Finally, in our render call, we render the meshes like this:
 ```c#
 void RenderFrame(Matrix4x4 modelMatrix)
 {
+    modelInstance.SetAnimationFrame("Walking", 2.17f); // example of animating the instance
+
+    modelInstance.SetWorldMatrix("Head", Matrix.LookAt(...) ); // example of manually setting a single node matrix
+
     foreach(var drawable in modelInstance.DrawableReferences)
     {
         var gpuMesh = gpuMeshes[drawable.Item1];

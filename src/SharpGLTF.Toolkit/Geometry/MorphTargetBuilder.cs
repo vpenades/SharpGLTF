@@ -180,7 +180,7 @@ namespace SharpGLTF.Geometry
                 }
             }
         }
-        
+
         #endregion
     }
 }

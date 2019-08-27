@@ -57,6 +57,16 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(materialEvaluator, nameof(materialEvaluator));
             Guard.NotNull(meshBuilders, nameof(meshBuilders));
 
+            return root.CreateMeshes(materialEvaluator, true, meshBuilders);
+        }
+
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial>(this ModelRoot root, Func<TMaterial, Material> materialEvaluator, bool strided, params IMeshBuilder<TMaterial>[] meshBuilders)
+        {
+            Guard.NotNull(root, nameof(root));
+            Guard.NotNull(materialEvaluator, nameof(materialEvaluator));
+            Guard.NotNull(meshBuilders, nameof(meshBuilders));
+            Guard.IsTrue(meshBuilders.Length == meshBuilders.Distinct().Count(), nameof(meshBuilders), "The collection has repeated meshes.");
+
             foreach (var m in meshBuilders) m.Validate();
 
             // create a new material for every unique (byRef) material in the mesh builders.
@@ -67,10 +77,25 @@ namespace SharpGLTF.Schema2
                 .Distinct()
                 .ToDictionary(m => m, m => materialEvaluator(m));
 
-            // creates meshes and primitives using MemoryAccessors using a single, shared vertex and index buffer
-            var srcMeshes = PackedMeshBuilder<TMaterial>
-                .PackMeshesRowVertices(meshBuilders)
-                .ToList();
+            // create Schema2.Mesh collections for every gathered group.
+
+            List<PackedMeshBuilder<TMaterial>> srcMeshes = null;
+
+            if (strided)
+            {
+                var meshGroups = meshBuilders.GroupBy(item => item.GetType());
+
+                srcMeshes = meshGroups
+                    .SelectMany(grp => PackedMeshBuilder<TMaterial>.PackMeshesRowVertices(grp.ToArray()))
+                    .ToList();
+            }
+            else
+            {
+                srcMeshes = PackedMeshBuilder<TMaterial>.PackMeshesColumnVertices(meshBuilders)
+                    .ToList();
+            }
+
+            // create schema2 meshes
 
             var dstMeshes = new List<Mesh>();
 
@@ -718,7 +743,6 @@ namespace SharpGLTF.Schema2
 
                 vmap[srcLine.Item1] = indices.Item1;
                 vmap[srcLine.Item2] = indices.Item2;
-
             }
 
             foreach (var srcTri in srcPrim.GetTriangleIndices())

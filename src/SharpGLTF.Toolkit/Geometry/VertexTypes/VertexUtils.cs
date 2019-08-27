@@ -213,12 +213,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (vertices == null || vertices.Count == 0) return null;
 
             // determine the vertex attributes from the first vertex.
-            var firstVertex = vertices[0];
-
-            var tvg = firstVertex.GetGeometry().GetType();
-            var tvm = firstVertex.GetMaterial().GetType();
-            var tvs = firstVertex.GetSkinning().GetType();
-            var attributes = _GetVertexAttributes(tvg, tvm, tvs, vertices.Count);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count);
 
             var attribute = attributes.FirstOrDefault(item => item.Name == attributeName);
             if (attribute.Name == null) return null;
@@ -243,12 +238,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (vertices == null || vertices.Count == 0) return null;
 
             // determine the vertex attributes from the first vertex.
-            var firstVertex = vertices[0];
-
-            var tvg = firstVertex.GetGeometry().GetType();
-            var tvm = firstVertex.GetMaterial().GetType();
-            var tvs = firstVertex.GetSkinning().GetType();
-            var attributes = _GetVertexAttributes(tvg, tvm, tvs, vertices.Count);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count);
 
             // create a buffer
             int byteStride = attributes[0].ByteStride;
@@ -301,23 +291,28 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        private static MemoryAccessInfo[] _GetVertexAttributes(Type vertexType, Type valuesType, Type jointsType, int itemsCount)
+
+        public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount)
         {
+            var tvg = firstVertex.GetGeometry().GetType();
+            var tvm = firstVertex.GetMaterial().GetType();
+            var tvs = firstVertex.GetSkinning().GetType();
+
             var attributes = new List<MemoryAccessInfo>();
 
-            foreach (var finfo in vertexType.GetFields())
+            foreach (var finfo in tvg.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
             }
 
-            foreach (var finfo in valuesType.GetFields())
+            foreach (var finfo in tvm.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
             }
 
-            foreach (var finfo in jointsType.GetFields())
+            foreach (var finfo in tvs.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
@@ -325,7 +320,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var array = attributes.ToArray();
 
-            MemoryAccessInfo.SetInterleavedInfo(array, 0, itemsCount);
+            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
 
             return array;
         }

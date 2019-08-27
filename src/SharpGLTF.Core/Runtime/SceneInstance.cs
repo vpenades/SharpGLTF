@@ -201,6 +201,20 @@ namespace SharpGLTF.Runtime
 
         #region API
 
+        public void SetLocalMatrix(string name, System.Numerics.Matrix4x4 localMatrix)
+        {
+            var n = LogicalNodes.FirstOrDefault(item => item.Name == name);
+            if (n == null) return;
+            n.LocalMatrix = localMatrix;
+        }
+
+        public void SetWorldMatrix(string name, System.Numerics.Matrix4x4 worldMatrix)
+        {
+            var n = LogicalNodes.FirstOrDefault(item => item.Name == name);
+            if (n == null) return;
+            n.WorldMatrix = worldMatrix;
+        }
+
         public void SetPoseTransforms()
         {
             foreach (var n in _NodeInstances) n.SetPoseTransform();

@@ -33,53 +33,43 @@ namespace SharpGLTF.Scenes
 
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
-            // gather all MaterialBuilder unique instances
+            // gather all unique MeshBuilders
 
-            var materialGroups = srcScene.Instances
+            var srcMeshes = srcScene.Instances
                 .Select(item => item.Content?.GetGeometryAsset())
                 .Where(item => item != null)
+                .Distinct()
+                .ToArray();
+
+            // gather all unique MaterialBuilders
+
+            var materialGroups = srcMeshes
                 .SelectMany(item => item.Primitives)
                 .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
                 .Select(item => item.Material)
-                .Where(item => item != null)
                 .Distinct()
                 .ToList()
                 // group by equal content, to reduce material splitting whenever possible.
                 .GroupBy(item => item, Materials.MaterialBuilder.ContentComparer);
 
+            // create a Schema2.Material for every MaterialBuilder.
+
             foreach (var mg in materialGroups)
             {
                 var val = dstScene.LogicalParent.CreateMaterial(mg.Key);
-
-                foreach (var key in mg)
-                {
-                    _Materials[key] = val;
-                }
+                foreach (var key in mg) _Materials[key] = val;
             }
 
-            // gather all MeshBuilder unique instances
-            // and group them by their vertex attribute layout.
+            // create a Schema2.Mesh for every MeshBuilder.
 
-            var meshGroups = srcScene.Instances
-                .Select(item => item.Content?.GetGeometryAsset())
-                .Where(item => item != null)
-                .Distinct()
-                .ToList()
-                .GroupBy(item => item.GetType());
+            var dstMeshes = dstScene.LogicalParent.CreateMeshes(mat => _Materials[mat], true,  srcMeshes);
 
-            // create Schema2.Mesh collections for every gathered group.
-
-            foreach (var meshGroup in meshGroups)
+            for (int i = 0; i < srcMeshes.Length; ++i)
             {
-                var meshArray = meshGroup.ToArray();
-
-                var meshDst = dstScene.LogicalParent.CreateMeshes(mat => _Materials[mat], meshArray);
-
-                for (int i = 0; i < meshArray.Length; ++i)
-                {
-                    _Meshes[meshArray[i]] = meshDst[i];
-                }
+                _Meshes[srcMeshes[i]] = dstMeshes[i];
             }
+
+            // TODO: here we could check that every dstMesh has been correctly created.
 
             // gather all NodeBuilder unique armatures
 
