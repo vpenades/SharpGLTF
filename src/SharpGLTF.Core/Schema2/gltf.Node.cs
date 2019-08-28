@@ -12,9 +12,50 @@ namespace SharpGLTF.Schema2
         Node CreateNode(string name = null);
     }
 
-    [System.Diagnostics.DebuggerDisplay("Node[{LogicalIndex}] {Name} SkinJoint:{IsSkinJoint} T:{LocalTransform.Translation.X} {LocalTransform.Translation.Y} {LocalTransform.Translation.Z}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public sealed partial class Node : IVisualNodeContainer
     {
+        #region debug
+
+        private string _GetDebuggerDisplay()
+        {
+            var txt = $"Node[{LogicalIndex}ᴵᵈˣ]";
+
+            if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" {this.Name}";
+
+            if (_matrix.HasValue)
+            {
+                if (_matrix.Value != Matrix4x4.Identity)
+                {
+                    var xform = this.LocalTransform;
+                    if (xform.Scale != Vector3.One) txt += $" 𝐒:{xform.Scale}";
+                    if (xform.Rotation != Quaternion.Identity) txt += $" 𝐑:{xform.Rotation}";
+                    if (xform.Translation != Vector3.Zero) txt += $" 𝚻:{xform.Translation}";
+                }
+            }
+            else
+            {
+                if (_scale.HasValue) txt += $" 𝐒:{_scale.Value}";
+                if (_rotation.HasValue) txt += $" 𝐑:{_rotation.Value}";
+                if (_translation.HasValue) txt += $" 𝚻:{_translation.Value}";
+            }
+
+            if (this.Mesh != null)
+            {
+                if (this.Skin != null) txt += $" ⇨ Skin[{this.Skin.LogicalIndex}ᴵᵈˣ]";
+                txt += $" ⇨ Mesh[{this.Mesh.LogicalIndex}ᴵᵈˣ]";
+            }
+
+            if (this.VisualChildren.Any())
+            {
+                txt += $" | Children[{this.VisualChildren.Count()}]";
+            }
+
+            return txt;
+        }
+
+        #endregion
+
         #region constants
 
         private const string _NOTRANSFORMMESSAGE = "Node instances with a Skin must not contain spatial transformations.";

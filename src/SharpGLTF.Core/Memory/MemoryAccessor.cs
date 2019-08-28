@@ -14,6 +14,38 @@ namespace SharpGLTF.Memory
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct MemoryAccessInfo
     {
+        #region debug
+
+        internal static string GetAttributeShortName(string attributeName)
+        {
+            if (attributeName == "POSITION") return "𝐏";
+            if (attributeName == "NORMAL") return "𝚴";
+            if (attributeName == "TANGENT") return "𝚻";
+            if (attributeName == "COLOR_0") return "𝐂₀";
+            if (attributeName == "COLOR_1") return "𝐂₁";
+            if (attributeName == "TEXCOORD_0") return "𝐔𝐕₀";
+            if (attributeName == "TEXCOORD_1") return "𝐔𝐕₁";
+
+            if (attributeName == "JOINTS_0") return "𝐉₀";
+            if (attributeName == "JOINTS_1") return "𝐉₁";
+
+            if (attributeName == "WEIGHTS_0") return "𝐖₀";
+            if (attributeName == "WEIGHTS_1") return "𝐖₁";
+            return attributeName;
+        }
+
+        internal String _GetDebuggerDisplay()
+        {
+            var txt = GetAttributeShortName(Name);
+            if (ByteOffset != 0) txt += $" Offs:{ByteOffset}ᴮʸᵗᵉˢ";
+            if (ByteStride != 0) txt += $" Strd:{ByteStride}ᴮʸᵗᵉˢ";
+            txt += $" {Encoding.ToDebugString(Dimensions, Normalized)}[{ItemsCount}]";
+
+            return txt;
+        }
+
+        #endregion
+
         #region constructor
 
         public static MemoryAccessInfo[] Create(params string[] attributes)
@@ -88,16 +120,6 @@ namespace SharpGLTF.Memory
         #endregion
 
         #region API
-
-        internal String _GetDebuggerDisplay()
-        {
-            var txt = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(Name);
-            if (ByteOffset != 0) txt += $" Offs:{ByteOffset}ᴮʸᵗᵉˢ";
-            if (ByteStride != 0) txt += $" Strd:{ByteStride}ᴮʸᵗᵉˢ";
-            txt += $" {Encoding.ToDebugString(Dimensions, Normalized)}[{ItemsCount}]";
-
-            return txt;
-        }
 
         /// <summary>
         /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.

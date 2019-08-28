@@ -6,9 +6,25 @@ using SharpGLTF.Collections;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerDisplay("Mesh[{LogicalIndex}] {Name}")]
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MeshDebugProxy))]
     public sealed partial class Mesh
     {
+        #region debug
+
+        private String _DebuggerDisplay()
+        {
+            var txt = $"Mesh[{this.LogicalIndex}]";
+
+            if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" {this.Name}";
+
+            txt += $" Primitives[{this.Primitives.Count}]";
+
+            return txt;
+        }
+
+        #endregion
+
         #region lifecycle
 
         internal Mesh()

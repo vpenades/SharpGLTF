@@ -13,7 +13,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Color4[{Count}]")]
     public struct ColorArray : IList<Vector4>, IReadOnlyList<Vector4>
     {
         #region constructors

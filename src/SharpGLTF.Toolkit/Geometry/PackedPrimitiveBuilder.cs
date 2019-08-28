@@ -102,9 +102,10 @@ namespace SharpGLTF.Geometry
                 var nAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(mtv, "NORMAL");
                 if (nAccessor != null) vAccessors.Add(nAccessor);
 
-                // tangets is tricky because for morph targets, it's stored as 3 components, not 4
+                var tAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(mtv, "MORPHTANGENT");
+                if (tAccessor != null) vAccessors.Add(tAccessor);
 
-                AddMorphTarget(pAccessor, nAccessor);
+                AddMorphTarget(pAccessor, nAccessor, tAccessor);
             }
         }
 

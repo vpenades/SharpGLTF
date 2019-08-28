@@ -26,9 +26,15 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐏:{Position}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPosition : IVertexGeometry
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐏:{Position}";
+
+        #endregion
+
         #region constructors
 
         public VertexPosition(Vector3 position)
@@ -100,9 +106,15 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position and a Normal.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐏:{Position} 𝚴:{Normal}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormal : IVertexGeometry
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal}";
+
+        #endregion
+
         #region constructors
 
         public VertexPositionNormal(Vector3 p, Vector3 n)
@@ -182,9 +194,15 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐏:{Position} 𝚴:{Normal} 𝚻:{Tangent}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormalTangent : IVertexGeometry
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal} 𝚻:{Tangent}";
+
+        #endregion
+
         #region constructors
 
         public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
@@ -260,6 +278,62 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    struct VertexPositionNormalTangentDisplacement : IVertexGeometry
+    {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal} 𝚻:{Tangent}";
+
+        #endregion
+
+        #region data
+
+        [VertexAttribute("POSITION")]
+        public Vector3 Position;
+
+        [VertexAttribute("NORMAL")]
+        public Vector3 Normal;
+
+        [VertexAttribute("TANGENT")]
+        public Vector3 Tangent;
+
+        #endregion
+
+        #region API
+
+        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
+
+        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
+
+        void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = new Vector3(tangent.X, tangent.Y, tangent.Z); }
+
+        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        {
+            throw new NotSupportedException();
+        }
+
+        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Vector3 GetPosition() { return this.Position; }
+
+        public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
+
+        public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.Tangent, 0); return true; }
+
+        public void ApplyTransform(Matrix4x4 xform) { throw new NotSupportedException(); }
+
+        public void Validate() { }
 
         #endregion
     }

@@ -219,7 +219,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Single"/> values
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Scalar Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Float[{Count}]")]
     public struct ScalarArray : IList<Single>, IReadOnlyList<Single>
     {
         #region constructors
@@ -330,7 +330,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector2"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Vector2 Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Vector2[{Count}]")]
     public struct Vector2Array : IList<Vector2>, IReadOnlyList<Vector2>
     {
         #region constructors
@@ -449,7 +449,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector3"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Vector3 Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Vector3[{Count}]")]
     public struct Vector3Array : IList<Vector3>, IReadOnlyList<Vector3>
     {
         #region constructors
@@ -569,7 +569,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Vector4 Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Vector4[{Count}]")]
     public struct Vector4Array : IList<Vector4>, IReadOnlyList<Vector4>
     {
         #region constructors
@@ -690,7 +690,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Quaternion"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Quaternion Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Quaternion[{Count}]")]
     public struct QuaternionArray : IList<Quaternion>, IReadOnlyList<Quaternion>
     {
         #region constructors
@@ -777,7 +777,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Matrix4x4"/> values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("MAtrix4x4 Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Matrix4x4[{Count}]")]
     public struct Matrix4x4Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
     {
         #region constructors
@@ -882,7 +882,7 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="float"/> array values.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("MultiArray Accessor {Count}")]
+    [System.Diagnostics.DebuggerDisplay("Float[][{Count}]")]
     public struct MultiArray : IList<Single[]>, IReadOnlyList<Single[]>
     {
         #region constructors

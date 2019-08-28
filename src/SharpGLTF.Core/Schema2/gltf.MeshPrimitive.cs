@@ -6,14 +6,55 @@ using SharpGLTF.Collections;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerDisplay("MeshPrimitive[{LogicalIndex}] {_mode} {_DebuggerDisplay_TryIdentifyContent()}")]
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public sealed partial class MeshPrimitive : IChildOf<Mesh>
     {
         #region debug
 
-        private String _DebuggerDisplay_TryIdentifyContent()
+        private String _DebuggerDisplay()
         {
-            return String.Join(" ", VertexAccessors.Keys);
+            var txt = $" Primitive[{this.LogicalIndex}]";
+
+            return _DebuggerDisplay(txt);
+        }
+
+        internal string _DebuggerDisplay(string txt)
+        {
+            if (this.Material != null)
+            {
+                if (string.IsNullOrWhiteSpace(this.Material.Name)) txt += $" Material[{this.Material.LogicalIndex}]";
+                else txt += $" Material {this.Material.Name}";
+            }
+
+            var vcount = this.VertexAccessors.Values
+                .Select(item => item.Count)
+                .Distinct();
+
+            if (vcount.Count() > 1)
+            {
+                var vAccessors = this.VertexAccessors
+                .Select(item => $"{Memory.MemoryAccessInfo.GetAttributeShortName(item.Key)}={item.Value._GetDebuggerDisplayShort()}")
+                .ToList();
+
+                txt += $" Vrts: {String.Join(" ", vAccessors)} ⚠️Vertex Count mismatch⚠️";
+            }
+            else
+            {
+                string toShort(string name, Accessor accessor)
+                {
+                    name = Memory.MemoryAccessInfo.GetAttributeShortName(name);
+                    var t = accessor.Encoding.ToDebugString(accessor.Dimensions, accessor.Normalized);
+                    return $"{name}.{t}";
+                }
+
+                var vAccessors = this.VertexAccessors
+                    .Select(item => toShort(item.Key, item.Value))
+                    .ToList();
+
+                txt += $" Vrts: ( {String.Join(" ", vAccessors)} )[{vcount.First()}]";
+            }
+
+            return txt;
         }
 
         #endregion

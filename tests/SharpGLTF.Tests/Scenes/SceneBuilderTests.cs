@@ -430,19 +430,21 @@ namespace SharpGLTF.Scenes
         }
 
 
-        [TestCase("Avocado.glb")]
-        [TestCase("GearboxAssy.glb")]
-        [TestCase("RiggedFigure.glb")]
-        [TestCase("RiggedSimple.glb")]
-        [TestCase("BoxAnimated.glb")]
         [TestCase("AnimatedMorphCube.glb")]
         [TestCase("AnimatedMorphSphere.glb")]
-        [TestCase("CesiumMan.glb")]
-        [TestCase("Monster.glb")]
+        [TestCase("Avocado.glb")]
+        [TestCase("BoxAnimated.glb")]
         [TestCase("BrainStem.glb")]
+        [TestCase("CesiumMan.glb")]
+        [TestCase("GearboxAssy.glb")]
+        [TestCase("Monster.glb")]
+        [TestCase("OrientationTest.glb")]
+        [TestCase("RiggedFigure.glb")]
+        [TestCase("RiggedSimple.glb")]
         public void TestRoundTrip(string path)
         {
             TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             path = TestFiles
                 .GetSampleModelsPaths()
@@ -481,8 +483,8 @@ namespace SharpGLTF.Scenes
             // save file
 
             path = System.IO.Path.GetFileNameWithoutExtension(path);
-            srcModel.AttachToCurrentTest(path +"_src" + ".glb");
-            rowModel.AttachToCurrentTest(path +"_row" + ".glb");
+            srcModel.AttachToCurrentTest(path + "_src" + ".glb");
+            rowModel.AttachToCurrentTest(path + "_row" + ".glb");
             colModel.AttachToCurrentTest(path + "_col" + ".glb");
 
             srcModel.AttachToCurrentTest(path + "_src" + ".gltf");
@@ -498,7 +500,7 @@ namespace SharpGLTF.Scenes
                 srcModel.AttachToCurrentTest(path + "_src_at01" + ".obj", srcModel.LogicalAnimations[0], 0.1f);
 
                 if (rowModel.LogicalAnimations.Count > 0)
-                    rowModel.AttachToCurrentTest(path + "_bis_at01" + ".obj", rowModel.LogicalAnimations[0], 0.1f);
+                    rowModel.AttachToCurrentTest(path + "_row_at01" + ".obj", rowModel.LogicalAnimations[0], 0.1f);
             }
         }
 

@@ -30,13 +30,13 @@ namespace SharpGLTF.Transforms
         {
             if (matrix.HasValue)
             {
-                Matrix4x4.Decompose(matrix.Value, out Scale, out Rotation, out Translation);
+                Matrix4x4.Decompose(matrix.Value, out this.Scale, out this.Rotation, out this.Translation);
             }
             else
             {
-                Rotation = rotation ?? Quaternion.Identity;
-                Scale = scale ?? Vector3.One;
-                Translation = translation ?? Vector3.Zero;
+                this.Scale = scale ?? Vector3.One;
+                this.Rotation = rotation ?? Quaternion.Identity;
+                this.Translation = translation ?? Vector3.Zero;
             }
         }
 

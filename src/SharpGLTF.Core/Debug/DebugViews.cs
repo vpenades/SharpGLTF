@@ -84,4 +84,17 @@ namespace SharpGLTF.Debug
             }
         }
     }
+
+    internal sealed class _MeshDebugProxy
+    {
+        public _MeshDebugProxy(Schema2.Mesh value) { _Value = value; }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly Schema2.Mesh _Value;
+
+        public String Name => _Value.Name;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        public Schema2.MeshPrimitive[] Primitives => _Value.Primitives.ToArray();
+    }
 }
