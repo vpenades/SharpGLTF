@@ -43,9 +43,12 @@ namespace SharpGLTF.Schema2
             while (_weights.Count > count) _weights.RemoveAt(_weights.Count - 1);
             while (_weights.Count < count) _weights.Add(0);
 
-            foreach (var kw in weights.GetIndexedWeights())
+            if (_weights.Count > 0)
             {
-                _weights[kw.Item1] = kw.Item2;
+                foreach (var kw in weights.GetIndexedWeights())
+                {
+                    _weights[kw.Item1] = kw.Item2;
+                }
             }
         }
 

@@ -202,7 +202,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(src, nameof(src));
 
-            var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.ByteStride, BufferMode.ARRAY_BUFFER);
+            var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.PaddedByteLength, BufferMode.ARRAY_BUFFER);
 
             SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
         }
