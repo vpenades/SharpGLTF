@@ -22,19 +22,37 @@ for(int i=0; i < model.LogicalMeshes.Count; ++i)
 
 Next, we create a scene template from the default glTF scene:
 ```c#
+
+// a SceneTemplate is an immutable object that
+// represent the resource asset in memory
+
 var modelTemplate = SharpGLTF.Runtime.SceneTemplate(model.DefaultScene,true);
 
-var modelInstance = modelTemplate.CreateInstance();
+// SceneInstances are lightweight objects that reference
+// the original template and can be animated separately.
+// each SceneInstance can be set to a specific animation/time,
+// and individual nodes can be edited at will, without affecting
+// the state of sibling instances.
+
+var inst1 = modelTemplate.CreateInstance();
+    inst1.SetAnimationFrame("Walking", 2.17f);
+    
+var inst2 = modelTemplate.CreateInstance();
+    inst2.SetAnimationFrame("Running", 3.523f);
+    
+var inst3 = modelTemplate.CreateInstance();
+    inst3.SetAnimationFrame("Running", 1.32f);
+    inst3.SetWorldMatrix("Head", Matrix.LookAt(...) ); // example of manually setting a single node matrix
+    
+    RenderInstance(inst1, Matrix4x4.CreateTranslation(-10,0,0));
+    RenderInstance(inst2, Matrix4x4.CreateTranslation(  0,0,0));
+    RenderInstance(inst3, Matrix4x4.CreateTranslation( 10,0,0));
 ```
 
-Finally, in our render call, we render the meshes like this:
+Finally, we render the instances like this:
 ```c#
-void RenderFrame(Matrix4x4 modelMatrix)
+void RenderInstance(SharpGLTF.Runtime.SceneInstance modelInstance, Matrix4x4 modelMatrix)
 {
-    modelInstance.SetAnimationFrame("Walking", 2.17f); // example of animating the instance
-
-    modelInstance.SetWorldMatrix("Head", Matrix.LookAt(...) ); // example of manually setting a single node matrix
-
     foreach(var drawable in modelInstance.DrawableReferences)
     {
         var gpuMesh = gpuMeshes[drawable.Item1];
