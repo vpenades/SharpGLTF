@@ -14,7 +14,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void TestVertexSkinningDowngradeFrom8To4Joints()
         {
             // vertex with 5 bindings
-            var v8 = new VertexJoints8x8
+            var v8 = new VertexJoints8
                 (
                 (1, 0.20f),
                 (2, 0.15f),
@@ -24,7 +24,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 );
 
             // we downgrade to 4 bindings; remaining bindings should be interpolated to keep weighting 1.
-            var v4 = v8.ConvertToSkinning<VertexJoints8x4>();
+            var v4 = v8.ConvertToSkinning<VertexJoints4>();
 
             var sparse = v4.GetWeights();
 

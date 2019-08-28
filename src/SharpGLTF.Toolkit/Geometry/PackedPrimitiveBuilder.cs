@@ -37,11 +37,11 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim)
+        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim , EncodingType encoding)
         {
             Guard.NotNull(srcPrim, nameof(srcPrim));
 
-            var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices);
+            var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, encoding);
 
             Guard.NotNull(vAccessors, nameof(srcPrim));
 
@@ -49,12 +49,12 @@ namespace SharpGLTF.Geometry
             _VertexAccessors = vAccessors;
         }
 
-        public void SetStreamedVertices(IPrimitiveReader<TMaterial> srcPrim)
+        public void SetStreamedVertices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
         {
             Guard.NotNull(srcPrim, nameof(srcPrim));
 
             var attributeNames = VertexTypes.VertexUtils
-                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count)
+                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count, encoding)
                         .Select(item => item.Name)
                         .ToList();
 
@@ -62,7 +62,7 @@ namespace SharpGLTF.Geometry
 
             foreach (var an in attributeNames)
             {
-                var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, an);
+                var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(srcPrim.Vertices, an, encoding);
                 if (vAccessor == null) continue;
 
                 System.Diagnostics.Debug.Assert(vAccessor.Attribute.ByteOffset == 0);
@@ -96,13 +96,13 @@ namespace SharpGLTF.Geometry
 
                 vAccessors.Clear();
 
-                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(mtv, "POSITION");
+                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITION", EncodingType.UNSIGNED_SHORT);
                 if (pAccessor != null) vAccessors.Add(pAccessor);
 
-                var nAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(mtv, "NORMAL");
+                var nAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMAL", EncodingType.UNSIGNED_SHORT);
                 if (nAccessor != null) vAccessors.Add(nAccessor);
 
-                var tAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(mtv, "MORPHTANGENT");
+                var tAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "MORPHTANGENT", EncodingType.UNSIGNED_SHORT);
                 if (tAccessor != null) vAccessors.Add(tAccessor);
 
                 AddMorphTarget(pAccessor, nAccessor, tAccessor);

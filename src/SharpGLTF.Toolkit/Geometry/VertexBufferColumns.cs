@@ -309,7 +309,7 @@ namespace SharpGLTF.Geometry
         {
             var g = GetVertexGeometry<VertexPositionNormalTangent>(index);
             var m = GetVertexMaterial<VertexColor2Texture2>(index);
-            var s = GetVertexSkinning<VertexJoints16x8>(index);
+            var s = GetVertexSkinning<VertexJoints8>(index);
 
             var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
 

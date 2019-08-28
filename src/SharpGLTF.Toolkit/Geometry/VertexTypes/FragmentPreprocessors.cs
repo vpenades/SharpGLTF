@@ -89,8 +89,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <see cref="VertexEmpty"/>,
         /// <see cref="VertexJoints8x4"/>,
         /// <see cref="VertexJoints8x8"/>,
-        /// <see cref="VertexJoints16x4"/>,
-        /// <see cref="VertexJoints16x8"/>.
+        /// <see cref="VertexJoints4"/>,
+        /// <see cref="VertexJoints8"/>.
         /// </typeparam>
         /// <param name="vertex">the source <typeparamref name="TvS"/> vertex.</param>
         /// <returns>A sanitized <typeparamref name="TvS"/> vertex, or null if sanitization failed.</returns>
@@ -219,8 +219,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <see cref="VertexEmpty"/>,
         /// <see cref="VertexJoints8x4"/>,
         /// <see cref="VertexJoints8x8"/>,
-        /// <see cref="VertexJoints16x4"/>,
-        /// <see cref="VertexJoints16x8"/>.
+        /// <see cref="VertexJoints4"/>,
+        /// <see cref="VertexJoints8"/>.
         /// </typeparam>
         /// <param name="vertex">the source <typeparamref name="TvS"/> vertex.</param>
         /// <returns>A sanitized <typeparamref name="TvS"/> vertex, or null if sanitization failed.</returns>

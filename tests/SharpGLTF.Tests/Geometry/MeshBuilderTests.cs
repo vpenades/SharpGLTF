@@ -9,8 +9,8 @@ using SharpGLTF.Schema2;
 
 namespace SharpGLTF.Geometry
 {
-    using VERTEX1 = VertexBuilder<VertexPosition, VertexColor1Texture1, VertexJoints8x4>;
-    using VERTEX2 = VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexJoints8x4>;
+    using VERTEX1 = VertexBuilder<VertexPosition, VertexColor1Texture1, VertexJoints4>;
+    using VERTEX2 = VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexJoints4>;
 
     [Category("Toolkit.Geometry")]
     public class MeshBuilderTests
@@ -90,7 +90,7 @@ namespace SharpGLTF.Geometry
 
             var p = new VertexPositionNormal(Vector3.UnitX, new Vector3(float.NaN));
             var m = new VertexColor1Texture1(Vector4.One * 7, new Vector2(float.NaN));
-            var s = new VertexJoints8x4((0, 2), (1, 7), (2, 6), (3, 5));
+            var s = new VertexJoints4((0, 2), (1, 7), (2, 6), (3, 5));
 
             var v1 = new VERTEX2(p, m, s);
             var v1Idx = prim.AddPoint(new VERTEX2(p, m, s));

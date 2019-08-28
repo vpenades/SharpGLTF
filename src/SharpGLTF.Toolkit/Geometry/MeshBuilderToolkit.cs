@@ -47,6 +47,18 @@ namespace SharpGLTF.Geometry
             return maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
         }
 
+        public static Schema2.EncodingType GetOptimalJointEncoding<TMaterial>(this IEnumerable<IMeshBuilder<TMaterial>> meshes)
+        {
+            var indices = meshes
+                .SelectMany(item => item.Primitives)
+                .SelectMany(item => item.Vertices)
+                .Select(item => item.GetSkinning().GetWeights().MaxIndex);
+
+            var maxIndex = indices.Any() ? indices.Max() : 0;
+
+            return maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : Schema2.EncodingType.UNSIGNED_SHORT;
+        }
+
         public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes<TMaterial>(params string[] vertexAttributes)
         {
             Type meshType = GetMeshBuilderType(typeof(TMaterial), vertexAttributes);

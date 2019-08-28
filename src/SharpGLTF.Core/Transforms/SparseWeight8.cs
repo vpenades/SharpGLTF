@@ -296,6 +296,8 @@ namespace SharpGLTF.Transforms
 
         public float WeightSum => Weight0 + Weight1 + Weight2 + Weight3 + Weight4 + Weight5 + Weight6 + Weight7;
 
+        public int MaxIndex => _GetMaxIndex();
+
         #endregion
 
         #region API
@@ -640,6 +642,22 @@ namespace SharpGLTF.Transforms
             }
 
             return new SparseWeight8(weights);
+        }
+
+        internal int _GetMaxIndex()
+        {
+            int idx = 0;
+
+            if (Weight0 != 0) idx = Math.Max(idx, Index0);
+            if (Weight1 != 0) idx = Math.Max(idx, Index1);
+            if (Weight2 != 0) idx = Math.Max(idx, Index2);
+            if (Weight3 != 0) idx = Math.Max(idx, Index3);
+            if (Weight4 != 0) idx = Math.Max(idx, Index4);
+            if (Weight5 != 0) idx = Math.Max(idx, Index5);
+            if (Weight6 != 0) idx = Math.Max(idx, Index6);
+            if (Weight7 != 0) idx = Math.Max(idx, Index7);
+
+            return idx;
         }
 
         #endregion

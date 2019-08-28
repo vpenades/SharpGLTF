@@ -106,8 +106,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexEmpty"/>,
     /// <see cref="VertexJoints8x4"/>,
     /// <see cref="VertexJoints8x8"/>,
-    /// <see cref="VertexJoints16x4"/>,
-    /// <see cref="VertexJoints16x8"/>.
+    /// <see cref="VertexJoints4"/>,
+    /// <see cref="VertexJoints8"/>.
     /// </typeparam>
     public abstract class PrimitiveBuilder<TMaterial, TvG, TvM, TvS> : IPrimitiveBuilder, IPrimitiveReader<TMaterial>
         where TvG : struct, IVertexGeometry

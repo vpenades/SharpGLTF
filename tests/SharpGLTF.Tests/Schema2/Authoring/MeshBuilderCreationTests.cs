@@ -14,7 +14,7 @@ namespace SharpGLTF.Schema2.Authoring
     using VEMPTY = Geometry.VertexTypes.VertexEmpty;
     using VPOSNRM = Geometry.VertexTypes.VertexPositionNormal;
     using VPOS = Geometry.VertexTypes.VertexPosition;
-    using VSKIN4 = Geometry.VertexTypes.VertexJoints8x4;
+    using VSKIN4 = Geometry.VertexTypes.VertexJoints4;
 
     [TestFixture]
     [Category("Model Authoring")]

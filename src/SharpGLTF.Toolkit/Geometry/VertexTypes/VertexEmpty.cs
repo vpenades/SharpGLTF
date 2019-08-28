@@ -26,7 +26,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
-        public SparseWeight8 GetWeights() { throw new NotSupportedException(); }
+        public SparseWeight8 GetWeights() { return default; }
 
         public void SetWeights(in SparseWeight8 weights) { throw new NotSupportedException(); }
 
@@ -43,6 +43,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         Vector4 IVertexSkinning.WeightsLow => Vector4.Zero;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.Weightshigh => Vector4.Zero;
+        Vector4 IVertexSkinning.WeightsHigh => Vector4.Zero;
     }
 }

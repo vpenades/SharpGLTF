@@ -36,8 +36,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexEmpty"/>,
     /// <see cref="VertexJoints8x4"/>,
     /// <see cref="VertexJoints8x8"/>,
-    /// <see cref="VertexJoints16x4"/>,
-    /// <see cref="VertexJoints16x8"/>.
+    /// <see cref="VertexJoints4"/>,
+    /// <see cref="VertexJoints8"/>.
     /// </typeparam>
     public class MeshBuilder<TMaterial, TvG, TvM, TvS> : IMeshBuilder<TMaterial>
         where TvG : struct, IVertexGeometry
@@ -177,8 +177,8 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexEmpty"/>,
     /// <see cref="VertexJoints8x4"/>,
     /// <see cref="VertexJoints8x8"/>,
-    /// <see cref="VertexJoints16x4"/>,
-    /// <see cref="VertexJoints16x8"/>.
+    /// <see cref="VertexJoints4"/>,
+    /// <see cref="VertexJoints8"/>.
     /// </typeparam>
     public class MeshBuilder<TvG, TvM, TvS> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry

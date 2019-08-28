@@ -65,8 +65,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             var joints = vertexAttributes.Contains("JOINTS_0") && vertexAttributes.Contains("WEIGHTS_0") ? 4 : 0;
             joints = vertexAttributes.Contains("JOINTS_1") && vertexAttributes.Contains("WEIGHTS_1") ? 8 : joints;
 
-            if (joints == 4) return typeof(VertexJoints16x4);
-            if (joints == 8) return typeof(VertexJoints16x8);
+            if (joints == 4) return typeof(VertexJoints4);
+            if (joints == 8) return typeof(VertexJoints8);
 
             return typeof(VertexEmpty);
         }
@@ -91,8 +91,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             var tvm = GetVertexMaterialType(numCols, numUV);
 
             var tvs = typeof(VertexEmpty);
-            if (numJoints == 4) tvs = typeof(VertexJoints16x4);
-            if (numJoints >= 8) tvs = typeof(VertexJoints16x8);
+            if (numJoints == 4) tvs = typeof(VertexJoints4);
+            if (numJoints >= 8) tvs = typeof(VertexJoints8);
 
             var vtype = typeof(VertexBuilder<,,>);
 
@@ -207,13 +207,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region memory buffers API
 
-        public static MemoryAccessor CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices, string attributeName)
+        public static MemoryAccessor CreateVertexMemoryAccessor<TVertex>(this IReadOnlyList<TVertex> vertices, string attributeName, Schema2.EncodingType jointEncoding)
             where TVertex : IVertexBuilder
         {
             if (vertices == null || vertices.Count == 0) return null;
 
             // determine the vertex attributes from the first vertex.
-            var attributes = GetVertexAttributes(vertices[0], vertices.Count);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count, jointEncoding);
 
             var isMorphTangent = attributeName == "MORPHTANGENT";
             if (isMorphTangent) attributeName = "TANGENT";
@@ -243,13 +243,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        public static MemoryAccessor[] CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices)
+        public static MemoryAccessor[] CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices, Schema2.EncodingType jointEncoding)
             where TVertex : IVertexBuilder
         {
             if (vertices == null || vertices.Count == 0) return null;
 
             // determine the vertex attributes from the first vertex.
-            var attributes = GetVertexAttributes(vertices[0], vertices.Count);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count, jointEncoding);
 
             // create a buffer
             int byteStride = attributes[0].ByteStride;
@@ -298,7 +298,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount)
+        public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, Schema2.EncodingType jointEncoding)
         {
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
@@ -321,7 +321,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             foreach (var finfo in tvs.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue) attributes.Add(attribute.Value);
+                if (attribute.HasValue)
+                {
+                    var a = attribute.Value;
+                    if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = jointEncoding;
+
+                    attributes.Add(a);
+                }
             }
 
             var array = attributes.ToArray();
@@ -374,7 +380,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (attributeName == "JOINTS_1") return v => v.GetSkinning().JointsHigh;
 
             if (attributeName == "WEIGHTS_0") return v => v.GetSkinning().WeightsLow;
-            if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().Weightshigh;
+            if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().WeightsHigh;
 
             return v => v.GetMaterial().GetCustomAttribute(attributeName);
         }

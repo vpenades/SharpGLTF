@@ -263,7 +263,13 @@ namespace SharpGLTF.Schema2
         public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
             where TVertex : IVertexBuilder
         {
-            var memAccessors = VertexUtils.CreateVertexMemoryAccessors( vertices );
+            var indices = vertices.Select(item => item.GetSkinning().GetWeights().MaxIndex);
+
+            var maxIndex = indices.Any() ? indices.Max() : 0;
+
+            var encoding = maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : EncodingType.UNSIGNED_SHORT;
+
+            var memAccessors = VertexUtils.CreateVertexMemoryAccessors(vertices, encoding);
 
             return primitive.WithVertexAccessors(memAccessors);
         }

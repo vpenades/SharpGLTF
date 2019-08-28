@@ -9,8 +9,8 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace InfiniteSkinnedTentacle
 {
-    using VERTEX = VertexBuilder<VertexPosition, VertexColor1, VertexJoints8x4>;
-    using MESH = MeshBuilder<VertexPosition, VertexColor1, VertexJoints8x4>;
+    using VERTEX = VertexBuilder<VertexPosition, VertexColor1, VertexJoints4>;
+    using MESH = MeshBuilder<VertexPosition, VertexColor1, VertexJoints4>;
 
     class Program
     {

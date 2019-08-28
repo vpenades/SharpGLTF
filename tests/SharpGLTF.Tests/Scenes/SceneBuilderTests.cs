@@ -14,7 +14,7 @@ namespace SharpGLTF.Scenes
 {
     using VPOSNRM = VertexBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty>;
 
-    using SKINNEDVERTEX = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8x4>;
+    using SKINNEDVERTEX = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
 
 
     [Category("Toolkit.Scenes")]

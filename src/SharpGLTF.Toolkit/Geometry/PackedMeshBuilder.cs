@@ -27,6 +27,7 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
+            var jointEncoding = meshBuilders.GetOptimalJointEncoding();
             var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
 
             foreach (var srcMesh in meshBuilders)
@@ -42,8 +43,8 @@ namespace SharpGLTF.Geometry
                     bool useStrided = prefferStrided;
                     if (srcPrim.MorphTargets.TargetsCount > 0) useStrided = false;
 
-                    if (useStrided) dstPrim.SetStridedVertices(srcPrim);
-                    else dstPrim.SetStreamedVertices(srcPrim);
+                    if (useStrided) dstPrim.SetStridedVertices(srcPrim, jointEncoding);
+                    else dstPrim.SetStreamedVertices(srcPrim, jointEncoding);
 
                     dstPrim.SetIndices(srcPrim, indexEncoding);
                     dstPrim.SetMorphTargets(srcPrim);

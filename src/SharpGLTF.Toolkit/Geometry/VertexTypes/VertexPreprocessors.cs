@@ -38,8 +38,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <see cref="VertexEmpty"/>,
     /// <see cref="VertexJoints8x4"/>,
     /// <see cref="VertexJoints8x8"/>,
-    /// <see cref="VertexJoints16x4"/>,
-    /// <see cref="VertexJoints16x8"/>.
+    /// <see cref="VertexJoints4"/>,
+    /// <see cref="VertexJoints8"/>.
     /// </typeparam>
     public sealed class VertexPreprocessor<TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
