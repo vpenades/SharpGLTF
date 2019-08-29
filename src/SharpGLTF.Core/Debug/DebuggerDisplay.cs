@@ -138,14 +138,22 @@ namespace SharpGLTF.Debug
                     break;
             }
 
-            txt += $" {prim.DrawPrimitiveType}[{pcount}]";
+            var primName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(prim.DrawPrimitiveType.ToString().ToLower());
+            txt += $" {primName}[{pcount}]";
+
+            // gather morph attributes information
+
+            if (prim.MorphTargetsCount > 0)
+            {
+                txt += $" MorphTargets[{prim.MorphTargetsCount}]";
+            }
 
             // materials
 
             if (prim.Material != null)
             {
                 if (string.IsNullOrWhiteSpace(prim.Material.Name)) txt += $" Material[{prim.Material.LogicalIndex}]";
-                else txt += $" Material {prim.Material.Name}";
+                else txt += "Material " + "\"" + prim.Material.Name + "\"";
             }
 
             return txt;

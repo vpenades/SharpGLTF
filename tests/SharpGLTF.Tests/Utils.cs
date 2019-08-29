@@ -43,11 +43,81 @@ namespace SharpGLTF
             return path;
         }
 
+        public static void AttachText(this TestContext context, string fileName, string[] lines)
+        {
+            fileName = context.GetAttachmentPath(fileName, true);
+
+            System.IO.File.WriteAllLines(fileName, lines.ToArray());
+
+            TestContext.AddTestAttachment(fileName);
+        }
+
+        public static void AttachShowDirLink(this TestContext context)
+        {
+            context.AttachLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
+        }
+
+        public static void AttachLink(this TestContext context, string linkPath, string targetPath)
+        {
+            linkPath = context.GetAttachmentPath(linkPath);
+
+            linkPath = ShortcutUtils.CreateLink(linkPath, targetPath);
+
+            TestContext.AddTestAttachment(linkPath);
+        }        
+    }
+
+    static class ShortcutUtils
+    {
+        public static string CreateLink(string localLinkPath, string targetPath)
+        {
+            if (string.IsNullOrWhiteSpace(localLinkPath)) throw new ArgumentNullException(nameof(localLinkPath));
+            if (string.IsNullOrWhiteSpace(targetPath)) throw new ArgumentNullException(nameof(targetPath));
+
+            if (!Uri.TryCreate(targetPath, UriKind.Absolute, out Uri uri)) throw new UriFormatException(nameof(targetPath));
+
+            var sb = new StringBuilder();
+
+            sb.AppendLine("[{000214A0-0000-0000-C000-000000000046}]");
+            sb.AppendLine("Prop3=19,11");
+            sb.AppendLine("[InternetShortcut]");
+            sb.AppendLine("IDList=");
+            sb.AppendLine($"URL={uri.AbsoluteUri}");
+
+            if (uri.IsFile)
+            {
+                sb.AppendLine("IconIndex=1");
+                string icon = targetPath.Replace('\\', '/');
+                sb.AppendLine("IconFile=" + icon);
+            }
+            else
+            {
+                sb.AppendLine("IconIndex=0");
+            }
+
+            localLinkPath = System.IO.Path.ChangeExtension(localLinkPath, ".url");
+
+            System.IO.File.WriteAllText(localLinkPath, sb.ToString());
+
+            return localLinkPath;
+        }
+    }
+
+    static class NUnitGltfUtils
+    {
+        public static void AttachGltfValidatorLinks(this TestContext context)
+        {
+            context.AttachLink("🌍 Khronos Validator", "http://github.khronos.org/glTF-Validator/");
+            context.AttachLink("🌍 BabylonJS Sandbox", "https://sandbox.babylonjs.com/");
+            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");
+            context.AttachLink("🌍 VirtualGIS Cesium Sandbox", "https://www.virtualgis.io/gltfviewer/");
+        }
+
         public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
         {
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-            
+
             if (fileName.ToLower().EndsWith(".glb"))
             {
                 model.SaveGLB(fileName);
@@ -79,7 +149,7 @@ namespace SharpGLTF
 
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-            
+
             Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName, animation, time);
 
             // Attach the saved file to the current test
@@ -100,37 +170,6 @@ namespace SharpGLTF
 
             gl2model.AttachToCurrentTest(fileName);
         }
-
-        public static void AttachText(this TestContext context, string fileName, string[] lines)
-        {
-            fileName = context.GetAttachmentPath(fileName, true);
-
-            System.IO.File.WriteAllLines(fileName, lines.ToArray());
-
-            TestContext.AddTestAttachment(fileName);
-        }
-
-        public static void AttachShowDirLink(this TestContext context)
-        {
-            context.AttachLink("📂 Show Directory", context.GetAttachmentPath(string.Empty));
-        }
-
-        public static void AttachGltfValidatorLinks(this TestContext context)
-        {
-            context.AttachLink("🌍 Khronos Validator", "http://github.khronos.org/glTF-Validator/");
-            context.AttachLink("🌍 BabylonJS Sandbox", "https://sandbox.babylonjs.com/");
-            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");
-            context.AttachLink("🌍 VirtualGIS Cesium Sandbox", "https://www.virtualgis.io/gltfviewer/");
-        }
-
-        public static void AttachLink(this TestContext context, string linkPath, string targetPath)
-        {
-            linkPath = context.GetAttachmentPath(linkPath);
-
-            linkPath = ShortcutUtils.CreateLink(linkPath, targetPath);
-
-            TestContext.AddTestAttachment(linkPath);
-        }        
     }
 
     static class DownloadUtils
@@ -198,43 +237,7 @@ namespace SharpGLTF
                 return localFilePath;
             }
         }
-    }
-
-    static class ShortcutUtils
-    {
-        public static string CreateLink(string localLinkPath, string targetPath)
-        {
-            if (string.IsNullOrWhiteSpace(localLinkPath)) throw new ArgumentNullException(nameof(localLinkPath));
-            if (string.IsNullOrWhiteSpace(targetPath)) throw new ArgumentNullException(nameof(targetPath));
-
-            if (!Uri.TryCreate(targetPath, UriKind.Absolute, out Uri uri)) throw new UriFormatException(nameof(targetPath));
-
-            var sb = new StringBuilder();
-
-            sb.AppendLine("[{000214A0-0000-0000-C000-000000000046}]");
-            sb.AppendLine("Prop3=19,11");
-            sb.AppendLine("[InternetShortcut]");
-            sb.AppendLine("IDList=");
-            sb.AppendLine($"URL={uri.AbsoluteUri}");
-
-            if (uri.IsFile)
-            {                
-                sb.AppendLine("IconIndex=1");
-                string icon = targetPath.Replace('\\', '/');
-                sb.AppendLine("IconFile=" + icon);
-            }
-            else
-            {
-                sb.AppendLine("IconIndex=0");
-            }
-
-            localLinkPath = System.IO.Path.ChangeExtension(localLinkPath, ".url");
-
-            System.IO.File.WriteAllText(localLinkPath, sb.ToString());
-
-            return localLinkPath;
-        }        
-    }
+    }    
 
     static class VectorsUtils
     {

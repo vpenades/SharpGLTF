@@ -7,16 +7,16 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
+    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord} _CUSTOM_1:{CustomId}")]
     public struct VertexColor1Texture1Custom1 : IVertexMaterial
     {
         #region constructors
 
-        public VertexColor1Texture1Custom1(Vector4 color, Vector2 tex, Single batchId)
+        public VertexColor1Texture1Custom1(Vector4 color, Vector2 tex, Single customId)
         {
             Color = color;
             TexCoord = tex;
-            BatchId = batchId;
+            CustomId = customId;
         }
 
         public VertexColor1Texture1Custom1(IVertexMaterial src)
@@ -26,17 +26,17 @@ namespace SharpGLTF.Geometry
 
             if (src is VertexColor1Texture1Custom1 custom)
             {
-                this.BatchId = custom.BatchId;
+                this.CustomId = custom.CustomId;
             }
             else
             {
-                this.BatchId = 0;
+                this.CustomId = 0;
             }
         }
 
-        public static implicit operator VertexColor1Texture1Custom1((Vector4 color, Vector2 tex, Single batchId) tuple)
+        public static implicit operator VertexColor1Texture1Custom1((Vector4 color, Vector2 tex, Single customId) tuple)
         {
-            return new VertexColor1Texture1Custom1(tuple.color, tuple.tex, tuple.batchId);
+            return new VertexColor1Texture1Custom1(tuple.color, tuple.tex, tuple.customId);
         }
 
         #endregion
@@ -46,7 +46,7 @@ namespace SharpGLTF.Geometry
         public const string CUSTOMATTRIBUTENAME = "_CUSTOM_1";
 
         [VertexAttribute(CUSTOMATTRIBUTENAME, Schema2.EncodingType.FLOAT, false)]
-        public Single BatchId;
+        public Single CustomId;
 
         [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
         public Vector4 Color;
@@ -82,7 +82,7 @@ namespace SharpGLTF.Geometry
 
         public object GetCustomAttribute(string attributeName)
         {
-            return attributeName == CUSTOMATTRIBUTENAME ? (Object)BatchId : null;
+            return attributeName == CUSTOMATTRIBUTENAME ? (Object)CustomId : null;
         }
 
         #endregion

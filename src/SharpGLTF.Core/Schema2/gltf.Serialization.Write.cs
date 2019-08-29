@@ -228,11 +228,29 @@ namespace SharpGLTF.Schema2
     partial class ModelRoot
     {
         /// <summary>
+        /// Writes this <see cref="MODEL"/> to a file in GLTF or GLB based on the extension of <paramref name="filePath"/>.
+        /// </summary>
+        /// <param name="filePath">A valid file path to write to.</param>
+        public void Save(string filePath)
+        {
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+
+            bool isGltfExtension = filePath
+                .ToLower(System.Globalization.CultureInfo.InvariantCulture)
+                .EndsWith(".gltf", StringComparison.OrdinalIgnoreCase);
+
+            if (isGltfExtension) SaveGLTF(filePath);
+            else SaveGLB(filePath);
+        }
+
+        /// <summary>
         /// Writes this <see cref="MODEL"/> to a file in GLB format.
         /// </summary>
         /// <param name="filePath">A valid file path to write to.</param>
         public void SaveGLB(string filePath)
         {
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+
             var settings = WriteSettings.ForBinary(filePath);
 
             var name = Path.GetFileNameWithoutExtension(filePath);
@@ -250,6 +268,8 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void SaveGLTF(string filePath, Formatting fmt = Formatting.None)
         {
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+
             var settings = WriteSettings.ForText(filePath);
 
             settings.JsonFormatting = fmt;
