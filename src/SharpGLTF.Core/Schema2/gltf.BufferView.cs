@@ -14,20 +14,7 @@ namespace SharpGLTF.Schema2
 
         internal string _GetDebuggerDisplay()
         {
-            var path = string.Empty;
-
-            path = $"Buffer[{this._buffer}ᴵᵈˣ] ⇨";
-
-            if (this.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) path += " VertexBuffer";
-            else if (this.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER) path += " IndexBuffer";
-            else path += " BufferView";
-
-            path += $"[{this.LogicalIndex}ᴵᵈˣ]";
-            path += $"[{this._byteLength}ᴮʸᵗᵉˢ]";
-
-            if (ByteStride > 0) path += $" Stride:{ByteStride}ᴮʸᵗᵉˢ";
-
-            return path;
+            return Debug.DebuggerDisplay.ToReport(this);
         }
 
         #endregion
@@ -120,16 +107,6 @@ namespace SharpGLTF.Schema2
             this._buffer = targetBuffer.BufferIndex;
             this._byteLength = data.Length;
             this._byteOffset = targetBuffer.Append(data);
-        }
-
-        private string _DebuggerDisplay_TryIdentifyContent()
-        {
-            var accessors = this
-                .FindAccessors()
-                .OrderBy(item => item.ByteOffset)
-                .ToList();
-
-            return String.Join(" ", accessors.Select(item => item._GetDebuggerDisplayShort()));
         }
 
         /// <summary>

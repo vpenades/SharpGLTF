@@ -16,32 +16,9 @@ namespace SharpGLTF.Memory
     {
         #region debug
 
-        internal static string GetAttributeShortName(string attributeName)
+        internal string _GetDebuggerDisplay()
         {
-            if (attributeName == "POSITION") return "𝐏";
-            if (attributeName == "NORMAL") return "𝚴";
-            if (attributeName == "TANGENT") return "𝚻";
-            if (attributeName == "COLOR_0") return "𝐂₀";
-            if (attributeName == "COLOR_1") return "𝐂₁";
-            if (attributeName == "TEXCOORD_0") return "𝐔𝐕₀";
-            if (attributeName == "TEXCOORD_1") return "𝐔𝐕₁";
-
-            if (attributeName == "JOINTS_0") return "𝐉₀";
-            if (attributeName == "JOINTS_1") return "𝐉₁";
-
-            if (attributeName == "WEIGHTS_0") return "𝐖₀";
-            if (attributeName == "WEIGHTS_1") return "𝐖₁";
-            return attributeName;
-        }
-
-        internal String _GetDebuggerDisplay()
-        {
-            var txt = GetAttributeShortName(Name);
-            if (ByteOffset != 0) txt += $" Offs:{ByteOffset}ᴮʸᵗᵉˢ";
-            if (ByteStride != 0) txt += $" Strd:{ByteStride}ᴮʸᵗᵉˢ";
-            txt += $" {Encoding.ToDebugString(Dimensions, Normalized)}[{ItemsCount}]";
-
-            return txt;
+            return Debug.DebuggerDisplay.ToReport(this);
         }
 
         #endregion
@@ -217,6 +194,49 @@ namespace SharpGLTF.Memory
             }
 
             return dst;
+        }
+
+        #endregion
+
+        #region types
+
+        private static int _GetSortingScore(string attribute)
+        {
+            switch (attribute)
+            {
+                case "POSITION": return 0;
+                case "NORMAL": return 1;
+                case "TANGENT": return 2;
+
+                case "COLOR_0": return 10;
+                case "COLOR_1": return 11;
+                case "COLOR_2": return 12;
+                case "COLOR_3": return 13;
+
+                case "TEXCOORD_0": return 20;
+                case "TEXCOORD_1": return 21;
+                case "TEXCOORD_2": return 22;
+                case "TEXCOORD_3": return 23;
+
+                case "JOINTS_0": return 50;
+                case "JOINTS_1": return 51;
+                case "WEIGHTS_0": return 50;
+                case "WEIGHTS_1": return 51;
+                default: return 100;
+            }
+        }
+
+        internal static IComparer<string> NameComparer { get; private set; } = new AttributeComparer();
+
+        private class AttributeComparer : IComparer<String>
+        {
+            public int Compare(string x, string y)
+            {
+                var xx = _GetSortingScore(x);
+                var yy = _GetSortingScore(y);
+
+                return xx.CompareTo(yy);
+            }
         }
 
         #endregion

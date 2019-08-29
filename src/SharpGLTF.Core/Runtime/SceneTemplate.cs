@@ -215,7 +215,8 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal StaticDrawableReference(Schema2.Node node, Func<Schema2.Node,int> indexFunc) : base(node)
+        internal StaticDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+            : base(node)
         {
             _NodeIndex = indexFunc(node);
         }
@@ -251,16 +252,17 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal SkinnedDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc) : base(node)
+        internal SkinnedDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+            : base(node)
         {
             var skin = node.Skin;
 
             _MorphNodeIndex = indexFunc(node);
 
             _JointsNodeIndices = new int[skin.JointsCount];
-            _BindMatrices = new System.Numerics.Matrix4x4[skin.JointsCount];            
+            _BindMatrices = new System.Numerics.Matrix4x4[skin.JointsCount];
 
-            for(int i=0; i < _JointsNodeIndices.Length; ++i)
+            for (int i = 0; i < _JointsNodeIndices.Length; ++i)
             {
                 var jm = skin.GetJoint(i);
 

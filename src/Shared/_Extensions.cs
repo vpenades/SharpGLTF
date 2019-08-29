@@ -518,9 +518,14 @@ namespace SharpGLTF
             }
         }
 
-        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, int count)
+        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, int vertexCount)
         {
-            return ptype.GetLinesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
+            return ptype.GetLinesIndices(Enumerable.Range(0, vertexCount).Select(item => (UInt32)item));
+        }
+
+        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int vertexCount)
+        {
+            return ptype.GetTrianglesIndices(Enumerable.Range(0, vertexCount).Select(item => (UInt32)item));
         }
 
         public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
@@ -547,11 +552,6 @@ namespace SharpGLTF
 
                 default: throw new NotImplementedException();
             }
-        }
-
-        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int count)
-        {
-            return ptype.GetTrianglesIndices(Enumerable.Range(0, count).Select(item => (UInt32)item));
         }
 
         public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
