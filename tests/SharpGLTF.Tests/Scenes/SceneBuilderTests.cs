@@ -9,6 +9,7 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
 using SharpGLTF.Schema2;
+using System.Collections.Generic;
 
 namespace SharpGLTF.Scenes
 {
@@ -429,6 +430,58 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("skinned.gltf");
         }
 
+        [Test]
+        public void CreateAllAnimationTypesScene()
+        {
+            // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            // create two materials
+
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1));
+
+            var yellow = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1));
+
+            var scene = new SceneBuilder();
+
+            var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
+            mesh1.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
+            var inst1 = scene.AddMesh(mesh1, Matrix4x4.Identity);
+
+            var mesh2 = VPOSNRM.CreateCompatibleMesh("shape2");
+            mesh2.AddCube(pink, Matrix4x4.Identity);
+            var inst2 = scene.AddMesh(mesh2, Matrix4x4.CreateTranslation(2,0,0));
+
+            scene.AttachToCurrentTest("static.glb");
+            scene.AttachToCurrentTest("static.gltf");
+
+            var morphBuilder = mesh2.UseMorphTarget(0);
+
+            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[0], Vector3.UnitY);
+            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[1], Vector3.UnitY);
+            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[2], Vector3.UnitY);
+            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[3], Vector3.UnitY);
+
+            inst2.Content.UseMorphing().Value = Transforms.SparseWeight8.Create(1);
+            
+            var curve = inst2.Content.UseMorphing().UseTrackBuilder("Default");
+            curve.SetPoint(0, Transforms.SparseWeight8.Create(0));
+            curve.SetPoint(1, Transforms.SparseWeight8.Create(1));
+            curve.SetPoint(2, Transforms.SparseWeight8.Create(0));
+
+            var gltf = scene.ToSchema2();
+
+            // Assert.AreEqual(1, gltf.LogicalMeshes[1].MorphWeights[0]);
+
+            scene.AttachToCurrentTest("mopth.glb");
+            scene.AttachToCurrentTest("mopth.gltf");
+        }
+
+        
 
         [TestCase("AnimatedMorphCube.glb")]
         [TestCase("AnimatedMorphSphere.glb")]

@@ -21,6 +21,8 @@ namespace SharpGLTF.Scenes
             dstNode.LocalMatrix = _WorldTransform;
 
             schema2Target.Setup(dstNode, context);
+
+            context.SetMorphAnimation(dstNode, this.Morphings);
         }
     }
 

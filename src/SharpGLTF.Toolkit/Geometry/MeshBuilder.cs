@@ -85,6 +85,11 @@ namespace SharpGLTF.Geometry
 
         #region API
 
+        public MorphTargetBuilder<TMaterial, TvG, TvS, TvM> UseMorphTarget(int index)
+        {
+            return new MorphTargetBuilder<TMaterial, TvG, TvS, TvM>(this, index);
+        }
+
         private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial, int) key)
         {
             if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))

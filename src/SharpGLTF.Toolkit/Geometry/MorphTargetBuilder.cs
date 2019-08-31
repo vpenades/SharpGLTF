@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Numerics;
 using System.Text;
 
 using SharpGLTF.Geometry.VertexTypes;
@@ -184,5 +186,49 @@ namespace SharpGLTF.Geometry
         }
 
         #endregion
+    }
+
+    public class MorphTargetBuilder<TMaterial, TvG, TvS, TvM>
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+    {
+        internal MorphTargetBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, int morphTargetIndex)
+        {
+            _Mesh = mesh;
+            _MorphTargetIndex = morphTargetIndex;
+
+            _Positions = _Mesh.Primitives
+                .SelectMany(item => item.Vertices)
+                .Select(item => item.Position)
+                .Distinct()
+                .ToArray();
+        }
+
+        private readonly MeshBuilder<TMaterial, TvG, TvM, TvS> _Mesh;
+        private readonly int _MorphTargetIndex;
+
+        private readonly Vector3[] _Positions;
+
+        public IReadOnlyList<Vector3> Positions => _Positions;
+
+        public void SetVertexDisplacement(Vector3 key, Vector3 displacement)
+        {
+            var g = default(TvG);
+
+            g.SetPosition(displacement);
+
+            foreach (var p in _Mesh.Primitives)
+            {
+                for (int i = 0; i < p.Vertices.Count; ++i)
+                {
+                    if (p.Vertices[i].Position == key)
+                    {
+                        p.MorphTargets.SetVertexDisplacement(_MorphTargetIndex, i, g);
+                    }
+                }
+            }
+        }
+
     }
 }

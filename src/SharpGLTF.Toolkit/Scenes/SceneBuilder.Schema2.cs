@@ -131,7 +131,8 @@ namespace SharpGLTF.Scenes
             if (animation == null) return;
 
             var dstMesh = dstNode.Mesh;
-            dstMesh.SetMorphWeights(default);
+
+            dstMesh.SetMorphWeights(animation.Value);
 
             foreach (var t in animation.Tracks) dstNode.WithMorphingAnimation(t.Key, t.Value);
         }
