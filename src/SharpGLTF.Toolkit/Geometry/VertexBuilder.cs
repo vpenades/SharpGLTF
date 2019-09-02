@@ -69,12 +69,73 @@ namespace SharpGLTF.Geometry
     /// <see cref="VertexJoints4"/>,
     /// <see cref="VertexJoints8"/>.
     /// </typeparam>
-    [System.Diagnostics.DebuggerDisplay("Vertex 𝐏:{Position} {_GetDebugWarnings()}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
     {
+        #region debug
+
+        internal string _GetDebuggerDisplay()
+        {
+            var txt = "Vertex ";
+
+            txt += " " + _GetDebuggerDisplayTextFrom(Geometry);
+            txt += " " + _GetDebuggerDisplayTextFrom(Material);
+            txt += " " + _GetDebuggerDisplayTextFrom(Skinning);
+
+            return txt;
+        }
+
+        private static string _GetDebuggerDisplayTextFrom(Object o)
+        {
+            var bindings = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance;
+
+            var method = o.GetType().GetMethod("_GetDebuggerDisplay", bindings);
+
+            if (method == null) return string.Empty;
+
+            return method.Invoke(o, Array.Empty<Object>()) as string;
+        }
+
+        private String _GetDebugWarnings()
+        {
+            var sb = new StringBuilder();
+
+            if (Geometry.TryGetNormal(out Vector3 n))
+            {
+                if (!n.IsValidNormal()) sb.Append($" ❌𝚴:{n}");
+            }
+
+            if (Geometry.TryGetTangent(out Vector4 t))
+            {
+                if (!t.IsValidTangent()) sb.Append($" ❌𝚻:{t}");
+            }
+
+            for (int i = 0; i < Material.MaxColors; ++i)
+            {
+                var c = Material.GetColor(i);
+                if (!c._IsFinite() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
+            }
+
+            for (int i = 0; i < Material.MaxTextCoords; ++i)
+            {
+                var uv = Material.GetTexCoord(i);
+                if (!uv._IsFinite()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
+            }
+
+            for (int i = 0; i < Skinning.MaxBindings; ++i)
+            {
+                var jw = Skinning.GetJointBinding(i);
+                if (!jw.Item2._IsFinite() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
+            }
+
+            return sb.ToString();
+        }
+
+        #endregion
+
         #region constructors
 
         public VertexBuilder(TvG g, TvM m, TvS s)
@@ -306,41 +367,6 @@ namespace SharpGLTF.Geometry
         public static MeshBuilder<TvG, TvM, TvS> CreateCompatibleMesh(string name = null)
         {
             return new MeshBuilder<TvG, TvM, TvS>(name);
-        }
-
-        private String _GetDebugWarnings()
-        {
-            var sb = new StringBuilder();
-
-            if (Geometry.TryGetNormal(out Vector3 n))
-            {
-                if (!n.IsValidNormal()) sb.Append($" ❌𝚴:{n}");
-            }
-
-            if (Geometry.TryGetTangent(out Vector4 t))
-            {
-                if (!t.IsValidTangent()) sb.Append($" ❌𝚻:{t}");
-            }
-
-            for (int i = 0; i < Material.MaxColors; ++i)
-            {
-                var c = Material.GetColor(i);
-                if (!c._IsFinite() | !c.IsInRange(Vector4.Zero, Vector4.One)) sb.Append($" ❌𝐂{i}:{c}");
-            }
-
-            for (int i = 0; i < Material.MaxTextCoords; ++i)
-            {
-                var uv = Material.GetTexCoord(i);
-                if (!uv._IsFinite()) sb.Append($" ❌𝐔𝐕{i}:{uv}");
-            }
-
-            for (int i = 0; i < Skinning.MaxBindings; ++i)
-            {
-                var jw = Skinning.GetJointBinding(i);
-                if (!jw.Item2._IsFinite() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
-            }
-
-            return sb.ToString();
         }
 
         IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }

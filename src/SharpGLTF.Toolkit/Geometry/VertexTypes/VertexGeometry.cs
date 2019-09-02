@@ -19,8 +19,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void ApplyTransform(Matrix4x4 xform);
 
-        IVertexGeometry ToAbsoluteMorph(IVertexGeometry baseValue);
-        IVertexGeometry ToDisplaceMorph(IVertexGeometry baseValue);
+        VertexGeometryDelta Subtract(IVertexGeometry baseValue);
+
+        void Add(VertexGeometryDelta delta);
     }
 
     /// <summary>
@@ -75,16 +76,14 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { }
 
-        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
-            var bv = (VertexPosition)baseValue;
-            return new VertexPosition(this.Position + bv.Position);
+            return new VertexGeometryDelta((VertexPosition)baseValue, this);
         }
 
-        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        public void Add(VertexGeometryDelta delta)
         {
-            var bv = (VertexPosition)baseValue;
-            return new VertexPosition(this.Position - bv.Position);
+            this.Position += delta.PositionDelta;
         }
 
         public Vector3 GetPosition() { return this.Position; }
@@ -162,16 +161,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { }
 
-        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
-            var bv = (VertexPositionNormal)baseValue;
-            return new VertexPositionNormal(this.Position + bv.Position, this.Normal + bv.Normal);
+            return new VertexGeometryDelta((VertexPositionNormal)baseValue, this);
         }
 
-        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        public void Add(VertexGeometryDelta delta)
         {
-            var bv = (VertexPositionNormal)baseValue;
-            return new VertexPositionNormal(this.Position - bv.Position, this.Normal - bv.Normal);
+            this.Position += delta.PositionDelta;
+            this.Normal += delta.NormalDelta;
         }
 
         public Vector3 GetPosition() { return this.Position; }
@@ -249,16 +247,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = tangent; }
 
-        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
+        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
-            var bv = (VertexPositionNormalTangent)baseValue;
-            return new VertexPositionNormalTangent(this.Position + bv.Position, this.Normal + bv.Normal, this.Tangent + bv.Tangent);
+            return new VertexGeometryDelta((VertexPositionNormalTangent)baseValue, this);
         }
 
-        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
+        public void Add(VertexGeometryDelta delta)
         {
-            var bv = (VertexPositionNormalTangent)baseValue;
-            return new VertexPositionNormalTangent(this.Position - bv.Position, this.Normal - bv.Normal, this.Tangent - bv.Tangent);
+            this.Position += delta.PositionDelta;
+            this.Normal += delta.NormalDelta;
+            this.Tangent += new Vector4(delta.TangentDelta, 0);
         }
 
         public Vector3 GetPosition() { return this.Position; }
@@ -286,52 +284,121 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    struct VertexPositionNormalTangentDisplacement : IVertexGeometry
+    public struct VertexGeometryDelta : IVertexGeometry
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal} 𝚻:{Tangent}";
+        private string _GetDebuggerDisplay() => $"Δ𝐏:{PositionDelta} Δ𝚴:{NormalDelta} Δ𝚻:{TangentDelta}";
+
+        #endregion
+
+        #region constructors
+
+        public static implicit operator VertexGeometryDelta(Vector3 position)
+        {
+            return new VertexGeometryDelta(position, Vector3.Zero, Vector3.Zero);
+        }
+
+        public static implicit operator VertexGeometryDelta((Vector3, Vector3) tuple)
+        {
+            return new VertexGeometryDelta(tuple.Item1, tuple.Item2, Vector3.Zero);
+        }
+
+        public static implicit operator VertexGeometryDelta((Vector3, Vector3, Vector3) tuple)
+        {
+            return new VertexGeometryDelta(tuple.Item1, tuple.Item2, tuple.Item3);
+        }
+
+        public VertexGeometryDelta(IVertexGeometry src)
+        {
+            Guard.NotNull(src, nameof(src));
+
+            this.PositionDelta = src.GetPosition();
+            src.TryGetNormal(out this.NormalDelta);
+            src.TryGetTangent(out Vector4 t);
+
+            this.TangentDelta = new Vector3(t.X, t.Y, t.Z);
+        }
+
+        public VertexGeometryDelta(Vector3 p, Vector3 n, Vector3 t)
+        {
+            this.PositionDelta = p;
+            this.NormalDelta = n;
+            this.TangentDelta = t;
+        }
+
+        internal VertexGeometryDelta(VertexPosition rootVal, VertexPosition morphVal)
+        {
+            PositionDelta = morphVal.Position - rootVal.Position;
+            NormalDelta = Vector3.Zero;
+            TangentDelta = Vector3.Zero;
+        }
+
+        internal VertexGeometryDelta(VertexPositionNormal rootVal, VertexPositionNormal morphVal)
+        {
+            PositionDelta = morphVal.Position - rootVal.Position;
+            NormalDelta = morphVal.Normal - rootVal.Normal;
+            TangentDelta = Vector3.Zero;
+        }
+
+        internal VertexGeometryDelta(VertexPositionNormalTangent rootVal, VertexPositionNormalTangent morphVal)
+        {
+            PositionDelta = morphVal.Position - rootVal.Position;
+            NormalDelta = morphVal.Normal - rootVal.Normal;
+
+            var dt = morphVal.Tangent - rootVal.Tangent;
+            TangentDelta = new Vector3(dt.X, dt.Y, dt.Z);
+        }
+
+        internal VertexGeometryDelta(VertexGeometryDelta rootVal, VertexGeometryDelta morphVal)
+        {
+            PositionDelta = morphVal.PositionDelta - rootVal.PositionDelta;
+            NormalDelta = morphVal.NormalDelta - rootVal.NormalDelta;
+            TangentDelta = morphVal.TangentDelta - rootVal.TangentDelta;
+        }
 
         #endregion
 
         #region data
 
-        [VertexAttribute("POSITION")]
-        public Vector3 Position;
+        [VertexAttribute("POSITIONDELTA")]
+        public Vector3 PositionDelta;
 
-        [VertexAttribute("NORMAL")]
-        public Vector3 Normal;
+        [VertexAttribute("NORMALDELTA")]
+        public Vector3 NormalDelta;
 
-        [VertexAttribute("TANGENT")]
-        public Vector3 Tangent;
+        [VertexAttribute("TANGENTDELTA")]
+        public Vector3 TangentDelta;
 
         #endregion
 
         #region API
 
-        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(Vector3 position) { this.PositionDelta = position; }
 
-        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
+        void IVertexGeometry.SetNormal(Vector3 normal) { this.NormalDelta = normal; }
 
-        void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = new Vector3(tangent.X, tangent.Y, tangent.Z); }
+        void IVertexGeometry.SetTangent(Vector4 tangent) { this.TangentDelta = new Vector3(tangent.X, tangent.Y, tangent.Z); }
 
-        IVertexGeometry IVertexGeometry.ToAbsoluteMorph(IVertexGeometry baseValue)
-        {
-            throw new NotSupportedException();
-        }
+        public Vector3 GetPosition() { return this.PositionDelta; }
 
-        IVertexGeometry IVertexGeometry.ToDisplaceMorph(IVertexGeometry baseValue)
-        {
-            throw new NotSupportedException();
-        }
+        public bool TryGetNormal(out Vector3 normal) { normal = this.NormalDelta; return true; }
 
-        public Vector3 GetPosition() { return this.Position; }
-
-        public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
-
-        public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.Tangent, 0); return true; }
+        public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.TangentDelta, 0); return true; }
 
         public void ApplyTransform(Matrix4x4 xform) { throw new NotSupportedException(); }
+
+        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
+        {
+            return new VertexGeometryDelta((VertexGeometryDelta)baseValue, this);
+        }
+
+        public void Add(VertexGeometryDelta delta)
+        {
+            this.PositionDelta += delta.PositionDelta;
+            this.NormalDelta += delta.NormalDelta;
+            this.TangentDelta += delta.TangentDelta;
+        }
 
         public void Validate() { }
 

@@ -28,6 +28,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color}")]
     public struct VertexColor1 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂:{Color}";
+
+        #endregion
+
         #region constructors
 
         public VertexColor1(Vector4 color)
@@ -90,6 +96,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐂₀:{Color0} 𝐂₁:{Color1}")]
     public struct VertexColor2 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1}";
+
+        #endregion
+
         #region constructors
 
         public VertexColor2(Vector4 color0, Vector4 color1)
@@ -159,6 +171,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐔𝐕:{TexCoord}")]
     public struct VertexTexture1 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐔𝐕:{TexCoord}";
+
+        #endregion
+
         #region constructors
 
         public VertexTexture1(Vector2 uv)
@@ -221,6 +239,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
     public struct VertexTexture2 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+
+        #endregion
+
         #region constructors
 
         public VertexTexture2(Vector2 uv0, Vector2 uv1)
@@ -293,6 +317,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexColor1Texture1 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂:{Color} 𝐔𝐕:{TexCoord}";
+
+        #endregion
+
         #region constructors
 
         public VertexColor1Texture1(Vector4 color, Vector2 tex)
@@ -361,6 +391,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
     public struct VertexColor1Texture2 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂:{Color} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+
+        #endregion
+
         #region constructors
 
         public VertexColor1Texture2(Vector4 color, Vector2 tex0, Vector2 tex1)
@@ -442,6 +478,12 @@ namespace SharpGLTF.Geometry.VertexTypes
     [System.Diagnostics.DebuggerDisplay("𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
     public struct VertexColor2Texture2 : IVertexMaterial
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+
+        #endregion
+
         #region constructors
 
         public VertexColor2Texture2(Vector4 color0, Vector4 color1, Vector2 tex0, Vector2 tex1)

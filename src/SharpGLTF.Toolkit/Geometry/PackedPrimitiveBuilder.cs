@@ -88,22 +88,21 @@ namespace SharpGLTF.Geometry
 
         public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim)
         {
-            var vAccessors = new List<Memory.MemoryAccessor>();
+            bool hasPositions = _VertexAccessors.Any(item => item.Attribute.Name == "POSITION");
+            bool hasNormals = _VertexAccessors.Any(item => item.Attribute.Name == "NORMAL");
+            bool hasTangents = _VertexAccessors.Any(item => item.Attribute.Name == "TANGENT");
+
+            if (!hasPositions) throw new InvalidOperationException("Set vertices before morph targets.");
 
             for (int i = 0; i < srcPrim.MorphTargets.TargetsCount; ++i)
             {
-                var mtv = srcPrim.MorphTargets.GetMorphTargetVertices(i, srcPrim.Vertices.Count);
+                var mtv = srcPrim.MorphTargets.GetMorphTargetVertices(srcPrim.Vertices.Count, i);
 
-                vAccessors.Clear();
+                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", EncodingType.UNSIGNED_SHORT);
 
-                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITION", EncodingType.UNSIGNED_SHORT);
-                if (pAccessor != null) vAccessors.Add(pAccessor);
+                var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", EncodingType.UNSIGNED_SHORT);
 
-                var nAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMAL", EncodingType.UNSIGNED_SHORT);
-                if (nAccessor != null) vAccessors.Add(nAccessor);
-
-                var tAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "MORPHTANGENT", EncodingType.UNSIGNED_SHORT);
-                if (tAccessor != null) vAccessors.Add(tAccessor);
+                var tAccessor = !hasTangents ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TANGENTDELTA", EncodingType.UNSIGNED_SHORT);
 
                 AddMorphTarget(pAccessor, nAccessor, tAccessor);
             }
@@ -113,7 +112,29 @@ namespace SharpGLTF.Geometry
         {
             morphTarget = morphTarget.Where(item => item != null).ToArray();
 
+            foreach (var accessor in morphTarget)
+            {
+                if (accessor.Attribute.Dimensions != DimensionType.VEC3) throw new InvalidOperationException();
+            }
+
+            morphTarget = morphTarget
+                .Select(item => _RemoveDelta(item))
+                .ToArray();
+
             _MorphTargets.Add(morphTarget);
+        }
+
+        private static Memory.MemoryAccessor _RemoveDelta(Memory.MemoryAccessor accessor)
+        {
+            var name = accessor.Attribute.Name;
+            if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
+
+            name = name.Substring(0, name.Length - 5);
+
+            var attr = accessor.Attribute;
+            attr.Name = name;
+
+            return new SharpGLTF.Memory.MemoryAccessor(accessor.Data, attr);
         }
 
         internal void CopyToMesh(Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)

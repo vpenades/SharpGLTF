@@ -461,10 +461,10 @@ namespace SharpGLTF.Scenes
 
             var morphBuilder = mesh2.UseMorphTarget(0);
 
-            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[0], Vector3.UnitY);
-            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[1], Vector3.UnitY);
-            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[2], Vector3.UnitY);
-            morphBuilder.SetVertexDisplacement(morphBuilder.Positions[3], Vector3.UnitY);
+            morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(0), (Vector3.UnitY, Vector3.Zero));
+            morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(1), (Vector3.UnitY, Vector3.Zero));
+            morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(2), (Vector3.UnitY, Vector3.Zero));
+            morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(3), (Vector3.UnitY, Vector3.Zero));
 
             inst2.Content.UseMorphing().Value = Transforms.SparseWeight8.Create(1);
             

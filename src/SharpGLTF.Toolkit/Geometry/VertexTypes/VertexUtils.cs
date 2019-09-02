@@ -215,14 +215,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             // determine the vertex attributes from the first vertex.
             var attributes = GetVertexAttributes(vertices[0], vertices.Count, jointEncoding);
 
-            var isMorphTangent = attributeName == "MORPHTANGENT";
-            if (isMorphTangent) attributeName = "TANGENT";
-
             var attribute = attributes.FirstOrDefault(item => item.Name == attributeName);
             if (attribute.Name == null) return null;
             attribute.ByteOffset = 0;
             attribute.ByteStride = 0;
-            if (isMorphTangent) attribute.Dimensions = Schema2.DimensionType.VEC3;
 
             // create a buffer
             var vbuffer = new ArraySegment<byte>(new Byte[attribute.PaddedByteLength * vertices.Count]);
@@ -230,15 +226,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             // fill the buffer with the vertex attributes.
             var accessor = new MemoryAccessor(vbuffer, attribute);
 
-            if (isMorphTangent)
-            {
-                var columnFunc = _GetVertexBuilderAttributeFunc("MORPHTANGENT");
-                accessor.AsVector3Array().Fill(vertices._GetColumn<TVertex, Vector3>(columnFunc));
-            }
-            else
-            {
-                accessor.FillAccessor(vertices);
-            }
+            accessor.FillAccessor(vertices);
 
             return accessor;
         }
@@ -364,7 +352,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
             if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
             if (attributeName == "TANGENT") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? t : Vector4.Zero; };
-            if (attributeName == "MORPHTANGENT") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? new Vector3(t.X, t.Y, t.Z) : Vector3.Zero; };
+
+            if (attributeName == "POSITIONDELTA") return v => v.GetGeometry().GetPosition();
+            if (attributeName == "NORMALDELTA") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
+            if (attributeName == "TANGENTDELTA") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? new Vector3(t.X, t.Y, t.Z) : Vector3.Zero; };
 
             if (attributeName == "COLOR_0") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.One : m.GetColor(0); };
             if (attributeName == "COLOR_1") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.One : m.GetColor(1); };

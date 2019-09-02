@@ -11,6 +11,14 @@ namespace SharpGLTF.Geometry.VertexTypes
     public class VertexSkinningTests
     {
         [Test]
+        public void TestVertexBuilderDebuggerDisplay()
+        {
+            var v = new VertexBuilder<VertexPositionNormalTangent, VertexColor1Texture1, VertexJoints4>();
+
+            var txt = v._GetDebuggerDisplay();
+        }
+
+        [Test]
         public void TestVertexSkinningDowngradeFrom8To4Joints()
         {
             // vertex with 5 bindings

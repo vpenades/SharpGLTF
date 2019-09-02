@@ -8,20 +8,31 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    public interface IMorphTargetReader
+    public interface IPrimitiveMorphTargetReader
     {
         int TargetsCount { get; }
 
+        /// <summary>
+        /// Gets the collection of vertex indices that have deltas.
+        /// </summary>
+        /// <param name="morphTargetIndex">The morph target to query.</param>
+        /// <returns>A collection of vertex indices.</returns>
         IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex);
 
-        IVertexBuilder GetVertexDisplacement(int morphTargetIndex, int vertexIndex);
+        /// <summary>
+        /// Gets the <see cref="VertexGeometryDelta"/> of a given vertex for a given morph target.
+        /// </summary>
+        /// <param name="morphTargetIndex"></param>
+        /// <param name="vertexIndex"></param>
+        /// <returns></returns>
+        VertexGeometryDelta GetVertexDelta(int morphTargetIndex, int vertexIndex);
     }
 
-    public class MorphTargetBuilder<TvG> : IMorphTargetReader
+    public class PrimitiveMorphTargetBuilder<TvG> : IPrimitiveMorphTargetReader
         where TvG : struct, IVertexGeometry
     {
         #region lifecycle
-        internal MorphTargetBuilder(Func<int, TvG> baseVertexFunc)
+        internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc)
         {
             _BaseVertexFunc = baseVertexFunc;
         }
@@ -40,8 +51,6 @@ namespace SharpGLTF.Geometry
 
         public int TargetsCount => _Targets.Count;
 
-        public Boolean AbsoluteMode => true;
-
         #endregion
 
         #region API
@@ -51,30 +60,30 @@ namespace SharpGLTF.Geometry
             return morphTargetIndex < _Targets.Count ? _Targets[morphTargetIndex].Keys : (IReadOnlyCollection<int>)Array.Empty<int>();
         }
 
-        IVertexBuilder IMorphTargetReader.GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
-        {
-            var g = _GetVertexDisplacement(morphTargetIndex, vertexIndex);
-
-            return new VertexBuilder<TvG, VertexEmpty, VertexEmpty>(g);
-        }
-
-        TvG GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
-        {
-            return _GetVertexDisplacement(morphTargetIndex, vertexIndex);
-        }
-
-        private TvG _GetVertexDisplacement(int morphTargetIndex, int vertexIndex)
+        public VertexGeometryDelta GetVertexDelta(int morphTargetIndex, int vertexIndex)
         {
             var target = _Targets[morphTargetIndex];
 
             if (target.TryGetValue(vertexIndex, out TvG value))
             {
-                if (this.AbsoluteMode) value = (TvG)value.ToDisplaceMorph(_BaseVertexFunc(vertexIndex));
-
-                return value;
+                return value.Subtract(_BaseVertexFunc(vertexIndex));
             }
 
             return default;
+        }
+
+        public void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta value)
+        {
+            if (object.Equals(value, default(VertexGeometryDelta)))
+            {
+                _RemoveVertex(morphTargetIndex, vertexIndex);
+                return;
+            }
+
+            var vertex = _BaseVertexFunc(vertexIndex);
+            vertex.Add(value);
+
+            _SetVertex(morphTargetIndex, vertexIndex, vertex);
         }
 
         public TvG GetVertex(int morphTargetIndex, int vertexIndex)
@@ -83,28 +92,10 @@ namespace SharpGLTF.Geometry
 
             if (target.TryGetValue(vertexIndex, out TvG value))
             {
-                if (!this.AbsoluteMode) value = (TvG)value.ToAbsoluteMorph(_BaseVertexFunc(vertexIndex));
-
                 return value;
             }
 
             return _BaseVertexFunc(vertexIndex);
-        }
-
-        public void SetVertexDisplacement(int morphTargetIndex, int vertexIndex, TvG value)
-        {
-            if (object.Equals(value, default(TvG)))
-            {
-                _RemoveVertex(morphTargetIndex, vertexIndex);
-                return;
-            }
-
-            if (this.AbsoluteMode)
-            {
-                value = (TvG)value.ToAbsoluteMorph(_BaseVertexFunc(vertexIndex));
-            }
-
-            _SetVertex(morphTargetIndex, vertexIndex, value);
         }
 
         public void SetVertex(int morphTargetIndex, int vertexIndex, TvG value)
@@ -113,11 +104,6 @@ namespace SharpGLTF.Geometry
             {
                 _RemoveVertex(morphTargetIndex, vertexIndex);
                 return;
-            }
-
-            if (!this.AbsoluteMode)
-            {
-                value = (TvG)value.ToDisplaceMorph(_BaseVertexFunc(vertexIndex));
             }
 
             _SetVertex(morphTargetIndex, vertexIndex, value);
@@ -161,7 +147,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        internal void SetMorphTargets(MorphTargetBuilder<TvG> other, IReadOnlyDictionary<int, int> vertexMap, Func<TvG, TvG> vertexFunc)
+        internal void SetMorphTargets(PrimitiveMorphTargetBuilder<TvG> other, IReadOnlyDictionary<int, int> vertexMap, Func<TvG, TvG> vertexFunc)
         {
             for (int tidx = 0; tidx < other.TargetsCount; ++tidx)
             {
@@ -198,34 +184,56 @@ namespace SharpGLTF.Geometry
             _Mesh = mesh;
             _MorphTargetIndex = morphTargetIndex;
 
-            _Positions = _Mesh.Primitives
-                .SelectMany(item => item.Vertices)
-                .Select(item => item.Position)
-                .Distinct()
-                .ToArray();
+            foreach (var prim in _Mesh.Primitives)
+            {
+                for (int vidx = 0; vidx < prim.Vertices.Count; ++vidx)
+                {
+                    var key = prim.Vertices[vidx].Geometry;
+
+                    if (!_Vertices.TryGetValue(key, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+                    {
+                        _Vertices[key] = val = new List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)>();
+                    }
+
+                    val.Add((prim, vidx));
+
+                    if (!_Positions.TryGetValue(key.GetPosition(), out List<TvG> geos))
+                    {
+                        _Positions[key.GetPosition()] = geos = new List<TvG>();
+                    }
+
+                    geos.Add(key);
+                }
+            }
+
         }
 
         private readonly MeshBuilder<TMaterial, TvG, TvM, TvS> _Mesh;
         private readonly int _MorphTargetIndex;
 
-        private readonly Vector3[] _Positions;
+        private readonly Dictionary<TvG, List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)>> _Vertices = new Dictionary<TvG, List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)>>();
 
-        public IReadOnlyList<Vector3> Positions => _Positions;
+        private readonly Dictionary<Vector3, List<TvG>> _Positions = new Dictionary<Vector3, List<TvG>>();
 
-        public void SetVertexDisplacement(Vector3 key, Vector3 displacement)
+        public IReadOnlyCollection<Vector3> Positions => _Positions.Keys;
+
+        public IReadOnlyCollection<TvG> Vertices => _Vertices.Keys;
+
+        public void SetVertexDelta(Vector3 key, VertexGeometryDelta delta)
         {
-            var g = default(TvG);
-
-            g.SetPosition(displacement);
-
-            foreach (var p in _Mesh.Primitives)
+            if (_Positions.TryGetValue(key, out List<TvG> geos))
             {
-                for (int i = 0; i < p.Vertices.Count; ++i)
+                foreach (var g in geos) SetVertexDisplacement(g, delta);
+            }
+        }
+
+        public void SetVertexDisplacement(TvG vertex, VertexGeometryDelta delta)
+        {
+            if (_Vertices.TryGetValue(vertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+            {
+                foreach (var entry in val)
                 {
-                    if (p.Vertices[i].Position == key)
-                    {
-                        p.MorphTargets.SetVertexDisplacement(_MorphTargetIndex, i, g);
-                    }
+                    entry.Item1.MorphTargets.SetVertexDelta(_MorphTargetIndex, entry.Item2, delta);
                 }
             }
         }

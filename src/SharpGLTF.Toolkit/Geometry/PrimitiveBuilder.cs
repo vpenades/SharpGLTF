@@ -32,7 +32,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         IReadOnlyList<IVertexBuilder> Vertices { get; }
 
-        IMorphTargetReader MorphTargets { get; }
+        IPrimitiveMorphTargetReader MorphTargets { get; }
 
         /// <summary>
         /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
@@ -68,7 +68,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         Type VertexType { get; }
 
-        void SetVertexDisplacement(int morphTargetIndex, int vertexIndex, IVertexGeometry vertex);
+        void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta);
 
         int AddPoint(IVertexBuilder a);
 
@@ -121,7 +121,7 @@ namespace SharpGLTF.Geometry
             this._Mesh = mesh;
             this._Material = material;
 
-            this._MorphTargets = new MorphTargetBuilder<TvG>( idx => _Vertices[idx].Geometry );
+            this._MorphTargets = new PrimitiveMorphTargetBuilder<TvG>( idx => _Vertices[idx].Geometry );
         }
 
         #endregion
@@ -134,7 +134,7 @@ namespace SharpGLTF.Geometry
 
         private readonly VertexListWrapper _Vertices = new VertexListWrapper();
 
-        private readonly MorphTargetBuilder<TvG> _MorphTargets;
+        private readonly PrimitiveMorphTargetBuilder<TvG> _MorphTargets;
 
         #endregion
 
@@ -166,9 +166,9 @@ namespace SharpGLTF.Geometry
 
         public virtual IReadOnlyList<(int, int, int, int?)> Surfaces => Array.Empty<(int, int, int, int?)>();
 
-        public MorphTargetBuilder<TvG> MorphTargets => _MorphTargets;
+        public PrimitiveMorphTargetBuilder<TvG> MorphTargets => _MorphTargets;
 
-        IMorphTargetReader IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
+        IPrimitiveMorphTargetReader IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
 
         #endregion
 
@@ -204,14 +204,9 @@ namespace SharpGLTF.Geometry
             return _Vertices.Use(vertex);
         }
 
-        void IPrimitiveBuilder.SetVertexDisplacement(int morphTargetIndex, int vertexIndex, IVertexGeometry vertex)
+        void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta)
         {
-            Guard.NotNull(vertex, nameof(vertex));
-
-            var v = vertex.ConvertToGeometry<TvG>();
-            System.Diagnostics.Debug.Assert(v.GetPosition() == vertex.GetPosition());
-
-            this._MorphTargets.SetVertexDisplacement(morphTargetIndex, vertexIndex, v);
+            this._MorphTargets.SetVertexDelta(morphTargetIndex, vertexIndex, delta);
         }
 
         /// <summary>
@@ -399,7 +394,7 @@ namespace SharpGLTF.Geometry
         {
             throw new NotSupportedException("Quadrangles are not supported for this primitive");
         }
-        
+
         #endregion
 
         #region helper types
