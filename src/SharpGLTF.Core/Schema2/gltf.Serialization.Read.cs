@@ -45,10 +45,14 @@ namespace SharpGLTF.Schema2
         /// Gets or sets the <see cref="AssetReader"/> delegate used to read satellite files.
         /// </summary>
         public AssetReader FileReader { get; set; }
+
+        public Boolean SkipValidation { get; set; }
     }
 
     partial class ModelRoot
     {
+        #region read / load methods
+
         /// <summary>
         /// Reads a <see cref="MODEL"/> instance from a path pointing to a GLB or a GLTF file
         /// </summary>
@@ -183,6 +187,10 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        #endregion
+
+        #region reading core
+
         private static MODEL _Read(TextReader textReader, ReadSettings settings)
         {
             Guard.NotNull(textReader, nameof(textReader));
@@ -212,11 +220,16 @@ namespace SharpGLTF.Schema2
                     image._ResolveUri(settings.FileReader);
                 }
 
-                var ex = root.Validate().FirstOrDefault();
-                if (ex != null) throw ex;
+                if (!settings.SkipValidation)
+                {
+                    var ex = root.Validate().FirstOrDefault();
+                    if (ex != null) throw ex;
+                }
 
                 return root;
             }
         }
+
+        #endregion
     }
 }

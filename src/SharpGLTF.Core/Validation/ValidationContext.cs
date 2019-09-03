@@ -54,6 +54,11 @@ namespace SharpGLTF.Validation
             _Exceptions.Add(new SemanticException(target, message));
         }
 
+        public void AddSemanticError(TARGET target, String format, params object[] args)
+        {
+            _Exceptions.Add(new SemanticException(target, String.Format(format, args)));
+        }
+
         #endregion
 
         #region data errors

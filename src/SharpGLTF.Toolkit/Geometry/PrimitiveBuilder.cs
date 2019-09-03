@@ -32,7 +32,10 @@ namespace SharpGLTF.Geometry
         /// </summary>
         IReadOnlyList<IVertexBuilder> Vertices { get; }
 
-        IPrimitiveMorphTargetReader MorphTargets { get; }
+        /// <summary>
+        /// Gets the list of <see cref="IPrimitiveMorphTargetReader"/>.
+        /// </summary>
+        IReadOnlyList<IPrimitiveMorphTargetReader> MorphTargets { get; }
 
         /// <summary>
         /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
@@ -104,8 +107,6 @@ namespace SharpGLTF.Geometry
     /// The vertex fragment type with Skin Joint Weights.
     /// Valid types are:
     /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexJoints8x4"/>,
-    /// <see cref="VertexJoints8x8"/>,
     /// <see cref="VertexJoints4"/>,
     /// <see cref="VertexJoints8"/>.
     /// </typeparam>
@@ -120,8 +121,6 @@ namespace SharpGLTF.Geometry
         {
             this._Mesh = mesh;
             this._Material = material;
-
-            this._MorphTargets = new PrimitiveMorphTargetBuilder<TvG>( idx => _Vertices[idx].Geometry );
         }
 
         #endregion
@@ -134,7 +133,7 @@ namespace SharpGLTF.Geometry
 
         private readonly VertexListWrapper _Vertices = new VertexListWrapper();
 
-        private readonly PrimitiveMorphTargetBuilder<TvG> _MorphTargets;
+        private readonly List<PrimitiveMorphTargetBuilder<TvG>> _MorphTargets = new List<PrimitiveMorphTargetBuilder<TvG>>();
 
         #endregion
 
@@ -158,6 +157,8 @@ namespace SharpGLTF.Geometry
 
         IReadOnlyList<IVertexBuilder> IPrimitiveReader<TMaterial>.Vertices => _Vertices;
 
+        IReadOnlyList<IPrimitiveMorphTargetReader> IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
+
         public virtual IReadOnlyList<int> Points => Array.Empty<int>();
 
         public virtual IReadOnlyList<(int, int)> Lines => Array.Empty<(int, int)>();
@@ -166,9 +167,16 @@ namespace SharpGLTF.Geometry
 
         public virtual IReadOnlyList<(int, int, int, int?)> Surfaces => Array.Empty<(int, int, int, int?)>();
 
-        public PrimitiveMorphTargetBuilder<TvG> MorphTargets => _MorphTargets;
+        #endregion
 
-        IPrimitiveMorphTargetReader IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
+        #region API - morph targets
+
+        internal PrimitiveMorphTargetBuilder<TvG> _UseMorphTarget(int morphTargetIndex)
+        {
+            while (this._MorphTargets.Count <= morphTargetIndex) this._MorphTargets.Add(new PrimitiveMorphTargetBuilder<TvG>(idx => _Vertices[idx].Geometry));
+
+            return this._MorphTargets[morphTargetIndex];
+        }
 
         #endregion
 
@@ -206,7 +214,7 @@ namespace SharpGLTF.Geometry
 
         void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta)
         {
-            this._MorphTargets.SetVertexDelta(morphTargetIndex, vertexIndex, delta);
+            _UseMorphTarget(morphTargetIndex).SetVertexDelta(vertexIndex, delta);
         }
 
         /// <summary>
@@ -273,7 +281,7 @@ namespace SharpGLTF.Geometry
 
             TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
 
-            _MorphTargets.TransformVertices(geoFunc);
+            foreach (var mt in _MorphTargets) mt.TransformVertices(geoFunc);
         }
 
         internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
@@ -340,7 +348,10 @@ namespace SharpGLTF.Geometry
 
             TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
 
-            _MorphTargets.SetMorphTargets(primitive._MorphTargets, vmap, geoFunc);
+            for (int i = 0; i < primitive._MorphTargets.Count; ++i)
+            {
+                _UseMorphTarget(i).SetMorphTargets(primitive._MorphTargets[i], vmap, geoFunc);
+            }
         }
 
         #endregion

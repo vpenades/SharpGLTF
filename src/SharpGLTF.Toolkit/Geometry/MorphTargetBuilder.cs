@@ -10,28 +10,25 @@ namespace SharpGLTF.Geometry
 {
     public interface IPrimitiveMorphTargetReader
     {
-        int TargetsCount { get; }
-
         /// <summary>
         /// Gets the collection of vertex indices that have deltas.
         /// </summary>
-        /// <param name="morphTargetIndex">The morph target to query.</param>
         /// <returns>A collection of vertex indices.</returns>
-        IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex);
+        IReadOnlyCollection<int> GetTargetIndices();
 
         /// <summary>
         /// Gets the <see cref="VertexGeometryDelta"/> of a given vertex for a given morph target.
         /// </summary>
-        /// <param name="morphTargetIndex"></param>
-        /// <param name="vertexIndex"></param>
-        /// <returns></returns>
-        VertexGeometryDelta GetVertexDelta(int morphTargetIndex, int vertexIndex);
+        /// <param name="vertexIndex">The index of the vertex.</param>
+        /// <returns>A Vertex delta.</returns>
+        VertexGeometryDelta GetVertexDelta(int vertexIndex);
     }
 
-    public class PrimitiveMorphTargetBuilder<TvG> : IPrimitiveMorphTargetReader
+    sealed class PrimitiveMorphTargetBuilder<TvG> : IPrimitiveMorphTargetReader
         where TvG : struct, IVertexGeometry
     {
         #region lifecycle
+
         internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc)
         {
             _BaseVertexFunc = baseVertexFunc;
@@ -43,28 +40,20 @@ namespace SharpGLTF.Geometry
 
         private readonly Func<int, TvG> _BaseVertexFunc;
 
-        private readonly List<Dictionary<int, TvG>> _Targets = new List<Dictionary<int, TvG>>();
-
-        #endregion
-
-        #region properties
-
-        public int TargetsCount => _Targets.Count;
+        private readonly Dictionary<int, TvG> _MorphVertices = new Dictionary<int, TvG>();
 
         #endregion
 
         #region API
 
-        public IReadOnlyCollection<int> GetTargetIndices(int morphTargetIndex)
+        public IReadOnlyCollection<int> GetTargetIndices()
         {
-            return morphTargetIndex < _Targets.Count ? _Targets[morphTargetIndex].Keys : (IReadOnlyCollection<int>)Array.Empty<int>();
+            return _MorphVertices.Keys;
         }
 
-        public VertexGeometryDelta GetVertexDelta(int morphTargetIndex, int vertexIndex)
+        public VertexGeometryDelta GetVertexDelta(int vertexIndex)
         {
-            var target = _Targets[morphTargetIndex];
-
-            if (target.TryGetValue(vertexIndex, out TvG value))
+            if (_MorphVertices.TryGetValue(vertexIndex, out TvG value))
             {
                 return value.Subtract(_BaseVertexFunc(vertexIndex));
             }
@@ -72,25 +61,23 @@ namespace SharpGLTF.Geometry
             return default;
         }
 
-        public void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta value)
+        public void SetVertexDelta(int vertexIndex, VertexGeometryDelta value)
         {
             if (object.Equals(value, default(VertexGeometryDelta)))
             {
-                _RemoveVertex(morphTargetIndex, vertexIndex);
+                _RemoveVertex(vertexIndex);
                 return;
             }
 
             var vertex = _BaseVertexFunc(vertexIndex);
             vertex.Add(value);
 
-            _SetVertex(morphTargetIndex, vertexIndex, vertex);
+            _SetVertex(vertexIndex, vertex);
         }
 
-        public TvG GetVertex(int morphTargetIndex, int vertexIndex)
+        public TvG GetVertex(int vertexIndex)
         {
-            var target = _Targets[morphTargetIndex];
-
-            if (target.TryGetValue(vertexIndex, out TvG value))
+            if (_MorphVertices.TryGetValue(vertexIndex, out TvG value))
             {
                 return value;
             }
@@ -98,32 +85,25 @@ namespace SharpGLTF.Geometry
             return _BaseVertexFunc(vertexIndex);
         }
 
-        public void SetVertex(int morphTargetIndex, int vertexIndex, TvG value)
+        public void SetVertex(int vertexIndex, TvG value)
         {
             if (object.Equals(value, _BaseVertexFunc(vertexIndex)))
             {
-                _RemoveVertex(morphTargetIndex, vertexIndex);
+                _RemoveVertex(vertexIndex);
                 return;
             }
 
-            _SetVertex(morphTargetIndex, vertexIndex, value);
+            _SetVertex(vertexIndex, value);
         }
 
-        private void _SetVertex(int morphTargetIndex, int vertexIndex, TvG value)
+        private void _SetVertex(int vertexIndex, TvG value)
         {
-            while (_Targets.Count <= morphTargetIndex)
-            {
-                _Targets.Add(new Dictionary<int, TvG>());
-            }
-
-            _Targets[morphTargetIndex][vertexIndex] = value;
+            _MorphVertices[vertexIndex] = value;
         }
 
-        private void _RemoveVertex(int morphTargetIndex, int vertexIndex)
+        private void _RemoveVertex(int vertexIndex)
         {
-            if (morphTargetIndex >= _Targets.Count) return;
-
-            _Targets[morphTargetIndex].Remove(vertexIndex);
+            _MorphVertices.Remove(vertexIndex);
         }
 
         #endregion
@@ -132,53 +112,50 @@ namespace SharpGLTF.Geometry
 
         internal void TransformVertices(Func<TvG, TvG> vertexFunc)
         {
-            for (int tidx = 0; tidx < _Targets.Count; ++tidx)
+            foreach (var vidx in _MorphVertices.Keys)
             {
-                var target = _Targets[tidx];
+                var g = GetVertex(vidx);
 
-                foreach (var vidx in target.Keys)
-                {
-                    var g = GetVertex(tidx, vidx);
+                g = vertexFunc(g);
 
-                    g = vertexFunc(g);
-
-                    SetVertex(tidx, vidx, g);
-                }
+                SetVertex(vidx, g);
             }
         }
 
         internal void SetMorphTargets(PrimitiveMorphTargetBuilder<TvG> other, IReadOnlyDictionary<int, int> vertexMap, Func<TvG, TvG> vertexFunc)
         {
-            for (int tidx = 0; tidx < other.TargetsCount; ++tidx)
+            var indices = other.GetTargetIndices();
+
+            foreach (var srcVidx in indices)
             {
-                var indices = other.GetTargetIndices(tidx);
+                var g = other.GetVertex(srcVidx);
 
-                foreach (var srcVidx in indices)
+                if (vertexFunc != null) g = vertexFunc(g);
+
+                var dstVidx = srcVidx;
+
+                if (vertexMap != null)
                 {
-                    var g = other.GetVertex(tidx, srcVidx);
-
-                    if (vertexFunc != null) g = vertexFunc(g);
-
-                    var dstVidx = srcVidx;
-
-                    if (vertexMap != null)
-                    {
-                        if (!vertexMap.TryGetValue(srcVidx, out dstVidx)) dstVidx = -1;
-                    }
-
-                    if (dstVidx >= 0) this.SetVertex(tidx, dstVidx, g);
+                    if (!vertexMap.TryGetValue(srcVidx, out dstVidx)) dstVidx = -1;
                 }
+
+                if (dstVidx >= 0) this.SetVertex(dstVidx, g);
             }
         }
 
         #endregion
     }
 
-    public class MorphTargetBuilder<TMaterial, TvG, TvS, TvM>
+    /// <summary>
+    /// Utility class to edit the Morph targets of a mesh.
+    /// </summary>
+    public sealed class MorphTargetBuilder<TMaterial, TvG, TvS, TvM>
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
     {
+        #region lifecycle
+
         internal MorphTargetBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, int morphTargetIndex)
         {
             _Mesh = mesh;
@@ -205,8 +182,11 @@ namespace SharpGLTF.Geometry
                     geos.Add(key);
                 }
             }
-
         }
+
+        #endregion
+
+        #region data
 
         private readonly MeshBuilder<TMaterial, TvG, TvM, TvS> _Mesh;
         private readonly int _MorphTargetIndex;
@@ -215,28 +195,57 @@ namespace SharpGLTF.Geometry
 
         private readonly Dictionary<Vector3, List<TvG>> _Positions = new Dictionary<Vector3, List<TvG>>();
 
+        #endregion
+
+        #region properties
+
         public IReadOnlyCollection<Vector3> Positions => _Positions.Keys;
 
         public IReadOnlyCollection<TvG> Vertices => _Vertices.Keys;
+
+        #endregion
+
+        #region API
+
+        public IReadOnlyList<TvG> GetVertices(Vector3 position)
+        {
+            return _Positions.TryGetValue(position, out List<TvG> geos) ? (IReadOnlyList<TvG>)geos : Array.Empty<TvG>();
+        }
 
         public void SetVertexDelta(Vector3 key, VertexGeometryDelta delta)
         {
             if (_Positions.TryGetValue(key, out List<TvG> geos))
             {
-                foreach (var g in geos) SetVertexDisplacement(g, delta);
+                foreach (var g in geos) SetVertexDelta(g, delta);
             }
         }
 
-        public void SetVertexDisplacement(TvG vertex, VertexGeometryDelta delta)
+        public void SetVertex(TvG meshVertex, TvG morphVertex)
         {
-            if (_Vertices.TryGetValue(vertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+            if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
             {
                 foreach (var entry in val)
                 {
-                    entry.Item1.MorphTargets.SetVertexDelta(_MorphTargetIndex, entry.Item2, delta);
+                    entry.Item1
+                        ._UseMorphTarget(_MorphTargetIndex)
+                        .SetVertex(entry.Item2, morphVertex);
                 }
             }
         }
 
+        public void SetVertexDelta(TvG meshVertex, VertexGeometryDelta delta)
+        {
+            if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+            {
+                foreach (var entry in val)
+                {
+                    entry.Item1
+                        ._UseMorphTarget(_MorphTargetIndex)
+                        .SetVertexDelta(entry.Item2, delta);
+                }
+            }
+        }
+
+        #endregion
     }
 }

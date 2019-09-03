@@ -96,6 +96,13 @@ namespace SharpGLTF.Schema2
             {
                 p.Validate(result);
             }
+
+            var morphTargetsCount = this.Primitives
+                .Select(item => item.MorphTargetsCount)
+                .Distinct();
+
+            if (morphTargetsCount.Count() != 1) result.AddSemanticError(this, Validation.SemanticErrors.MESH_PRIMITIVES_UNEQUAL_TARGETS_COUNT);
+            if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError(this, Validation.SemanticErrors.MESH_INVALID_WEIGHTS_COUNT, _weights.Count, morphTargetsCount.First());
         }
 
         internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)

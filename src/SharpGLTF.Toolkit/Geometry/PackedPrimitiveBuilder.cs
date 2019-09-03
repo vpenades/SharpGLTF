@@ -94,9 +94,9 @@ namespace SharpGLTF.Geometry
 
             if (!hasPositions) throw new InvalidOperationException("Set vertices before morph targets.");
 
-            for (int i = 0; i < srcPrim.MorphTargets.TargetsCount; ++i)
+            for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
             {
-                var mtv = srcPrim.MorphTargets.GetMorphTargetVertices(srcPrim.Vertices.Count, i);
+                var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
 
                 var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", EncodingType.UNSIGNED_SHORT);
 

@@ -41,7 +41,7 @@ namespace SharpGLTF.Geometry
                     var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
                     bool useStrided = prefferStrided;
-                    if (srcPrim.MorphTargets.TargetsCount > 0) useStrided = false;
+                    if (srcPrim.MorphTargets.Count > 0) useStrided = false;
 
                     if (useStrided) dstPrim.SetStridedVertices(srcPrim, jointEncoding);
                     else dstPrim.SetStreamedVertices(srcPrim, jointEncoding);
