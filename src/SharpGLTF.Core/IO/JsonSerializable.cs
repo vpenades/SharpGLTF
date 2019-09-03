@@ -18,7 +18,7 @@ namespace SharpGLTF.IO
 
             Validate(result);
 
-            return result.Exceptions;
+            return result.Errors;
         }
 
         internal virtual void Validate(Validation.ValidationContext result)

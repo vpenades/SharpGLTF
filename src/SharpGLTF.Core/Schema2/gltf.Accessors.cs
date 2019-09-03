@@ -331,26 +331,41 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        #endregion
+
+        #region validation
+
         internal override void Validate(Validation.ValidationContext result)
         {
             base.Validate(result);
 
-            if (!_bufferView.HasValue) { result.AddError(this, $"BufferView index missing"); return; }
-            if (_bufferView < 0 || _bufferView >= LogicalParent.LogicalBufferViews.Count) result.AddError(this, $"BufferView index out of range");
+            result.CheckIsDefined(this, "BufferView", _bufferView);
+            result.CheckIndex(this, "BufferView", _bufferView, this.LogicalParent.LogicalBufferViews.Count);
 
             if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
             if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
 
+            if (this.Normalized)
+            {
+                if (this._componentType != EncodingType.UNSIGNED_BYTE && this._componentType != EncodingType.UNSIGNED_SHORT)
+                {
+                    result.AddDataError(this, Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
+                }
+            }
+
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len > 0 && (len & 3) != 0) result.AddError(this, $"Expected length to be multiple of 4, found {len}");
+                result.CheckMultipleOf(this, "Encoding", len, 4);
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
-                var len = Encoding.ByteLength() * Dimensions.DimCount();
-                if (len != 1 && len != 2 && len != 4) result.AddError(this, $"Expected length to be 1, 2 or 4, found {len}");
+                if (this.Normalized) result.AddDataError(this, "Normalized", Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
+                if (this.Dimensions != DimensionType.SCALAR) result.AddDataError(this, "Dimensions", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
+                if (this.Encoding != EncodingType.UNSIGNED_BYTE && this.Encoding != EncodingType.UNSIGNED_INT && this.Encoding != EncodingType.UNSIGNED_SHORT) result.AddDataError(this, "Encoding", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
+
+                // if this.Encoding != EncodingType.UNSIGNED_BYTE > warning, no longer valid.
             }
         }
 
@@ -396,6 +411,16 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateIndices(Validation.ValidationContext result, uint vertexCount, PrimitiveType drawingType)
         {
+            // if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) // error, this must be a ELEMENT_ARRAY_BUFFER
+
+            if (this.Normalized) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Normalized, false);
+
+            if (Encoding != EncodingType.UNSIGNED_BYTE &&
+                Encoding != EncodingType.UNSIGNED_SHORT &&
+                Encoding != EncodingType.UNSIGNED_INT) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
+
+            if (Dimensions != DimensionType.SCALAR) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Dimensions, DimensionType.SCALAR);
+
             switch (drawingType)
             {
                 case PrimitiveType.LINE_LOOP:
@@ -425,10 +450,7 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < indices.Count; ++i)
             {
-                var idx = indices[i];
-
-                if (idx == restart_value) result.AddError(this, $"Index[{i}] value {idx} is invalid PRIMITIVE RESTART value");
-                else if (idx >= vertexCount) result.AddError(this, $"Index[{i}] value {idx} is out of range {0}-{vertexCount}");
+                result.CheckVertexIndex(this, i, indices[i], vertexCount, restart_value);
             }
         }
 
@@ -439,8 +461,7 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < positions.Count; ++i)
             {
                 var pos = positions[i];
-
-                if (!pos._IsFinite()) result.AddError(this, $"POSITION[{i}] value {pos} has non finite values");
+                result.CheckDataIsFinite(this, i, pos);
             }
         }
 
@@ -451,8 +472,8 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < normals.Count; ++i)
             {
                 var nrm = normals[i];
-
-                if (!nrm.IsValidNormal()) result.AddError(this, $"NORMAL[{i}] value {nrm} is invalid");
+                result.CheckDataIsFinite(this, i, nrm);
+                result.CheckDataIsUnitLength(this, i, nrm);
             }
         }
 
@@ -464,54 +485,33 @@ namespace SharpGLTF.Schema2
             {
                 var tgt = tangents[i];
 
-                if (!tgt._IsFinite()) result.AddError(this, $"TANGENT[{i}] value {tgt} has non finite values");
-
-                var len = new Vector3(tgt.X, tgt.Y, tgt.Z).Length();
-
-                if (len < 0.99f || len > 1.01f) result.AddError(this, $"TANGENT[{i}] length {len} is not unit length");
-
-                if (tgt.W != 1 && tgt.W != -1) result.AddError(this, $"TANGENT[{i}].W {tgt.W} has invalid value");
+                result.CheckDataIsFinite(this, i, tgt);
+                result.CheckDataIsUnitLength(this, i, new Vector3(tgt.X, tgt.Y, tgt.Z));
+                result.CheckDataIsValidSign(this, i, tgt.W);
             }
         }
 
         internal void ValidateJoints(Validation.ValidationContext result, int jwset, int jointsCount)
         {
-            var jj = this.AsVector4Array();
+            var joints = this.AsVector4Array();
 
-            void _CheckJoint(Validation.ValidationContext r, float v, int idx, string n)
+            for (int i = 0; i < joints.Count; ++i)
             {
-                if (!v._IsFinite()) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is not finite");
-                if ((v % 1) != 0) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} should be a round value");
-                if (v < 0 || v >= jointsCount) result.AddError(this, $"JOINTS_{jwset}[{idx}].{n} value {v} is out of range 0-{jointsCount}");
-            }
-
-            for (int i = 0; i < jj.Count; ++i)
-            {
-                var jjjj = jj[i];
-                _CheckJoint(result, jjjj.X, i, "X");
-                _CheckJoint(result, jjjj.Y, i, "Y");
-                _CheckJoint(result, jjjj.Z, i, "Z");
-                _CheckJoint(result, jjjj.W, i, "W");
+                var jjjj = joints[i];
+                result.CheckDataIsFinite(this, i, jjjj);
+                result.CheckDataIsInRange(this, i, jjjj, 0, jointsCount-1);
             }
         }
 
         internal void ValidateWeights(Validation.ValidationContext result, int jwset)
         {
-            var ww = this.AsVector4Array();
+            var weights = this.AsVector4Array();
 
-            void _CheckWeight(Validation.ValidationContext r, float v, int idx, string n)
+            for (int i = 0; i < weights.Count; ++i)
             {
-                if (!v._IsFinite()) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is not finite");
-                if (v < 0 || v > 1) result.AddError(this, $"WEIGHTS_{jwset}[{idx}].{n} value {v} is out of range 0-1");
-            }
-
-            for (int i = 0; i < ww.Count; ++i)
-            {
-                var wwww = ww[i];
-                _CheckWeight(result, wwww.X, i, "X");
-                _CheckWeight(result, wwww.Y, i, "Y");
-                _CheckWeight(result, wwww.Z, i, "Z");
-                _CheckWeight(result, wwww.W, i, "W");
+                var wwww = weights[i];
+                result.CheckDataIsFinite(this, i, wwww);
+                result.CheckDataIsInRange(this, i, wwww, 0, 1);
 
                 // theoretically, the sum of all the weights should give 1, ASSUMING there's only one weight set.
                 // but in practice, that seems not to be true.

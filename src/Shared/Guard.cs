@@ -87,6 +87,14 @@ namespace SharpGLTF
 
         #region comparison
 
+        public static void MustBeEqualTo<TValue>(TValue value, TValue expected, string parameterName)
+                    where TValue : IComparable<TValue>
+        {
+            if (value.CompareTo(expected) == 0) return;
+
+            throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be equal to {expected}.");
+        }
+
         public static void MustBePositiveAndMultipleOf(int value, int padding, string parameterName, string message = "")
         {
             if (value < 0)
@@ -179,5 +187,57 @@ namespace SharpGLTF
         }
 
         #endregion
+    }
+
+    [DebuggerStepThrough]
+    internal static class GuardAll
+    {
+        public static void NotNull<T>(IEnumerable<T> collection, string parameterName, string message = "")
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.NotNull(val, parameterName, message);
+        }
+
+        public static void MustBeEqualTo<TValue>(IEnumerable<TValue> collection, TValue expected, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeEqualTo(val, expected, parameterName);
+        }
+
+        public static void MustBeGreaterThan<TValue>(IEnumerable<TValue> collection, TValue minExclusive, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeGreaterThan(val, minExclusive, parameterName);
+        }
+
+        public static void MustBeLessThan<TValue>(IEnumerable<TValue> collection, TValue maxExclusive, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeLessThan(val, maxExclusive, parameterName);
+        }
+
+        public static void MustBeLessThanOrEqualTo<TValue>(IEnumerable<TValue> collection, TValue maxInclusive, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeLessThanOrEqualTo(val, maxInclusive, parameterName);
+        }
+
+        public static void MustBeGreaterThanOrEqualTo<TValue>(IEnumerable<TValue> collection, TValue minInclusive, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeGreaterThanOrEqualTo(val, minInclusive, parameterName);
+        }
+
+        public static void MustBeBetweenOrEqualTo<TValue>(IEnumerable<TValue> collection, TValue minInclusive, TValue maxInclusive, string parameterName)
+            where TValue : IComparable<TValue>
+        {
+            Guard.NotNull(collection, nameof(collection));
+            foreach (var val in collection) Guard.MustBeBetweenOrEqualTo(val, minInclusive, maxInclusive, parameterName);
+        }
     }
 }

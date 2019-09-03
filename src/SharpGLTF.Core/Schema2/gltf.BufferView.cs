@@ -125,6 +125,21 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region validation
+
+        internal override void Validate(Validation.ValidationContext result)
+        {
+            base.Validate(result);
+
+            if (this.FindAccessors().Skip(1).Any())
+            {
+                if (!_byteStride.HasValue) result.AddLinkError(this, Validation.ErrorCodes.MESH_PRIMITIVE_ACCESSOR_WITHOUT_BYTESTRIDE);
+            }
+        }
+
+        #endregion
+
     }
 
     public partial class ModelRoot

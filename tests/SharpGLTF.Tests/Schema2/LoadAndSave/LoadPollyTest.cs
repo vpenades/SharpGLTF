@@ -12,7 +12,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// </summary>
     [TestFixture]
     [Category("Model Load and Save")]
-    public class LoadPollyTest
+    public class LoadSpecialModelsTest
     {
         #region setup
 

@@ -76,7 +76,7 @@ namespace SharpGLTF.Schema2
             if (Version < MINVERSION) result.AddError(this, $"Minimum supported version is {MINVERSION} but found:{MinVersion}");
             if (MinVersion > MAXVERSION) result.AddError(this, $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
 
-            if (MinVersion > Version) result.AddSemanticError(this, $"Asset minVersion {MinVersion} is greater than version {Version}.");
+            if (MinVersion > Version) result.AddSemanticWarning(this, Validation.ErrorCodes.ASSET_MIN_VERSION_GREATER_THAN_VERSION, MinVersion, Version);
         }
 
         private string _GetExtraInfo(string key)

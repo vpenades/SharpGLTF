@@ -4,7 +4,7 @@ using System.Text;
 
 namespace SharpGLTF.Validation
 {
-    static class SemanticErrors
+    static partial class ErrorCodes
     {
         #pragma warning disable SA1310 // Field names should not contain underscore
 

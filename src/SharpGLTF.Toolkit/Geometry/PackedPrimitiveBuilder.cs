@@ -59,14 +59,13 @@ namespace SharpGLTF.Geometry
                         .ToList();
 
             var vAccessors = new List<Memory.MemoryAccessor>();
+            GuardAll.MustBeEqualTo(vAccessors.Select(item => item.Attribute.ByteOffset), 0, nameof(vAccessors));
+            GuardAll.MustBeEqualTo(vAccessors.Select(item => item.Attribute.ByteStride), 0, nameof(vAccessors));
 
             foreach (var an in attributeNames)
             {
                 var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(srcPrim.Vertices, an, encoding);
                 if (vAccessor == null) continue;
-
-                System.Diagnostics.Debug.Assert(vAccessor.Attribute.ByteOffset == 0);
-                System.Diagnostics.Debug.Assert(vAccessor.Attribute.ByteStride == 0);
 
                 vAccessors.Add(vAccessor);
             }
@@ -129,7 +128,7 @@ namespace SharpGLTF.Geometry
             var name = accessor.Attribute.Name;
             if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
 
-            name = name.Substring(0, name.Length - 5);
+            name = name.Replace("DELTA", string.Empty);
 
             var attr = accessor.Attribute;
             attr.Name = name;
