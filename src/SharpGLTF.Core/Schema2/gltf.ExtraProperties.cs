@@ -119,13 +119,26 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
+
+            foreach (var ext in this.Extensions) ext.ValidateReferences(result);
+
+            if (this._extras is JsonSerializable js) js.ValidateReferences(result);
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            foreach (var ext in this.Extensions) ext.Validate(result);
+
+            if (this._extras is JsonSerializable js) js.Validate(result);
 
             if (this._extras != null)
             {
-                result.CheckJsonSerializable(this, "Extras", this._extras);
+                result.CheckJsonSerializable("Extras", this._extras);
             }
         }
 

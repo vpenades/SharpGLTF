@@ -320,6 +320,22 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(Validation.ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            if (!String.IsNullOrWhiteSpace(_uri))
+            {
+                if (!Uri.TryCreate(_uri, UriKind.Relative, out Uri uri)) result.AddLinkError(Validation.ErrorCodes.INVALID_URI);
+            }
+
+            result.CheckReferenceIndex("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+        }
+
+        #endregion
     }
 
     public partial class ModelRoot

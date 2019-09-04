@@ -92,21 +92,19 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidate(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidate(result);
 
-            foreach (var p in this.Primitives)
-            {
-                p.Validate(result);
-            }
+            foreach (var p in this.Primitives) { p.Validate(result); }
 
             var morphTargetsCount = this.Primitives
                 .Select(item => item.MorphTargetsCount)
                 .Distinct();
 
-            if (morphTargetsCount.Count() != 1) result.AddSemanticError(this, Validation.ErrorCodes.MESH_PRIMITIVES_UNEQUAL_TARGETS_COUNT);
-            if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError(this, Validation.ErrorCodes.MESH_INVALID_WEIGHTS_COUNT, _weights.Count, morphTargetsCount.First());
+            if (morphTargetsCount.Count() != 1) result.AddSemanticError(Validation.ErrorCodes.MESH_PRIMITIVES_UNEQUAL_TARGETS_COUNT);
+
+            if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError(Validation.ErrorCodes.MESH_INVALID_WEIGHTS_COUNT, _weights.Count, morphTargetsCount.First());
         }
 
         internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)

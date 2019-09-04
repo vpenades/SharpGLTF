@@ -238,37 +238,46 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
 
-            var ibxAccessor = GetInverseBindMatricesAccessor();
+            result.CheckReferenceIndex("Skeleton", _skeleton, this.LogicalParent.LogicalNodes);
 
-            var logicalNodeCount = this.LogicalParent.LogicalNodes.Count;
+            result.CheckIsDefined("InverseBindMatrices", _inverseBindMatrices);
+            result.CheckReferenceIndex("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
 
-            if (_joints == null || _joints.Count < _jointsMinItems)
+            if (_joints.Count < _jointsMinItems)
             {
-                result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
+
+                // result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
                 return;
             }
 
             for (int i = 0; i < _joints.Count; ++i)
             {
                 var jidx = _joints[i];
-                if (jidx < 0 || jidx >= logicalNodeCount) result.AddError(this, $"Joint {i} Node index reference is out of bounds.");
 
-                if (ibxAccessor != null)
-                {
-                    var ibxform = ibxAccessor.AsMatrix4x4Array()[i];
-                    try { ibxform.Inverse(); }
-                    catch (ArgumentException) { result.AddError(this, $"Joint {i} has invalid bind matrix"); }
-                }
+                result.CheckReferenceIndex("Joints", _joints[i], this.LogicalParent.LogicalNodes);
+            }
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            var ibxAccessor = GetInverseBindMatricesAccessor();
+
+            if (ibxAccessor != null)
+            {
+                if (_joints.Count != ibxAccessor.Count) result.AddLinkError(Validation.ErrorCodes.INVALID_IBM_ACCESSOR_COUNT, _joints.Count, ibxAccessor.Count);
+
+                if (ibxAccessor.Dimensions != DimensionType.MAT4) result.AddLinkError(Validation.ErrorCodes.SKIN_IBM_INVALID_FORMAT, ibxAccessor.Dimensions);
+                else ibxAccessor.ValidateMatrices(result);
             }
 
             if (_skeleton.HasValue)
             {
-                if (_skeleton.Value < 0 || _skeleton.Value >= logicalNodeCount) result.AddError(this, $"Skeleton Node index reference is out of bounds.");
-
                 var skeletonNode = this.Skeleton;
 
                 for (int i = 0; i < this.JointsCount; ++i)
@@ -278,7 +287,7 @@ namespace SharpGLTF.Schema2
                     if (skeletonNode == jointNode) continue;
                     if (skeletonNode._ContainsVisualNode(jointNode, true)) continue;
 
-                    result.AddError(this, $"Skeleton node is not a common ancestor of Joint[{i}]");
+                    // result.AddError(this, $"Skeleton node is not a common ancestor of Joint[{i}]");
                 }
             }
         }

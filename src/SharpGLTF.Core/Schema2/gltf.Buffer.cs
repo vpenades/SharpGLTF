@@ -172,7 +172,7 @@ namespace SharpGLTF.Schema2
 
             var sbbuilder = new _StaticBufferBuilder(0);
 
-            foreach (var bv in views) bv._ConvertToStaticBuffer(sbbuilder);
+            foreach (var bv in views) bv._IsolateBufferMemory(sbbuilder);
 
             this._buffers.Clear();
 

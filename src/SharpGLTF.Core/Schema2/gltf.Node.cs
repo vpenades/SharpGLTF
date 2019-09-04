@@ -364,21 +364,32 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
 
             // check out of range indices
             foreach (var idx in this._children)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) result.AddError(this, $"references invalid Node[{idx}]");
+                result.CheckReferenceIndex(nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
             }
 
+            result.CheckReferenceIndex(nameof(Mesh), _mesh, this.LogicalParent.LogicalMeshes);
+            result.CheckReferenceIndex(nameof(Skin), _skin, this.LogicalParent.LogicalSkins);
+            result.CheckReferenceIndex(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            var thisIndex = this.LogicalIndex;
+
             // check duplicated indices
-            if (this._children.Distinct().Count() != this._children.Count) result.AddError(this, "has duplicated node references");
+            if (this._children.Distinct().Count() != this._children.Count) result.AddSchemaError(nameof(VisualChildren), Validation.ErrorCodes.DUPLICATE_ELEMENTS);
 
             // check self references
-            if (this._children.Contains(this.LogicalIndex)) result.AddError(this, "has self references");
+            if (this._children.Contains(thisIndex)) result.AddLinkError(Validation.ErrorCodes.NODE_LOOP);
 
             // check circular references
             var p = this;
@@ -386,28 +397,30 @@ namespace SharpGLTF.Schema2
             {
                 p = p.VisualParent;
                 if (p == null) break;
-                if (p.LogicalIndex == this.LogicalIndex)
+                if (p.LogicalIndex == thisIndex)
                 {
-                    result.AddError(this, "has a circular reference");
+                    result.AddLinkError(Validation.ErrorCodes.NODE_LOOP);
                     break;
                 }
             }
 
-            // check Transforms (out or range, NaN, etc)
-
-            // check morph weights
-
-            if (this._skin != null)
+            if (_skin.HasValue)
             {
-                if (this._mesh == null)
+                if (!_mesh.HasValue)
                 {
-                    result.AddError(this, "Found a Skin, but Mesh is missing");
+                    result.AddLinkError(Validation.ErrorCodes.NODE_SKIN_WITH_NON_SKINNED_MESH);
                 }
                 else
                 {
                     this.Mesh.ValidateSkinning(result, this.Skin.JointsCount);
                 }
             }
+
+            // TODO:
+
+            // check Transforms (out or range, NaN, etc)
+
+            // check morph weights
         }
 
         #endregion

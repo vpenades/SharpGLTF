@@ -333,37 +333,44 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region validation
+        #region Validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
 
-            result.CheckIsDefined(this, "BufferView", _bufferView);
-            result.CheckIndex(this, "BufferView", _bufferView, this.LogicalParent.LogicalBufferViews.Count);
+            result.CheckIsDefined("BufferView", _bufferView);
+            result.CheckReferenceIndex("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+        }
 
-            if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
-            if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
+        /// <see href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/base/accessor.dart"/>
+        /// <seealso href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/data_access/validate_accessors.dart"/>
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            // if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
+            // if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
 
             if (this.Normalized)
             {
                 if (this._componentType != EncodingType.UNSIGNED_BYTE && this._componentType != EncodingType.UNSIGNED_SHORT)
                 {
-                    result.AddDataError(this, Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
+                    result.AddDataError(Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
                 }
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                result.CheckMultipleOf(this, "Encoding", len, 4);
+                result.CheckMultipleOf("Encoding", len, 4);
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
             {
-                if (this.Normalized) result.AddDataError(this, "Normalized", Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
-                if (this.Dimensions != DimensionType.SCALAR) result.AddDataError(this, "Dimensions", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
-                if (this.Encoding != EncodingType.UNSIGNED_BYTE && this.Encoding != EncodingType.UNSIGNED_INT && this.Encoding != EncodingType.UNSIGNED_SHORT) result.AddDataError(this, "Encoding", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
+                if (this.Normalized) result.AddDataError("Normalized", Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
+                if (this.Dimensions != DimensionType.SCALAR) result.AddDataError("Dimensions", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
+                if (this.Encoding != EncodingType.UNSIGNED_BYTE && this.Encoding != EncodingType.UNSIGNED_INT && this.Encoding != EncodingType.UNSIGNED_SHORT) result.AddDataError("Encoding", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
 
                 // if this.Encoding != EncodingType.UNSIGNED_BYTE > warning, no longer valid.
             }
@@ -371,16 +378,18 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateBounds(Validation.ValidationContext result)
         {
+            result = result.GetContext(this);
+
             if (_min.Count == 0 && _max.Count == 0) return;
 
             var dimensions = this.Dimensions.DimCount();
 
-            if (_min.Count != dimensions) { result.AddError(this, $"min bounds length mismatch; expected {dimensions} but found {_min.Count}"); return; }
-            if (_max.Count != dimensions) { result.AddError(this, $"max bounds length mismatch; expected {dimensions} but found {_max.Count}"); return; }
+            // if (_min.Count != dimensions) { result.AddError($"min bounds length mismatch; expected {dimensions} but found {_min.Count}"); return; }
+            // if (_max.Count != dimensions) { result.AddError($"max bounds length mismatch; expected {dimensions} but found {_max.Count}"); return; }
 
             for (int i = 0; i < _min.Count; ++i)
             {
-                if (_min[i] > _max[i]) result.AddError(this, $"min[{i}] is larger than max[{i}]");
+                // if (_min[i] > _max[i]) result.AddError(this, $"min[{i}] is larger than max[{i}]");
             }
 
             if (this.Encoding != EncodingType.FLOAT) return;
@@ -399,48 +408,29 @@ namespace SharpGLTF.Schema2
                 {
                     var v = current[j];
 
-                    if (!v._IsFinite()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
+                    // if (!v._IsFinite()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
 
                     var min = minimum[j];
                     var max = maximum[j];
 
-                    if (v < min || v > max) result.AddError(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}");
+                    // if (v < min || v > max) result.AddError(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}");
                 }
             }
         }
 
         internal void ValidateIndices(Validation.ValidationContext result, uint vertexCount, PrimitiveType drawingType)
         {
-            // if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) // error, this must be a ELEMENT_ARRAY_BUFFER
+            result = result.GetContext(this);
 
-            if (this.Normalized) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Normalized, false);
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ELEMENT_ARRAY_BUFFER);
+
+            if (this.Normalized) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Normalized, false);
 
             if (Encoding != EncodingType.UNSIGNED_BYTE &&
                 Encoding != EncodingType.UNSIGNED_SHORT &&
-                Encoding != EncodingType.UNSIGNED_INT) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
+                Encoding != EncodingType.UNSIGNED_INT) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
 
-            if (Dimensions != DimensionType.SCALAR) result.AddDataError(this, Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Dimensions, DimensionType.SCALAR);
-
-            switch (drawingType)
-            {
-                case PrimitiveType.LINE_LOOP:
-                case PrimitiveType.LINE_STRIP:
-                    if (this.Count < 2) result.AddError(this, $"Indices count {this.Count} is less than 2");
-                    break;
-
-                case PrimitiveType.TRIANGLE_FAN:
-                case PrimitiveType.TRIANGLE_STRIP:
-                    if (this.Count < 3) result.AddError(this, $"Indices count {this.Count} is less than 3");
-                    break;
-
-                case PrimitiveType.LINES:
-                    if (!this.Count.IsMultipleOf(2)) result.AddError(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}");
-                    break;
-
-                case PrimitiveType.TRIANGLES:
-                    if (!this.Count.IsMultipleOf(3)) result.AddError(this, $"Indices count {this.Count} incompatible with Primitive.{drawingType}");
-                    break;
-            }
+            if (Dimensions != DimensionType.SCALAR) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Dimensions, DimensionType.SCALAR);
 
             uint restart_value = 0xff;
             if (this.Encoding == EncodingType.UNSIGNED_SHORT) restart_value = 0xffff;
@@ -450,71 +440,108 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < indices.Count; ++i)
             {
-                result.CheckVertexIndex(this, i, indices[i], vertexCount, restart_value);
+                result.CheckVertexIndex(i, indices[i], vertexCount, restart_value);
             }
         }
 
         internal void ValidatePositions(Validation.ValidationContext result)
         {
+            result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+
             var positions = this.AsVector3Array();
 
             for (int i = 0; i < positions.Count; ++i)
             {
                 var pos = positions[i];
-                result.CheckDataIsFinite(this, i, pos);
+                result.CheckDataIsFinite(i, pos);
             }
         }
 
         internal void ValidateNormals(Validation.ValidationContext result)
         {
+            result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+
             var normals = this.AsVector3Array();
 
             for (int i = 0; i < normals.Count; ++i)
             {
                 var nrm = normals[i];
-                result.CheckDataIsFinite(this, i, nrm);
-                result.CheckDataIsUnitLength(this, i, nrm);
+                result.CheckDataIsFinite(i, nrm);
+                result.CheckDataIsUnitLength(i, nrm);
             }
         }
 
         internal void ValidateTangents(Validation.ValidationContext result)
         {
+            result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+
             var tangents = this.AsVector4Array();
 
             for (int i = 0; i < tangents.Count; ++i)
             {
                 var tgt = tangents[i];
 
-                result.CheckDataIsFinite(this, i, tgt);
-                result.CheckDataIsUnitLength(this, i, new Vector3(tgt.X, tgt.Y, tgt.Z));
-                result.CheckDataIsValidSign(this, i, tgt.W);
+                result.CheckDataIsFinite(i, tgt);
+                result.CheckDataIsUnitLength(i, new Vector3(tgt.X, tgt.Y, tgt.Z));
+                result.CheckDataIsValidSign(i, tgt.W);
             }
         }
 
         internal void ValidateJoints(Validation.ValidationContext result, int jwset, int jointsCount)
         {
+            result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+
             var joints = this.AsVector4Array();
 
             for (int i = 0; i < joints.Count; ++i)
             {
                 var jjjj = joints[i];
-                result.CheckDataIsFinite(this, i, jjjj);
-                result.CheckDataIsInRange(this, i, jjjj, 0, jointsCount-1);
+                result.CheckDataIsFinite(i, jjjj);
+                result.CheckDataIsInRange(i, jjjj, 0, jointsCount-1);
             }
         }
 
         internal void ValidateWeights(Validation.ValidationContext result, int jwset)
         {
+            result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+
             var weights = this.AsVector4Array();
 
             for (int i = 0; i < weights.Count; ++i)
             {
                 var wwww = weights[i];
-                result.CheckDataIsFinite(this, i, wwww);
-                result.CheckDataIsInRange(this, i, wwww, 0, 1);
+                result.CheckDataIsFinite(i, wwww);
+                result.CheckDataIsInRange(i, wwww, 0, 1);
 
                 // theoretically, the sum of all the weights should give 1, ASSUMING there's only one weight set.
                 // but in practice, that seems not to be true.
+            }
+        }
+
+        internal void ValidateMatrices(Validation.ValidationContext result)
+        {
+            result = result.GetContext(this);
+
+            // if (SourceBufferView.DeviceBufferTarget != null)  
+
+            var matrices = this.AsMatrix4x4Array();
+
+            for (int i = 0; i < matrices.Count; ++i)
+            {
+                var m = matrices[i];
+
+                if (Matrix4x4.Invert(m, out Matrix4x4 r)) continue;
+                result.AddDataError(Validation.ErrorCodes.ACCESSOR_INDECOMPOSABLE_MATRIX, i);
             }
         }
 

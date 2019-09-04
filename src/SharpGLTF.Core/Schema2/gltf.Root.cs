@@ -144,29 +144,50 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckReferenceIndex(nameof(DefaultScene), _scene, this.LogicalScenes);
+
+            foreach (var b in _bufferViews) b.ValidateReferences(result);
+
+            foreach (var t in _textures) t.ValidateReferences(result);
+            foreach (var m in _materials) m.ValidateReferences(result);
+
+            foreach (var a in _accessors) a.ValidateReferences(result);
+            foreach (var m in _meshes) m.ValidateReferences(result);
+            foreach (var s in _skins) s.ValidateReferences(result);
+
+            foreach (var s in _scenes) s.ValidateReferences(result);
+            foreach (var n in _nodes) n.ValidateReferences(result);
+            foreach (var a in _animations) a.ValidateReferences(result);
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
         {
             // 1st check version number
 
-            if (Asset == null) result.AddError(this, "missing Asset object, can't check glTF version"); // fix: create a default Asset
+            if (Asset == null) result.AddSchemaError("Asset","Missing");
             else Asset.Validate(result);
 
-            if (result.HasErrors) return;
+            if (result.Result.HasErrors) return;
 
             // 2nd check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                result.UnsupportedExtensionError(this, iex);
+                result.UnsupportedExtensionError(iex);
             }
 
-            if (result.HasErrors) return;
+            if (result.Result.HasErrors) return;
 
             // 3rd check base class
 
-            base.Validate(result);
+            base.OnValidate(result);
 
             // 4th check contents
+
             foreach (var s in _scenes) s.Validate(result);
             foreach (var n in _nodes) n.Validate(result);
 

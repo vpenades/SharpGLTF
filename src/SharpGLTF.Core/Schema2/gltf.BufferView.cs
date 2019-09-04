@@ -96,7 +96,7 @@ namespace SharpGLTF.Schema2
                 .Where(accessor => accessor._LogicalBufferViewIndex == idx);
         }
 
-        internal void _ConvertToStaticBuffer(_StaticBufferBuilder targetBuffer)
+        internal void _IsolateBufferMemory(_StaticBufferBuilder targetBuffer)
         {
             // retrieve old buffer
             var srcBuf = this.LogicalParent.LogicalBuffers[this._buffer].Content;
@@ -126,16 +126,32 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region validation
+        #region Validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
 
-            if (this.FindAccessors().Skip(1).Any())
-            {
-                if (!_byteStride.HasValue) result.AddLinkError(this, Validation.ErrorCodes.MESH_PRIMITIVE_ACCESSOR_WITHOUT_BYTESTRIDE);
-            }
+            result.CheckReferenceIndex(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers);
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            result.CheckMultipleOf(nameof(ByteStride), ByteStride, 4);
+
+            // if (this.DeviceBufferTarget.HasValue && this.FindAccessors().Any(item => item.IsSparse)) result.AddError()
+        }
+
+        internal void ValidateBufferUsage(Validation.ValidationContext result, BufferMode usingMode)
+        {
+            result = result.GetContext(this);
+
+            if (!this.DeviceBufferTarget.HasValue) return;
+            if (usingMode == this.DeviceBufferTarget.Value) return;
+
+            result.AddSchemaError(nameof(DeviceBufferTarget), Validation.ErrorCodes.BUFFER_VIEW_TARGET_OVERRIDE, this.DeviceBufferTarget.Value, usingMode);
         }
 
         #endregion

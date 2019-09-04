@@ -194,21 +194,107 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
+
+            var root = this.LogicalParent.LogicalParent;
+
+            result.CheckReferenceIndex("Material", _material, root.LogicalMaterials);
+            result.CheckReferenceIndex("Indices", _indices, root.LogicalAccessors);
+
+            foreach (var idx in _attributes.Values)
+            {
+                result.CheckReferenceIndex("Attributes", idx, root.LogicalAccessors);
+            }
+
+            foreach (var idx in _targets.SelectMany(item => item.Values))
+            {
+                result.CheckReferenceIndex("Targets", idx, root.LogicalAccessors);
+            }
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            // check vertex count
 
             var vertexCounts = VertexAccessors
                 .Select(item => item.Value.Count)
                 .Distinct();
 
-            if (vertexCounts.Count() != 1) result.AddError(this, $"Vertex Accessors have mismatching vertices count.");
+            if (vertexCounts.Count() != 1)
+            {
+                result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_UNEQUAL_ACCESSOR_COUNT);
+                return;
+            }
 
-            if (IndexAccessor != null) IndexAccessor.ValidateIndices(result, (uint)vertexCounts.First(), DrawPrimitiveType);
+            var vertexCount = vertexCounts.First();
 
-            GetVertexAccessor("POSITION")?.ValidatePositions(result);
+            // check indices
+
+            if (IndexAccessor != null)
+            {
+                if (IndexAccessor.SourceBufferView.ByteStride != 0) result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_WITH_BYTESTRIDE);
+                IndexAccessor.ValidateIndices(result, (uint)vertexCount, DrawPrimitiveType);
+
+                var incompatibleMode = false;
+
+                switch (this.DrawPrimitiveType)
+                {
+                    case PrimitiveType.LINE_LOOP:
+                    case PrimitiveType.LINE_STRIP:
+                        if (IndexAccessor.Count < 2) incompatibleMode = true;
+                        break;
+
+                    case PrimitiveType.TRIANGLE_FAN:
+                    case PrimitiveType.TRIANGLE_STRIP:
+                        if (IndexAccessor.Count < 3) incompatibleMode = true;
+                        break;
+
+                    case PrimitiveType.LINES:
+                        if (!IndexAccessor.Count.IsMultipleOf(2)) incompatibleMode = true;
+                        break;
+
+                    case PrimitiveType.TRIANGLES:
+                        if (!IndexAccessor.Count.IsMultipleOf(3)) incompatibleMode = true;
+                        break;
+                }
+
+                if (incompatibleMode) result.AddLinkWarning(Validation.WarnCodes.MESH_PRIMITIVE_INCOMPATIBLE_MODE, IndexAccessor.Count, this.DrawPrimitiveType);
+            }
+
+            // check attributes
+
+            foreach (var group in this.VertexAccessors.Values.GroupBy(item => item.SourceBufferView))
+            {
+                if (group.Skip(1).Any())
+                {
+                    if (group.Key.ByteStride == 0) result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_ACCESSOR_WITHOUT_BYTESTRIDE);
+                }
+            }
+
+            var positions = GetVertexAccessor("POSITION");
+            if (positions != null)
+            {
+                positions.ValidatePositions(result);
+            }
+            else
+            {
+                result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_NO_POSITION);
+            }
+
             GetVertexAccessor("NORMAL")?.ValidateNormals(result);
-            GetVertexAccessor("TANGENT")?.ValidateTangents(result);
+
+            var tangents = GetVertexAccessor("TANGENT");
+            if (tangents != null)
+            {
+                if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_WITHOUT_NORMAL);
+                if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_POINTS);
+                tangents.ValidateTangents(result);
+            }
+
         }
 
         internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)
@@ -224,8 +310,8 @@ namespace SharpGLTF.Schema2
 
         private void ValidateSkinning(Validation.ValidationContext result, Accessor j, Accessor w, int jwset, int jointsCount)
         {
-            if (j == null) result.AddError(this, $"Missing JOINTS_{jwset} vertex attribute");
-            if (w == null) result.AddError(this, $"Missing WEIGHTS_{jwset} vertex attribute");
+            // if (j == null) result.AddError(this, $"Missing JOINTS_{jwset} vertex attribute");
+            // if (w == null) result.AddError(this, $"Missing WEIGHTS_{jwset} vertex attribute");
             if (j == null || w == null) return;
 
             j.ValidateJoints(result, jwset, jointsCount);

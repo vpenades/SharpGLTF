@@ -67,18 +67,6 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal override void Validate(Validation.ValidationContext result)
-        {
-            base.Validate(result);
-
-            if (string.IsNullOrWhiteSpace(_version)) result.AddError(this, "version number is missing");
-
-            if (Version < MINVERSION) result.AddError(this, $"Minimum supported version is {MINVERSION} but found:{MinVersion}");
-            if (MinVersion > MAXVERSION) result.AddError(this, $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
-
-            if (MinVersion > Version) result.AddSemanticWarning(this, Validation.ErrorCodes.ASSET_MIN_VERSION_GREATER_THAN_VERSION, MinVersion, Version);
-        }
-
         private string _GetExtraInfo(string key)
         {
             if (this.Extras is IReadOnlyDictionary<string, Object> dict)
@@ -95,6 +83,26 @@ namespace SharpGLTF.Schema2
         {
             throw new NotImplementedException();
             // if (this.Extras == null) this.Extras = new Dictionary<string, Object>();
+        }
+
+        #endregion
+
+        #region Validation
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            if (!Version.TryParse(_version, out Version ver))
+            {
+                result.AddSemanticError(Validation.ErrorCodes.UNKNOWN_ASSET_MAJOR_VERSION, _version);
+                return;
+            }
+
+            // if (Version < MINVERSION) result.AddError($"Minimum supported version is {MINVERSION} but found:{MinVersion}");
+            // if (MinVersion > MAXVERSION) result.AddError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
+
+            if (MinVersion > Version) result.AddSemanticWarning(Validation.WarnCodes.ASSET_MIN_VERSION_GREATER_THAN_VERSION, MinVersion, Version);
         }
 
         #endregion

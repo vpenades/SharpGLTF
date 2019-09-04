@@ -59,20 +59,20 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region validation
+        #region Validation
 
-        internal override void Validate(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.Validate(result);
+            base.OnValidateReferences(result);
 
             // check out of range indices
             foreach (var idx in this._nodes)
             {
-                if (idx < 0 || idx >= this.LogicalParent.LogicalNodes.Count) result.AddError(this, $"references invalid Node[{idx}]");
+                result.CheckReferenceIndex( nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
             }
 
             // check duplicated indices
-            if (this._nodes.Distinct().Count() != this._nodes.Count) result.AddError(this, "has duplicated node references");
+            // if (this._nodes.Distinct().Count() != this._nodes.Count) result.AddError(this, "has duplicated node references");
         }
 
         #endregion

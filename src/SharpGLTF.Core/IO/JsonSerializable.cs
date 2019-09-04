@@ -12,16 +12,24 @@ namespace SharpGLTF.IO
     {
         #region validation
 
-        public IEnumerable<Exception> Validate()
+        internal void ValidateReferences(Validation.ValidationContext context)
         {
-            var result = new Validation.ValidationContext();
-
-            Validate(result);
-
-            return result.Errors;
+            context = context.Result.GetContext(this);
+            OnValidateReferences(context);
         }
 
-        internal virtual void Validate(Validation.ValidationContext result)
+        protected virtual void OnValidateReferences(Validation.ValidationContext result)
+        {
+
+        }
+
+        internal void Validate(Validation.ValidationContext context)
+        {
+            context = context.Result.GetContext(this);
+            OnValidate(context);
+        }
+
+        protected virtual void OnValidate(Validation.ValidationContext result)
         {
         }
 

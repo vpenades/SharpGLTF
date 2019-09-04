@@ -6,6 +6,7 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using SharpGLTF.Validation;
     using TEXLERP = TextureInterpolationFilter;
     using TEXMIPMAP = TextureMipMapFilter;
     using TEXWRAP = TextureWrapMode;
@@ -57,21 +58,21 @@ namespace SharpGLTF.Schema2
 
         private Image _GetPrimaryImage()
         {
-            var ddstex = this.GetExtension<TextureDDS>();
-            if (ddstex != null && ddstex.Image != null) return ddstex.Image;
+            var ddsimg = this.GetExtension<TextureDDS>()?.Image;
+            if (ddsimg != null) return ddsimg;
 
-            var wbptex = this.GetExtension<TextureWEBP>();
-            if (wbptex != null && wbptex.Image != null) return wbptex.Image;
+            var wbpimg = this.GetExtension<TextureWEBP>()?.Image;
+            if (wbpimg != null) return wbpimg;
 
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }
 
         private Image _GetFallbackImage()
         {
-            var ddstex = this.GetExtension<TextureDDS>();
-            if (ddstex == null) return null;
+            var img = _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
 
-            return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
+            // if the default image is provided by _GetPrimaryImage() we don't need to return anything here.
+            return _GetPrimaryImage() == img ? null : img;
         }
 
         public void ClearImages()
@@ -145,6 +146,18 @@ namespace SharpGLTF.Schema2
             if (sampler != this.Sampler) return false;
 
             return true;
+        }
+
+        #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckReferenceIndex("Source", _source, this.LogicalParent.LogicalImages);
+            result.CheckReferenceIndex("Sampler", _sampler, this.LogicalParent.LogicalTextureSamplers);
         }
 
         #endregion

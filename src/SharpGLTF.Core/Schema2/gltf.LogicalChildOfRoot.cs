@@ -38,14 +38,7 @@ namespace SharpGLTF.Schema2
         {
             return items.All(item => Object.ReferenceEquals(this.LogicalParent, item.LogicalParent));
         }
-
-        internal override void Validate(Validation.ValidationContext result)
-        {
-            base.Validate(result);
-
-            // TODO: verify the name does not have invalid characters
-        }
-
+        
         #endregion
 
         #region API
