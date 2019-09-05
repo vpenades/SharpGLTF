@@ -16,7 +16,7 @@ we create the equivalent AwesomeMesh:
 var gpuMeshes = new AwesomeMesh[model.LogicalMeshes.Count];
 for(int i=0; i < model.LogicalMeshes.Count; ++i)
 {
-    gpuMeshes = new AwesomeMesh(model.LogicalMeshes[i]);
+    gpuMeshes[i] = new AwesomeMesh(model.LogicalMeshes[i]);
 }
 ```
 
