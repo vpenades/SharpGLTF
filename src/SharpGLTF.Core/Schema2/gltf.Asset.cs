@@ -99,8 +99,8 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
-            // if (Version < MINVERSION) result.AddError($"Minimum supported version is {MINVERSION} but found:{MinVersion}");
-            // if (MinVersion > MAXVERSION) result.AddError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
+            if (Version < MINVERSION) result.AddSemanticError($"Minimum supported version is {MINVERSION} but found:{MinVersion}");
+            if (MinVersion > MAXVERSION) result.AddSemanticError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
 
             if (MinVersion > Version) result.AddSemanticWarning(Validation.WarnCodes.ASSET_MIN_VERSION_GREATER_THAN_VERSION, MinVersion, Version);
         }

@@ -48,7 +48,7 @@ namespace SharpGLTF.Validation
         {
             if (value.HasValue) return true;
 
-            AddSchemaError(property, ErrorCodes.UNDEFINED_PROPERTY);
+            AddSchemaError(property, ErrorCodes.UNDEFINED_PROPERTY, property);
 
             return false;
         }
@@ -214,6 +214,7 @@ namespace SharpGLTF.Validation
         #endregion
     }
 
+    [System.Diagnostics.DebuggerStepThrough]
     public sealed class ValidationResult
     {
         #region data

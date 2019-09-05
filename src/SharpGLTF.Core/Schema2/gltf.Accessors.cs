@@ -349,6 +349,7 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidate(result);
 
+            // TODO: check BufferView access.
             // if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
             // if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
 
