@@ -48,6 +48,8 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<Single> MorphWeights => _weights.Count == 0 ? null : _weights.Select(item => (Single)item).ToList();
 
+        public bool AllPrimitivesHaveJoints => Primitives.All(p => p.GetVertexAccessor("JOINTS_0") != null);
+
         #endregion
 
         #region API
@@ -92,11 +94,20 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
+        protected override void OnValidateReferences(Validation.ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckLinksInCollection("Primitives", _primitives);
+
+            foreach (var p in this.Primitives) p.ValidateReferences(result);
+        }
+
         protected override void OnValidate(Validation.ValidationContext result)
         {
             base.OnValidate(result);
 
-            foreach (var p in this.Primitives) { p.Validate(result); }
+            foreach (var p in this.Primitives) p.Validate(result);
 
             var morphTargetsCount = this.Primitives
                 .Select(item => item.MorphTargetsCount)
@@ -105,11 +116,6 @@ namespace SharpGLTF.Schema2
             if (morphTargetsCount.Count() != 1) result.AddSemanticError(Validation.ErrorCodes.MESH_PRIMITIVES_UNEQUAL_TARGETS_COUNT);
 
             if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError(Validation.ErrorCodes.MESH_INVALID_WEIGHTS_COUNT, _weights.Count, morphTargetsCount.First());
-        }
-
-        internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)
-        {
-            foreach (var p in Primitives) p.ValidateSkinning(result, jointsCount);
         }
 
         #endregion

@@ -138,7 +138,7 @@ namespace SharpGLTF.Schema2
 
             if (this._extras != null)
             {
-                result.CheckJsonSerializable("Extras", this._extras);
+                result.CheckSchemaIsJsonSerializable("Extras", this._extras);
             }
         }
 

@@ -146,9 +146,9 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateReferences(Validation.ValidationContext result)
         {
-            base.OnValidateReferences(result);
+            if (Asset == null) result.AddSchemaError(nameof(Asset), "is missing");
 
-            result.CheckReferenceIndex(nameof(DefaultScene), _scene, this.LogicalScenes);
+            result.CheckArrayIndexAccess(nameof(DefaultScene), _scene, this.LogicalScenes);
 
             foreach (var b in _bufferViews) b.ValidateReferences(result);
 
@@ -162,14 +162,15 @@ namespace SharpGLTF.Schema2
             foreach (var s in _scenes) s.ValidateReferences(result);
             foreach (var n in _nodes) n.ValidateReferences(result);
             foreach (var a in _animations) a.ValidateReferences(result);
+
+            base.OnValidateReferences(result);
         }
 
         protected override void OnValidate(Validation.ValidationContext result)
         {
             // 1st check version number
 
-            if (Asset == null) result.AddSchemaError("Asset","Missing");
-            else Asset.Validate(result);
+            Asset.Validate(result);
 
             if (result.Result.HasErrors) return;
 

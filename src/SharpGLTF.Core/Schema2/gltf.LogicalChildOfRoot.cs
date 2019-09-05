@@ -38,7 +38,7 @@ namespace SharpGLTF.Schema2
         {
             return items.All(item => Object.ReferenceEquals(this.LogicalParent, item.LogicalParent));
         }
-        
+
         #endregion
 
         #region API

@@ -339,8 +339,8 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            result.CheckIsDefined("BufferView", _bufferView);
-            result.CheckReferenceIndex("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+            result.CheckSchemaIsDefined("BufferView", _bufferView);
+            result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
         }
 
         /// <see href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/base/accessor.dart"/>
@@ -357,23 +357,14 @@ namespace SharpGLTF.Schema2
             {
                 if (this._componentType != EncodingType.UNSIGNED_BYTE && this._componentType != EncodingType.UNSIGNED_SHORT)
                 {
-                    result.AddDataError(Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
+                    result.AddDataError(nameof(Normalized), "Only (u)byte and (u)short accessors can be normalized.");
                 }
             }
 
             if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
             {
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
-                result.CheckMultipleOf("Encoding", len, 4);
-            }
-
-            if (SourceBufferView.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)
-            {
-                if (this.Normalized) result.AddDataError("Normalized", Validation.ErrorCodes.ACCESSOR_NORMALIZED_INVALID);
-                if (this.Dimensions != DimensionType.SCALAR) result.AddDataError("Dimensions", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
-                if (this.Encoding != EncodingType.UNSIGNED_BYTE && this.Encoding != EncodingType.UNSIGNED_INT && this.Encoding != EncodingType.UNSIGNED_SHORT) result.AddDataError("Encoding", Validation.ErrorCodes.VALUE_MULTIPLE_OF, Encoding.ByteLength() * Dimensions.DimCount(), Encoding.ByteLength());
-
-                // if this.Encoding != EncodingType.UNSIGNED_BYTE > warning, no longer valid.
+                result.CheckSchemaIsMultipleOf("Encoding", len, 4);
             }
         }
 
@@ -424,14 +415,9 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsage(result, BufferMode.ELEMENT_ARRAY_BUFFER);
-
-            if (this.Normalized) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Normalized, false);
-
-            if (Encoding != EncodingType.UNSIGNED_BYTE &&
-                Encoding != EncodingType.UNSIGNED_SHORT &&
-                Encoding != EncodingType.UNSIGNED_INT) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
-
-            if (Dimensions != DimensionType.SCALAR) result.AddDataError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_INVALID_FORMAT, this.Dimensions, DimensionType.SCALAR);
+            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
 
             uint restart_value = 0xff;
             if (this.Encoding == EncodingType.UNSIGNED_SHORT) restart_value = 0xffff;
@@ -450,13 +436,15 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
 
             var positions = this.AsVector3Array();
 
             for (int i = 0; i < positions.Count; ++i)
             {
-                var pos = positions[i];
-                result.CheckDataIsFinite(i, pos);
+                result.CheckIsFinite(i, positions[i]);
             }
         }
 
@@ -465,14 +453,15 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
 
             var normals = this.AsVector3Array();
 
             for (int i = 0; i < normals.Count; ++i)
             {
-                var nrm = normals[i];
-                result.CheckDataIsFinite(i, nrm);
-                result.CheckDataIsUnitLength(i, nrm);
+                result.CheckIsUnitLength(i, normals[i]);
             }
         }
 
@@ -481,48 +470,46 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3, DimensionType.VEC4);
 
             var tangents = this.AsVector4Array();
 
             for (int i = 0; i < tangents.Count; ++i)
             {
-                var tgt = tangents[i];
-
-                result.CheckDataIsFinite(i, tgt);
-                result.CheckDataIsUnitLength(i, new Vector3(tgt.X, tgt.Y, tgt.Z));
-                result.CheckDataIsValidSign(i, tgt.W);
+                result.CheckIsTangent(i, tangents[i]);
             }
         }
 
-        internal void ValidateJoints(Validation.ValidationContext result, int jwset, int jointsCount)
+        internal void ValidateJoints(Validation.ValidationContext result, string attributeName)
         {
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
 
             var joints = this.AsVector4Array();
 
             for (int i = 0; i < joints.Count; ++i)
             {
-                var jjjj = joints[i];
-                result.CheckDataIsFinite(i, jjjj);
-                result.CheckDataIsInRange(i, jjjj, 0, jointsCount-1);
+                result.CheckIsFinite(i, joints[i]);
             }
         }
 
         internal void ValidateWeights(Validation.ValidationContext result, int jwset)
         {
             result = result.GetContext(this);
-
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
 
             var weights = this.AsVector4Array();
 
             for (int i = 0; i < weights.Count; ++i)
             {
-                var wwww = weights[i];
-                result.CheckDataIsFinite(i, wwww);
-                result.CheckDataIsInRange(i, wwww, 0, 1);
+                result.CheckIsInRange(i, weights[i], 0, 1);
 
                 // theoretically, the sum of all the weights should give 1, ASSUMING there's only one weight set.
                 // but in practice, that seems not to be true.
@@ -533,16 +520,16 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            // if (SourceBufferView.DeviceBufferTarget != null)  
+            // SourceBufferView.ValidateBufferUsage(result, null);
+            // result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+            // result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.MAT4);
 
             var matrices = this.AsMatrix4x4Array();
 
             for (int i = 0; i < matrices.Count; ++i)
             {
-                var m = matrices[i];
-
-                if (Matrix4x4.Invert(m, out Matrix4x4 r)) continue;
-                result.AddDataError(Validation.ErrorCodes.ACCESSOR_INDECOMPOSABLE_MATRIX, i);
+                result.CheckIsMatrix(i, matrices[i]);
             }
         }
 

@@ -109,6 +109,27 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region validation
+
+        protected override void OnValidateReferences(Validation.ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckSchemaIsValidURI("Uri", this._uri);
+
+            result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
+            result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
+        }
+
+        protected override void OnValidate(Validation.ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            if (_Content.Length < _byteLength) result.AddDataError("ByteLength", $"Actual data length {_Content.Length} is less than the declared buffer byteLength {_byteLength}.");
+        }
+
+        #endregion
     }
 
     public partial class ModelRoot

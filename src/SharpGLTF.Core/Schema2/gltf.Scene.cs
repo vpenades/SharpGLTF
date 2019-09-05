@@ -68,7 +68,7 @@ namespace SharpGLTF.Schema2
             // check out of range indices
             foreach (var idx in this._nodes)
             {
-                result.CheckReferenceIndex( nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
+                result.CheckArrayIndexAccess( nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
             }
 
             // check duplicated indices

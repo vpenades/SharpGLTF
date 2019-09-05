@@ -371,56 +371,82 @@ namespace SharpGLTF.Schema2
             // check out of range indices
             foreach (var idx in this._children)
             {
-                result.CheckReferenceIndex(nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
+                result.CheckArrayIndexAccess(nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
             }
 
-            result.CheckReferenceIndex(nameof(Mesh), _mesh, this.LogicalParent.LogicalMeshes);
-            result.CheckReferenceIndex(nameof(Skin), _skin, this.LogicalParent.LogicalSkins);
-            result.CheckReferenceIndex(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
+            result.CheckArrayIndexAccess(nameof(Mesh), _mesh, this.LogicalParent.LogicalMeshes);
+            result.CheckArrayIndexAccess(nameof(Skin), _skin, this.LogicalParent.LogicalSkins);
+            result.CheckArrayIndexAccess(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
         }
 
         protected override void OnValidate(Validation.ValidationContext result)
         {
             base.OnValidate(result);
 
+            _ValidateHierarchy(result);
+            _ValidateTransforms(result);
+            _ValidateMeshAndSkin(result, Mesh, Skin);
+        }
+
+        private void _ValidateHierarchy(Validation.ValidationContext result)
+        {
+            var allNodes = this.LogicalParent.LogicalNodes;
+
             var thisIndex = this.LogicalIndex;
 
-            // check duplicated indices
-            if (this._children.Distinct().Count() != this._children.Count) result.AddSchemaError(nameof(VisualChildren), Validation.ErrorCodes.DUPLICATE_ELEMENTS);
+            var pidx = thisIndex;
 
-            // check self references
-            if (this._children.Contains(thisIndex)) result.AddLinkError(Validation.ErrorCodes.NODE_LOOP);
-
-            // check circular references
-            var p = this;
             while (true)
             {
-                p = p.VisualParent;
-                if (p == null) break;
-                if (p.LogicalIndex == thisIndex)
+                result = result.GetContext(result.Root.LogicalNodes[pidx]);
+
+                // every node must have 0 or 1 parents.
+
+                var allParents = allNodes
+                    .Where(n => n._HasVisualChild(pidx))
+                    .ToList();
+
+                if (allParents.Count == 0) break; // we're already root
+
+                if (allParents.Count > 1)
                 {
-                    result.AddLinkError(Validation.ErrorCodes.NODE_LOOP);
+                    var parents = string.Join(" ", allParents);
+
+                    result.AddLinkError($"is child of nodes {parents}. A node can only have one parent.");
                     break;
                 }
-            }
 
-            if (_skin.HasValue)
+                if (allParents[0].LogicalIndex == pidx)
+                {
+                    result.AddLinkError("is a part of a node loop.");
+                    break;
+                }
+
+                pidx = allParents[0].LogicalIndex;
+            }
+        }
+
+        private void _ValidateTransforms(Validation.ValidationContext result)
+        {
+            result.CheckIsFinite("Scale", _scale);
+            result.CheckIsFinite("Rotation", _rotation);
+            result.CheckIsFinite("Translation", _translation);
+            result.CheckIsMatrix("Matrix", _matrix);
+        }
+
+        private static void _ValidateMeshAndSkin(Validation.ValidationContext result, Mesh mesh, Skin skin)
+        {
+            if (mesh == null && skin == null) return;
+
+            if (mesh != null)
             {
-                if (!_mesh.HasValue)
-                {
-                    result.AddLinkError(Validation.ErrorCodes.NODE_SKIN_WITH_NON_SKINNED_MESH);
-                }
-                else
-                {
-                    this.Mesh.ValidateSkinning(result, this.Skin.JointsCount);
-                }
+                if (skin == null && mesh.AllPrimitivesHaveJoints) result.AddLinkWarning(Validation.WarnCodes.NODE_SKINNED_MESH_WITHOUT_SKIN);
             }
 
-            // TODO:
-
-            // check Transforms (out or range, NaN, etc)
-
-            // check morph weights
+            if (skin != null)
+            {
+                if (mesh == null || !mesh.AllPrimitivesHaveJoints) result.AddLinkError(Validation.ErrorCodes.NODE_SKIN_WITH_NON_SKINNED_MESH);
+            }
         }
 
         #endregion

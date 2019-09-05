@@ -327,12 +327,9 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            if (!String.IsNullOrWhiteSpace(_uri))
-            {
-                if (!Uri.TryCreate(_uri, UriKind.Relative, out Uri uri)) result.AddLinkError(Validation.ErrorCodes.INVALID_URI);
-            }
+            result.CheckSchemaIsValidURI("Uri", this._uri);
 
-            result.CheckReferenceIndex("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+            result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
         }
 
         #endregion

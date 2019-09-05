@@ -75,7 +75,10 @@ namespace SharpGLTF.Schema2
             get
             {
                 var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
-                return new BYTES(buffer.Content, this._byteOffset.AsValue(0), this._byteLength);
+                var offset = this._byteOffset.AsValue(_byteOffsetDefault);
+                var length = this._byteLength;
+
+                return new BYTES(buffer.Content, offset, length);
             }
         }
 
@@ -132,14 +135,30 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            result.CheckReferenceIndex(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers);
+            result.CheckArrayIndexAccess(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers);
+
+            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
+
+            result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
+
+            // ByteStride must be multiple of 4, between 4 and 252
+            if (_byteStride.HasValue)
+            {
+                result.CheckSchemaIsInRange(nameof(ByteStride), _byteStride.Value, _byteStrideMinimum, _byteStrideMaximum);
+                result.CheckSchemaIsMultipleOf(nameof(ByteStride), _byteStride.Value, 4);
+            }
         }
 
         protected override void OnValidate(Validation.ValidationContext result)
         {
             base.OnValidate(result);
 
-            result.CheckMultipleOf(nameof(ByteStride), ByteStride, 4);
+            var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
+            var bcontent = buffer.Content;
+
+            result.CheckArrayRangeAccess("ByteOffset", _byteOffset, _byteLength, buffer.Content);
+
+            if (ByteStride > _byteLength) result.AddSemanticError(nameof(ByteStride), $"value ({ByteStride}) is larger than byteLength ({_byteLength}).");
 
             // if (this.DeviceBufferTarget.HasValue && this.FindAccessors().Any(item => item.IsSparse)) result.AddError()
         }
@@ -151,7 +170,7 @@ namespace SharpGLTF.Schema2
             if (!this.DeviceBufferTarget.HasValue) return;
             if (usingMode == this.DeviceBufferTarget.Value) return;
 
-            result.AddSchemaError(nameof(DeviceBufferTarget), Validation.ErrorCodes.BUFFER_VIEW_TARGET_OVERRIDE, this.DeviceBufferTarget.Value, usingMode);
+            result.AddLinkError(nameof(DeviceBufferTarget), $"is set as {this.DeviceBufferTarget.Value}. But an accessor wants to use it as '{usingMode}'.");
         }
 
         #endregion

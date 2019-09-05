@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using TARGET = SharpGLTF.IO.JsonSerializable;
@@ -31,6 +32,8 @@ namespace SharpGLTF.Validation
 
         #region properties
 
+        public Schema2.ModelRoot Root => _Result.Root;
+
         public ValidationResult Result => _Result;
 
         #endregion
@@ -39,54 +42,44 @@ namespace SharpGLTF.Validation
 
         public ValidationContext GetContext(TARGET target) { return _Result.GetContext(target); }
 
-        #endregion
+        public void AddSchemaError(ValueLocation location, string message) { AddSchemaError(location.ToString(_Target, message)); }
 
-        #region schema errors
+        public void AddLinkError(ValueLocation location, string message) { AddLinkError(location.ToString(_Target, message)); }
 
-        public bool CheckIsDefined<T>(string property, T? value)
-            where T : struct
+        public void AddLinkWarning(String format, params object[] args) { AddLinkWarning(String.Format(format, args)); }
+
+        public void AddDataError(ValueLocation location, string message) { AddDataError(location.ToString(_Target, message)); }
+
+        public void AddSemanticWarning(String format, params object[] args) { AddSemanticWarning(String.Format(format, args)); }
+
+        public void AddSemanticError(String format, params object[] args) { AddSemanticError(String.Format(format, args)); }
+
+        public void AddLinkWarning(string message)
         {
-            if (value.HasValue) return true;
+            var ex = new LinkException(_Target, message);
 
-            AddSchemaError(property, ErrorCodes.UNDEFINED_PROPERTY, property);
-
-            return false;
+            _Result.AddWarning(ex);
         }
 
-        public void CheckIndex(string property, int? index, int maxExclusive)
+        public void AddLinkError(string message)
         {
-            if (!index.HasValue) return;
+            var ex = new LinkException(_Target, message);
 
-            if (index.Value < 0) AddSchemaError(property, ErrorCodes.INVALID_INDEX, index);
-            if (index.Value >= maxExclusive) AddSchemaError(property, ErrorCodes.VALUE_NOT_IN_RANGE, index);
+            _Result.AddError(ex);
         }
 
-        public void CheckMultipleOf(string property,  int value, int multiple)
+        public void AddSchemaError(string message)
         {
-            if ((value % multiple) == 0) return;
-
-            AddSchemaError(property, ErrorCodes.VALUE_MULTIPLE_OF, value, multiple);
-        }
-
-        public void CheckJsonSerializable(string property, Object value)
-        {
-            if (IO.JsonUtils.IsSerializable(value)) return;
-
-            AddSchemaError(property, ErrorCodes.INVALID_JSON, string.Empty);
-        }
-
-        public void AddSchemaError(string property, String format, params object[] args)
-        {
-            var message = property + " " + String.Format(format, args);
-
             var ex = new SchemaException(_Target, message);
 
             _Result.AddError(ex);
         }
 
-        #endregion
-
-        #region semantic errors
+        public void AddDataError(string message)
+        {
+            var ex = new DataException(_Target, message);
+            _Result.AddError(ex);
+        }
 
         public void AddSemanticError(String message)
         {
@@ -95,97 +88,257 @@ namespace SharpGLTF.Validation
             _Result.AddError(ex);
         }
 
-        public void AddSemanticWarning(String format, params object[] args)
+        public void AddSemanticWarning(String message)
         {
-            var message = String.Format(format, args);
-
             var ex = new SemanticException(_Target, message);
 
             _Result.AddWarning(ex);
         }
 
-        public void AddSemanticError(String format, params object[] args)
+        #endregion
+
+        #region schema errors
+
+        public bool CheckSchemaIsDefined<T>(ValueLocation location, T? value)
+            where T : struct
         {
-            var message = String.Format(format, args);
+            if (value.HasValue) return true;
 
-            var ex = new SemanticException(_Target, message);
+            AddSchemaError(location, "must be defined.");
 
-            _Result.AddError(ex);
+            return false;
         }
+
+        public bool CheckSchemaNonNegative(ValueLocation location, int? value)
+        {
+            if ((value ?? 0) >= 0) return true;
+            AddSchemaError(location, "must be a non-negative integer.");
+            return false;
+        }
+
+        public void CheckSchemaIsInRange<T>(ValueLocation location, T value, T minInclusive, T maxInclusive)
+            where T : IComparable<T>
+        {
+            if (value.CompareTo(minInclusive) == -1) AddSchemaError(location, $"is below minimum {minInclusive} value: {value}");
+            if (value.CompareTo(maxInclusive) == +1) AddSchemaError(location, $"is above maximum {maxInclusive} value: {value}");
+        }
+
+        public void CheckSchemaIsMultipleOf(ValueLocation location,  int value, int multiple)
+        {
+            if ((value % multiple) == 0) return;
+
+            AddSchemaError(location, $"Value {value} is not a multiple of {multiple}.");
+        }
+
+        public void CheckSchemaIsJsonSerializable(ValueLocation location, Object value)
+        {
+            if (IO.JsonUtils.IsSerializable(value)) return;
+
+            AddSchemaError(location, "Invalid JSON data.");
+        }
+
+        public void CheckSchemaIsValidURI(ValueLocation location, string uri)
+        {
+            if (string.IsNullOrEmpty(uri)) return;
+
+            if (uri.StartsWith("data:"))
+            {
+                // check decoding
+                return;
+            }
+
+            if (Uri.TryCreate(uri, UriKind.Relative, out Uri xuri)) return;
+
+            AddSchemaError(location, $"Invalid URI '{uri}'.");
+        }
+
+        #endregion
+
+        #region semantic errors
+
+        
 
         #endregion
 
         #region data errors
 
-        public void CheckVertexIndex(int index, UInt32 vertexIndex, UInt32 vertexCount, UInt32 vertexRestart)
+        public void CheckVertexIndex(ValueLocation location, UInt32 vertexIndex, UInt32 vertexCount, UInt32 vertexRestart)
         {
-            if (vertexIndex == vertexRestart) AddDataError(ErrorCodes.ACCESSOR_INDEX_PRIMITIVE_RESTART, index, vertexIndex);
-            else if (vertexIndex >= vertexCount) AddDataError(ErrorCodes.ACCESSOR_INDEX_OOB, index, vertexIndex, vertexCount);
+            if (vertexIndex == vertexRestart)
+            {
+                AddDataError(location, $"is a primitive restart value ({vertexIndex})");
+                return;
+            }
+
+            if (vertexIndex >= vertexCount)
+            {
+                AddDataError(location, $"has a value ({vertexIndex}) that exceeds number of available vertices ({vertexCount})");
+                return;
+            }
         }
 
-        public void CheckDataIsFinite(int index, System.Numerics.Vector3 v)
+        public bool CheckIsFinite(ValueLocation location, System.Numerics.Vector2? value)
         {
-            if (v._IsFinite()) return;
-
-            AddDataError(ErrorCodes.ACCESSOR_INVALID_FLOAT, index);
+            if (!value.HasValue) return true;
+            if (value.Value._IsFinite()) return true;
+            AddDataError(location, $"is NaN or Infinity.");
+            return false;
         }
 
-        public void CheckDataIsFinite(int index, System.Numerics.Vector4 v)
+        public bool CheckIsFinite(ValueLocation location, System.Numerics.Vector3? value)
         {
-            if (v._IsFinite()) return;
-
-            AddDataError(ErrorCodes.ACCESSOR_INVALID_FLOAT, index);
+            if (!value.HasValue) return true;
+            if (value.Value._IsFinite()) return true;
+            AddDataError(location, "is NaN or Infinity.");
+            return false;
         }
 
-        public void CheckDataIsUnitLength(int index, System.Numerics.Vector3 v)
+        public bool CheckIsFinite(ValueLocation location, System.Numerics.Vector4? value)
         {
-            if (v.IsValidNormal()) return;
-
-            AddDataError(ErrorCodes.ACCESSOR_NON_UNIT, index, v.Length());
+            if (!value.HasValue) return true;
+            if (value.Value._IsFinite()) return true;
+            AddDataError(location, "is NaN or Infinity.");
+            return false;
         }
 
-        public void CheckDataIsInRange(int index, System.Numerics.Vector4 v, float minInclusive, float maxInclusive)
+        public bool CheckIsFinite(ValueLocation location, System.Numerics.Quaternion? value)
         {
-            CheckDataIsInRange(index, v.X, minInclusive, maxInclusive);
-            CheckDataIsInRange(index, v.Y, minInclusive, maxInclusive);
-            CheckDataIsInRange(index, v.Z, minInclusive, maxInclusive);
-            CheckDataIsInRange(index, v.W, minInclusive, maxInclusive);
+            if (!value.HasValue) return true;
+            if (value.Value._IsFinite()) return true;
+            AddDataError(location, "is NaN or Infinity.");
+            return false;
         }
 
-        public void CheckDataIsInRange(int index, float v, float minInclusive, float maxInclusive)
+        public void CheckIsUnitLength(ValueLocation location, System.Numerics.Vector3? value)
         {
-            if (v < minInclusive) AddDataError(ErrorCodes.ACCESSOR_ELEMENT_OUT_OF_MIN_BOUND, index, v);
-            if (v > maxInclusive) AddDataError(ErrorCodes.ACCESSOR_ELEMENT_OUT_OF_MAX_BOUND, index, v);
+            if (!value.HasValue) return;
+            if (!CheckIsFinite(location, value)) return;
+            if (value.Value.IsValidNormal()) return;
+            AddDataError(location, $"is not of unit length: {value.Value.Length()}.");
         }
 
-        public void CheckDataIsValidSign(int index, float w)
+        public void CheckIsTangent(ValueLocation location, System.Numerics.Vector4 tangent)
         {
-            if (w == 1 || w == -1) return;
+            CheckIsUnitLength(location, new System.Numerics.Vector3(tangent.X, tangent.Y, tangent.Z));
 
-            AddDataError(ErrorCodes.ACCESSOR_INVALID_SIGN, index, w);
+            if (tangent.W == 1 || tangent.W == -1) return;
+
+            AddDataError(location, $"has invalid value: {tangent.W}. Must be 1.0 or -1.0.");
         }
 
-        public void AddDataError(String format, params object[] args)
+        public void CheckIsInRange(ValueLocation location, System.Numerics.Vector4 v, float minInclusive, float maxInclusive)
         {
-            var message = String.Format(format, args);
+            CheckIsInRange(location, v.X, minInclusive, maxInclusive);
+            CheckIsInRange(location, v.Y, minInclusive, maxInclusive);
+            CheckIsInRange(location, v.Z, minInclusive, maxInclusive);
+            CheckIsInRange(location, v.W, minInclusive, maxInclusive);
+        }
 
-            var ex = new DataException(_Target, message);
+        public void CheckIsInRange(ValueLocation location, float value, float minInclusive, float maxInclusive)
+        {
+            if (value < minInclusive) AddDataError(location, $"is below minimum {minInclusive} value: {value}");
+            if (value > maxInclusive) AddDataError(location, $"is above maximum {maxInclusive} value: {value}");
+        }
 
-            _Result.AddError(ex);
+        public bool CheckIsMatrix(ValueLocation location, System.Numerics.Matrix4x4? matrix)
+        {
+            if (matrix == null) return true;
+
+            if (!matrix.Value._IsFinite())
+            {
+                AddDataError(location, "is NaN or Infinity.");
+                return false;
+            }
+
+            if (!System.Numerics.Matrix4x4.Decompose(matrix.Value, out System.Numerics.Vector3 s, out System.Numerics.Quaternion r, out System.Numerics.Vector3 t))
+            {
+                AddDataError(location, "is not decomposable to TRS.");
+                return false;
+            }
+
+            return true;
         }
 
         #endregion
 
         #region link errors
 
-        public bool CheckReferenceIndex<T>(string property, int? index, IReadOnlyList<T> collection)
+        public bool CheckArrayIndexAccess<T>(ValueLocation location, int? index, IReadOnlyList<T> array)
         {
-            if (!index.HasValue) return true;
-            if (index.Value >= 0 && index.Value < collection.Count) return true;
+            return CheckArrayRangeAccess(location, index, 1, array);
+        }
 
-            AddLinkError(ErrorCodes.UNRESOLVED_REFERENCE, property);
+        public bool CheckArrayRangeAccess<T>(ValueLocation location, int? offset, int length, IReadOnlyList<T> array)
+        {
+            if (!offset.HasValue) return true;
+
+            if (!CheckSchemaNonNegative(location, offset)) return false;
+
+            if (length <= 0)
+            {
+                AddSchemaError(location, "Invalid length");
+                return false;
+            }
+
+            if (array == null)
+            {
+                AddLinkError(location, $"Index {offset} exceeds the number of available items (null).");
+                return false;
+            }
+
+            if (offset > array.Count - length)
+            {
+                if (length == 1) AddLinkError(location, $"Index {offset} exceeds the number of available items ({array.Count}).");
+                else AddLinkError(location, $"Index {offset}+{length} exceeds the number of available items ({array.Count}).");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool CheckLinkMustBeAnyOf<T>(ValueLocation location, T value, params T[] values)
+        {
+            if (values.Contains(value)) return true;
+
+            var validValues = string.Join(" ", values);
+
+            AddLinkError(location, $"value {value} is invalid. Must be one of {validValues}");
 
             return false;
+        }
+
+        public bool CheckLinksInCollection<T>(ValueLocation location, IEnumerable<T> collection)
+            where T : class
+        {
+            int idx = 0;
+
+            if (collection == null)
+            {
+                AddLinkError(location, "Is NULL.");
+                return false;
+            }
+
+            var uniqueInstances = new HashSet<T>();
+
+            foreach (var v in collection)
+            {
+                if (v == null)
+                {
+                    AddLinkError((location, idx), "Is NULL.");
+                    return false;
+                }
+                else if (uniqueInstances.Contains(v))
+                {
+                    AddSchemaError((location, idx), "Is duplicated.");
+                    return false;
+                }
+
+                uniqueInstances.Add(v);
+
+                ++idx;
+            }
+
+            return true;
         }
 
         public void UnsupportedExtensionError(String message)
@@ -193,31 +346,73 @@ namespace SharpGLTF.Validation
             AddLinkError(message);
         }
 
-        public void AddLinkError(String format, params object[] args)
-        {
-            var message = String.Format(format, args);
-
-            var ex = new LinkException(_Target, message);
-
-            _Result.AddError(ex);
-        }
-
-        public void AddLinkWarning(String format, params object[] args)
-        {
-            var message = String.Format(format, args);
-
-            var ex = new LinkException(_Target, message);
-
-            _Result.AddWarning(ex);
-        }
-
         #endregion
+    }
+
+    public struct ValueLocation
+    {
+        public static implicit operator ValueLocation(int index) { return new ValueLocation(string.Empty, index); }
+
+        public static implicit operator ValueLocation(string name) { return new ValueLocation(name); }
+
+        public static implicit operator ValueLocation((string, int) tuple) { return new ValueLocation(tuple.Item1, tuple.Item2); }
+
+        public static implicit operator String(ValueLocation location) { return location.ToString(); }
+
+        private ValueLocation(string name, int idx1 = -1)
+        {
+            _Name = name;
+            _Index = idx1;
+        }
+
+        private readonly string _Name;
+        private readonly int _Index;
+
+        public override string ToString()
+        {
+            if (_Index >= 0) return $"{_Name}[{_Index}]";
+            return _Name;
+        }
+
+        public string ToString(TARGET target, string message)
+        {
+            return ToString(target) + " " + message;
+        }
+
+        public string ToString(TARGET target)
+        {
+            if (target == null) return this.ToString();
+
+            var name = target.GetType().Name;
+
+            var pinfo = target.GetType().GetProperty("LogicalIndex");
+
+            if (pinfo != null)
+            {
+                var idx = pinfo.GetValue(target);
+
+                name += $"[{idx}]";
+            }
+
+            return name + this.ToString();
+        }
     }
 
     [System.Diagnostics.DebuggerStepThrough]
     public sealed class ValidationResult
     {
+        #region lifecycle
+
+        public ValidationResult(Schema2.ModelRoot root)
+        {
+            _Root = root;
+        }
+
+        #endregion
+
         #region data
+
+        private readonly Schema2.ModelRoot _Root;
 
         private readonly List<Exception> _Errors = new List<Exception>();
         private readonly List<Exception> _Warnings = new List<Exception>();
@@ -225,6 +420,8 @@ namespace SharpGLTF.Validation
         #endregion
 
         #region properties
+
+        public Schema2.ModelRoot Root => _Root;
 
         public IEnumerable<Exception> Errors => _Errors;
 

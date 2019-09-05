@@ -156,8 +156,8 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            result.CheckReferenceIndex("Source", _source, this.LogicalParent.LogicalImages);
-            result.CheckReferenceIndex("Sampler", _sampler, this.LogicalParent.LogicalTextureSamplers);
+            result.CheckArrayIndexAccess("Source", _source, this.LogicalParent.LogicalImages);
+            result.CheckArrayIndexAccess("Sampler", _sampler, this.LogicalParent.LogicalTextureSamplers);
         }
 
         #endregion

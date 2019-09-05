@@ -242,9 +242,9 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            result.CheckReferenceIndex("Skeleton", _skeleton, this.LogicalParent.LogicalNodes);
+            result.CheckArrayIndexAccess("Skeleton", _skeleton, this.LogicalParent.LogicalNodes);
 
-            result.CheckReferenceIndex("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
+            result.CheckArrayIndexAccess("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
 
             if (_joints.Count < _jointsMinItems)
             {
@@ -257,7 +257,7 @@ namespace SharpGLTF.Schema2
             {
                 var jidx = _joints[i];
 
-                result.CheckReferenceIndex("Joints", _joints[i], this.LogicalParent.LogicalNodes);
+                result.CheckArrayIndexAccess("Joints", _joints[i], this.LogicalParent.LogicalNodes);
             }
         }
 
@@ -269,14 +269,9 @@ namespace SharpGLTF.Schema2
 
             if (ibxAccessor != null)
             {
-                if (_joints.Count != ibxAccessor.Count) result.AddLinkError(Validation.ErrorCodes.INVALID_IBM_ACCESSOR_COUNT, _joints.Count, ibxAccessor.Count);
+                if (_joints.Count != ibxAccessor.Count) result.AddLinkError("InverseBindMatrices", $"has {ibxAccessor.Count} matrices. But expected {_joints.Count}.");
 
-                var isValidIBM = true;
-                isValidIBM &= ibxAccessor.Dimensions == DimensionType.MAT4;
-                isValidIBM &= ibxAccessor.SourceBufferView.DeviceBufferTarget == null;
-
-                if (!isValidIBM) result.AddLinkError(Validation.ErrorCodes.SKIN_IBM_INVALID_FORMAT, ibxAccessor.Dimensions);
-                else ibxAccessor.ValidateMatrices(result);
+                ibxAccessor.ValidateMatrices(result);
             }
 
             if (_skeleton.HasValue)

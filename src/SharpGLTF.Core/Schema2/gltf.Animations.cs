@@ -7,6 +7,7 @@ using System.Numerics;
 using SharpGLTF.Collections;
 using SharpGLTF.Transforms;
 using SharpGLTF.Animations;
+using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2
 {
@@ -216,6 +217,21 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckLinksInCollection("Samplers", _samplers);
+            result.CheckLinksInCollection("Channels", _channels);
+
+            foreach (var s in _samplers) s.ValidateReferences(result);
+            foreach (var c in _channels) c.ValidateReferences(result);
+        }
+
+        #endregion
     }
 
     sealed partial class AnimationChannelTarget
@@ -237,6 +253,17 @@ namespace SharpGLTF.Schema2
         internal int? _NodeId => this._node;
 
         internal PropertyPath _NodePath => this._path;
+
+        #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckArrayIndexAccess("Node", _node, result.Root.LogicalNodes);
+        }
 
         #endregion
     }
@@ -288,6 +315,19 @@ namespace SharpGLTF.Schema2
         }
 
         public PropertyPath TargetNodePath => this._target?._NodePath ?? PropertyPath.translation;
+
+        #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckArrayIndexAccess("Sampler", _sampler, this.LogicalParent._Samplers);
+
+            _target.ValidateReferences(result);
+        }
 
         #endregion
     }
@@ -684,6 +724,18 @@ namespace SharpGLTF.Schema2
             }
 
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region validation
+
+        protected override void OnValidateReferences(ValidationContext result)
+        {
+            base.OnValidateReferences(result);
+
+            result.CheckArrayIndexAccess("Input", _input, this.LogicalParent.LogicalParent.LogicalAccessors);
+            result.CheckArrayIndexAccess("Output", _output, this.LogicalParent.LogicalParent.LogicalAccessors);
         }
 
         #endregion

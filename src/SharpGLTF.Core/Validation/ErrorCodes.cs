@@ -99,7 +99,7 @@ namespace SharpGLTF.Validation
         public const string ACCESSOR_SPARSE_COUNT_OUT_OF_RANGE = "Sparse accessor overrides more elements ({0}) than the base accessor contains({1}).";
         public const string BUFFER_DATA_URI_MIME_TYPE_INVALID = "Buffer's Data URI MIME-Type must be 'application/octet-stream' or 'application/gltf-buffer'. Found '{0}' instead.";
         public const string BUFFER_VIEW_INVALID_BYTE_STRIDE = "Only buffer views with raw vertex data can have byteStride.";
-        public const string BUFFER_VIEW_TOO_BIG_BYTE_STRIDE = "Buffer view's byteStride ({0}) is smaller than byteLength ({1}).";
+        public const string BUFFER_VIEW_TOO_BIG_BYTE_STRIDE = "Buffer view's byteStride ({0}) is larger than byteLength ({1}).";
         public const string CAMERA_ZFAR_LEQUAL_ZNEAR = "zfar must be greater than znear.";
         public const string INVALID_GL_VALUE = "Invalid value {0} for GL type '{1}'.";
         public const string KHR_LIGHTS_PUNCTUAL_LIGHT_SPOT_ANGLES = "outerConeAngle ({1}) is less than or equal to innerConeAngle({0}).";

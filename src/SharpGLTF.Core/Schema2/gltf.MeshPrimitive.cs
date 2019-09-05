@@ -200,17 +200,17 @@ namespace SharpGLTF.Schema2
 
             var root = this.LogicalParent.LogicalParent;
 
-            result.CheckReferenceIndex("Material", _material, root.LogicalMaterials);
-            result.CheckReferenceIndex("Indices", _indices, root.LogicalAccessors);
+            result.CheckArrayIndexAccess("Material", _material, root.LogicalMaterials);
+            result.CheckArrayIndexAccess("Indices", _indices, root.LogicalAccessors);
 
             foreach (var idx in _attributes.Values)
             {
-                result.CheckReferenceIndex("Attributes", idx, root.LogicalAccessors);
+                result.CheckArrayIndexAccess("Attributes", idx, root.LogicalAccessors);
             }
 
             foreach (var idx in _targets.SelectMany(item => item.Values))
             {
-                result.CheckReferenceIndex("Targets", idx, root.LogicalAccessors);
+                result.CheckArrayIndexAccess("Targets", idx, root.LogicalAccessors);
             }
         }
 
@@ -275,47 +275,80 @@ namespace SharpGLTF.Schema2
                 }
             }
 
+            _ValidatePositions(result);
+            _ValidateNormals(result);
+            _ValidateTangents(result);
+
+            // find skins using this mesh primitive:
+
+            var skins = this.LogicalParent
+                .LogicalParent
+                .LogicalNodes
+                .Where(item => item.Mesh == this.LogicalParent)
+                .Select(item => item.Skin)
+                .ToList();
+
+            _ValidateJoints(result, skins, "JOINTS_0");
+            _ValidateJoints(result, skins, "JOINTS_1");
+        }
+
+        private void _ValidatePositions(Validation.ValidationContext result)
+        {
             var positions = GetVertexAccessor("POSITION");
-            if (positions != null)
-            {
-                positions.ValidatePositions(result);
-            }
-            else
+            if (positions == null)
             {
                 result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_NO_POSITION);
+                return;
             }
 
-            GetVertexAccessor("NORMAL")?.ValidateNormals(result);
+            positions.ValidatePositions(result);
+        }
 
+        private void _ValidateNormals(Validation.ValidationContext result)
+        {
+            var normals = GetVertexAccessor("NORMAL");
+            if (normals == null) return;
+
+            normals.ValidateNormals(result);
+        }
+
+        private void _ValidateTangents(Validation.ValidationContext result)
+        {
             var tangents = GetVertexAccessor("TANGENT");
-            if (tangents != null)
+            if (tangents == null) return;
+
+            if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_WITHOUT_NORMAL);
+            if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_POINTS);
+
+            tangents.ValidateTangents(result);
+        }
+
+        private void _ValidateJoints(Validation.ValidationContext result, IEnumerable<Skin> skins, string attributeName)
+        {
+            var joints = GetVertexAccessor(attributeName);
+
+            if (joints == null) return;
+
+            joints.ValidateJoints(result, attributeName);
+
+            int max = 0;
+            foreach (var jjjj in joints.AsVector4Array())
             {
-                if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_WITHOUT_NORMAL);
-                if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_POINTS);
-                tangents.ValidateTangents(result);
+                max = Math.Max(max, (int)jjjj.X);
+                max = Math.Max(max, (int)jjjj.Y);
+                max = Math.Max(max, (int)jjjj.Z);
+                max = Math.Max(max, (int)jjjj.W);
             }
 
-        }
-
-        internal void ValidateSkinning(Validation.ValidationContext result, int jointsCount)
-        {
-            var j0 = GetVertexAccessor("JOINTS_0");
-            var w0 = GetVertexAccessor("WEIGHTS_0");
-            ValidateSkinning(result, j0, w0, 0, jointsCount);
-
-            var j1 = GetVertexAccessor("JOINTS_1");
-            var w1 = GetVertexAccessor("WEIGHTS_1");
-            if (j1 != null || w1 != null) ValidateSkinning(result, j1, w1, 1, jointsCount);
-        }
-
-        private void ValidateSkinning(Validation.ValidationContext result, Accessor j, Accessor w, int jwset, int jointsCount)
-        {
-            // if (j == null) result.AddError(this, $"Missing JOINTS_{jwset} vertex attribute");
-            // if (w == null) result.AddError(this, $"Missing WEIGHTS_{jwset} vertex attribute");
-            if (j == null || w == null) return;
-
-            j.ValidateJoints(result, jwset, jointsCount);
-            w.ValidateWeights(result, jwset);
+            foreach (var skin in skins)
+            {
+                if (skin == null) continue;
+                else
+                {
+                    var skinJoints = new int[skin.JointsCount];
+                    result.CheckArrayIndexAccess(attributeName, max, skinJoints);
+                }
+            }
         }
 
         #endregion

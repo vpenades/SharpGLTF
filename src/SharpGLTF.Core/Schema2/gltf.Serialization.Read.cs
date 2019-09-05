@@ -211,7 +211,7 @@ namespace SharpGLTF.Schema2
                 }
 
                 // reference checking is mandatory and cannot be skipped
-                var result = new Validation.ValidationResult();
+                var result = new Validation.ValidationResult(root);
                 root.ValidateReferences(result.GetContext(root));
                 var ex = result.Errors.FirstOrDefault();
                 if (ex != null) throw ex;
@@ -228,7 +228,7 @@ namespace SharpGLTF.Schema2
 
                 if (!settings.SkipValidation)
                 {
-                    result = new Validation.ValidationResult();
+                    result = new Validation.ValidationResult(root);
                     root.Validate(result.GetContext(root));
                     ex = result.Errors.FirstOrDefault();
                     if (ex != null) throw ex;
