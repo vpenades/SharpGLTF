@@ -271,7 +271,61 @@ namespace SharpGLTF.Schema2
             {
                 if (group.Skip(1).Any())
                 {
-                    if (group.Key.ByteStride == 0) result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_ACCESSOR_WITHOUT_BYTESTRIDE);
+                    if (group.Key.ByteStride == 0)
+                    {
+                        result.GetContext(group.Key).AddLinkError("ByteStride", " must be defined when two or more accessors use the same buffer view.");
+                    }
+
+                    // now, there's two possible outcomes:
+                    // - independent streaming accessors: all accessors must have ByteStride size
+                    // - strided accessors: the sum of all accessors must match bytestride
+
+                    if (group.All(item => item.ItemByteSize.WordPadded() == group.Key.ByteStride))
+                    {
+                        // sequential format.
+
+                        // all accessor are laid sequentially, so they must not overlap.
+
+                        var accessors = group.OrderBy(item => item.ByteOffset);
+                        var startOffset = accessors.First().ByteOffset;
+
+                        int pointer = 0;
+
+                        foreach (var accessor in accessors)
+                        {
+                            var accessorStartOffset = accessor.ByteOffset - startOffset;
+                            var accessorByteCount = accessor.ItemByteSize.WordPadded() * accessor.Count;
+
+                            if (accessorStartOffset < pointer) result.AddLinkError("Attributes", "Accessors overlapping found.");
+
+                            pointer += accessorByteCount;
+                        }
+                    }
+                    else if (group.Sum(item => item.ItemByteSize.WordPadded()) == group.Key.ByteStride)
+                    {
+                        // strided format.
+
+                        var accessors = group.OrderBy(item => item.ByteOffset);
+                        var startOffset = accessors.First().ByteOffset;
+
+                        int pointer = 0;
+
+                        foreach (var accessor in accessors)
+                        {
+                            var accessorStartOffset = accessor.ByteOffset - startOffset;
+                            var accessorByteCount = accessor.ItemByteSize.WordPadded();
+
+                            if (accessorStartOffset < pointer) result.AddLinkError("Attributes", "Accessors overlapping found.");
+                            if (accessorStartOffset + accessorByteCount > group.Key.ByteStride) result.AddLinkError("Attributes", "Accessors exceed BufferView's ByteStride.");
+
+                            pointer += accessorByteCount;
+                        }
+                    }
+                    else
+                    {
+                        var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
+                        result.AddLinkError("Attributes", $"Inconsistent accessors configuration: {accessors}");
+                    }
                 }
             }
 

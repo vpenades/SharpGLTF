@@ -182,11 +182,11 @@ namespace SharpGLTF.Geometry
         {
             _MergeIndices(primitives);
             _MergeStridedVertices(primitives.Where(p => p._StridedVertexType != null));
-            _MergeStreamedVertices(primitives.Where(p => p._StridedVertexType == null).Select(p => p._VertexAccessors));
-            _MergeStreamedVertices(primitives.SelectMany(p => p._MorphTargets));
+            _MergeSequentialVertices(primitives.Where(p => p._StridedVertexType == null).Select(p => p._VertexAccessors));
+            _MergeSequentialVertices(primitives.SelectMany(p => p._MorphTargets));
         }
 
-        private static void _MergeStreamedVertices(IEnumerable<Memory.MemoryAccessor[]> primitives)
+        private static void _MergeSequentialVertices(IEnumerable<Memory.MemoryAccessor[]> primitives)
         {
             var vertexBuffers = new Dictionary<string, PackedBuffer>();
 
