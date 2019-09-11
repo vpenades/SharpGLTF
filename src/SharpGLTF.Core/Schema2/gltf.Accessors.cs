@@ -341,6 +341,9 @@ namespace SharpGLTF.Schema2
 
             result.CheckSchemaIsDefined("BufferView", _bufferView);
             result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+
+            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
+            result.CheckSchemaIsInRange("Count", _count, _countMinimum, int.MaxValue);
         }
 
         /// <see href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/base/accessor.dart"/>
@@ -366,11 +369,24 @@ namespace SharpGLTF.Schema2
                 var len = Encoding.ByteLength() * Dimensions.DimCount();
                 result.CheckSchemaIsMultipleOf("Encoding", len, 4);
             }
+
+            if (this.SourceBufferView.ByteStride > 0)
+            {
+                var o = this.ByteOffset - (this.ByteOffset % this.SourceBufferView.ByteStride);
+
+                var accessorByteLen = o + this.SourceBufferView.ByteStride * this.Count;
+
+                if (accessorByteLen > this.SourceBufferView.Content.Count) result.AddLinkError("Count", "exceeds the bounds of BufferView.ByteLength.");
+            }
+
+            ValidateBounds(result);
         }
 
-        internal void ValidateBounds(Validation.ValidationContext result)
+        private void ValidateBounds(Validation.ValidationContext result)
         {
             result = result.GetContext(this);
+
+            if (_min.Count != _max.Count) result.AddDataError("Max", $"Min and Max bounds dimension mismatch Min:{_min.Count} Max:{_max.Count}");
 
             if (_min.Count == 0 && _max.Count == 0) return;
 

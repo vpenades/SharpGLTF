@@ -218,15 +218,15 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidate(result);
 
-            // check vertex count
+            // all vertices must have the same vertex count
 
             var vertexCounts = VertexAccessors
                 .Select(item => item.Value.Count)
                 .Distinct();
 
-            if (vertexCounts.Count() != 1)
+            if (vertexCounts.Skip(1).Any())
             {
-                result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_UNEQUAL_ACCESSOR_COUNT);
+                result.AddLinkError("Attributes", "All accessors of the same primitive must have the same count.");
                 return;
             }
 
@@ -262,7 +262,7 @@ namespace SharpGLTF.Schema2
                         break;
                 }
 
-                if (incompatibleMode) result.AddLinkWarning(Validation.WarnCodes.MESH_PRIMITIVE_INCOMPATIBLE_MODE, IndexAccessor.Count, this.DrawPrimitiveType);
+                if (incompatibleMode) result.AddLinkWarning("Indices", $"Number of vertices or indices({IndexAccessor.Count}) is not compatible with used drawing mode('{this.DrawPrimitiveType}').");
             }
 
             // check attributes
@@ -271,13 +271,16 @@ namespace SharpGLTF.Schema2
             {
                 if (group.Skip(1).Any())
                 {
+                    // if more than one accessor shares a BufferView, it must define a ByteStride
+
                     if (group.Key.ByteStride == 0)
                     {
-                        result.GetContext(group.Key).AddLinkError("ByteStride", " must be defined when two or more accessors use the same buffer view.");
+                        result.GetContext(group.Key).AddLinkError("ByteStride", " must be defined when two or more accessors use the same BufferView.");
+                        return;
                     }
 
                     // now, there's two possible outcomes:
-                    // - independent streaming accessors: all accessors must have ByteStride size
+                    // - sequential accessors: accessor data comes one after another.
                     // - strided accessors: the sum of all accessors must match bytestride
 
                     if (group.All(item => item.ItemByteSize.WordPadded() == group.Key.ByteStride))
@@ -287,13 +290,13 @@ namespace SharpGLTF.Schema2
                         // all accessor are laid sequentially, so they must not overlap.
 
                         var accessors = group.OrderBy(item => item.ByteOffset);
-                        var startOffset = accessors.First().ByteOffset;
+                        var bvByteOffset = accessors.First().ByteOffset;
 
                         int pointer = 0;
 
                         foreach (var accessor in accessors)
                         {
-                            var accessorStartOffset = accessor.ByteOffset - startOffset;
+                            var accessorStartOffset = accessor.ByteOffset - bvByteOffset;
                             var accessorByteCount = accessor.ItemByteSize.WordPadded() * accessor.Count;
 
                             if (accessorStartOffset < pointer) result.AddLinkError("Attributes", "Accessors overlapping found.");
@@ -306,20 +309,8 @@ namespace SharpGLTF.Schema2
                         // strided format.
 
                         var accessors = group.OrderBy(item => item.ByteOffset);
-                        var startOffset = accessors.First().ByteOffset;
-
-                        int pointer = 0;
-
-                        foreach (var accessor in accessors)
-                        {
-                            var accessorStartOffset = accessor.ByteOffset - startOffset;
-                            var accessorByteCount = accessor.ItemByteSize.WordPadded();
-
-                            if (accessorStartOffset < pointer) result.AddLinkError("Attributes", "Accessors overlapping found.");
-                            if (accessorStartOffset + accessorByteCount > group.Key.ByteStride) result.AddLinkError("Attributes", "Accessors exceed BufferView's ByteStride.");
-
-                            pointer += accessorByteCount;
-                        }
+                        var bvByteOffset = accessors.First().ByteOffset;
+                        var bvByteCount = group.Key.ByteStride * vertexCount;
                     }
                     else
                     {
@@ -394,14 +385,10 @@ namespace SharpGLTF.Schema2
                 max = Math.Max(max, (int)jjjj.W);
             }
 
-            foreach (var skin in skins)
+            foreach (var skin in skins.Where(item => item != null))
             {
-                if (skin == null) continue;
-                else
-                {
-                    var skinJoints = new int[skin.JointsCount];
-                    result.CheckArrayIndexAccess(attributeName, max, skinJoints);
-                }
+                var skinJoints = new int[skin.JointsCount];
+                result.CheckArrayIndexAccess(attributeName, max, skinJoints);
             }
         }
 

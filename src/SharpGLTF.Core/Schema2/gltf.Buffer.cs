@@ -119,7 +119,7 @@ namespace SharpGLTF.Schema2
             result.CheckSchemaIsValidURI("Uri", this._uri);
 
             result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
-            result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
+            // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
         }
 
         protected override void OnValidate(Validation.ValidationContext result)

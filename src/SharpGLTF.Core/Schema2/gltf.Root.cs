@@ -150,17 +150,21 @@ namespace SharpGLTF.Schema2
 
             result.CheckArrayIndexAccess(nameof(DefaultScene), _scene, this.LogicalScenes);
 
-            foreach (var b in _bufferViews) b.ValidateReferences(result);
+            foreach (var b in _buffers) b.ValidateReferences(result);
+            foreach (var v in _bufferViews) v.ValidateReferences(result);
+            foreach (var a in _accessors) a.ValidateReferences(result);
 
+            foreach (var i in _images) i.ValidateReferences(result);
+            foreach (var s in _samplers) s.ValidateReferences(result);
             foreach (var t in _textures) t.ValidateReferences(result);
             foreach (var m in _materials) m.ValidateReferences(result);
 
-            foreach (var a in _accessors) a.ValidateReferences(result);
             foreach (var m in _meshes) m.ValidateReferences(result);
             foreach (var s in _skins) s.ValidateReferences(result);
+            foreach (var c in _cameras) c.ValidateReferences(result);
 
-            foreach (var s in _scenes) s.ValidateReferences(result);
             foreach (var n in _nodes) n.ValidateReferences(result);
+            foreach (var s in _scenes) s.ValidateReferences(result);
             foreach (var a in _animations) a.ValidateReferences(result);
 
             base.OnValidateReferences(result);
@@ -189,17 +193,22 @@ namespace SharpGLTF.Schema2
 
             // 4th check contents
 
-            foreach (var s in _scenes) s.Validate(result);
-            foreach (var n in _nodes) n.Validate(result);
+            foreach (var b in _buffers) b.Validate(result);
+            foreach (var v in _bufferViews) v.Validate(result);
+            foreach (var a in _accessors) a.Validate(result);
 
-            foreach (var a in _accessors)
-            {
-                a.Validate(result);
-                a.ValidateBounds(result);
-            }
+            foreach (var i in _images) i.Validate(result);
+            foreach (var s in _samplers) s.Validate(result);
+            foreach (var t in _textures) t.Validate(result);
+            foreach (var m in _materials) m.Validate(result);
 
             foreach (var m in _meshes) m.Validate(result);
             foreach (var s in _skins) s.Validate(result);
+            foreach (var c in _cameras) c.Validate(result);
+
+            foreach (var n in _nodes) n.Validate(result);
+            foreach (var s in _scenes) s.Validate(result);
+            foreach (var a in _animations) a.Validate(result);
         }
 
         #endregion
