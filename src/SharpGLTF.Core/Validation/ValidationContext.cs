@@ -99,6 +99,16 @@ namespace SharpGLTF.Validation
 
         #region schema errors
 
+        public bool CheckSchemaIsDefined<T>(ValueLocation location, T value)
+            where T : class
+        {
+            if (value != null) return true;
+
+            AddSchemaError(location, "must be defined.");
+
+            return false;
+        }
+
         public bool CheckSchemaIsDefined<T>(ValueLocation location, T? value)
             where T : struct
         {
@@ -353,9 +363,13 @@ namespace SharpGLTF.Validation
     {
         public static implicit operator ValueLocation(int index) { return new ValueLocation(string.Empty, index); }
 
+        public static implicit operator ValueLocation(int? index) { return new ValueLocation(string.Empty, index ?? 0); }
+
         public static implicit operator ValueLocation(string name) { return new ValueLocation(name); }
 
         public static implicit operator ValueLocation((string, int) tuple) { return new ValueLocation(tuple.Item1, tuple.Item2); }
+
+        public static implicit operator ValueLocation((string, int?) tuple) { return new ValueLocation(tuple.Item1, tuple.Item2 ?? 0); }
 
         public static implicit operator String(ValueLocation location) { return location.ToString(); }
 

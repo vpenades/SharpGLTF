@@ -596,7 +596,7 @@ namespace SharpGLTF.CodeGen
 
             yield return string.Empty;
 
-            yield return "/// <inheritdoc />".Indent(1);
+            // yield return "/// <inheritdoc />".Indent(1);
             yield return "protected override void SerializeProperties(JsonWriter writer)".Indent(1);
             yield return "{".Indent(1);
             if (HasBaseClass) yield return "base.SerializeProperties(writer);".Indent(2);
@@ -605,7 +605,7 @@ namespace SharpGLTF.CodeGen
 
             yield return string.Empty;
 
-            yield return "/// <inheritdoc />".Indent(1);
+            // yield return "/// <inheritdoc />".Indent(1);
             yield return "protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)".Indent(1);
             yield return "{".Indent(1);
             yield return "switch (jsonPropertyName)".Indent(2);

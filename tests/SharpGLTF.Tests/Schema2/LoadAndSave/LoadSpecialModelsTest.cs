@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             }
         }
 
-        [Test]
+        // [Test]
         public void LoadUniVRM()
         {
             TestContext.CurrentContext.AttachShowDirLink();
@@ -85,7 +85,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest("AliceModel.glb");
         }
 
-        [Test]
+        // [Test]
         public void LoadShrekshaoModel()
         {
             TestContext.CurrentContext.AttachShowDirLink();

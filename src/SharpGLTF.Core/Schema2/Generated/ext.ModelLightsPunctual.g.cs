@@ -39,7 +39,6 @@ namespace SharpGLTF.Schema2
 		private Double? _outerConeAngle = _outerConeAngleDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -47,7 +46,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "outerConeAngle", _outerConeAngle, _outerConeAngleDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -81,7 +79,6 @@ namespace SharpGLTF.Schema2
 		private String _type;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -92,7 +89,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "type", _type);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -115,14 +111,12 @@ namespace SharpGLTF.Schema2
 		private ChildrenCollection<PunctualLight,ModelRoot> _lights;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "lights", _lights, _lightsMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)

@@ -47,7 +47,6 @@ namespace SharpGLTF.Schema2
 		private TextureInfo _specularGlossinessTexture;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -58,7 +57,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "specularGlossinessTexture", _specularGlossinessTexture);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)

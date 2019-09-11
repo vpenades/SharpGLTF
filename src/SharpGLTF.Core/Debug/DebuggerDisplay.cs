@@ -41,8 +41,8 @@ namespace SharpGLTF.Debug
         {
             var path = string.Empty;
 
-            if (bv.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) path += " VertexView";
-            else if (bv.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER) path += " IndexView";
+            if (bv.IsVertexBuffer) path += " VertexView";
+            else if (bv.IsIndexBuffer) path += " IndexView";
             else path += " BufferView";
 
             var content = bv.Content;
@@ -66,8 +66,8 @@ namespace SharpGLTF.Debug
 
             var bv = accessor.SourceBufferView;
 
-            if (bv.DeviceBufferTarget == BufferMode.ARRAY_BUFFER) path += "VertexBuffer";
-            else if (bv.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER) path += "IndexBuffer";
+            if (bv.IsVertexBuffer) path += "VertexBuffer";
+            else if (bv.IsIndexBuffer) path += "IndexBuffer";
             else path += "BufferView";
             path += $"[{bv.LogicalIndex}ᴵᵈˣ] ⇨";
 

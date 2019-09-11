@@ -104,8 +104,8 @@ namespace SharpGLTF.Schema2.Authoring
             // checks
             Assert.AreEqual(1, model.LogicalBuffers.Count);
             Assert.AreEqual(2, model.LogicalBufferViews.Count);
-            Assert.AreEqual(BufferMode.ARRAY_BUFFER, model.LogicalBufferViews[0].DeviceBufferTarget);
-            Assert.AreEqual(BufferMode.ELEMENT_ARRAY_BUFFER, model.LogicalBufferViews[1].DeviceBufferTarget);
+            Assert.IsTrue(model.LogicalBufferViews[0].IsVertexBuffer);
+            Assert.IsTrue(model.LogicalBufferViews[1].IsIndexBuffer);
             Assert.AreEqual(2, model.LogicalMaterials.Count);
 
             model.AttachToCurrentTest("result.glb");

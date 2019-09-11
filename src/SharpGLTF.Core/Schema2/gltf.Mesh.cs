@@ -70,7 +70,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_primitives);

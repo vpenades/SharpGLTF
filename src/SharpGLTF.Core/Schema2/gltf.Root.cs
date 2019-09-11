@@ -96,7 +96,6 @@ namespace SharpGLTF.Schema2
         public IReadOnlyList<Scene>             LogicalScenes           => _scenes;
         public IReadOnlyList<Animation>         LogicalAnimations       => _animations;
 
-        /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             var containers = base.GetLogicalChildren();

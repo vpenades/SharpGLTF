@@ -41,8 +41,6 @@ namespace SharpGLTF.Debug
 
         public int ByteLength => _Value.Content.Count;
 
-        public Schema2.BufferMode? DeviceBufferTarget => _Value.DeviceBufferTarget;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public Schema2.Accessor[] Accessors => _Value.FindAccessors().ToArray();
     }
@@ -69,7 +67,7 @@ namespace SharpGLTF.Debug
                 if (_Value.Dimensions == Schema2.DimensionType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();
                 if (_Value.Dimensions == Schema2.DimensionType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
 
-                var itemByteSz = _Value.ItemByteSize;
+                var itemByteSz = _Value.ElementByteSize;
                 var byteStride = Math.Max(_Value.SourceBufferView.ByteStride, itemByteSz);
                 var items = new ArraySegment<Byte>[_Value.Count];
 

@@ -177,14 +177,12 @@ namespace SharpGLTF.Schema2
 		private String _name;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "name", _name);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -211,7 +209,6 @@ namespace SharpGLTF.Schema2
 		private IndexEncodingType _componentType;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -220,7 +217,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumValue<IndexEncodingType>(writer, "componentType", _componentType);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -247,7 +243,6 @@ namespace SharpGLTF.Schema2
 		private Int32? _byteOffset = _byteOffsetDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -255,7 +250,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "byteOffset", _byteOffset, _byteOffsetDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -282,7 +276,6 @@ namespace SharpGLTF.Schema2
 		private AccessorSparseValues _values;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -291,7 +284,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "values", _values);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -340,7 +332,6 @@ namespace SharpGLTF.Schema2
 		private DimensionType _type;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -355,7 +346,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumSymbol<DimensionType>(writer, "type", _type);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -386,7 +376,6 @@ namespace SharpGLTF.Schema2
 		private PropertyPath _path;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -394,7 +383,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumSymbol<PropertyPath>(writer, "path", _path);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -418,7 +406,6 @@ namespace SharpGLTF.Schema2
 		private AnimationChannelTarget _target;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -426,7 +413,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "target", _target);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -453,7 +439,6 @@ namespace SharpGLTF.Schema2
 		private Int32 _output;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -462,7 +447,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "output", _output);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -489,7 +473,6 @@ namespace SharpGLTF.Schema2
 		private ChildrenCollection<AnimationSampler,Animation> _samplers;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -497,7 +480,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "samplers", _samplers, _samplersMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -525,7 +507,6 @@ namespace SharpGLTF.Schema2
 		private String _version;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -535,7 +516,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "version", _version);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -562,7 +542,6 @@ namespace SharpGLTF.Schema2
 		private String _uri;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -570,7 +549,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "uri", _uri);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -605,7 +583,6 @@ namespace SharpGLTF.Schema2
 		private BufferMode? _target;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -616,7 +593,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumValue<BufferMode>(writer, "target", _target);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -649,7 +625,6 @@ namespace SharpGLTF.Schema2
 		private Double _znear;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -659,7 +634,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "znear", _znear);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -693,7 +667,6 @@ namespace SharpGLTF.Schema2
 		private Double _znear;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -703,7 +676,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "znear", _znear);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -732,7 +704,6 @@ namespace SharpGLTF.Schema2
 		private CameraType _type;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -741,7 +712,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumSymbol<CameraType>(writer, "type", _type);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -768,7 +738,6 @@ namespace SharpGLTF.Schema2
 		private Int32? _texCoord = _texCoordDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -776,7 +745,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "texCoord", _texCoord, _texCoordDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -813,7 +781,6 @@ namespace SharpGLTF.Schema2
 		private Double? _roughnessFactor = _roughnessFactorDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -824,7 +791,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "roughnessFactor", _roughnessFactor, _roughnessFactorDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -847,14 +813,12 @@ namespace SharpGLTF.Schema2
 		private Double? _scale = _scaleDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "scale", _scale, _scaleDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -875,14 +839,12 @@ namespace SharpGLTF.Schema2
 		private Double? _strength = _strengthDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "strength", _strength, _strengthDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -922,7 +884,6 @@ namespace SharpGLTF.Schema2
 		private MaterialPBRMetallicRoughness _pbrMetallicRoughness;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -936,7 +897,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "pbrMetallicRoughness", _pbrMetallicRoughness);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -974,7 +934,6 @@ namespace SharpGLTF.Schema2
 		private List<Dictionary<String,Int32>> _targets;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -985,7 +944,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "targets", _targets, _targetsMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1016,7 +974,6 @@ namespace SharpGLTF.Schema2
 		private List<Double> _weights;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1024,7 +981,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "weights", _weights, _weightsMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1066,7 +1022,6 @@ namespace SharpGLTF.Schema2
 		private List<Double> _weights;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1081,7 +1036,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "weights", _weights, _weightsMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1118,7 +1072,6 @@ namespace SharpGLTF.Schema2
 		private TextureWrapMode? _wrapT = _wrapTDefault;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1128,7 +1081,6 @@ namespace SharpGLTF.Schema2
 			SerializePropertyEnumValue<TextureWrapMode>(writer, "wrapT", _wrapT, _wrapTDefault);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1153,14 +1105,12 @@ namespace SharpGLTF.Schema2
 		private List<Int32> _nodes;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "nodes", _nodes, _nodesMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1186,7 +1136,6 @@ namespace SharpGLTF.Schema2
 		private Int32? _skeleton;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1195,7 +1144,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "skeleton", _skeleton);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1220,7 +1168,6 @@ namespace SharpGLTF.Schema2
 		private Int32? _source;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1228,7 +1175,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "source", _source);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1297,7 +1243,6 @@ namespace SharpGLTF.Schema2
 		private ChildrenCollection<Texture,ModelRoot> _textures;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1320,7 +1265,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "textures", _textures, _texturesMinItems);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)
@@ -1361,7 +1305,6 @@ namespace SharpGLTF.Schema2
 		private String _uri;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -1370,7 +1313,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "uri", _uri);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)

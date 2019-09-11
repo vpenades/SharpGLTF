@@ -66,10 +66,29 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex                 => this.LogicalParent.LogicalBufferViews.IndexOfReference(this);
 
-        public BufferMode? DeviceBufferTarget   => this._target;
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="BufferView"/> defines a GPU Ready Vertex Buffer.
+        /// </summary>
+        public bool IsVertexBuffer              => this._target == BufferMode.ARRAY_BUFFER;
 
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="BufferView"/> defines a GPU Ready Index Buffer.
+        /// </summary>
+        public bool IsIndexBuffer               => this._target == BufferMode.ELEMENT_ARRAY_BUFFER;
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="BufferView"/> defines a general purpose data buffer.
+        /// </summary>
+        public bool IsDataBuffer                => this._target == null;
+
+        /// <summary>
+        /// Gets the number of bytes between the beginnings of successive elements, or Zero.
+        /// </summary>
         public int ByteStride                   => this._byteStride.AsValue(0);
 
+        /// <summary>
+        /// Gets the actual bytes defined by this <see cref="BufferView"/>
+        /// </summary>
         public BYTES Content
         {
             get
@@ -86,6 +105,15 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        public IEnumerable<Image> FindImages()
+        {
+            var idx = LogicalIndex;
+
+            return this.LogicalParent
+                .LogicalImages
+                .Where(image => image._SourceBufferViewIndex == idx);
+        }
+
         /// <summary>
         /// Finds all the accessors using this BufferView
         /// </summary>
@@ -96,7 +124,7 @@ namespace SharpGLTF.Schema2
 
             return this.LogicalParent
                 .LogicalAccessors
-                .Where(accessor => accessor._LogicalBufferViewIndex == idx);
+                .Where(accessor => accessor._SourceBufferViewIndex == idx);
         }
 
         internal void _IsolateBufferMemory(_StaticBufferBuilder targetBuffer)
@@ -127,9 +155,72 @@ namespace SharpGLTF.Schema2
                 .All(o => o < this.ByteStride);
         }
 
+        internal static bool AreEqual(BufferView bv, BYTES content, int byteStride, BufferMode? target)
+        {
+            if (bv.Content.Array != content.Array) return false;
+            if (bv.Content.Offset != content.Offset) return false;
+            if (bv.Content.Count != content.Count) return false;
+            if (bv.ByteStride != byteStride) return false;
+            if (bv._target != target) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Calculates the number of bytes to which this accessors reads
+        /// taking into account if the source <see cref="BufferView"/> is strided.
+        /// </summary>
+        /// <returns>The number of bytes to access.</returns>
+        internal int GetAccessorByteLength(DimensionType dim, EncodingType enc, int count)
+        {
+            var elementByteSize = dim.DimCount() * enc.ByteLength();
+            if (this.ByteStride == 0) return elementByteSize * count;
+            return (this.ByteStride * (count - 1)) + elementByteSize;
+        }
+
         #endregion
 
         #region Validation
+
+        internal static void CheckAccess(Validation.ValidationContext result, BufferView bv, int accessorByteOffset, DimensionType dim, EncodingType enc, bool nrm, int count)
+        {
+            if (nrm)
+            {
+                if (enc != EncodingType.UNSIGNED_BYTE && enc != EncodingType.UNSIGNED_SHORT)
+                {
+                    result.AddDataError("Normalized", "Only (u)byte and (u)short accessors can be normalized.");
+                }
+            }
+
+            var elementByteSize = dim.DimCount() * enc.ByteLength();
+
+            if (bv.IsVertexBuffer)
+            {
+                if (bv.ByteStride == 0) result.CheckSchemaIsMultipleOf("ElementByteSize", elementByteSize, 4);
+            }
+
+            if (bv.IsIndexBuffer)
+            {
+                if (dim != DimensionType.SCALAR) result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor dimensions is: {dim}");
+                if (enc == EncodingType.BYTE)    result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)byte");
+                if (enc == EncodingType.SHORT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)short");
+                if (enc == EncodingType.FLOAT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is float");
+                if (nrm)                         result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor is normalized");
+            }
+
+            if (bv.ByteStride > 0)
+            {
+                if (bv.ByteStride < elementByteSize) result.AddLinkError("ElementByteSize", $"Referenced bufferView's byteStride value {bv.ByteStride} is less than accessor element's length {elementByteSize}.");
+
+                // "Accessor's total byteOffset {0} isn't a multiple of componentType length {1}.";
+
+                return;
+            }
+
+            var accessorByteLength = bv.GetAccessorByteLength(dim, enc, count);
+
+            // "Accessor(offset: {0}, length: {1}) does not fit referenced bufferView[% 3] length %4.";
+            result.CheckArrayRangeAccess(("BufferView", bv.LogicalIndex), accessorByteOffset, accessorByteLength, bv.Content);
+        }
 
         protected override void OnValidateReferences(Validation.ValidationContext result)
         {
@@ -167,10 +258,10 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            if (!this.DeviceBufferTarget.HasValue) return;
-            if (usingMode == this.DeviceBufferTarget.Value) return;
+            if (!this._target.HasValue) return;
+            if (usingMode == this._target.Value) return;
 
-            result.AddLinkError(nameof(DeviceBufferTarget), $"is set as {this.DeviceBufferTarget.Value}. But an accessor wants to use it as '{usingMode}'.");
+            result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as '{usingMode}'.");
         }
 
         #endregion
@@ -224,17 +315,11 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, "this", buffer, nameof(buffer));
 
-            byteLength = byteLength.AsValue(buffer.Content.Length - byteOffset);
+            var content = new BYTES(buffer.Content, byteOffset, byteLength.AsValue(buffer.Content.Length - byteOffset) );
 
             foreach (var bv in this.LogicalBufferViews)
             {
-                if (bv.Content.Array != buffer.Content) continue;
-                if (bv.Content.Offset != byteOffset) continue;
-                if (bv.Content.Count != byteLength.Value) continue;
-                if (bv.ByteStride != byteStride) continue;
-                if (bv.DeviceBufferTarget != target) continue;
-
-                return bv;
+                if (BufferView.AreEqual(bv, content, byteStride, target)) return bv;
             }
 
             var newbv = new BufferView(buffer, byteOffset, byteLength, byteStride, target);

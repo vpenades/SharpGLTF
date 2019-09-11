@@ -44,8 +44,6 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 Assert.Fail(ex.Message);
             }
 
-
-
             var perf_load = perf.ElapsedMilliseconds;
 
             // do a model clone and compare it
@@ -113,9 +111,33 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
+            foreach (var f in TestFiles.GetBabylonJSValidModelsPaths())
             {
+                TestContext.Progress.WriteLine(f);
+
                 _LoadModel(f);
+            }
+        }
+
+        [Test]
+        public void LoadInvalidModelsFromBabylonJs()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            foreach (var f in TestFiles.GetBabylonJSInvalidModelsPaths())
+            {
+                TestContext.Progress.WriteLine(f);
+
+                try
+                {
+                    var model = ModelRoot.Load(f);
+                    Assert.Fail("Should throw");
+                }
+                catch(Exception ex)
+                {
+                    TestContext.WriteLine(ex.Message);
+                }
             }
         }
 

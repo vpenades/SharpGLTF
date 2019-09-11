@@ -66,6 +66,8 @@ namespace SharpGLTF
         private static readonly string _BabylonJsMeshesDir;
         private static readonly string _BabylonJsPlaygroundDir;
 
+        private static readonly string[] _BabylonJsInvalidFiles = {"seagulf.glb" };
+
         private static string _GeneratedModelsDir;        
 
         #endregion
@@ -124,14 +126,25 @@ namespace SharpGLTF
                 .ToList();
         }
 
-        public static IReadOnlyList<string> GetBabylonJSModelsPaths()
+        public static IReadOnlyList<string> GetBabylonJSValidModelsPaths()
         {
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
-                .Where(item => !item.EndsWith("shaderBall.glb")) // invalid
+                .Where(item => !_BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))                
+                .ToList();
+        }
+
+        public static IReadOnlyList<string> GetBabylonJSInvalidModelsPaths()
+        {
+            var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
+
+            return files
+                .OrderBy(item => item)
+                .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
+                .Where(item => _BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))
                 .ToList();
         }
 

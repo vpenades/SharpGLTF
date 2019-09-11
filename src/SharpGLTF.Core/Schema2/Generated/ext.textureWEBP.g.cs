@@ -34,14 +34,12 @@ namespace SharpGLTF.Schema2
 		private Int32? _source;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "source", _source);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)

@@ -44,7 +44,6 @@ namespace SharpGLTF.Schema2
 		private Int32? _texCoord;
 		
 	
-		/// <inheritdoc />
 		protected override void SerializeProperties(JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
@@ -54,7 +53,6 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "texCoord", _texCoord);
 		}
 	
-		/// <inheritdoc />
 		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
 		{
 			switch (jsonPropertyName)

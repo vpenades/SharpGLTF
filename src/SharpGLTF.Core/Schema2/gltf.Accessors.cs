@@ -38,7 +38,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex                 => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
 
-        internal int _LogicalBufferViewIndex    => this._bufferView.AsValue(-1);
+        internal int _SourceBufferViewIndex => this._bufferView.AsValue(-1);
 
         /// <summary>
         /// Gets the <see cref="BufferView"/> buffer that contains the items as an encoded byte array.
@@ -54,6 +54,11 @@ namespace SharpGLTF.Schema2
         /// Gets the starting byte offset within <see cref="SourceBufferView"/>.
         /// </summary>
         public int ByteOffset                   => this._byteOffset.AsValue(0);
+
+        /// <summary>
+        /// Gets the number of bytes, starting at <see cref="ByteOffset"/> use by this <see cref="Accessor"/>
+        /// </summary>
+        public int ByteLength                   => SourceBufferView.GetAccessorByteLength(Dimensions, Encoding, Count);
 
         /// <summary>
         /// Gets the <see cref="DimensionType"/> of an item.
@@ -79,7 +84,7 @@ namespace SharpGLTF.Schema2
         /// Gets the number of bytes required to encode a single item in <see cref="SourceBufferView"/>
         /// Given the current <see cref="Dimensions"/> and <see cref="Encoding"/> states.
         /// </summary>
-        public int ItemByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
+        public int ElementByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
         #endregion
 
@@ -99,6 +104,47 @@ namespace SharpGLTF.Schema2
                 (KeyValuePair<IntegerArray, MemoryAccessor>?)null
                 :
                 this._sparse._CreateMemoryAccessors(this);
+        }
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatItems(_sparse);
+        }
+
+        public void UpdateBounds()
+        {
+            this._min.Clear();
+            this._max.Clear();
+
+            if (this.Count == 0) return;
+
+            // With the current limitations of the serializer, we can only handle floating point values.
+            if (this.Encoding != EncodingType.FLOAT) return;
+
+            // https://github.com/KhronosGroup/glTF-Validator/issues/79
+
+            var dimensions = this.Dimensions.DimCount();
+
+            for (int i = 0; i < dimensions; ++i)
+            {
+                this._min.Add(double.MaxValue);
+                this._max.Add(double.MinValue);
+            }
+
+            var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
+
+            var current = new float[dimensions];
+
+            for (int i = 0; i < array.Count; ++i)
+            {
+                array.CopyItemTo(i, current);
+
+                for (int j = 0; j < current.Length; ++j)
+                {
+                    this._min[j] = Math.Min(this._min[j], current[j]);
+                    this._max[j] = Math.Max(this._max[j], current[j]);
+                }
+            }
         }
 
         #endregion
@@ -160,8 +206,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-
-            if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ELEMENT_ARRAY_BUFFER, nameof(buffer));
+            Guard.IsFalse(buffer.IsVertexBuffer, nameof(buffer));
 
             SetData(buffer, bufferByteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
         }
@@ -201,8 +246,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.MustBePositiveAndMultipleOf(dimensions.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
-
-            if (buffer.DeviceBufferTarget.HasValue) Guard.IsTrue(buffer.DeviceBufferTarget.Value == BufferMode.ARRAY_BUFFER, nameof(buffer));
+            Guard.IsFalse(buffer.IsIndexBuffer, nameof(buffer));
 
             SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
         }
@@ -288,51 +332,6 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatItems(_sparse);
-        }
-
-        public void UpdateBounds()
-        {
-            this._min.Clear();
-            this._max.Clear();
-
-            if (this.Count == 0) return;
-
-            // With the current limitations of the serializer, we can only handle floating point values.
-            if (this.Encoding != EncodingType.FLOAT) return;
-
-            // https://github.com/KhronosGroup/glTF-Validator/issues/79
-
-            var dimensions = this.Dimensions.DimCount();
-
-            for (int i = 0; i < dimensions; ++i)
-            {
-                this._min.Add(double.MaxValue);
-                this._max.Add(double.MinValue);
-            }
-
-            var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
-
-            var current = new float[dimensions];
-
-            for (int i = 0; i < array.Count; ++i)
-            {
-                array.CopyItemTo(i, current);
-
-                for (int j = 0; j < current.Length; ++j)
-                {
-                    this._min[j] = Math.Min(this._min[j], current[j]);
-                    this._max[j] = Math.Max(this._max[j], current[j]);
-                }
-            }
-        }
-
-        #endregion
-
         #region Validation
 
         protected override void OnValidateReferences(Validation.ValidationContext result)
@@ -344,42 +343,22 @@ namespace SharpGLTF.Schema2
 
             result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
             result.CheckSchemaIsInRange("Count", _count, _countMinimum, int.MaxValue);
+
+            _sparse?.ValidateReferences(result);
         }
 
-        /// <see href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/base/accessor.dart"/>
-        /// <seealso href="https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/data_access/validate_accessors.dart"/>
         protected override void OnValidate(Validation.ValidationContext result)
         {
             base.OnValidate(result);
 
-            // TODO: check BufferView access.
-            // if (_count < _countMinimum) result.AddError(this, $"Count is out of range");
-            // if (_byteOffset < 0) result.AddError(this, $"ByteOffset is out of range");
+            _sparse?.Validate(result);
 
-            if (this.Normalized)
-            {
-                if (this._componentType != EncodingType.UNSIGNED_BYTE && this._componentType != EncodingType.UNSIGNED_SHORT)
-                {
-                    result.AddDataError(nameof(Normalized), "Only (u)byte and (u)short accessors can be normalized.");
-                }
-            }
-
-            if (SourceBufferView.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)
-            {
-                var len = Encoding.ByteLength() * Dimensions.DimCount();
-                result.CheckSchemaIsMultipleOf("Encoding", len, 4);
-            }
-
-            if (this.SourceBufferView.ByteStride > 0)
-            {
-                var o = this.ByteOffset - (this.ByteOffset % this.SourceBufferView.ByteStride);
-
-                var accessorByteLen = o + this.SourceBufferView.ByteStride * this.Count;
-
-                if (accessorByteLen > this.SourceBufferView.Content.Count) result.AddLinkError("Count", "exceeds the bounds of BufferView.ByteLength.");
-            }
+            BufferView.CheckAccess(result, this.SourceBufferView, this.ByteOffset, this.Dimensions, this.Encoding, this.Normalized, this.Count);
 
             ValidateBounds(result);
+
+            // at this point we don't know which kind of data we're accessing, so it's up to the components
+            // using this accessor to validate the data.
         }
 
         private void ValidateBounds(Validation.ValidationContext result)
@@ -392,8 +371,8 @@ namespace SharpGLTF.Schema2
 
             var dimensions = this.Dimensions.DimCount();
 
-            // if (_min.Count != dimensions) { result.AddError($"min bounds length mismatch; expected {dimensions} but found {_min.Count}"); return; }
-            // if (_max.Count != dimensions) { result.AddError($"max bounds length mismatch; expected {dimensions} but found {_max.Count}"); return; }
+            if (_min.Count != dimensions) { result.AddLinkError("Min", $"size mismatch; expected {dimensions} but found {_min.Count}"); return; }
+            if (_max.Count != dimensions) { result.AddLinkError("Max", $"size mismatch; expected {dimensions} but found {_max.Count}"); return; }
 
             for (int i = 0; i < _min.Count; ++i)
             {

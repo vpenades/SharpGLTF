@@ -140,10 +140,9 @@ namespace SharpGLTF.Reporting
         {
             var rrrr = new ModelReport();
 
-            foreach (var bv in model.LogicalBufferViews.Where(item => item.DeviceBufferTarget == BufferMode.ARRAY_BUFFER)) rrrr._VertexBuffers.Add(bv.Content.Count);
-            foreach (var iv in model.LogicalBufferViews.Where(item => item.DeviceBufferTarget == BufferMode.ELEMENT_ARRAY_BUFFER)) rrrr._IndexBuffers.Add(iv.Content.Count);
-            foreach (var dv in model.LogicalBufferViews.Where(item => item.DeviceBufferTarget == null)) rrrr._DataBuffers.Add(dv.Content.Count);
-
+            foreach (var vb in model.LogicalBufferViews.Where(item => item.IsVertexBuffer)) rrrr._VertexBuffers.Add(vb.Content.Count);
+            foreach (var ib in model.LogicalBufferViews.Where(item => item.IsIndexBuffer)) rrrr._IndexBuffers.Add(ib.Content.Count);
+            foreach (var db in model.LogicalBufferViews.Where(item => item.IsDataBuffer)) rrrr._DataBuffers.Add(db.Content.Count);
 
             foreach (var mesh in model.LogicalMeshes)
             {

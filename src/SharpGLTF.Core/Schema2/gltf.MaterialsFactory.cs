@@ -141,7 +141,6 @@ namespace SharpGLTF.Schema2
 
     internal sealed partial class MaterialPBRMetallicRoughness
     {
-        /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().ConcatItems(_baseColorTexture, _metallicRoughnessTexture);
@@ -213,7 +212,6 @@ namespace SharpGLTF.Schema2
     {
         internal MaterialPBRSpecularGlossiness(Material material) { }
 
-        /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().ConcatItems(_diffuseTexture, _specularGlossinessTexture);

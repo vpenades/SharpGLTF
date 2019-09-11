@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using SharpGLTF.Validation;
 using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
@@ -98,6 +98,8 @@ namespace SharpGLTF.Schema2
                 return "raw";
             }
         }
+
+        internal int _SourceBufferViewIndex => _bufferView.AsValue(-1);
 
         #endregion
 
@@ -330,6 +332,17 @@ namespace SharpGLTF.Schema2
             result.CheckSchemaIsValidURI("Uri", this._uri);
 
             result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+        }
+
+        protected override void OnValidate(ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            if (this._bufferView.HasValue)
+            {
+                var bv = result.Root.LogicalBufferViews[this._bufferView ?? 0];
+                if (!bv.IsDataBuffer) result.AddLinkError(("BufferView", this._bufferView), "is a GPU target.");
+            }
         }
 
         #endregion

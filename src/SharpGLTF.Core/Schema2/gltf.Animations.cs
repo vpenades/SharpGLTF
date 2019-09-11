@@ -41,7 +41,6 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        /// <inheritdoc />
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
@@ -736,6 +735,14 @@ namespace SharpGLTF.Schema2
 
             result.CheckArrayIndexAccess("Input", _input, this.LogicalParent.LogicalParent.LogicalAccessors);
             result.CheckArrayIndexAccess("Output", _output, this.LogicalParent.LogicalParent.LogicalAccessors);
+        }
+
+        protected override void OnValidate(ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            // Input.ValidateAnimationInput();
+            // Output.ValidateAnimationOutput();
         }
 
         #endregion
