@@ -254,7 +254,7 @@ namespace SharpGLTF.Schema2
             // if (this.DeviceBufferTarget.HasValue && this.FindAccessors().Any(item => item.IsSparse)) result.AddError()
         }
 
-        internal void ValidateBufferUsage(Validation.ValidationContext result, BufferMode usingMode)
+        internal void ValidateBufferUsageGPU(Validation.ValidationContext result, BufferMode usingMode)
         {
             result = result.GetContext(this);
 
@@ -262,6 +262,17 @@ namespace SharpGLTF.Schema2
             if (usingMode == this._target.Value) return;
 
             result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as '{usingMode}'.");
+        }
+
+        internal void ValidateBufferUsageData(Validation.ValidationContext result)
+        {
+            if (this.ByteStride != 0) result.AddLinkError("BufferView", "Unexpected ByteStride found. Expected 0");
+
+            result = result.GetContext(this);
+
+            if (!this._target.HasValue) return;
+
+            result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer.");
         }
 
         #endregion

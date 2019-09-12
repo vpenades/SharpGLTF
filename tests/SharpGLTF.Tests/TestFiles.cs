@@ -66,7 +66,7 @@ namespace SharpGLTF
         private static readonly string _BabylonJsMeshesDir;
         private static readonly string _BabylonJsPlaygroundDir;
 
-        private static readonly string[] _BabylonJsInvalidFiles = {"seagulf.glb" };
+        private static readonly string[] _BabylonJsInvalidFiles = { };
 
         private static string _GeneratedModelsDir;        
 

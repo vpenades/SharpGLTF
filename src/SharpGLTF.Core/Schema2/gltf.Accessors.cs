@@ -409,7 +409,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ELEMENT_ARRAY_BUFFER);
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ELEMENT_ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
@@ -430,7 +430,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
@@ -447,7 +447,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
@@ -464,7 +464,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3, DimensionType.VEC4);
@@ -481,7 +481,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsage(result, BufferMode.ARRAY_BUFFER);
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
@@ -497,6 +497,8 @@ namespace SharpGLTF.Schema2
         internal void ValidateWeights(Validation.ValidationContext result, int jwset)
         {
             result = result.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
 
@@ -515,9 +517,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            // SourceBufferView.ValidateBufferUsage(result, null);
-            // result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            // result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
+            SourceBufferView.ValidateBufferUsageData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.MAT4);
 
             var matrices = this.AsMatrix4x4Array();
@@ -526,6 +526,18 @@ namespace SharpGLTF.Schema2
             {
                 result.CheckIsMatrix(i, matrices[i]);
             }
+        }
+
+        internal void ValidateAnimationInput(Validation.ValidationContext result)
+        {
+            SourceBufferView.ValidateBufferUsageData(result);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
+        }
+
+        internal void ValidateAnimationOutput(Validation.ValidationContext result)
+        {
+            SourceBufferView.ValidateBufferUsageData(result);
+            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
         }
 
         #endregion

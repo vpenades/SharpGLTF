@@ -230,6 +230,14 @@ namespace SharpGLTF.Schema2
             foreach (var c in _channels) c.ValidateReferences(result);
         }
 
+        protected override void OnValidate(ValidationContext result)
+        {
+            base.OnValidate(result);
+
+            foreach (var s in _samplers) s.Validate(result);
+            foreach (var c in _channels) c.Validate(result);
+        }
+
         #endregion
     }
 
@@ -741,8 +749,15 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidate(result);
 
-            // Input.ValidateAnimationInput();
-            // Output.ValidateAnimationOutput();
+            if (Output.Dimensions != DimensionType.SCALAR)
+            {
+                var outMult = InterpolationMode == AnimationInterpolationMode.CUBICSPLINE ? 3 : 1;
+
+                if (Input.Count * outMult != Output.Count) result.AddLinkError("Output", $"Input and Output count mismatch; Input: {Input.Count * outMult} Output:{Output.Count}");
+            }
+
+            Input.ValidateAnimationInput(result);
+            Output.ValidateAnimationOutput(result);
         }
 
         #endregion
