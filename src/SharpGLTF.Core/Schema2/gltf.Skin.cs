@@ -248,7 +248,6 @@ namespace SharpGLTF.Schema2
 
             if (_joints.Count < _jointsMinItems)
             {
-
                 // result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
                 return;
             }

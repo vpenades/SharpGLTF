@@ -95,14 +95,14 @@ namespace SharpGLTF.Schema2
 
             if (!Version.TryParse(_version, out Version ver))
             {
-                result.AddSemanticError(Validation.ErrorCodes.UNKNOWN_ASSET_MAJOR_VERSION, _version);
+                result.AddSemanticError("Version", $"Unknown glTF major asset version: {_version}.");
                 return;
             }
 
             if (Version < MINVERSION) result.AddSemanticError($"Minimum supported version is {MINVERSION} but found:{MinVersion}");
             if (MinVersion > MAXVERSION) result.AddSemanticError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
 
-            if (MinVersion > Version) result.AddSemanticWarning(Validation.WarnCodes.ASSET_MIN_VERSION_GREATER_THAN_VERSION, MinVersion, Version);
+            if (MinVersion > Version) result.AddSemanticWarning("Version", $"Asset minVersion '{MinVersion}' is greater than version '{Version}'.");
         }
 
         #endregion

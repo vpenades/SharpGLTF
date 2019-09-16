@@ -13,9 +13,13 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadInvalidJsonModel()
         {
-            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "Invalid_Json.gltf");
+            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "Invalid_Json.gltf");            
 
             Assert.Throws<Validation.SchemaException>(() => ModelRoot.Load(path));
+
+            var validation = ModelRoot.Validate(path);
+
+            Assert.IsTrue(validation.HasErrors);
         }
     }
 }

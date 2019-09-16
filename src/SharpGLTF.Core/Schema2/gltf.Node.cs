@@ -440,12 +440,12 @@ namespace SharpGLTF.Schema2
 
             if (mesh != null)
             {
-                if (skin == null && mesh.AllPrimitivesHaveJoints) result.AddLinkWarning(Validation.WarnCodes.NODE_SKINNED_MESH_WITHOUT_SKIN);
+                if (skin == null && mesh.AllPrimitivesHaveJoints) result.AddLinkWarning("Skin", "Node uses skinned mesh, but has no skin defined.");
             }
 
             if (skin != null)
             {
-                if (mesh == null || !mesh.AllPrimitivesHaveJoints) result.AddLinkError(Validation.ErrorCodes.NODE_SKIN_WITH_NON_SKINNED_MESH);
+                if (mesh == null || !mesh.AllPrimitivesHaveJoints) result.AddLinkError("Mesh", "Node has skin defined, but mesh has no joints data.");
             }
         }
 

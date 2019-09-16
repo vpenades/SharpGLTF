@@ -51,6 +51,33 @@ namespace SharpGLTF.Schema2
 
     partial class ModelRoot
     {
+        #region validate
+
+        public static Validation.ValidationResult Validate(string filePath)
+        {
+            Guard.FilePathMustExist(filePath, nameof(filePath));
+
+            var settings = new ReadSettings(filePath);
+
+            using (var stream = File.OpenRead(filePath))
+            {
+                bool binaryFile = glb._Identify(stream);
+
+                if (binaryFile) return _ReadGLB(stream, settings).Item2;
+
+                string content = null;
+
+                using (var streamReader = new StreamReader(stream))
+                {
+                    content = streamReader.ReadToEnd();
+                }
+
+                return _ParseGLTF(content, settings).Item2;
+            }
+        }
+
+        #endregion
+
         #region read / load methods
 
         /// <summary>
@@ -130,6 +157,55 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="MODEL"/> instance.</returns>
         public static MODEL ReadGLB(Stream stream, ReadSettings settings)
         {
+            var mv = _ReadGLB(stream, settings);
+
+            if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+
+            return mv.Item1;
+        }
+
+        /// <summary>
+        /// Parses a <see cref="MODEL"/> instance from a <see cref="String"/> JSON content representing a GLTF file.
+        /// </summary>
+        /// <param name="jsonContent">A <see cref="String"/> JSON content representing a GLTF file.</param>
+        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public static MODEL ParseGLTF(String jsonContent, ReadSettings settings)
+        {
+            var mv = _ParseGLTF(jsonContent, settings);
+
+            if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+
+            return mv.Item1;
+        }
+
+        public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
+        {
+            Guard.NotNull(files, nameof(files));
+
+            var jsonBytes = files[fileName];
+
+            var settings = new ReadSettings(fn => files[fn]);
+
+            using (var m = new MemoryStream(jsonBytes.Array, jsonBytes.Offset, jsonBytes.Count))
+            {
+                using (var tr = new StreamReader(m))
+                {
+                    var mv = _Read(tr, settings);
+
+                    if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+
+                    return mv.Item1;
+                }
+            }
+        }
+
+        #endregion
+
+        #region reading core
+
+        private static (MODEL, Validation.ValidationResult) _ReadGLB(Stream stream, ReadSettings settings)
+        {
             Guard.NotNull(stream, nameof(stream));
             Guard.NotNull(settings, nameof(settings));
 
@@ -150,16 +226,10 @@ namespace SharpGLTF.Schema2
                     sourceReader.Invoke(key);
             }
 
-            return ParseGLTF(dom, settings);
+            return _ParseGLTF(dom, settings);
         }
 
-        /// <summary>
-        /// Parses a <see cref="MODEL"/> instance from a <see cref="String"/> JSON content representing a GLTF file.
-        /// </summary>
-        /// <param name="jsonContent">A <see cref="String"/> JSON content representing a GLTF file.</param>
-        /// <param name="settings">A <see cref="ReadSettings"/> instance defining the reading options.</param>
-        /// <returns>A <see cref="MODEL"/> instance.</returns>
-        public static MODEL ParseGLTF(String jsonContent, ReadSettings settings)
+        private static (MODEL, Validation.ValidationResult) _ParseGLTF(String jsonContent, ReadSettings settings)
         {
             Guard.NotNullOrEmpty(jsonContent, nameof(jsonContent));
             Guard.NotNull(settings, nameof(settings));
@@ -170,28 +240,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
-        {
-            Guard.NotNull(files, nameof(files));
-
-            var jsonBytes = files[fileName];
-
-            var settings = new ReadSettings(fn => files[fn]);
-
-            using (var m = new MemoryStream(jsonBytes.Array, jsonBytes.Offset, jsonBytes.Count))
-            {
-                using (var s = new StreamReader(m))
-                {
-                    return _Read(s, settings);
-                }
-            }
-        }
-
-        #endregion
-
-        #region reading core
-
-        private static MODEL _Read(TextReader textReader, ReadSettings settings)
+        private static (MODEL, Validation.ValidationResult) _Read(TextReader textReader, ReadSettings settings)
         {
             Guard.NotNull(textReader, nameof(textReader));
             Guard.NotNull(settings, nameof(settings));
@@ -199,22 +248,31 @@ namespace SharpGLTF.Schema2
             using (var reader = new JsonTextReader(textReader))
             {
                 var root = new MODEL();
+                var vcontext = new Validation.ValidationResult(root);
+
+                if (!reader.Read())
+                {
+                    vcontext.AddError(new Validation.ModelException(root, "Json is empty"));
+                    return (null, vcontext);
+                }
 
                 try
                 {
-                    reader.Read();
                     root.Deserialize(reader);
                 }
                 catch (JsonReaderException rex)
                 {
-                    throw new Validation.SchemaException(root, rex);
+                    vcontext.AddError(new Validation.SchemaException(root, rex));
+                    return (null, vcontext);
                 }
 
-                // reference checking is mandatory and cannot be skipped
-                var result = new Validation.ValidationResult(root);
-                root.ValidateReferences(result.GetContext(root));
-                var ex = result.Errors.FirstOrDefault();
-                if (ex != null) throw ex;
+                // schema validation
+
+                root.ValidateReferences(vcontext.GetContext(root));
+                var ex = vcontext.Errors.FirstOrDefault();
+                if (ex != null) return (null, vcontext);
+
+                // resolve external references
 
                 foreach (var buffer in root._buffers)
                 {
@@ -226,15 +284,16 @@ namespace SharpGLTF.Schema2
                     image._ResolveUri(settings.FileReader);
                 }
 
+                // full validation
+
                 if (!settings.SkipValidation)
                 {
-                    result = new Validation.ValidationResult(root);
-                    root.Validate(result.GetContext(root));
-                    ex = result.Errors.FirstOrDefault();
-                    if (ex != null) throw ex;
+                    root.Validate(vcontext.GetContext(root));
+                    ex = vcontext.Errors.FirstOrDefault();
+                    if (ex != null) return (null, vcontext);
                 }
 
-                return root;
+                return (root, vcontext);
             }
         }
 

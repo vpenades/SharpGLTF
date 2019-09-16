@@ -236,7 +236,7 @@ namespace SharpGLTF.Schema2
 
             if (IndexAccessor != null)
             {
-                if (IndexAccessor.SourceBufferView.ByteStride != 0) result.AddLinkError(Validation.ErrorCodes.MESH_PRIMITIVE_INDICES_ACCESSOR_WITH_BYTESTRIDE);
+                if (IndexAccessor.SourceBufferView.ByteStride != 0) result.AddLinkError("bufferView.byteStride must not be defined for indices accessor.");
                 IndexAccessor.ValidateIndices(result, (uint)vertexCount, DrawPrimitiveType);
 
                 var incompatibleMode = false;
@@ -323,7 +323,7 @@ namespace SharpGLTF.Schema2
             var positions = GetVertexAccessor("POSITION");
             if (positions == null)
             {
-                result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_NO_POSITION);
+                result.AddSemanticWarning("No POSITION attribute found.");
                 return;
             }
 
@@ -343,8 +343,8 @@ namespace SharpGLTF.Schema2
             var tangents = GetVertexAccessor("TANGENT");
             if (tangents == null) return;
 
-            if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_WITHOUT_NORMAL);
-            if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning(Validation.WarnCodes.MESH_PRIMITIVE_TANGENT_POINTS);
+            if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning("TANGENT", "attribute without NORMAL found.");
+            if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning("TANGENT", "attribute defined for POINTS rendering mode.");
 
             tangents.ValidateTangents(result);
         }

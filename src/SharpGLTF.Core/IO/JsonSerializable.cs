@@ -18,10 +18,7 @@ namespace SharpGLTF.IO
             OnValidateReferences(context);
         }
 
-        protected virtual void OnValidateReferences(Validation.ValidationContext result)
-        {
-
-        }
+        protected virtual void OnValidateReferences(Validation.ValidationContext result) { }
 
         internal void Validate(Validation.ValidationContext context)
         {

@@ -112,9 +112,9 @@ namespace SharpGLTF.Schema2
                 .Select(item => item.MorphTargetsCount)
                 .Distinct();
 
-            if (morphTargetsCount.Count() != 1) result.AddSemanticError(Validation.ErrorCodes.MESH_PRIMITIVES_UNEQUAL_TARGETS_COUNT);
+            if (morphTargetsCount.Count() != 1) result.AddSemanticError("Count", "All primitives must have the same number of morph targets.");
 
-            if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError(Validation.ErrorCodes.MESH_INVALID_WEIGHTS_COUNT, _weights.Count, morphTargetsCount.First());
+            if (_weights.Count != 0 && morphTargetsCount.First() != _weights.Count) result.AddSemanticError("Weights", $"The length of weights array ({_weights.Count}) does not match the number of morph targets({morphTargetsCount.First()}).");
         }
 
         #endregion
