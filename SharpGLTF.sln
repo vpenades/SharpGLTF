@@ -29,7 +29,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{83
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointCloudGalaxy", "examples\PointCloudGalaxy\PointCloudGalaxy.csproj", "{53B7933A-DD1B-4E75-90EC-94E46101C6CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InfiniteSkinnedTentacle", "examples\InfiniteSkinnedTentacle\InfiniteSkinnedTentacle.csproj", "{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InfiniteSkinnedTentacle", "examples\InfiniteSkinnedTentacle\InfiniteSkinnedTentacle.csproj", "{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Runtime.MonoGame", "examples\SharpGLTF.Runtime.MonoGame\SharpGLTF.Runtime.MonoGame.csproj", "{6C7B3CD8-21D0-447E-9034-8F72057F2ED7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGameScene", "examples\MonoGameScene\MonoGameScene.csproj", "{894781CA-F508-43AE-8526-6AA6B6EDF613}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,6 +69,14 @@ Global
 		{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +89,8 @@ Global
 		{68662AA0-8523-4B9E-9230-DE79F2B07EAB} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{53B7933A-DD1B-4E75-90EC-94E46101C6CC} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
+		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
+		{894781CA-F508-43AE-8526-6AA6B6EDF613} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7BBAD9-834C-4981-AC96-0AA5226FC43F}

@@ -233,14 +233,20 @@ namespace SharpGLTF.Runtime
             return GetAnimationDuration(_AnimationTracks.IndexOf(trackName));
         }
 
-        public void SetAnimationFrame(int trackLogicalIndex, float time)
+        public void SetAnimationFrame(int trackLogicalIndex, float time, bool looped = true)
         {
+            if (looped)
+            {
+                var duration = GetAnimationDuration(trackLogicalIndex);
+                if (duration > 0) time = time % duration;
+            }
+
             foreach (var n in _NodeInstances) n.SetAnimationFrame(trackLogicalIndex, time);
         }
 
-        public void SetAnimationFrame(string trackName, float time)
+        public void SetAnimationFrame(string trackName, float time, bool looped = true)
         {
-            SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time);
+            SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time, looped);
         }
 
         public void SetAnimationFrame(params (int, float, float)[] blended)
