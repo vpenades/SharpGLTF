@@ -137,7 +137,10 @@ namespace MonoGameScene
 
             var animTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
-            var camera = Matrix.CreateWorld(new Vector3(0, 2, 12), -Vector3.UnitZ, Vector3.UnitY);                      
+            var lookAt = new Vector3(0, 2, 0);
+            var camPos = new Vector3((float)Math.Sin(animTime*0.5f) * 2, 2, 12);
+
+            var camera = Matrix.CreateWorld(camPos, lookAt - camPos, Vector3.UnitY);                      
 
             // draw all the instances.
 
