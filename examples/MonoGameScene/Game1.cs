@@ -119,7 +119,7 @@ namespace MonoGameScene
 
             var animTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
-            _BrainStem.Controller.SetAnimationFrame(0, animTime);
+            _BrainStem.Controller.SetAnimationFrame(0, 0.7f* animTime);
             _CesiumMan1.Controller.SetAnimationFrame(0, 0.3f);
             _CesiumMan2.Controller.SetAnimationFrame(0, 0.5f * animTime);
             _CesiumMan3.Controller.SetAnimationFrame(0, 1.0f * animTime);
@@ -131,9 +131,11 @@ namespace MonoGameScene
         
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.DarkSlateGray);
 
-            base.Draw(gameTime);            
+            base.Draw(gameTime);
+
+            var animTime = (float)gameTime.TotalGameTime.TotalSeconds;
 
             var camera = Matrix.CreateWorld(new Vector3(0, 2, 12), -Vector3.UnitZ, Vector3.UnitY);                      
 
@@ -141,9 +143,9 @@ namespace MonoGameScene
 
             var ctx = new ModelDrawContext(_Graphics, camera);
 
-            ctx.DrawModelInstance(_Avocado, Matrix.CreateScale(30) * Matrix.CreateTranslation(-5,5,-5));
+            ctx.DrawModelInstance(_Avocado, Matrix.CreateScale(30) * Matrix.CreateRotationY(animTime*0.3f) * Matrix.CreateTranslation(-5,5,-5));
 
-            ctx.DrawModelInstance(_HauntedHouse, Matrix.CreateScale(20));
+            ctx.DrawModelInstance(_HauntedHouse, Matrix.CreateScale(20) * Matrix.CreateRotationY(1));
 
             ctx.DrawModelInstance(_BrainStem, Matrix.CreateTranslation(0,0.5f,8));
 
