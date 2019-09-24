@@ -22,7 +22,7 @@ namespace SharpGLTF.Runtime
         {
             srcModel.FixTextureSampler();
 
-            var template = Runtime.SceneTemplate.Create(srcModel.DefaultScene, false);
+            var template = Runtime.SceneTemplate.Create(srcModel.DefaultScene, true);
 
             var context = new LoaderContext(device);
 

@@ -226,6 +226,44 @@ namespace SharpGLTF.Animations
             return (left.Value, right.Value, amount);
         }
 
+        internal static IEnumerable<(float, T)[]> SplitByTime<T>(this IEnumerable<(Single Time, T Value)> sequence)
+        {
+            if (!sequence.Any()) yield break;
+
+            var segment = new List<(float, T)>();
+            int time = 0;
+
+            var last = sequence.First();
+
+            foreach (var item in sequence)
+            {
+                var t = (int)item.Time;
+
+                if (time > t) throw new InvalidOperationException("unexpected data encountered.");
+
+                while (time < t)
+                {
+                    if (segment.Count == 0 && item.Time > last.Time) segment.Add(last);
+
+                    segment.Add(item);
+                    yield return segment.ToArray();
+                    segment.Clear();
+
+                    ++time;
+                }
+
+                if (time == t)
+                {
+                    if (segment.Count == 0 && time > (int)last.Time && time < item.Time) segment.Add(last);
+                    segment.Add(item);
+                }
+
+                last = item;
+            }
+
+            if (segment.Count > 0) yield return segment.ToArray();
+        }
+
         #endregion
 
         #region interpolation utils
@@ -291,18 +329,22 @@ namespace SharpGLTF.Animations
             return collection;
         }
 
-        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true)
+        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new Vector3LinearSampler(collection, isLinear);
+            var sampler = new Vector3LinearSampler(collection, isLinear);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, Quaternion)> collection, bool isLinear = true)
+        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, Quaternion)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new QuaternionLinearSampler(collection, isLinear);
+            var sampler = new QuaternionLinearSampler(collection, isLinear);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, Transforms.SparseWeight8)> collection, bool isLinear = true)
@@ -319,18 +361,22 @@ namespace SharpGLTF.Animations
             return new ArrayLinearSampler(collection, isLinear);
         }
 
-        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection)
+        public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new Vector3CubicSampler(collection);
+            var sampler = new Vector3CubicSampler(collection);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> collection)
+        public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> collection, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new QuaternionCubicSampler(collection);
+            var sampler = new QuaternionCubicSampler(collection);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> collection)

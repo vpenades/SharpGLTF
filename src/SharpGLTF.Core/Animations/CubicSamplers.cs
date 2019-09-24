@@ -57,6 +57,16 @@ namespace SharpGLTF.Animations
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }
 
+        public ICurveSampler<Vector3> ToFastSampler()
+        {
+            var split = _Sequence
+                .SplitByTime()
+                .Select(item => new Vector3CubicSampler(item))
+                .Cast<ICurveSampler<Vector3>>();
+
+            return new FastSampler<Vector3>(split);
+        }
+
         #endregion
     }
 
@@ -109,6 +119,16 @@ namespace SharpGLTF.Animations
         public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+        }
+
+        public ICurveSampler<Quaternion> ToFastSampler()
+        {
+            var split = _Sequence
+                .SplitByTime()
+                .Select(item => new QuaternionCubicSampler(item))
+                .Cast<ICurveSampler<Quaternion>>();
+
+            return new FastSampler<Quaternion>(split);
         }
 
         #endregion

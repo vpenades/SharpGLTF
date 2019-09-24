@@ -683,9 +683,9 @@ namespace SharpGLTF.Schema2
 
             switch (this.InterpolationMode)
             {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler();
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler(isolateMemory);
             }
 
             throw new NotImplementedException();
@@ -697,9 +697,9 @@ namespace SharpGLTF.Schema2
 
             switch (this.InterpolationMode)
             {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler();
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler();
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler(isolateMemory);
             }
 
             throw new NotImplementedException();
@@ -712,7 +712,7 @@ namespace SharpGLTF.Schema2
             switch (this.InterpolationMode)
             {
                 case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler();
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(true);
                 case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler();
             }
 
@@ -726,7 +726,7 @@ namespace SharpGLTF.Schema2
             switch (this.InterpolationMode)
             {
                 case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(false);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler();
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys(isolateMemory).CreateSampler(true);
                 case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys(isolateMemory).CreateSampler();
             }
 

@@ -12,6 +12,99 @@ namespace SharpGLTF
     [Category("Core.Animations")]
     public class AnimationSamplingTests
     {
+        [Test]
+        public void TestAnimationSplit()
+        {
+            var anim0 = new[]
+            {
+                (0.1f, 1),                
+            };
+
+            var anim1 = new[]
+            {
+                (0.1f, 1),
+                (0.2f, 2)
+            };
+
+            var anim2 = new[]
+            {
+                (0.1f, 1),
+                (0.2f, 2),
+                (3.2f, 2),
+                (3.3f, 2)
+            };
+
+            var anim3 = new[]
+            {
+                (2.1f, 1),
+                (2.2f, 2),
+                (3.2f, 3),
+                (3.3f, 4),
+                (4.0f, 5),
+                (4.1f, 6),
+                (5.0f, 7),
+            };
+
+            void checkSegment(int time, (float,int)[] segment)
+            {
+                // should check all times are incremental
+                Assert.Greater(segment.Length, 1);
+                Assert.LessOrEqual(segment.First().Item1, time);
+                Assert.Greater(segment.Last().Item1, time);
+            }
+
+
+            var r0 = Animations.SamplerFactory.SplitByTime(anim0).ToArray();
+            Assert.AreEqual(1, r0.Length);
+            Assert.AreEqual(1, r0[0].Length);
+
+            var r1 = Animations.SamplerFactory.SplitByTime(anim1).ToArray();
+            Assert.AreEqual(1, r1.Length);
+            Assert.AreEqual(2, r1[0].Length);
+
+            var r2 = Animations.SamplerFactory.SplitByTime(anim2).ToArray();
+            Assert.AreEqual(4, r2.Length);
+            Assert.AreEqual(3, r2[0].Length); 
+            Assert.AreEqual(2, r2[1].Length); checkSegment(1, r2[1]);
+            Assert.AreEqual(2, r2[2].Length); checkSegment(2, r2[2]);
+            Assert.AreEqual(3, r2[3].Length); checkSegment(3, r2[3]);
+
+            var r3 = Animations.SamplerFactory.SplitByTime(anim3).ToArray();
+            Assert.AreEqual(6, r3.Length);
+            Assert.AreEqual(1, r3[0].Length); 
+            Assert.AreEqual(1, r3[1].Length); 
+            Assert.AreEqual(3, r3[2].Length); 
+            Assert.AreEqual(4, r3[3].Length); checkSegment(3, r3[3]);
+            Assert.AreEqual(4, r3[3].Length); checkSegment(4, r3[4]);
+            Assert.AreEqual(1, r3[5].Length);
+        }
+
+        [Test]
+        public void TestFastSampler()
+        {
+            var curve = Enumerable
+                .Range(0, 1000)
+                .Select(idx => (0.1f * (float)idx, new Vector3(idx, idx, idx)))
+                .ToArray();
+
+            var defaultSampler = new Animations.Vector3LinearSampler(curve, true);
+            var fastSampler = defaultSampler.ToFastSampler();
+
+            foreach(var k in curve)
+            {
+                Assert.AreEqual(k.Item2, defaultSampler.GetPoint(k.Item1));
+                Assert.AreEqual(k.Item2, fastSampler.GetPoint(k.Item1));
+            }
+
+            for(float t=0; t < 100; t+=0.232f)
+            {
+                var dv = defaultSampler.GetPoint(t);
+                var fv = fastSampler.GetPoint(t);
+
+                Assert.AreEqual(dv, fv);
+            }
+        }
+
         [TestCase(0, 0, 0, 1, 1, 1, 1, 0)]
         [TestCase(0, 0, 0.1f, 5, 0.7f, 3, 1, 0)]
         public void TestHermiteInterpolation1(float p1x, float p1y, float p2x, float p2y, float p3x, float p3y, float p4x, float p4y)
