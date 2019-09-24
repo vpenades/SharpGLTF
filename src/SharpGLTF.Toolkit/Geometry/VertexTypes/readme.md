@@ -18,10 +18,10 @@ The table below shows the possible combinations:
 |Position|Material|Skinning _(maxBones×weights)_|
 |-|-|-|
 |Position|Empty|Empty|
-|Position Normal|Color0|256 ×4
-|Position Normal Tangent|Texture0|256 ×8
-||Color0 Texture0|65536 ×4
-||Color0 Texture0 Texture1|65536 ×8
+|Position Normal|Color0| Joints0
+|Position Normal Tangent|Texture0| Joints0 Joints1
+||Color0 Texture0|
+||Color0 Texture0 Texture1|
 ||Color0 Color1 Texture0 Texture1|
 
 By using these predefined building blocks, declaring a vertex structure can be
@@ -39,16 +39,16 @@ in `SharpGLTF.Geometry.VertexTypes` namespace:
 - Material
   - `VertexEmpty`
   - `VertexColor1`
+  - `VertexColor2`
   - `VertexTexture1`
+  - `VertexTexture2`
   - `VertexColor1Texture1`
   - `VertexColor1Texture2`
   - `VertexColor2Texture2`
 - Skinning
   - `VertexEmpty`
-  - `VertexJoints8x4`
-  - `VertexJoints8x8`
-  - `VertexJoints16x4`
-  - `VertexJoints16x8`
+  - `VertexJoints4`
+  - `VertexJoints8`  
 
 #### Appendix
 
