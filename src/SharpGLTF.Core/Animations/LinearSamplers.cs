@@ -191,6 +191,17 @@ namespace SharpGLTF.Animations
             throw new NotImplementedException();
         }
 
+        public ICurveSampler<Transforms.SparseWeight8> ToFastSampler()
+        {
+            var linear = _Linear;
+            var split = _Sequence
+                .SplitByTime()
+                .Select(item => new SparseLinearSampler(item, linear))
+                .Cast<ICurveSampler<Transforms.SparseWeight8>>();
+
+            return new FastSampler<Transforms.SparseWeight8>(split);
+        }
+
         #endregion
     }
 
@@ -244,6 +255,17 @@ namespace SharpGLTF.Animations
         public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()
         {
             throw new NotImplementedException();
+        }
+
+        public ICurveSampler<float[]> ToFastSampler()
+        {
+            var linear = _Linear;
+            var split = _Sequence
+                .SplitByTime()
+                .Select(item => new ArrayLinearSampler(item, linear))
+                .Cast<ICurveSampler<float[]>>();
+
+            return new FastSampler<float[]>(split);
         }
 
         #endregion

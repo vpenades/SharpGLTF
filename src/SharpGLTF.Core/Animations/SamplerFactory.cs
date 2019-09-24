@@ -347,18 +347,22 @@ namespace SharpGLTF.Animations
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, Transforms.SparseWeight8)> collection, bool isLinear = true)
+        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, Transforms.SparseWeight8)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new SparseLinearSampler(collection, isLinear);
+            var sampler = new SparseLinearSampler(collection, isLinear);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true)
+        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new ArrayLinearSampler(collection, isLinear);
+            var sampler = new ArrayLinearSampler(collection, isLinear);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection, bool optimize = false)
@@ -379,18 +383,22 @@ namespace SharpGLTF.Animations
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> collection)
+        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> collection, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new SparseCubicSampler(collection);
+            var sampler = new SparseCubicSampler(collection);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
-        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection)
+        public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection, bool optimize = false)
         {
             if (collection == null) return null;
 
-            return new ArrayCubicSampler(collection);
+            var sampler = new ArrayCubicSampler(collection);
+
+            return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         #endregion
