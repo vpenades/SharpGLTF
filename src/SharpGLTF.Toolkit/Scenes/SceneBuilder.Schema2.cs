@@ -11,7 +11,7 @@ using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.Material
 namespace SharpGLTF.Scenes
 {
     /// <summary>
-    /// Helper class to create a Schema2.Scene from a Scene Builder
+    /// Helper class to create a Schema2.Scene from one or multiple <see cref="SceneBuilder"/> instances.
     /// </summary>
     class Schema2SceneBuilder
     {
@@ -31,11 +31,12 @@ namespace SharpGLTF.Scenes
 
         public Node GetNode(NodeBuilder key) { return key == null ? null : _Nodes.TryGetValue(key, out Node val) ? val : null; }
 
-        public void AddScene(Scene dstScene, SceneBuilder srcScene, bool useStridedBuffers = true)
+        public void AddGeometryResources(ModelRoot root, IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers)
         {
             // gather all unique MeshBuilders
 
-            var srcMeshes = srcScene.Instances
+            var srcMeshes = srcScenes
+                .SelectMany(item => item.Instances)
                 .Select(item => item.Content?.GetGeometryAsset())
                 .Where(item => item != null)
                 .Distinct()
@@ -56,13 +57,13 @@ namespace SharpGLTF.Scenes
 
             foreach (var mg in materialGroups)
             {
-                var val = dstScene.LogicalParent.CreateMaterial(mg.Key);
+                var val = root.CreateMaterial(mg.Key);
                 foreach (var key in mg) _Materials[key] = val;
             }
 
             // create a Schema2.Mesh for every MeshBuilder.
 
-            var dstMeshes = dstScene.LogicalParent.CreateMeshes(mat => _Materials[mat], useStridedBuffers,  srcMeshes);
+            var dstMeshes = root.CreateMeshes(mat => _Materials[mat], useStridedBuffers, srcMeshes);
 
             for (int i = 0; i < srcMeshes.Length; ++i)
             {
@@ -70,10 +71,18 @@ namespace SharpGLTF.Scenes
             }
 
             // TODO: here we could check that every dstMesh has been correctly created.
+        }
+
+        private void AddArmatureResources(Func<string, Node> nodeFactory, IEnumerable<SceneBuilder> srcScenes)
+        {
+            // ALIGNMENT ISSUE:
+            // the toolkit builder is designed in a way that every instance can reuse the same node many times, even from different scenes.
+            // so the only way to handle this is to forcefully recreate all the nodes on every scene.
 
             // gather all NodeBuilder unique armatures
 
-            var armatures = srcScene.Instances
+            var armatures = srcScenes
+                .SelectMany(item => item.Instances)
                 .Select(item => item.Content?.GetArmatureAsset())
                 .Where(item => item != null)
                 .Select(item => item.Root)
@@ -84,29 +93,13 @@ namespace SharpGLTF.Scenes
 
             foreach (var armature in armatures)
             {
-                CreateArmature(dstScene,  armature);
-            }
-
-            // process instances
-
-            var schema2Instances = srcScene
-                .Instances
-                .OfType<IOperator<Scene>>();
-
-            foreach (var inst in schema2Instances)
-            {
-                inst.Setup(dstScene, this);
+                CreateArmature(nodeFactory, armature);
             }
         }
 
-        /// <summary>
-        /// Recursively converts all the <see cref="NodeBuilder"/> instances into <see cref="Schema2.Node"/> instances.
-        /// </summary>
-        /// <param name="container">The target <see cref="Schema2.Scene"/> or <see cref="Schema2.Node"/>.</param>
-        /// <param name="srcNode">The source <see cref="NodeBuilder"/> instance.</param>
-        private void CreateArmature(IVisualNodeContainer container, NodeBuilder srcNode)
+        private void CreateArmature(Func<string, Node> nodeFactory, NodeBuilder srcNode)
         {
-            var dstNode = container.CreateNode(srcNode.Name);
+            var dstNode = nodeFactory(srcNode.Name);
             _Nodes[srcNode] = dstNode;
 
             if (srcNode.HasAnimations)
@@ -123,7 +116,7 @@ namespace SharpGLTF.Scenes
                 dstNode.LocalMatrix = srcNode.LocalMatrix;
             }
 
-            foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode, c);
+            foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode.CreateNode, c);
         }
 
         public void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
@@ -135,6 +128,21 @@ namespace SharpGLTF.Scenes
             dstMesh.SetMorphWeights(animation.Value);
 
             foreach (var t in animation.Tracks) dstNode.WithMorphingAnimation(t.Key, t.Value);
+        }
+
+        public void AddScene(Scene dstScene, SceneBuilder srcScene)
+        {
+            _Nodes.Clear();
+            AddArmatureResources(dstScene.CreateNode, new[] { srcScene });
+
+            var schema2Instances = srcScene
+                .Instances
+                .OfType<IOperator<Scene>>();
+
+            foreach (var inst in schema2Instances)
+            {
+                inst.Setup(dstScene, this);
+            }
         }
 
         #endregion
@@ -153,6 +161,25 @@ namespace SharpGLTF.Scenes
     {
         #region from SceneBuilder to Schema2
 
+        public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers = true)
+        {
+            var context = new Schema2SceneBuilder();
+
+            var dstModel = ModelRoot.CreateModel();
+            context.AddGeometryResources(dstModel, srcScenes, useStridedBuffers);
+
+            foreach (var srcScene in srcScenes)
+            {
+                var dstScene = dstModel.UseScene(dstModel.LogicalScenes.Count);
+
+                dstScene.Name = srcScene.Name;
+
+                context.AddScene(dstScene, srcScene);
+            }
+
+            return dstModel;
+        }
+
         /// <summary>
         /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
         /// </summary>
@@ -160,12 +187,16 @@ namespace SharpGLTF.Scenes
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public ModelRoot ToSchema2(bool useStridedBuffers = true)
         {
+            var context = new Schema2SceneBuilder();
+
             var dstModel = ModelRoot.CreateModel();
+            context.AddGeometryResources(dstModel, new[] { this }, useStridedBuffers);
 
             var dstScene = dstModel.UseScene(0);
 
-            var context = new Schema2SceneBuilder();
-            context.AddScene(dstScene, this, useStridedBuffers);
+            dstScene.Name = this.Name;
+
+            context.AddScene(dstScene, this);
 
             return dstModel;
         }

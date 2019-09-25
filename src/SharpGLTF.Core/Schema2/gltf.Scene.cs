@@ -40,7 +40,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Node"/> instance.</returns>
         public Node CreateNode(String name = null)
         {
-            var n = this.LogicalParent._CreateLogicalNode(this._nodes);
+            var n = this.LogicalParent._CreateVisualNode(this._nodes);
             n.Name = name;
             return n;
         }

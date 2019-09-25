@@ -64,8 +64,6 @@ namespace SharpGLTF.Geometry
     /// The vertex fragment type with Skin Joint Weights.
     /// Valid types are:
     /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexJoints8x4"/>,
-    /// <see cref="VertexJoints8x8"/>,
     /// <see cref="VertexJoints4"/>,
     /// <see cref="VertexJoints8"/>.
     /// </typeparam>

@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
+        #region API - Buffers
 
         public IEnumerable<BufferView> GetBufferViews(bool includeIndices, bool includeVertices, bool includeMorphs)
         {
@@ -110,6 +110,21 @@ namespace SharpGLTF.Schema2
             return indices.Select(idx => this.LogicalParent.LogicalParent.LogicalBufferViews[idx]);
         }
 
+        public IReadOnlyList<KeyValuePair<String, Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
+        {
+            Guard.NotNull(vb, nameof(vb));
+            Guard.MustShareLogicalParent(this.LogicalParent, vb, nameof(vb));
+
+            return VertexAccessors
+                .Where(key => key.Value.SourceBufferView == vb)
+                .OrderBy(item => item.Value.ByteOffset)
+                .ToArray();
+        }
+
+        #endregion
+
+        #region API - Vertices
+
         public Accessor GetVertexAccessor(string attributeKey)
         {
             Guard.NotNullOrEmpty(attributeKey, nameof(attributeKey));
@@ -134,6 +149,15 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public Memory.MemoryAccessor GetVertices(string attributeKey)
+        {
+            return GetVertexAccessor(attributeKey)._GetMemoryAccessor();
+        }
+
+        #endregion
+
+        #region API - Indices
+
         public Accessor GetIndexAccessor()
         {
             if (!this._indices.HasValue) return null;
@@ -149,6 +173,55 @@ namespace SharpGLTF.Schema2
 
             this._indices = accessor.LogicalIndex;
         }
+
+        /// <summary>
+        /// Gets the raw list of indices of this primitive.
+        /// </summary>
+        /// <returns>A list of indices, or null.</returns>
+        public IList<UInt32> GetIndices() => IndexAccessor?.AsIndicesArray();
+
+        /// <summary>
+        /// Decodes the raw indices and returns a list of indexed points.
+        /// </summary>
+        /// <returns>A sequence of indexed points.</returns>
+        public IEnumerable<int> GetPointIndices()
+        {
+            if (this.DrawPrimitiveType.GetPrimitiveVertexSize() != 1) return Enumerable.Empty<int>();
+
+            if (this.IndexAccessor == null) return Enumerable.Range(0, VertexAccessors.Values.First().Count);
+
+            return this.IndexAccessor.AsIndicesArray().Select(item => (int)item);
+        }
+
+        /// <summary>
+        /// Decodes the raw indices and returns a list of indexed lines.
+        /// </summary>
+        /// <returns>A sequence of indexed lines.</returns>
+        public IEnumerable<(int, int)> GetLineIndices()
+        {
+            if (this.DrawPrimitiveType.GetPrimitiveVertexSize() != 2) return Enumerable.Empty<(int, int)>();
+
+            if (this.IndexAccessor == null) return this.DrawPrimitiveType.GetLinesIndices(VertexAccessors.Values.First().Count);
+
+            return this.DrawPrimitiveType.GetLinesIndices(this.IndexAccessor.AsIndicesArray());
+        }
+
+        /// <summary>
+        /// Decodes the raw indices and returns a list of indexed triangles.
+        /// </summary>
+        /// <returns>A sequence of indexed triangles.</returns>
+        public IEnumerable<(int, int, int)> GetTriangleIndices()
+        {
+            if (this.DrawPrimitiveType.GetPrimitiveVertexSize() != 3) return Enumerable.Empty<(int, int, int)>();
+
+            if (this.IndexAccessor == null) return this.DrawPrimitiveType.GetTrianglesIndices(VertexAccessors.Values.First().Count);
+
+            return this.DrawPrimitiveType.GetTrianglesIndices(this.IndexAccessor.AsIndicesArray());
+        }
+
+        #endregion
+
+        #region API - Morph Targets
 
         public IReadOnlyDictionary<String, Accessor> GetMorphTargetAccessors(int idx)
         {
@@ -174,21 +247,6 @@ namespace SharpGLTF.Schema2
                 target[kvp.Key] = kvp.Value.LogicalIndex;
             }
         }
-
-        public IReadOnlyList<KeyValuePair<String, Accessor>> GetVertexAccessorsByBuffer(BufferView vb)
-        {
-            Guard.NotNull(vb, nameof(vb));
-            Guard.MustShareLogicalParent(this.LogicalParent, vb, nameof(vb));
-
-            return VertexAccessors
-                .Where(key => key.Value.SourceBufferView == vb)
-                .OrderBy(item => item.Value.ByteOffset)
-                .ToArray();
-        }
-
-        public Memory.IntegerArray GetIndices() => IndexAccessor.AsIndicesArray();
-
-        public Memory.MemoryAccessor GetVertices(string attributeKey) => GetVertexAccessor(attributeKey)._GetMemoryAccessor();
 
         #endregion
 

@@ -10,12 +10,21 @@ namespace SharpGLTF.Geometry.Parametric
 {
     using VERTEX = VertexBuilder<VertexPositionNormal, VertexColor1Texture1, VertexEmpty>;
 
-    interface IParametricShape<TMaterial>
+    abstract class ParametricShape<TMaterial>
     {
-        void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform);
+        public abstract void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform);
+
+        public MeshBuilder<TMaterial, VertexPositionNormal, VertexColor1Texture1, VertexEmpty> ToMesh(Matrix4x4 xform)
+        {
+            var mesh = new MeshBuilder<TMaterial, VertexPositionNormal, VertexColor1Texture1, VertexEmpty>();
+
+            AddTo(mesh, xform);
+
+            return mesh;
+        }
     }
 
-    class Cube<TMaterial> : IParametricShape<TMaterial>
+    class Cube<TMaterial> : ParametricShape<TMaterial>
     {
         #region lifecycle
 
@@ -49,7 +58,7 @@ namespace SharpGLTF.Geometry.Parametric
 
         #region API
 
-        public void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform)
+        public override void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform)
         {
             var x = Vector3.UnitX * _Size.X * 0.5f;
             var y = Vector3.UnitY * _Size.Y * 0.5f;
@@ -81,20 +90,11 @@ namespace SharpGLTF.Geometry.Parametric
                 new VERTEX( (p4, n), (Vector4.One, Vector2.UnitY) )
                 );
         }
-
-        public MeshBuilder<TMaterial, VertexPositionNormal, VertexColor1Texture1, VertexEmpty> ToMesh(Matrix4x4 xform)
-        {
-            var mesh = new MeshBuilder<TMaterial, VertexPositionNormal, VertexColor1Texture1, VertexEmpty>();
-
-            AddTo(mesh, xform);
-
-            return mesh;
-        }
-
+        
         #endregion
     }
 
-    class IcoSphere<TMaterial> : IParametricShape<TMaterial>
+    class IcoSphere<TMaterial> : ParametricShape<TMaterial>
     {
         #region lifecycle
 
@@ -116,7 +116,7 @@ namespace SharpGLTF.Geometry.Parametric
 
         #region API        
 
-        public void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform)
+        public override void AddTo(IMeshBuilder<TMaterial> meshBuilder, Matrix4x4 xform)
         {
             // http://blog.andreaskahler.com/2009/06/creating-icosphere-mesh-in-code.html
 

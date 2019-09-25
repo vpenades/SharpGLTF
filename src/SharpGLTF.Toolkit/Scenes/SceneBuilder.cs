@@ -10,7 +10,30 @@ namespace SharpGLTF.Scenes
 {
     public partial class SceneBuilder
     {
+        #region lifecycle
+
+        public SceneBuilder() { }
+
+        public SceneBuilder(string name)
+        {
+            _Name = name;
+        }
+
+        public SceneBuilder Clone()
+        {
+            var clone = new SceneBuilder();
+            clone._Name = this._Name;
+
+            clone._Instances.AddRange(this._Instances.Select(item => item.Clone(this)));
+
+            return clone;
+        }
+
+        #endregion
+
         #region data
+
+        private String _Name;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly List<InstanceBuilder> _Instances = new List<InstanceBuilder>();
@@ -18,6 +41,12 @@ namespace SharpGLTF.Scenes
         #endregion
 
         #region properties
+
+        public String Name
+        {
+            get => _Name;
+            set => _Name = value;
+        }
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;

@@ -481,6 +481,33 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("mopth.gltf");
         }
 
+        [Test]
+        public void CreateSharedNodeInstanceScene()
+        {
+            // SceneBuilder API supports reusing a NodeBuilder in multiple instances with different content.
+            // but glTF nodes can only hold one mesh per node, so if we find this case we need to internally
+            // add an additional child node to give room to the the extra mesh.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var m = MaterialBuilder.CreateDefault();
+
+            var cube = new Cube<MaterialBuilder>(m, 1.7f, 1.7f, 1.7f).ToMesh(Matrix4x4.Identity);
+            var sphere = new IcoSphere<MaterialBuilder>(m).ToMesh(Matrix4x4.Identity);
+
+            var armature1 = new NodeBuilder("Skeleton1");
+            var joint0 = armature1
+                .CreateNode("Joint 0")
+                .WithLocalTranslation(new Vector3(0, 1, 0));
+
+            var scene = new SceneBuilder();
+            scene.AddMesh(cube, joint0);
+            scene.AddMesh(sphere, joint0);
+
+            scene.AttachToCurrentTest("instanced.glb");
+            scene.AttachToCurrentTest("instanced.gltf");
+        }
         
 
         [TestCase("AnimatedMorphCube.glb")]

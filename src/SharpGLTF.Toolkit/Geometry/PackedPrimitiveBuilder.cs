@@ -37,7 +37,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim , EncodingType encoding)
+        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
         {
             Guard.NotNull(srcPrim, nameof(srcPrim));
 
@@ -153,7 +153,6 @@ namespace SharpGLTF.Geometry
             }
             else
             {
-
                 var pt = PrimitiveType.LINES;
                 if (_VerticesPerPrimitive == 3) pt = PrimitiveType.TRIANGLES;
 

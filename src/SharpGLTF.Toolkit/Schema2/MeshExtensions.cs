@@ -343,48 +343,6 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static int GetPrimitiveVertexSize(this PrimitiveType ptype)
-        {
-            switch (ptype)
-            {
-                case PrimitiveType.POINTS: return 1;
-                case PrimitiveType.LINES: return 2;
-                case PrimitiveType.LINE_LOOP: return 2;
-                case PrimitiveType.LINE_STRIP: return 2;
-                case PrimitiveType.TRIANGLES: return 3;
-                case PrimitiveType.TRIANGLE_FAN: return 3;
-                case PrimitiveType.TRIANGLE_STRIP: return 3;
-                default: throw new NotImplementedException();
-            }
-        }
-
-        public static IEnumerable<int> GetPointIndices(this MeshPrimitive primitive)
-        {
-            if (primitive == null || primitive.DrawPrimitiveType.GetPrimitiveVertexSize() != 1) return Enumerable.Empty<int>();
-
-            if (primitive.IndexAccessor == null) return Enumerable.Range(0, primitive.GetVertexAccessor("POSITION").Count);
-
-            return primitive.IndexAccessor.AsIndicesArray().Select(item => (int)item);
-        }
-
-        public static IEnumerable<(int, int)> GetLineIndices(this MeshPrimitive primitive)
-        {
-            if (primitive == null || primitive.DrawPrimitiveType.GetPrimitiveVertexSize() != 2) return Enumerable.Empty<(int, int)>();
-
-            if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetLinesIndices(primitive.GetVertexAccessor("POSITION").Count);
-
-            return primitive.DrawPrimitiveType.GetLinesIndices(primitive.IndexAccessor.AsIndicesArray());
-        }
-
-        public static IEnumerable<(int, int, int)> GetTriangleIndices(this MeshPrimitive primitive)
-        {
-            if (primitive == null || primitive.DrawPrimitiveType.GetPrimitiveVertexSize() != 3) return Enumerable.Empty<(int, int, int)>();
-
-            if (primitive.IndexAccessor == null) return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.GetVertexAccessor("POSITION").Count);
-
-            return primitive.DrawPrimitiveType.GetTrianglesIndices(primitive.IndexAccessor.AsIndicesArray());
-        }
-
         public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();

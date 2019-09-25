@@ -35,6 +35,11 @@ namespace SharpGLTF.Animations
             this.Value = other.Value;
         }
 
+        public AnimatableProperty<T> Clone()
+        {
+            return new AnimatableProperty<T>(this);
+        }
+
         #endregion
 
         #region data

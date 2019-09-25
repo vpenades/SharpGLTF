@@ -6,13 +6,22 @@ using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Sc
 
 namespace SharpGLTF.Scenes
 {
-    public class InstanceBuilder : SCHEMA2SCENE
+    public sealed class InstanceBuilder : SCHEMA2SCENE
     {
         #region lifecycle
 
         internal InstanceBuilder(SceneBuilder parent)
         {
             _Parent = parent;
+        }
+
+        internal InstanceBuilder Clone(SceneBuilder newParent)
+        {
+            var clone = new InstanceBuilder(newParent);
+            clone._Name = this.Name;
+            clone._ContentTransformer = this._ContentTransformer?.Clone();
+
+            return clone;
         }
 
         #endregion

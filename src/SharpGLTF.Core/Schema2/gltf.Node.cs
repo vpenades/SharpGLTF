@@ -286,7 +286,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Node"/> instance.</returns>
         public Node CreateNode(string name = null)
         {
-            var node = this.LogicalParent._CreateLogicalNode(this._children);
+            var node = this.LogicalParent._CreateVisualNode(this._children);
             node.Name = name;
             return node;
         }
@@ -473,17 +473,17 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal Node _CreateLogicalNode()
+        public Node CreateLogicalNode()
         {
             var n = new Node();
             _nodes.Add(n);
             return n;
         }
 
-        internal Node _CreateLogicalNode(IList<int> children)
+        internal Node _CreateVisualNode(IList<int> parentChildren)
         {
-            var n = _CreateLogicalNode();
-            children.Add(n.LogicalIndex);
+            var n = CreateLogicalNode();
+            parentChildren.Add(n.LogicalIndex);
             return n;
         }
     }

@@ -25,6 +25,11 @@ namespace SharpGLTF.Scenes
     {
         void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
         {
+            // we try to assign our mesh to the target node.
+            // but if the target node already has a mesh, we need to create
+            // a child node that will contain our mesh.
+
+            if (dstNode.Mesh != null) dstNode = dstNode.CreateNode();
             dstNode.Mesh = context.GetMesh(_Mesh);
         }
     }
@@ -33,6 +38,11 @@ namespace SharpGLTF.Scenes
     {
         void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
         {
+            // we try to assign our camera to the target node.
+            // but if the target node already has a mesh, we need to create
+            // a child node that will contain our camera.
+
+            if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
             dstNode.WithOrthographicCamera(_XMag, _YMag, _ZNear, _ZFar);
         }
     }
@@ -41,6 +51,11 @@ namespace SharpGLTF.Scenes
     {
         void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
         {
+            // we try to assign our camera to the target node.
+            // but if the target node already has a mesh, we need to create
+            // a child node that will contain our camera.
+
+            if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
             dstNode.WithPerspectiveCamera(_AspectRatio, _FovY, _ZNear, _ZFar);
         }
     }

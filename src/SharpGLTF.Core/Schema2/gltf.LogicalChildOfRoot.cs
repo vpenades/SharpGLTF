@@ -16,7 +16,7 @@ namespace SharpGLTF.Schema2
         public String Name
         {
             get => _name;
-            internal set => _name = value;
+            set => _name = value;
         }
 
         #endregion

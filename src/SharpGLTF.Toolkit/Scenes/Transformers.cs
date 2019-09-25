@@ -28,6 +28,14 @@ namespace SharpGLTF.Scenes
             _Content = new MeshContent(mesh);
         }
 
+        public abstract ContentTransformer Clone();
+
+        protected ContentTransformer(ContentTransformer other)
+        {
+            this._Content = other._Content;
+            this._Morphings = other._Morphings?.Clone();
+        }
+
         #endregion
 
         #region data
@@ -87,6 +95,16 @@ namespace SharpGLTF.Scenes
             _WorldTransform = xform;
         }
 
+        protected StaticTransformer(StaticTransformer other) : base(other)
+        {
+            this._WorldTransform = other._WorldTransform;
+        }
+
+        public override ContentTransformer Clone()
+        {
+            return new StaticTransformer(this);
+        }
+
         #endregion
 
         #region data
@@ -128,6 +146,16 @@ namespace SharpGLTF.Scenes
             _Node = node;
         }
 
+        protected NodeTransformer(NodeTransformer other) : base(other)
+        {
+            this._Node = other._Node;
+        }
+
+        public override ContentTransformer Clone()
+        {
+            return new NodeTransformer(this);
+        }
+
         #endregion
 
         #region data
@@ -167,6 +195,17 @@ namespace SharpGLTF.Scenes
             : base(mesh)
         {
             SetJoints(joints);
+        }
+
+        protected SkinTransformer(SkinTransformer other) : base(other)
+        {
+            this._TargetBindMatrix = other._TargetBindMatrix;
+            this._Joints.AddRange(other._Joints);
+        }
+
+        public override ContentTransformer Clone()
+        {
+            return new SkinTransformer(this);
         }
 
         #endregion
