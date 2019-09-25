@@ -10,4 +10,4 @@ This is not the case of this demo; the glTF files are loaded at runtime without 
 
 Also for simplicity, the demo uses the default in-built BasicEffect and SkinnedEffect shaders, which date from the years of DirectX9, so PBR rendering is not supported.
 
-The project depends on [SharpGLTF.Runtime.MonoGame](../SharpGLTF.Runtime.MonoGame), which also depends on [SharpGLTF.Core](../../src\SharpGLTF.Core), that's everything you need to load and render glTF models into MonoGame.
+The project depends on [SharpGLTF.Runtime.MonoGame](../SharpGLTF.Runtime.MonoGame), which also depends on [SharpGLTF.Core](../../src/SharpGLTF.Core), that's everything you need to load and render glTF models into MonoGame.
