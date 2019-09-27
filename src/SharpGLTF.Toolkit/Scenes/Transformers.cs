@@ -79,6 +79,9 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    /// <summary>
+    /// Applies a static transform to the underlaying content.
+    /// </summary>
     public partial class StaticTransformer : ContentTransformer
     {
         #region lifecycle
@@ -130,6 +133,9 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    /// <summary>
+    /// Applies the transform of a <see cref="NodeBuilder"/> to the underlaying content.
+    /// </summary>
     public partial class NodeTransformer : ContentTransformer
     {
         #region lifecycle
@@ -181,6 +187,9 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    /// <summary>
+    /// Applies the transforms of many <see cref="NodeBuilder"/> to the underlaying content.
+    /// </summary>
     public partial class SkinTransformer : ContentTransformer
     {
         #region lifecycle

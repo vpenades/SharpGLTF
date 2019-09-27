@@ -128,13 +128,13 @@ namespace SharpGLTF.Schema2
         /// Gets the Angle, in radians, from centre of spotlight where falloff begins.
         /// Must be greater than or equal to 0 and less than outerConeAngle.
         /// </summary>
-        public float InnerConeAngle => this._spot == null ? 0 : (float)this._spot.InnerConeAngle;
+        public Single InnerConeAngle => this._spot == null ? 0 : (Single)this._spot.InnerConeAngle;
 
         /// <summary>
         /// Gets Angle, in radians, from centre of spotlight where falloff ends.
         /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
         /// </summary>
-        public float OuterConeAngle => this._spot == null ? 0 : (float)this._spot.OuterConeAngle;
+        public Single OuterConeAngle => this._spot == null ? 0 : (Single)this._spot.OuterConeAngle;
 
         /// <summary>
         /// Gets or sets the RGB value for light's color in linear space.
@@ -150,9 +150,9 @@ namespace SharpGLTF.Schema2
         /// point and spot lights use luminous intensity in candela (lm/sr) while directional
         /// lights use illuminance in lux (lm/m2)
         /// </summary>
-        public float Intensity
+        public Single Intensity
         {
-            get => (float)_intensity.AsValue(_intensityDefault);
+            get => (Single)_intensity.AsValue(_intensityDefault);
             set => _intensity = ((double)value).AsNullable(_intensityDefault, _intensityMinimum, float.MaxValue);
         }
 
@@ -161,9 +161,9 @@ namespace SharpGLTF.Schema2
         /// to have reached zero. Supported only for point and spot lights. Must be > 0.
         /// When undefined, range is assumed to be infinite.
         /// </summary>
-        public float Range
+        public Single Range
         {
-            get => (float)_range.AsValue(0);
+            get => (Single)_range.AsValue(0);
             set => _range = LightType == PunctualLightType.Directional ? 0 : ((double)value).AsNullable(0, _rangeMinimum, float.MaxValue);
         }
 
@@ -172,16 +172,16 @@ namespace SharpGLTF.Schema2
 
     partial class PunctualLightSpot
     {
-        public Double InnerConeAngle
+        public Single InnerConeAngle
         {
-            get => _innerConeAngle.AsValue(_innerConeAngleDefault);
-            set => _innerConeAngle = value.AsNullable(_innerConeAngleDefault, _innerConeAngleMinimum, _innerConeAngleMaximum);
+            get => (Single)_innerConeAngle.AsValue(_innerConeAngleDefault);
+            set => _innerConeAngle = ((Double)value).AsNullable(_innerConeAngleDefault, _innerConeAngleMinimum, _innerConeAngleMaximum);
         }
 
-        public Double OuterConeAngle
+        public Single OuterConeAngle
         {
-            get => _outerConeAngle.AsValue(_outerConeAngleDefault);
-            set => _outerConeAngle = value.AsNullable(_outerConeAngleDefault, _outerConeAngleMinimum, _outerConeAngleMaximum);
+            get => (Single)_outerConeAngle.AsValue(_outerConeAngleDefault);
+            set => _outerConeAngle = ((Double)value).AsNullable(_outerConeAngleDefault, _outerConeAngleMinimum, _outerConeAngleMaximum);
         }
     }
 

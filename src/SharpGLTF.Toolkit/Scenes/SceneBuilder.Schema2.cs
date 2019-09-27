@@ -223,6 +223,8 @@ namespace SharpGLTF.Scenes
 
             var dstScene = new SceneBuilder();
 
+            dstScene.Name = srcScene.Name;
+
             // process mesh instances
             var srcMeshInstances = Node.Flatten(srcScene)
                 .Where(item => item.Mesh != null)

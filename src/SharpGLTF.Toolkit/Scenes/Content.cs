@@ -84,4 +84,5 @@ namespace SharpGLTF.Scenes
         float _ZNear;
         float _ZFar;
     }
+
 }
