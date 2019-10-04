@@ -378,11 +378,12 @@ namespace SharpGLTF.Runtime
                 dstTracks.SetValue(index, name, anim.Duration);
             }
 
-            return new SceneTemplate(dstNodes, drawables, dstTracks);
+            return new SceneTemplate(srcScene.Name, dstNodes, drawables, dstTracks);
         }
 
-        private SceneTemplate(NodeTemplate[] nodes, DrawableReference[] drawables, Collections.NamedList<float> animTracks)
+        private SceneTemplate(string name, NodeTemplate[] nodes, DrawableReference[] drawables, Collections.NamedList<float> animTracks)
         {
+            _Name = name;
             _NodeTemplates = nodes;
             _DrawableReferences = drawables;
             _AnimationTracks = animTracks;
@@ -392,6 +393,8 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        private readonly String _Name;
+
         private readonly NodeTemplate[] _NodeTemplates;
         private readonly DrawableReference[] _DrawableReferences;
 
@@ -400,6 +403,8 @@ namespace SharpGLTF.Runtime
         #endregion
 
         #region properties
+
+        public String Name => _Name;
 
         /// <summary>
         /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
