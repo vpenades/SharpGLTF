@@ -12,7 +12,7 @@
     
     <PackageTags>C# glTF 3D</PackageTags>
     <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
-    <PackageIconUrl>https://raw.githubusercontent.com/vpenades/SharpGLTF/master/build/Icons/glTF2Sharp.png</PackageIconUrl>
+    <PackageIcon>glTF2Sharp.png</PackageIcon>
     
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
     
@@ -22,15 +22,11 @@
 
   <PropertyGroup>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+  </PropertyGroup>  
   
-  <!--
-  <PropertyGroup>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-  </PropertyGroup>
   <ItemGroup>
-    <None Include="$(MsBuildThisFileDirectory)..\LICENSE" Pack="true" PackagePath="$(PackageLicenseFile)" />
+    <None Include="$(MsBuildThisFileDirectory)..\build\Icons\glTF2Sharp.png" Pack="true" Visible="false" PackagePath="" />  
   </ItemGroup>
-  -->
+  
 	
 </Project>
