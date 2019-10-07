@@ -7,14 +7,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SharpGLTF.Runtime
 {
-    public class MonoGameModelInstance
+    public sealed class MonoGameModelInstance
     {
         #region lifecycle
 
-        internal MonoGameModelInstance(MonoGameModelTemplate template, Runtime.SceneInstance instance)
+        internal MonoGameModelInstance(MonoGameModelTemplate template, SceneInstance instance)
         {
             _Template = template;
-            _Instance = instance;
+            _Controller = instance;
         }
 
         #endregion
@@ -22,23 +22,35 @@ namespace SharpGLTF.Runtime
         #region data
 
         private readonly MonoGameModelTemplate _Template;
-        private readonly Runtime.SceneInstance _Instance;
+        private readonly SceneInstance _Controller;
 
         #endregion
 
         #region properties
 
+        /// <summary>
+        /// Gets a reference to the template used to create this <see cref="MonoGameModelInstance"/>.
+        /// </summary>
         public MonoGameModelTemplate Template => _Template;
 
-        public Runtime.SceneInstance Controller => _Instance;
+        /// <summary>
+        /// Gets a reference to the animation controller of this <see cref="MonoGameModelInstance"/>.
+        /// </summary>
+        public SceneInstance Controller => _Controller;
 
         #endregion
 
         #region API
 
+        /// <summary>
+        /// Draws this <see cref="MonoGameModelInstance"/> into the current <see cref="GraphicsDevice"/>.
+        /// </summary>
+        /// <param name="projection">The projection matrix.</param>
+        /// <param name="view">The view matrix.</param>
+        /// <param name="world">The world matrix.</param>
         public void Draw(Matrix projection, Matrix view, Matrix world)
         {
-            foreach (var d in _Instance.DrawableReferences)
+            foreach (var d in _Controller.DrawableReferences)
             {
                 Draw(_Template._Meshes[d.Item1], projection, view, world, d.Item2);
             }

@@ -34,29 +34,54 @@ namespace SharpGLTF.Scenes
         }
     }
 
-    partial class OrthographicCameraContent : SCHEMA2NODE
+    partial class CameraContent : SCHEMA2NODE
     {
-        void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
+        public void Setup(Node dstNode, Schema2SceneBuilder context)
         {
-            // we try to assign our camera to the target node.
-            // but if the target node already has a mesh, we need to create
-            // a child node that will contain our camera.
+            if (_Camera is CameraBuilder.Orthographic ortho)
+            {
+                if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
+                dstNode.WithOrthographicCamera(ortho.XMag, ortho.YMag, ortho.ZNear, ortho.ZFar);
+            }
 
-            if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
-            dstNode.WithOrthographicCamera(_XMag, _YMag, _ZNear, _ZFar);
+            if (_Camera is CameraBuilder.Perspective persp)
+            {
+                if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
+                dstNode.WithPerspectiveCamera(persp.AspectRatio, persp.VerticalFOV, persp.ZNear, persp.ZFar);
+            }
         }
     }
 
-    partial class PerspectiveCameraContent : SCHEMA2NODE
+    partial class LightContent : SCHEMA2NODE
     {
-        void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
+        public void Setup(Node dstNode, Schema2SceneBuilder context)
         {
-            // we try to assign our camera to the target node.
-            // but if the target node already has a mesh, we need to create
-            // a child node that will contain our camera.
+            if (_Light is LightBuilder.Directional directional)
+            {
+                if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
+                dstNode.PunctualLight = dstNode.LogicalParent.CreatePunctualLight(PunctualLightType.Directional);
+                dstNode.PunctualLight.Color = directional.Color;
+                dstNode.PunctualLight.Intensity = directional.Intensity;
+            }
 
-            if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
-            dstNode.WithPerspectiveCamera(_AspectRatio, _FovY, _ZNear, _ZFar);
+            if (_Light is LightBuilder.Point point)
+            {
+                if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
+                dstNode.PunctualLight = dstNode.LogicalParent.CreatePunctualLight(PunctualLightType.Point);
+                dstNode.PunctualLight.Color = point.Color;
+                dstNode.PunctualLight.Intensity = point.Intensity;
+                dstNode.PunctualLight.Range = point.Range;
+            }
+
+            if (_Light is LightBuilder.Spot spot)
+            {
+                if (dstNode.Camera != null) dstNode = dstNode.CreateNode();
+                dstNode.PunctualLight = dstNode.LogicalParent.CreatePunctualLight(PunctualLightType.Spot);
+                dstNode.PunctualLight.Color = spot.Color;
+                dstNode.PunctualLight.Intensity = spot.Intensity;
+                dstNode.PunctualLight.Range = spot.Range;
+                dstNode.PunctualLight.SetSpotCone(spot.InnerConeAngle, spot.OuterConeAngle);
+            }
         }
     }
 }

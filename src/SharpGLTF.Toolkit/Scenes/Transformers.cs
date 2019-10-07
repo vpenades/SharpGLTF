@@ -200,13 +200,14 @@ namespace SharpGLTF.Scenes
             SetJoints(meshWorldMatrix, joints);
         }
 
-        public SkinTransformer(MESHBUILDER mesh, (NodeBuilder, Matrix4x4)[] joints)
+        public SkinTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
             : base(mesh)
         {
             SetJoints(joints);
         }
 
-        protected SkinTransformer(SkinTransformer other) : base(other)
+        protected SkinTransformer(SkinTransformer other)
+            : base(other)
         {
             this._TargetBindMatrix = other._TargetBindMatrix;
             this._Joints.AddRange(other._Joints);
@@ -224,7 +225,7 @@ namespace SharpGLTF.Scenes
         private Matrix4x4? _TargetBindMatrix;
 
         // condition: all NodeBuilder objects must have the same root.
-        private readonly List<(NodeBuilder, Matrix4x4?)> _Joints = new List<(NodeBuilder, Matrix4x4?)>();
+        private readonly List<(NodeBuilder Joints, Matrix4x4? InverseBindMatrix)> _Joints = new List<(NodeBuilder, Matrix4x4?)>();
 
         #endregion
 
@@ -240,24 +241,24 @@ namespace SharpGLTF.Scenes
             _Joints.AddRange(joints.Select(item => (item, (Matrix4x4?)null)));
         }
 
-        private void SetJoints((NodeBuilder, Matrix4x4)[] joints)
+        private void SetJoints((NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(joints, nameof(joints));
-            Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Item1)), nameof(joints));
+            Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Joint)), nameof(joints));
 
             _TargetBindMatrix = null;
             _Joints.Clear();
-            _Joints.AddRange(joints.Select(item => (item.Item1, (Matrix4x4?)item.Item2)));
+            _Joints.AddRange(joints.Select(item => (item.Joint, (Matrix4x4?)item.InverseBindMatrix)));
         }
 
-        public (NodeBuilder, Matrix4x4)[] GetJointBindings()
+        public (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] GetJointBindings()
         {
-            var jb = new (NodeBuilder, Matrix4x4)[_Joints.Count];
+            var jb = new (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[_Joints.Count];
 
             for (int i = 0; i < jb.Length; ++i)
             {
-                var j = _Joints[i].Item1;
-                var m = _Joints[i].Item2 ?? Transforms.SkinTransform.CalculateInverseBinding(_TargetBindMatrix ?? Matrix4x4.Identity, j.WorldMatrix);
+                var j = _Joints[i].Joints;
+                var m = _Joints[i].InverseBindMatrix ?? Transforms.SkinTransform.CalculateInverseBinding(_TargetBindMatrix ?? Matrix4x4.Identity, j.WorldMatrix);
 
                 jb[i] = (j, m);
             }
@@ -268,7 +269,7 @@ namespace SharpGLTF.Scenes
         public override NodeBuilder GetArmatureAsset()
         {
             return _Joints
-                .Select(item => item.Item1.Root)
+                .Select(item => item.Joints.Root)
                 .Distinct()
                 .FirstOrDefault();
         }
@@ -280,8 +281,8 @@ namespace SharpGLTF.Scenes
             return new Transforms.SkinTransform
                 (
                 jb.Length,
-                idx => jb[idx].Item2,
-                idx => jb[idx].Item1.GetWorldMatrix(animationTrack, time),
+                idx => jb[idx].InverseBindMatrix,
+                idx => jb[idx].Joint.GetWorldMatrix(animationTrack, time),
                 default, false
                 );
         }

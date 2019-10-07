@@ -85,7 +85,7 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, params (NodeBuilder, Matrix4x4)[] joints)
+        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             var instance = new InstanceBuilder(this);
             instance.Content = new SkinTransformer(mesh, joints);
@@ -95,20 +95,44 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        public InstanceBuilder AddOrthographicCamera(NodeBuilder node, float xmag, float ymag, float znear, float zfar)
+        public InstanceBuilder AddCamera(CameraBuilder camera, NodeBuilder node)
         {
-            var content = new OrthographicCameraContent(xmag, ymag, znear, zfar);
+            var content = new CameraContent(camera);
             var instance = new InstanceBuilder(this);
             instance.Content = new NodeTransformer(content, node);
             _Instances.Add(instance);
             return instance;
         }
 
-        public InstanceBuilder AddPerspectiveCamera(NodeBuilder node, float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+        public InstanceBuilder AddCamera(CameraBuilder camera, Matrix4x4 cameraWorldMatrix)
         {
-            var content = new PerspectiveCameraContent(aspectRatio, fovy, znear, zfar);
+            var content = new CameraContent(camera);
+            var instance = new InstanceBuilder(this);
+            instance.Content = new StaticTransformer(content, cameraWorldMatrix);
+            _Instances.Add(instance);
+            return instance;
+        }
+
+        public InstanceBuilder AddCamera(CameraBuilder camera, Vector3 position, Vector3 lookat)
+        {
+            var xform = Matrix4x4.CreateWorld(position, Vector3.Normalize(lookat - position), Vector3.UnitY);
+            return AddCamera(camera, xform);
+        }
+
+        public InstanceBuilder AddLight(LightBuilder light, NodeBuilder node)
+        {
+            var content = new LightContent(light);
             var instance = new InstanceBuilder(this);
             instance.Content = new NodeTransformer(content, node);
+            _Instances.Add(instance);
+            return instance;
+        }
+
+        public InstanceBuilder AddLight(LightBuilder light, Matrix4x4 lightWorldMatrix)
+        {
+            var content = new LightContent(light);
+            var instance = new InstanceBuilder(this);
+            instance.Content = new StaticTransformer(content, lightWorldMatrix);
             _Instances.Add(instance);
             return instance;
         }

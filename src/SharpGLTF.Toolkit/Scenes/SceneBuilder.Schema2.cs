@@ -239,6 +239,12 @@ namespace SharpGLTF.Scenes
 
             _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
 
+            var srcLightInstances = Node.Flatten(srcScene)
+                .Where(item => item.PunctualLight != null)
+                .ToList();
+
+            _AddLightInstances(dstScene, dstNodes, srcCameraInstances);
+
             return dstScene;
         }
 
@@ -284,17 +290,34 @@ namespace SharpGLTF.Scenes
             foreach (var srcInstance in srcInstances)
             {
                 var dstNode = dstNodes[srcInstance];
-                var cam = srcInstance.Camera;
+                var srcCam = srcInstance.Camera;
+                if (srcCam == null) continue;
 
-                if (cam.Settings is CameraPerspective perspective)
-                {
-                    dstScene.AddPerspectiveCamera(dstNode, perspective.AspectRatio, perspective.VerticalFOV, perspective.ZNear, perspective.ZFar);
-                }
+                CameraBuilder dstCam = null;
 
-                if (cam.Settings is CameraOrthographic orthographic)
-                {
-                    dstScene.AddOrthographicCamera(dstNode, orthographic.XMag, orthographic.YMag, orthographic.ZNear, orthographic.ZFar);
-                }
+                if (srcCam.Settings is CameraPerspective perspective) dstCam = new CameraBuilder.Perspective(perspective);
+                if (srcCam.Settings is CameraOrthographic orthographic) dstCam = new CameraBuilder.Orthographic(orthographic);
+
+                if (dstCam != null) dstScene.AddCamera(dstCam, dstNode);
+            }
+        }
+
+        private static void _AddLightInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            if (srcInstances.Count == 0) return;
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstNode = dstNodes[srcInstance];
+                var srcLight = srcInstance.PunctualLight;
+                if (srcLight == null) continue;
+
+                LightBuilder dstLight = null;
+                if (srcLight.LightType == PunctualLightType.Directional) dstLight = new LightBuilder.Directional(srcLight);
+                if (srcLight.LightType == PunctualLightType.Point) dstLight = new LightBuilder.Point(srcLight);
+                if (srcLight.LightType == PunctualLightType.Spot) dstLight = new LightBuilder.Spot(srcLight);
+
+                if (dstLight != null) dstScene.AddLight(dstLight, dstNode);
             }
         }
 

@@ -14,7 +14,7 @@ namespace SharpGLTF.Runtime
     /// Defines a node of a scene graph in <see cref="SceneInstance"/>
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Name}")]
-    public class NodeInstance
+    public sealed class NodeInstance
     {
         #region lifecycle
 
@@ -121,7 +121,7 @@ namespace SharpGLTF.Runtime
     /// <summary>
     /// Represents a specific and independent state of a <see cref="SceneTemplate"/>.
     /// </summary>
-    public class SceneInstance
+    public sealed class SceneInstance
     {
         #region lifecycle
 
@@ -169,10 +169,19 @@ namespace SharpGLTF.Runtime
 
         #region properties
 
+        /// <summary>
+        /// Gets a list of all the <see cref="NodeInstance"/> nodes used by this <see cref="SceneInstance"/>.
+        /// </summary>
         public IReadOnlyList<NodeInstance> LogicalNodes => _NodeInstances;
 
+        /// <summary>
+        /// Gets all the <see cref="NodeInstance"/> roots used by this <see cref="SceneInstance"/>.
+        /// </summary>
         public IEnumerable<NodeInstance> VisualNodes => _NodeInstances.Where(item => item.VisualParent == null);
 
+        /// <summary>
+        /// Gets all the names of the animations tracks.
+        /// </summary>
         public IEnumerable<String> AnimationTracks => _AnimationTracks.Names;
 
         /// <summary>
@@ -201,14 +210,14 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public void SetLocalMatrix(string name, System.Numerics.Matrix4x4 localMatrix)
+        public void SetLocalMatrix(string name, XFORM localMatrix)
         {
             var n = LogicalNodes.FirstOrDefault(item => item.Name == name);
             if (n == null) return;
             n.LocalMatrix = localMatrix;
         }
 
-        public void SetWorldMatrix(string name, System.Numerics.Matrix4x4 worldMatrix)
+        public void SetWorldMatrix(string name, XFORM worldMatrix)
         {
             var n = LogicalNodes.FirstOrDefault(item => item.Name == name);
             if (n == null) return;
@@ -249,12 +258,12 @@ namespace SharpGLTF.Runtime
             SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time, looped);
         }
 
-        public void SetAnimationFrame(params (int, float, float)[] blended)
+        public void SetAnimationFrame(params (int TrackIdx, float Time, float Weight)[] blended)
         {
             SetAnimationFrame(_NodeInstances, blended);
         }
 
-        public static void SetAnimationFrame(IEnumerable<NodeInstance> nodes, params (int, float, float)[] blended)
+        public static void SetAnimationFrame(IEnumerable<NodeInstance> nodes, params (int TrackIdx, float Time, float Weight)[] blended)
         {
             Guard.NotNull(nodes, nameof(nodes));
 
@@ -262,15 +271,15 @@ namespace SharpGLTF.Runtime
             Span<float> times = stackalloc float[blended.Length];
             Span<float> weights = stackalloc float[blended.Length];
 
-            float w = blended.Sum(item => item.Item3);
+            float w = blended.Sum(item => item.Weight);
 
             w = w == 0 ? 1 : 1 / w;
 
             for (int i = 0; i < blended.Length; ++i)
             {
-                tracks[i] = blended[i].Item1;
-                times[i] = blended[i].Item2;
-                weights[i] = blended[i].Item3 * w;
+                tracks[i] = blended[i].TrackIdx;
+                times[i] = blended[i].Time;
+                weights[i] = blended[i].Weight * w;
             }
 
             foreach (var n in nodes) n.SetAnimationFrame(tracks, times, weights);

@@ -53,36 +53,39 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
-    partial class OrthographicCameraContent
+    partial class CameraContent
     {
-        public OrthographicCameraContent(float xmag, float ymag, float znear, float zfar)
+        #region lifecycle
+
+        public CameraContent(CameraBuilder camera)
         {
-            _XMag = xmag;
-            _YMag = ymag;
-            _ZNear = znear;
-            _ZFar = zfar;
+            _Camera = camera;
         }
 
-        private float _XMag;
-        private float _YMag;
-        private float _ZNear;
-        private float _ZFar;
+        #endregion
+
+        #region data
+
+        private CameraBuilder _Camera;
+
+        #endregion
     }
 
-    partial class PerspectiveCameraContent
+    partial class LightContent
     {
-        public PerspectiveCameraContent(float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+        #region lifecycle
+
+        public LightContent(LightBuilder light)
         {
-            _AspectRatio = aspectRatio;
-            _FovY = fovy;
-            _ZNear = znear;
-            _ZFar = zfar;
+            _Light = light;
         }
 
-        float? _AspectRatio;
-        float _FovY;
-        float _ZNear;
-        float _ZFar;
-    }
+        #endregion
 
+        #region data
+
+        private LightBuilder _Light;
+
+        #endregion
+    }
 }
