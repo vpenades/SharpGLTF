@@ -58,7 +58,7 @@ namespace SharpGLTF.Runtime
 
         private void Draw(ModelMesh mesh, Matrix projectionXform, Matrix viewXform, Matrix worldXform, Transforms.IGeometryTransform modelXform)
         {
-            if (modelXform is Transforms.SkinTransform skinXform)
+            if (modelXform is Transforms.SkinnedTransform skinXform)
             {
                 var skinTransforms = skinXform.SkinMatrices.Select(item => item.ToXna()).ToArray();
 
@@ -68,7 +68,7 @@ namespace SharpGLTF.Runtime
                 }
             }
 
-            if (modelXform is Transforms.StaticTransform statXform)
+            if (modelXform is Transforms.RigidTransform statXform)
             {
                 var statTransform = statXform.WorldMatrix.ToXna();
 

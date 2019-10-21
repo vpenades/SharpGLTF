@@ -83,7 +83,7 @@ namespace SharpGLTF.Scenes
 
             var armatures = srcScenes
                 .SelectMany(item => item.Instances)
-                .Select(item => item.Content?.GetArmatureAsset())
+                .Select(item => item.Content?.GetArmatureRoot())
                 .Where(item => item != null)
                 .Select(item => item.Root)
                 .Distinct()

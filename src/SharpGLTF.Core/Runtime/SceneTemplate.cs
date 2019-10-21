@@ -209,13 +209,13 @@ namespace SharpGLTF.Runtime
     }
 
     /// <summary>
-    /// Defines a reference to a drawable static mesh
+    /// Defines a reference to a drawable rigid mesh
     /// </summary>
-    sealed class StaticDrawableReference : DrawableReference
+    sealed class RigidDrawableReference : DrawableReference
     {
         #region lifecycle
 
-        internal StaticDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+        internal RigidDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
             : base(node)
         {
             _NodeIndex = indexFunc(node);
@@ -231,13 +231,13 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.StaticTransform(); }
+        public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.RigidTransform(); }
 
-        public override void UpdateGeometryTransform(Transforms.IGeometryTransform geoxform, IReadOnlyList<NodeInstance> instances)
+        public override void UpdateGeometryTransform(Transforms.IGeometryTransform rigidTransform, IReadOnlyList<NodeInstance> instances)
         {
             var node = instances[_NodeIndex];
 
-            var statxform = (Transforms.StaticTransform)geoxform;
+            var statxform = (Transforms.RigidTransform)rigidTransform;
             statxform.Update(node.WorldMatrix);
             statxform.Update(node.MorphWeights, false);
         }
@@ -260,7 +260,7 @@ namespace SharpGLTF.Runtime
             _MorphNodeIndex = indexFunc(node);
 
             _JointsNodeIndices = new int[skin.JointsCount];
-            _BindMatrices = new System.Numerics.Matrix4x4[skin.JointsCount];
+            _BindMatrices = new Matrix4x4[skin.JointsCount];
 
             for (int i = 0; i < _JointsNodeIndices.Length; ++i)
             {
@@ -283,11 +283,11 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.SkinTransform(); }
+        public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.SkinnedTransform(); }
 
-        public override void UpdateGeometryTransform(Transforms.IGeometryTransform geoxform, IReadOnlyList<NodeInstance> instances)
+        public override void UpdateGeometryTransform(Transforms.IGeometryTransform skinnedTransform, IReadOnlyList<NodeInstance> instances)
         {
-            var skinxform = (Transforms.SkinTransform)geoxform;
+            var skinxform = (Transforms.SkinnedTransform)skinnedTransform;
             skinxform.Update(_JointsNodeIndices.Length, idx => _BindMatrices[idx], idx => instances[_JointsNodeIndices[idx]].WorldMatrix);
             skinxform.Update(instances[_MorphNodeIndex].MorphWeights, false);
         }
@@ -361,7 +361,7 @@ namespace SharpGLTF.Runtime
                     ?
                     (DrawableReference)new SkinnedDrawableReference(srcInstance, indexSolver)
                     :
-                    (DrawableReference)new StaticDrawableReference(srcInstance, indexSolver);
+                    (DrawableReference)new RigidDrawableReference(srcInstance, indexSolver);
             }
 
             // gather animation durations.

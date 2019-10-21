@@ -10,7 +10,7 @@ using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Sc
 
 namespace SharpGLTF.Scenes
 {
-    partial class StaticTransformer : SCHEMA2SCENE
+    partial class FixedTransformer : SCHEMA2SCENE
     {
         void SCHEMA2SCENE.Setup(Scene dstScene, Schema2SceneBuilder context)
         {
@@ -26,7 +26,7 @@ namespace SharpGLTF.Scenes
         }
     }
 
-    partial class NodeTransformer : SCHEMA2SCENE
+    partial class RigidTransformer : SCHEMA2SCENE
     {
         void SCHEMA2SCENE.Setup(Scene dstScene, Schema2SceneBuilder context)
         {
@@ -40,7 +40,7 @@ namespace SharpGLTF.Scenes
         }
     }
 
-    partial class SkinTransformer : SCHEMA2SCENE
+    partial class SkinnedTransformer : SCHEMA2SCENE
     {
         void SCHEMA2SCENE.Setup(Scene dstScene, Schema2SceneBuilder context)
         {

@@ -21,7 +21,7 @@ namespace SharpGLTF.Transforms
             var joint = Matrix4x4.CreateFromYawPitchRoll(jx, jy, jz);
             joint.Translation = new Vector3(jx, jy, jz);
 
-            var invBindMatrix = SkinTransform.CalculateInverseBinding(model, joint);
+            var invBindMatrix = SkinnedTransform.CalculateInverseBinding(model, joint);
 
             Matrix4x4.Invert(model, out Matrix4x4 xform);            
             Matrix4x4.Invert(joint * xform, out Matrix4x4 result);

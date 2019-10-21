@@ -15,11 +15,11 @@ namespace SharpGLTF.Scenes
             _Parent = parent;
         }
 
-        internal InstanceBuilder Clone(SceneBuilder newParent)
+        internal InstanceBuilder DeepClone(SceneBuilder newParent)
         {
             var clone = new InstanceBuilder(newParent);
             clone._Name = this.Name;
-            clone._ContentTransformer = this._ContentTransformer?.Clone();
+            clone._ContentTransformer = this._ContentTransformer?.DeepClone();
 
             return clone;
         }

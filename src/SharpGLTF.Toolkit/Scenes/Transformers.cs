@@ -8,7 +8,7 @@ using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.Material
 namespace SharpGLTF.Scenes
 {
     /// <summary>
-    /// Wraps a content object (usually a Mesh, a Camera or a light)
+    /// Applies a transform to the underlaying content object (usually a Mesh, a Camera or a light)
     /// </summary>
     public abstract class ContentTransformer
     {
@@ -18,17 +18,12 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(content, nameof(content));
 
+            if (content is MESHBUILDER mesh) content = new MeshContent(mesh);
+
             _Content = content;
         }
 
-        protected ContentTransformer(MESHBUILDER mesh)
-        {
-            Guard.NotNull(mesh, nameof(mesh));
-
-            _Content = new MeshContent(mesh);
-        }
-
-        public abstract ContentTransformer Clone();
+        public abstract ContentTransformer DeepClone();
 
         protected ContentTransformer(ContentTransformer other)
         {
@@ -42,7 +37,7 @@ namespace SharpGLTF.Scenes
 
         private Object _Content;
 
-        private Animations.AnimatableProperty<Transforms.SparseWeight8> _Morphings; // maybe it should be moved to transformers!!
+        private Animations.AnimatableProperty<Transforms.SparseWeight8> _Morphings;
 
         #endregion
 
@@ -56,9 +51,17 @@ namespace SharpGLTF.Scenes
 
         #region API
 
+        /// <summary>
+        /// If this <see cref="ContentTransformer"/> contains a <see cref="MESHBUILDER"/>.
+        /// </summary>
+        /// <returns>A <see cref="MESHBUILDER"/> instance, or NULL.</returns>
         public virtual MESHBUILDER GetGeometryAsset() { return (_Content as IRenderableContent)?.GetGeometryAsset(); }
 
-        public abstract NodeBuilder GetArmatureAsset();
+        /// <summary>
+        /// If this <see cref="ContentTransformer"/> uses a <see cref="NodeBuilder"/> armature, it returns the root of the armature.
+        /// </summary>
+        /// <returns>A <see cref="NodeBuilder"/> instance, or NULL.</returns>
+        public abstract NodeBuilder GetArmatureRoot();
 
         public Animations.AnimatableProperty<Transforms.SparseWeight8> UseMorphing()
         {
@@ -80,32 +83,27 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
-    /// Applies a static transform to the underlaying content.
+    /// Applies a fixed <see cref="Matrix4x4"/> transform to the underlaying content.
     /// </summary>
-    public partial class StaticTransformer : ContentTransformer
+    public partial class FixedTransformer : ContentTransformer
     {
         #region lifecycle
 
-        public StaticTransformer(Object content, Matrix4x4 xform)
+        internal FixedTransformer(Object content, Matrix4x4 xform)
             : base(content)
         {
             _WorldTransform = xform;
         }
 
-        public StaticTransformer(MESHBUILDER mesh, Matrix4x4 xform)
-            : base(mesh)
-        {
-            _WorldTransform = xform;
-        }
-
-        protected StaticTransformer(StaticTransformer other) : base(other)
+        protected FixedTransformer(FixedTransformer other)
+            : base(other)
         {
             this._WorldTransform = other._WorldTransform;
         }
 
-        public override ContentTransformer Clone()
+        public override ContentTransformer DeepClone()
         {
-            return new StaticTransformer(this);
+            return new FixedTransformer(this);
         }
 
         #endregion
@@ -128,38 +126,33 @@ namespace SharpGLTF.Scenes
 
         #region API
 
-        public override NodeBuilder GetArmatureAsset() { return null; }
+        public override NodeBuilder GetArmatureRoot() { return null; }
 
         #endregion
     }
 
     /// <summary>
-    /// Applies the transform of a <see cref="NodeBuilder"/> to the underlaying content.
+    /// Applies the transform of a single <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
-    public partial class NodeTransformer : ContentTransformer
+    public partial class RigidTransformer : ContentTransformer
     {
         #region lifecycle
 
-        public NodeTransformer(Object content, NodeBuilder node)
+        internal RigidTransformer(Object content, NodeBuilder node)
             : base(content)
         {
             _Node = node;
         }
 
-        public NodeTransformer(MESHBUILDER mesh, NodeBuilder node)
-            : base(mesh)
-        {
-            _Node = node;
-        }
-
-        protected NodeTransformer(NodeTransformer other) : base(other)
+        protected RigidTransformer(RigidTransformer other)
+            : base(other)
         {
             this._Node = other._Node;
         }
 
-        public override ContentTransformer Clone()
+        public override ContentTransformer DeepClone()
         {
-            return new NodeTransformer(this);
+            return new RigidTransformer(this);
         }
 
         #endregion
@@ -182,7 +175,7 @@ namespace SharpGLTF.Scenes
 
         #region API
 
-        public override NodeBuilder GetArmatureAsset() { return _Node.Root; }
+        public override NodeBuilder GetArmatureRoot() { return _Node.Root; }
 
         #endregion
     }
@@ -190,32 +183,32 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Applies the transforms of many <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
-    public partial class SkinTransformer : ContentTransformer
+    public partial class SkinnedTransformer : ContentTransformer
     {
         #region lifecycle
 
-        public SkinTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
+        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
             : base(mesh)
         {
             SetJoints(meshWorldMatrix, joints);
         }
 
-        public SkinTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
+        internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
             : base(mesh)
         {
             SetJoints(joints);
         }
 
-        protected SkinTransformer(SkinTransformer other)
+        protected SkinnedTransformer(SkinnedTransformer other)
             : base(other)
         {
             this._TargetBindMatrix = other._TargetBindMatrix;
             this._Joints.AddRange(other._Joints);
         }
 
-        public override ContentTransformer Clone()
+        public override ContentTransformer DeepClone()
         {
-            return new SkinTransformer(this);
+            return new SkinnedTransformer(this);
         }
 
         #endregion
@@ -258,7 +251,7 @@ namespace SharpGLTF.Scenes
             for (int i = 0; i < jb.Length; ++i)
             {
                 var j = _Joints[i].Joints;
-                var m = _Joints[i].InverseBindMatrix ?? Transforms.SkinTransform.CalculateInverseBinding(_TargetBindMatrix ?? Matrix4x4.Identity, j.WorldMatrix);
+                var m = _Joints[i].InverseBindMatrix ?? Transforms.SkinnedTransform.CalculateInverseBinding(_TargetBindMatrix ?? Matrix4x4.Identity, j.WorldMatrix);
 
                 jb[i] = (j, m);
             }
@@ -266,7 +259,7 @@ namespace SharpGLTF.Scenes
             return jb;
         }
 
-        public override NodeBuilder GetArmatureAsset()
+        public override NodeBuilder GetArmatureRoot()
         {
             return _Joints
                 .Select(item => item.Joints.Root)
@@ -278,7 +271,7 @@ namespace SharpGLTF.Scenes
         {
             var jb = GetJointBindings();
 
-            return new Transforms.SkinTransform
+            return new Transforms.SkinnedTransform
                 (
                 jb.Length,
                 idx => jb[idx].InverseBindMatrix,

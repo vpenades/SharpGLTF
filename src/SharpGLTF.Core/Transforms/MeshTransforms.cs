@@ -167,22 +167,22 @@ namespace SharpGLTF.Transforms
         #endregion
     }
 
-    public class StaticTransform : MorphTransform, IGeometryTransform
+    public class RigidTransform : MorphTransform, IGeometryTransform
     {
         #region constructor
 
-        public StaticTransform()
+        public RigidTransform()
         {
             Update(TRANSFORM.Identity);
         }
 
-        public StaticTransform(TRANSFORM worldMatrix)
+        public RigidTransform(TRANSFORM worldMatrix)
         {
             Update(default, false);
             Update(worldMatrix);
         }
 
-        public StaticTransform(TRANSFORM worldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
+        public RigidTransform(TRANSFORM worldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphs)
         {
             Update(morphWeights, useAbsoluteMorphs);
             Update(worldMatrix);
@@ -254,19 +254,19 @@ namespace SharpGLTF.Transforms
         #endregion
     }
 
-    public class SkinTransform : MorphTransform, IGeometryTransform
+    public class SkinnedTransform : MorphTransform, IGeometryTransform
     {
         #region constructor
 
-        public SkinTransform() { }
+        public SkinnedTransform() { }
 
-        public SkinTransform(TRANSFORM[] invBindMatrix, TRANSFORM[] currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public SkinnedTransform(TRANSFORM[] invBindMatrix, TRANSFORM[] currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
             Update(morphWeights, useAbsoluteMorphTargets);
             Update(invBindMatrix, currWorldMatrix);
         }
 
-        public SkinTransform(int count, Func<int, TRANSFORM> invBindMatrix, Func<int, TRANSFORM> currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
+        public SkinnedTransform(int count, Func<int, TRANSFORM> invBindMatrix, Func<int, TRANSFORM> currWorldMatrix, SparseWeight8 morphWeights, bool useAbsoluteMorphTargets)
         {
             Update(morphWeights, useAbsoluteMorphTargets);
             Update(count, invBindMatrix, currWorldMatrix);

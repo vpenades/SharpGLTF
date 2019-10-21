@@ -113,9 +113,9 @@ namespace SharpGLTF.Runtime
             {
                 var b = _Meshes[d.Item1].BoundingSphere;
 
-                if (d.Item2 is Transforms.StaticTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
+                if (d.Item2 is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
 
-                if (d.Item2 is Transforms.SkinTransform skinXform)
+                if (d.Item2 is Transforms.SkinnedTransform skinXform)
                 {
                     // this is a bit agressive and probably over-reaching, but with skins you never know the actual bounds
                     // unless you calculate the bounds frame by frame.
