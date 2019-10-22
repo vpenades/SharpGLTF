@@ -217,12 +217,38 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Single"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{single}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Float[{Count}]")]
     public struct ScalarArray : IList<Single>, IReadOnlyList<Single>
     {
         #region constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public ScalarArray(Byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public ScalarArray(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
@@ -238,19 +264,6 @@ namespace SharpGLTF.Memory
         /// <param name="normalized">True if values are normalized.</param>
         public ScalarArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="byteStride">
-        /// The byte stride between elements.
-        /// If the value is zero, the size of the item is used instead.
-        /// </param>
-        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
-        /// <param name="normalized">True if values are normalized.</param>
-        public ScalarArray(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScalarArray"/> struct.
@@ -328,12 +341,38 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector2"/> values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector2}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector2[{Count}]")]
     public struct Vector2Array : IList<Vector2>, IReadOnlyList<Vector2>
     {
         #region constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector2Array(Byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
@@ -349,19 +388,6 @@ namespace SharpGLTF.Memory
         /// <param name="normalized">True if values are normalized.</param>
         public Vector2Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="byteStride">
-        /// The byte stride between elements.
-        /// If the value is zero, the size of the item is used instead.
-        /// </param>
-        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
-        /// <param name="normalized">True if values are normalized.</param>
-        public Vector2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector2Array"/> struct.
@@ -447,12 +473,38 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector3"/> values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector3}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector3[{Count}]")]
     public struct Vector3Array : IList<Vector3>, IReadOnlyList<Vector3>
     {
         #region constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector3Array(Byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector3Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
@@ -468,19 +520,6 @@ namespace SharpGLTF.Memory
         /// <param name="normalized">True if values are normalized.</param>
         public Vector3Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="byteStride">
-        /// The byte stride between elements.
-        /// If the value is zero, the size of the item is used instead.
-        /// </param>
-        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
-        /// <param name="normalized">True if values are normalized.</param>
-        public Vector3Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector3Array"/> struct.
@@ -567,12 +606,38 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector4}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4[{Count}]")]
     public struct Vector4Array : IList<Vector4>, IReadOnlyList<Vector4>
     {
         #region constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector4Array(Byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="byteStride">
+        /// The byte stride between elements.
+        /// If the value is zero, the size of the item is used instead.
+        /// </param>
+        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
+        /// <param name="normalized">True if values are normalized.</param>
+        public Vector4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
@@ -588,19 +653,6 @@ namespace SharpGLTF.Memory
         /// <param name="normalized">True if values are normalized.</param>
         public Vector4Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="byteStride">
-        /// The byte stride between elements.
-        /// If the value is zero, the size of the item is used instead.
-        /// </param>
-        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
-        /// <param name="normalized">True if values are normalized.</param>
-        public Vector4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vector4Array"/> struct.
@@ -688,18 +740,21 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Quaternion"/> values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Quaternion}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Quaternion[{Count}]")]
     public struct QuaternionArray : IList<Quaternion>, IReadOnlyList<Quaternion>
     {
         #region constructors
 
-        public QuaternionArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
+        public QuaternionArray(Byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public QuaternionArray(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public QuaternionArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
 
         public QuaternionArray(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
@@ -775,18 +830,21 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Matrix4x4"/> values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Matrix4x4[{Count}]")]
     public struct Matrix4x4Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
     {
         #region constructors
 
-        public Matrix4x4Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
-            : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
+        public Matrix4x4Array(byte[] source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
 
         public Matrix4x4Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
             : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix4x4Array(Byte[] source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(new BYTES(source), byteOffset, itemsCount, byteStride, encoding, normalized) { }
 
         public Matrix4x4Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
         {
@@ -880,7 +938,7 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="float"/> array values.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an IList{Single[]}/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Float[][{Count}]")]
     public struct MultiArray : IList<Single[]>, IReadOnlyList<Single[]>

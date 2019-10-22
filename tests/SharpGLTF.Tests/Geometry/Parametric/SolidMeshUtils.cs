@@ -231,7 +231,7 @@ namespace SharpGLTF.Geometry.Parametric
         {
             // we create a new material to use with the terrain mesh
             var material = new Materials.MaterialBuilder("TerrainMaterial")
-                .WithChannelImage(Materials.KnownChannels.BaseColor, terrainColorImagePath);
+                .WithChannelImage(Materials.KnownChannel.BaseColor, terrainColorImagePath);
 
             // we create a MeshBuilder
             var terrainMesh = new MeshBuilder<VertexPosition, VertexTexture1>("terrain");

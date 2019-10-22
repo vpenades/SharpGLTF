@@ -163,6 +163,8 @@ namespace SharpGLTF.Scenes
 
         public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers = true)
         {
+            Guard.NotNull(srcScenes, nameof(srcScenes));
+
             var context = new Schema2SceneBuilder();
 
             var dstModel = ModelRoot.CreateModel();

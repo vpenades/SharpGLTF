@@ -27,6 +27,8 @@ namespace SharpGLTF.Scenes
 
         #region types
 
+        #pragma warning disable CA1034 // Nested types should not be visible
+
         [System.Diagnostics.DebuggerDisplay("Orthographic ({XMag},{YMag})  {ZNear} < {ZFar}")]
         public sealed class Orthographic : CameraBuilder
         {
@@ -112,6 +114,8 @@ namespace SharpGLTF.Scenes
 
             #endregion
         }
+
+        #pragma warning restore CA1034 // Nested types should not be visible
 
         #endregion
     }

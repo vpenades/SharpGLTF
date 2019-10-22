@@ -14,7 +14,7 @@ namespace SharpGLTF.Materials
         BLEND,
     }
 
-    public enum KnownChannels
+    public enum KnownChannel
     {
         Normal,
         Occlusion,

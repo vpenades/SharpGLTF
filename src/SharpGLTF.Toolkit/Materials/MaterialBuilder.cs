@@ -167,7 +167,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public ChannelBuilder GetChannel(KnownChannels channelKey)
+        public ChannelBuilder GetChannel(KnownChannel channelKey)
         {
             return GetChannel(channelKey.ToString());
         }
@@ -181,7 +181,7 @@ namespace SharpGLTF.Materials
             return _Channels.FirstOrDefault(item => string.Equals(channelKey, item.Key, StringComparison.OrdinalIgnoreCase));
         }
 
-        public ChannelBuilder UseChannel(KnownChannels channelKey)
+        public ChannelBuilder UseChannel(KnownChannel channelKey)
         {
             return UseChannel(channelKey.ToString());
         }
@@ -212,7 +212,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelParam(KnownChannels channelKey, Vector4 parameter)
+        public MaterialBuilder WithChannelParam(KnownChannel channelKey, Vector4 parameter)
         {
             this.UseChannel(channelKey).Parameter = parameter;
 
@@ -226,7 +226,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(KnownChannels channelKey, string primaryImagePath)
+        public MaterialBuilder WithChannelImage(KnownChannel channelKey, string primaryImagePath)
         {
             this.UseChannel(channelKey)
                 .UseTexture()

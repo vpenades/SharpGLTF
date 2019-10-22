@@ -9,6 +9,8 @@ namespace SharpGLTF.Scenes
     {
         protected LightBuilder(Schema2.PunctualLight light)
         {
+            Guard.NotNull(light, nameof(light));
+
             this.Color = light.Color;
             this.Intensity = light.Intensity;
         }
@@ -28,6 +30,8 @@ namespace SharpGLTF.Scenes
         public Single Intensity { get; set; }
 
         #region types
+
+        #pragma warning disable CA1034 // Nested types should not be visible
 
         [System.Diagnostics.DebuggerDisplay("Directional")]
         public sealed class Directional : LightBuilder
@@ -54,6 +58,7 @@ namespace SharpGLTF.Scenes
         }
 
         [System.Diagnostics.DebuggerDisplay("Spot")]
+
         public sealed class Spot : LightBuilder
         {
             internal Spot(Schema2.PunctualLight light)
@@ -83,6 +88,8 @@ namespace SharpGLTF.Scenes
             /// </summary>
             public Single OuterConeAngle { get; set; }
         }
+
+        #pragma warning restore CA1034 // Nested types should not be visible
 
         #endregion
     }

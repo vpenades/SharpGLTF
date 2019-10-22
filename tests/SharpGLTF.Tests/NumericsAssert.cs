@@ -11,12 +11,16 @@ namespace SharpGLTF
     {
         public static void IsFinite(Single value, string message = null)
         {
-            Assert.IsTrue(float.IsFinite(value), message);
+            // Assert.IsTrue(float.IsFinite(value), message);
+
+            Assert.IsTrue(!float.IsNaN(value) && !float.IsInfinity(value), message);
         }
 
         public static void IsFinite(Double value, string message = null)
         {
-            Assert.IsTrue(double.IsFinite(value), message);
+            // Assert.IsTrue(double.IsFinite(value), message);
+
+            Assert.IsTrue(!Double.IsNaN(value) && !Double.IsInfinity(value), message);
         }
 
         public static void IsFinite(Vector2 vector)

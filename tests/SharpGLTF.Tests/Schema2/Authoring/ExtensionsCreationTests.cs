@@ -16,7 +16,7 @@ namespace SharpGLTF.Schema2.Authoring
         [OneTimeSetUp]
         public void Setup()
         {
-            TestFiles.DownloadReferenceModels();
+            // TestFiles.DownloadReferenceModels();
         }
 
         #endregion
@@ -49,26 +49,26 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
 
             // first, create a default material
             var material = new Materials.MaterialBuilder("material1 fallback")
                 .WithMetallicRoughnessShader()
-                .WithChannelImage(Materials.KnownChannels.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
-                .WithChannelImage(Materials.KnownChannels.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
-                .WithChannelImage(Materials.KnownChannels.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
-                .WithChannelImage(Materials.KnownChannels.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
-                .WithChannelImage(Materials.KnownChannels.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
+                .WithChannelImage(Materials.KnownChannel.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
+                .WithChannelImage(Materials.KnownChannel.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelImage(Materials.KnownChannel.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
+                .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
 
             // wrap the fallback material with a PBR Specular Glossiness material.
             material = new Materials.MaterialBuilder("material1")
                 .WithFallback(material)
                 .WithSpecularGlossinessShader()
-                .WithChannelImage(Materials.KnownChannels.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
-                .WithChannelImage(Materials.KnownChannels.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
-                .WithChannelImage(Materials.KnownChannels.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
-                .WithChannelImage(Materials.KnownChannels.Diffuse, System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"))
-                .WithChannelImage(Materials.KnownChannels.SpecularGlossiness, System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
+                .WithChannelImage(Materials.KnownChannel.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
+                .WithChannelImage(Materials.KnownChannel.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelImage(Materials.KnownChannel.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelImage(Materials.KnownChannel.Diffuse, System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"))
+                .WithChannelImage(Materials.KnownChannel.SpecularGlossiness, System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
             mesh.UsePrimitive(material).AddQuadrangle
@@ -101,7 +101,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithMetallicRoughnessShader()
                 .WithChannelImage
                 (
-                    Materials.KnownChannels.BaseColor,
+                    Materials.KnownChannel.BaseColor,
                     System.IO.Path.Combine(basePath, textureFileName)
                 );                
 
@@ -141,9 +141,9 @@ namespace SharpGLTF.Schema2.Authoring
             var material = new Materials.MaterialBuilder("material1")
                 .WithDoubleSide(true)
                 .WithMetallicRoughnessShader()
-                .WithChannelImage(Materials.KnownChannels.BaseColor, System.IO.Path.Combine(basePath, "shannon.jpg"));
+                .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "shannon.jpg"));
 
-            material.GetChannel(Materials.KnownChannels.BaseColor).UseTexture().WithTransform(0.40f,0.25f, 0.5f,0.5f);
+            material.GetChannel(Materials.KnownChannel.BaseColor).UseTexture().WithTransform(0.40f,0.25f, 0.5f,0.5f);
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
 

@@ -138,7 +138,9 @@ namespace SharpGLTF.Debug
                     break;
             }
 
-            var primName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(prim.DrawPrimitiveType.ToString().ToLower());
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+
+            var primName = culture.TextInfo.ToTitleCase(prim.DrawPrimitiveType.ToString().ToLower(culture));
             txt += $" {primName}[{pcount}]";
 
             // gather morph attributes information

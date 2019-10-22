@@ -132,11 +132,11 @@ namespace SharpGLTF.Geometry
         /// Given a set of 4 points defining a quadrangle, it determines which
         /// is the optimal diagonal to choose to reprensent the quadrangle as two triangles.
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <returns></returns>
+        /// <param name="a">The first vertex.</param>
+        /// <param name="b">The second vertex.</param>
+        /// <param name="c">The third vertex.</param>
+        /// <param name="d">The fourth vertex.</param>
+        /// <returns>True if two triangles are (A,B,C),(A,C,D) , false if two triangles are (B,C,D),(B,D,A).</returns>
         public static bool GetQuadrangleDiagonal(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
         {
             var area1 = Vector3.Cross(a - b, c - b).Length() + Vector3.Cross(a - d, c - d).Length();

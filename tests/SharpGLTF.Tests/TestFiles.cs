@@ -16,48 +16,42 @@ namespace SharpGLTF
 
         static TestFiles()
         {
-            var workingDir = TestContext.CurrentContext.WorkDirectory;
+            var wdir = TestContext.CurrentContext.WorkDirectory;
 
-            _SchemaDir = System.IO.Path.Combine(workingDir, "glTF-Schema");
-            _SampleModelsDir = System.IO.Path.Combine(workingDir, "glTF-Sample-Models");
-            _PollyModelsDir = System.IO.Path.Combine(workingDir, "glTF-Blender-Exporter");
-            _UniVRMModelsDir = System.IO.Path.Combine(workingDir, "UniVRM");
-            _BabylonJsMeshesDir = System.IO.Path.Combine(workingDir, "BabylonJS-MeshesLibrary");
-            _BabylonJsPlaygroundDir = System.IO.Path.Combine(workingDir, "BabylonJS-PlaygroundScenes");
-        }
+            _ExamplesFound = false;
 
-        public static void DownloadReferenceModels()
-        {
-            if (_DonwloadCompleted) return;
-            _DonwloadCompleted = true;
-            
-            TestContext.Progress.WriteLine("Downloading reference files... It might take a while, please, wait...");            
+            while (wdir.Length > 3)
+            {
+                _RootDir = System.IO.Path.Combine(wdir, "TestFiles");
 
-            var dstPath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "GeneratedReferenceModels", "v_0_6_1.zip");
-            _GeneratedModelsDir = DownloadUtils.DownloadFile("https://github.com/KhronosGroup/glTF-Asset-Generator/releases/download/v0.6.1/GeneratedAssets-0.6.1.zip", dstPath);
+                if (wdir.ToLower().EndsWith("tests") && System.IO.Directory.Exists(_RootDir))
+                {
+                    _ExamplesFound = true;
+                    break;
+                }
 
-            dstPath = System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
-            DownloadUtils.DownloadFile("https://github.com/vrm-c/UniVRMTest/raw/master/Models/Alicia_vrm-0.40/AliciaSolid_vrm-0.40.vrm", dstPath);
+                wdir = System.IO.Path.GetDirectoryName(wdir);
+            }
 
+            _Check();
 
-            
+            _SchemaDir = System.IO.Path.Combine(_RootDir, "glTF-Schema");
+            _SampleModelsDir = System.IO.Path.Combine(_RootDir, "glTF-Sample-Models");
+            _PollyModelsDir = System.IO.Path.Combine(_RootDir, "glTF-Blender-Exporter");
+            _UniVRMModelsDir = System.IO.Path.Combine(_RootDir, "UniVRM");
+            _BabylonJsMeshesDir = System.IO.Path.Combine(_RootDir, "BabylonJS-MeshesLibrary");
+            _BabylonJsPlaygroundDir = System.IO.Path.Combine(_RootDir, "BabylonJS-PlaygroundScenes");
 
-            TestContext.Progress.WriteLine("Checking out test files... It might take a while, please, wait...");            
-
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);            
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _SchemaDir);
-            DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsMeshesDir);
-            // DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/Babylon.js.git", _BabylonJsPlaygroundDir);
-
-            TestContext.Progress.WriteLine("... Download Completed.");
-        }
+            _GeneratedModelsDir = System.IO.Path.Combine(_RootDir, "GeneratedReferenceModels", "v_0_6_1");
+        }       
 
         #endregion
 
         #region data
 
-        private static Boolean _DonwloadCompleted = false;
+        private static Boolean _ExamplesFound = false;
+
+        private static readonly string _RootDir;
 
         private static readonly string _SchemaDir;
         private static readonly string _SampleModelsDir;
@@ -65,22 +59,38 @@ namespace SharpGLTF
         private static readonly string _UniVRMModelsDir;
         private static readonly string _BabylonJsMeshesDir;
         private static readonly string _BabylonJsPlaygroundDir;
+        private static readonly string _GeneratedModelsDir;
 
         private static readonly string[] _BabylonJsInvalidFiles = { };
 
-        private static string _GeneratedModelsDir;        
+        
+
+        #endregion
+
+        #region properties
+
+        public static string RootDirectory { get { _Check(); return _RootDir; } }
 
         #endregion
 
         #region API
 
+        private static void _Check()
+        {
+            Assert.IsTrue(_ExamplesFound, "TestFiles directory not found; please, run '1_DownloadTestFiles.cmd' before running the tests.");            
+        }
+
         public static IReadOnlyList<string> GetSchemaExtensionsModelsPaths()
         {
+            _Check();
+
             return GetModelPathsInDirectory(_SchemaDir, "extensions", "2.0");         
         }
 
         public static IEnumerable<(string, bool)> GetReferenceModelPaths(bool useNegative = false)
         {
+            _Check();
+
             var dirPath = _GeneratedModelsDir;
             if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length - 4);
 
@@ -118,6 +128,8 @@ namespace SharpGLTF
 
         public static IReadOnlyList<string> GetSampleModelsPaths()
         {
+            _Check();
+
             var files = GetModelPathsInDirectory(_SampleModelsDir, "2.0");
 
             return files
@@ -128,17 +140,22 @@ namespace SharpGLTF
 
         public static IReadOnlyList<string> GetBabylonJSValidModelsPaths()
         {
+            _Check();
+
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
+                .Where(item => !item.Contains("\\Sheen\\"))
                 .Where(item => !_BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))                
                 .ToList();
         }
 
         public static IReadOnlyList<string> GetBabylonJSInvalidModelsPaths()
         {
+            _Check();
+
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
@@ -150,21 +167,28 @@ namespace SharpGLTF
 
         public static string GetPollyFileModelPath()
         {
+            _Check();
+
             return System.IO.Path.Combine(_PollyModelsDir, "polly", "project_polly.glb");
         }
 
         public static string GetUniVRMModelPath()
         {
+            _Check();
+
             return System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
         }
 
         private static IReadOnlyList<string> GetModelPathsInDirectory(params string[] paths)
         {
+            _Check();
+
             var dirPath = System.IO.Path.Combine(paths);
 
             if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length-4);
 
-            if (!System.IO.Path.IsPathFullyQualified(dirPath)) throw new ArgumentException(nameof(dirPath));
+            // if (!System.IO.Path.IsPathFullyQualified(dirPath)) throw new ArgumentException(nameof(dirPath));
+            if (!System.IO.Path.IsPathRooted(dirPath)) throw new ArgumentException(nameof(dirPath));
 
             var gltf = System.IO.Directory.GetFiles(dirPath, "*.gltf", System.IO.SearchOption.AllDirectories);
             var glbb = System.IO.Directory.GetFiles(dirPath, "*.glb", System.IO.SearchOption.AllDirectories);

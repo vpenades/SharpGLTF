@@ -61,7 +61,7 @@ namespace SharpGLTF
             {
                 var points = series
                     .Select((y, x) => (x, y))
-                    .Where(item => float.IsFinite(item.Item2))
+                    .Where(item => item.Item2.IsFinite())
                     .Select(item => new Vector2(item.Item1, item.Item2));
 
                 return Create(points, lt);
@@ -71,7 +71,7 @@ namespace SharpGLTF
             {
                 var points = series
                     .Select((y, x) => (x, (float)y))
-                    .Where(item => float.IsFinite(item.Item2))
+                    .Where(item => item.Item2.IsFinite())
                     .Select(item => new Vector2(item.Item1, item.Item2));
 
                 return Create(points, lt);
@@ -79,7 +79,7 @@ namespace SharpGLTF
 
             public static Point2Series Create(IEnumerable<Vector2> points, LineType lt = LineType.Dot)
             {
-                points = points.Where(item => float.IsFinite(item.X) && float.IsFinite(item.Y));
+                points = points.Where(item => item.X.IsFinite() && item.Y.IsFinite());
 
                 var ps = new Point2Series();
                 ps._Points.AddRange(points.Select(item => new Point2(item)));
@@ -175,7 +175,7 @@ namespace SharpGLTF
 
             public static Point3Series Create(IEnumerable<Vector3> points)
             {
-                points = points.Where(item => float.IsFinite(item.X) && float.IsFinite(item.Y) && float.IsFinite(item.Z) );
+                points = points.Where(item => item.X.IsFinite() && item.Y.IsFinite() && item.Z.IsFinite() );
 
                 var ps = new Point3Series();
                 ps._Points.AddRange(points);

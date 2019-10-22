@@ -19,7 +19,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [OneTimeSetUp]
         public void Setup()
         {
-            TestFiles.DownloadReferenceModels();
+            // TestFiles.DownloadReferenceModels();
         }
         
         #endregion

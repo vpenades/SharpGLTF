@@ -224,6 +224,8 @@ namespace SharpGLTF.Geometry
         /// <returns>The indices of the vertices.</returns>
         public int AddPoint(IVertexBuilder a)
         {
+            Guard.NotNull(a, nameof(a));
+
             return AddPoint(ConvertVertex(a));
         }
 
@@ -235,6 +237,9 @@ namespace SharpGLTF.Geometry
         /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
         public (int, int) AddLine(IVertexBuilder a, IVertexBuilder b)
         {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+
             return AddLine(ConvertVertex(a), ConvertVertex(b));
         }
 
@@ -247,6 +252,10 @@ namespace SharpGLTF.Geometry
         /// <returns>The indices of the vertices, or, in case the triangle is degenerated, (-1,-1,-1).</returns>
         public (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
         {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+            Guard.NotNull(c, nameof(c));
+
             return AddTriangle(ConvertVertex(a), ConvertVertex(b), ConvertVertex(c));
         }
 
@@ -264,6 +273,11 @@ namespace SharpGLTF.Geometry
         /// </remarks>
         public (int, int, int, int) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d)
         {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+            Guard.NotNull(c, nameof(c));
+            Guard.NotNull(d, nameof(d));
+
             return AddQuadrangle(ConvertVertex(a), ConvertVertex(b), ConvertVertex(c), ConvertVertex(d));
         }
 

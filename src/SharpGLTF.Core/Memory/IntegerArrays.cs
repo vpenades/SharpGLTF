@@ -10,12 +10,28 @@ using ENCODING = SharpGLTF.Schema2.IndexEncodingType;
 namespace SharpGLTF.Memory
 {
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="UInt32"/> values
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{UInt32}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Integer[{Count}]")]
     public struct IntegerArray : IList<UInt32>, IReadOnlyList<UInt32>
     {
         #region constructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="encoding">Byte encoding.</param>
+        public IntegerArray(Byte[] source, ENCODING encoding = ENCODING.UNSIGNED_INT)
+            : this(source, 0, int.MaxValue, encoding) { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
+        /// </summary>
+        /// <param name="source">The array range to wrap.</param>
+        /// <param name="encoding">Byte encoding.</param>
+        public IntegerArray(BYTES source, ENCODING encoding = ENCODING.UNSIGNED_INT)
+            : this(source, 0, int.MaxValue, encoding) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
@@ -26,14 +42,6 @@ namespace SharpGLTF.Memory
         /// <param name="encoding">Byte encoding.</param>
         public IntegerArray(Byte[] source, int byteOffset, int itemsCount, ENCODING encoding)
             : this(new BYTES(source), byteOffset, itemsCount, encoding) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="encoding">Byte encoding.</param>
-        public IntegerArray(BYTES source, ENCODING encoding = ENCODING.UNSIGNED_INT)
-            : this(source, 0, int.MaxValue, encoding) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntegerArray"/> struct.

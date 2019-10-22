@@ -211,9 +211,9 @@ namespace SharpGLTF.Geometry
 
             // since Materials.MaterialBuilder is not immutable we can change the contents,
             // so now, material1, material2 and material3 no longer represent the same material
-            material1.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.2f);
-            material2.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.4f);
-            material3.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannels.BaseColor, Vector4.One * 0.6f);
+            material1.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.2f);
+            material2.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.4f);
+            material3.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.6f);
 
             var mesh2 = model.CreateMeshes(mesh)[0];
             Assert.AreEqual(4, model.LogicalMaterials.Count);

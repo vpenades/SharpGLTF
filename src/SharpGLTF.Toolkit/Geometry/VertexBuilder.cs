@@ -222,6 +222,8 @@ namespace SharpGLTF.Geometry
             return new VertexBuilder<TvG, TvM, TvS>(g);
         }
 
+        #pragma warning disable CA1000 // Do not declare static members on generic types
+
         public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position)
         {
             var v = default(VertexBuilder<TvG, TvM, TvS>);
@@ -245,6 +247,8 @@ namespace SharpGLTF.Geometry
             v.Geometry.SetTangent(tangent);
             return v;
         }
+
+        #pragma warning restore CA1000 // Do not declare static members on generic types
 
         #endregion
 
@@ -357,6 +361,8 @@ namespace SharpGLTF.Geometry
             return new VertexBuilder<TvPP, TvMM, TvSS>(p, m, s);
         }
 
+        #pragma warning disable CA1000 // Do not declare static members on generic types
+
         public static MeshBuilder<TMaterial, TvG, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
         {
             return new MeshBuilder<TMaterial, TvG, TvM, TvS>(name);
@@ -366,6 +372,8 @@ namespace SharpGLTF.Geometry
         {
             return new MeshBuilder<TvG, TvM, TvS>(name);
         }
+
+        #pragma warning restore CA1000 // Do not declare static members on generic types
 
         IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
 

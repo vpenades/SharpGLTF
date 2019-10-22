@@ -36,6 +36,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Runtime.MonoGame"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGameScene", "examples\MonoGameScene\MonoGameScene.csproj", "{894781CA-F508-43AE-8526-6AA6B6EDF613}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.DownloadTestFiles", "tests\SharpGLTF.DownloadTestFiles\SharpGLTF.DownloadTestFiles.csproj", "{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -78,6 +80,10 @@ Global
 		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{894781CA-F508-43AE-8526-6AA6B6EDF613}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -92,6 +98,7 @@ Global
 		{F64C6CC1-BD12-47B8-B6EA-D5609AC738DF} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{894781CA-F508-43AE-8526-6AA6B6EDF613} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
+		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7BBAD9-834C-4981-AC96-0AA5226FC43F}

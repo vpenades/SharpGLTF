@@ -33,7 +33,7 @@ namespace SharpGLTF.Schema2.Authoring
             var v4 = new VPOSNRM(-10, -10, 0, 0, 0, 1);
 
             // create a material
-            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, Vector4.One);
+            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannel.BaseColor, Vector4.One);
 
             // create model
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
@@ -61,10 +61,10 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create materials
             var material1 = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1));
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1));
 
             var material2 = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1));            
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1));            
 
             // create several meshes
             var meshBuilder1 = new MeshBuilder<VPOSNRM>("mesh1");
@@ -128,7 +128,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a material
-            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannels.BaseColor, Vector4.One);
+            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannel.BaseColor, Vector4.One);
 
             // create a mesh
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
@@ -166,11 +166,11 @@ namespace SharpGLTF.Schema2.Authoring
 
             // create two materials
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1))
                 .WithDoubleSide(true);
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannels.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1))
                 .WithDoubleSide(true);
 
             // create the mesh

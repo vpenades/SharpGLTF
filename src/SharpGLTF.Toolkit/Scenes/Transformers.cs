@@ -27,6 +27,8 @@ namespace SharpGLTF.Scenes
 
         protected ContentTransformer(ContentTransformer other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this._Content = other._Content;
             this._Morphings = other._Morphings?.Clone();
         }
@@ -98,6 +100,8 @@ namespace SharpGLTF.Scenes
         protected FixedTransformer(FixedTransformer other)
             : base(other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this._WorldTransform = other._WorldTransform;
         }
 
@@ -147,6 +151,8 @@ namespace SharpGLTF.Scenes
         protected RigidTransformer(RigidTransformer other)
             : base(other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this._Node = other._Node;
         }
 
@@ -202,6 +208,8 @@ namespace SharpGLTF.Scenes
         protected SkinnedTransformer(SkinnedTransformer other)
             : base(other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this._TargetBindMatrix = other._TargetBindMatrix;
             this._Joints.AddRange(other._Joints);
         }

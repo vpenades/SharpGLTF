@@ -15,7 +15,7 @@ namespace SharpGLTF.Materials
         {
             Guard.NotNull(parent, nameof(parent));
             Guard.NotNullOrEmpty(key, nameof(key));
-            Guard.IsTrue(Enum.GetNames(typeof(KnownChannels)).Contains(key), nameof(key), $"{nameof(key)} must be a name of {nameof(KnownChannels)}.");
+            Guard.IsTrue(Enum.GetNames(typeof(KnownChannel)).Contains(key), nameof(key), $"{nameof(key)} must be a name of {nameof(KnownChannel)}.");
 
             _Parent = parent;
             _Key = key;
@@ -76,7 +76,7 @@ namespace SharpGLTF.Materials
         #region properties
 
         /// <summary>
-        /// Gets the <see cref="ChannelBuilder"/> name. It must be a name of <see cref="KnownChannels"/>.
+        /// Gets the <see cref="ChannelBuilder"/> name. It must be a name of <see cref="KnownChannel"/>.
         /// </summary>
         public String Key => _Key;
 
