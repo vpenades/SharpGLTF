@@ -61,8 +61,8 @@ namespace SharpGLTF
             {
                 var points = series
                     .Select((y, x) => (x, y))
-                    .Where(item => item.Item2.IsFinite())
-                    .Select(item => new Vector2(item.Item1, item.Item2));
+                    .Where(item => item.y.IsFinite())
+                    .Select(item => new Vector2(item.x, item.y));
 
                 return Create(points, lt);
             }
@@ -72,7 +72,7 @@ namespace SharpGLTF
                 var points = series
                     .Select((y, x) => (x, (float)y))
                     .Where(item => item.Item2.IsFinite())
-                    .Select(item => new Vector2(item.Item1, item.Item2));
+                    .Select(item => new Vector2(item.x, item.Item2));
 
                 return Create(points, lt);
             }
@@ -199,7 +199,7 @@ namespace SharpGLTF
                 DrawToFile(filePath, this);
             }
 
-            public static (Vector3, Vector3) GetBounds(params Point3Series[] series)
+            public static (Vector3 Min,  Vector3 Max) GetBounds(params Point3Series[] series)
             {
                 var xmin = series.SelectMany(item => item._Points).Min(item => item.X);
                 var xmax = series.SelectMany(item => item._Points).Max(item => item.X);
@@ -247,7 +247,7 @@ namespace SharpGLTF
 
                     pl.init();
 
-                    pl.env(bounds.Item1.X, bounds.Item2.X, bounds.Item1.Y, bounds.Item2.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
+                    pl.env(bounds.Min.X, bounds.Max.X, bounds.Min.Y, bounds.Max.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
 
                     for (int i = 0; i < series.Length; ++i)
                     {

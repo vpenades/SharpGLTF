@@ -557,8 +557,8 @@ namespace SharpGLTF.Scenes
             var colRep = Reporting.ModelReport.CreateReportFrom(colModel);
 
             Assert.AreEqual(srcRep.NumTriangles, rowRep.NumTriangles);
-            NumericsAssert.AreEqual(srcRep.Bounds.Item1, rowRep.Bounds.Item1, 0.0001f);
-            NumericsAssert.AreEqual(srcRep.Bounds.Item2, rowRep.Bounds.Item2, 0.0001f);
+            NumericsAssert.AreEqual(srcRep.Bounds.Min, rowRep.Bounds.Min, 0.0001f);
+            NumericsAssert.AreEqual(srcRep.Bounds.Max, rowRep.Bounds.Max, 0.0001f);
 
             // save file
 

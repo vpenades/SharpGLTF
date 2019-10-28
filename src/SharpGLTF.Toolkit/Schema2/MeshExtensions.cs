@@ -237,24 +237,24 @@ namespace SharpGLTF.Schema2
             return primitive.WithVertexAccessors(xvertices);
         }
 
-        public static MeshPrimitive WithVertexAccessors<TvP, TvM>(this MeshPrimitive primitive, IReadOnlyList<(TvP, TvM)> vertices)
+        public static MeshPrimitive WithVertexAccessors<TvP, TvM>(this MeshPrimitive primitive, IReadOnlyList<(TvP Geo, TvM Mat)> vertices)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
             var xvertices = vertices
-                .Select(item => new VertexBuilder<TvP, TvM, VertexEmpty>(item.Item1, item.Item2))
+                .Select(item => new VertexBuilder<TvP, TvM, VertexEmpty>(item.Geo, item.Mat))
                 .ToList();
 
             return primitive.WithVertexAccessors(xvertices);
         }
 
-        public static MeshPrimitive WithVertexAccessors<TvP, TvM, TvS>(this MeshPrimitive primitive, IReadOnlyList<(TvP, TvM, TvS)> vertices)
+        public static MeshPrimitive WithVertexAccessors<TvP, TvM, TvS>(this MeshPrimitive primitive, IReadOnlyList<(TvP Geo, TvM Mat, TvS Skin)> vertices)
             where TvP : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
             var xvertices = vertices
-                .Select(item => new VertexBuilder<TvP, TvM, TvS>(item.Item1, item.Item2, item.Item3))
+                .Select(item => new VertexBuilder<TvP, TvM, TvS>(item.Geo, item.Mat, item.Skin))
                 .ToList();
 
             return primitive.WithVertexAccessors(xvertices);
@@ -274,7 +274,7 @@ namespace SharpGLTF.Schema2
             return primitive.WithVertexAccessors(memAccessors);
         }
 
-        public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<Memory.MemoryAccessor> memAccessors)
+        public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<MemoryAccessor> memAccessors)
         {
             Guard.NotNull(memAccessors, nameof(memAccessors));
             Guard.IsTrue(memAccessors.All(item => item != null), nameof(memAccessors));
@@ -284,7 +284,7 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, Memory.MemoryAccessor memAccessor)
+        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, MemoryAccessor memAccessor)
         {
             Guard.NotNull(primitive, nameof(primitive));
             Guard.NotNull(memAccessor, nameof(memAccessor));
@@ -296,7 +296,7 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
-        public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, Memory.MemoryAccessor memAccessor)
+        public static MeshPrimitive WithIndicesAccessor(this MeshPrimitive primitive, PrimitiveType primitiveType, MemoryAccessor memAccessor)
         {
             Guard.NotNull(primitive, nameof(primitive));
 
@@ -312,7 +312,7 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
-        public static MeshPrimitive WithMorphTargetAccessors(this MeshPrimitive primitive, int targetIndex, IEnumerable<Memory.MemoryAccessor> memAccessors)
+        public static MeshPrimitive WithMorphTargetAccessors(this MeshPrimitive primitive, int targetIndex, IEnumerable<MemoryAccessor> memAccessors)
         {
             Guard.NotNull(primitive, nameof(primitive));
             Guard.MustBeGreaterThanOrEqualTo(targetIndex, 0, nameof(targetIndex));
@@ -343,14 +343,14 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, Material Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();
 
             return mesh.Primitives.SelectMany(item => item.EvaluatePoints(xform));
         }
 
-        public static IEnumerable<(IVertexBuilder, Material)> EvaluatePoints(this MeshPrimitive prim, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, Material Material)> EvaluatePoints(this MeshPrimitive prim, MESHXFORM xform = null)
         {
             if (prim == null) yield break;
             if (xform != null && !xform.Visible) yield break;
@@ -369,14 +369,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this Mesh mesh, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, Material Material)> EvaluateLines(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, Material)>();
 
             return mesh.Primitives.SelectMany(item => item.EvaluateLines(xform));
         }
 
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, Material)> EvaluateLines(this MeshPrimitive prim, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, Material Material)> EvaluateLines(this MeshPrimitive prim, MESHXFORM xform = null)
         {
             if (prim == null) yield break;
             if (xform != null && !xform.Visible) yield break;
@@ -389,21 +389,21 @@ namespace SharpGLTF.Schema2
 
             foreach (var t in lines)
             {
-                var a = vertices.GetVertex(vtype, t.Item1);
-                var b = vertices.GetVertex(vtype, t.Item2);
+                var a = vertices.GetVertex(vtype, t.A);
+                var b = vertices.GetVertex(vtype, t.B);
 
                 yield return (a, b, prim.Material);
             }
         }
 
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Mesh mesh, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, IVertexBuilder C, Material Material)> EvaluateTriangles(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
             return mesh.Primitives.SelectMany(item => item.EvaluateTriangles(xform));
         }
 
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this MeshPrimitive prim, MESHXFORM xform = null)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, IVertexBuilder C, Material Material)> EvaluateTriangles(this MeshPrimitive prim, MESHXFORM xform = null)
         {
             if (prim == null) yield break;
             if (xform != null && !xform.Visible) yield break;
@@ -416,15 +416,15 @@ namespace SharpGLTF.Schema2
 
             foreach (var t in triangles)
             {
-                var a = vertices.GetVertex(vtype, t.Item1);
-                var b = vertices.GetVertex(vtype, t.Item2);
-                var c = vertices.GetVertex(vtype, t.Item3);
+                var a = vertices.GetVertex(vtype, t.A);
+                var b = vertices.GetVertex(vtype, t.B);
+                var c = vertices.GetVertex(vtype, t.C);
 
                 yield return (a, b, c, prim.Material);
             }
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh, MESHXFORM xform = null)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh, MESHXFORM xform = null)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -434,7 +434,7 @@ namespace SharpGLTF.Schema2
             return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM, TvS>(xform));
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim, MESHXFORM xform = null)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim, MESHXFORM xform = null)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -451,9 +451,9 @@ namespace SharpGLTF.Schema2
 
             foreach (var t in triangles)
             {
-                var a = vertices.GetVertex<TvG, TvM, TvS>(t.Item1);
-                var b = vertices.GetVertex<TvG, TvM, TvS>(t.Item2);
-                var c = vertices.GetVertex<TvG, TvM, TvS>(t.Item3);
+                var a = vertices.GetVertex<TvG, TvM, TvS>(t.A);
+                var b = vertices.GetVertex<TvG, TvM, TvS>(t.B);
+                var c = vertices.GetVertex<TvG, TvM, TvS>(t.C);
 
                 if (!hasNormals)
                 {
@@ -534,9 +534,9 @@ namespace SharpGLTF.Schema2
 
                 foreach (var t in p.GetTriangleIndices())
                 {
-                    var p1 = positions[t.Item1];
-                    var p2 = positions[t.Item2];
-                    var p3 = positions[t.Item3];
+                    var p1 = positions[t.A];
+                    var p2 = positions[t.B];
+                    var p3 = positions[t.C];
                     var d = Vector3.Cross(p2 - p1, p3 - p1);
                     addDirection(posnrm, p1, d);
                     addDirection(posnrm, p2, d);
@@ -571,7 +571,7 @@ namespace SharpGLTF.Schema2
 
                 foreach (var tri in srcPrim.EvaluateTriangles<TvG, TvM, TvS>(null))
                 {
-                    dstPrim.AddTriangle(tri.Item1, tri.Item2, tri.Item3);
+                    dstPrim.AddTriangle(tri.A, tri.B, tri.C);
                 }
             }
         }
@@ -604,7 +604,7 @@ namespace SharpGLTF.Schema2
             {
                 var material = materialFunc(tri.Item4);
 
-                mesh.UsePrimitive(material).AddTriangle(tri.Item1, tri.Item2, tri.Item3);
+                mesh.UsePrimitive(material).AddTriangle(tri.A, tri.B, tri.C);
             }
 
             return mesh;
@@ -706,26 +706,26 @@ namespace SharpGLTF.Schema2
 
             foreach (var srcLine in srcPrim.GetLineIndices())
             {
-                var v1 = vertices.GetVertex(dstPrim.VertexType, srcLine.Item1);
-                var v2 = vertices.GetVertex(dstPrim.VertexType, srcLine.Item2);
+                var v1 = vertices.GetVertex(dstPrim.VertexType, srcLine.A);
+                var v2 = vertices.GetVertex(dstPrim.VertexType, srcLine.B);
 
                 var indices = dstPrim.AddLine(v1, v2);
 
-                vmap[srcLine.Item1] = indices.Item1;
-                vmap[srcLine.Item2] = indices.Item2;
+                vmap[srcLine.A] = indices.A;
+                vmap[srcLine.B] = indices.B;
             }
 
             foreach (var srcTri in srcPrim.GetTriangleIndices())
             {
-                var v1 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item1);
-                var v2 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item2);
-                var v3 = vertices.GetVertex(dstPrim.VertexType, srcTri.Item3);
+                var v1 = vertices.GetVertex(dstPrim.VertexType, srcTri.A);
+                var v2 = vertices.GetVertex(dstPrim.VertexType, srcTri.B);
+                var v3 = vertices.GetVertex(dstPrim.VertexType, srcTri.C);
 
                 var indices = dstPrim.AddTriangle(v1, v2, v3);
 
-                vmap[srcTri.Item1] = indices.Item1;
-                vmap[srcTri.Item2] = indices.Item2;
-                vmap[srcTri.Item3] = indices.Item3;
+                vmap[srcTri.A] = indices.A;
+                vmap[srcTri.B] = indices.B;
+                vmap[srcTri.C] = indices.C;
             }
 
             for (int tidx = 0; tidx < vertices.MorphTargets.Count; ++tidx)

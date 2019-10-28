@@ -13,7 +13,7 @@ namespace SharpGLTF.Animations
     {
         #region lifecycle
 
-        public Vector3LinearSampler(IEnumerable<(float, Vector3)> sequence, bool isLinear)
+        public Vector3LinearSampler(IEnumerable<(float Key, Vector3 Value)> sequence, bool isLinear)
         {
             _Sequence = sequence;
             _Linear = isLinear;
@@ -23,7 +23,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private readonly IEnumerable<(float, Vector3)> _Sequence;
+        private readonly IEnumerable<(float Key, Vector3 Value)> _Sequence;
         private readonly Boolean _Linear;
 
         #endregion
@@ -36,21 +36,21 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.Item1;
+            if (!_Linear) return segment.A;
 
-            return Vector3.Lerp(segment.Item1, segment.Item2, segment.Item3);
+            return Vector3.Lerp(segment.A, segment.B, segment.Amount);
         }
 
         public IReadOnlyDictionary<float, Vector3> ToStepCurve()
         {
             Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, Vector3> ToLinearCurve()
         {
             Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Vector3, Vector3, Vector3)> ToSplineCurve()
@@ -89,7 +89,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private readonly IEnumerable<(float, Quaternion)> _Sequence;
+        private readonly IEnumerable<(float Key, Quaternion Value)> _Sequence;
         private readonly Boolean _Linear;
 
         #endregion
@@ -102,21 +102,21 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.Item1;
+            if (!_Linear) return segment.A;
 
-            return Quaternion.Slerp(segment.Item1, segment.Item2, segment.Item3);
+            return Quaternion.Slerp(segment.A, segment.B, segment.Amount);
         }
 
         public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
         {
             Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, Quaternion> ToLinearCurve()
         {
             Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
@@ -145,7 +145,7 @@ namespace SharpGLTF.Animations
     {
         #region lifecycle
 
-        public SparseLinearSampler(IEnumerable<(float, Transforms.SparseWeight8)> sequence, bool isLinear)
+        public SparseLinearSampler(IEnumerable<(float Key, Transforms.SparseWeight8 Value)> sequence, bool isLinear)
         {
             _Sequence = sequence;
             _Linear = isLinear;
@@ -155,7 +155,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private readonly IEnumerable<(float, Transforms.SparseWeight8)> _Sequence;
+        private readonly IEnumerable<(float Key, Transforms.SparseWeight8 Value)> _Sequence;
         private readonly Boolean _Linear;
 
         #endregion
@@ -168,9 +168,9 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.Item1;
+            if (!_Linear) return segment.A;
 
-            var weights = Transforms.SparseWeight8.InterpolateLinear(segment.Item1, segment.Item2, segment.Item3);
+            var weights = Transforms.SparseWeight8.InterpolateLinear(segment.A, segment.B, segment.Amount);
 
             return weights;
         }
@@ -183,7 +183,7 @@ namespace SharpGLTF.Animations
         public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToLinearCurve()
         {
             Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8)> ToSplineCurve()
@@ -222,7 +222,7 @@ namespace SharpGLTF.Animations
 
         #region data
 
-        private readonly IEnumerable<(float, float[])> _Sequence;
+        private readonly IEnumerable<(float Key, float[] Value)> _Sequence;
         private readonly Boolean _Linear;
 
         #endregion
@@ -235,21 +235,21 @@ namespace SharpGLTF.Animations
         {
             var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.Item1;
+            if (!_Linear) return segment.A;
 
-            return SamplerFactory.InterpolateLinear(segment.Item1, segment.Item2, segment.Item3);
+            return SamplerFactory.InterpolateLinear(segment.A, segment.B, segment.Amount);
         }
 
         public IReadOnlyDictionary<float, float[]> ToStepCurve()
         {
             Guard.IsFalse(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, float[]> ToLinearCurve()
         {
             Guard.IsTrue(_Linear, nameof(_Linear));
-            return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
+            return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()

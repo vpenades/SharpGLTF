@@ -193,6 +193,8 @@ namespace SharpGLTF.Schema2
 
         #region properties - transform
 
+        #pragma warning disable CA1721 // Property names should not match get methods
+
         /// <summary>
         /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
         /// </summary>
@@ -211,6 +213,8 @@ namespace SharpGLTF.Schema2
                 _translation = value.Translation.AsNullable(Vector3.Zero);
             }
         }
+
+        #pragma warning restore CA1721 // Property names should not match get methods
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
@@ -236,6 +240,8 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        #pragma warning disable CA1721 // Property names should not match get methods
+
         /// <summary>
         /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
         /// </summary>
@@ -252,6 +258,8 @@ namespace SharpGLTF.Schema2
                 LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
             }
         }
+
+        #pragma warning restore CA1721 // Property names should not match get methods
 
         #endregion
 

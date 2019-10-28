@@ -147,20 +147,24 @@ namespace SharpGLTF.Validation
             AddSchemaError(location, "Invalid JSON data.");
         }
 
-        public void CheckSchemaIsValidURI(ValueLocation location, string uri)
-        {
-            if (string.IsNullOrEmpty(uri)) return;
+        #pragma warning disable CA1054 // Uri parameters should not be strings
 
-            if (uri.StartsWith("data:"))
+        public void CheckSchemaIsValidURI(ValueLocation location, string gltfURI)
+        {
+            if (string.IsNullOrEmpty(gltfURI)) return;
+
+            if (gltfURI.StartsWith("data:", StringComparison.Ordinal))
             {
                 // check decoding
                 return;
             }
 
-            if (Uri.TryCreate(uri, UriKind.Relative, out Uri xuri)) return;
+            if (Uri.TryCreate(gltfURI, UriKind.Relative, out Uri xuri)) return;
 
-            AddSchemaError(location, $"Invalid URI '{uri}'.");
+            AddSchemaError(location, $"Invalid URI '{gltfURI}'.");
         }
+
+        #pragma warning restore CA1054 // Uri parameters should not be strings
 
         #endregion
 
@@ -365,9 +369,9 @@ namespace SharpGLTF.Validation
 
         public static implicit operator ValueLocation(string name) { return new ValueLocation(name); }
 
-        public static implicit operator ValueLocation((string, int) tuple) { return new ValueLocation(tuple.Item1, tuple.Item2); }
+        public static implicit operator ValueLocation((string name, int index) tuple) { return new ValueLocation(tuple.name, tuple.index); }
 
-        public static implicit operator ValueLocation((string, int?) tuple) { return new ValueLocation(tuple.Item1, tuple.Item2 ?? 0); }
+        public static implicit operator ValueLocation((string name, int? index) tuple) { return new ValueLocation(tuple.name, tuple.index ?? 0); }
 
         public static implicit operator String(ValueLocation location) { return location.ToString(); }
 

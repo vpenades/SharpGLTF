@@ -36,9 +36,9 @@ namespace SharpGLTF.Animations
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
-                segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
-                segment.Item3                               // amount
+                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
+                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
+                segment.Amount                               // amount
                 );
         }
 
@@ -100,9 +100,9 @@ namespace SharpGLTF.Animations
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
-                segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
-                segment.Item3                               // amount
+                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
+                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
+                segment.Amount                               // amount
                 );
         }
 
@@ -164,9 +164,9 @@ namespace SharpGLTF.Animations
 
             return Transforms.SparseWeight8.InterpolateCubic
                 (
-                segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
-                segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
-                segment.Item3                               // amount
+                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
+                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
+                segment.Amount                               // amount
                 );
         }
 
@@ -228,9 +228,9 @@ namespace SharpGLTF.Animations
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.Item1.Item2, segment.Item1.Item3,   // start, startTangentOut
-                segment.Item2.Item2, segment.Item2.Item1,   // end, endTangentIn
-                segment.Item3                               // amount
+                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
+                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
+                segment.Amount                               // amount
                 );
         }
 

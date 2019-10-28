@@ -33,13 +33,13 @@ namespace SharpGLTF.Schema2
 
         #region data
 
-        private static readonly List<(string, Type, Type)> _Extensions = new List<(string, Type, Type)>();
+        private static readonly List<(string Name, Type ParentType, Type ExtType)> _Extensions = new List<(string, Type, Type)>();
 
         #endregion
 
         #region API
 
-        public static IEnumerable<string> SupportedExtensions => _Extensions.Select(item => item.Item1);
+        public static IEnumerable<string> SupportedExtensions => _Extensions.Select(item => item.Name);
 
         public static void RegisterExtension<TParent, TExtension>(string persistentName)
             where TParent : JsonSerializable
@@ -52,13 +52,13 @@ namespace SharpGLTF.Schema2
         {
             var ptype = parent.GetType();
 
-            var entry = _Extensions.FirstOrDefault(item => item.Item1 == key && item.Item2 == ptype);
+            var entry = _Extensions.FirstOrDefault(item => item.Name == key && item.ParentType == ptype);
 
-            if (entry.Item1 == null) return null;
+            if (entry.Name == null) return null;
 
             var instance = Activator.CreateInstance
                 (
-                entry.Item3,
+                entry.ExtType,
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
                 null,
                 new Object[] { parent },
@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2
         {
             foreach (var entry in _Extensions)
             {
-                if (entry.Item2 == parentType && entry.Item3 == extensionType) return entry.Item1;
+                if (entry.ParentType == parentType && entry.ExtType == extensionType) return entry.Name;
             }
 
             return null;

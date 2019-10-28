@@ -56,16 +56,16 @@ namespace SharpGLTF.Scenes
                 {
                     var srcNode = _Joints[i];
 
-                    System.Diagnostics.Debug.Assert(!srcNode.Item2.HasValue);
+                    System.Diagnostics.Debug.Assert(!srcNode.InverseBindMatrix.HasValue);
 
-                    dstNodes[i] = context.GetNode(srcNode.Item1);
+                    dstNodes[i] = context.GetNode(srcNode.Joints);
                 }
 
                 #if DEBUG
                 for (int i = 0; i < dstNodes.Length; ++i)
                 {
                     var srcNode = _Joints[i];
-                    System.Diagnostics.Debug.Assert(dstNodes[i].WorldMatrix == srcNode.Item1.WorldMatrix);
+                    System.Diagnostics.Debug.Assert(dstNodes[i].WorldMatrix == srcNode.Joints.WorldMatrix);
                 }
                 #endif
 
@@ -74,14 +74,14 @@ namespace SharpGLTF.Scenes
             else
             {
                 var skinnedJoints = _Joints
-                .Select(j => (context.GetNode(j.Item1), j.Item2.Value))
+                .Select(j => (context.GetNode(j.Joints), j.InverseBindMatrix.Value))
                 .ToArray();
 
                 skinnedMeshNode.WithSkinBinding(skinnedJoints);
             }
 
             // set skeleton
-            // var root = _Joints[0].Item1.Root;
+            // var root = _Joints[0].Joint.Root;
             // skinnedMeshNode.Skin.Skeleton = context.GetNode(root);
 
             schema2Target.Setup(skinnedMeshNode, context);

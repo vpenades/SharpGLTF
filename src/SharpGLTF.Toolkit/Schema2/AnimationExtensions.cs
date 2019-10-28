@@ -87,23 +87,23 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
-        public static Node WithScaleAnimation(this Node node, string animationName, params (Single, Vector3)[] keyframes)
+        public static Node WithScaleAnimation(this Node node, string animationName, params (Single Key, Vector3 Value)[] keyframes)
         {
-            var keys = keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+            var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithScaleAnimation(animationName, keys);
         }
 
-        public static Node WithRotationAnimation(this Node node, string animationName, params (Single, Quaternion)[] keyframes)
+        public static Node WithRotationAnimation(this Node node, string animationName, params (Single Key, Quaternion Value)[] keyframes)
         {
-            var keys = keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+            var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithRotationAnimation(animationName, keys);
         }
 
-        public static Node WithTranslationAnimation(this Node node, string animationName, params (Single, Vector3)[] keyframes)
+        public static Node WithTranslationAnimation(this Node node, string animationName, params (Single Key, Vector3 Value)[] keyframes)
         {
-            var keys = keyframes.ToDictionary(kvp => kvp.Item1, kvp => kvp.Item2);
+            var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithTranslationAnimation(animationName, keys);
         }

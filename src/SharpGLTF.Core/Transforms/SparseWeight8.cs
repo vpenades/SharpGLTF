@@ -23,8 +23,8 @@ namespace SharpGLTF.Transforms
         private string _GetDebuggerDisplay()
         {
             var iw = this.GetIndexedWeights()
-                .Where(item => item.Item2 != 0)
-                .Select(item => $"[{item.Item1}]={item.Item2}");
+                .Where(item => item.Weight != 0)
+                .Select(item => $"[{item.Index}]={item.Weight}");
 
             var txt = string.Join(" ", iw);
 
@@ -72,7 +72,7 @@ namespace SharpGLTF.Transforms
         /// </summary>
         /// <param name="indexedWeights">A sequence of indexed weight values.</param>
         /// <returns>A <see cref="SparseWeight8"/> instance.</returns>
-        public static SparseWeight8 Create(params (int, float)[] indexedWeights)
+        public static SparseWeight8 Create(params (int Index, float Weight)[] indexedWeights)
         {
             if (indexedWeights == null) return default;
 
@@ -83,9 +83,9 @@ namespace SharpGLTF.Transforms
             for (int i = 0; i < indexedWeights.Length; ++i)
             {
                 var p = indexedWeights[i];
-                if (p.Item2 == 0) continue;
+                if (p.Weight == 0) continue;
 
-                Guard.MustBeGreaterThanOrEqualTo(p.Item1, 0, nameof(indexedWeights));
+                Guard.MustBeGreaterThanOrEqualTo(p.Index, 0, nameof(indexedWeights));
 
                 sparse[o++] = p;
             }
@@ -418,7 +418,7 @@ namespace SharpGLTF.Transforms
         {
             var basis = Animations.SamplerFactory.CreateHermitePointWeights(amount);
 
-            return _OperateCubic(x, xt, y, yt, (xx, xxt, yy, yyt) => (xx * basis.Item1) + (yy * basis.Item2) + (xxt * basis.Item3) + (yyt * basis.Item4));
+            return _OperateCubic(x, xt, y, yt, (xx, xxt, yy, yyt) => (xx * basis.StartPosition) + (yy * basis.EndPosition) + (xxt * basis.StartTangent) + (yyt * basis.EndTangent));
         }
 
         public IEnumerable<float> Expand(int count)
@@ -429,7 +429,7 @@ namespace SharpGLTF.Transforms
             }
         }
 
-        public IEnumerable<(int, float)> GetIndexedWeights()
+        public IEnumerable<(int Index, float Weight)> GetIndexedWeights()
         {
             yield return (Index0, Weight0);
             yield return (Index1, Weight1);
@@ -579,7 +579,7 @@ namespace SharpGLTF.Transforms
             return new SparseWeight8(rrr);
         }
 
-        internal IEnumerable<(int, float)> GetNonZeroWeights()
+        internal IEnumerable<(int Index, float Weight)> GetNonZeroWeights()
         {
             if (Weight0 != 0) yield return (Index0, Weight0);
             if (Weight1 != 0) yield return (Index1, Weight1);

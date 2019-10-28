@@ -118,9 +118,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
         }
 
-        public static implicit operator VertexColor2((Vector4, Vector4) tuple)
+        public static implicit operator VertexColor2((Vector4 Color0, Vector4 Color1) tuple)
         {
-            return new VertexColor2(tuple.Item1, tuple.Item2);
+            return new VertexColor2(tuple.Color0, tuple.Color1);
         }
 
         #endregion
@@ -261,9 +261,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
-        public static implicit operator VertexTexture2((Vector2, Vector2) tuple)
+        public static implicit operator VertexTexture2((Vector2 Tex0, Vector2 Tex1) tuple)
         {
-            return new VertexTexture2(tuple.Item1, tuple.Item2);
+            return new VertexTexture2(tuple.Tex0, tuple.Tex1);
         }
 
         #endregion
@@ -339,9 +339,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
         }
 
-        public static implicit operator VertexColor1Texture1((Vector4, Vector2) tuple)
+        public static implicit operator VertexColor1Texture1((Vector4 Color, Vector2 Tex) tuple)
         {
-            return new VertexColor1Texture1(tuple.Item1, tuple.Item2);
+            return new VertexColor1Texture1(tuple.Color, tuple.Tex);
         }
 
         #endregion
@@ -415,9 +415,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
-        public static implicit operator VertexColor1Texture2((Vector4, Vector2, Vector2) tuple)
+        public static implicit operator VertexColor1Texture2((Vector4 Color, Vector2 Tex0, Vector2 Tex1) tuple)
         {
-            return new VertexColor1Texture2(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexColor1Texture2(tuple.Color, tuple.Tex0, tuple.Tex1);
         }
 
         #endregion
@@ -504,9 +504,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
         }
 
-        public static implicit operator VertexColor2Texture2((Vector4, Vector4, Vector2, Vector2) tuple)
+        public static implicit operator VertexColor2Texture2((Vector4 Color0, Vector4 Color1, Vector2 Tex0, Vector2 Tex1) tuple)
         {
-            return new VertexColor2Texture2(tuple.Item1, tuple.Item2, tuple.Item3, tuple.Item4);
+            return new VertexColor2Texture2(tuple.Color0, tuple.Color1, tuple.Tex0, tuple.Tex1);
         }
 
         #endregion

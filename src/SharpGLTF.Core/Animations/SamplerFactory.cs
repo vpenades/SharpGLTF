@@ -52,12 +52,12 @@ namespace SharpGLTF.Animations
         /// <param name="amount">The input amount (must be between 0 and 1)</param>
         /// <returns>
         /// The output weights.
-        /// - Item1: Weight for Start point
-        /// - Item2: Weight for End point
-        /// - Item3: Weight for Start Outgoing Tangent
-        /// - Item4: Weight for End Incoming Tangent
+        /// - StartPosition: Weight for Start point
+        /// - EndPosition: Weight for End point
+        /// - StartTangent: Weight for Start Outgoing Tangent
+        /// - EndTangent: Weight for End Incoming Tangent
         /// </returns>
-        public static (float, float, float, float) CreateHermitePointWeights(float amount)
+        public static (float StartPosition, float EndPosition, float StartTangent, float EndTangent) CreateHermitePointWeights(float amount)
         {
             System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1, nameof(amount));
 
@@ -89,12 +89,12 @@ namespace SharpGLTF.Animations
         /// <param name="amount">The input amount (must be between 0 and 1)</param>
         /// <returns>
         /// The output weights.
-        /// - Item1: Weight for Start point
-        /// - Item2: Weight for End point
-        /// - Item3: Weight for Start Outgoing Tangent
-        /// - Item4: Weight for End Incoming Tangent
+        /// - StartPosition: Weight for Start point
+        /// - EndPosition: Weight for End point
+        /// - StartTangent: Weight for Start Outgoing Tangent
+        /// - EndTangent: Weight for End Incoming Tangent
         /// </returns>
-        public static (float, float, float, float) CreateHermiteTangentWeights(float amount)
+        public static (float StartPosition, float EndPosition, float StartTangent, float EndTangent) CreateHermiteTangentWeights(float amount)
         {
             System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1, nameof(amount));
 
@@ -125,29 +125,29 @@ namespace SharpGLTF.Animations
         /// <param name="sequence">A sequence of float+<typeparamref name="T"/> pairs sorted in ascending order.</param>
         /// <param name="offset">the offset to look for in the sequence.</param>
         /// <returns>Two consecutive <typeparamref name="T"/> values and a float amount to LERP amount.</returns>
-        public static (T, T, float) FindPairContainingOffset<T>(this IEnumerable<(float, T)> sequence, float offset)
+        public static (T A, T B, Single Amount) FindPairContainingOffset<T>(this IEnumerable<(float Key, T Value)> sequence, float offset)
         {
             Guard.NotNull(sequence, nameof(sequence));
 
             if (!sequence.Any()) return (default(T), default(T), 0);
 
-            (float, T)? left = null;
-            (float, T)? right = null;
-            (float, T)? prev = null;
+            (float Key, T Value)? left = null;
+            (float Key, T Value)? right = null;
+            (float Key, T Value)? prev = null;
 
             var first = sequence.First();
-            if (offset < first.Item1) offset = first.Item1;
+            if (offset < first.Key) offset = first.Key;
 
             foreach (var item in sequence)
             {
-                System.Diagnostics.Debug.Assert(!prev.HasValue || prev.Value.Item1 < item.Item1, "Values in the sequence must be sorted ascending.");
+                System.Diagnostics.Debug.Assert(condition: !prev.HasValue || prev.Value.Key < item.Key, "Values in the sequence must be sorted ascending.");
 
-                if (item.Item1 == offset)
+                if (item.Key == offset)
                 {
                     left = item; continue;
                 }
 
-                if (item.Item1 > offset)
+                if (item.Key > offset)
                 {
                     if (left == null) left = prev;
                     right = item;
@@ -158,18 +158,18 @@ namespace SharpGLTF.Animations
             }
 
             if (left == null && right == null) return (default(T), default(T), 0);
-            if (left == null) return (right.Value.Item2, right.Value.Item2, 0);
-            if (right == null) return (left.Value.Item2, left.Value.Item2, 0);
+            if (left == null) return (right.Value.Value, right.Value.Value, 0);
+            if (right == null) return (left.Value.Value, left.Value.Value, 0);
 
-            var delta = right.Value.Item1 - left.Value.Item1;
+            var delta = right.Value.Key - left.Value.Key;
 
             System.Diagnostics.Debug.Assert(delta > 0);
 
-            var amount = (offset - left.Value.Item1) / delta;
+            var amount = (offset - left.Value.Key) / delta;
 
             System.Diagnostics.Debug.Assert(amount >= 0 && amount <= 1);
 
-            return (left.Value.Item2, right.Value.Item2, amount);
+            return (left.Value.Value, right.Value.Value, amount);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace SharpGLTF.Animations
         /// <param name="sequence">A sequence of offsets sorted in ascending order.</param>
         /// <param name="offset">the offset to look for in the sequence.</param>
         /// <returns>Two consecutive offsets and a LERP amount.</returns>
-        public static (float, float, float) FindPairContainingOffset(IEnumerable<float> sequence, float offset)
+        public static (Single A, Single B, Single Amount) FindPairContainingOffset(IEnumerable<float> sequence, float offset)
         {
             Guard.NotNull(sequence, nameof(sequence));
 
@@ -288,16 +288,16 @@ namespace SharpGLTF.Animations
 
         public static Vector3 InterpolateCubic(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
         {
-            var hermite = SamplerFactory.CreateHermitePointWeights(amount);
+            var hermite = CreateHermitePointWeights(amount);
 
-            return (start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4);
+            return (start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent);
         }
 
         public static Quaternion InterpolateCubic(Quaternion start, Quaternion outgoingTangent, Quaternion end, Quaternion incomingTangent, Single amount)
         {
             var hermite = CreateHermitePointWeights(amount);
 
-            return Quaternion.Normalize((start * hermite.Item1) + (end * hermite.Item2) + (outgoingTangent * hermite.Item3) + (incomingTangent * hermite.Item4));
+            return Quaternion.Normalize((start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent));
         }
 
         public static Single[] InterpolateCubic(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
@@ -313,7 +313,7 @@ namespace SharpGLTF.Animations
 
             for (int i = 0; i < result.Length; ++i)
             {
-                result[i] = (start[i] * hermite.Item1) + (end[i] * hermite.Item2) + (outgoingTangent[i] * hermite.Item3) + (incomingTangent[i] * hermite.Item4);
+                result[i] = (start[i] * hermite.StartPosition) + (end[i] * hermite.EndPosition) + (outgoingTangent[i] * hermite.StartTangent) + (incomingTangent[i] * hermite.EndTangent);
             }
 
             return result;

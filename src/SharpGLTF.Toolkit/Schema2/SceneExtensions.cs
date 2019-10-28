@@ -83,14 +83,14 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
-        public static Node WithSkinBinding(this Node node, params (Node, Matrix4x4)[] joints)
+        public static Node WithSkinBinding(this Node node, params (Node Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(node, nameof(node));
 
             foreach (var j in joints)
             {
-                Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
-                Guard.IsTrue(Matrix4x4.Invert(j.Item2, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+                Guard.MustShareLogicalParent(node, j.Joint, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(j.InverseBindMatrix, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
             }
 
             var skin = node.LogicalParent.CreateSkin();
@@ -116,7 +116,7 @@ namespace SharpGLTF.Schema2
                 .WithSkinBinding(meshPoseTransform, joints);
         }
 
-        public static Node WithSkinnedMesh(this Node node, Mesh mesh, params (Node, Matrix4x4)[] joints)
+        public static Node WithSkinnedMesh(this Node node, Mesh mesh, params (Node Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(node, nameof(node));
             Guard.NotNull(mesh, nameof(mesh));
@@ -125,8 +125,8 @@ namespace SharpGLTF.Schema2
 
             foreach (var j in joints)
             {
-                Guard.MustShareLogicalParent(node, j.Item1, nameof(joints));
-                Guard.IsTrue(Matrix4x4.Invert(j.Item2, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+                Guard.MustShareLogicalParent(node, j.Joint, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(j.InverseBindMatrix, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
             }
 
             // TODO: the joints must be visible in the visual tree that contains node.
@@ -209,7 +209,7 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)> EvaluateTriangles(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, IVertexBuilder C, Material Material)> EvaluateTriangles(this Scene scene, Animation animation = null, float time = 0)
         {
             if (scene == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
@@ -230,8 +230,8 @@ namespace SharpGLTF.Schema2
 
             return instance
                 .DrawableReferences
-                .Where(item => item.Item2.Visible)
-                .SelectMany(item => meshes[item.Item1].EvaluateTriangles(item.Item2));
+                .Where(item => item.Transform.Visible)
+                .SelectMany(item => meshes[item.MeshIndex].EvaluateTriangles(item.Transform));
         }
 
         /// <summary>
@@ -243,7 +243,7 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty> A, VertexBuilder<TvG, TvM, VertexEmpty> B, VertexBuilder<TvG, TvM, VertexEmpty> C, Material Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -266,8 +266,8 @@ namespace SharpGLTF.Schema2
 
             return instance
                 .DrawableReferences
-                .Where(item => item.Item2.Visible)
-                .SelectMany(item => meshes[item.Item1].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Item2));
+                .Where(item => item.Transform.Visible)
+                .SelectMany(item => meshes[item.MeshIndex].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Transform));
         }
 
         public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)

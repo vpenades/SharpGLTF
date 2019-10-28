@@ -201,9 +201,9 @@ namespace SharpGLTF.IO
 
                 foreach (var t in p.Triangles)
                 {
-                    var a = t.Item1 + baseVertexIndex;
-                    var b = t.Item2 + baseVertexIndex;
-                    var c = t.Item3 + baseVertexIndex;
+                    var a = t.A + baseVertexIndex;
+                    var b = t.B + baseVertexIndex;
+                    var c = t.C + baseVertexIndex;
 
                     sb.AppendLine(Invariant($"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}"));
                 }
@@ -252,7 +252,7 @@ namespace SharpGLTF.IO
                     dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
                 }
 
-                this.AddTriangle(dstMaterial, triangle.Item1, triangle.Item2, triangle.Item3);
+                this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
             }
         }
 
@@ -275,7 +275,7 @@ namespace SharpGLTF.IO
                     dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
                 }
 
-                this.AddTriangle(dstMaterial, triangle.Item1, triangle.Item2, triangle.Item3);
+                this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
             }
         }
 

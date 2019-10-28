@@ -45,17 +45,17 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets the indices of all lines, given that <see cref="VerticesPerPrimitive"/> is 2.
         /// </summary>
-        IReadOnlyList<(int, int)> Lines { get; }
+        IReadOnlyList<(int A, int B)> Lines { get; }
 
         /// <summary>
         /// Gets the indices of all the surfaces as triangles, given that <see cref="VerticesPerPrimitive"/> is 3.
         /// </summary>
-        IReadOnlyList<(int, int, int)> Triangles { get; }
+        IReadOnlyList<(int A, int B, int C)> Triangles { get; }
 
         /// <summary>
         /// Gets the indices of all the surfaces, given that <see cref="VerticesPerPrimitive"/> is 3.
         /// </summary>
-        IReadOnlyList<(int, int, int, int?)> Surfaces { get; }
+        IReadOnlyList<(int A, int B, int C, int? D)> Surfaces { get; }
 
         /// <summary>
         /// Calculates the raw list of indices to use for this primitive.
@@ -75,11 +75,11 @@ namespace SharpGLTF.Geometry
 
         int AddPoint(IVertexBuilder a);
 
-        (int, int) AddLine(IVertexBuilder a, IVertexBuilder b);
+        (int A, int B) AddLine(IVertexBuilder a, IVertexBuilder b);
 
-        (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
+        (int A, int B, int C) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
 
-        (int, int, int, int) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d);
+        (int A, int B, int C, int D) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d);
     }
 
     /// <summary>
@@ -161,11 +161,11 @@ namespace SharpGLTF.Geometry
 
         public virtual IReadOnlyList<int> Points => Array.Empty<int>();
 
-        public virtual IReadOnlyList<(int, int)> Lines => Array.Empty<(int, int)>();
+        public virtual IReadOnlyList<(int A, int B)> Lines => Array.Empty<(int, int)>();
 
-        public virtual IReadOnlyList<(int, int, int)> Triangles => Array.Empty<(int, int, int)>();
+        public virtual IReadOnlyList<(int A, int B, int C)> Triangles => Array.Empty<(int, int, int)>();
 
-        public virtual IReadOnlyList<(int, int, int, int?)> Surfaces => Array.Empty<(int, int, int, int?)>();
+        public virtual IReadOnlyList<(int A, int B, int C, int? D)> Surfaces => Array.Empty<(int, int, int, int?)>();
 
         #endregion
 
@@ -235,7 +235,7 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
         /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
-        public (int, int) AddLine(IVertexBuilder a, IVertexBuilder b)
+        public (int A, int B) AddLine(IVertexBuilder a, IVertexBuilder b)
         {
             Guard.NotNull(a, nameof(a));
             Guard.NotNull(b, nameof(b));
@@ -250,7 +250,7 @@ namespace SharpGLTF.Geometry
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
         /// <returns>The indices of the vertices, or, in case the triangle is degenerated, (-1,-1,-1).</returns>
-        public (int, int, int) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
+        public (int A, int B, int C) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c)
         {
             Guard.NotNull(a, nameof(a));
             Guard.NotNull(b, nameof(b));
@@ -271,7 +271,7 @@ namespace SharpGLTF.Geometry
         /// If only one of the vertices is degenerated, leading to a single triangle, the resulting indices would
         /// have just one negative index, like this: (16,-1,17,18)
         /// </remarks>
-        public (int, int, int, int) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d)
+        public (int A, int B, int C, int D) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d)
         {
             Guard.NotNull(a, nameof(a));
             Guard.NotNull(b, nameof(b));
@@ -321,13 +321,13 @@ namespace SharpGLTF.Geometry
             {
                 foreach (var l in primitive.Lines)
                 {
-                    var a = vertexTransformFunc(primitive.Vertices[l.Item1]);
-                    var b = vertexTransformFunc(primitive.Vertices[l.Item2]);
+                    var a = vertexTransformFunc(primitive.Vertices[l.A]);
+                    var b = vertexTransformFunc(primitive.Vertices[l.B]);
 
                     var indices = AddLine(a, b);
 
-                    vmap[l.Item1] = indices.Item1;
-                    vmap[l.Item2] = indices.Item2;
+                    vmap[l.A] = indices.A;
+                    vmap[l.B] = indices.B;
                 }
             }
 
@@ -335,27 +335,27 @@ namespace SharpGLTF.Geometry
             {
                 foreach (var s in primitive.Surfaces)
                 {
-                    var a = vertexTransformFunc(primitive.Vertices[s.Item1]);
-                    var b = vertexTransformFunc(primitive.Vertices[s.Item2]);
-                    var c = vertexTransformFunc(primitive.Vertices[s.Item3]);
+                    var a = vertexTransformFunc(primitive.Vertices[s.A]);
+                    var b = vertexTransformFunc(primitive.Vertices[s.B]);
+                    var c = vertexTransformFunc(primitive.Vertices[s.C]);
 
-                    if (s.Item4.HasValue)
+                    if (s.D.HasValue)
                     {
-                        var d = vertexTransformFunc(primitive.Vertices[s.Item4.Value]);
+                        var d = vertexTransformFunc(primitive.Vertices[s.D.Value]);
                         var indices = AddQuadrangle(a, b, c, d);
 
-                        vmap[s.Item1] = indices.Item1;
-                        vmap[s.Item2] = indices.Item2;
-                        vmap[s.Item3] = indices.Item3;
-                        vmap[s.Item4.Value] = indices.Item4;
+                        vmap[s.A] = indices.A;
+                        vmap[s.B] = indices.B;
+                        vmap[s.C] = indices.C;
+                        vmap[s.D.Value] = indices.D;
                     }
                     else
                     {
                         var indices = AddTriangle(a, b, c);
 
-                        vmap[s.Item1] = indices.Item1;
-                        vmap[s.Item2] = indices.Item2;
-                        vmap[s.Item3] = indices.Item3;
+                        vmap[s.A] = indices.A;
+                        vmap[s.B] = indices.B;
+                        vmap[s.C] = indices.C;
                     }
                 }
             }
@@ -390,7 +390,7 @@ namespace SharpGLTF.Geometry
         /// <param name="a">First corner of the line.</param>
         /// <param name="b">Second corner of the line.</param>
         /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
-        public virtual (int, int) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
+        public virtual (int A, int B) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
         {
             throw new NotSupportedException("Lines are not supported for this primitive");
         }
@@ -402,7 +402,7 @@ namespace SharpGLTF.Geometry
         /// <param name="b">Second corner of the triangle.</param>
         /// <param name="c">Third corner of the triangle.</param>
         /// <returns>The indices of the vertices, or, in case the triangle is degenerated, (-1,-1,-1).</returns>
-        public virtual (int, int, int) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        public virtual (int A, int B, int C) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             throw new NotSupportedException("Triangles are not supported for this primitive");
         }
@@ -415,7 +415,7 @@ namespace SharpGLTF.Geometry
         /// <param name="c">Third corner of the quadrangle.</param>
         /// <param name="d">Fourth corner of the quadrangle.</param>
         /// <returns>The indices of the vertices, or, in case the quadrangle is degenerated, (-1,-1,-1,-1).</returns>
-        public virtual (int, int, int, int) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
+        public virtual (int A, int B, int C, int D) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
         {
             throw new NotSupportedException("Quadrangles are not supported for this primitive");
         }
@@ -518,7 +518,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly List<(int, int)> _Indices = new List<(int, int)>();
+        private readonly List<(int A, int B)> _Indices = new List<(int A, int B)>();
 
         #endregion
 
@@ -526,13 +526,13 @@ namespace SharpGLTF.Geometry
 
         public override int VerticesPerPrimitive => 2;
 
-        public override IReadOnlyList<(int, int)> Lines => _Indices;
+        public override IReadOnlyList<(int A, int B)> Lines => _Indices;
 
         #endregion
 
         #region API
 
-        public override (int, int) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
+        public override (int A, int B) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
         {
             if (Mesh.VertexPreprocessor != null)
             {
@@ -556,7 +556,7 @@ namespace SharpGLTF.Geometry
         public override IReadOnlyList<int> GetIndices()
         {
             return _Indices
-                .SelectMany(item => new[] { item.Item1, item.Item2 })
+                .SelectMany(item => new[] { item.A, item.B })
                 .ToList();
         }
 
@@ -580,8 +580,8 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly List<(int, int, int)> _TriIndices = new List<(int, int, int)>();
-        private readonly List<(int, int, int, int)> _QuadIndices = new List<(int, int, int, int)>();
+        private readonly List<(int A, int B, int C)> _TriIndices = new List<(int A, int B, int C)>();
+        private readonly List<(int A, int B, int C, int D)> _QuadIndices = new List<(int A, int B, int C, int D)>();
 
         #endregion
 
@@ -589,15 +589,15 @@ namespace SharpGLTF.Geometry
 
         public override int VerticesPerPrimitive => 3;
 
-        public override IReadOnlyList<(int, int, int)> Triangles => new TriangleList(_TriIndices, _QuadIndices);
+        public override IReadOnlyList<(int A, int B, int C)> Triangles => new TriangleList(_TriIndices, _QuadIndices);
 
-        public override IReadOnlyList<(int, int, int, int?)> Surfaces => new SurfaceList(_TriIndices, _QuadIndices);
+        public override IReadOnlyList<(int A, int B, int C, int? D)> Surfaces => new SurfaceList(_TriIndices, _QuadIndices);
 
         #endregion
 
         #region API
 
-        public override (int, int, int) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        public override (int A, int B, int C) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             if (Mesh.VertexPreprocessor != null)
             {
@@ -609,7 +609,7 @@ namespace SharpGLTF.Geometry
             return _AddTriangle(a, b, c);
         }
 
-        public override (int, int, int, int) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
+        public override (int A, int B, int C, int D) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
         {
             if (Mesh.VertexPreprocessor != null)
             {
@@ -626,28 +626,28 @@ namespace SharpGLTF.Geometry
             if (a.Position == b.Position)
             {
                 var tri = _AddTriangle(b, c, d);
-                return (-1, tri.Item1, tri.Item2, tri.Item3);
+                return (-1, tri.A, tri.B, tri.C);
             }
 
             // B-C degenerated
             if (b.Position == c.Position)
             {
                 var tri = _AddTriangle(a, c, d);
-                return (tri.Item1, -1, tri.Item2, tri.Item3);
+                return (tri.A, -1, tri.B, tri.C);
             }
 
             // C-D degenerated
             if (c.Position == d.Position)
             {
                 var tri = _AddTriangle(a, b, d);
-                return (tri.Item1, tri.Item2, -1, tri.Item3);
+                return (tri.A, tri.B, -1, tri.C);
             }
 
             // D-A degenerated
             if (d.Position == a.Position)
             {
                 var tri = _AddTriangle(a, b, c);
-                return (tri.Item1, tri.Item2, tri.Item3, -1);
+                return (tri.A, tri.B, tri.C, -1);
             }
 
             // at some points it could be interesting to comply with https://github.com/KhronosGroup/glTF/pull/1620
@@ -673,7 +673,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private (int, int, int) _AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        private (int A, int B, int C) _AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             // check for degenerated triangle
             if (a.Position == b.Position || a.Position == c.Position || b.Position == c.Position) return (-1, -1, -1);
@@ -694,7 +694,7 @@ namespace SharpGLTF.Geometry
         public override IReadOnlyList<int> GetIndices()
         {
             return Triangles
-                .SelectMany(item => new[] { item.Item1, item.Item2, item.Item3 })
+                .SelectMany(item => new[] { item.A, item.B, item.C })
                 .ToList();
         }
 
@@ -702,7 +702,7 @@ namespace SharpGLTF.Geometry
 
         #region Types
 
-        private struct TriangleList : IReadOnlyList<(int, int, int)>
+        private struct TriangleList : IReadOnlyList<(int A, int B, int C)>
         {
             public TriangleList(IReadOnlyList<(int, int, int)> tris, IReadOnlyList<(int, int, int, int)> quads)
             {
@@ -710,12 +710,12 @@ namespace SharpGLTF.Geometry
                 _Quads = quads;
             }
 
-            private readonly IReadOnlyList<(int, int, int)> _Tris;
-            private readonly IReadOnlyList<(int, int, int, int)> _Quads;
+            private readonly IReadOnlyList<(int A, int B, int C)> _Tris;
+            private readonly IReadOnlyList<(int A, int B, int C, int D)> _Quads;
 
             public int Count => _Tris.Count + (_Quads.Count * 2);
 
-            public (int, int, int) this[int index]
+            public (int A, int B, int C) this[int index]
             {
                 get
                 {
@@ -729,11 +729,11 @@ namespace SharpGLTF.Geometry
 
                     var quad = _Quads[index / 2];
 
-                    return (index & 1) == 0 ? (quad.Item1, quad.Item2, quad.Item3) : (quad.Item1, quad.Item3, quad.Item4);
+                    return (index & 1) == 0 ? (quad.A, quad.B, quad.C) : (quad.A, quad.C, quad.D);
                 }
             }
 
-            public IEnumerator<(int, int, int)> GetEnumerator()
+            public IEnumerator<(int A, int B, int C)> GetEnumerator()
             {
                 var c = this.Count;
                 for (int i = 0; i < c; ++i) yield return this[i];
@@ -746,7 +746,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private struct SurfaceList : IReadOnlyList<(int, int, int, int?)>
+        private struct SurfaceList : IReadOnlyList<(int A, int B, int C, int? D)>
         {
             public SurfaceList(IReadOnlyList<(int, int, int)> tris, IReadOnlyList<(int, int, int, int)> quads)
             {
@@ -754,29 +754,29 @@ namespace SharpGLTF.Geometry
                 _Quads = quads;
             }
 
-            private readonly IReadOnlyList<(int, int, int)> _Tris;
-            private readonly IReadOnlyList<(int, int, int, int)> _Quads;
+            private readonly IReadOnlyList<(int A, int B, int C)> _Tris;
+            private readonly IReadOnlyList<(int A, int B, int C, int D)> _Quads;
 
             public int Count => _Tris.Count + _Quads.Count;
 
-            public (int, int, int, int?) this[int index]
+            public (int A, int B, int C, int? D) this[int index]
             {
                 get
                 {
                     if (index < _Tris.Count)
                     {
                         var tri = _Tris[index];
-                        return (tri.Item1, tri.Item2, tri.Item3, null);
+                        return (tri.A, tri.B, tri.C, null);
                     }
 
                     index -= _Tris.Count;
 
                     var quad = _Quads[index];
-                    return (quad.Item1, quad.Item2, quad.Item3, quad.Item4);
+                    return (quad.A, quad.B, quad.C, quad.D);
                 }
             }
 
-            public IEnumerator<(int, int, int, int?)> GetEnumerator()
+            public IEnumerator<(int A, int B, int C, int? D)> GetEnumerator()
             {
                 var c = this.Count;
                 for (int i = 0; i < c; ++i) yield return this[i];

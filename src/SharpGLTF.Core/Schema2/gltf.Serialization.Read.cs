@@ -63,7 +63,7 @@ namespace SharpGLTF.Schema2
             {
                 bool binaryFile = glb._Identify(stream);
 
-                if (binaryFile) return _ReadGLB(stream, settings).Item2;
+                if (binaryFile) return _ReadGLB(stream, settings).Validation;
 
                 string content = null;
 
@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2
                     content = streamReader.ReadToEnd();
                 }
 
-                return _ParseGLTF(content, settings).Item2;
+                return _ParseGLTF(content, settings).Validation;
             }
         }
 
@@ -157,11 +157,14 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="MODEL"/> instance.</returns>
         public static MODEL ReadGLB(Stream stream, ReadSettings settings)
         {
+            Guard.NotNull(stream, nameof(stream));
+            Guard.NotNull(settings, nameof(settings));
+
             var mv = _ReadGLB(stream, settings);
 
-            if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+            if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
 
-            return mv.Item1;
+            return mv.Model;
         }
 
         /// <summary>
@@ -174,9 +177,9 @@ namespace SharpGLTF.Schema2
         {
             var mv = _ParseGLTF(jsonContent, settings);
 
-            if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+            if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
 
-            return mv.Item1;
+            return mv.Model;
         }
 
         public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
@@ -193,9 +196,9 @@ namespace SharpGLTF.Schema2
                 {
                     var mv = _Read(tr, settings);
 
-                    if (mv.Item2.HasErrors) throw mv.Item2.Errors.FirstOrDefault();
+                    if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
 
-                    return mv.Item1;
+                    return mv.Model;
                 }
             }
         }
@@ -204,7 +207,7 @@ namespace SharpGLTF.Schema2
 
         #region reading core
 
-        private static (MODEL, Validation.ValidationResult) _ReadGLB(Stream stream, ReadSettings settings)
+        private static (MODEL Model, Validation.ValidationResult Validation) _ReadGLB(Stream stream, ReadSettings settings)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.NotNull(settings, nameof(settings));
@@ -229,7 +232,7 @@ namespace SharpGLTF.Schema2
             return _ParseGLTF(dom, settings);
         }
 
-        private static (MODEL, Validation.ValidationResult) _ParseGLTF(String jsonContent, ReadSettings settings)
+        private static (MODEL Model, Validation.ValidationResult Validation) _ParseGLTF(String jsonContent, ReadSettings settings)
         {
             Guard.NotNullOrEmpty(jsonContent, nameof(jsonContent));
             Guard.NotNull(settings, nameof(settings));
@@ -240,7 +243,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static (MODEL, Validation.ValidationResult) _Read(TextReader textReader, ReadSettings settings)
+        private static (MODEL Model, Validation.ValidationResult Validation) _Read(TextReader textReader, ReadSettings settings)
         {
             Guard.NotNull(textReader, nameof(textReader));
             Guard.NotNull(settings, nameof(settings));

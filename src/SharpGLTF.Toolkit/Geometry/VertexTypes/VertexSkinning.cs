@@ -12,7 +12,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void Validate();
 
-        (int, float) GetJointBinding(int index);
+        (int Index, float Weight) GetJointBinding(int index);
         void SetJointBinding(int index, int joint, float weight);
 
         void SetWeights(in SparseWeight8 weights);
@@ -195,7 +195,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints8(weights); }
 
-        public (int, float) GetJointBinding(int index)
+        public (int Index, float Weight) GetJointBinding(int index)
         {
             switch (index)
             {

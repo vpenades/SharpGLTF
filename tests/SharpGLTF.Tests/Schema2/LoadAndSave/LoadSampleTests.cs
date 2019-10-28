@@ -315,7 +315,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 instance.SetAnimationFrame(anim.LogicalIndex, t);
 
-                var nodexform = instance.GetDrawableReference(0).Item2;
+                var nodexform = instance.GetDrawableReference(0).Transform;
 
                 TestContext.WriteLine($"Animation at {t}");
 
@@ -333,7 +333,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     .ToList();
 
                 var vertices = triangles
-                    .SelectMany(item => new[] { item.Item1.Position, item.Item2.Position, item.Item3.Position })
+                    .SelectMany(item => new[] { item.A.Position, item.B.Position, item.C.Position })
                     .Distinct()
                     .ToList();
 

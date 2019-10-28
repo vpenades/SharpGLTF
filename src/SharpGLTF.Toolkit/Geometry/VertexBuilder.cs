@@ -126,7 +126,7 @@ namespace SharpGLTF.Geometry
             for (int i = 0; i < Skinning.MaxBindings; ++i)
             {
                 var jw = Skinning.GetJointBinding(i);
-                if (!jw.Item2._IsFinite() || jw.Item2 < 0 || jw.Item1 < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Item1}:{jw.Item2}");
+                if (!jw.Weight._IsFinite() || jw.Weight < 0 || jw.Index < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Index}:{jw.Weight}");
             }
 
             return sb.ToString();
@@ -183,7 +183,7 @@ namespace SharpGLTF.Geometry
             Skinning = default;
         }
 
-        public VertexBuilder(TvG g, params (int, float)[] bindings)
+        public VertexBuilder(TvG g, params (int Index, float Weight)[] bindings)
         {
             Geometry = g;
             Material = default;
@@ -202,19 +202,19 @@ namespace SharpGLTF.Geometry
             Skinning.SetWeights(bindings);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM, TvS) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvM Mat, TvS Skin) tuple)
         {
-            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat, tuple.Skin);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvM) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvM Mat) tuple)
         {
-            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG, TvS) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvS Mat) tuple)
         {
-            return new VertexBuilder<TvG, TvM, TvS>(tuple.Item1, tuple.Item2);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat);
         }
 
         public static implicit operator VertexBuilder<TvG, TvM, TvS>(TvG g)
@@ -321,7 +321,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int, float)[] bindings)
+        public VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int Index, float Weight)[] bindings)
         {
             var v = this;
 
@@ -329,7 +329,7 @@ namespace SharpGLTF.Geometry
 
             while (i < bindings.Length)
             {
-                v.Skinning.SetJointBinding(i, bindings[i].Item1, bindings[i].Item2);
+                v.Skinning.SetJointBinding(i, bindings[i].Index, bindings[i].Weight);
                 ++i;
             }
 

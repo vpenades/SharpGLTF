@@ -197,7 +197,7 @@ namespace SharpGLTF.Schema2
         /// Decodes the raw indices and returns a list of indexed lines.
         /// </summary>
         /// <returns>A sequence of indexed lines.</returns>
-        public IEnumerable<(int, int)> GetLineIndices()
+        public IEnumerable<(int A, int B)> GetLineIndices()
         {
             if (this.DrawPrimitiveType.GetPrimitiveVertexSize() != 2) return Enumerable.Empty<(int, int)>();
 
@@ -210,7 +210,7 @@ namespace SharpGLTF.Schema2
         /// Decodes the raw indices and returns a list of indexed triangles.
         /// </summary>
         /// <returns>A sequence of indexed triangles.</returns>
-        public IEnumerable<(int, int, int)> GetTriangleIndices()
+        public IEnumerable<(int A, int B, int C)> GetTriangleIndices()
         {
             if (this.DrawPrimitiveType.GetPrimitiveVertexSize() != 3) return Enumerable.Empty<(int, int, int)>();
 

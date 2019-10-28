@@ -115,16 +115,16 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
-                    p += val * pair.Item2;
+                    var val = pair.Index == COMPLEMENT_INDEX ? value : morphTargets[pair.Index];
+                    p += val * pair.Weight;
                 }
             }
             else
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
-                    p += val * pair.Item2;
+                    var val = pair.Index == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Index];
+                    p += val * pair.Weight;
                 }
             }
 
@@ -143,16 +143,16 @@ namespace SharpGLTF.Transforms
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : morphTargets[pair.Item1];
-                    p += val * pair.Item2;
+                    var val = pair.Index == COMPLEMENT_INDEX ? value : morphTargets[pair.Index];
+                    p += val * pair.Weight;
                 }
             }
             else
             {
                 foreach (var pair in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Item1 == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Item1];
-                    p += val * pair.Item2;
+                    var val = pair.Index == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Index];
+                    p += val * pair.Weight;
                 }
             }
 
@@ -334,7 +334,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldPosition += V3.Transform(localPosition, _SkinTransforms[jw.Item1]) * jw.Item2 * wnrm;
+                worldPosition += V3.Transform(localPosition, _SkinTransforms[jw.Index]) * jw.Weight * wnrm;
             }
 
             return worldPosition;
@@ -350,7 +350,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldNormal += V3.TransformNormal(localNormal, _SkinTransforms[jw.Item1]) * jw.Item2;
+                worldNormal += V3.TransformNormal(localNormal, _SkinTransforms[jw.Index]) * jw.Weight;
             }
 
             return V3.Normalize(localNormal);
@@ -366,7 +366,7 @@ namespace SharpGLTF.Transforms
 
             foreach (var jw in skinWeights.GetIndexedWeights())
             {
-                worldTangent += V3.TransformNormal(localTangentV, _SkinTransforms[jw.Item1]) * jw.Item2;
+                worldTangent += V3.TransformNormal(localTangentV, _SkinTransforms[jw.Index]) * jw.Weight;
             }
 
             worldTangent = V3.Normalize(worldTangent);

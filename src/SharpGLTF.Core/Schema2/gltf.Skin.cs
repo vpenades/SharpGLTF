@@ -66,7 +66,7 @@ namespace SharpGLTF.Schema2
             return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
         }
 
-        public (Node, Matrix4x4) GetJoint(int idx)
+        public (Node Joint, Matrix4x4 InverseBindMatrix) GetJoint(int idx)
         {
             var nodeIdx = _joints[idx];
 
@@ -119,19 +119,19 @@ namespace SharpGLTF.Schema2
         /// A collection of <see cref="Node"/> joints,
         /// where each joint has an Inverse Bind Matrix.
         /// </param>
-        public void BindJoints((Node, Matrix4x4)[] joints)
+        public void BindJoints((Node Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(joints, nameof(joints));
 
-            _FindCommonAncestor(joints.Select(item => item.Item1));
+            _FindCommonAncestor(joints.Select(item => item.Joint));
 
-            foreach (var j in joints) { Guard.IsTrue(j.Item2._IsFinite(), nameof(joints)); }
+            foreach (var j in joints) { Guard.IsTrue(j.InverseBindMatrix._IsFinite(), nameof(joints)); }
 
             // inverse bind matrices accessor
 
             var data = new Byte[joints.Length * 16 * 4];
             var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
-            matrices.Fill(joints.Select(item => item.Item2));
+            matrices.Fill(joints.Select(item => item.InverseBindMatrix));
 
             var accessor = LogicalParent.CreateAccessor("Bind Matrices");
             accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
@@ -141,7 +141,7 @@ namespace SharpGLTF.Schema2
             // joints
 
             _joints.Clear();
-            _joints.AddRange(joints.Select(item => item.Item1.LogicalIndex));
+            _joints.AddRange(joints.Select(item => item.Joint.LogicalIndex));
         }
 
         #endregion
@@ -165,8 +165,8 @@ namespace SharpGLTF.Schema2
                 var src = joints[i];
                 var dst = GetJoint(i);
 
-                if (!ReferenceEquals(src.Key, dst.Item1)) return false;
-                if (src.Value != dst.Item2) return false;
+                if (!ReferenceEquals(src.Key, dst.Joint)) return false;
+                if (src.Value != dst.InverseBindMatrix) return false;
             }
 
             return true;
@@ -279,7 +279,7 @@ namespace SharpGLTF.Schema2
 
                 for (int i = 0; i < this.JointsCount; ++i)
                 {
-                    var jointNode = GetJoint(i).Item1;
+                    var jointNode = GetJoint(i).Joint;
 
                     if (skeletonNode == jointNode) continue;
                     if (skeletonNode._ContainsVisualNode(jointNode, true)) continue;

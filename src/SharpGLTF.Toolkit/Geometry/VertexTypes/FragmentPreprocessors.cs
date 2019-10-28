@@ -110,13 +110,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             for (int i = 0; i < vertex.MaxBindings; ++i)
             {
-                var pair = vertex.GetJointBinding(i);
+                var (index, weight) = vertex.GetJointBinding(i);
 
-                Guard.MustBeGreaterThanOrEqualTo(pair.Item1, 0, $"Joint{i}");
-                Guard.IsTrue(pair.Item2._IsFinite(), $"Weight{i}", "Values are not finite.");
-                if (pair.Item2 == 0) Guard.IsTrue(pair.Item1 == 0, "joints with weight zero must be set to zero");
+                Guard.MustBeGreaterThanOrEqualTo(index, 0, $"Joint{i}");
+                Guard.IsTrue(weight._IsFinite(), $"Weight{i}", "Values are not finite.");
+                if (weight == 0) Guard.IsTrue(index == 0, "joints with weight zero must be set to zero");
 
-                weightsSum += pair.Item2;
+                weightsSum += weight;
             }
 
             // TODO: check that joints are unique

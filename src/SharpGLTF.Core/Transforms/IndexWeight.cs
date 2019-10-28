@@ -10,13 +10,13 @@ namespace SharpGLTF.Transforms
     {
         #region constructor
 
-        public IndexWeight((int, float) pair)
+        public IndexWeight((int Index, float Weight) pair)
         {
-            Index = pair.Item1;
-            Weight = pair.Item2;
+            Index = pair.Index;
+            Weight = pair.Weight;
         }
 
-        public static implicit operator IndexWeight((int, float) pair) { return new IndexWeight(pair.Item1, pair.Item2); }
+        public static implicit operator IndexWeight((int Index, float Weight) pair) { return new IndexWeight(pair.Index, pair.Weight); }
 
         public IndexWeight(int i, float w)
         {

@@ -87,7 +87,7 @@ namespace SharpGLTF
             return GetModelPathsInDirectory(_SchemaDir, "extensions", "2.0");         
         }
 
-        public static IEnumerable<(string, bool)> GetReferenceModelPaths(bool useNegative = false)
+        public static IEnumerable<(string Path, bool ShouldLoad)> GetReferenceModelPaths(bool useNegative = false)
         {
             _Check();
 

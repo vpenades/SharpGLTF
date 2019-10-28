@@ -26,6 +26,9 @@ namespace SharpGLTF.Geometry.Parametric
 
     class Cube<TMaterial> : ParametricShape<TMaterial>
     {
+        // TODO:
+        // Faces and UV alignment should follow: https://github.com/KhronosGroup/glTF/blob/master/extensions/2.0/Vendor/EXT_lights_image_based/figures/Cube_map.svg
+
         #region lifecycle
 
         public Cube(TMaterial material)

@@ -57,7 +57,7 @@ namespace SharpGLTF.Geometry
 
         #region data
 
-        private readonly Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
+        private readonly Dictionary<(TMaterial Material, int PrimType), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> _Primitives = new Dictionary<(TMaterial, int), PrimitiveBuilder<TMaterial, TvG, TvM, TvS>>();
 
         private VertexPreprocessor<TvG, TvM, TvS> _VertexPreprocessor;
 
@@ -73,7 +73,7 @@ namespace SharpGLTF.Geometry
             set => _VertexPreprocessor = value;
         }
 
-        public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Item1).Distinct();
+        public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Material).Distinct();
 
         public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> Primitives => _Primitives.Values;
 
@@ -88,13 +88,13 @@ namespace SharpGLTF.Geometry
             return new MorphTargetBuilder<TMaterial, TvG, TvS, TvM>(this, index);
         }
 
-        private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial, int) key)
+        private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial Material, int PrimType) key)
         {
             if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))
             {
-                if (key.Item2 == 1) primitive = new PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
-                if (key.Item2 == 2) primitive = new LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
-                if (key.Item2 == 3) primitive = new TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Item1);
+                if (key.PrimType == 1) primitive = new PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Material);
+                if (key.PrimType == 2) primitive = new LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Material);
+                if (key.PrimType == 3) primitive = new TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(this, key.Material);
 
                 Guard.NotNull(primitive, nameof(key));
 

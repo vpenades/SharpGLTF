@@ -190,12 +190,19 @@ namespace SharpGLTF.Runtime
         public int DrawableReferencesCount => _DrawableTransforms.Length;
 
         /// <summary>
-        /// Gets a collection of drawable references, where Item1 is the logical Index
-        /// of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
-        /// and Item2 is an <see cref="IGeometryTransform"/> that can be used to transform
-        /// the <see cref="Schema2.Mesh"/> into world space.
+        /// Gets a collection of drawable references, where:
+        /// <list type="bullet">
+        /// <item>
+        /// <term>MeshIndex</term>
+        /// <description>The logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.</description>
+        /// </item>
+        /// <item>
+        /// <term>Transform</term>
+        /// <description>An <see cref="IGeometryTransform"/> that can be used to transform the <see cref="Schema2.Mesh"/> into world space.</description>
+        /// </item>
+        /// </list>
         /// </summary>
-        public IEnumerable<(int, IGeometryTransform)> DrawableReferences
+        public IEnumerable<(int MeshIndex, IGeometryTransform Transform)> DrawableReferences
         {
             get
             {
@@ -286,14 +293,13 @@ namespace SharpGLTF.Runtime
         }
 
         /// <summary>
-        /// Gets a drawable reference pair, where Item1 is the logical Index
-        /// of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
-        /// and Item2 is an <see cref="IGeometryTransform"/> that can be used to transform
-        /// the <see cref="Schema2.Mesh"/> into world space.
+        /// Gets a drawable reference pair, where:
+        /// - MeshIndex is the logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.
+        /// - Transform is an <see cref="IGeometryTransform"/> that can be used to transform the <see cref="Schema2.Mesh"/> into world space.
         /// </summary>
         /// <param name="index">The index of the drawable reference, from 0 to <see cref="DrawableReferencesCount"/></param>
         /// <returns>A drawable reference</returns>
-        public (int, IGeometryTransform) GetDrawableReference(int index)
+        public (int MeshIndex, IGeometryTransform Transform) GetDrawableReference(int index)
         {
             var dref = _DrawableReferences[index];
 

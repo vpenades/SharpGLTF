@@ -52,7 +52,7 @@ namespace SharpGLTF.Runtime
         {
             foreach (var d in _Controller.DrawableReferences)
             {
-                Draw(_Template._Meshes[d.Item1], projection, view, world, d.Item2);
+                Draw(_Template._Meshes[d.MeshIndex], projection, view, world, d.Transform);
             }
         }
 

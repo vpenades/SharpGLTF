@@ -18,7 +18,7 @@ namespace SharpGLTF.Reporting
         public int NumLines { get; internal set; }
         public int NumPoints { get; internal set; }
 
-        public (XYZ, XYZ) Bounds { get; internal set; }
+        public (XYZ Min, XYZ Max) Bounds { get; internal set; }
 
         public IEnumerable<string> VertexAttributes { get; internal set; }
 
@@ -49,7 +49,7 @@ namespace SharpGLTF.Reporting
             this.NumTriangles = tris.Count;
 
             Bounds = tris
-                .SelectMany(item => new[] { item.Item1, item.Item2, item.Item3 })
+                .SelectMany(item => new[] { item.A, item.B, item.C })
                 .Select(item => item.GetGeometry().GetPosition())
                 .GetBounds();
 
@@ -63,8 +63,8 @@ namespace SharpGLTF.Reporting
             NumLines = many.Sum(item => item.NumLines);
             NumPoints = many.Sum(item => item.NumPoints);
 
-            var min = many.Select(item => item.Bounds.Item1).GetMin();
-            var max = many.Select(item => item.Bounds.Item2).GetMax();
+            var min = many.Select(item => item.Bounds.Min).GetMin();
+            var max = many.Select(item => item.Bounds.Max).GetMax();
             Bounds = (min, max);
 
             VertexAttributes = many

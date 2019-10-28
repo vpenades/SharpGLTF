@@ -97,9 +97,9 @@ namespace SharpGLTF.Geometry
             {
                 foreach (var tri in prim.Triangles)
                 {
-                    var a = prim.Vertices[tri.Item1].GetGeometry().GetPosition();
-                    var b = prim.Vertices[tri.Item1].GetGeometry().GetPosition();
-                    var c = prim.Vertices[tri.Item1].GetGeometry().GetPosition();
+                    var a = prim.Vertices[tri.A].GetGeometry().GetPosition();
+                    var b = prim.Vertices[tri.B].GetGeometry().GetPosition();
+                    var c = prim.Vertices[tri.C].GetGeometry().GetPosition();
                     var d = Vector3.Cross(b - a, c - a);
                     addDirection(posnrm, a, d);
                     addDirection(posnrm, b, d);

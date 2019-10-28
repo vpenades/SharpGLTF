@@ -39,35 +39,35 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 {
                     var model = ModelRoot.Load(f.Item1);
 
-                    if (!f.Item2)
+                    if (!f.ShouldLoad)
                     {
-                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should not load!");
+                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should not load!");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");                        
+                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");                        
                     }                    
                 }
                 catch (Exception ex)
                 {
-                    if (f.Item2)
+                    if (f.ShouldLoad)
                     {
-                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should load!");
+                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should load!");
                         TestContext.Error.WriteLine($"   ERROR: {ex.Message}");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");
+                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
                         TestContext.WriteLine($"   Exception: {ex.Message}");
                     }                    
                 }
 
-                if (f.Item2 && !f.Item1.ToLower().Contains("compatibility"))
+                if (f.ShouldLoad && !f.Path.ToLower().Contains("compatibility"))
                 {
-                    var model = ModelRoot.Load(f.Item1);
-                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Item1), ".obj"));
+                    var model = ModelRoot.Load(f.Path);
+                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Path), ".obj"));
                 }
             }
 
@@ -87,37 +87,37 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 try
                 {
-                    var model = ModelRoot.Load(f.Item1);
+                    var model = ModelRoot.Load(f.Path);
 
-                    if (!f.Item2)
+                    if (!f.ShouldLoad)
                     {
-                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should not load!");
+                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should not load!");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");
+                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
                     }
                 }
                 catch (Exception ex)
                 {
-                    if (f.Item2)
+                    if (f.ShouldLoad)
                     {
-                        TestContext.Error.WriteLine($"{f.Item1.ToShortDisplayPath()} 👎😦 Should load!");
+                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should load!");
                         TestContext.Error.WriteLine($"   ERROR: {ex.Message}");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Item1.ToShortDisplayPath()} 🙂👍");
+                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
                         TestContext.WriteLine($"   Exception: {ex.Message}");
                     }
                 }
 
-                if (f.Item2 && !f.Item1.ToLower().Contains("compatibility"))
+                if (f.ShouldLoad && !f.Path.ToLower().Contains("compatibility"))
                 {
-                    var model = ModelRoot.Load(f.Item1);
-                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Item1), ".obj"));
+                    var model = ModelRoot.Load(f.Path);
+                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Path), ".obj"));
                 }
             }
 

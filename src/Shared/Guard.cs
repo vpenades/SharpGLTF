@@ -58,14 +58,12 @@ namespace SharpGLTF
         public static void NotNull(object target, string parameterName, string message = "")
         {
             if (target != null) return;
-            if (string.IsNullOrWhiteSpace(message)) throw new ArgumentNullException(parameterName);
             throw new ArgumentNullException(parameterName, message);
         }
 
         public static void MustBeNull(object target, string parameterName, string message = "")
         {
             if (target == null) return;
-            if (string.IsNullOrWhiteSpace(message)) throw new ArgumentException("Argument must be null.", parameterName);
             throw new ArgumentException(parameterName, message);
         }
 

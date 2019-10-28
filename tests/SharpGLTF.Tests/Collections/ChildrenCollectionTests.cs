@@ -27,16 +27,16 @@ namespace SharpGLTF.Collections
 
             Assert.Throws<ArgumentNullException>(() => list.Add(null));
 
-            var item1 = new TestChild();
-            Assert.IsNull(item1.LogicalParent);
+            var item = new TestChild();
+            Assert.IsNull(item.LogicalParent);
 
-            list.Add(item1);
-            Assert.AreSame(item1.LogicalParent, this);
+            list.Add(item);
+            Assert.AreSame(item.LogicalParent, this);
 
-            Assert.Throws<ArgumentException>(() => list.Add(item1));
+            Assert.Throws<ArgumentException>(() => list.Add(item));
 
-            list.Remove(item1);
-            Assert.IsNull(item1.LogicalParent);
+            list.Remove(item);
+            Assert.IsNull(item.LogicalParent);
         }
 
     }

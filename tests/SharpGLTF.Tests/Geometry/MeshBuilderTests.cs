@@ -156,9 +156,9 @@ namespace SharpGLTF.Geometry
                     new VertexPosition(validTriangle.Item2),
                     new VertexPosition(validTriangle.Item3)
                     );
-            Assert.GreaterOrEqual(validIndices.Item1, 0);
-            Assert.GreaterOrEqual(validIndices.Item2, 0);
-            Assert.GreaterOrEqual(validIndices.Item3, 0);
+            Assert.GreaterOrEqual(validIndices.A, 0);
+            Assert.GreaterOrEqual(validIndices.B, 0);
+            Assert.GreaterOrEqual(validIndices.C, 0);
 
             var degenIndices = mesh.UsePrimitive(material2)
                 .AddTriangle
@@ -167,9 +167,9 @@ namespace SharpGLTF.Geometry
                     new VertexPosition(degeneratedTriangle.Item2),
                     new VertexPosition(degeneratedTriangle.Item3)
                     );
-            Assert.Less(degenIndices.Item1, 0);
-            Assert.Less(degenIndices.Item2, 0);
-            Assert.Less(degenIndices.Item3, 0);
+            Assert.Less(degenIndices.A, 0);
+            Assert.Less(degenIndices.B, 0);
+            Assert.Less(degenIndices.C, 0);
 
             // create meshes:
 

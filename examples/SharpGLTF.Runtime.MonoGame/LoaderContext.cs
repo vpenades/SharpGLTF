@@ -115,10 +115,10 @@ namespace SharpGLTF.Runtime
             return vb;
         }
 
-        private IndexBuffer CreateIndexBuffer(IEnumerable<(int, int, int)> triangles)
+        private IndexBuffer CreateIndexBuffer(IEnumerable<(int A, int B, int C)> triangles)
         {
             var sequence32 = triangles
-                .SelectMany(item => new[] { (UInt32)item.Item3, (UInt32)item.Item2, (UInt32)item.Item1 })
+                .SelectMany(item => new[] { (UInt32)item.C, (UInt32)item.B, (UInt32)item.A })
                 .ToArray();
 
             var max = sequence32.Max();

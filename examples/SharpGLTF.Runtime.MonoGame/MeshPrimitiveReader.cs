@@ -56,7 +56,7 @@ namespace SharpGLTF.Runtime
             if (doubleSided) // Monogame's effect material does not support double sided materials, so we simulate it by adding reverse faces
             {
                 var front = srcPrim.GetTriangleIndices();
-                var back = front.Select(item => (item.Item1, item.Item3, item.Item2));
+                var back = front.Select(item => (item.A, item.C, item.B));
                 _Triangles = front.Concat(back).ToArray();
             }
             else

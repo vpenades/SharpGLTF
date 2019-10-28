@@ -167,7 +167,7 @@ namespace SharpGLTF.Schema2
 
         public IAnimationSampler<SparseWeight8> FindSparseMorphSampler(Node node) { return FindChannel(node, PropertyPath.weights)?.Sampler; }
 
-        public AffineTransform GetLocalTransform(Node node, float time)
+        public AffineTransform GetLocalTransform(Node node, Single time)
         {
             Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
@@ -185,7 +185,7 @@ namespace SharpGLTF.Schema2
             return xform;
         }
 
-        public IReadOnlyList<float> GetMorphWeights(Node node, float time)
+        public IReadOnlyList<float> GetMorphWeights(Node node, Single time)
         {
             Guard.NotNull(node, nameof(node));
 
@@ -200,7 +200,7 @@ namespace SharpGLTF.Schema2
             return mfunc.GetPoint(time);
         }
 
-        public SparseWeight8 GetSparseMorphWeights(Node node, float time)
+        public SparseWeight8 GetSparseMorphWeights(Node node, Single time)
         {
             Guard.NotNull(node, nameof(node));
 
@@ -463,7 +463,7 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
+        private static (Single[] Keys, TValue[] Values) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
         {
             var sorted = keyframes
                 .OrderBy(item => item.Key)
@@ -481,7 +481,7 @@ namespace SharpGLTF.Schema2
             return (keys, vals);
         }
 
-        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue, TValue, TValue)> keyframes)
+        private static (Single[] Keys, TValue[] Values) _Split<TValue>(IReadOnlyDictionary<Single, (TValue, TValue, TValue)> keyframes)
         {
             var sorted = keyframes
                 .OrderBy(item => item.Key)
@@ -504,55 +504,58 @@ namespace SharpGLTF.Schema2
         internal void SetKeys(IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             var kv = _Split(keyframes);
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
             var kv = _Split(keyframes);
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int expandedCount)
         {
             var kv = _Split(keyframes);
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2, expandedCount).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values, expandedCount).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Vector3, Vector3, Vector3)> keyframes)
         {
             var kv = _Split(keyframes);
 
-            kv.Item2[0] = Vector3.Zero;
-            kv.Item2[kv.Item2.Length - 1] = Vector3.Zero;
+            // this might not be true for a looped animation, where first and last might be the same
+            kv.Values[0] = Vector3.Zero;
+            kv.Values[kv.Values.Length - 1] = Vector3.Zero;
 
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Quaternion, Quaternion, Quaternion)> keyframes)
         {
             var kv = _Split(keyframes);
 
-            kv.Item2[0] = default(Quaternion);
-            kv.Item2[kv.Item2.Length - 1] = default(Quaternion);
+            // this might not be true for a looped animation, where first and last might be the same
+            kv.Values[0] = default;
+            kv.Values[kv.Values.Length - 1] = default;
 
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (SparseWeight8, SparseWeight8, SparseWeight8)> keyframes, int expandedCount)
         {
             var kv = _Split(keyframes);
 
-            kv.Item2[0] = default(SparseWeight8);
-            kv.Item2[kv.Item2.Length - 1] = default(SparseWeight8);
+            // this might not be true for a looped animation, where first and last might be the same
+            kv.Values[0] = default;
+            kv.Values[kv.Values.Length - 1] = default;
 
-            _input = this._CreateInputAccessor(kv.Item1).LogicalIndex;
-            _output = this._CreateOutputAccessor(kv.Item2, expandedCount).LogicalIndex;
+            _input = this._CreateInputAccessor(kv.Keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(kv.Values, expandedCount).LogicalIndex;
         }
 
         IEnumerable<(Single, Vector3)> IAnimationSampler<Vector3>.GetLinearKeys()

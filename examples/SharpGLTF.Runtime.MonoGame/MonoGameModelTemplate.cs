@@ -111,11 +111,11 @@ namespace SharpGLTF.Runtime
 
             foreach (var d in instance.DrawableReferences)
             {
-                var b = _Meshes[d.Item1].BoundingSphere;
+                var b = _Meshes[d.MeshIndex].BoundingSphere;
 
-                if (d.Item2 is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
+                if (d.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
 
-                if (d.Item2 is Transforms.SkinnedTransform skinXform)
+                if (d.Transform is Transforms.SkinnedTransform skinXform)
                 {
                     // this is a bit agressive and probably over-reaching, but with skins you never know the actual bounds
                     // unless you calculate the bounds frame by frame.

@@ -65,7 +65,7 @@ namespace SharpGLTF.Schema2
             {
                 foreach (var kw in weights.GetIndexedWeights())
                 {
-                    _weights[kw.Item1] = kw.Item2;
+                    _weights[kw.Index] = kw.Weight;
                 }
             }
         }

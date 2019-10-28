@@ -122,10 +122,10 @@ namespace SharpGLTF
 
                 var p = Vector2.Zero;
 
-                p += p1 * hermite.Item1;
-                p += p4 * hermite.Item2;
-                p += (p2 - p1) * 4 * hermite.Item3;
-                p += (p4 - p3) * 4 * hermite.Item4;
+                p += p1 * hermite.StartPosition;
+                p += p4 * hermite.EndPosition;
+                p += (p2 - p1) * 4 * hermite.StartTangent;
+                p += (p4 - p3) * 4 * hermite.EndTangent;
 
                 ppp.Add(p);
             }
@@ -137,8 +137,8 @@ namespace SharpGLTF
             var hb = Animations.SamplerFactory.CreateHermitePointWeights(k);
             var ht = Animations.SamplerFactory.CreateHermiteTangentWeights(k);
 
-            var pp = p1 * hb.Item1 + p4 * hb.Item2 + (p2 - p1) * 4 * hb.Item3 + (p4 - p3) * 4 * hb.Item4;
-            var pt = p1 * ht.Item1 + p4 * ht.Item2 + (p2 - p1) * 4 * ht.Item3 + (p4 - p3) * 4 * ht.Item4;
+            var pp = p1 * hb.StartPosition + p4 * hb.EndPosition + (p2 - p1) * 4 * hb.StartTangent + (p4 - p3) * 4 * hb.EndTangent;
+            var pt = p1 * ht.StartPosition + p4 * ht.EndPosition + (p2 - p1) * 4 * ht.StartTangent + (p4 - p3) * 4 * ht.EndTangent;
 
             // plotting
 
@@ -164,10 +164,10 @@ namespace SharpGLTF
 
                 var p = Vector2.Zero;
 
-                p += p1 * hermite.Item1;
-                p += p2 * hermite.Item2;
-                p += t * hermite.Item3;
-                p += t * hermite.Item4;
+                p += p1 * hermite.StartPosition;
+                p += p2 * hermite.EndPosition;
+                p += t * hermite.StartTangent;
+                p += t * hermite.EndTangent;
 
                 ppp.Add(p);
             }
@@ -207,10 +207,10 @@ namespace SharpGLTF
                 // hermite interpolation with a unit tangent
                 var hermite = Animations.SamplerFactory.CreateHermitePointWeights(amount);
                 var hq = default(Quaternion);
-                hq += q1 * hermite.Item1;
-                hq += q2 * hermite.Item2;
-                hq += qt * hermite.Item3;
-                hq += qt * hermite.Item4;
+                hq += q1 * hermite.StartPosition;
+                hq += q2 * hermite.EndPosition;
+                hq += qt * hermite.StartTangent;
+                hq += qt * hermite.EndTangent;
                 hq = Quaternion.Normalize(hq);
                 
                 // check

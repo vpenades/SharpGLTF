@@ -61,20 +61,20 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            switch (sample.Item1.Degree)
+            switch (sample.A.Degree)
             {
                 case 0:
-                    return sample.Item1.Point;
+                    return sample.A.Point;
 
                 case 1:
-                    return Vector3.Lerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+                    return Vector3.Lerp(sample.A.Point, sample.B.Point, sample.Amount);
 
                 case 3:
                     return SamplerFactory.InterpolateCubic
                             (
-                            sample.Item1.Point, sample.Item1.OutgoingTangent,
-                            sample.Item2.Point, sample.Item2.IncomingTangent,
-                            sample.Item3
+                            sample.A.Point, sample.A.OutgoingTangent,
+                            sample.B.Point, sample.B.IncomingTangent,
+                            sample.Amount
                             );
 
                 default:
@@ -117,20 +117,20 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            switch (sample.Item1.Degree)
+            switch (sample.A.Degree)
             {
                 case 0:
-                    return sample.Item1.Point;
+                    return sample.A.Point;
 
                 case 1:
-                    return Quaternion.Slerp(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+                    return Quaternion.Slerp(sample.A.Point, sample.B.Point, sample.Amount);
 
                 case 3:
                     return SamplerFactory.InterpolateCubic
                             (
-                            sample.Item1.Point, sample.Item1.OutgoingTangent,
-                            sample.Item2.Point, sample.Item2.IncomingTangent,
-                            sample.Item3
+                            sample.A.Point, sample.A.OutgoingTangent,
+                            sample.B.Point, sample.B.IncomingTangent,
+                            sample.Amount
                             );
 
                 default:
@@ -173,20 +173,20 @@ namespace SharpGLTF.Animations
         {
             var sample = FindSample(offset);
 
-            switch (sample.Item1.Degree)
+            switch (sample.A.Degree)
             {
                 case 0:
-                    return sample.Item1.Point;
+                    return sample.A.Point;
 
                 case 1:
-                    return SPARSE.InterpolateLinear(sample.Item1.Point, sample.Item2.Point, sample.Item3);
+                    return SPARSE.InterpolateLinear(sample.A.Point, sample.B.Point, sample.Amount);
 
                 case 3:
                     return SPARSE.InterpolateCubic
                             (
-                            sample.Item1.Point, sample.Item1.OutgoingTangent,
-                            sample.Item2.Point, sample.Item2.IncomingTangent,
-                            sample.Item3
+                            sample.A.Point, sample.A.OutgoingTangent,
+                            sample.B.Point, sample.B.IncomingTangent,
+                            sample.Amount
                             );
 
                 default:

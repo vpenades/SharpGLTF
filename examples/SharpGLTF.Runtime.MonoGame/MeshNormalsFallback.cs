@@ -22,9 +22,9 @@ namespace SharpGLTF.Runtime
 
                 foreach (var srcTri in srcPrim.GetTriangleIndices())
                 {
-                    var a = positions[srcTri.Item1];
-                    var b = positions[srcTri.Item2];
-                    var c = positions[srcTri.Item3];
+                    var a = positions[srcTri.A];
+                    var b = positions[srcTri.B];
+                    var c = positions[srcTri.C];
                     var d = XYZ.Cross(b - a, c - a);
 
                     AddWeightedNormal(a, d);

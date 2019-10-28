@@ -136,9 +136,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetNormal(out this.Normal);
         }
 
-        public static implicit operator VertexPositionNormal((Vector3, Vector3) tuple)
+        public static implicit operator VertexPositionNormal((Vector3 Pos, Vector3 Nrm) tuple)
         {
-            return new VertexPositionNormal(tuple.Item1, tuple.Item2);
+            return new VertexPositionNormal(tuple.Pos, tuple.Nrm);
         }
 
         #endregion
@@ -219,9 +219,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetTangent(out this.Tangent);
         }
 
-        public static implicit operator VertexPositionNormalTangent((Vector3, Vector3, Vector4) tuple)
+        public static implicit operator VertexPositionNormalTangent((Vector3 Pos, Vector3 Nrm, Vector4 Tgt) tuple)
         {
-            return new VertexPositionNormalTangent(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexPositionNormalTangent(tuple.Pos, tuple.Nrm, tuple.Tgt);
         }
 
         #endregion
@@ -299,14 +299,14 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexGeometryDelta(position, Vector3.Zero, Vector3.Zero);
         }
 
-        public static implicit operator VertexGeometryDelta((Vector3, Vector3) tuple)
+        public static implicit operator VertexGeometryDelta((Vector3 Pos, Vector3 Nrm) tuple)
         {
-            return new VertexGeometryDelta(tuple.Item1, tuple.Item2, Vector3.Zero);
+            return new VertexGeometryDelta(tuple.Pos, tuple.Nrm, Vector3.Zero);
         }
 
-        public static implicit operator VertexGeometryDelta((Vector3, Vector3, Vector3) tuple)
+        public static implicit operator VertexGeometryDelta((Vector3 Pos, Vector3 Nrm, Vector3 tgt) tuple)
         {
-            return new VertexGeometryDelta(tuple.Item1, tuple.Item2, tuple.Item3);
+            return new VertexGeometryDelta(tuple.Pos, tuple.Nrm, tuple.tgt);
         }
 
         public VertexGeometryDelta(IVertexGeometry src)

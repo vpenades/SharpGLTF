@@ -275,7 +275,7 @@ namespace SharpGLTF.Scenes
                     for (int i = 0; i < joints.Length; ++i)
                     {
                         var j = srcInstance.Skin.GetJoint(i);
-                        joints[i] = (dstNodes[j.Item1], j.Item2);
+                        joints[i] = (dstNodes[j.Joint], j.InverseBindMatrix);
                     }
 
                     var dstInst = dstScene.AddSkinnedMesh(dstMesh, joints);

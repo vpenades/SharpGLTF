@@ -79,6 +79,8 @@ namespace SharpGLTF.Scenes
             }
         }
 
+        #pragma warning disable CA1721 // Property names should not match get methods
+
         /// <summary>
         /// Gets or sets the local Scale, Rotation and Translation of this <see cref="NodeBuilder"/>.
         /// </summary>
@@ -117,6 +119,8 @@ namespace SharpGLTF.Scenes
                 LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
             }
         }
+
+        #pragma warning restore CA1721 // Property names should not match get methods
 
         #endregion
 
