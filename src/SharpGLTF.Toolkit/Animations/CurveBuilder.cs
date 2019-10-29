@@ -102,18 +102,19 @@ namespace SharpGLTF.Animations
 
             offset -= float.Epsilon;
 
-            var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, _) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
-            var a = _Keys[offsets.A];
-            var b = _Keys[offsets.B];
+            var a = _Keys[keyA];
+            var b = _Keys[keyB];
 
             if (a.Degree == 1) a.OutgoingTangent = GetTangent(a.Point, b.Point);
 
             a.Degree = 3;
+
             b.IncomingTangent = tangent;
 
-            _Keys[offsets.A] = a;
-            _Keys[offsets.B] = b;
+            _Keys[keyA] = a;
+            _Keys[keyB] = b;
         }
 
         /// <summary>
@@ -125,30 +126,31 @@ namespace SharpGLTF.Animations
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
 
-            var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, _) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
-            var a = _Keys[offsets.A];
-            var b = _Keys[offsets.B];
+            var a = _Keys[keyA];
+            var b = _Keys[keyB];
 
-            if (offsets.A != offsets.B)
+            if (keyA != keyB)
             {
                 if (a.Degree == 1) b.IncomingTangent = GetTangent(a.Point, b.Point);
-                _Keys[offsets.B] = b;
+                _Keys[keyB] = b;
             }
 
             a.Degree = 3;
+
             a.OutgoingTangent = tangent;
 
-            _Keys[offsets.A] = a;
+            _Keys[keyA] = a;
         }
 
         private protected (_CurveNode<T> A, _CurveNode<T> B, float Amount) FindSample(float offset)
         {
             if (_Keys.Count == 0) return (default(_CurveNode<T>), default(_CurveNode<T>), 0);
 
-            var offsets = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, amount) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
 
-            return (_Keys[offsets.A], _Keys[offsets.B], offsets.Amount);
+            return (_Keys[keyA], _Keys[keyB], amount);
         }
 
         public void SetCurve(ICurveSampler<T> curve)
@@ -169,10 +171,16 @@ namespace SharpGLTF.Animations
                     return;
                 }
 
-                if (convertible.MaxDegree > 1)
+                if (convertible.MaxDegree == 3)
                 {
-                    var linear = convertible.ToLinearCurve();
-                    foreach (var p in linear) this.SetPoint(p.Key, p.Value);
+                    var spline = convertible.ToSplineCurve();
+                    foreach (var ppp in spline)
+                    {
+                        this.SetPoint(ppp.Key, ppp.Value.Item2);
+                        this.SetIncomingTangent(ppp.Key, ppp.Value.Item1);
+                        this.SetOutgoingTangent(ppp.Key, ppp.Value.Item3);
+                    }
+
                     return;
                 }
             }

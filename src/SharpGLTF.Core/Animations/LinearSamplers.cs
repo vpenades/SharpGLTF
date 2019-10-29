@@ -34,11 +34,11 @@ namespace SharpGLTF.Animations
 
         public Vector3 GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.A;
+            if (!_Linear) return valA;
 
-            return Vector3.Lerp(segment.A, segment.B, segment.Amount);
+            return Vector3.Lerp(valA, valB, amount);
         }
 
         public IReadOnlyDictionary<float, Vector3> ToStepCurve()
@@ -100,11 +100,11 @@ namespace SharpGLTF.Animations
 
         public Quaternion GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.A;
+            if (!_Linear) return valA;
 
-            return Quaternion.Slerp(segment.A, segment.B, segment.Amount);
+            return Quaternion.Slerp(valA, valB, amount);
         }
 
         public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
@@ -166,11 +166,11 @@ namespace SharpGLTF.Animations
 
         public Transforms.SparseWeight8 GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.A;
+            if (!_Linear) return valA;
 
-            var weights = Transforms.SparseWeight8.InterpolateLinear(segment.A, segment.B, segment.Amount);
+            var weights = Transforms.SparseWeight8.InterpolateLinear(valA, valB, amount);
 
             return weights;
         }
@@ -233,11 +233,11 @@ namespace SharpGLTF.Animations
 
         public float[] GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
-            if (!_Linear) return segment.A;
+            if (!_Linear) return valA;
 
-            return SamplerFactory.InterpolateLinear(segment.A, segment.B, segment.Amount);
+            return SamplerFactory.InterpolateLinear(valA, valB, amount);
         }
 
         public IReadOnlyDictionary<float, float[]> ToStepCurve()

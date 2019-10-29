@@ -163,10 +163,10 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < this._joints.Count; ++i)
             {
                 var src = joints[i];
-                var dst = GetJoint(i);
+                var (j, ibm) = GetJoint(i);
 
-                if (!ReferenceEquals(src.Key, dst.Joint)) return false;
-                if (src.Value != dst.InverseBindMatrix) return false;
+                if (!ReferenceEquals(src.Key, j)) return false;
+                if (src.Value != ibm) return false;
             }
 
             return true;

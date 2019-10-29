@@ -32,13 +32,13 @@ namespace SharpGLTF.Animations
 
         public Vector3 GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
-                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
-                segment.Amount                               // amount
+                valA.Item2, valA.Item3,   // start, startTangentOut
+                valB.Item2, valB.Item1,   // end, endTangentIn
+                amount                               // amount
                 );
         }
 
@@ -96,13 +96,13 @@ namespace SharpGLTF.Animations
 
         public Quaternion GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
-                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
-                segment.Amount                               // amount
+                valA.Item2, valA.Item3,   // start, startTangentOut
+                valB.Item2, valB.Item1,   // end, endTangentIn
+                amount                               // amount
                 );
         }
 
@@ -160,13 +160,13 @@ namespace SharpGLTF.Animations
 
         public Transforms.SparseWeight8 GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
             return Transforms.SparseWeight8.InterpolateCubic
                 (
-                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
-                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
-                segment.Amount                               // amount
+                valA.Item2, valA.Item3,   // start, startTangentOut
+                valB.Item2, valB.Item1,   // end, endTangentIn
+                amount                               // amount
                 );
         }
 
@@ -224,13 +224,13 @@ namespace SharpGLTF.Animations
 
         public float[] GetPoint(float offset)
         {
-            var segment = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
 
             return SamplerFactory.InterpolateCubic
                 (
-                segment.A.Item2, segment.A.Item3,   // start, startTangentOut
-                segment.B.Item2, segment.B.Item1,   // end, endTangentIn
-                segment.Amount                               // amount
+                valA.Item2, valA.Item3,   // start, startTangentOut
+                valB.Item2, valB.Item1,   // end, endTangentIn
+                amount                               // amount
                 );
         }
 

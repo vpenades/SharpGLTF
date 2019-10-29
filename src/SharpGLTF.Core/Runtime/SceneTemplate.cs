@@ -264,10 +264,10 @@ namespace SharpGLTF.Runtime
 
             for (int i = 0; i < _JointsNodeIndices.Length; ++i)
             {
-                var jm = skin.GetJoint(i);
+                var (j, ibm) = skin.GetJoint(i);
 
-                _JointsNodeIndices[i] = indexFunc(jm.Joint);
-                _BindMatrices[i] = jm.InverseBindMatrix;
+                _JointsNodeIndices[i] = indexFunc(j);
+                _BindMatrices[i] = ibm;
             }
         }
 

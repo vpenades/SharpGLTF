@@ -218,7 +218,7 @@ namespace SharpGLTF.Scenes
             foreach (var srcArmature in srcScene.VisualChildren)
             {
                 var dstArmature = new NodeBuilder();
-                CopyToNodeBuilder(dstArmature, srcArmature, dstNodes);
+                _CopyToNodeBuilder(dstArmature, srcArmature, dstNodes);
             }
 
             // TODO: we must also process the armatures of every skin, in case the joints are outside the scene.
@@ -266,7 +266,7 @@ namespace SharpGLTF.Scenes
                     var dstNode = dstNodes[srcInstance];
                     var dstInst = dstScene.AddMesh(dstMesh, dstNode);
 
-                    CopyMorphingAnimation(dstInst, srcInstance);
+                    _CopyMorphingAnimation(dstInst, srcInstance);
                 }
                 else
                 {
@@ -274,13 +274,13 @@ namespace SharpGLTF.Scenes
 
                     for (int i = 0; i < joints.Length; ++i)
                     {
-                        var j = srcInstance.Skin.GetJoint(i);
-                        joints[i] = (dstNodes[j.Joint], j.InverseBindMatrix);
+                        var (j, ibm) = srcInstance.Skin.GetJoint(i);
+                        joints[i] = (dstNodes[j], ibm);
                     }
 
                     var dstInst = dstScene.AddSkinnedMesh(dstMesh, joints);
 
-                    CopyMorphingAnimation(dstInst, srcInstance);
+                    _CopyMorphingAnimation(dstInst, srcInstance);
                 }
             }
         }
@@ -323,7 +323,7 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private static void CopyToNodeBuilder(NodeBuilder dstNode, Node srcNode, IDictionary<Node, NodeBuilder> nodeMapping)
+        private static void _CopyToNodeBuilder(NodeBuilder dstNode, Node srcNode, IDictionary<Node, NodeBuilder> nodeMapping)
         {
             Guard.NotNull(srcNode, nameof(srcNode));
             Guard.NotNull(dstNode, nameof(dstNode));
@@ -331,7 +331,7 @@ namespace SharpGLTF.Scenes
             dstNode.Name = srcNode.Name;
             dstNode.LocalTransform = srcNode.LocalTransform;
 
-            CopyTransformAnimation(dstNode, srcNode);
+            _CopyTransformAnimation(dstNode, srcNode);
 
             if (nodeMapping == null) return;
 
@@ -340,11 +340,11 @@ namespace SharpGLTF.Scenes
             foreach (var srcChild in srcNode.VisualChildren)
             {
                 var dstChild = dstNode.CreateNode();
-                CopyToNodeBuilder(dstChild, srcChild, nodeMapping);
+                _CopyToNodeBuilder(dstChild, srcChild, nodeMapping);
             }
         }
 
-        private static void CopyTransformAnimation(NodeBuilder dstNode, Node srcNode)
+        private static void _CopyTransformAnimation(NodeBuilder dstNode, Node srcNode)
         {
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
@@ -362,7 +362,7 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private static void CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
+        private static void _CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
         {
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
