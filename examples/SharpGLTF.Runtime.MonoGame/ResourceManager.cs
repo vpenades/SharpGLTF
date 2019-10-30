@@ -267,7 +267,9 @@ namespace SharpGLTF.Runtime
 
         private static Vector3 GetDiffuseColor(Schema2.Material srcMaterial)
         {
-            var diffuse = srcMaterial.FindChannel("BaseColor");
+            var diffuse = srcMaterial.FindChannel("Diffuse");
+
+            if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
 
             if (diffuse == null) return Vector3.One;
 
@@ -315,7 +317,9 @@ namespace SharpGLTF.Runtime
 
         private Texture2D GetDiffuseTexture(Schema2.Material srcMaterial)
         {
-            var diffuse = srcMaterial.FindChannel("BaseColor");
+            var diffuse = srcMaterial.FindChannel("Diffuse");
+
+            if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
 
             if (diffuse == null) return null;
 

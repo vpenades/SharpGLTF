@@ -398,10 +398,10 @@ namespace SharpGLTF.Schema2
         {
             if (material == null) return defaultColor;
 
-            var channel = material.FindChannel("BaseColor");
+            var channel = material.FindChannel("Diffuse");
             if (channel.HasValue) return channel.Value.Parameter;
 
-            channel = material.FindChannel("Diffuse");
+            channel = material.FindChannel("BaseColor");
             if (channel.HasValue) return channel.Value.Parameter;
 
             return defaultColor;
@@ -411,10 +411,10 @@ namespace SharpGLTF.Schema2
         {
             if (material == null) return null;
 
-            var channel = material.FindChannel("BaseColor");
+            var channel = material.FindChannel("Diffuse");
             if (channel.HasValue) return channel.Value.Texture;
 
-            channel = material.FindChannel("Diffuse");
+            channel = material.FindChannel("BaseColor");
             if (channel.HasValue) return channel.Value.Texture;
 
             return null;
