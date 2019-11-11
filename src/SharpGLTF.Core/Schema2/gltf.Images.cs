@@ -106,6 +106,18 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
+        /// Opens the image file.
+        /// </summary>
+        /// <returns>A <see cref="System.IO.Stream"/> containing the image file.</returns>
+        public System.IO.Stream OpenImageFile()
+        {
+            var content = GetImageContent();
+            if (content.Count == 0) return null;
+
+            return new System.IO.MemoryStream(content.Array, content.Offset, content.Count, false);
+        }
+
+        /// <summary>
         /// Retrieves the image file as a segment of bytes.
         /// </summary>
         /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS or WEBP format.</returns>

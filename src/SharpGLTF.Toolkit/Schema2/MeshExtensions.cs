@@ -343,6 +343,48 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
+        /// <summary>
+        /// Calculates a default set of smooth normals for the given mesh.
+        /// </summary>
+        /// <param name="mesh">A <see cref="Mesh"/> instance.</param>
+        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the keys represent positions and the values represent Normals.</returns>
+        public static Dictionary<Vector3, Vector3> GetSmoothNormals(this Mesh mesh)
+        {
+            if (mesh == null) return null;
+
+            var posnrm = new Dictionary<Vector3, Vector3>();
+
+            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
+            {
+                if (!dir._IsFinite()) return;
+                if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
+                dict[pos] = n + dir;
+            }
+
+            foreach (var p in mesh.Primitives)
+            {
+                var positions = p.GetVertexAccessor("POSITION").AsVector3Array();
+
+                foreach (var (ta, tb, tc) in p.GetTriangleIndices())
+                {
+                    var p1 = positions[ta];
+                    var p2 = positions[tb];
+                    var p3 = positions[tc];
+                    var d = Vector3.Cross(p2 - p1, p3 - p1);
+                    addDirection(posnrm, p1, d);
+                    addDirection(posnrm, p2, d);
+                    addDirection(posnrm, p3, d);
+                }
+            }
+
+            foreach (var pos in posnrm.Keys.ToList())
+            {
+                posnrm[pos] = Vector3.Normalize(posnrm[pos]);
+            }
+
+            return posnrm;
+        }
+
         public static IEnumerable<(IVertexBuilder A, Material Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();
@@ -387,12 +429,12 @@ namespace SharpGLTF.Schema2
             var vertices = prim.GetVertexColumns(xform);
             var vtype = vertices.GetCompatibleVertexType();
 
-            foreach (var t in lines)
+            foreach (var (la, lb) in lines)
             {
-                var a = vertices.GetVertex(vtype, t.A);
-                var b = vertices.GetVertex(vtype, t.B);
+                var va = vertices.GetVertex(vtype, la);
+                var vb = vertices.GetVertex(vtype, lb);
 
-                yield return (a, b, prim.Material);
+                yield return (va, vb, prim.Material);
             }
         }
 
@@ -414,13 +456,13 @@ namespace SharpGLTF.Schema2
             var vertices = prim.GetVertexColumns(xform);
             var vtype = vertices.GetCompatibleVertexType();
 
-            foreach (var t in triangles)
+            foreach (var (ta, tb, tc) in triangles)
             {
-                var a = vertices.GetVertex(vtype, t.A);
-                var b = vertices.GetVertex(vtype, t.B);
-                var c = vertices.GetVertex(vtype, t.C);
+                var va = vertices.GetVertex(vtype, ta);
+                var vb = vertices.GetVertex(vtype, tb);
+                var vc = vertices.GetVertex(vtype, tc);
 
-                yield return (a, b, c, prim.Material);
+                yield return (va, vb, vc, prim.Material);
             }
         }
 
@@ -449,22 +491,22 @@ namespace SharpGLTF.Schema2
 
             bool hasNormals = vertices.Normals != null;
 
-            foreach (var t in triangles)
+            foreach (var (ta, tb, tc) in triangles)
             {
-                var a = vertices.GetVertex<TvG, TvM, TvS>(t.A);
-                var b = vertices.GetVertex<TvG, TvM, TvS>(t.B);
-                var c = vertices.GetVertex<TvG, TvM, TvS>(t.C);
+                var va = vertices.GetVertex<TvG, TvM, TvS>(ta);
+                var vb = vertices.GetVertex<TvG, TvM, TvS>(tb);
+                var vc = vertices.GetVertex<TvG, TvM, TvS>(tc);
 
                 if (!hasNormals)
                 {
-                    var n = Vector3.Cross(b.Position - a.Position, c.Position - a.Position);
+                    var n = Vector3.Cross(vb.Position - va.Position, vc.Position - va.Position);
                     n = Vector3.Normalize(n);
-                    a.Geometry.SetNormal(n);
-                    b.Geometry.SetNormal(n);
-                    c.Geometry.SetNormal(n);
+                    va.Geometry.SetNormal(n);
+                    vb.Geometry.SetNormal(n);
+                    vc.Geometry.SetNormal(n);
                 }
 
-                yield return (a, b, c, prim.Material);
+                yield return (va, vb, vc, prim.Material);
             }
         }
 
@@ -508,48 +550,6 @@ namespace SharpGLTF.Schema2
 
             if (vertexAccessors.ContainsKey("WEIGHTS_0")) dstColumns.Weights0 = vertexAccessors["WEIGHTS_0"].AsVector4Array();
             if (vertexAccessors.ContainsKey("WEIGHTS_1")) dstColumns.Weights1 = vertexAccessors["WEIGHTS_1"].AsVector4Array();
-        }
-
-        /// <summary>
-        /// Calculates a default set of normals for the given mesh.
-        /// </summary>
-        /// <param name="mesh">A <see cref="Mesh"/> instance.</param>
-        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the keys represent positions and the values represent Normals.</returns>
-        public static Dictionary<Vector3, Vector3> GetComputedNormals(this Mesh mesh)
-        {
-            if (mesh == null) return null;
-
-            var posnrm = new Dictionary<Vector3, Vector3>();
-
-            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
-            {
-                if (!dir._IsFinite()) return;
-                if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
-                dict[pos] = n + dir;
-            }
-
-            foreach (var p in mesh.Primitives)
-            {
-                var positions = p.GetVertexAccessor("POSITION").AsVector3Array();
-
-                foreach (var t in p.GetTriangleIndices())
-                {
-                    var p1 = positions[t.A];
-                    var p2 = positions[t.B];
-                    var p3 = positions[t.C];
-                    var d = Vector3.Cross(p2 - p1, p3 - p1);
-                    addDirection(posnrm, p1, d);
-                    addDirection(posnrm, p2, d);
-                    addDirection(posnrm, p3, d);
-                }
-            }
-
-            foreach (var pos in posnrm.Keys.ToList())
-            {
-                posnrm[pos] = Vector3.Normalize(posnrm[pos]);
-            }
-
-            return posnrm;
         }
 
         public static void AddMesh<TMaterial, TvG, TvM, TvS>(this MeshBuilder<TMaterial, TvG, TvM, TvS> meshBuilder, Mesh srcMesh, Func<Material, TMaterial> materialFunc)
@@ -697,35 +697,35 @@ namespace SharpGLTF.Schema2
 
             foreach (var srcPoint in srcPrim.GetPointIndices())
             {
-                var v = vertices.GetVertex(dstPrim.VertexType, srcPoint);
+                var vrt = vertices.GetVertex(dstPrim.VertexType, srcPoint);
 
-                var idx = dstPrim.AddPoint(v);
+                var idx = dstPrim.AddPoint(vrt);
 
                 vmap[srcPoint] = idx;
             }
 
-            foreach (var srcLine in srcPrim.GetLineIndices())
+            foreach (var (srcA, srcB) in srcPrim.GetLineIndices())
             {
-                var v1 = vertices.GetVertex(dstPrim.VertexType, srcLine.A);
-                var v2 = vertices.GetVertex(dstPrim.VertexType, srcLine.B);
+                var vrtA = vertices.GetVertex(dstPrim.VertexType, srcA);
+                var vrtB = vertices.GetVertex(dstPrim.VertexType, srcB);
 
-                var indices = dstPrim.AddLine(v1, v2);
+                var (idxA, idxB) = dstPrim.AddLine(vrtA, vrtB);
 
-                vmap[srcLine.A] = indices.A;
-                vmap[srcLine.B] = indices.B;
+                vmap[srcA] = idxA;
+                vmap[srcB] = idxB;
             }
 
-            foreach (var srcTri in srcPrim.GetTriangleIndices())
+            foreach (var (srcA, srcB, srcC) in srcPrim.GetTriangleIndices())
             {
-                var v1 = vertices.GetVertex(dstPrim.VertexType, srcTri.A);
-                var v2 = vertices.GetVertex(dstPrim.VertexType, srcTri.B);
-                var v3 = vertices.GetVertex(dstPrim.VertexType, srcTri.C);
+                var vrtA = vertices.GetVertex(dstPrim.VertexType, srcA);
+                var vrtB = vertices.GetVertex(dstPrim.VertexType, srcB);
+                var vrtC = vertices.GetVertex(dstPrim.VertexType, srcC);
 
-                var indices = dstPrim.AddTriangle(v1, v2, v3);
+                var (idxA, idxB, idxC) = dstPrim.AddTriangle(vrtA, vrtB, vrtC);
 
-                vmap[srcTri.A] = indices.A;
-                vmap[srcTri.B] = indices.B;
-                vmap[srcTri.C] = indices.C;
+                vmap[srcA] = idxA;
+                vmap[srcB] = idxB;
+                vmap[srcC] = idxC;
             }
 
             for (int tidx = 0; tidx < vertices.MorphTargets.Count; ++tidx)
