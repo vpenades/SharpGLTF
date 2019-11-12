@@ -239,16 +239,16 @@ namespace SharpGLTF.Transforms
         {
             normal = MorphVectors(normal, morphTargets);
 
-            return V3.Normalize(V3.Transform(normal, _WorldMatrix));
+            return V3.Normalize(V3.TransformNormal(normal, _WorldMatrix));
         }
 
         public V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights)
         {
-            var n = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
+            var t = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
 
-            n = V3.Normalize(V3.Transform(n, _WorldMatrix));
+            t = V3.Normalize(V3.TransformNormal(t, _WorldMatrix));
 
-            return new V4(n, tangent.W);
+            return new V4(t, tangent.W);
         }
 
         #endregion

@@ -132,37 +132,44 @@ namespace SharpGLTF
 
                 var bounds = GetBounds(series);
 
-                using (var pl = new PLplot.PLStream())
+                try
                 {
-                    pl.sdev("pngcairo");
-                    pl.sfnam(filePath);
-                    pl.spal0("cmap0_alternate.pal");
-
-                    pl.init();
-
-                    pl.env(bounds.Item1.X, bounds.Item2.X, bounds.Item1.Y, bounds.Item2.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
-
-                    for (int i = 0; i < series.Length; ++i)
+                    using (var pl = new PLplot.PLStream())
                     {
-                        var ps = series[i];
-                        var s = ps._Points;
+                        pl.sdev("pngcairo");
+                        pl.sfnam(filePath);
+                        pl.spal0("cmap0_alternate.pal");
 
-                        var seriesX = new double[s.Count];
-                        var seriesY = new double[s.Count];
+                        pl.init();
 
-                        for(int j=0; j < s.Count; ++j)
+                        pl.env(bounds.Item1.X, bounds.Item2.X, bounds.Item1.Y, bounds.Item2.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
+
+                        for (int i = 0; i < series.Length; ++i)
                         {
-                            seriesX[j] = s[j].X;
-                            seriesY[j] = s[j].Y;
+                            var ps = series[i];
+                            var s = ps._Points;
+
+                            var seriesX = new double[s.Count];
+                            var seriesY = new double[s.Count];
+
+                            for (int j = 0; j < s.Count; ++j)
+                            {
+                                seriesX[j] = s[j].X;
+                                seriesY[j] = s[j].Y;
+                            }
+
+                            pl.col0(i + 2);
+
+                            if (ps.LineType == LineType.Continuous) pl.line(seriesX, seriesY);
+                            else pl.poin(seriesX, seriesY, (char)ps.LineType);
                         }
 
-                        pl.col0(i + 2);
-
-                        if (ps.LineType == LineType.Continuous) pl.line(seriesX, seriesY);
-                        else pl.poin(seriesX, seriesY, (char)ps.LineType);
+                        pl.eop(); // write to disk
                     }
-
-                    pl.eop(); // write to disk
+                }
+                catch
+                {
+                    NUnit.Framework.TestContext.WriteLine("PLPlot not supported.");
                 }
             }
 
@@ -297,7 +304,7 @@ namespace SharpGLTF
 
             Plotting.Point2Series.DrawToFile(fileName, series.ToArray());
 
-            NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            if (System.IO.File.Exists(fileName)) NUnit.Framework.TestContext.AddTestAttachment(fileName);
         }
     }
 }
