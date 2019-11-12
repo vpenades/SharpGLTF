@@ -471,42 +471,50 @@ namespace SharpGLTF.Schema2
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
+            if (xform != null && !xform.Visible) mesh = null;
             if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
 
-            return mesh.Primitives.SelectMany(item => item.EvaluateTriangles<TvG, TvM, TvS>(xform));
+            var primitives = mesh.Primitives
+                .Where(prim => prim.GetTriangleIndices().Any())
+                .Select(prim => (prim.Material, prim.GetVertexColumns(xform), (IEnumerable<(int, int, int)>)prim.GetTriangleIndices().ToList()))
+                .ToList();
+
+            bool needsNormals = default(TvG).TryGetNormal(out Vector3 nrm);
+            bool needsTangents = default(TvG).TryGetTangent(out Vector4 tgt);
+
+            if (needsNormals)
+            {
+                var prims = primitives
+                    .Where(p => p.Item2.Normals == null)
+                    .Select(p => (p.Item2, p.Item3));
+
+                if (prims.Any()) VertexBufferColumns.CalculateSmoothNormals(prims);
+            }
+
+            if (needsTangents)
+            {
+                var prims = primitives
+                    .Where(p => p.Item2.Tangents == null && p.Item2.TexCoords0 != null)
+                    .Select(p => (p.Item2, p.Item3));
+
+                if (prims.Any()) VertexBufferColumns.CalculateTangents(prims);
+            }
+
+            return primitives.SelectMany(prim => _EvaluateTriangles<TvG, TvM, TvS>(prim.Material, prim.Item2, prim.Item3));
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> EvaluateTriangles<TvG, TvM, TvS>(this MeshPrimitive prim, MESHXFORM xform = null)
+        private static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> _EvaluateTriangles<TvG, TvM, TvS>(Material material, VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            if (prim == null) yield break;
-            if (xform != null && !xform.Visible) yield break;
-
-            var triangles = prim.GetTriangleIndices();
-            if (!triangles.Any()) yield break;
-
-            var vertices = prim.GetVertexColumns(xform);
-
-            bool hasNormals = vertices.Normals != null;
-
-            foreach (var (ta, tb, tc) in triangles)
+            foreach (var (ta, tb, tc) in indices)
             {
                 var va = vertices.GetVertex<TvG, TvM, TvS>(ta);
                 var vb = vertices.GetVertex<TvG, TvM, TvS>(tb);
                 var vc = vertices.GetVertex<TvG, TvM, TvS>(tc);
 
-                if (!hasNormals)
-                {
-                    var n = Vector3.Cross(vb.Position - va.Position, vc.Position - va.Position);
-                    n = Vector3.Normalize(n);
-                    va.Geometry.SetNormal(n);
-                    vb.Geometry.SetNormal(n);
-                    vc.Geometry.SetNormal(n);
-                }
-
-                yield return (va, vb, vc, prim.Material);
+                yield return (va, vb, vc, material);
             }
         }
 
@@ -562,17 +570,23 @@ namespace SharpGLTF.Schema2
 
             if (srcMesh == null) return;
 
-            foreach (var srcPrim in srcMesh.Primitives)
+            var materialMap = srcMesh.Primitives
+                .Select(prim => prim.Material)
+                .Distinct()
+                .ToDictionary(mat => mat, mat => materialFunc(mat));
+
+            Material currMat = null;
+            PrimitiveBuilder<TMaterial, TvG, TvM, TvS> currPrim = null;
+
+            foreach (var tri in srcMesh.EvaluateTriangles<TvG, TvM, TvS>())
             {
-                if (srcPrim != null) continue;
-
-                var dstMat = materialFunc(srcPrim.Material);
-                var dstPrim = meshBuilder.UsePrimitive(dstMat);
-
-                foreach (var tri in srcPrim.EvaluateTriangles<TvG, TvM, TvS>(null))
+                if (currMat != tri.Material)
                 {
-                    dstPrim.AddTriangle(tri.A, tri.B, tri.C);
+                    currMat = tri.Material;
+                    currPrim = meshBuilder.UsePrimitive(materialMap[currMat]);
                 }
+
+                currPrim.AddTriangle(tri.A, tri.B, tri.C);
             }
         }
 
