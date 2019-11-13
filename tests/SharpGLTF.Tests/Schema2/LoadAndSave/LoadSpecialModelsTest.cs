@@ -95,5 +95,19 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var model = ModelRoot.Load(path);
             Assert.NotNull(model);
         }
+
+        [Test]
+        public void LoadGeneratedTangetsTest()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.EndsWith("NormalTangentTest.glb"));
+
+            var model = ModelRoot.Load(path);
+
+            var tris = model.DefaultScene
+                .EvaluateTriangles<Geometry.VertexTypes.VertexPositionNormalTangent, Geometry.VertexTypes.VertexTexture1>()
+                .ToArray();
+        }
     }
 }

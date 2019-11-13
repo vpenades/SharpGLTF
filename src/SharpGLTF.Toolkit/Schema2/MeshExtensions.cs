@@ -486,7 +486,8 @@ namespace SharpGLTF.Schema2
             {
                 var prims = primitives
                     .Where(p => p.Item2.Normals == null)
-                    .Select(p => (p.Item2, p.Item3));
+                    .Select(p => (p.Item2, p.Item3))
+                    .ToList();
 
                 if (prims.Any()) VertexBufferColumns.CalculateSmoothNormals(prims);
             }
@@ -495,7 +496,8 @@ namespace SharpGLTF.Schema2
             {
                 var prims = primitives
                     .Where(p => p.Item2.Tangents == null && p.Item2.TexCoords0 != null)
-                    .Select(p => (p.Item2, p.Item3));
+                    .Select(p => (p.Item2, p.Item3))
+                    .ToList();
 
                 if (prims.Any()) VertexBufferColumns.CalculateTangents(prims);
             }
