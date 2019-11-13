@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -261,6 +262,20 @@ namespace SharpGLTF.Geometry
             var batchId = dstMesh.Primitives[0].GetVertexAccessor(VertexColor1Texture1Custom1.CUSTOMATTRIBUTENAME).AsScalarArray();
 
             CollectionAssert.AreEqual(new float[] { 1, 2, 3 }, batchId);
+        }
+
+        [Test]
+        public void GenerateTangents()
+        {
+            var vertices = new VertexBufferColumns();
+            vertices.Positions = new[] { Vector3.Zero, Vector3.UnitX, Vector3.UnitY };
+            vertices.Normals = new[] { Vector3.UnitZ, Vector3.UnitZ, Vector3.UnitZ };
+            vertices.TexCoords0 = new[] { Vector2.Zero, Vector2.UnitX, Vector2.UnitY };
+
+            var indices = new[] { (0,1,2) } as IEnumerable<(int,int,int)>;
+
+            VertexBufferColumns.CalculateTangents(new[] { (vertices, indices) });
+
         }
     }
 }

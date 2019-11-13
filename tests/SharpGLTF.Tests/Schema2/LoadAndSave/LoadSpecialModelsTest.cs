@@ -96,18 +96,27 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
         }
 
-        [Test]
-        public void LoadGeneratedTangetsTest()
+        // these models show normal mapping but lack tangents, which are expected to be
+        // generated at runtime; These tests generate the tangents and check them against the baseline.
+        [TestCase("NormalTangentTest.glb")]
+        [TestCase("NormalTangentMirrorTest.glb")]
+        public void LoadGeneratedTangetsTest(string fileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.EndsWith("NormalTangentTest.glb"));
+            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.EndsWith(fileName));
 
             var model = ModelRoot.Load(path);
 
-            var tris = model.DefaultScene
+            var mesh = model.DefaultScene
                 .EvaluateTriangles<Geometry.VertexTypes.VertexPositionNormalTangent, Geometry.VertexTypes.VertexTexture1>()
-                .ToArray();
+                .ToMeshBuilder( m => m.ToMaterialBuilder() );            
+
+            var editableScene = new Scenes.SceneBuilder();
+            editableScene.AddMesh(mesh, System.Numerics.Matrix4x4.Identity);
+
+            model.AttachToCurrentTest("original.glb");
+            editableScene.ToSchema2().AttachToCurrentTest("WithTangents.glb");
         }
     }
 }

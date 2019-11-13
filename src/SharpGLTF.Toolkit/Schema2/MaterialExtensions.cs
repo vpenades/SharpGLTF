@@ -179,6 +179,16 @@ namespace SharpGLTF.Schema2
             return m;
         }
 
+        public static Materials.MaterialBuilder ToMaterialBuilder(this Material srcMaterial)
+        {
+            if (srcMaterial == null) return Materials.MaterialBuilder.CreateDefault();
+            var dstMaterial = new Materials.MaterialBuilder(srcMaterial.Name);
+
+            srcMaterial.CopyTo(dstMaterial);
+
+            return dstMaterial;
+        }
+
         #endregion
 
         #region transfer API

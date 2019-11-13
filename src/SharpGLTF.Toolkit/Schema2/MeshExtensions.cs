@@ -704,6 +704,34 @@ namespace SharpGLTF.Schema2
             return dstMesh;
         }
 
+        public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS> ToMeshBuilder<TMaterial, TvG, TvM, TvS>(this IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, TMaterial Material)> triangles, Func<TMaterial, Materials.MaterialBuilder> materialFunc)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            var mats = new Dictionary<TMaterial, Materials.MaterialBuilder>();
+
+            Materials.MaterialBuilder useMaterial(TMaterial srcMat)
+            {
+                if (mats.TryGetValue(srcMat, out Materials.MaterialBuilder dstMat)) return dstMat;
+
+                mats[srcMat] = dstMat = materialFunc(srcMat);
+
+                return dstMat;
+            }
+
+            var m = new MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS>();
+
+            foreach (var tri in triangles)
+            {
+                var prim = m.UsePrimitive(useMaterial(tri.Material));
+
+                prim.AddTriangle(tri.A, tri.B, tri.C);
+            }
+
+            return m;
+        }
+
         private static void AddPrimitiveGeometry(this IPrimitiveBuilder dstPrim, MeshPrimitive srcPrim)
         {
             Guard.NotNull(dstPrim, nameof(dstPrim));

@@ -346,7 +346,7 @@ namespace SharpGLTF.Geometry
 
         #region utilites
 
-        public static void CalculateSmoothNormals(IEnumerable<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
+        public static void CalculateSmoothNormals(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
         {
             Guard.NotNull(primitives, nameof(primitives));
 
@@ -406,7 +406,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public static void CalculateTangents(IEnumerable<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
+        public static void CalculateTangents(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
         {
             // https://gamedev.stackexchange.com/questions/128023/how-does-mikktspace-work-for-calculating-the-tangent-space-during-normal-mapping
             // https://stackoverflow.com/questions/25349350/calculating-per-vertex-tangents-for-glsl
@@ -438,13 +438,19 @@ namespace SharpGLTF.Geometry
                     var p2 = vertices.Positions[i2];
                     var p3 = vertices.Positions[i3];
 
-                    var n1 = vertices.Normals[i1];
-                    var n2 = vertices.Normals[i2];
-                    var n3 = vertices.Normals[i3];
+                    // check for degenerated triangle
+                    if (p1 == p2 || p1 == p3 || p2 == p3) continue;
 
                     var uv1 = vertices.TexCoords0[i1];
                     var uv2 = vertices.TexCoords0[i2];
                     var uv3 = vertices.TexCoords0[i3];
+
+                    // check for degenerated triangle
+                    if (uv1 == uv2 || uv1 == uv3 || uv2 == uv3) continue;
+
+                    var n1 = vertices.Normals[i1];
+                    var n2 = vertices.Normals[i2];
+                    var n3 = vertices.Normals[i3];
 
                     var svec = p2 - p1;
                     var tvec = p3 - p1;
@@ -452,15 +458,17 @@ namespace SharpGLTF.Geometry
                     var stex = uv2 - uv1;
                     var ttex = uv3 - uv1;
 
-                    float s1 = stex.X;
-                    float s2 = ttex.X;
-                    float t1 = stex.Y;
-                    float t2 = ttex.Y;
+                    float sx = stex.X;
+                    float tx = ttex.X;
+                    float sy = stex.Y;
+                    float ty = ttex.Y;
 
-                    var r = 1.0F / ((s1 * t2) - (s2 * t1));
+                    var r = 1.0F / ((sx * ty) - (tx * sy));
 
-                    var sdir = new Vector3((t2 * svec.X) - (t1 * tvec.X), (t2 * svec.Y) - (t1 * tvec.Y), (t2 * svec.Z) - (t1 * tvec.Z) ) * r;
-                    var tdir = new Vector3((s1 * tvec.X) - (s2 * svec.X), (s1 * tvec.Y) - (s2 * svec.Y), (s1 * tvec.Z) - (s2 * svec.Z) ) * r;
+                    if (!r._IsFinite()) continue;
+
+                    var sdir = new Vector3((ty * svec.X) - (sy * tvec.X), (ty * svec.Y) - (sy * tvec.Y), (ty * svec.Z) - (sy * tvec.Z) ) * r;
+                    var tdir = new Vector3((sx * tvec.X) - (tx * svec.X), (sx * tvec.Y) - (tx * svec.Y), (sx * tvec.Z) - (tx * svec.Z) ) * r;
 
                     addTangent(tangentsMap, (p1, n1, uv1), (sdir, tdir));
                     addTangent(tangentsMap, (p2, n2, uv2), (sdir, tdir));
@@ -495,7 +503,7 @@ namespace SharpGLTF.Geometry
 
                     if (tangentsMap.TryGetValue((p, n, t), out (Vector3 u, Vector3 v) tangents))
                     {
-                        var handedness = Vector3.Dot(Vector3.Cross(n, tangents.u), tangents.v) < 0 ? -1.0f : 1.0f;
+                        var handedness = Vector3.Dot(Vector3.Cross(tangents.u, n), tangents.v) < 0 ? -1.0f : 1.0f;
 
                         vertices.Tangents[i] = new Vector4(tangents.u, handedness);
                     }
