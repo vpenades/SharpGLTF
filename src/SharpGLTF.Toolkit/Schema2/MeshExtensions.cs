@@ -343,48 +343,6 @@ namespace SharpGLTF.Schema2
 
         #region evaluation
 
-        /// <summary>
-        /// Calculates a default set of smooth normals for the given mesh.
-        /// </summary>
-        /// <param name="mesh">A <see cref="Mesh"/> instance.</param>
-        /// <returns>A <see cref="Dictionary{TKey, TValue}"/> where the keys represent positions and the values represent Normals.</returns>
-        public static Dictionary<Vector3, Vector3> GetSmoothNormals(this Mesh mesh)
-        {
-            if (mesh == null) return null;
-
-            var posnrm = new Dictionary<Vector3, Vector3>();
-
-            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
-            {
-                if (!dir._IsFinite()) return;
-                if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
-                dict[pos] = n + dir;
-            }
-
-            foreach (var p in mesh.Primitives)
-            {
-                var positions = p.GetVertexAccessor("POSITION").AsVector3Array();
-
-                foreach (var (ta, tb, tc) in p.GetTriangleIndices())
-                {
-                    var p1 = positions[ta];
-                    var p2 = positions[tb];
-                    var p3 = positions[tc];
-                    var d = Vector3.Cross(p2 - p1, p3 - p1);
-                    addDirection(posnrm, p1, d);
-                    addDirection(posnrm, p2, d);
-                    addDirection(posnrm, p3, d);
-                }
-            }
-
-            foreach (var pos in posnrm.Keys.ToList())
-            {
-                posnrm[pos] = Vector3.Normalize(posnrm[pos]);
-            }
-
-            return posnrm;
-        }
-
         public static IEnumerable<(IVertexBuilder A, Material Material)> EvaluatePoints(this Mesh mesh, MESHXFORM xform = null)
         {
             if (mesh == null) return Enumerable.Empty<(IVertexBuilder, Material)>();

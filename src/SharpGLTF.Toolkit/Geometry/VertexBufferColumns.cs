@@ -346,173 +346,58 @@ namespace SharpGLTF.Geometry
 
         #region utilites
 
+        struct _NormalTangentAgent : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+        {
+            public _NormalTangentAgent(VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
+            {
+                _Vertices = vertices;
+                _Indices = indices;
+            }
+
+            private readonly VertexBufferColumns _Vertices;
+            private readonly IEnumerable<(int A, int B, int C)> _Indices;
+
+            public int VertexCount => _Vertices.Positions.Count;
+
+            public IEnumerable<(int A, int B, int C)> GetTriangleIndices() { return _Indices; }
+
+            public Vector3 GetVertexPosition(int idx) { return _Vertices.Positions[idx]; }
+
+            public Vector3 GetVertexNormal(int idx) { return _Vertices.Normals[idx]; }
+
+            public Vector2 GetVertexTexCoord(int idx) { return _Vertices.TexCoords0[idx]; }
+
+            public void SetVertexNormal(int idx, Vector3 normal)
+            {
+                if (_Vertices.Normals == null) _Vertices.Normals = new Vector3[_Vertices.Positions.Count];
+
+                _Vertices.Normals[idx] = normal;
+            }
+
+            public void SetVertexTangent(int idx, Vector4 tangent)
+            {
+                if (_Vertices.Tangents == null) _Vertices.Tangents = new Vector4[_Vertices.Positions.Count];
+
+                _Vertices.Tangents[idx] = tangent;
+            }
+        }
+
         public static void CalculateSmoothNormals(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
         {
             Guard.NotNull(primitives, nameof(primitives));
 
-            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
-            {
-                if (!dir._IsFinite()) return;
-                if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;
-                dict[pos] = n + dir;
-            }
+            var agents = primitives.Select(item => new _NormalTangentAgent(item.Vertices, item.Indices)).ToList();
 
-            // calculate
-
-            var normalMap = new Dictionary<Vector3, Vector3>();
-
-            foreach (var (vertices, indices) in primitives)
-            {
-                foreach (var (ta, tb, tc) in indices)
-                {
-                    var p1 = vertices.Positions[ta];
-                    var p2 = vertices.Positions[tb];
-                    var p3 = vertices.Positions[tc];
-
-                    var d = Vector3.Cross(p2 - p1, p3 - p1);
-
-                    addDirection(normalMap, p1, d);
-                    addDirection(normalMap, p2, d);
-                    addDirection(normalMap, p3, d);
-                }
-            }
-
-            // normalize
-
-            foreach (var pos in normalMap.Keys.ToList())
-            {
-                var nrm = Vector3.Normalize(normalMap[pos]);
-
-                normalMap[pos] = nrm._IsFinite() && nrm.LengthSquared() > 0.5f ? nrm : Vector3.UnitZ;
-            }
-
-            // apply
-
-            foreach (var (vertices, indices) in primitives)
-            {
-                vertices.Normals = new Vector3[vertices.Positions.Count];
-
-                for (int i = 0; i < vertices.Positions.Count; ++i)
-                {
-                    if (normalMap.TryGetValue(vertices.Positions[i],out Vector3 nrm))
-                    {
-                        vertices.Normals[i] = nrm;
-                    }
-                    else
-                    {
-                        vertices.Normals[i] = Vector3.UnitZ;
-                    }
-                }
-            }
+            VertexNormalsFactory.CalculateSmoothNormals(agents);
         }
 
         public static void CalculateTangents(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
         {
-            // https://gamedev.stackexchange.com/questions/128023/how-does-mikktspace-work-for-calculating-the-tangent-space-during-normal-mapping
-            // https://stackoverflow.com/questions/25349350/calculating-per-vertex-tangents-for-glsl
-            // https://github.com/buildaworldnet/IrrlichtBAW/wiki/How-to-Normal-Detail-Bump-Derivative-Map,-why-Mikkelsen-is-slightly-wrong-and-why-you-should-give-up-on-calculating-per-vertex-tangents
-            // https://gamedev.stackexchange.com/questions/68612/how-to-compute-tangent-and-bitangent-vectors
-            // https://www.marti.works/calculating-tangents-for-your-mesh/
-            // https://www.html5gamedevs.com/topic/34364-gltf-support-and-mikkt-space/
-
             Guard.NotNull(primitives, nameof(primitives));
 
-            void addTangent(Dictionary<(Vector3 pos, Vector3 nrm, Vector2 uv), (Vector3, Vector3)> dict, (Vector3 pos, Vector3 nrm, Vector2 uv) key, (Vector3 tu, Vector3 tv) alpha)
-            {
-                dict.TryGetValue(key, out (Vector3 tu, Vector3 tv) beta);
+            var agents = primitives.Select(item => new _NormalTangentAgent(item.Vertices, item.Indices)).ToList();
 
-                dict[key] = (alpha.tu + beta.tu, alpha.tv + beta.tv);
-            }
-
-            // calculate
-
-            var tangentsMap = new Dictionary<(Vector3 pos, Vector3 nrm, Vector2 uv), (Vector3 u, Vector3 v)>();
-
-            foreach (var (vertices, indices) in primitives)
-            {
-                vertices.Tangents = new Vector4[vertices.Positions.Count];
-
-                foreach (var (i1, i2, i3) in indices)
-                {
-                    var p1 = vertices.Positions[i1];
-                    var p2 = vertices.Positions[i2];
-                    var p3 = vertices.Positions[i3];
-
-                    // check for degenerated triangle
-                    if (p1 == p2 || p1 == p3 || p2 == p3) continue;
-
-                    var uv1 = vertices.TexCoords0[i1];
-                    var uv2 = vertices.TexCoords0[i2];
-                    var uv3 = vertices.TexCoords0[i3];
-
-                    // check for degenerated triangle
-                    if (uv1 == uv2 || uv1 == uv3 || uv2 == uv3) continue;
-
-                    var n1 = vertices.Normals[i1];
-                    var n2 = vertices.Normals[i2];
-                    var n3 = vertices.Normals[i3];
-
-                    var svec = p2 - p1;
-                    var tvec = p3 - p1;
-
-                    var stex = uv2 - uv1;
-                    var ttex = uv3 - uv1;
-
-                    float sx = stex.X;
-                    float tx = ttex.X;
-                    float sy = stex.Y;
-                    float ty = ttex.Y;
-
-                    var r = 1.0F / ((sx * ty) - (tx * sy));
-
-                    if (!r._IsFinite()) continue;
-
-                    var sdir = new Vector3((ty * svec.X) - (sy * tvec.X), (ty * svec.Y) - (sy * tvec.Y), (ty * svec.Z) - (sy * tvec.Z) ) * r;
-                    var tdir = new Vector3((sx * tvec.X) - (tx * svec.X), (sx * tvec.Y) - (tx * svec.Y), (sx * tvec.Z) - (tx * svec.Z) ) * r;
-
-                    addTangent(tangentsMap, (p1, n1, uv1), (sdir, tdir));
-                    addTangent(tangentsMap, (p2, n2, uv2), (sdir, tdir));
-                    addTangent(tangentsMap, (p3, n3, uv3), (sdir, tdir));
-                }
-            }
-
-            // normalize
-
-            foreach (var key in tangentsMap.Keys.ToList())
-            {
-                var val = tangentsMap[key];
-
-                // Gram-Schmidt orthogonalize
-                val.u = Vector3.Normalize(val.u - (key.nrm * Vector3.Dot(key.nrm, val.u)));
-                val.v = Vector3.Normalize(val.v - (key.nrm * Vector3.Dot(key.nrm, val.v)));
-
-                tangentsMap[key] = val;
-            }
-
-            // apply
-
-            foreach (var (vertices, indices) in primitives)
-            {
-                vertices.Tangents = new Vector4[vertices.Tangents.Count];
-
-                for (int i = 0; i < vertices.Positions.Count; ++i)
-                {
-                    var p = vertices.Positions[i];
-                    var n = vertices.Normals[i];
-                    var t = vertices.TexCoords0[i];
-
-                    if (tangentsMap.TryGetValue((p, n, t), out (Vector3 u, Vector3 v) tangents))
-                    {
-                        var handedness = Vector3.Dot(Vector3.Cross(tangents.u, n), tangents.v) < 0 ? -1.0f : 1.0f;
-
-                        vertices.Tangents[i] = new Vector4(tangents.u, handedness);
-                    }
-                    else
-                    {
-                        vertices.Tangents[i] = new Vector4(1, 0, 0, 1);
-                    }
-                }
-            }
+            VertexTangentsFactory.CalculateTangents(agents);
         }
 
         #endregion
