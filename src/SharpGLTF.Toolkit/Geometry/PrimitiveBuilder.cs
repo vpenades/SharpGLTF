@@ -791,4 +791,92 @@ namespace SharpGLTF.Geometry
 
         #endregion
     }
+
+    /// <summary>
+    /// Helper class used to calculate Normals and Tangents of missing meshes.
+    /// </summary>
+    /// <typeparam name="TMaterial">default material</typeparam>
+    class MeshPrimitiveNormalsAndTangents<TMaterial> : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+    {
+        #region constructor
+
+        // TODO: we need a solution for morph targets.
+
+        public static IReadOnlyDictionary<IPrimitiveReader<TMaterial>, MeshPrimitiveNormalsAndTangents<TMaterial>> GenerateNormalsTangents(IMeshBuilder<TMaterial> mesh)
+        {
+            var pairs = mesh.Primitives
+                .Where(item => item.VerticesPerPrimitive > 2)
+                .ToDictionary(p => p, p => new MeshPrimitiveNormalsAndTangents<TMaterial>(p));
+
+            // we can safaly generate both sets because MeshPrimitiveNormalsAndTangents will still return the good normals and tangets if they exist.
+
+            VertexNormalsFactory.CalculateSmoothNormals(pairs.Values.ToList());
+            VertexTangentsFactory.CalculateTangents(pairs.Values.ToList());
+
+            return pairs;
+        }
+
+        public MeshPrimitiveNormalsAndTangents(IPrimitiveReader<TMaterial> source)
+        {
+            _Source = source;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly IPrimitiveReader<TMaterial> _Source;
+        private Vector3[] _Normals;
+        private Vector4[] _Tangents;
+
+        #endregion
+
+        #region API
+
+        public int VertexCount => _Source.Vertices.Count;
+
+        public IEnumerable<(int A, int B, int C)> GetTriangleIndices()
+        {
+            return _Source.Triangles;
+        }
+
+        public Vector3 GetVertexPosition(int idx)
+        {
+            var v = _Source.Vertices[idx];
+            return v.GetGeometry().GetPosition();
+        }
+
+        public Vector3 GetVertexNormal(int idx)
+        {
+            var v = _Source.Vertices[idx];
+            return v.GetGeometry().TryGetNormal(out Vector3 normal) ? normal : _Normals[idx];
+        }
+
+        public Vector4 GetVertexTangent(int idx)
+        {
+            var v = _Source.Vertices[idx];
+            return v.GetGeometry().TryGetTangent(out Vector4 tangent) ? tangent : _Tangents[idx];
+        }
+
+        public Vector2 GetVertexTexCoord(int idx)
+        {
+            var v = _Source.Vertices[idx];
+            var m = v.GetMaterial();
+            return m.MaxTextCoords > 0 ? m.GetTexCoord(0) : Vector2.Zero;
+        }
+
+        public void SetVertexNormal(int idx, Vector3 normal)
+        {
+            if (_Normals == null) _Normals = new Vector3[VertexCount];
+            _Normals[idx] = normal;
+        }
+
+        public void SetVertexTangent(int idx, Vector4 tangent)
+        {
+            if (_Tangents == null) _Tangents = new Vector4[VertexCount];
+            _Tangents[idx] = tangent;
+        }
+
+        #endregion
+    }
 }

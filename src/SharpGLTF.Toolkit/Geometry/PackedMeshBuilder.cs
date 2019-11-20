@@ -16,6 +16,13 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
+        /// <summary>
+        /// Converts a collection of <see cref="IMeshBuilder{TMaterial}"/> meshes into a collection of <see cref="PackedMeshBuilder{TMaterial}"/> meshes,
+        /// ensuring that the resources are shared across all meshes.
+        /// </summary>
+        /// <param name="meshBuilders">A collection of <see cref="IMeshBuilder{TMaterial}"/> meshes.</param>
+        /// <param name="prefferStrided">true to create strided vertex buffers.</param>
+        /// <returns>A collectio of <see cref="PackedMeshBuilder{TMaterial}"/> meshes.</returns>
         internal static IEnumerable<PackedMeshBuilder<TMaterial>> CreatePackedMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders, bool prefferStrided)
         {
             try
@@ -41,7 +48,7 @@ namespace SharpGLTF.Geometry
                     var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
                     bool useStrided = prefferStrided;
-                    if (srcPrim.MorphTargets.Count > 0) useStrided = false;
+                    if (srcPrim.MorphTargets.Count > 0) useStrided = false; // if the primitive has morphing, it is better not to use strided vertex buffers.
 
                     if (useStrided) dstPrim.SetStridedVertices(srcPrim, jointEncoding);
                     else dstPrim.SetStreamedVertices(srcPrim, jointEncoding);

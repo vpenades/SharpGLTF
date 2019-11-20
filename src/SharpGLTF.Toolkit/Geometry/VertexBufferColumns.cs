@@ -272,11 +272,11 @@ namespace SharpGLTF.Geometry
         {
             var m = default(TvM);
 
-            if (Colors0 != null && m.MaxColors > 0) m.SetColor(0, Colors0[index]);
-            if (Colors1 != null && m.MaxColors > 1) m.SetColor(1, Colors1[index]);
+            if (m.MaxColors > 0) m.SetColor(0, Colors0 == null ? Vector4.One : Colors0[index]);
+            if (m.MaxColors > 1) m.SetColor(1, Colors1 == null ? Vector4.One : Colors1[index]);
 
-            if (TexCoords0 != null && m.MaxTextCoords > 0) m.SetTexCoord(0, TexCoords0[index]);
-            if (TexCoords1 != null && m.MaxTextCoords > 1) m.SetTexCoord(1, TexCoords1[index]);
+            if (m.MaxTextCoords > 0) m.SetTexCoord(0, TexCoords0 == null ? Vector2.Zero : TexCoords0[index]);
+            if (m.MaxTextCoords > 1) m.SetTexCoord(1, TexCoords1 == null ? Vector2.Zero : TexCoords1[index]);
 
             return m;
         }
@@ -386,7 +386,9 @@ namespace SharpGLTF.Geometry
         {
             Guard.NotNull(primitives, nameof(primitives));
 
-            var agents = primitives.Select(item => new _NormalTangentAgent(item.Vertices, item.Indices)).ToList();
+            var agents = primitives
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
+                .ToList();
 
             VertexNormalsFactory.CalculateSmoothNormals(agents);
         }
@@ -395,7 +397,9 @@ namespace SharpGLTF.Geometry
         {
             Guard.NotNull(primitives, nameof(primitives));
 
-            var agents = primitives.Select(item => new _NormalTangentAgent(item.Vertices, item.Indices)).ToList();
+            var agents = primitives
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
+                .ToList();
 
             VertexTangentsFactory.CalculateTangents(agents);
         }
