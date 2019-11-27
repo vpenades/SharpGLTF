@@ -13,24 +13,24 @@ namespace SharpGLTF.Schema2
     using MODEL = ModelRoot;
 
     /// <summary>
-    /// Determines the way in which <see cref="Image"/> instances are stored.
+    /// Determines how resources are written.
     /// </summary>
-    public enum ImageWriteMode
+    public enum ResourceWriteMode
     {
         /// <summary>
-        /// Images will be stored as external satellite files.
+        /// Resources will be stored as external satellite files.
         /// </summary>
         SatelliteFile,
 
         /// <summary>
-        /// Images will be stored as internal binary buffers.
+        /// Resources will be embedded into the JSON encoded in MIME64.
         /// </summary>
-        BufferView,
+        Embedded,
 
         /// <summary>
-        /// Images will be embedded into the JSON encoded in MIME64.
+        /// Resources will be stored as internal binary buffers. Valid only for <see cref="Image"/>
         /// </summary>
-        Embedded
+        BufferView
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings()
             {
                 BinaryMode = false,
-                ImageWriting = ImageWriteMode.SatelliteFile,
+                ImageWriting = ResourceWriteMode.SatelliteFile,
                 MergeBuffers = false,
                 JsonFormatting = Formatting.None,
                 _UpdateSupportedExtensions = false,
@@ -78,7 +78,7 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings
             {
                 BinaryMode = false,
-                ImageWriting = ImageWriteMode.SatelliteFile,
+                ImageWriting = ResourceWriteMode.SatelliteFile,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.Indented,
                 _UpdateSupportedExtensions = true,
@@ -94,7 +94,7 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings()
             {
                 BinaryMode = false,
-                ImageWriting = ImageWriteMode.SatelliteFile,
+                ImageWriting = ResourceWriteMode.SatelliteFile,
                 MergeBuffers = false,
                 JsonFormatting = Formatting.None,
                 _UpdateSupportedExtensions = true,
@@ -114,7 +114,7 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings
             {
                 BinaryMode = true,
-                ImageWriting = ImageWriteMode.BufferView,
+                ImageWriting = ResourceWriteMode.BufferView,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.None,
                 _UpdateSupportedExtensions = true,
@@ -133,7 +133,7 @@ namespace SharpGLTF.Schema2
             var settings = new WriteSettings
             {
                 BinaryMode = true,
-                ImageWriting = ImageWriteMode.BufferView,
+                ImageWriting = ResourceWriteMode.BufferView,
                 MergeBuffers = true,
                 JsonFormatting = Formatting.None,
                 _UpdateSupportedExtensions = true,
@@ -143,9 +143,7 @@ namespace SharpGLTF.Schema2
 
             return settings;
         }
-
-        private WriteSettings() { }
-
+        
         #endregion
 
         #region data
@@ -158,7 +156,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets a value indicating how to write the images of the model.
         /// </summary>
-        public ImageWriteMode ImageWriting { get; set; }
+        public ResourceWriteMode ImageWriting { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to merge all the buffers in <see cref="MODEL.LogicalBuffers"/> into a single buffer.
@@ -203,7 +201,7 @@ namespace SharpGLTF.Schema2
 
             var needsMergeBuffers = (this.MergeBuffers | this.BinaryMode) && model.LogicalBuffers.Count > 1;
 
-            var imagesAsBufferViews = model.LogicalImages.Count > 0 && this.ImageWriting == ImageWriteMode.BufferView;
+            var imagesAsBufferViews = model.LogicalImages.Count > 0 && this.ImageWriting == ResourceWriteMode.BufferView;
 
             if (needsMergeBuffers | imagesAsBufferViews)
             {
@@ -211,7 +209,7 @@ namespace SharpGLTF.Schema2
                 model = model.DeepClone();
             }
 
-            if (ImageWriting == ImageWriteMode.BufferView)
+            if (ImageWriting == ResourceWriteMode.BufferView)
             {
                 model.MergeImages();
                 needsMergeBuffers |= this.MergeBuffers | this.BinaryMode;
@@ -399,7 +397,7 @@ namespace SharpGLTF.Schema2
             {
                 var image = model._images[i];
                 var iname = model._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
-                if (settings.ImageWriting != ImageWriteMode.SatelliteFile) image._WriteToInternal();
+                if (settings.ImageWriting != ResourceWriteMode.SatelliteFile) image._WriteToInternal();
                 else image._WriteToSatellite(settings.FileWriter, iname);
             }
 
