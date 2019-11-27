@@ -146,11 +146,26 @@ namespace SharpGLTF
             return true;
         }
 
+        internal static Vector3 SanitizeNormal(this Vector3 normal)
+        {
+            var isn = normal._IsFinite() && normal.LengthSquared() > 0;
+            return isn ? Vector3.Normalize(normal) : Vector3.UnitZ;
+        }
+
         internal static bool IsValidTangent(this Vector4 tangent)
         {
             if (tangent.W != 1 && tangent.W != -1) return false;
 
             return new Vector3(tangent.X, tangent.Y, tangent.Z).IsValidNormal();
+        }
+
+        internal static Vector4 SanitizeTangent(this Vector4 tangent)
+        {
+            var n = new Vector3(tangent.X, tangent.Y, tangent.Z);
+            var s = float.IsNaN(tangent.W) ? 1 : tangent.W;
+            var isn = n._IsFinite() && n.LengthSquared() > 0;
+            n = isn ? Vector3.Normalize(n) : Vector3.UnitX;
+            return new Vector4(n, s > 0 ? 1 : -1);
         }
 
         internal static Matrix4x4 Inverse(this Matrix4x4 src)

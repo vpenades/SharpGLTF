@@ -41,7 +41,7 @@ namespace Example1
 
             var scene = new SharpGLTF.Scenes.SceneBuilder();
 
-            scene.AddMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             // save the model in different formats
 

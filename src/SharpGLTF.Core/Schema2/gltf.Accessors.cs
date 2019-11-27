@@ -456,7 +456,10 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < normals.Count; ++i)
             {
-                result.CheckIsUnitLength(i, normals[i]);
+                if (result.TryFixUnitLength(i, normals[i]))
+                {
+                    normals[i] = normals[i].SanitizeNormal();
+                }
             }
         }
 
@@ -473,7 +476,10 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < tangents.Count; ++i)
             {
-                result.CheckIsTangent(i, tangents[i]);
+                if (result.TryFixTangent(i, tangents[i]))
+                {
+                    tangents[i] = tangents[i].SanitizeTangent();
+                }
             }
         }
 

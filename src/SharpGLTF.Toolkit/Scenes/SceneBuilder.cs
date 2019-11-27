@@ -55,7 +55,19 @@ namespace SharpGLTF.Scenes
 
         #region API
 
+        [Obsolete("Use AddRigidMesh")]
         public InstanceBuilder AddMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
+        {
+            return AddRigidMesh(mesh, meshWorldMatrix);
+        }
+
+        [Obsolete("Use AddRigidMesh")]
+        public InstanceBuilder AddMesh(MESHBUILDER mesh, NodeBuilder node)
+        {
+            return AddRigidMesh(mesh, node);
+        }
+
+        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
         {
             var instance = new InstanceBuilder(this);
             instance.Content = new FixedTransformer(mesh, meshWorldMatrix);
@@ -65,7 +77,7 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        public InstanceBuilder AddMesh(MESHBUILDER mesh, NodeBuilder node)
+        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, NodeBuilder node)
         {
             var instance = new InstanceBuilder(this);
             instance.Content = new RigidTransformer(mesh, node);

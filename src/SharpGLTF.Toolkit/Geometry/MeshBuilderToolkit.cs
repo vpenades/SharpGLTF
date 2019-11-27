@@ -86,7 +86,7 @@ namespace SharpGLTF.Geometry
         {
             var posnrm = new Dictionary<Vector3, Vector3>();
 
-            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
+            static void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
             {
                 if (!dir._IsFinite()) return;
                 if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;

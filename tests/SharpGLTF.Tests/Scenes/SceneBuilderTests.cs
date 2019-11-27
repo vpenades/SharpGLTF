@@ -32,7 +32,7 @@ namespace SharpGLTF.Scenes
 
             var scene = new SceneBuilder();
 
-            scene.AddMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             scene.AttachToCurrentTest("cube.glb");
         }
@@ -74,7 +74,7 @@ namespace SharpGLTF.Scenes
 
             var scene = new SceneBuilder();
 
-            scene.AddMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             scene.AttachToCurrentTest("cube.glb");
         }
@@ -104,7 +104,7 @@ namespace SharpGLTF.Scenes
 
             var scene = new SceneBuilder();            
 
-            scene.AddMesh(mesh, pivot);
+            scene.AddRigidMesh(mesh, pivot);
 
             scene.AttachToCurrentTest("animated.glb");
             scene.AttachToCurrentTest("animated.gltf");
@@ -150,7 +150,7 @@ namespace SharpGLTF.Scenes
                 var r = rnd.NextVector3() * 5;
                 var xform = Matrix4x4.CreateFromYawPitchRoll(r.X, r.Y, r.Z) * Matrix4x4.CreateTranslation(rnd.NextVector3() * 25);
 
-                scene.AddMesh(mesh, xform);                
+                scene.AddRigidMesh(mesh, xform);                
             }
 
             // save the model as GLB
@@ -172,8 +172,8 @@ namespace SharpGLTF.Scenes
             mesh1.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
             mesh2.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
 
-            scene.AddMesh(mesh1, Matrix4x4.CreateTranslation(-2, 0, 0));
-            scene.AddMesh(mesh2, Matrix4x4.CreateTranslation(2, 0, 0));
+            scene.AddRigidMesh(mesh1, Matrix4x4.CreateTranslation(-2, 0, 0));
+            scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(2, 0, 0));
 
             scene.AttachToCurrentTest("scene.glb");
         }
@@ -212,9 +212,9 @@ namespace SharpGLTF.Scenes
 
             var scene = new SceneBuilder();
 
-            scene.AddMesh(mesh1, Matrix4x4.Identity);
-            scene.AddMesh(mesh2, Matrix4x4.Identity);
-            scene.AddMesh(mesh3, Matrix4x4.CreateTranslation(0,10,0));
+            scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh2, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh3, Matrix4x4.CreateTranslation(0,10,0));
 
             var model = scene.ToSchema2();
 
@@ -450,11 +450,11 @@ namespace SharpGLTF.Scenes
 
             var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
             mesh1.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
-            var inst1 = scene.AddMesh(mesh1, Matrix4x4.Identity);
+            var inst1 = scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
 
             var mesh2 = VPOSNRM.CreateCompatibleMesh("shape2");
             mesh2.AddCube(pink, Matrix4x4.Identity);
-            var inst2 = scene.AddMesh(mesh2, Matrix4x4.CreateTranslation(2,0,0));
+            var inst2 = scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(2,0,0));
 
             scene.AttachToCurrentTest("static.glb");
             scene.AttachToCurrentTest("static.gltf");
@@ -502,8 +502,8 @@ namespace SharpGLTF.Scenes
                 .WithLocalTranslation(new Vector3(0, 1, 0));
 
             var scene = new SceneBuilder();
-            scene.AddMesh(cube, joint0);
-            scene.AddMesh(sphere, joint0);
+            scene.AddRigidMesh(cube, joint0);
+            scene.AddRigidMesh(sphere, joint0);
 
             scene.AttachToCurrentTest("instanced.glb");
             scene.AttachToCurrentTest("instanced.gltf");

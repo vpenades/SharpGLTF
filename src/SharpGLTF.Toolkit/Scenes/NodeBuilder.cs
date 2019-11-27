@@ -9,8 +9,44 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Defines a node object within an armature.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public class NodeBuilder
     {
+        #region debug
+
+        private string _GetDebuggerDisplay()
+        {
+            var txt = $"NodeBuilder";
+
+            if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" {this.Name}";
+
+            if (_Matrix.HasValue)
+            {
+                if (_Matrix.Value != Matrix4x4.Identity)
+                {
+                    var xform = this.LocalTransform;
+                    if (xform.Scale != Vector3.One) txt += $" 𝐒:{xform.Scale}";
+                    if (xform.Rotation != Quaternion.Identity) txt += $" 𝐑:{xform.Rotation}";
+                    if (xform.Translation != Vector3.Zero) txt += $" 𝚻:{xform.Translation}";
+                }
+            }
+            else
+            {
+                if (_Scale != null) txt += $" 𝐒:{_Scale.Value}";
+                if (_Rotation != null) txt += $" 𝐑:{_Rotation.Value}";
+                if (_Translation != null) txt += $" 𝚻:{_Translation.Value}";
+            }
+
+            if (this.VisualChildren.Any())
+            {
+                txt += $" | Children[{this.VisualChildren.Count}]";
+            }
+
+            return txt;
+        }
+
+        #endregion
+
         #region lifecycle
 
         public NodeBuilder() { }

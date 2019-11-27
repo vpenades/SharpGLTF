@@ -91,6 +91,9 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
+    /// <summary>
+    /// Common interface for <see cref="CameraOrthographic"/> and <see cref="CameraPerspective"/>.
+    /// </summary>
     public interface ICamera
     {
         bool IsOrthographic { get; }

@@ -36,6 +36,8 @@ namespace SharpGLTF.Validation
 
         public ValidationResult Result => _Result;
 
+        public bool TryFix => Result.Mode == Validation.ValidationMode.TryFix;
+
         #endregion
 
         #region API
@@ -44,11 +46,29 @@ namespace SharpGLTF.Validation
 
         public void AddSchemaError(ValueLocation location, string message) { AddSchemaError(location.ToString(_Target, message)); }
 
+        public bool TryFixLink(ValueLocation location, string message)
+        {
+            if (TryFix) AddLinkWarning(location.ToString(_Target, message));
+            else AddLinkError(location.ToString(_Target, message));
+
+            return TryFix;
+        }
+
+        public bool TryFixData(ValueLocation location, string message)
+        {
+            if (TryFix) AddDataWarning(location.ToString(_Target, message));
+            else AddDataError(location.ToString(_Target, message));
+
+            return TryFix;
+        }
+
         public void AddLinkError(ValueLocation location, string message) { AddLinkError(location.ToString(_Target, message)); }
 
         public void AddLinkWarning(String format, params object[] args) { AddLinkWarning(String.Format(format, args)); }
 
         public void AddDataError(ValueLocation location, string message) { AddDataError(location.ToString(_Target, message)); }
+
+        public void AddDataWarning(ValueLocation location, string message) { AddDataWarning(location.ToString(_Target, message)); }
 
         public void AddSemanticWarning(String format, params object[] args) { AddSemanticWarning(String.Format(format, args)); }
 
@@ -73,6 +93,12 @@ namespace SharpGLTF.Validation
             var ex = new SchemaException(_Target, message);
 
             _Result.AddError(ex);
+        }
+
+        public void AddDataWarning(string message)
+        {
+            var ex = new DataException(_Target, message);
+            _Result.AddWarning(ex);
         }
 
         public void AddDataError(string message)
@@ -221,21 +247,22 @@ namespace SharpGLTF.Validation
             return false;
         }
 
-        public void CheckIsUnitLength(ValueLocation location, System.Numerics.Vector3? value)
+        public bool TryFixUnitLength(ValueLocation location, System.Numerics.Vector3? value)
         {
-            if (!value.HasValue) return;
-            if (!CheckIsFinite(location, value)) return;
-            if (value.Value.IsValidNormal()) return;
-            AddDataError(location, $"is not of unit length: {value.Value.Length()}.");
+            if (!value.HasValue) return false;
+            if (!CheckIsFinite(location, value)) return false;
+            if (value.Value.IsValidNormal()) return false;
+
+            return TryFixData(location, $"is not of unit length: {value.Value.Length()}.");
         }
 
-        public void CheckIsTangent(ValueLocation location, System.Numerics.Vector4 tangent)
+        public bool TryFixTangent(ValueLocation location, System.Numerics.Vector4 tangent)
         {
-            CheckIsUnitLength(location, new System.Numerics.Vector3(tangent.X, tangent.Y, tangent.Z));
+            if (TryFixUnitLength(location, new System.Numerics.Vector3(tangent.X, tangent.Y, tangent.Z))) return true;
 
-            if (tangent.W == 1 || tangent.W == -1) return;
+            if (tangent.W == 1 || tangent.W == -1) return false;
 
-            AddDataError(location, $"has invalid value: {tangent.W}. Must be 1.0 or -1.0.");
+            return TryFixData(location, $"has invalid value: {tangent.W}. Must be 1.0 or -1.0.");
         }
 
         public void CheckIsInRange(ValueLocation location, System.Numerics.Vector4 v, float minInclusive, float maxInclusive)

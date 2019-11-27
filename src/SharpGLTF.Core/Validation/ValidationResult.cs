@@ -11,9 +11,10 @@ namespace SharpGLTF.Validation
     {
         #region lifecycle
 
-        public ValidationResult(Schema2.ModelRoot root, bool instantThrow = false)
+        public ValidationResult(Schema2.ModelRoot root, ValidationMode mode, bool instantThrow = false)
         {
             _Root = root;
+            _Mode = mode;
             _InstantThrow = instantThrow;
         }
 
@@ -22,6 +23,7 @@ namespace SharpGLTF.Validation
         #region data
 
         private readonly Schema2.ModelRoot _Root;
+        private readonly ValidationMode _Mode;
         private readonly bool _InstantThrow;
 
         private readonly List<Exception> _Errors = new List<Exception>();
@@ -32,6 +34,8 @@ namespace SharpGLTF.Validation
         #region properties
 
         public Schema2.ModelRoot Root => _Root;
+
+        public ValidationMode Mode => _Mode;
 
         public IEnumerable<Exception> Errors => _Errors;
 

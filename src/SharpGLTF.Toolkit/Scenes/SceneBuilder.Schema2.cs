@@ -264,7 +264,7 @@ namespace SharpGLTF.Scenes
                 if (srcInstance.Skin == null)
                 {
                     var dstNode = dstNodes[srcInstance];
-                    var dstInst = dstScene.AddMesh(dstMesh, dstNode);
+                    var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode);
 
                     _CopyMorphingAnimation(dstInst, srcInstance);
                 }

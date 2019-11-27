@@ -266,13 +266,22 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateBufferUsageData(Validation.ValidationContext result)
         {
-            if (this.ByteStride != 0) result.AddLinkError("BufferView", "Unexpected ByteStride found. Expected 0");
+            if (this._byteStride.HasValue)
+            {
+                if (result.TryFixLink("BufferView", "Unexpected ByteStride found. Expected null"))
+                {
+                    this._byteStride = null;
+                }
+            }
 
             result = result.GetContext(this);
 
             if (!this._target.HasValue) return;
 
-            result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer.");
+            if (result.TryFixLink("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer."))
+            {
+                this._target = null;
+            }
         }
 
         #endregion

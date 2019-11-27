@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 
 using Newtonsoft.Json;
+
 using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
 {
     using MODEL = ModelRoot;
+    using VALIDATIONMODE = Validation.ValidationMode;
 
     /// <summary>
     /// Callback used for loading associated files of current model.
@@ -46,7 +48,10 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public AssetReader FileReader { get; set; }
 
-        public Boolean SkipValidation { get; set; }
+        /// <summary>
+        /// Gets or sets a value indicating the level of validation applied when loading a file.
+        /// </summary>
+        public VALIDATIONMODE Validation { get; set; } = VALIDATIONMODE.Strict;
     }
 
     partial class ModelRoot
@@ -84,12 +89,15 @@ namespace SharpGLTF.Schema2
         /// Reads a <see cref="MODEL"/> instance from a path pointing to a GLB or a GLTF file
         /// </summary>
         /// <param name="filePath">A valid file path.</param>
+        /// <param name="vmode">Defines the file validation level.</param>
         /// <returns>A <see cref="MODEL"/> instance.</returns>
-        public static MODEL Load(string filePath)
+        public static MODEL Load(string filePath, VALIDATIONMODE vmode = VALIDATIONMODE.Strict)
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
             var settings = new ReadSettings(filePath);
+
+            settings.Validation = vmode;
 
             using (var s = File.OpenRead(filePath))
             {
@@ -182,13 +190,15 @@ namespace SharpGLTF.Schema2
             return mv.Model;
         }
 
-        public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName)
+        public static MODEL ReadFromDictionary(Dictionary<string, BYTES> files, string fileName, VALIDATIONMODE vmode = VALIDATIONMODE.Strict)
         {
             Guard.NotNull(files, nameof(files));
 
             var jsonBytes = files[fileName];
 
             var settings = new ReadSettings(fn => files[fn]);
+
+            settings.Validation = vmode;
 
             using (var m = new MemoryStream(jsonBytes.Array, jsonBytes.Offset, jsonBytes.Count))
             {
@@ -248,11 +258,11 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(textReader, nameof(textReader));
             Guard.NotNull(settings, nameof(settings));
 
+            var root = new MODEL();
+            var vcontext = new Validation.ValidationResult(root, settings.Validation);
+
             using (var reader = new JsonTextReader(textReader))
             {
-                var root = new MODEL();
-                var vcontext = new Validation.ValidationResult(root);
-
                 if (!reader.Read())
                 {
                     vcontext.AddError(new Validation.ModelException(root, "Json is empty"));
@@ -268,36 +278,36 @@ namespace SharpGLTF.Schema2
                     vcontext.AddError(new Validation.SchemaException(root, rex));
                     return (null, vcontext);
                 }
-
-                // schema validation
-
-                root.ValidateReferences(vcontext.GetContext(root));
-                var ex = vcontext.Errors.FirstOrDefault();
-                if (ex != null) return (null, vcontext);
-
-                // resolve external references
-
-                foreach (var buffer in root._buffers)
-                {
-                    buffer._ResolveUri(settings.FileReader);
-                }
-
-                foreach (var image in root._images)
-                {
-                    image._ResolveUri(settings.FileReader);
-                }
-
-                // full validation
-
-                if (!settings.SkipValidation)
-                {
-                    root.Validate(vcontext.GetContext(root));
-                    ex = vcontext.Errors.FirstOrDefault();
-                    if (ex != null) return (null, vcontext);
-                }
-
-                return (root, vcontext);
             }
+
+            // schema validation
+
+            root.ValidateReferences(vcontext.GetContext(root));
+            var ex = vcontext.Errors.FirstOrDefault();
+            if (ex != null) return (null, vcontext);
+
+            // resolve external references
+
+            foreach (var buffer in root._buffers)
+            {
+                buffer._ResolveUri(settings.FileReader);
+            }
+
+            foreach (var image in root._images)
+            {
+                image._ResolveUri(settings.FileReader);
+            }
+
+            // full validation
+
+            if (settings.Validation != VALIDATIONMODE.Skip)
+            {
+                root.Validate(vcontext.GetContext(root));
+                ex = vcontext.Errors.FirstOrDefault();
+                if (ex != null) return (null, vcontext);
+            }
+
+            return (root, vcontext);
         }
 
         #endregion
