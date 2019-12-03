@@ -43,7 +43,7 @@ namespace SharpGLTF.Schema2
     /// <summary>
     /// Configuration settings for writing model files.
     /// </summary>
-    public class WriteSettings
+    public class WriteContext
     {
         #region lifecycle
 
@@ -51,10 +51,10 @@ namespace SharpGLTF.Schema2
         /// These settings are used exclusively by <see cref="MODEL.DeepClone"/>.
         /// </summary>
         /// <param name="dict">The dictionary where the model will be stored</param>
-        /// <returns>The settings to use with <see cref="MODEL.Write(WriteSettings, string)"/></returns>
-        internal static WriteSettings ForDeepClone(Dictionary<string, BYTES> dict)
+        /// <returns>The settings to use with <see cref="MODEL.Write(WriteContext, string)"/></returns>
+        internal static WriteContext ForDeepClone(Dictionary<string, BYTES> dict)
         {
-            var settings = new WriteSettings()
+            var settings = new WriteContext()
             {
                 BinaryMode = false,
                 ImageWriting = ResourceWriteMode.SatelliteFile,
@@ -69,13 +69,13 @@ namespace SharpGLTF.Schema2
             return settings;
         }
 
-        internal static WriteSettings ForText(string filePath)
+        internal static WriteContext ForText(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
             var dir = Path.GetDirectoryName(filePath);
 
-            var settings = new WriteSettings
+            var settings = new WriteContext
             {
                 BinaryMode = false,
                 ImageWriting = ResourceWriteMode.SatelliteFile,
@@ -89,9 +89,9 @@ namespace SharpGLTF.Schema2
             return settings;
         }
 
-        internal static WriteSettings ForText(Dictionary<string, BYTES> dict)
+        internal static WriteContext ForText(Dictionary<string, BYTES> dict)
         {
-            var settings = new WriteSettings()
+            var settings = new WriteContext()
             {
                 BinaryMode = false,
                 ImageWriting = ResourceWriteMode.SatelliteFile,
@@ -105,13 +105,13 @@ namespace SharpGLTF.Schema2
             return settings;
         }
 
-        internal static WriteSettings ForBinary(string filePath)
+        internal static WriteContext ForBinary(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
             var dir = Path.GetDirectoryName(filePath);
 
-            var settings = new WriteSettings
+            var settings = new WriteContext
             {
                 BinaryMode = true,
                 ImageWriting = ResourceWriteMode.BufferView,
@@ -125,12 +125,12 @@ namespace SharpGLTF.Schema2
             return settings;
         }
 
-        internal static WriteSettings ForBinary(Stream stream)
+        internal static WriteContext ForBinary(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanWrite, nameof(stream));
 
-            var settings = new WriteSettings
+            var settings = new WriteContext
             {
                 BinaryMode = true,
                 ImageWriting = ResourceWriteMode.BufferView,
@@ -249,7 +249,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
-            var settings = WriteSettings.ForBinary(filePath);
+            var settings = WriteContext.ForBinary(filePath);
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
@@ -268,7 +268,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
-            var settings = WriteSettings.ForText(filePath);
+            var settings = WriteContext.ForText(filePath);
 
             settings.JsonFormatting = fmt;
 
@@ -286,7 +286,7 @@ namespace SharpGLTF.Schema2
         {
             var dict = new Dictionary<string, BYTES>();
 
-            var settings = WriteSettings.ForText(dict);
+            var settings = WriteContext.ForText(dict);
 
             _Write(settings, fileName, this);
 
@@ -330,20 +330,20 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanWrite, nameof(stream));
 
-            var settings = WriteSettings.ForBinary(stream);
+            var settings = WriteContext.ForBinary(stream);
 
             _Write(settings, "model", this);
         }
 
         /// <summary>
-        /// Writes this <see cref="MODEL"/> to the asset writer in <see cref="WriteSettings"/> configuration.
+        /// Writes this <see cref="MODEL"/> to the asset writer in <see cref="WriteContext"/> configuration.
         /// </summary>
-        /// <param name="settings">A <see cref="WriteSettings"/> to use to write the files.</param>
+        /// <param name="settings">A <see cref="WriteContext"/> to use to write the files.</param>
         /// <param name="baseName">The base name to use for asset files.</param>
         /// <remarks>
         /// Satellite files like buffers and images are also written with the file name formatted as "FILE_{Index}.EXT".
         /// </remarks>
-        public void Write(WriteSettings settings, string baseName)
+        public void Write(WriteContext settings, string baseName)
         {
             Guard.NotNull(settings, nameof(settings));
             _Write(settings, baseName, this);
@@ -359,13 +359,15 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static void _Write(WriteSettings settings, string baseName, MODEL model)
+        private static void _Write(WriteContext settings, string baseName, MODEL model)
         {
             Guard.NotNull(settings, nameof(settings));
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
 
             model = settings.FilterModel(model);
+
+            foreach (var img in model._images) if (!img._HasContent) throw new Validation.DataException(img, "Content is missing.");
 
             if (settings._UpdateSupportedExtensions) model.UpdateExtensionsSupport();
 
@@ -396,9 +398,16 @@ namespace SharpGLTF.Schema2
             for (int i = 0; i < model._images.Count; ++i)
             {
                 var image = model._images[i];
-                var iname = model._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
-                if (settings.ImageWriting != ResourceWriteMode.SatelliteFile) image._WriteToInternal();
-                else image._WriteToSatellite(settings.FileWriter, iname);
+
+                if (settings.ImageWriting != ResourceWriteMode.SatelliteFile)
+                {
+                    image._WriteToInternal();
+                }
+                else
+                {
+                    var iname = model._images.Count != 1 ? $"{baseName}_{i}" : $"{baseName}";
+                    image._WriteToSatellite(settings.FileWriter, iname);
+                }
             }
 
             using (var m = new MemoryStream())

@@ -456,7 +456,7 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < normals.Count; ++i)
             {
-                if (result.TryFixUnitLength(i, normals[i]))
+                if (result.TryFixUnitLengthOrError(i, normals[i]))
                 {
                     normals[i] = normals[i].SanitizeNormal();
                 }
@@ -476,7 +476,7 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < tangents.Count; ++i)
             {
-                if (result.TryFixTangent(i, tangents[i]))
+                if (result.TryFixTangentOrError(i, tangents[i]))
                 {
                     tangents[i] = tangents[i].SanitizeTangent();
                 }
@@ -523,7 +523,7 @@ namespace SharpGLTF.Schema2
         {
             result = result.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsageData(result);
+            SourceBufferView.ValidateBufferUsagePlainData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.MAT4);
 
             var matrices = this.AsMatrix4x4Array();
@@ -536,13 +536,13 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateAnimationInput(Validation.ValidationContext result)
         {
-            SourceBufferView.ValidateBufferUsageData(result);
+            SourceBufferView.ValidateBufferUsagePlainData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
         }
 
         internal void ValidateAnimationOutput(Validation.ValidationContext result)
         {
-            SourceBufferView.ValidateBufferUsageData(result);
+            SourceBufferView.ValidateBufferUsagePlainData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
         }
 

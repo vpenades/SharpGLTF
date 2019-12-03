@@ -101,6 +101,16 @@ namespace SharpGLTF.Schema2
 
         internal int _SourceBufferViewIndex => _bufferView.AsValue(-1);
 
+        internal bool _HasContent
+        {
+            get
+            {
+                if (_bufferView != null) return true;
+                if (_SatelliteImageContent != null) return true;
+                return false;
+            }
+        }
+
         #endregion
 
         #region API
@@ -168,9 +178,8 @@ namespace SharpGLTF.Schema2
 
             if (imageType == null) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
-            this._uri = null;
-            this._mimeType = null;
-            this._bufferView = null;
+            _DiscardContent();
+
             this._SatelliteImageContent = content;
         }
 
@@ -196,24 +205,34 @@ namespace SharpGLTF.Schema2
 
         #region binary read
 
-        internal void _ResolveUri(AssetReader externalReferenceSolver)
+        internal void _ResolveUri(ReadContext context)
         {
             if (!String.IsNullOrWhiteSpace(_uri))
             {
-                _SatelliteImageContent = _LoadImageUnchecked(externalReferenceSolver, _uri);
+                var data = _LoadImageUnchecked(context, _uri);
+
+                _SatelliteImageContent = data;
                 _uri = null;
                 _mimeType = null;
             }
         }
 
-        private static Byte[] _LoadImageUnchecked(AssetReader externalReferenceSolver, string uri)
+        private static Byte[] _LoadImageUnchecked(ReadContext context, string uri)
         {
             return uri._TryParseBase64Unchecked(EMBEDDED_GLTF_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_OCTET_STREAM)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_JPEG_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_PNG_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_DDS_BUFFER)
-                ?? externalReferenceSolver.Invoke(uri).ToArray();
+                ?? context.ReadBytes(uri).ToArray();
+        }
+
+        internal void _DiscardContent()
+        {
+            this._uri = null;
+            this._mimeType = null;
+            this._bufferView = null;
+            this._SatelliteImageContent = null;
         }
 
         #endregion

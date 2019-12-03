@@ -46,7 +46,7 @@ namespace SharpGLTF.Validation
 
         public void AddSchemaError(ValueLocation location, string message) { AddSchemaError(location.ToString(_Target, message)); }
 
-        public bool TryFixLink(ValueLocation location, string message)
+        public bool TryFixLinkOrError(ValueLocation location, string message)
         {
             if (TryFix) AddLinkWarning(location.ToString(_Target, message));
             else AddLinkError(location.ToString(_Target, message));
@@ -54,7 +54,7 @@ namespace SharpGLTF.Validation
             return TryFix;
         }
 
-        public bool TryFixData(ValueLocation location, string message)
+        public bool TryFixDataOrError(ValueLocation location, string message)
         {
             if (TryFix) AddDataWarning(location.ToString(_Target, message));
             else AddDataError(location.ToString(_Target, message));
@@ -247,22 +247,22 @@ namespace SharpGLTF.Validation
             return false;
         }
 
-        public bool TryFixUnitLength(ValueLocation location, System.Numerics.Vector3? value)
+        public bool TryFixUnitLengthOrError(ValueLocation location, System.Numerics.Vector3? value)
         {
             if (!value.HasValue) return false;
             if (!CheckIsFinite(location, value)) return false;
             if (value.Value.IsValidNormal()) return false;
 
-            return TryFixData(location, $"is not of unit length: {value.Value.Length()}.");
+            return TryFixDataOrError(location, $"is not of unit length: {value.Value.Length()}.");
         }
 
-        public bool TryFixTangent(ValueLocation location, System.Numerics.Vector4 tangent)
+        public bool TryFixTangentOrError(ValueLocation location, System.Numerics.Vector4 tangent)
         {
-            if (TryFixUnitLength(location, new System.Numerics.Vector3(tangent.X, tangent.Y, tangent.Z))) return true;
+            if (TryFixUnitLengthOrError(location, new System.Numerics.Vector3(tangent.X, tangent.Y, tangent.Z))) return true;
 
             if (tangent.W == 1 || tangent.W == -1) return false;
 
-            return TryFixData(location, $"has invalid value: {tangent.W}. Must be 1.0 or -1.0.");
+            return TryFixDataOrError(location, $"has invalid value: {tangent.W}. Must be 1.0 or -1.0.");
         }
 
         public void CheckIsInRange(ValueLocation location, System.Numerics.Vector4 v, float minInclusive, float maxInclusive)

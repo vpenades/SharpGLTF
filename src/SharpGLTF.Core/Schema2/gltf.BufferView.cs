@@ -201,6 +201,8 @@ namespace SharpGLTF.Schema2
             if (bv.IsIndexBuffer)
             {
                 if (dim != DimensionType.SCALAR) result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor dimensions is: {dim}");
+
+                // TODO: these could by fixed by replacing BYTE by UBYTE, SHORT by USHORT, etc
                 if (enc == EncodingType.BYTE)    result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)byte");
                 if (enc == EncodingType.SHORT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)short");
                 if (enc == EncodingType.FLOAT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is float");
@@ -264,11 +266,11 @@ namespace SharpGLTF.Schema2
             result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as '{usingMode}'.");
         }
 
-        internal void ValidateBufferUsageData(Validation.ValidationContext result)
+        internal void ValidateBufferUsagePlainData(Validation.ValidationContext result)
         {
             if (this._byteStride.HasValue)
             {
-                if (result.TryFixLink("BufferView", "Unexpected ByteStride found. Expected null"))
+                if (result.TryFixLinkOrError("BufferView", "Unexpected ByteStride found. Expected null"))
                 {
                     this._byteStride = null;
                 }
@@ -278,7 +280,7 @@ namespace SharpGLTF.Schema2
 
             if (!this._target.HasValue) return;
 
-            if (result.TryFixLink("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer."))
+            if (result.TryFixLinkOrError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer."))
             {
                 this._target = null;
             }

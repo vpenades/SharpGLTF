@@ -45,6 +45,8 @@ namespace SharpGLTF.Validation
 
         #region API
 
+        public ValidationContext GetContext() { return new ValidationContext(this, _Root); }
+
         public ValidationContext GetContext(TARGET target) { return new ValidationContext(this, target); }
 
         public void AddWarning(ModelException ex)

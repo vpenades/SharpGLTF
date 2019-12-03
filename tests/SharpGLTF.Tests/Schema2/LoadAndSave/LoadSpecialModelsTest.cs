@@ -24,6 +24,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         #endregion
 
+        public void LoadWithCustomImageLoader()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            
+
+            // load Polly model
+            var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath());
+        }
+
         [Test(Description = "Example of traversing the visual tree all the way to individual vertices and indices")]
         public void LoadPollyModel()
         {

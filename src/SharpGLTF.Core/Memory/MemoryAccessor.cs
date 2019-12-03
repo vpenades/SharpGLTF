@@ -198,7 +198,7 @@ namespace SharpGLTF.Memory
 
         #endregion
 
-        #region types
+        #region nested types
 
         private static int _GetSortingScore(string attribute)
         {

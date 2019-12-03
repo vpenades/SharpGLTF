@@ -61,9 +61,7 @@ namespace SharpGLTF
         private static readonly string _BabylonJsPlaygroundDir;
         private static readonly string _GeneratedModelsDir;
 
-        private static readonly string[] _BabylonJsInvalidFiles = { };
-
-        
+        private static readonly string[] _BabylonJsInvalidFiles = { };        
 
         #endregion
 

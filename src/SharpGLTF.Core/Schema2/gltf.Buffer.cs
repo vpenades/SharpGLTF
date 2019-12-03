@@ -44,18 +44,18 @@ namespace SharpGLTF.Schema2
         const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream;base64,";
         const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
 
-        internal void _ResolveUri(AssetReader satelliteReferenceSolver)
+        internal void _ResolveUri(ReadContext context)
         {
-            _Content = _LoadBinaryBufferUnchecked(_uri, satelliteReferenceSolver);
+            _Content = _LoadBinaryBufferUnchecked(_uri, context);
 
             _uri = null; // When _Data is not empty, clear URI
         }
 
-        private static Byte[] _LoadBinaryBufferUnchecked(string uri, AssetReader satelliteReferenceSolver)
+        private static Byte[] _LoadBinaryBufferUnchecked(string uri, ReadContext context)
         {
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? satelliteReferenceSolver.Invoke(uri).ToArray();
+                ?? context.ReadBytes(uri).ToArray();
         }
 
         #endregion

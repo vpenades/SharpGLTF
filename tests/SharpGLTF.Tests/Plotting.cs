@@ -295,7 +295,7 @@ namespace SharpGLTF
 
             points.DrawToFile(fileName);
 
-            NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            if (System.IO.File.Exists(fileName)) NUnit.Framework.TestContext.AddTestAttachment(fileName);
         }
 
         public static void AttachToCurrentTest(this IEnumerable<Plotting.Point2Series> series, string fileName)
