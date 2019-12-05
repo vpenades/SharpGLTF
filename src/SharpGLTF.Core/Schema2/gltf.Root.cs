@@ -54,15 +54,17 @@ namespace SharpGLTF.Schema2
         public ModelRoot DeepClone()
         {
             var dict = new Dictionary<string, ArraySegment<Byte>>();
-            var settings = WriteContext.ForDeepClone(dict);
+            var wcontext = IO.WriteContext
+                .CreateFromDictionary(dict)
+                .WithDeepCloneSettings();
 
-            System.Diagnostics.Debug.Assert(settings._NoCloneWatchdog, "invalid clone settings");
+            System.Diagnostics.Debug.Assert(wcontext._NoCloneWatchdog, "invalid clone settings");
 
-            this.Write(settings, "deepclone");
+            wcontext.WriteTextSchema2("deepclone", this);
 
-            var context = ReadContext.CreateFromDictionary(dict);
-            context.Validation = Validation.ValidationMode.Strict;
-            return context._ReadFromDictionary("deepclone.gltf");
+            var rcontext = IO.ReadContext.CreateFromDictionary(dict);
+            rcontext.Validation = Validation.ValidationMode.Strict;
+            return rcontext._ReadFromDictionary("deepclone.gltf");
         }
 
         #endregion

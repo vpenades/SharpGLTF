@@ -205,7 +205,7 @@ namespace SharpGLTF.Schema2
 
         #region binary read
 
-        internal void _ResolveUri(ReadContext context)
+        internal void _ResolveUri(IO.ReadContext context)
         {
             if (!String.IsNullOrWhiteSpace(_uri))
             {
@@ -217,14 +217,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static Byte[] _LoadImageUnchecked(ReadContext context, string uri)
+        private static Byte[] _LoadImageUnchecked(IO.ReadContext context, string uri)
         {
             return uri._TryParseBase64Unchecked(EMBEDDED_GLTF_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_OCTET_STREAM)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_JPEG_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_PNG_BUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDED_DDS_BUFFER)
-                ?? context.ReadBytes(uri).ToArray();
+                ?? context.ReadAllBytesToEnd(uri).ToArray();
         }
 
         internal void _DiscardContent()
@@ -284,7 +284,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="writer">The satellite asset writer</param>
         /// <param name="satelliteUri">A local satellite URI</param>
-        internal void _WriteToSatellite(AssetWriter writer, string satelliteUri)
+        internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
         {
             if (_SatelliteImageContent == null)
             {
@@ -296,7 +296,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".png";
-                writer(_uri, _SatelliteImageContent.Slice(0) );
+                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
                 return;
             }
 
@@ -304,7 +304,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".jpg";
-                writer(_uri, _SatelliteImageContent.Slice(0) );
+                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
                 return;
             }
 
@@ -312,7 +312,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".dds";
-                writer(_uri, _SatelliteImageContent.Slice(0) );
+                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
                 return;
             }
 
@@ -320,7 +320,7 @@ namespace SharpGLTF.Schema2
             {
                 _mimeType = null;
                 _uri = satelliteUri += ".webp";
-                writer(_uri, _SatelliteImageContent.Slice(0));
+                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0));
                 return;
             }
 
@@ -343,7 +343,7 @@ namespace SharpGLTF.Schema2
 
         /// <summary>
         /// Called by the serializer immediatelly after
-        /// calling <see cref="_WriteToSatellite(AssetWriter, string)"/>
+        /// calling <see cref="_WriteToSatellite(FileWriterCallback, string)"/>
         /// or <see cref="_WriteToInternal"/>
         /// </summary>
         internal void _ClearAfterWrite()

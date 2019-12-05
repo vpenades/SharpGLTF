@@ -124,7 +124,7 @@ namespace SharpGLTF
             }
             else if (fileName.ToLower().EndsWith(".gltf"))
             {
-                model.SaveGLTF(fileName, Newtonsoft.Json.Formatting.Indented);
+                model.Save(fileName, Newtonsoft.Json.Formatting.Indented);
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {

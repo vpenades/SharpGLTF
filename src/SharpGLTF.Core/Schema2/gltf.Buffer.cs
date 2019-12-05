@@ -44,18 +44,18 @@ namespace SharpGLTF.Schema2
         const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream;base64,";
         const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
 
-        internal void _ResolveUri(ReadContext context)
+        internal void _ResolveUri(IO.ReadContext context)
         {
             _Content = _LoadBinaryBufferUnchecked(_uri, context);
 
             _uri = null; // When _Data is not empty, clear URI
         }
 
-        private static Byte[] _LoadBinaryBufferUnchecked(string uri, ReadContext context)
+        private static Byte[] _LoadBinaryBufferUnchecked(string uri, IO.ReadContext context)
         {
             return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
                 ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? context.ReadBytes(uri).ToArray();
+                ?? context.ReadAllBytesToEnd(uri).ToArray();
         }
 
         #endregion
@@ -67,12 +67,12 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="writer">The satellite asset writer</param>
         /// <param name="satelliteUri">A local satellite URI</param>
-        internal void _WriteToSatellite(AssetWriter writer, string satelliteUri)
+        internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
         {
             this._uri = satelliteUri;
             this._byteLength = _Content.Length;
 
-            writer(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()) );
+            writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()) );
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace SharpGLTF.Schema2
 
         /// <summary>
         /// Called by the serializer immediatelly after
-        /// calling <see cref="_WriteToSatellite(AssetWriter, string)"/>
+        /// calling <see cref="_WriteToSatellite(WriteContext, string)"/>
         /// or <see cref="_WriteToInternal"/>
         /// </summary>
         internal void _ClearAfterWrite()

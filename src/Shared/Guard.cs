@@ -51,6 +51,14 @@ namespace SharpGLTF
             throw new ArgumentException(message, parameterName);
         }
 
+        public static void DirectoryPathMustExist(string dirPath, string parameterName, string message = "")
+        {
+            if (System.IO.Directory.Exists(dirPath)) return;
+
+            if (string.IsNullOrWhiteSpace(message)) message = $"{dirPath} is invalid or does not exist.";
+            throw new ArgumentException(message, parameterName);
+        }
+
         #endregion
 
         #region null / empty
