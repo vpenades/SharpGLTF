@@ -333,6 +333,9 @@ namespace SharpGLTF.Animations
         {
             if (collection == null) return null;
 
+            var single = SingleValueSampler<Vector3>.CreateForSingle(collection);
+            if (single != null) return single;
+
             var sampler = new Vector3LinearSampler(collection, isLinear);
 
             return optimize ? sampler.ToFastSampler() : sampler;
@@ -341,6 +344,9 @@ namespace SharpGLTF.Animations
         public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, Quaternion)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
+
+            var single = SingleValueSampler<Quaternion>.CreateForSingle(collection);
+            if (single != null) return single;
 
             var sampler = new QuaternionLinearSampler(collection, isLinear);
 
@@ -351,6 +357,9 @@ namespace SharpGLTF.Animations
         {
             if (collection == null) return null;
 
+            var single = SingleValueSampler<Transforms.SparseWeight8>.CreateForSingle(collection);
+            if (single != null) return single;
+
             var sampler = new SparseLinearSampler(collection, isLinear);
 
             return optimize ? sampler.ToFastSampler() : sampler;
@@ -359,6 +368,9 @@ namespace SharpGLTF.Animations
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection == null) return null;
+
+            var single = SingleValueSampler<Single[]>.CreateForSingle(collection);
+            if (single != null) return single;
 
             var sampler = new ArrayLinearSampler(collection, isLinear);
 
@@ -369,6 +381,9 @@ namespace SharpGLTF.Animations
         {
             if (collection == null) return null;
 
+            var single = SingleValueSampler<Vector3>.CreateForSingle(collection);
+            if (single != null) return single;
+
             var sampler = new Vector3CubicSampler(collection);
 
             return optimize ? sampler.ToFastSampler() : sampler;
@@ -377,6 +392,9 @@ namespace SharpGLTF.Animations
         public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> collection, bool optimize = false)
         {
             if (collection == null) return null;
+
+            var single = SingleValueSampler<Quaternion>.CreateForSingle(collection);
+            if (single != null) return single;
 
             var sampler = new QuaternionCubicSampler(collection);
 
@@ -387,6 +405,9 @@ namespace SharpGLTF.Animations
         {
             if (collection == null) return null;
 
+            var single = SingleValueSampler<Transforms.SparseWeight8>.CreateForSingle(collection);
+            if (single != null) return single;
+
             var sampler = new SparseCubicSampler(collection);
 
             return optimize ? sampler.ToFastSampler() : sampler;
@@ -395,6 +416,9 @@ namespace SharpGLTF.Animations
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection, bool optimize = false)
         {
             if (collection == null) return null;
+
+            var single = SingleValueSampler<Single[]>.CreateForSingle(collection);
+            if (single != null) return single;
 
             var sampler = new ArrayCubicSampler(collection);
 

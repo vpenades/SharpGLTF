@@ -257,8 +257,10 @@ namespace SharpGLTF.Schema2
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal int? _NodeId => this._node;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal PropertyPath _NodePath => this._path;
 
         #endregion
@@ -275,6 +277,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
+    [System.Diagnostics.DebuggerDisplay("AnimChannel LogicalNode[{TargetNode.LogicalIndex}].{TargetNodePath}")]
     sealed partial class AnimationChannel : IChildOf<Animation>
     {
         #region lifecycle
@@ -302,6 +305,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the <see cref="Animation"/> instance that owns this object.
         /// </summary>
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Animation LogicalParent { get; private set; }
 
         void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }

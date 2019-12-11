@@ -6,6 +6,61 @@ using System.Text;
 
 namespace SharpGLTF.Animations
 {
+    struct SingleValueSampler<T> : ICurveSampler<T>, IConvertibleCurve<T>
+    {
+        #region lifecycle
+
+        public static ICurveSampler<T> CreateForSingle(IEnumerable<(float Key, T Value)> sequence)
+        {
+            if (sequence.Skip(1).Any()) return null;
+
+            return new SingleValueSampler<T>(sequence.First().Value);
+        }
+
+        public static ICurveSampler<T> CreateForSingle(IEnumerable<(float Key, (T, T, T) Value)> sequence)
+        {
+            if (sequence.Skip(1).Any()) return null;
+
+            return new SingleValueSampler<T>(sequence.First().Value.Item2);
+        }
+
+        private SingleValueSampler(T value)
+        {
+            _Value = value;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly T _Value;
+
+        #endregion
+
+        #region API
+
+        public int MaxDegree => 0;
+
+        public T GetPoint(float offset) { return _Value; }
+
+        public IReadOnlyDictionary<float, T> ToLinearCurve()
+        {
+            return new Dictionary<float, T> { [0] = _Value };
+        }
+
+        public IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve()
+        {
+            return new Dictionary<float, (T, T, T)> { [0] = (default, _Value, default) };
+        }
+
+        public IReadOnlyDictionary<float, T> ToStepCurve()
+        {
+            return new Dictionary<float, T> { [0] = _Value };
+        }
+
+        #endregion
+    }
+
     /// <summary>
     /// Defines a <see cref="Vector3"/> curve sampler that can be sampled with STEP or LINEAR interpolations.
     /// </summary>

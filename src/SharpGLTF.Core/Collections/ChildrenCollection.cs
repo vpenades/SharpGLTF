@@ -7,7 +7,6 @@ using System.Text;
 namespace SharpGLTF.Collections
 {
     [System.Diagnostics.DebuggerDisplay("{Count}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CollectionDebugProxy<>))]
     sealed class ChildrenCollection<T, TParent> : IList<T>, IReadOnlyList<T>
         where T : class, IChildOf<TParent>
         where TParent : class
@@ -27,7 +26,7 @@ namespace SharpGLTF.Collections
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly TParent _Parent;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private List<T> _Collection;
 
         #endregion
@@ -64,6 +63,7 @@ namespace SharpGLTF.Collections
 
         public int Count => _Collection == null ? 0 : _Collection.Count;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public bool IsReadOnly => false;
 
         #endregion

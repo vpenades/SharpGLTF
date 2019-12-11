@@ -106,6 +106,29 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
         }
 
+        [Test]
+        public void LoadMouseModel()
+        {
+            // this model has several nodes with curve animations containing a single animation key,
+            // which is causing some problems to the interpolator.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var path = "Assets\\SpecialCases\\mouse.glb";
+
+            var model = ModelRoot.Load(path);
+
+            var channel = model.LogicalAnimations[1].FindRotationSampler(model.LogicalNodes[5]);
+
+            var node5_R_00 = channel.CreateCurveSampler(true).GetPoint(0);
+            var node5_R_01 = channel.CreateCurveSampler(true).GetPoint(1);
+
+            Assert.AreEqual(node5_R_00, node5_R_01);
+
+            model.AttachToCurrentTest("mouse_00.obj", model.LogicalAnimations[1], 0f);
+            model.AttachToCurrentTest("mouse_01.obj", model.LogicalAnimations[1], 1f);
+        }
+
         // these models show normal mapping but lack tangents, which are expected to be
         // generated at runtime; These tests generate the tangents and check them against the baseline.
         [TestCase("NormalTangentTest.glb")]
