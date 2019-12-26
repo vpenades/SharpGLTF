@@ -135,6 +135,54 @@ namespace SharpGLTF.Schema2
             return context.ReadBinarySchema2(stream);
         }
 
+        /// <summary>
+        /// Gets the list of satellite / dependency files for a given glTF file.
+        /// This includes binary blobs and texture images.
+        /// </summary>
+        /// <param name="filePath">A valid file path.</param>
+        /// <returns>A list of relative file paths, as found in the file.</returns>
+        /// <remarks>
+        /// This method is designed to be as fast as possible, and it avoids performing much
+        /// of the validation and parsing of a glTf file, it just blindly looks for URI fields.
+        /// </remarks>
+        public static string[] GetSatellitePaths(string filePath)
+        {
+            Guard.FilePathMustExist(filePath, nameof(filePath));
+
+            var context = IO.ReadContext.CreateFromFile(filePath);
+
+            string json = null;
+
+            using (var s = File.OpenRead(filePath))
+            {
+                json = context.ReadJson(s);
+            }
+
+            return ParseSatellitePaths(json);
+        }
+
+        private static string[] ParseSatellitePaths(string json)
+        {
+            var rss = Newtonsoft.Json.Linq.JObject.Parse(json);
+
+            var buffers = rss["buffers"]?.Select(item => (String)item["uri"]);
+            var images = rss["images"]?.Select(item => (String)item["uri"]);
+
+            IEnumerable<string> uris = buffers;
+
+            if (images != null)
+            {
+                uris = uris == null ? images : uris.Concat(images);
+            }
+
+            uris = uris
+                .Where(uri => !string.IsNullOrWhiteSpace(uri))
+                .Where(uri => !uri.StartsWith("data:", StringComparison.Ordinal))
+                .Distinct();
+
+            return uris.ToArray();
+        }
+
         #endregion
 
         #region externals dependencies resolver

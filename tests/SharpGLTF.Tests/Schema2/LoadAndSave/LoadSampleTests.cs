@@ -344,5 +344,28 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
 
         }
+
+
+
+        [Test]
+        public void FindDependencyFiles()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            foreach (var f in TestFiles.GetBabylonJSValidModelsPaths())
+            {
+                TestContext.WriteLine(f);
+
+                var dependencies = ModelRoot.GetSatellitePaths(f);
+
+                foreach(var d in dependencies)
+                {
+                    TestContext.WriteLine($"    {d}");
+                }
+
+                TestContext.WriteLine();
+            }
+        }
     }
 }

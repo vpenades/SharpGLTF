@@ -102,6 +102,25 @@ namespace SharpGLTF.IO
             return new MemoryStream(content.Array, content.Offset, content.Count);
         }
 
+        public String ReadJson(Stream stream)
+        {
+            Guard.NotNull(stream, nameof(stream));
+
+            bool binaryFile = glb._Identify(stream);
+
+            if (binaryFile)
+            {
+                var chunks = glb.ReadBinaryFile(stream);
+
+                return Encoding.UTF8.GetString(chunks[glb.CHUNKJSON]);
+            }
+
+            using (var streamReader = new StreamReader(stream))
+            {
+                return streamReader.ReadToEnd();
+            }
+        }
+
         /// <summary>
         /// Reads a <see cref="SCHEMA2"/> instance from a <see cref="Stream"/> containing a GLB or a GLTF file.
         /// </summary>
