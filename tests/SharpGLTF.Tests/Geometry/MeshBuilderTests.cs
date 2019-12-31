@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Schema2;
+using SharpGLTF.Geometry.Parametric;
 
 namespace SharpGLTF.Geometry
 {
@@ -275,7 +276,40 @@ namespace SharpGLTF.Geometry
             var indices = new[] { (0,1,2) } as IEnumerable<(int,int,int)>;
 
             VertexBufferColumns.CalculateTangents(new[] { (vertices, indices) });
+        }
 
+        [Test]
+        public void CloneMeshBuilder()
+        {
+            var material1 = Materials.MaterialBuilder.CreateDefault();
+            var material2 = Materials.MaterialBuilder.CreateDefault();
+
+            var mesh = new MeshBuilder<VertexPosition>();
+            mesh.AddCube(material1, Matrix4x4.Identity);
+            mesh.AddSphere(material2, 5, Matrix4x4.CreateTranslation(0, 10, 0));
+
+            var cloned1 = mesh.Clone( m => m.Clone() );
+
+            var primitivePairs = mesh.Primitives.Zip(cloned1.Primitives, (src, dst) => (src, dst));
+
+            foreach(var (src, dst) in primitivePairs)
+            {
+                Assert.AreNotSame(src.Material, dst.Material);
+                Assert.AreEqual(src.Triangles.Count, dst.Triangles.Count);
+
+                CollectionAssert.AreEqual(src.Triangles, dst.Triangles);
+            }
+
+            var material3 = Materials.MaterialBuilder.CreateDefault();
+            
+            // force all geometries to use a single material,
+            // which should result in a mesh with with all the primitives
+            // of the source mesh merged into a single primitive.
+            var cloned2 = cloned1.Clone(m => material3);
+
+            Assert.AreEqual(1, cloned2.Primitives.Count);
+            Assert.AreSame(material3, cloned2.Primitives.First().Material);
+            Assert.AreEqual(cloned1.Primitives.Sum(item => item.Triangles.Count), cloned2.Primitives.Sum(item => item.Triangles.Count));
         }
     }
 }

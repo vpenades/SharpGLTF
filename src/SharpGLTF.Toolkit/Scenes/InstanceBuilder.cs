@@ -15,15 +15,6 @@ namespace SharpGLTF.Scenes
             _Parent = parent;
         }
 
-        internal InstanceBuilder DeepClone(SceneBuilder newParent)
-        {
-            var clone = new InstanceBuilder(newParent);
-            clone._Name = this.Name;
-            clone._ContentTransformer = this._ContentTransformer?.DeepClone();
-
-            return clone;
-        }
-
         #endregion
 
         #region data
@@ -31,7 +22,7 @@ namespace SharpGLTF.Scenes
         private string _Name;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly SceneBuilder _Parent;
+        private SceneBuilder _Parent;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private ContentTransformer _ContentTransformer;
@@ -55,6 +46,23 @@ namespace SharpGLTF.Scenes
         #endregion
 
         #region API
+
+        public void Remove()
+        {
+            if (_Parent == null) return;
+
+            _Parent._Instances.Remove(this);
+            _Parent = null;
+        }
+
+        internal InstanceBuilder _CopyTo(SceneBuilder other)
+        {
+            var clone = new InstanceBuilder(other);
+            clone._Name = this._Name;
+            clone._ContentTransformer = this._ContentTransformer?.DeepClone();
+
+            return clone;
+        }
 
         void SCHEMA2SCENE.Setup(Schema2.Scene dstScene, Schema2SceneBuilder context)
         {

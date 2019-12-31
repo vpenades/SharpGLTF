@@ -161,6 +161,12 @@ namespace SharpGLTF.Scenes
     {
         #region from SceneBuilder to Schema2
 
+        /// <summary>
+        /// Convertes a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <param name="srcScenes">A collection of scenes</param>
+        /// <param name="useStridedBuffers">True to generate strided vertex buffers whenever possible.</param>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers = true)
         {
             Guard.NotNull(srcScenes, nameof(srcScenes));
@@ -199,6 +205,8 @@ namespace SharpGLTF.Scenes
             dstScene.Name = this.Name;
 
             context.AddScene(dstScene, this);
+
+            dstModel.DefaultScene = dstScene;
 
             return dstModel;
         }

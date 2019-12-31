@@ -31,7 +31,14 @@ namespace SharpGLTF.Geometry
 
         internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc)
         {
-            _BaseVertexFunc = baseVertexFunc;
+            this._BaseVertexFunc = baseVertexFunc;
+            this._MorphVertices = new Dictionary<int, TvG>();
+        }
+
+        internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc, PrimitiveMorphTargetBuilder<TvG> other)
+        {
+            this._BaseVertexFunc = baseVertexFunc;
+            this._MorphVertices = new Dictionary<int, TvG>(other._MorphVertices);
         }
 
         #endregion
@@ -40,7 +47,7 @@ namespace SharpGLTF.Geometry
 
         private readonly Func<int, TvG> _BaseVertexFunc;
 
-        private readonly Dictionary<int, TvG> _MorphVertices = new Dictionary<int, TvG>();
+        private readonly Dictionary<int, TvG> _MorphVertices;
 
         #endregion
 

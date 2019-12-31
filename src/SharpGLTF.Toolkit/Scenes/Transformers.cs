@@ -29,7 +29,15 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(other, nameof(other));
 
-            this._Content = other._Content;
+            if (other._Content is ICloneable cloneable)
+            {
+                this._Content = cloneable.Clone();
+            }
+            else
+            {
+                this._Content = other._Content;
+            }
+
             this._Morphings = other._Morphings?.Clone();
         }
 

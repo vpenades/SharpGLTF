@@ -7,6 +7,12 @@ namespace SharpGLTF.Scenes
 {
     public abstract class CameraBuilder
     {
+        #region lifecycle
+
+        public abstract CameraBuilder Clone();
+
+        #endregion
+
         #region properties
 
         public static Vector3 LocalDirection => -Vector3.UnitZ;
@@ -25,7 +31,7 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
-        #region types
+        #region Nested types
 
         #pragma warning disable CA1034 // Nested types should not be visible
 
@@ -43,6 +49,19 @@ namespace SharpGLTF.Scenes
             }
 
             internal Orthographic(Schema2.CameraOrthographic ortho)
+            {
+                this.XMag = ortho.XMag;
+                this.YMag = ortho.YMag;
+                this.ZNear = ortho.ZNear;
+                this.ZFar = ortho.ZFar;
+            }
+
+            public override CameraBuilder Clone()
+            {
+                return new Orthographic(this);
+            }
+
+            internal Orthographic(Orthographic ortho)
             {
                 this.XMag = ortho.XMag;
                 this.YMag = ortho.YMag;
@@ -86,6 +105,19 @@ namespace SharpGLTF.Scenes
             }
 
             internal Perspective(Schema2.CameraPerspective persp)
+            {
+                this.AspectRatio = persp.AspectRatio;
+                this.VerticalFOV = persp.VerticalFOV;
+                this.ZNear = persp.ZNear;
+                this.ZFar = persp.ZFar;
+            }
+
+            public override CameraBuilder Clone()
+            {
+                return new Perspective(this);
+            }
+
+            internal Perspective(Perspective persp)
             {
                 this.AspectRatio = persp.AspectRatio;
                 this.VerticalFOV = persp.VerticalFOV;

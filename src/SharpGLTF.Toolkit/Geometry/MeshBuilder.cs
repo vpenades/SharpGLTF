@@ -53,6 +53,46 @@ namespace SharpGLTF.Geometry
             _VertexPreprocessor.SetSanitizerPreprocessors();
         }
 
+        IMeshBuilder<TMaterial> IMeshBuilder<TMaterial>.Clone(Func<TMaterial, TMaterial> materialCloneCallback)
+        {
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(this, materialCloneCallback);
+        }
+
+        public MeshBuilder<TMaterial, TvG, TvM, TvS> Clone(Func<TMaterial, TMaterial> materialCloneCallback = null)
+        {
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(this, materialCloneCallback);
+        }
+
+        private MeshBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> other, Func<TMaterial, TMaterial> materialCloneCallback = null)
+        {
+            Guard.NotNull(other, nameof(other));
+
+            this.Name = other.Name;
+            this._VertexPreprocessor = other._VertexPreprocessor;
+
+            foreach (var kvp in other._Primitives)
+            {
+                var material = kvp.Key.Material;
+
+                if (materialCloneCallback != null)
+                {
+                    material = materialCloneCallback(material);
+                    if (material == null) continue;
+                }
+
+                var key = (material, kvp.Key.PrimType);
+
+                if (_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> existing))
+                {
+                    existing.AddPrimitive(kvp.Value, null);
+                }
+                else
+                {
+                    _Primitives[key] = kvp.Value.Clone(this, material);
+                }
+            }
+        }
+
         #endregion
 
         #region data

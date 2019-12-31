@@ -123,6 +123,24 @@ namespace SharpGLTF.Geometry
             this._Material = material;
         }
 
+        protected PrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, PrimitiveBuilder<TMaterial, TvG, TvM, TvS> other, TMaterial material)
+        {
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(other, nameof(other));
+
+            this._Mesh = mesh;
+            this._Material = material ?? other.Material;
+            other._Vertices.CopyTo(this._Vertices);
+
+            foreach (var otherMT in other._MorphTargets)
+            {
+                var thisMT = new PrimitiveMorphTargetBuilder<TvG>(idx => this._Vertices[idx].Geometry, otherMT);
+                this._MorphTargets.Add(otherMT);
+            }
+        }
+
+        internal abstract PrimitiveBuilder<TMaterial, TvG, TvM, TvS> Clone(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material);
+
         #endregion
 
         #region data
@@ -302,60 +320,62 @@ namespace SharpGLTF.Geometry
         {
             if (primitive == null) return;
 
+            if (vertexTransformFunc == null) vertexTransformFunc = v => v;
+
             // vertex-vertex map so we can know where to set the morph targets.
             var vmap = new Dictionary<int, int>();
 
             if (this.VerticesPerPrimitive == 1)
             {
-                foreach (var p in primitive.Points)
+                foreach (var src in primitive.Points)
                 {
-                    var a = vertexTransformFunc(primitive.Vertices[p]);
+                    var vrt = vertexTransformFunc(primitive.Vertices[src]);
 
-                    var idx = AddPoint(a);
+                    var idx = AddPoint(vrt);
 
-                    vmap[p] = idx;
+                    vmap[src] = idx;
                 }
             }
 
             if (this.VerticesPerPrimitive == 2)
             {
-                foreach (var l in primitive.Lines)
+                foreach (var (srcA, srcB) in primitive.Lines)
                 {
-                    var a = vertexTransformFunc(primitive.Vertices[l.A]);
-                    var b = vertexTransformFunc(primitive.Vertices[l.B]);
+                    var vrtA = vertexTransformFunc(primitive.Vertices[srcA]);
+                    var vrtB = vertexTransformFunc(primitive.Vertices[srcB]);
 
-                    var indices = AddLine(a, b);
+                    var (dstA, dstB) = AddLine(vrtA, vrtB);
 
-                    vmap[l.A] = indices.A;
-                    vmap[l.B] = indices.B;
+                    vmap[srcA] = dstA;
+                    vmap[srcB] = dstB;
                 }
             }
 
             if (this.VerticesPerPrimitive == 3)
             {
-                foreach (var s in primitive.Surfaces)
+                foreach (var (srcA, srcB, srcC, srcD) in primitive.Surfaces)
                 {
-                    var a = vertexTransformFunc(primitive.Vertices[s.A]);
-                    var b = vertexTransformFunc(primitive.Vertices[s.B]);
-                    var c = vertexTransformFunc(primitive.Vertices[s.C]);
+                    var vrtA = vertexTransformFunc(primitive.Vertices[srcA]);
+                    var vrtB = vertexTransformFunc(primitive.Vertices[srcB]);
+                    var vrtC = vertexTransformFunc(primitive.Vertices[srcC]);
 
-                    if (s.D.HasValue)
+                    if (srcD.HasValue)
                     {
-                        var d = vertexTransformFunc(primitive.Vertices[s.D.Value]);
-                        var indices = AddQuadrangle(a, b, c, d);
+                        var vrtD = vertexTransformFunc(primitive.Vertices[srcD.Value]);
+                        var (dstA, dstB, dstC, dstD) = AddQuadrangle(vrtA, vrtB, vrtC, vrtD);
 
-                        vmap[s.A] = indices.A;
-                        vmap[s.B] = indices.B;
-                        vmap[s.C] = indices.C;
-                        vmap[s.D.Value] = indices.D;
+                        vmap[srcA] = dstA;
+                        vmap[srcB] = dstB;
+                        vmap[srcC] = dstC;
+                        vmap[srcD.Value] = dstD;
                     }
                     else
                     {
-                        var indices = AddTriangle(a, b, c);
+                        var (dstA, dstB, dstC) = AddTriangle(vrtA, vrtB, vrtC);
 
-                        vmap[s.A] = indices.A;
-                        vmap[s.B] = indices.B;
-                        vmap[s.C] = indices.C;
+                        vmap[srcA] = dstA;
+                        vmap[srcB] = dstB;
+                        vmap[srcC] = dstC;
                     }
                 }
             }
@@ -452,6 +472,16 @@ namespace SharpGLTF.Geometry
         {
         }
 
+        internal override PrimitiveBuilder<TMaterial, TvG, TvM, TvS> Clone(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material)
+        {
+            return new PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(mesh, this, material);
+        }
+
+        private PointsPrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS> other, TMaterial material)
+            : base(mesh, other, material)
+        {
+        }
+
         #endregion
 
         #region properties
@@ -514,6 +544,17 @@ namespace SharpGLTF.Geometry
         {
         }
 
+        internal override PrimitiveBuilder<TMaterial, TvG, TvM, TvS> Clone(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material)
+        {
+            return new LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(mesh, this, material);
+        }
+
+        private LinesPrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS> other, TMaterial material)
+            : base(mesh, other, material)
+        {
+            this._Indices.AddRange(other._Indices);
+        }
+
         #endregion
 
         #region data
@@ -574,6 +615,18 @@ namespace SharpGLTF.Geometry
         internal TrianglesPrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material)
             : base(mesh, material)
         {
+        }
+
+        internal override PrimitiveBuilder<TMaterial, TvG, TvM, TvS> Clone(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TMaterial material)
+        {
+            return new TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS>(mesh, this, material);
+        }
+
+        private TrianglesPrimitiveBuilder(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS> other, TMaterial material)
+            : base(mesh, other, material)
+        {
+            this._TriIndices.AddRange(other._TriIndices);
+            this._QuadIndices.AddRange(other._QuadIndices);
         }
 
         #endregion

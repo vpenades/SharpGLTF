@@ -21,6 +21,30 @@ namespace SharpGLTF.Materials
             return new MaterialBuilder("Default");
         }
 
+        public MaterialBuilder Clone() { return new MaterialBuilder(this); }
+
+        public MaterialBuilder(MaterialBuilder other)
+        {
+            Guard.NotNull(other, nameof(other));
+
+            this.Name = other.Name;
+            this.AlphaMode = other.AlphaMode;
+            this.AlphaCutoff = other.AlphaCutoff;
+            this.DoubleSided = other.DoubleSided;
+            this.ShaderStyle = other.ShaderStyle;
+
+            this._CompatibilityFallbackMaterial = other._CompatibilityFallbackMaterial == null
+                ? null
+                : new MaterialBuilder(other._CompatibilityFallbackMaterial);
+
+            foreach (var otherChannel in other._Channels)
+            {
+                var thisChannel = UseChannel(otherChannel.Key);
+
+                otherChannel.CopyTo(thisChannel);
+            }
+        }
+
         #endregion
 
         #region data

@@ -16,9 +16,10 @@ namespace SharpGLTF.Collections
 
         private readonly List<T> _Vertices = new List<T>();
 
-        private readonly T[] _VertexProbe = new T[1];
-
         private readonly Dictionary<VertexKey, int> _VertexCache = new Dictionary<VertexKey, int>();
+
+        [ThreadStatic]
+        private readonly T[] _VertexProbe = new T[1];
 
         #endregion
 
@@ -64,6 +65,18 @@ namespace SharpGLTF.Collections
                 var key = new VertexKey(_Vertices, i);
 
                 _VertexCache[key] = i;
+            }
+        }
+
+        public void CopyTo(VertexList<T> dst)
+        {
+            for (int i = 0; i < this._Vertices.Count; ++i)
+            {
+                var v = this._Vertices[i];
+
+                var idx = dst._Vertices.Count;
+                dst._Vertices.Add(v);
+                dst._VertexCache[new VertexKey(dst._Vertices, idx)] = idx;
             }
         }
 

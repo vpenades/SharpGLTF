@@ -125,6 +125,22 @@ namespace SharpGLTF.Materials
 
         #region API
 
+        internal void CopyTo(TextureBuilder other)
+        {
+            other._PrimaryImageContent = this._PrimaryImageContent;
+            other._FallbackImageContent = this._FallbackImageContent;
+
+            other.CoordinateSet = this.CoordinateSet;
+
+            other.MinFilter = this.MinFilter;
+            other.MagFilter = this.MagFilter;
+            other.WrapS = this.WrapS;
+            other.WrapT = this.WrapT;
+
+            var xform = new TextureTransformBuilder(this._Transform);
+            other._Transform = xform.IsDefault ? null : xform;
+        }
+
         public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
 
         [Obsolete("Use WithPrimaryImage instead.")]
@@ -259,6 +275,14 @@ namespace SharpGLTF.Materials
             this.Scale = scale;
             this.Rotation = rotation;
             this.CoordinateSetOverride = coordSetOverride;
+        }
+
+        internal TextureTransformBuilder(TextureTransformBuilder other)
+        {
+            this.Offset = other?.Offset ?? Vector2.Zero;
+            this.Scale = other?.Scale ?? Vector2.One;
+            this.Rotation = other?.Rotation ?? 0;
+            this.CoordinateSetOverride = other?.CoordinateSetOverride;
         }
 
         #endregion

@@ -86,6 +86,20 @@ namespace SharpGLTF.Materials
 
         #region API
 
+        internal void CopyTo(ChannelBuilder other)
+        {
+            other.Parameter = this.Parameter;
+
+            if (this.Texture == null)
+            {
+                RemoveTexture();
+            }
+            else
+            {
+                this.Texture.CopyTo(other.UseTexture());
+            }
+        }
+
         public void SetDefaultParameter()
         {
             switch (_Key)
@@ -116,7 +130,7 @@ namespace SharpGLTF.Materials
 
         #endregion
 
-        #region Support types
+        #region Nested types
 
         sealed class _ContentComparer : IEqualityComparer<ChannelBuilder>
         {

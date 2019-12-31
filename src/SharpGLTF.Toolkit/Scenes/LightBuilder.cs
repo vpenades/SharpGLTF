@@ -7,6 +7,8 @@ namespace SharpGLTF.Scenes
 {
     public abstract class LightBuilder
     {
+        #region lifecycle
+
         protected LightBuilder(Schema2.PunctualLight light)
         {
             Guard.NotNull(light, nameof(light));
@@ -14,6 +16,18 @@ namespace SharpGLTF.Scenes
             this.Color = light.Color;
             this.Intensity = light.Intensity;
         }
+
+        public abstract LightBuilder Clone();
+
+        protected LightBuilder(LightBuilder other)
+        {
+            this.Color = other.Color;
+            this.Intensity = other.Intensity;
+        }
+
+        #endregion
+
+        #region data
 
         public static Vector3 LocalDirection => -Vector3.UnitZ;
 
@@ -29,25 +43,55 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public Single Intensity { get; set; }
 
-        #region types
+        #endregion
+
+        #region Nested types
 
         #pragma warning disable CA1034 // Nested types should not be visible
 
         [System.Diagnostics.DebuggerDisplay("Directional")]
         public sealed class Directional : LightBuilder
         {
+            #region lifecycle
             internal Directional(Schema2.PunctualLight light)
                 : base(light) { }
+
+            public override LightBuilder Clone()
+            {
+                return new Directional(this);
+            }
+
+            private Directional(Directional other)
+                : base(other) { }
+
+            #endregion
         }
 
         [System.Diagnostics.DebuggerDisplay("Point")]
         public sealed class Point : LightBuilder
         {
+            #region lifecycle
+
             internal Point(Schema2.PunctualLight light)
                 : base(light)
             {
                 this.Range = light.Range;
             }
+
+            public override LightBuilder Clone()
+            {
+                return new Point(this);
+            }
+
+            private Point(Point other)
+                : base(other)
+            {
+                this.Range = other.Range;
+            }
+
+            #endregion
+
+            #region data
 
             /// <summary>
             /// Gets or sets a Hint defining a distance cutoff at which the light's intensity may be considered
@@ -55,12 +99,16 @@ namespace SharpGLTF.Scenes
             /// When undefined, range is assumed to be infinite.
             /// </summary>
             public Single Range { get; set; }
+
+            #endregion
         }
 
         [System.Diagnostics.DebuggerDisplay("Spot")]
 
         public sealed class Spot : LightBuilder
         {
+            #region lifecycle
+
             internal Spot(Schema2.PunctualLight light)
                 : base(light)
             {
@@ -68,6 +116,23 @@ namespace SharpGLTF.Scenes
                 this.InnerConeAngle = light.InnerConeAngle;
                 this.OuterConeAngle = light.OuterConeAngle;
             }
+
+            public override LightBuilder Clone()
+            {
+                return new Spot(this);
+            }
+
+            private Spot(Spot other)
+                : base(other)
+            {
+                this.Range = other.Range;
+                this.InnerConeAngle = other.InnerConeAngle;
+                this.OuterConeAngle = other.OuterConeAngle;
+            }
+
+            #endregion
+
+            #region data
 
             /// <summary>
             /// Gets or sets a Hint defining a distance cutoff at which the light's intensity may be considered
@@ -87,6 +152,8 @@ namespace SharpGLTF.Scenes
             /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
             /// </summary>
             public Single OuterConeAngle { get; set; }
+
+            #endregion
         }
 
         #pragma warning restore CA1034 // Nested types should not be visible
