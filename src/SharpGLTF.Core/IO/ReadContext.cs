@@ -106,13 +106,13 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            bool binaryFile = glb._Identify(stream);
+            bool binaryFile = BinarySerialization._Identify(stream);
 
             if (binaryFile)
             {
-                var chunks = glb.ReadBinaryFile(stream);
+                var chunks = BinarySerialization.ReadBinaryFile(stream);
 
-                return Encoding.UTF8.GetString(chunks[glb.CHUNKJSON]);
+                return Encoding.UTF8.GetString(chunks[BinarySerialization.CHUNKJSON]);
             }
 
             using (var streamReader = new StreamReader(stream))
@@ -130,7 +130,7 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            bool binaryFile = glb._Identify(stream);
+            bool binaryFile = BinarySerialization._Identify(stream);
 
             return binaryFile ? ReadBinarySchema2(stream) : ReadTextSchema2(stream);
         }
@@ -188,7 +188,7 @@ namespace SharpGLTF.IO
         {
             using (var stream = File.OpenRead(filePath))
             {
-                bool isBinary = glb._Identify(stream);
+                bool isBinary = BinarySerialization._Identify(stream);
 
                 if (isBinary) return _ReadGLB(stream).Validation;
 
@@ -226,16 +226,16 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            var chunks = glb.ReadBinaryFile(stream);
+            var chunks = BinarySerialization.ReadBinaryFile(stream);
 
-            var dom = Encoding.UTF8.GetString(chunks[glb.CHUNKJSON]);
+            var dom = Encoding.UTF8.GetString(chunks[BinarySerialization.CHUNKJSON]);
 
             var context = this;
 
-            if (chunks.ContainsKey(glb.CHUNKBIN))
+            if (chunks.ContainsKey(BinarySerialization.CHUNKBIN))
             {
                 context = new ReadContext(context); // clone instance
-                context._BinaryChunk = chunks[glb.CHUNKBIN];
+                context._BinaryChunk = chunks[BinarySerialization.CHUNKBIN];
             }
 
             return context._ParseGLTF(dom);

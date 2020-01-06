@@ -181,7 +181,7 @@ namespace SharpGLTF.IO
             model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, true);
             Guard.NotNull(model, nameof(model));
 
-            var ex = glb.IsBinaryCompatible(model);
+            var ex = BinarySerialization.IsBinaryCompatible(model);
             if (ex != null) throw ex;
 
             model._PrepareBuffersForInternalWriting();
@@ -192,7 +192,7 @@ namespace SharpGLTF.IO
             {
                 using (var w = new BinaryWriter(m))
                 {
-                    glb.WriteBinaryModel(w, model);
+                    BinarySerialization.WriteBinaryModel(w, model);
                 }
 
                 WriteAllBytesToEnd($"{baseName}.glb", m.ToArraySegment());

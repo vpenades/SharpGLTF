@@ -124,7 +124,7 @@ namespace SharpGLTF.Schema2
     {
         /// <summary>
         /// Creates a new <see cref="Mesh"/> instance
-        /// and adds it to <see cref="ModelRoot.LogicalMeshes"/>.
+        /// and appends it to <see cref="ModelRoot.LogicalMeshes"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Mesh"/> instance.</returns>

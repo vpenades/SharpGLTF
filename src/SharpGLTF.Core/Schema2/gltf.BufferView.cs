@@ -300,7 +300,7 @@ namespace SharpGLTF.Schema2
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
         /// <returns>A <see cref="BufferView"/> instance.</returns>
-        public BufferView UseBufferView(ArraySegment<Byte> data, int byteStride = 0, BufferMode? target = null)
+        public BufferView UseBufferView(BYTES data, int byteStride = 0, BufferMode? target = null)
         {
             Guard.NotNull(data.Array, nameof(data));
             return UseBufferView(data.Array, data.Offset, data.Count, byteStride, target);

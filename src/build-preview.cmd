@@ -34,4 +34,7 @@ dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Toolkit\Sharp
 rem dotnet nuget push "SharpGLTF.Core/bin/Release/SharpGLTF.Core.1.0.0-%VERSIONSUFFIX%.nupkg" --source "github"
 rem dotnet nuget push "SharpGLTF.Toolkit/bin/Release/SharpGLTF.Toolkit.1.0.0-%VERSIONSUFFIX%.nupkg" --source "github"
 
+nuget push "SharpGLTF.Core/bin/Release/SharpGLTF.Core.1.0.0-%VERSIONSUFFIX%.nupkg" -src "github"
+nuget push "SharpGLTF.Toolkit/bin/Release/SharpGLTF.Toolkit.1.0.0-%VERSIONSUFFIX%.nupkg" -src "github"
+
 pause

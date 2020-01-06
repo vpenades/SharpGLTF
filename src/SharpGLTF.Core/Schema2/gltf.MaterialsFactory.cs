@@ -121,24 +121,6 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    public partial class ModelRoot
-    {
-        /// <summary>
-        /// Creates a new <see cref="Material"/> instance and adds it to <see cref="ModelRoot.LogicalMaterials"/>.
-        /// </summary>
-        /// <param name="name">The name of the instance.</param>
-        /// <returns>A <see cref="Material"/> instance.</returns>
-        public Material CreateMaterial(string name = null)
-        {
-            var mat = new Material();
-            mat.Name = name;
-
-            _materials.Add(mat);
-
-            return mat;
-        }
-    }
-
     internal sealed partial class MaterialPBRMetallicRoughness
     {
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()

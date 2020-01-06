@@ -243,7 +243,7 @@ namespace SharpGLTF.Schema2
     {
         /// <summary>
         /// Creates a new <see cref="Camera"/> instance.
-        /// and adds it to <see cref="ModelRoot.LogicalCameras"/>.
+        /// and appends it to <see cref="ModelRoot.LogicalCameras"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Camera"/> instance.</returns>

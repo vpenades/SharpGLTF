@@ -383,7 +383,7 @@ namespace SharpGLTF.Schema2
     {
         /// <summary>
         /// Creates a new <see cref="Image"/> instance.
-        /// and adds it to <see cref="ModelRoot.LogicalImages"/>.
+        /// and appends it to <see cref="ModelRoot.LogicalImages"/>.
         /// </summary>
         /// <param name="name">The name of the instance.</param>
         /// <returns>A <see cref="Image"/> instance.</returns>
