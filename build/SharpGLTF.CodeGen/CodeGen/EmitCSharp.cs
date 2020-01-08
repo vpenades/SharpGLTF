@@ -1,4 +1,6 @@
-﻿using System;
+﻿// #define USENEWTONSOFT
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -331,7 +333,12 @@ namespace SharpGLTF.CodeGen
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Text;");
             sb.AppendLine("using System.Numerics;");
+
+            #if USENEWTONSOFT
             sb.AppendLine("using Newtonsoft.Json;");
+            #else
+            sb.AppendLine("using System.Text.Json;");
+            #endif
             sb.AppendLine();
 
             sb.AppendLine($"namespace {Constants.OutputNamespace}");
@@ -471,7 +478,7 @@ namespace SharpGLTF.CodeGen
             yield return string.Empty;
         }            
 
-        #endregion
+#endregion
     }
 
     /// <summary>
@@ -503,6 +510,8 @@ namespace SharpGLTF.CodeGen
 
         public bool HasBaseClass { get; set; }
 
+        private const string _READERMODIFIER = "ref ";
+
         #endregion
 
         #region API
@@ -526,7 +535,7 @@ namespace SharpGLTF.CodeGen
                     this.AddFieldSerializerCase(smethod);
 
                     // emit deserializer
-                    this.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(etype)}>(reader);");
+                    this.AddFieldDeserializerCase(f.PersistentName, $"{frname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(etype)}>({_READERMODIFIER}reader);");
 
                     continue;
                 }
@@ -565,15 +574,15 @@ namespace SharpGLTF.CodeGen
             if (f.FieldType is ArrayType atype)
             {
                 var titem = _Emitter._GetRuntimeName(atype.ItemType);
-                return $"DeserializePropertyList<{titem}>(reader, {fname});";
+                return $"DeserializePropertyList<{titem}>({_READERMODIFIER}reader, {fname});";
             }
             else if (f.FieldType is DictionaryType dtype)
             {
                 var titem = _Emitter._GetRuntimeName(dtype.ValueType);
-                return $"DeserializePropertyDictionary<{titem}>(reader, {fname});";
+                return $"DeserializePropertyDictionary<{titem}>({_READERMODIFIER}reader, {fname});";
             }
 
-            return $"{fname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(f.FieldType)}>(reader);";
+            return $"{fname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(f.FieldType)}>({_READERMODIFIER}reader);";
         }        
 
         public void AddFieldSerializerCase(string line) { _SerializerBody.Add(line); }
@@ -585,6 +594,15 @@ namespace SharpGLTF.CodeGen
 
         public IEnumerable<string> EmitCode()
         {
+            #if USENEWTONSOFT
+            var readerType = "JsonReader";
+            var writerType = "JsonWriter";
+            #else
+            var readerType = "ref Utf8JsonReader";
+            var writerType = "Utf8JsonWriter";
+            #endif
+
+
             foreach (var l in ClassSummary.EmitSummary(0)) yield return l;
             
             yield return ClassDeclaration;
@@ -597,7 +615,7 @@ namespace SharpGLTF.CodeGen
             yield return string.Empty;
 
             // yield return "/// <inheritdoc />".Indent(1);
-            yield return "protected override void SerializeProperties(JsonWriter writer)".Indent(1);
+            yield return $"protected override void SerializeProperties({writerType} writer)".Indent(1);
             yield return "{".Indent(1);
             if (HasBaseClass) yield return "base.SerializeProperties(writer);".Indent(2);
             foreach (var l in _SerializerBody.Indent(2)) yield return l;
@@ -606,13 +624,13 @@ namespace SharpGLTF.CodeGen
             yield return string.Empty;
 
             // yield return "/// <inheritdoc />".Indent(1);
-            yield return "protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)".Indent(1);
+            yield return $"protected override void DeserializeProperty(string jsonPropertyName, {readerType} reader)".Indent(1);
             yield return "{".Indent(1);
             yield return "switch (jsonPropertyName)".Indent(2);
             yield return "{".Indent(2);
 
             foreach (var l in _DeserializerSwitchBody.Indent(3)) yield return l;
-            if (HasBaseClass) yield return "default: base.DeserializeProperty(jsonPropertyName, reader); break;".Indent(3);
+            if (HasBaseClass) yield return $"default: base.DeserializeProperty(jsonPropertyName,{_READERMODIFIER}reader); break;".Indent(3);
             else yield return "default: throw new NotImplementedException();".Indent(3);
 
             yield return "}".Indent(2);
@@ -623,6 +641,6 @@ namespace SharpGLTF.CodeGen
             yield return "}";
         }
 
-        #endregion
+#endregion
     }
 }

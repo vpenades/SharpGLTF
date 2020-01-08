@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SharpGLTF.Schema2
 {
@@ -39,20 +39,20 @@ namespace SharpGLTF.Schema2
 		private Double? _outerConeAngle = _outerConeAngleDefault;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "innerConeAngle", _innerConeAngle, _innerConeAngleDefault);
 			SerializeProperty(writer, "outerConeAngle", _outerConeAngle, _outerConeAngleDefault);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(reader); break;
-				case "outerConeAngle": _outerConeAngle = DeserializePropertyValue<Double?>(reader); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(ref reader); break;
+				case "outerConeAngle": _outerConeAngle = DeserializePropertyValue<Double?>(ref reader); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	
@@ -79,7 +79,7 @@ namespace SharpGLTF.Schema2
 		private String _type;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "color", _color, _colorDefault);
@@ -89,16 +89,16 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "type", _type);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "color": _color = DeserializePropertyValue<Vector3?>(reader); break;
-				case "intensity": _intensity = DeserializePropertyValue<Double?>(reader); break;
-				case "range": _range = DeserializePropertyValue<Double?>(reader); break;
-				case "spot": _spot = DeserializePropertyValue<PunctualLightSpot>(reader); break;
-				case "type": _type = DeserializePropertyValue<String>(reader); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "color": _color = DeserializePropertyValue<Vector3?>(ref reader); break;
+				case "intensity": _intensity = DeserializePropertyValue<Double?>(ref reader); break;
+				case "range": _range = DeserializePropertyValue<Double?>(ref reader); break;
+				case "spot": _spot = DeserializePropertyValue<PunctualLightSpot>(ref reader); break;
+				case "type": _type = DeserializePropertyValue<String>(ref reader); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	
@@ -111,18 +111,18 @@ namespace SharpGLTF.Schema2
 		private ChildrenCollection<PunctualLight,ModelRoot> _lights;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "lights", _lights, _lightsMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "lights": DeserializePropertyList<PunctualLight>(reader, _lights); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "lights": DeserializePropertyList<PunctualLight>(ref reader, _lights); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	

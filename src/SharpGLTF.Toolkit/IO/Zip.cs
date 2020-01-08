@@ -50,7 +50,7 @@ namespace SharpGLTF.IO
         {
             return _Archive
                 .Entries
-                .Where(item => item.FullName.ToLower().EndsWith(".gltf") || item.FullName.ToLower().EndsWith(".glb"))
+                .Where(item => item.FullName.EndsWith(".gltf", StringComparison.OrdinalIgnoreCase) || item.FullName.EndsWith(".glb", StringComparison.OrdinalIgnoreCase))
                 .OrderBy(item => item.FullName);
         }
 
@@ -93,14 +93,11 @@ namespace SharpGLTF.IO
                     else return new ArraySegment<byte>(m.ToArray());
                 }
             }
-
         }
 
         private System.IO.Compression.ZipArchiveEntry _FindEntry(string filePath)
         {
-            filePath = filePath.ToLower();
-
-            var entry = _Archive.Entries.FirstOrDefault(item => item.FullName.ToLower() == filePath);
+            var entry = _Archive.Entries.FirstOrDefault(item => item.FullName.Equals(filePath, StringComparison.OrdinalIgnoreCase) );
             if (entry == null) throw new System.IO.FileNotFoundException(filePath);
             return entry;
         }

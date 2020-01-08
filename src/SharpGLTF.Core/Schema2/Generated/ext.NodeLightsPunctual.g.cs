@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SharpGLTF.Schema2
 {
@@ -31,18 +31,18 @@ namespace SharpGLTF.Schema2
 		private Int32 _light;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "light", _light);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "light": _light = DeserializePropertyValue<Int32>(reader); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "light": _light = DeserializePropertyValue<Int32>(ref reader); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	

@@ -113,8 +113,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // which is causing some problems to the interpolator.
 
             TestContext.CurrentContext.AttachShowDirLink();
-
-            var path = "Assets\\SpecialCases\\mouse.glb";
+            
+            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\mouse.glb");
 
             var model = ModelRoot.Load(path);
 

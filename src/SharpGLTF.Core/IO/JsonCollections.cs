@@ -2,12 +2,26 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 
 namespace SharpGLTF.IO
 {
     static class JsonUtils
     {
-        public static bool IsSerializable(Object value)
+        public static ArraySegment<Byte> ReadBytesToEnd(this System.IO.Stream s)
+        {
+            using (var m = new System.IO.MemoryStream())
+            {
+                s.CopyTo(m);
+                if (m.TryGetBuffer(out ArraySegment<Byte> segment)) return segment;
+
+                var array = m.ToArray();
+
+                return new ArraySegment<byte>(array);
+            }
+        }
+
+        public static bool IsJsonSerializable(Object value)
         {
             if (value == null) return false;
 
@@ -23,12 +37,12 @@ namespace SharpGLTF.IO
 
             if (value is JsonList list)
             {
-                return list.All(item => IsSerializable(item));
+                return list.All(item => IsJsonSerializable(item));
             }
 
             if (value is JsonDictionary dict)
             {
-                return dict.Values.All(item => IsSerializable(item));
+                return dict.Values.All(item => IsJsonSerializable(item));
             }
 
             return false;

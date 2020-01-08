@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SharpGLTF.IO
 {
@@ -19,13 +19,13 @@ namespace SharpGLTF.IO
 
         public JsonDictionary Properties => _Properties;
 
-        protected override void DeserializeProperty(string property, JsonReader reader)
+        protected override void DeserializeProperty(string property, ref Utf8JsonReader reader)
         {
             reader.Read();
-            _Properties[property] = DeserializeUnknownObject(reader);
+            _Properties[property] = DeserializeUnknownObject(ref reader);
         }
 
-        protected override void SerializeProperties(JsonWriter writer)
+        protected override void SerializeProperties(Utf8JsonWriter writer)
         {
             foreach (var kvp in _Properties)
             {

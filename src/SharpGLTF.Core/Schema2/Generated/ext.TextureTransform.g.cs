@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SharpGLTF.Schema2
 {
@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2
 		private Int32? _texCoord;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "offset", _offset, _offsetDefault);
@@ -53,15 +53,15 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "texCoord", _texCoord);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "offset": _offset = DeserializePropertyValue<Vector2?>(reader); break;
-				case "rotation": _rotation = DeserializePropertyValue<Double?>(reader); break;
-				case "scale": _scale = DeserializePropertyValue<Vector2?>(reader); break;
-				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(reader); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "offset": _offset = DeserializePropertyValue<Vector2?>(ref reader); break;
+				case "rotation": _rotation = DeserializePropertyValue<Double?>(ref reader); break;
+				case "scale": _scale = DeserializePropertyValue<Vector2?>(ref reader); break;
+				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(ref reader); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	

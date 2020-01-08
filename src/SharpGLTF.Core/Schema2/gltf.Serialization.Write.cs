@@ -4,8 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Newtonsoft.Json;
-
 using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
@@ -42,14 +40,6 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public static implicit operator WriteSettings(Formatting jsonfmt)
-        {
-            return new WriteSettings
-            {
-                JsonFormatting = jsonfmt
-            };
-        }
-
         public WriteSettings() { }
 
         public WriteSettings(WriteSettings other)
@@ -75,7 +65,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets a value indicating how to format the JSON document of the glTF.
         /// </summary>
-        public Formatting JsonFormatting { get; set; } = Formatting.None;
+        public Boolean JsonIndented { get; set; } = false;
 
         #endregion
 
@@ -86,7 +76,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(other, nameof(other));
             this.ImageWriting = other.ImageWriting;
             this.MergeBuffers = other.MergeBuffers;
-            this.JsonFormatting = other.JsonFormatting;
+            this.JsonIndented = other.JsonIndented;
         }
 
         #endregion
@@ -158,15 +148,28 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the JSON document of this <see cref="MODEL"/>.
         /// </summary>
-        /// <param name="fmt">The formatting of the JSON document.</param>
+        /// <param name="indented">The formatting of the JSON document.</param>
         /// <returns>A JSON content.</returns>
-        public string GetJSON(Formatting fmt)
+        public string GetJSON(bool indented)
         {
+            using (var mm = new System.IO.MemoryStream())
+            {
+                _WriteJSON(mm, indented);
+
+                mm.Position = 0;
+
+                using (var ss = new System.IO.StreamReader(mm))
+                {
+                    return ss.ReadToEnd();
+                }
+            }
+
+            /*
             using (var ss = new StringWriter())
             {
                 _WriteJSON(ss, fmt);
                 return ss.ToString();
-            }
+            }*/
         }
 
         /// <summary>
@@ -210,12 +213,14 @@ namespace SharpGLTF.Schema2
 
         #region core
 
-        internal void _WriteJSON(TextWriter sw, Formatting fmt)
+        internal void _WriteJSON(System.IO.Stream sw, bool indented)
         {
-            using (var writer = new JsonTextWriter(sw))
-            {
-                writer.Formatting = fmt;
+            System.Text.Json.JsonWriterOptions options = default;
 
+            options.Indented = indented;
+
+            using (var writer = new System.Text.Json.Utf8JsonWriter(sw, options))
+            {
                 this.Serialize(writer);
             }
         }

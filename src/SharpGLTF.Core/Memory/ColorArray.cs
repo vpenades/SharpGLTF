@@ -33,7 +33,7 @@ namespace SharpGLTF.Memory
         /// <param name="normalized">True if values are normalized.</param>
         /// <param name="defaultW">If <paramref name="dimensions"/> is 3, the W values are filled with this value</param>
         public ColorArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false, Single defaultW = 1)
-            : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized)
+            : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized, defaultW)
         { }
 
         /// <summary>

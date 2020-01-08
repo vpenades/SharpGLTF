@@ -4,14 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Newtonsoft.Json;
-
 using BYTES = System.ArraySegment<byte>;
+
+using VALIDATIONMODE = SharpGLTF.Validation.ValidationMode;
 
 namespace SharpGLTF.Schema2
 {
     using MODEL = ModelRoot;
-    using VALIDATIONMODE = Validation.ValidationMode;
 
     public delegate Boolean ImageReaderCallback(Image image);
 
@@ -149,36 +148,48 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
-            var context = IO.ReadContext.CreateFromFile(filePath);
-
-            string json = null;
+            BYTES json = default;
 
             using (var s = File.OpenRead(filePath))
             {
-                json = context.ReadJson(s);
+                json = IO.ReadContext.ReadJsonBytes(s);
             }
 
             return ParseSatellitePaths(json);
         }
 
-        private static string[] ParseSatellitePaths(string json)
+        private static string[] ParseSatellitePaths(BYTES json)
         {
-            var rss = Newtonsoft.Json.Linq.JObject.Parse(json);
+            var uris = new HashSet<string>();
 
-            var buffers = rss["buffers"]?.Select(item => (String)item["uri"]);
-            var images = rss["images"]?.Select(item => (String)item["uri"]);
-
-            IEnumerable<string> uris = buffers;
-
-            if (images != null)
+            void _addUri(System.Text.Json.JsonElement property)
             {
-                uris = uris == null ? images : uris.Concat(images);
+                var newUri = property.GetString();
+
+                if (string.IsNullOrWhiteSpace(newUri)) return;
+                if (newUri.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return;
+
+                uris.Add(newUri);
             }
 
-            uris = uris
-                .Where(uri => !string.IsNullOrWhiteSpace(uri))
-                .Where(uri => !uri.StartsWith("data:", StringComparison.Ordinal))
-                .Distinct();
+            using (var dom = System.Text.Json.JsonDocument.Parse(json))
+            {
+                if (dom.RootElement.TryGetProperty("buffers", out System.Text.Json.JsonElement buffers))
+                {
+                    foreach (var buffer in buffers.EnumerateArray())
+                    {
+                        if (buffer.TryGetProperty("uri", out System.Text.Json.JsonElement uri)) _addUri(uri);
+                    }
+                }
+
+                if (dom.RootElement.TryGetProperty("images", out System.Text.Json.JsonElement images))
+                {
+                    foreach (var image in images.EnumerateArray())
+                    {
+                        if (image.TryGetProperty("uri", out System.Text.Json.JsonElement uri)) _addUri(uri);
+                    }
+                }
+            }
 
             return uris.ToArray();
         }

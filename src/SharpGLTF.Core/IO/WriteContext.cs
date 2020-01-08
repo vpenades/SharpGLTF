@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-using Newtonsoft.Json;
 using SharpGLTF.Schema2;
 
 using BYTES = System.ArraySegment<byte>;
@@ -53,7 +52,7 @@ namespace SharpGLTF.IO
 
             var context = Create((fn, d) => File.WriteAllBytes(Path.Combine(dirPath, fn), d.ToArray()));
             context.ImageWriting = ResourceWriteMode.SatelliteFile;
-            context.JsonFormatting = Formatting.Indented;
+            context.JsonIndented = true;
             return context;
         }
 
@@ -64,7 +63,7 @@ namespace SharpGLTF.IO
             var context = Create((fn, buff) => dict[fn] = buff);
             context.ImageWriting = ResourceWriteMode.SatelliteFile;
             context.MergeBuffers = false;
-            context.JsonFormatting = Formatting.None;
+            context.JsonIndented = false;
 
             return context;
         }
@@ -77,7 +76,7 @@ namespace SharpGLTF.IO
             var context = Create((fn, d) => stream.Write(d.Array, d.Offset, d.Count));
             context.ImageWriting = ResourceWriteMode.Embedded;
             context.MergeBuffers = true;
-            context.JsonFormatting = Formatting.None;
+            context.JsonIndented = false;
 
             return context.WithBinarySettings();
         }
@@ -86,7 +85,7 @@ namespace SharpGLTF.IO
         {
             ImageWriting = ResourceWriteMode.BufferView;
             MergeBuffers = true;
-            JsonFormatting = Formatting.None;
+            JsonIndented = false;
 
             return this;
         }
@@ -157,10 +156,13 @@ namespace SharpGLTF.IO
 
             using (var m = new MemoryStream())
             {
+                model._WriteJSON(m, this.JsonIndented);
+
+                /*
                 using (var w = new StreamWriter(m))
                 {
                     model._WriteJSON(w, this.JsonFormatting);
-                }
+                }*/
 
                 WriteAllBytesToEnd($"{baseName}.gltf", m.ToArraySegment());
             }

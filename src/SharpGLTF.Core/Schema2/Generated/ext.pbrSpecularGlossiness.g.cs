@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Numerics;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SharpGLTF.Schema2
 {
@@ -47,7 +47,7 @@ namespace SharpGLTF.Schema2
 		private TextureInfo _specularGlossinessTexture;
 		
 	
-		protected override void SerializeProperties(JsonWriter writer)
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "diffuseFactor", _diffuseFactor, _diffuseFactorDefault);
@@ -57,16 +57,16 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "specularGlossinessTexture", _specularGlossinessTexture);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "diffuseFactor": _diffuseFactor = DeserializePropertyValue<Vector4?>(reader); break;
-				case "diffuseTexture": _diffuseTexture = DeserializePropertyValue<TextureInfo>(reader); break;
-				case "glossinessFactor": _glossinessFactor = DeserializePropertyValue<Double?>(reader); break;
-				case "specularFactor": _specularFactor = DeserializePropertyValue<Vector3?>(reader); break;
-				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializePropertyValue<TextureInfo>(reader); break;
-				default: base.DeserializeProperty(jsonPropertyName, reader); break;
+				case "diffuseFactor": _diffuseFactor = DeserializePropertyValue<Vector4?>(ref reader); break;
+				case "diffuseTexture": _diffuseTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "glossinessFactor": _glossinessFactor = DeserializePropertyValue<Double?>(ref reader); break;
+				case "specularFactor": _specularFactor = DeserializePropertyValue<Vector3?>(ref reader); break;
+				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
 	

@@ -58,7 +58,7 @@ namespace SharpGLTF.Validation
         internal SchemaException(TARGET target, String message)
             : base(target, message) { }
 
-        internal SchemaException(TARGET target, Newtonsoft.Json.JsonReaderException rex)
+        internal SchemaException(TARGET target, System.Text.Json.JsonException rex)
             : base(target, rex) { }
     }
 

@@ -343,7 +343,7 @@ namespace SharpGLTF.Schema2
 
         /// <summary>
         /// Called by the serializer immediatelly after
-        /// calling <see cref="_WriteToSatellite(FileWriterCallback, string)"/>
+        /// calling <see cref="_WriteToSatellite(IO.WriteContext, string)"/>
         /// or <see cref="_WriteToInternal"/>
         /// </summary>
         internal void _ClearAfterWrite()

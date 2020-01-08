@@ -23,8 +23,10 @@ namespace SharpGLTF.Collections
         [Test]
         public void TestChildCollectionList1()
         {
-            var list = new ChildrenCollection<TestChild, ChildrenCollectionTests>(this);
+            if (System.Diagnostics.Debugger.IsAttached) return;
 
+            var list = new ChildrenCollection<TestChild, ChildrenCollectionTests>(this);
+            
             Assert.Throws<ArgumentNullException>(() => list.Add(null));
 
             var item = new TestChild();

@@ -168,7 +168,7 @@ namespace SharpGLTF.Validation
 
         public void CheckSchemaIsJsonSerializable(ValueLocation location, Object value)
         {
-            if (IO.JsonUtils.IsSerializable(value)) return;
+            if (IO.JsonUtils.IsJsonSerializable(value)) return;
 
             AddSchemaError(location, "Invalid JSON data.");
         }
