@@ -330,7 +330,7 @@ namespace SharpGLTF
             }
         }
 
-        internal static void AddRange<Tin, Tout>(this IList<Tout> dst, IEnumerable<Tin> src, Func<Tin, Tout> cvt)
+        internal static void AddRange<Tin, Tout>(this IList<Tout> dst, IEnumerable<Tin> src, Converter<Tin, Tout> cvt)
         {
             foreach (var item in src)
             {

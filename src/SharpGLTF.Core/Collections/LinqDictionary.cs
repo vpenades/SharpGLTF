@@ -16,7 +16,7 @@ namespace SharpGLTF.Collections
     {
         #region lifecycle
 
-        public ReadOnlyLinqDictionary(IReadOnlyDictionary<TKey, TValueIn> dict, Func<TValueIn, TValueOut> valConverter)
+        public ReadOnlyLinqDictionary(IReadOnlyDictionary<TKey, TValueIn> dict, Converter<TValueIn, TValueOut> valConverter)
         {
             _Source = dict;
             _ValueConverter = valConverter;
@@ -27,7 +27,7 @@ namespace SharpGLTF.Collections
         #region data
 
         private readonly IReadOnlyDictionary<TKey, TValueIn> _Source;
-        private readonly Func<TValueIn, TValueOut> _ValueConverter;
+        private readonly Converter<TValueIn, TValueOut> _ValueConverter;
 
         #endregion
 
@@ -85,7 +85,7 @@ namespace SharpGLTF.Collections
     {
         #region lifecycle
 
-        public LinqDictionary(IDictionary<TKey, TValueIn> dict, Func<TValueOut, TValueIn> inConverter, Func<TValueIn, TValueOut> outConverter)
+        public LinqDictionary(IDictionary<TKey, TValueIn> dict, Converter<TValueOut, TValueIn> inConverter, Converter<TValueIn, TValueOut> outConverter)
         {
             _Source = dict;
             _InConverter = inConverter;
@@ -97,8 +97,8 @@ namespace SharpGLTF.Collections
         #region data
 
         private readonly IDictionary<TKey, TValueIn> _Source;
-        private readonly Func<TValueOut, TValueIn> _InConverter;
-        private readonly Func<TValueIn, TValueOut> _OutConverter;
+        private readonly Converter<TValueOut, TValueIn> _InConverter;
+        private readonly Converter<TValueIn, TValueOut> _OutConverter;
 
         #endregion
 

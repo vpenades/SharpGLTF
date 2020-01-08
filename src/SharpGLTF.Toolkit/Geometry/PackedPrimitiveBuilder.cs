@@ -136,7 +136,7 @@ namespace SharpGLTF.Geometry
             return new SharpGLTF.Memory.MemoryAccessor(accessor.Data, attr);
         }
 
-        internal void CopyToMesh(Mesh dstMesh, Func<TMaterial, Material> materialEvaluator)
+        internal void CopyToMesh(Mesh dstMesh, Converter<TMaterial, Material> materialEvaluator)
         {
             if (_VerticesPerPrimitive < 1 || _VerticesPerPrimitive > 3) return;
 

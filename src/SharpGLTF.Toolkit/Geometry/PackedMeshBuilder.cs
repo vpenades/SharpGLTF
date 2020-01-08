@@ -83,7 +83,7 @@ namespace SharpGLTF.Geometry
             return p;
         }
 
-        public Mesh CreateSchema2Mesh(ModelRoot root, Func<TMaterial, Material> materialEvaluator)
+        public Mesh CreateSchema2Mesh(ModelRoot root, Converter<TMaterial, Material> materialEvaluator)
         {
             if (_Primitives.Count == 0) return null;
 
