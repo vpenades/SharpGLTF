@@ -157,7 +157,7 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
-    public partial class SceneBuilder
+    public partial class SceneBuilder : IConvertibleToGltf2
     {
         #region from SceneBuilder to Schema2
 
@@ -188,12 +188,18 @@ namespace SharpGLTF.Scenes
             return dstModel;
         }
 
+        [Obsolete("Use ToGltf2")]
+        public ModelRoot ToSchema2(bool useStridedBuffers = true)
+        {
+            return ToGltf2(useStridedBuffers);
+        }
+
         /// <summary>
         /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
         /// </summary>
         /// <param name="useStridedBuffers">True to generate strided vertex buffers whenever possible.</param>
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToSchema2(bool useStridedBuffers = true)
+        public ModelRoot ToGltf2(bool useStridedBuffers = true)
         {
             var context = new Schema2SceneBuilder();
 
@@ -209,6 +215,11 @@ namespace SharpGLTF.Scenes
             dstModel.DefaultScene = dstScene;
 
             return dstModel;
+        }
+
+        public ModelRoot ToGltf2()
+        {
+            return ToGltf2(true);
         }
 
         #endregion

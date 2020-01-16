@@ -216,7 +216,7 @@ namespace SharpGLTF.Scenes
             scene.AddRigidMesh(mesh2, Matrix4x4.Identity);
             scene.AddRigidMesh(mesh3, Matrix4x4.CreateTranslation(0,10,0));
 
-            var model = scene.ToSchema2();
+            var model = scene.ToGltf2();
 
             Assert.AreEqual(3, model.LogicalMaterials.Count);
             CollectionAssert.AreEquivalent(new[] { "material0", "material2", "material3" }, model.LogicalMaterials.Select(item => item.Name));
@@ -473,7 +473,7 @@ namespace SharpGLTF.Scenes
             curve.SetPoint(1, Transforms.SparseWeight8.Create(1));
             curve.SetPoint(2, Transforms.SparseWeight8.Create(0));
 
-            var gltf = scene.ToSchema2();
+            var gltf = scene.ToGltf2();
 
             // Assert.AreEqual(1, gltf.LogicalMeshes[1].MorphWeights[0]);
 
@@ -537,8 +537,8 @@ namespace SharpGLTF.Scenes
 
             var srcScene = Schema2Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
 
-            var rowModel = srcScene.ToSchema2();
-            var colModel = srcScene.ToSchema2(false);
+            var rowModel = srcScene.ToGltf2();
+            var colModel = srcScene.ToGltf2(false);
 
             var rowScene = Schema2Toolkit.ToSceneBuilder(rowModel.DefaultScene);
             var colScene = Schema2Toolkit.ToSceneBuilder(colModel.DefaultScene);

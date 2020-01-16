@@ -45,7 +45,7 @@ namespace Example1
 
             // save the model in different formats
 
-            var model = scene.ToSchema2();
+            var model = scene.ToGltf2();
             model.SaveAsWavefront("mesh.obj");
             model.SaveGLB("mesh.glb");
             model.SaveGLTF("mesh.gltf");

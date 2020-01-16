@@ -138,7 +138,7 @@ namespace SharpGLTF
 
         public static void AttachToCurrentTest(this Scenes.SceneBuilder scene, string fileName)
         {
-            var model = scene.ToSchema2();
+            var model = scene.ToGltf2();
 
             model.AttachToCurrentTest(fileName);
         }

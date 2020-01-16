@@ -149,7 +149,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             editableScene.AddRigidMesh(mesh, System.Numerics.Matrix4x4.Identity);
 
             model.AttachToCurrentTest("original.glb");
-            editableScene.ToSchema2().AttachToCurrentTest("WithTangents.glb");
+            editableScene.ToGltf2().AttachToCurrentTest("WithTangents.glb");
         }
     }
 }

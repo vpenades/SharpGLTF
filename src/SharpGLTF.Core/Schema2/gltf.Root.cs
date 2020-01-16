@@ -7,7 +7,7 @@ using SharpGLTF.Collections;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Model Root")]
-    public sealed partial class ModelRoot
+    public sealed partial class ModelRoot : IConvertibleToGltf2
     {
         #region lifecycle
 
@@ -78,6 +78,8 @@ namespace SharpGLTF.Schema2
         public IEnumerable<String> ExtensionsRequired           => _extensionsRequired;
 
         public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions).ToList();
+
+        ModelRoot IConvertibleToGltf2.ToGltf2() { return this; }
 
         #endregion
 
