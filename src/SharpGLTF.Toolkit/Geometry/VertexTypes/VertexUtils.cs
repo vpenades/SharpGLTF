@@ -244,7 +244,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             var vbuffer = new ArraySegment<byte>(new Byte[byteStride * vertices.Count]);
 
             // fill the buffer with the vertex attributes.
-            var accessors = MemoryAccessInfo
+            var accessors = MemoryEncoding
                 .Slice(attributes, 0, vertices.Count)
                 .Select(item => new MemoryAccessor(vbuffer, item))
                 .ToArray();
@@ -272,7 +272,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (indices == null || indices.Count == 0) return null;
 
-            var attribute = new MemoryAccessInfo("INDEX", 0, indices.Count, 0, Schema2.DimensionType.SCALAR, encoding);
+            var attribute = new MemoryEncoding("INDEX", 0, indices.Count, 0, Schema2.DimensionType.SCALAR, encoding);
 
             // create buffer
             var ibytes = new Byte[encoding.ByteLength() * indices.Count];
@@ -286,13 +286,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, Schema2.EncodingType jointEncoding)
+        public static MemoryEncoding[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, Schema2.EncodingType jointEncoding)
         {
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
 
-            var attributes = new List<MemoryAccessInfo>();
+            var attributes = new List<MemoryEncoding>();
 
             foreach (var finfo in tvg.GetFields())
             {
@@ -320,12 +320,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var array = attributes.ToArray();
 
-            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
+            MemoryEncoding.SetInterleavedInfo(array, 0, vertexCount);
 
             return array;
         }
 
-        private static MemoryAccessInfo? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
+        private static MemoryEncoding? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
         {
             var attribute = finfo.GetCustomAttributes(true)
                     .OfType<VertexAttributeAttribute>()
@@ -344,7 +344,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
 
-            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
+            return new MemoryEncoding(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
         private static Func<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)

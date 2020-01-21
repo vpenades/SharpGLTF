@@ -129,7 +129,7 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(other, nameof(other));
 
             this._Mesh = mesh;
-            this._Material = material ?? other.Material;
+            this._Material = material != null ? material : other.Material;
             other._Vertices.CopyTo(this._Vertices);
 
             foreach (var otherMT in other._MorphTargets)

@@ -225,6 +225,7 @@ namespace SharpGLTF.IO
             try
             {
                 root.Deserialize(ref reader);
+                root.OnDeserializationCompleted();
             }
             catch (JsonException rex)
             {

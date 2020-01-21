@@ -198,6 +198,11 @@ namespace SharpGLTF.Schema2
 
         #region externals dependencies resolver
 
+        internal void OnDeserializationCompleted()
+        {
+            _FindMeshQuantizationExtension();
+        }
+
         internal void _ResolveSatelliteDependencies(IO.ReadContext context)
         {
             // resolve satellite buffers

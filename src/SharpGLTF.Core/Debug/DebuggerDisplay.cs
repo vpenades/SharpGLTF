@@ -27,7 +27,7 @@ namespace SharpGLTF.Debug
             return attributeName;
         }
 
-        public static String ToReport(this Memory.MemoryAccessInfo minfo)
+        public static String ToReport(this Memory.MemoryEncoding minfo)
         {
             var txt = GetAttributeShortName(minfo.Name);
             if (minfo.ByteOffset != 0) txt += $" Offs:{minfo.ByteOffset}ᴮʸᵗᵉˢ";
@@ -93,7 +93,7 @@ namespace SharpGLTF.Debug
             if (vcounts.Count() > 1)
             {
                 var vAccessors = prim.VertexAccessors
-                    .OrderBy(item => item.Key, Memory.MemoryAccessInfo.NameComparer)
+                    .OrderBy(item => item.Key, Memory.MemoryEncoding.NameComparer)
                     .Select(item => $"{GetAttributeShortName(item.Key)}={item.Value.ToReportShort()}")
                     .ToList();
 
@@ -109,7 +109,7 @@ namespace SharpGLTF.Debug
                 }
 
                 var vAccessors = prim.VertexAccessors
-                    .OrderBy(item => item.Key, Memory.MemoryAccessInfo.NameComparer)
+                    .OrderBy(item => item.Key, Memory.MemoryEncoding.NameComparer)
                     .Select(item => toShort(item.Key, item.Value))
                     .ToList();
 

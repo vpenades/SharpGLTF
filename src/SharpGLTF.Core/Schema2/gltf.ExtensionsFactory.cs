@@ -83,6 +83,22 @@ namespace SharpGLTF.Schema2
 
     partial class ModelRoot
     {
+        #region properties
+
+        public bool MeshQuantizationAllowed { get; private set; }
+
+        #endregion
+
+        #region API
+
+        /// <summary>
+        /// Immediatelly called after deserialization, it assigns
+        /// </summary>
+        private void _FindMeshQuantizationExtension()
+        {
+            MeshQuantizationAllowed = this._extensionsRequired.Contains("KHR_mesh_quantization");
+        }
+
         internal void UpdateExtensionsSupport()
         {
             var used = RetrieveUsedExtensions();
@@ -90,6 +106,16 @@ namespace SharpGLTF.Schema2
             // update the used list
             this._extensionsUsed.Clear();
             this._extensionsUsed.AddRange(used);
+
+            _SetRequiredExtension("KHR_mesh_quantization", MeshQuantizationAllowed);
+        }
+
+        private void _SetRequiredExtension(string extension, bool enabled)
+        {
+            if (!enabled) { this._extensionsRequired.Remove(extension); return; }
+
+            if (this._extensionsRequired.Contains(extension)) return;
+            this._extensionsRequired.Add(extension);
         }
 
         internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()
@@ -135,5 +161,7 @@ namespace SharpGLTF.Schema2
 
             this._extensionsUsed.Add(id);
         }
+
+        #endregion
     }
 }

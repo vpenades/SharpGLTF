@@ -150,7 +150,7 @@ namespace SharpGLTF.Schema2
         internal Memory.MemoryAccessor _GetMemoryAccessor(ROOT root, int count, Accessor baseAccessor)
         {
             var view = root.LogicalBufferViews[this._bufferView];
-            var info = new Memory.MemoryAccessInfo(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
+            var info = new Memory.MemoryEncoding(null, this._byteOffset ?? 0, count, view.ByteStride, baseAccessor.Dimensions, baseAccessor.Encoding, baseAccessor.Normalized);
             return new Memory.MemoryAccessor(view.Content, info);
         }
 

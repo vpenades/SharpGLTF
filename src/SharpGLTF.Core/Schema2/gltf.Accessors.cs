@@ -93,7 +93,7 @@ namespace SharpGLTF.Schema2
         internal MemoryAccessor _GetMemoryAccessor()
         {
             var view = SourceBufferView;
-            var info = new MemoryAccessInfo(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            var info = new MemoryEncoding(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
             return new MemoryAccessor(view.Content, info);
         }
 
@@ -431,9 +431,12 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
+            if (!this.LogicalParent.MeshQuantizationAllowed)
+            {
+                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            }
 
             var positions = this.AsVector3Array();
 
@@ -448,9 +451,17 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
+            if (!this.LogicalParent.MeshQuantizationAllowed)
+            {
+                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            }
+            else
+            {
+                if (Normalized) result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.BYTE, EncodingType.SHORT);
+                else result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            }
 
             var normals = this.AsVector3Array();
 
@@ -468,17 +479,30 @@ namespace SharpGLTF.Schema2
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3, DimensionType.VEC4);
-
-            var tangents = this.AsVector4Array();
-
-            for (int i = 0; i < tangents.Count; ++i)
+            if (!this.LogicalParent.MeshQuantizationAllowed)
             {
-                if (result.TryFixTangentOrError(i, tangents[i]))
+                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
+                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            }
+            else
+            {
+                if (Normalized) result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.BYTE, EncodingType.SHORT);
+                else result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+            }
+
+            // when Dimensions == VEC3, its morph target tangent deltas
+
+            if (Dimensions == DimensionType.VEC4) 
+            {
+                var tangents = this.AsVector4Array();
+
+                for (int i = 0; i < tangents.Count; ++i)
                 {
-                    tangents[i] = tangents[i].SanitizeTangent();
+                    if (result.TryFixTangentOrError(i, tangents[i]))
+                    {
+                        tangents[i] = tangents[i].SanitizeTangent();
+                    }
                 }
             }
         }
