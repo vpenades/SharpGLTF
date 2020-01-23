@@ -105,12 +105,11 @@ namespace SharpGLTF.IO
 
             foreach (var img in images)
             {
-                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}";
+                var imimg = new Memory.InMemoryImage(img);
 
-                if (img._IsPngImage()) files[imgName + ".png"] = img;
-                if (img._IsJpgImage()) files[imgName + ".jpg"] = img;
-                if (img._IsDdsImage()) files[imgName + ".dds"] = img;
-                if (img._IsWebpImage()) files[imgName + ".webp"] = img;
+                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}.{imimg.FileExtension}";
+
+                files[imgName] = img;
 
                 firstImg = false;
             }

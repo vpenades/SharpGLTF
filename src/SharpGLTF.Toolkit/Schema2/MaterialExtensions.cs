@@ -298,12 +298,8 @@ namespace SharpGLTF.Schema2
                 dstChannel.Texture.WithTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.TextureCoordinateOverride);
             }
 
-            dstChannel.Texture.PrimaryImageContent = srcChannel.Texture.PrimaryImage.GetImageContent();
-
-            if (srcChannel.Texture.FallbackImage != null)
-            {
-                dstChannel.Texture.FallbackImageContent = srcChannel.Texture.FallbackImage.GetImageContent();
-            }
+            dstChannel.Texture.PrimaryImage = srcChannel.Texture.PrimaryImage?.MemoryImage ?? Memory.InMemoryImage.Empty;
+            dstChannel.Texture.FallbackImage = srcChannel.Texture.FallbackImage?.MemoryImage ?? Memory.InMemoryImage.Empty;
         }
 
         public static void CopyTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial)
@@ -375,19 +371,23 @@ namespace SharpGLTF.Schema2
             var srcTex = srcChannel.Texture;
             if (srcTex == null) return;
 
-            var primary = dstChannel
-                .LogicalParent
-                .LogicalParent
-                .UseImageWithContent(srcTex.PrimaryImageContent.ToArray());
-
+            Image primary = null;
             Image fallback = null;
 
-            if (srcTex.FallbackImageContent.Count > 0)
+            if (srcTex.PrimaryImage.IsValid)
+            {
+                primary = dstChannel
+                .LogicalParent
+                .LogicalParent
+                .UseImageWithContent(srcTex.PrimaryImage.GetBuffer().ToArray());
+            }
+
+            if (srcTex.FallbackImage.IsValid)
             {
                 fallback = dstChannel
                 .LogicalParent
                 .LogicalParent
-                .UseImageWithContent(srcTex.FallbackImageContent.ToArray());
+                .UseImageWithContent(srcTex.FallbackImage.GetBuffer().ToArray());
             }
 
             dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);

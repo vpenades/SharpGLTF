@@ -101,6 +101,7 @@ namespace SharpGLTF.Materials
         /// Gets or sets the default image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG, DDS and WEBP
         /// </summary>
+        [Obsolete("Use PrimaryImage property.")]
         public BYTES PrimaryImageContent
         {
             get => _PrimaryImageContent;
@@ -111,10 +112,31 @@ namespace SharpGLTF.Materials
         /// Gets or sets the fallback image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG.
         /// </summary>
+        [Obsolete("Use FallbackImage property.")]
         public BYTES FallbackImageContent
         {
             get => _FallbackImageContent;
             set => WithFallbackImage(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the default image bytes to use by this <see cref="TextureBuilder"/>,
+        /// Supported formats are: PNG, JPG, DDS and WEBP
+        /// </summary>
+        public Memory.InMemoryImage PrimaryImage
+        {
+            get => new Memory.InMemoryImage(_PrimaryImageContent);
+            set => WithPrimaryImage(value.GetBuffer());
+        }
+
+        /// <summary>
+        /// Gets or sets the fallback image bytes to use by this <see cref="TextureBuilder"/>,
+        /// Supported formats are: PNG, JPG.
+        /// </summary>
+        public Memory.InMemoryImage FallbackImage
+        {
+            get => new Memory.InMemoryImage(_FallbackImageContent);
+            set => WithFallbackImage(value.GetBuffer());
         }
 
         public TextureTransformBuilder Transform => _Transform;
@@ -147,7 +169,7 @@ namespace SharpGLTF.Materials
         public TextureBuilder WithImage(string imagePath) { return WithPrimaryImage(imagePath); }
 
         [Obsolete("Use WithPrimaryImage instead,")]
-        public TextureBuilder WithImage(BYTES image) { return WithPrimaryImage(image); }
+        public TextureBuilder WithImage(Memory.InMemoryImage image) { return WithPrimaryImage(image); }
 
         public TextureBuilder WithPrimaryImage(string imagePath)
         {
@@ -158,18 +180,18 @@ namespace SharpGLTF.Materials
             return WithPrimaryImage(primary);
         }
 
-        public TextureBuilder WithPrimaryImage(BYTES image)
+        public TextureBuilder WithPrimaryImage(Memory.InMemoryImage image)
         {
-            if (image.Count > 0)
+            if (!image.IsEmpty)
             {
-                Guard.IsTrue(image._IsImage(), nameof(image), "Must be JPG, PNG, DDS or WEBP");
+                Guard.IsTrue(image.IsValid, nameof(image), "Must be JPG, PNG, DDS or WEBP");
             }
             else
             {
                 image = default;
             }
 
-            _PrimaryImageContent = image;
+            _PrimaryImageContent = image.GetBuffer();
             return this;
         }
 
@@ -182,18 +204,18 @@ namespace SharpGLTF.Materials
             return WithFallbackImage(primary);
         }
 
-        public TextureBuilder WithFallbackImage(BYTES image)
+        public TextureBuilder WithFallbackImage(Memory.InMemoryImage image)
         {
-            if (image.Count > 0)
+            if (!image.IsEmpty)
             {
-                Guard.IsTrue(image._IsJpgImage() || image._IsPngImage(), nameof(image), "Must be JPG or PNG");
+                Guard.IsTrue(image.IsJpg || image.IsPng, nameof(image), "Must be JPG or PNG");
             }
             else
             {
                 image = default;
             }
 
-            _FallbackImageContent = image;
+            _FallbackImageContent = image.GetBuffer();
             return this;
         }
 
@@ -239,27 +261,6 @@ namespace SharpGLTF.Materials
             {
                 return TextureBuilder.GetContentHashCode(obj);
             }
-        }
-
-        #endregion
-
-        #region image utilities
-
-        /// <summary>
-        /// Checks if <paramref name="data"/> represents a stream of an encoded image.
-        /// </summary>
-        /// <param name="data">A stream of bytes.</param>
-        /// <param name="extension">
-        /// An image format, valid values are:
-        /// - PNG
-        /// - JPG
-        /// - DDS
-        /// - WEBP
-        /// </param>
-        /// <returns>True if <paramref name="data"/> is an image.</returns>
-        public static bool IsImage(ArraySegment<Byte> data, string extension)
-        {
-            return data._IsImage(extension);
         }
 
         #endregion

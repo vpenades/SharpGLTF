@@ -10,26 +10,6 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
     public sealed partial class Image
     {
-        #region Base64 constants
-
-        const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream;base64,";
-        const string EMBEDDED_GLTF_BUFFER = "data:application/gltf-buffer;base64,";
-        const string EMBEDDED_JPEG_BUFFER = "data:image/jpeg;base64,";
-        const string EMBEDDED_PNG_BUFFER = "data:image/png;base64,";
-        const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds;base64,";
-        const string EMBEDDED_WEBP_BUFFER = "data:image/webp;base64,";
-
-        const string MIME_PNG = "image/png";
-        const string MIME_JPG = "image/jpeg";
-        const string MIME_DDS = "image/vnd-ms.dds";
-        const string MIME_WEBP = "image/webp";
-
-        const string DEFAULT_PNG_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAHXpUWHRUaXRsZQAACJlzSU1LLM0pCUmtKCktSgUAKVIFt/VCuZ8AAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAANElEQVQoz2O8cuUKAwxoa2vD2VevXsUqzsRAIqC9Bsb///8TdDey+CD0Awsx7h6NB5prAADPsx0VAB8VRQAAAABJRU5ErkJggg==";
-
-        internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
-
-        #endregion
-
         #region lifecycle
 
         internal Image() { }
@@ -65,39 +45,39 @@ namespace SharpGLTF.Schema2
         public bool IsSatelliteFile => _SatelliteImageContent != null;
 
         /// <summary>
+        /// Returns the in-memory representation of the image file.
+        /// </summary>
+        public Memory.InMemoryImage MemoryImage => new Memory.InMemoryImage(GetImageContent());
+
+        /// <summary>
         /// Gets a value indicating whether the contained image is a PNG image.
         /// </summary>
-        public bool IsPng => GetImageContent()._IsPngImage();
+        [Obsolete("Use MemoryImage property")]
+        public bool IsPng => this.MemoryImage.IsPng;
 
         /// <summary>
         /// Gets a value indicating whether the contained image is a JPEG image.
         /// </summary>
-        public bool IsJpeg => GetImageContent()._IsJpgImage();
+        [Obsolete("Use MemoryImage property")]
+        public bool IsJpeg => this.MemoryImage.IsJpg;
 
         /// <summary>
         /// Gets a value indicating whether the contained image is a DDS image.
         /// </summary>
-        public bool IsDds => GetImageContent()._IsDdsImage();
+        [Obsolete("Use MemoryImage property")]
+        public bool IsDds => this.MemoryImage.IsDds;
 
         /// <summary>
         /// Gets a value indicating whether the contained image is a WEBP image.
         /// </summary>
-        public bool IsWebp => GetImageContent()._IsWebpImage();
+        [Obsolete("Use MemoryImage property")]
+        public bool IsWebp => this.MemoryImage.IsWebp;
 
         /// <summary>
         /// Gets the filename extension of the image that can be retrieved with <see cref="GetImageContent"/>
         /// </summary>
-        public string FileExtension
-        {
-            get
-            {
-                if (IsPng) return "png";
-                if (IsJpeg) return "jpg";
-                if (IsDds) return "dds";
-                if (IsWebp) return "webp";
-                return "raw";
-            }
-        }
+        [Obsolete("Use MemoryImage property")]
+        public string FileExtension => this.MemoryImage.FileExtension;
 
         internal int _SourceBufferViewIndex => _bufferView.AsValue(-1);
 
@@ -119,12 +99,10 @@ namespace SharpGLTF.Schema2
         /// Opens the image file.
         /// </summary>
         /// <returns>A <see cref="System.IO.Stream"/> containing the image file.</returns>
+        [Obsolete("Use MemoryImage property")]
         public System.IO.Stream OpenImageFile()
         {
-            var content = GetImageContent();
-            if (content.Count == 0) return null;
-
-            return new System.IO.MemoryStream(content.Array, content.Offset, content.Count, false);
+            return this.MemoryImage.Open();
         }
 
         /// <summary>
@@ -169,14 +147,10 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(content, nameof(content));
 
-            string imageType = null;
+            var imimg = new Memory.InMemoryImage(content);
+            if (!imimg.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
-            if (content._IsPngImage()) imageType = MIME_PNG;
-            if (content._IsJpgImage()) imageType = MIME_JPG;
-            if (content._IsDdsImage()) imageType = MIME_DDS;
-            if (content._IsWebpImage()) imageType = MIME_WEBP;
-
-            if (imageType == null) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
+            string imageType = imimg.MimeType;
 
             _DiscardContent();
 
@@ -207,24 +181,22 @@ namespace SharpGLTF.Schema2
 
         internal void _ResolveUri(IO.ReadContext context)
         {
-            if (!String.IsNullOrWhiteSpace(_uri))
+            if (String.IsNullOrWhiteSpace(_uri)) return;
+
+            var data = Memory.InMemoryImage.TryParseBytes(_uri);
+
+            if (data == null)
             {
-                var data = _LoadImageUnchecked(context, _uri);
+                var bytes = context.ReadAllBytesToEnd(_uri);
 
-                _SatelliteImageContent = data;
-                _uri = null;
-                _mimeType = null;
+                // let's try to avoid making a copy if it's not neccesary.
+                if (bytes.Offset == 0 && bytes.Array.Length == bytes.Count) data = bytes.Array;
+                else data = bytes.ToArray();
             }
-        }
 
-        private static Byte[] _LoadImageUnchecked(IO.ReadContext context, string uri)
-        {
-            return uri._TryParseBase64Unchecked(EMBEDDED_GLTF_BUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDED_OCTET_STREAM)
-                ?? uri._TryParseBase64Unchecked(EMBEDDED_JPEG_BUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDED_PNG_BUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDED_DDS_BUFFER)
-                ?? context.ReadAllBytesToEnd(uri).ToArray();
+            _SatelliteImageContent = data;
+            _uri = null;
+            _mimeType = null;
         }
 
         internal void _DiscardContent()
@@ -246,37 +218,9 @@ namespace SharpGLTF.Schema2
         {
             if (_SatelliteImageContent == null) { _WriteAsBufferView(); return; }
 
-            var mimeContent = Convert.ToBase64String(_SatelliteImageContent, Base64FormattingOptions.None);
-
-            if (_SatelliteImageContent._IsPngImage())
-            {
-                _mimeType = MIME_PNG;
-                _uri = EMBEDDED_PNG_BUFFER + mimeContent;
-                return;
-            }
-
-            if (_SatelliteImageContent._IsJpgImage())
-            {
-                _mimeType = MIME_JPG;
-                _uri = EMBEDDED_JPEG_BUFFER + mimeContent;
-                return;
-            }
-
-            if (_SatelliteImageContent._IsDdsImage())
-            {
-                _mimeType = MIME_DDS;
-                _uri = EMBEDDED_DDS_BUFFER + mimeContent;
-                return;
-            }
-
-            if (_SatelliteImageContent._IsWebpImage())
-            {
-                _mimeType = MIME_WEBP;
-                _uri = EMBEDDED_WEBP_BUFFER + mimeContent;
-                return;
-            }
-
-            throw new NotImplementedException();
+            var imimg = new Memory.InMemoryImage(_SatelliteImageContent);
+            _mimeType = imimg.MimeType;
+            _uri = imimg.ToMime64();
         }
 
         /// <summary>
@@ -292,53 +236,23 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
-            if (_SatelliteImageContent._IsPngImage())
-            {
-                _mimeType = null;
-                _uri = satelliteUri += ".png";
-                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
-                return;
-            }
+            _mimeType = null;
 
-            if (_SatelliteImageContent._IsJpgImage())
-            {
-                _mimeType = null;
-                _uri = satelliteUri += ".jpg";
-                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
-                return;
-            }
+            var imimg = new Memory.InMemoryImage(_SatelliteImageContent);
+            if (!imimg.IsValid) throw new InvalidOperationException();
 
-            if (_SatelliteImageContent._IsDdsImage())
-            {
-                _mimeType = null;
-                _uri = satelliteUri += ".dds";
-                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0) );
-                return;
-            }
-
-            if (_SatelliteImageContent._IsWebpImage())
-            {
-                _mimeType = null;
-                _uri = satelliteUri += ".webp";
-                writer.WriteAllBytesToEnd(_uri, _SatelliteImageContent.Slice(0));
-                return;
-            }
-
-            throw new NotImplementedException();
+            _uri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+            writer.WriteAllBytesToEnd(_uri, imimg.GetBuffer());
         }
 
         private void _WriteAsBufferView()
         {
             Guard.IsTrue(_bufferView.HasValue, nameof(_bufferView));
 
-            var imageContent = GetImageContent();
+            var imimg = this.MemoryImage;
+            if (!imimg.IsValid) throw new InvalidOperationException();
 
-            if (imageContent._IsPngImage()) { _mimeType = MIME_PNG; return; }
-            if (imageContent._IsJpgImage()) { _mimeType = MIME_JPG; return; }
-            if (imageContent._IsDdsImage()) { _mimeType = MIME_DDS; return; }
-            if (imageContent._IsWebpImage()) { _mimeType = MIME_WEBP; return; }
-
-            throw new NotImplementedException();
+            _mimeType = imimg.MimeType;
         }
 
         /// <summary>
@@ -405,7 +319,7 @@ namespace SharpGLTF.Schema2
         public Image UseImage(BYTES imageContent)
         {
             Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
-            Guard.IsTrue(imageContent._IsImage(), nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
+            Guard.IsTrue(new Memory.InMemoryImage(imageContent).IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
 
             foreach (var img in this.LogicalImages)
             {

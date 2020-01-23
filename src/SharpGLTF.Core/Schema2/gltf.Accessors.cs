@@ -493,7 +493,7 @@ namespace SharpGLTF.Schema2
 
             // when Dimensions == VEC3, its morph target tangent deltas
 
-            if (Dimensions == DimensionType.VEC4) 
+            if (Dimensions == DimensionType.VEC4)
             {
                 var tangents = this.AsVector4Array();
 

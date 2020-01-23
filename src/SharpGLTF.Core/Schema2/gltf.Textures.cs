@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2
 
             if (primaryImage.IsDds || primaryImage.IsWebp)
             {
-                var fallback = LogicalParent.UseImage(Image.DefaultPngImage.Slice(0));
+                var fallback = LogicalParent.UseImage(Memory.InMemoryImage.DefaultPngImage.Slice(0));
                 SetImages(primaryImage, fallback);
             }
             else
@@ -105,17 +105,17 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(fallbackImage, nameof(fallbackImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
-            Guard.IsTrue(primaryImage.IsDds || primaryImage.IsWebp, "Primary image must be DDS or WEBP");
-            Guard.IsTrue(fallbackImage.IsJpeg || fallbackImage.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
+            Guard.IsTrue(primaryImage.MemoryImage.IsDds || primaryImage.MemoryImage.IsWebp, "Primary image must be DDS or WEBP");
+            Guard.IsTrue(fallbackImage.MemoryImage.IsJpg || fallbackImage.MemoryImage.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
 
             ClearImages();
 
-            if (primaryImage.IsDds)
+            if (primaryImage.MemoryImage.IsDds)
             {
                 _UseDDSTexture().Image = primaryImage;
             }
 
-            if (primaryImage.IsWebp)
+            if (primaryImage.MemoryImage.IsWebp)
             {
                 _UseWEBPTexture().Image = primaryImage;
             }
@@ -180,7 +180,7 @@ namespace SharpGLTF.Schema2
                 if (value != null)
                 {
                     Guard.MustShareLogicalParent(_Parent, value, nameof(value));
-                    Guard.IsTrue(value.IsDds, nameof(value));
+                    Guard.IsTrue(value.MemoryImage.IsDds, nameof(value));
                 }
 
                 _source = value?.LogicalIndex;
