@@ -8,7 +8,7 @@
     <RootNamespace>SharpGLTF</RootNamespace>
 
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
     <None Remove="Assets\SpecialCases\mouse.glb" />
@@ -18,6 +18,11 @@
     <Content Include="Assets\SpecialCases\mouse.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\tools\linux64\gltf_validator" Link="gltf_validator" />
+    <None Include="..\..\tools\win64\gltf_validator.exe" Link="gltf_validator.exe" />
   </ItemGroup>
 
   <ItemGroup>    

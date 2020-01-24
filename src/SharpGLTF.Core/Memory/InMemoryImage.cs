@@ -41,6 +41,12 @@ namespace SharpGLTF.Memory
 
         public InMemoryImage(Byte[] image) { _Image = image == null ? default : new ArraySegment<byte>(image); }
 
+        public InMemoryImage(string filePath)
+        {
+            var data = System.IO.File.ReadAllBytes(filePath);
+            _Image = new ArraySegment<byte>(data);
+        }
+
         #endregion
 
         #region data

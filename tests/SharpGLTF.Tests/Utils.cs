@@ -113,28 +113,7 @@ namespace SharpGLTF
             context.AttachLink("🌍 VirtualGIS Cesium Sandbox", "https://www.virtualgis.io/gltfviewer/");
         }
 
-        public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
-        {
-            // find the output path for the current test
-            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-
-            if (fileName.ToLower().EndsWith(".glb"))
-            {
-                model.SaveGLB(fileName);
-            }
-            else if (fileName.ToLower().EndsWith(".gltf"))
-            {
-                model.Save(fileName, new Schema2.WriteSettings { JsonIndented=true } );
-            }
-            else if (fileName.ToLower().EndsWith(".obj"))
-            {
-                fileName = fileName.Replace(" ", "_");
-                Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName);
-            }
-
-            // Attach the saved file to the current test
-            TestContext.AddTestAttachment(fileName);
-        }
+        
 
         public static void AttachToCurrentTest(this Scenes.SceneBuilder scene, string fileName)
         {
@@ -169,6 +148,41 @@ namespace SharpGLTF
             node.Mesh = gl2mesh;
 
             gl2model.AttachToCurrentTest(fileName);
+        }
+
+        public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
+        {
+            // find the output path for the current test
+            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+
+            if (fileName.ToLower().EndsWith(".glb"))
+            {
+                model.SaveGLB(fileName);
+            }
+            else if (fileName.ToLower().EndsWith(".gltf"))
+            {
+                model.Save(fileName, new Schema2.WriteSettings { JsonIndented = true });
+            }
+            else if (fileName.ToLower().EndsWith(".obj"))
+            {
+                fileName = fileName.Replace(" ", "_");
+                Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName);
+            }
+
+            // Attach the saved file to the current test
+            TestContext.AddTestAttachment(fileName);
+
+            if (fileName.ToLower().EndsWith(".obj")) return;
+
+            var report = gltf_validator.ValidateFile(fileName);
+            if (report == null) return;
+
+            if (report.HasErrors || report.HasWarnings)
+            {
+                TestContext.WriteLine(report.ToString());
+            }
+
+            Assert.IsFalse(report.HasErrors);
         }
     }
 
