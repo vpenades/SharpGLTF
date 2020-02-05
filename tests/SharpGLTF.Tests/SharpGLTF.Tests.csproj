@@ -1,119 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net471</TargetFrameworks>
-
+    <TargetFrameworks>netcoreapp3;net471</TargetFrameworks>
     <IsPackable>false</IsPackable>
-
     <RootNamespace>SharpGLTF</RootNamespace>
-
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>  
+  </PropertyGroup> 
 
-  <ItemGroup>
-    <None Remove="Assets\SpecialCases\mouse.glb" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Assets\SpecialCases\mouse.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\tools\linux64\gltf_validator" Link="gltf_validator" />
-    <None Include="..\..\tools\win64\gltf_validator.exe" Link="gltf_validator.exe" />
+  <ItemGroup>    
+    <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
   </ItemGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />    
-    <PackageReference Include="nunit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.16.0">
+    <PackageReference Include="NUnit3TestAdapter" Version="3.16.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-    <PackageReference Include="PLplot" Version="5.13.7" />    
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj" />
-    <ProjectReference Include="..\..\src\SharpGLTF.Core\SharpGLTF.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Assets\API.Core.1.0.0-alpha0005.txt">
+    <None Update="Assets\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0006.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0007.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0008.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0009.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0010.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Core.1.0.0-alpha0011.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0005.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0006.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0007.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0008.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0009.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0010.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha0011.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\API.Toolkit.1.0.0-alpha011.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Invalid_Json.gltf">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\shannon-dxt5.dds">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\shannon.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\shannon.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\shannon.webp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\SpecialCases\batched.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\SpecialCases\body_id.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\SpecialCases\shrekshao.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Texture1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </None>    
   </ItemGroup>
 
 </Project>

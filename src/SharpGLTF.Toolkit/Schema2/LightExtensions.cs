@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2
         /// When undefined, range is assumed to be infinite.
         /// </param>
         /// <returns>This <see cref="PunctualLight"/> instance.</returns>
-        public static PunctualLight WithColor(this PunctualLight light, Vector3 color, float intensity = 1, float range = 0)
+        public static PunctualLight WithColor(this PunctualLight light, Vector3 color, float intensity = 1, float range = float.PositiveInfinity)
         {
             Guard.NotNull(light, nameof(light));
 

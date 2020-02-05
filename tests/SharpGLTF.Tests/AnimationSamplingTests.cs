@@ -218,7 +218,7 @@ namespace SharpGLTF
                 NumericsAssert.AngleLessOrEqual(sq, hq, 0.22f);
 
                 // diff
-                var a = VectorsUtils.GetAngle(sq, hq) * 180.0f / 3.141592f;
+                var a = (sq, hq).GetAngle() * 180.0f / 3.141592f;
                 angles.Add(new Vector2(amount, a));                          
             }
 

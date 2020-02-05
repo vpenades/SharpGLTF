@@ -103,7 +103,7 @@ namespace SharpGLTF.Geometry
 
             if (Geometry.TryGetNormal(out Vector3 n))
             {
-                if (!n.IsValidNormal()) sb.Append($" ❌𝚴:{n}");
+                if (!n.IsNormalized()) sb.Append($" ❌𝚴:{n}");
             }
 
             if (Geometry.TryGetTangent(out Vector4 t))

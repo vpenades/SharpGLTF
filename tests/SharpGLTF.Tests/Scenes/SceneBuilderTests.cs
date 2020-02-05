@@ -517,7 +517,7 @@ namespace SharpGLTF.Scenes
         [TestCase("BrainStem.glb")]
         [TestCase("CesiumMan.glb")]
         [TestCase("GearboxAssy.glb")]
-        [TestCase("Monster.glb")]
+        // [TestCase("Monster.glb")]
         [TestCase("OrientationTest.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
@@ -530,7 +530,7 @@ namespace SharpGLTF.Scenes
                 .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.Contains(path));
 
-            var srcModel = Schema2.ModelRoot.Load(path);
+            var srcModel = Schema2.ModelRoot.Load(path, Validation.ValidationMode.TryFix);
             Assert.NotNull(srcModel);
 
             // perform roundtrip
@@ -538,7 +538,10 @@ namespace SharpGLTF.Scenes
             var srcScene = Schema2Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
 
             var rowModel = srcScene.ToGltf2();
-            var colModel = srcScene.ToGltf2(false);
+
+            var settings = SceneBuilderSchema2Settings.Default;
+            settings.UseStridedBuffers = false;
+            var colModel = srcScene.ToGltf2(settings);
 
             var rowScene = Schema2Toolkit.ToSceneBuilder(rowModel.DefaultScene);
             var colScene = Schema2Toolkit.ToSceneBuilder(colModel.DefaultScene);

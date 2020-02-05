@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
+using ENCODING = SharpGLTF.Schema2.EncodingType;
+
 namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexMaterial
@@ -57,7 +59,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color;
 
         public int MaxColors => 1;
@@ -127,10 +129,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color0;
 
-        [VertexAttribute("COLOR_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color1;
 
         public int MaxColors => 2;
@@ -348,7 +350,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color;
 
         [VertexAttribute("TEXCOORD_0")]
@@ -424,7 +426,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color;
 
         [VertexAttribute("TEXCOORD_0")]
@@ -513,10 +515,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color0;
 
-        [VertexAttribute("COLOR_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color1;
 
         [VertexAttribute("TEXCOORD_0")]

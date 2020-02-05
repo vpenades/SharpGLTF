@@ -13,7 +13,7 @@ namespace SharpGLTF.Runtime
 
         public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath)
         {
-            var model = Schema2.ModelRoot.Load(filePath);
+            var model = Schema2.ModelRoot.Load(filePath, Validation.ValidationMode.TryFix);
 
             return CreateDeviceModel(device, model);
         }

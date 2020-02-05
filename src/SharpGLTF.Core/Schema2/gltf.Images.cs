@@ -47,7 +47,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Returns the in-memory representation of the image file.
         /// </summary>
-        public Memory.InMemoryImage MemoryImage => new Memory.InMemoryImage(GetImageContent());
+        public Memory.MemoryImage MemoryImage => new Memory.MemoryImage(GetImageContent());
 
         /// <summary>
         /// Gets a value indicating whether the contained image is a PNG image.
@@ -147,7 +147,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(content, nameof(content));
 
-            var imimg = new Memory.InMemoryImage(content);
+            var imimg = new Memory.MemoryImage(content);
             if (!imimg.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
             string imageType = imimg.MimeType;
@@ -183,7 +183,7 @@ namespace SharpGLTF.Schema2
         {
             if (String.IsNullOrWhiteSpace(_uri)) return;
 
-            var data = Memory.InMemoryImage.TryParseBytes(_uri);
+            var data = Memory.MemoryImage.TryParseBytes(_uri);
 
             if (data == null)
             {
@@ -218,7 +218,7 @@ namespace SharpGLTF.Schema2
         {
             if (_SatelliteImageContent == null) { _WriteAsBufferView(); return; }
 
-            var imimg = new Memory.InMemoryImage(_SatelliteImageContent);
+            var imimg = new Memory.MemoryImage(_SatelliteImageContent);
             _mimeType = imimg.MimeType;
             _uri = imimg.ToMime64();
         }
@@ -238,7 +238,7 @@ namespace SharpGLTF.Schema2
 
             _mimeType = null;
 
-            var imimg = new Memory.InMemoryImage(_SatelliteImageContent);
+            var imimg = new Memory.MemoryImage(_SatelliteImageContent);
             if (!imimg.IsValid) throw new InvalidOperationException();
 
             _uri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
@@ -319,7 +319,7 @@ namespace SharpGLTF.Schema2
         public Image UseImage(BYTES imageContent)
         {
             Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
-            Guard.IsTrue(new Memory.InMemoryImage(imageContent).IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
+            Guard.IsTrue(new Memory.MemoryImage(imageContent).IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
 
             foreach (var img in this.LogicalImages)
             {

@@ -200,6 +200,8 @@ namespace SharpGLTF.Schema2
 
             if (bv.IsIndexBuffer)
             {
+                if (bv._byteStride.HasValue) result.AddSemanticError("bufferView: Invalid ByteStride.");
+
                 if (dim != DimensionType.SCALAR) result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor dimensions is: {dim}");
 
                 // TODO: these could by fixed by replacing BYTE by UBYTE, SHORT by USHORT, etc
@@ -212,8 +214,6 @@ namespace SharpGLTF.Schema2
             if (bv.ByteStride > 0)
             {
                 if (bv.ByteStride < elementByteSize) result.AddLinkError("ElementByteSize", $"Referenced bufferView's byteStride value {bv.ByteStride} is less than accessor element's length {elementByteSize}.");
-
-                // "Accessor's total byteOffset {0} isn't a multiple of componentType length {1}.";
 
                 return;
             }
@@ -268,13 +268,14 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateBufferUsagePlainData(Validation.ValidationContext result)
         {
+            /*
             if (this._byteStride.HasValue)
             {
                 if (result.TryFixLinkOrError("BufferView", "Unexpected ByteStride found. Expected null"))
                 {
                     this._byteStride = null;
                 }
-            }
+            }*/
 
             result = result.GetContext(this);
 

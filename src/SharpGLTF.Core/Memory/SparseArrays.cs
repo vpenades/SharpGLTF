@@ -10,7 +10,7 @@ namespace SharpGLTF.Memory
     /// </summary>
     /// <typeparam name="T">An unmanage structure type.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
-    public struct SparseArray<T> : IList<T>, IReadOnlyList<T>
+    public readonly struct SparseArray<T> : IList<T>, IReadOnlyList<T>
         where T : unmanaged
     {
         #region lifecycle

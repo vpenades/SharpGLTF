@@ -13,18 +13,28 @@ namespace SharpGLTF
     /// </summary>
     static class _Extensions
     {
+        #region constants
+
+        // constants from: https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/errors.dart
+
+        private const float unitLengthThresholdVec3 = 0.00674f;
+        private const float unitLengthThresholdVec4 = 0.00769f;
+
+        // This value is slightly greater
+        // than the maximum error from unsigned 8-bit quantization
+        // 1..2 elements - 0 * step
+        // 3..4 elements - 1 * step
+        // 5..6 elements - 2 * step
+        // ...
+        private const float unitSumThresholdStep = 0.0039216f;
+
+        #endregion
+
         #region private numerics extensions
 
         internal static bool IsMultipleOf(this int value, int mult)
         {
             return (value % mult) == 0;
-        }
-
-        internal static int PaddingSize(this int size, int mult)
-        {
-            var rest = size % mult;
-
-            return rest == 0 ? 0 : mult - rest;
         }
 
         internal static int WordPadded(this int length)
@@ -36,36 +46,36 @@ namespace SharpGLTF
 
         internal static bool _IsFinite(this float value)
         {
-            return !(float.IsNaN(value) | float.IsInfinity(value));
+            return !(float.IsNaN(value) || float.IsInfinity(value));
         }
 
         internal static bool _IsFinite(this Vector2 v)
         {
-            return v.X._IsFinite() & v.Y._IsFinite();
+            return v.X._IsFinite() && v.Y._IsFinite();
         }
 
         internal static bool _IsFinite(this Vector3 v)
         {
-            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite();
+            return v.X._IsFinite() && v.Y._IsFinite() && v.Z._IsFinite();
         }
 
         internal static bool _IsFinite(this Vector4 v)
         {
-            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite() & v.W._IsFinite();
+            return v.X._IsFinite() && v.Y._IsFinite() && v.Z._IsFinite() && v.W._IsFinite();
         }
 
         internal static bool _IsFinite(this Matrix4x4 v)
         {
-            if (!(v.M11._IsFinite() & v.M12._IsFinite() & v.M13._IsFinite() & v.M14._IsFinite())) return false;
-            if (!(v.M21._IsFinite() & v.M22._IsFinite() & v.M23._IsFinite() & v.M24._IsFinite())) return false;
-            if (!(v.M31._IsFinite() & v.M32._IsFinite() & v.M33._IsFinite() & v.M34._IsFinite())) return false;
-            if (!(v.M41._IsFinite() & v.M42._IsFinite() & v.M43._IsFinite() & v.M44._IsFinite())) return false;
+            if (!(v.M11._IsFinite() && v.M12._IsFinite() && v.M13._IsFinite() && v.M14._IsFinite())) return false;
+            if (!(v.M21._IsFinite() && v.M22._IsFinite() && v.M23._IsFinite() && v.M24._IsFinite())) return false;
+            if (!(v.M31._IsFinite() && v.M32._IsFinite() && v.M33._IsFinite() && v.M34._IsFinite())) return false;
+            if (!(v.M41._IsFinite() && v.M42._IsFinite() && v.M43._IsFinite() && v.M44._IsFinite())) return false;
             return true;
         }
 
         internal static bool _IsFinite(this Quaternion v)
         {
-            return v.X._IsFinite() & v.Y._IsFinite() & v.Z._IsFinite() & v.W._IsFinite();
+            return v.X._IsFinite() && v.Y._IsFinite() && v.Z._IsFinite() && v.W._IsFinite();
         }
 
         internal static Vector3 WithLength(this Vector3 v, float len)
@@ -73,16 +83,25 @@ namespace SharpGLTF
             return Vector3.Normalize(v) * len;
         }
 
-        internal static Quaternion AsQuaternion(this Vector4 v)
+        internal static Boolean IsNormalized(this Vector3 normal)
         {
-            return new Quaternion(v.X, v.Y, v.Z, v.W);
+            if (!normal._IsFinite()) return false;
+
+            return Math.Abs(normal.Length() - 1) <= unitLengthThresholdVec3;
         }
 
         internal static Boolean IsNormalized(this Quaternion q)
         {
             // As per: https://github.com/KhronosGroup/glTF-Validator/issues/33 , quaternions need to be normalized.
 
-            return Math.Abs(1.0 - q.Length()) > 0.000005;
+            if (!q._IsFinite()) return false;
+
+            return Math.Abs(q.Length() - 1) <= 0.000005;
+        }
+
+        internal static Quaternion AsQuaternion(this Vector4 v)
+        {
+            return new Quaternion(v.X, v.Y, v.Z, v.W);
         }
 
         internal static Quaternion Sanitized(this Quaternion q)
@@ -114,18 +133,17 @@ namespace SharpGLTF
             return (value - r) == Vector4.Zero;
         }
 
+        /*
         internal static void Validate(this Vector3 vector, string msg)
         {
             if (!vector._IsFinite()) throw new NotFiniteNumberException($"{msg} is invalid.");
-        }
+        }*/
 
         internal static void ValidateNormal(this Vector3 normal, string msg)
         {
             if (!normal._IsFinite()) throw new NotFiniteNumberException($"{msg} is invalid.");
 
-            var len = normal.Length();
-
-            if (len < 0.99f || len > 1.01f) throw new ArithmeticException($"{msg} is not unit length.");
+            if (!normal.IsNormalized()) throw new ArithmeticException($"{msg} is not unit length.");
         }
 
         internal static void ValidateTangent(this Vector4 tangent, string msg)
@@ -135,36 +153,22 @@ namespace SharpGLTF
             new Vector3(tangent.X, tangent.Y, tangent.Z).ValidateNormal(msg);
         }
 
-        internal static bool IsValidNormal(this Vector3 normal)
-        {
-            if (!normal._IsFinite()) return false;
-
-            var len = normal.Length();
-
-            if (len < 0.99f || len > 1.01f) return false;
-
-            return true;
-        }
-
         internal static Vector3 SanitizeNormal(this Vector3 normal)
         {
-            var isn = normal._IsFinite() && normal.LengthSquared() > 0;
-            return isn ? Vector3.Normalize(normal) : Vector3.UnitZ;
+            return normal.IsNormalized() ? normal : Vector3.Normalize(normal);
         }
 
         internal static bool IsValidTangent(this Vector4 tangent)
         {
             if (tangent.W != 1 && tangent.W != -1) return false;
 
-            return new Vector3(tangent.X, tangent.Y, tangent.Z).IsValidNormal();
+            return new Vector3(tangent.X, tangent.Y, tangent.Z).IsNormalized();
         }
 
         internal static Vector4 SanitizeTangent(this Vector4 tangent)
         {
-            var n = new Vector3(tangent.X, tangent.Y, tangent.Z);
+            var n = new Vector3(tangent.X, tangent.Y, tangent.Z).SanitizeNormal();
             var s = float.IsNaN(tangent.W) ? 1 : tangent.W;
-            var isn = n._IsFinite() && n.LengthSquared() > 0;
-            n = isn ? Vector3.Normalize(n) : Vector3.UnitX;
             return new Vector4(n, s > 0 ? 1 : -1);
         }
 
@@ -474,17 +478,17 @@ namespace SharpGLTF
             }
         }
 
-        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, int vertexCount)
+        public static IEnumerable<(int A, int B)> GetLinesIndices(this PrimitiveType ptype, int vertexCount)
         {
             return ptype.GetLinesIndices(Enumerable.Range(0, vertexCount).Select(item => (UInt32)item));
         }
 
-        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, int vertexCount)
+        public static IEnumerable<(int A, int B, int C)> GetTrianglesIndices(this PrimitiveType ptype, int vertexCount)
         {
             return ptype.GetTrianglesIndices(Enumerable.Range(0, vertexCount).Select(item => (UInt32)item));
         }
 
-        public static IEnumerable<(int, int)> GetLinesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
+        public static IEnumerable<(int A, int B)> GetLinesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
         {
             switch (ptype)
             {
@@ -510,7 +514,7 @@ namespace SharpGLTF
             }
         }
 
-        public static IEnumerable<(int, int, int)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
+        public static IEnumerable<(int A, int B, int C)> GetTrianglesIndices(this PrimitiveType ptype, IEnumerable<UInt32> sourceIndices)
         {
             switch (ptype)
             {
@@ -621,7 +625,10 @@ namespace SharpGLTF
 
             if (content.Length.IsMultipleOf(4)) return content;
 
-            var paddedContent = new Byte[content.Length + content.Length.PaddingSize(4)];
+            var rest = content.Length % 4;
+            rest = rest == 0 ? 0 : 4 - rest;
+
+            var paddedContent = new Byte[content.Length + rest];
             content.CopyTo(paddedContent, 0);
             return paddedContent;
         }

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
+using BYTES = System.ArraySegment<System.Byte>;
+
 namespace SharpGLTF.Memory
 {
     /// <summary>
     /// Represents an image file stored as an in-memory byte array
     /// </summary>
-    public readonly struct InMemoryImage
+    public readonly struct MemoryImage
     {
         #region constants
 
@@ -27,31 +29,31 @@ namespace SharpGLTF.Memory
 
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
-        public static InMemoryImage Empty => default;
+        public static MemoryImage Empty => default;
 
         #endregion
 
         #region constructor
 
-        public static implicit operator InMemoryImage(ArraySegment<Byte> image) { return new InMemoryImage(image); }
+        public static implicit operator MemoryImage(BYTES image) { return new MemoryImage(image); }
 
-        public static implicit operator InMemoryImage(Byte[] image) { return new InMemoryImage(image); }
+        public static implicit operator MemoryImage(Byte[] image) { return new MemoryImage(image); }
 
-        public InMemoryImage(ArraySegment<Byte> image) { _Image = image; }
+        public MemoryImage(BYTES image) { _Image = image; }
 
-        public InMemoryImage(Byte[] image) { _Image = image == null ? default : new ArraySegment<byte>(image); }
+        public MemoryImage(Byte[] image) { _Image = image == null ? default : new BYTES(image); }
 
-        public InMemoryImage(string filePath)
+        public MemoryImage(string filePath)
         {
             var data = System.IO.File.ReadAllBytes(filePath);
-            _Image = new ArraySegment<byte>(data);
+            _Image = new BYTES(data);
         }
 
         #endregion
 
         #region data
 
-        private readonly ArraySegment<Byte> _Image;
+        private readonly BYTES _Image;
 
         #endregion
 
@@ -153,7 +155,7 @@ namespace SharpGLTF.Memory
         /// Gets the internal buffer.
         /// </summary>
         /// <returns>An array buffer.</returns>
-        public ArraySegment<Byte> GetBuffer() { return _Image; }
+        public BYTES GetBuffer() { return _Image; }
 
         /// <summary>
         /// Tries to parse a Mime64 string to a Byte array.

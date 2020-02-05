@@ -31,7 +31,7 @@ namespace SharpGLTF.Scenes
 
         public Node GetNode(NodeBuilder key) { return key == null ? null : _Nodes.TryGetValue(key, out Node val) ? val : null; }
 
-        public void AddGeometryResources(ModelRoot root, IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers)
+        public void AddGeometryResources(ModelRoot root, IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
         {
             // gather all unique MeshBuilders
 
@@ -63,7 +63,7 @@ namespace SharpGLTF.Scenes
 
             // create a Schema2.Mesh for every MeshBuilder.
 
-            var dstMeshes = root.CreateMeshes(mat => _Materials[mat], useStridedBuffers, srcMeshes);
+            var dstMeshes = root.CreateMeshes(mat => _Materials[mat], settings, srcMeshes);
 
             for (int i = 0; i < srcMeshes.Length; ++i)
             {
@@ -157,6 +157,19 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    public struct SceneBuilderSchema2Settings
+    {
+        public static SceneBuilderSchema2Settings Default => new SceneBuilderSchema2Settings
+        {
+            UseStridedBuffers = true,
+            CompactVertexWeights = false
+        };
+
+        public bool UseStridedBuffers;
+
+        public bool CompactVertexWeights;
+    }
+
     public partial class SceneBuilder : IConvertibleToGltf2
     {
         #region from SceneBuilder to Schema2
@@ -167,14 +180,14 @@ namespace SharpGLTF.Scenes
         /// <param name="srcScenes">A collection of scenes</param>
         /// <param name="useStridedBuffers">True to generate strided vertex buffers whenever possible.</param>
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, bool useStridedBuffers = true)
+        public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
         {
             Guard.NotNull(srcScenes, nameof(srcScenes));
 
             var context = new Schema2SceneBuilder();
 
             var dstModel = ModelRoot.CreateModel();
-            context.AddGeometryResources(dstModel, srcScenes, useStridedBuffers);
+            context.AddGeometryResources(dstModel, srcScenes, settings);
 
             foreach (var srcScene in srcScenes)
             {
@@ -191,7 +204,10 @@ namespace SharpGLTF.Scenes
         [Obsolete("Use ToGltf2")]
         public ModelRoot ToSchema2(bool useStridedBuffers = true)
         {
-            return ToGltf2(useStridedBuffers);
+            var settings = SceneBuilderSchema2Settings.Default;
+            settings.UseStridedBuffers = useStridedBuffers;
+
+            return ToGltf2(settings);
         }
 
         /// <summary>
@@ -199,12 +215,12 @@ namespace SharpGLTF.Scenes
         /// </summary>
         /// <param name="useStridedBuffers">True to generate strided vertex buffers whenever possible.</param>
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToGltf2(bool useStridedBuffers = true)
+        public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
         {
             var context = new Schema2SceneBuilder();
 
             var dstModel = ModelRoot.CreateModel();
-            context.AddGeometryResources(dstModel, new[] { this }, useStridedBuffers);
+            context.AddGeometryResources(dstModel, new[] { this }, settings);
 
             var dstScene = dstModel.UseScene(0);
 
@@ -219,7 +235,7 @@ namespace SharpGLTF.Scenes
 
         public ModelRoot ToGltf2()
         {
-            return ToGltf2(true);
+            return ToGltf2(SceneBuilderSchema2Settings.Default);
         }
 
         #endregion

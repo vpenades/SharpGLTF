@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using SharpGLTF.Memory;
 
+using BYTES = System.ArraySegment<byte>;
+
 namespace SharpGLTF.Geometry
 {
     class PackedBuffer
@@ -51,7 +53,7 @@ namespace SharpGLTF.Geometry
 
             int offset = 0;
 
-            var dstOffsets = new Dictionary<ArraySegment<Byte>, int>();
+            var dstOffsets = new Dictionary<BYTES, int>();
 
             foreach (var src in srcBuffers)
             {
@@ -63,7 +65,7 @@ namespace SharpGLTF.Geometry
                 offset += src.Count;
             }
 
-            var dstBuffer = new ArraySegment<Byte>(array);
+            var dstBuffer = new BYTES(array);
 
             foreach (var a in _Accessors)
             {

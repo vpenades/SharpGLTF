@@ -37,11 +37,11 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
+        public void SetStridedVertices(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncoding)
         {
             Guard.NotNull(srcPrim, nameof(srcPrim));
 
-            var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, encoding);
+            var vAccessors = VertexTypes.VertexUtils.CreateVertexMemoryAccessors(srcPrim.Vertices, vertexEncoding);
 
             Guard.NotNull(vAccessors, nameof(srcPrim));
 
@@ -49,12 +49,12 @@ namespace SharpGLTF.Geometry
             _VertexAccessors = vAccessors;
         }
 
-        public void SetStreamedVertices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
+        public void SetStreamedVertices(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncoding)
         {
             Guard.NotNull(srcPrim, nameof(srcPrim));
 
             var attributeNames = VertexTypes.VertexUtils
-                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count, encoding)
+                        .GetVertexAttributes(srcPrim.Vertices[0], srcPrim.Vertices.Count, vertexEncoding)
                         .Select(item => item.Name)
                         .ToList();
 
@@ -64,13 +64,15 @@ namespace SharpGLTF.Geometry
 
             foreach (var an in attributeNames)
             {
-                var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(srcPrim.Vertices, an, encoding);
+                var vAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(srcPrim.Vertices, an, vertexEncoding);
                 if (vAccessor == null) continue;
 
                 vAccessors.Add(vAccessor);
             }
 
             _VertexAccessors = vAccessors.ToArray();
+
+            Memory.MemoryAccessor.SanitizeVertexAttributes(_VertexAccessors);
         }
 
         public void SetIndices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
@@ -85,7 +87,7 @@ namespace SharpGLTF.Geometry
             _IndexAccessors = iAccessor;
         }
 
-        public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim)
+        public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncodings)
         {
             bool hasPositions = _VertexAccessors.Any(item => item.Attribute.Name == "POSITION");
             bool hasNormals = _VertexAccessors.Any(item => item.Attribute.Name == "NORMAL");
@@ -97,11 +99,11 @@ namespace SharpGLTF.Geometry
             {
                 var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
 
-                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", EncodingType.UNSIGNED_SHORT);
+                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", vertexEncodings);
 
-                var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", EncodingType.UNSIGNED_SHORT);
+                var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", vertexEncodings);
 
-                var tAccessor = !hasTangents ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TANGENTDELTA", EncodingType.UNSIGNED_SHORT);
+                var tAccessor = !hasTangents ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TANGENTDELTA", vertexEncodings);
 
                 AddMorphTarget(pAccessor, nAccessor, tAccessor);
             }

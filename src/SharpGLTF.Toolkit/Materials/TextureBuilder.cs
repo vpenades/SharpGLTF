@@ -123,9 +123,9 @@ namespace SharpGLTF.Materials
         /// Gets or sets the default image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG, DDS and WEBP
         /// </summary>
-        public Memory.InMemoryImage PrimaryImage
+        public Memory.MemoryImage PrimaryImage
         {
-            get => new Memory.InMemoryImage(_PrimaryImageContent);
+            get => new Memory.MemoryImage(_PrimaryImageContent);
             set => WithPrimaryImage(value.GetBuffer());
         }
 
@@ -133,9 +133,9 @@ namespace SharpGLTF.Materials
         /// Gets or sets the fallback image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG.
         /// </summary>
-        public Memory.InMemoryImage FallbackImage
+        public Memory.MemoryImage FallbackImage
         {
-            get => new Memory.InMemoryImage(_FallbackImageContent);
+            get => new Memory.MemoryImage(_FallbackImageContent);
             set => WithFallbackImage(value.GetBuffer());
         }
 
@@ -169,7 +169,7 @@ namespace SharpGLTF.Materials
         public TextureBuilder WithImage(string imagePath) { return WithPrimaryImage(imagePath); }
 
         [Obsolete("Use WithPrimaryImage instead,")]
-        public TextureBuilder WithImage(Memory.InMemoryImage image) { return WithPrimaryImage(image); }
+        public TextureBuilder WithImage(Memory.MemoryImage image) { return WithPrimaryImage(image); }
 
         public TextureBuilder WithPrimaryImage(string imagePath)
         {
@@ -180,7 +180,7 @@ namespace SharpGLTF.Materials
             return WithPrimaryImage(primary);
         }
 
-        public TextureBuilder WithPrimaryImage(Memory.InMemoryImage image)
+        public TextureBuilder WithPrimaryImage(Memory.MemoryImage image)
         {
             if (!image.IsEmpty)
             {
@@ -204,7 +204,7 @@ namespace SharpGLTF.Materials
             return WithFallbackImage(primary);
         }
 
-        public TextureBuilder WithFallbackImage(Memory.InMemoryImage image)
+        public TextureBuilder WithFallbackImage(Memory.MemoryImage image)
         {
             if (!image.IsEmpty)
             {

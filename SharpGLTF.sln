@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.329
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
@@ -36,7 +36,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Runtime.MonoGame"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGameScene", "examples\MonoGameScene\MonoGameScene.csproj", "{894781CA-F508-43AE-8526-6AA6B6EDF613}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.DownloadTestFiles", "tests\SharpGLTF.DownloadTestFiles\SharpGLTF.DownloadTestFiles.csproj", "{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.DownloadTestFiles", "tests\SharpGLTF.DownloadTestFiles\SharpGLTF.DownloadTestFiles.csproj", "{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.NUnit", "tests\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj", "{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -84,6 +86,10 @@ Global
 		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -99,6 +105,7 @@ Global
 		{6C7B3CD8-21D0-447E-9034-8F72057F2ED7} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{894781CA-F508-43AE-8526-6AA6B6EDF613} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{7CC20DF6-14B5-4C1C-B4FC-151E97AED4F4} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
+		{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7BBAD9-834C-4981-AC96-0AA5226FC43F}

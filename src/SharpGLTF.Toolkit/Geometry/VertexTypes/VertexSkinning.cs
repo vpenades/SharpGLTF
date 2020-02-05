@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Text;
 using SharpGLTF.Transforms;
 
+using ENCODING = SharpGLTF.Schema2.EncodingType;
+
 namespace SharpGLTF.Geometry.VertexTypes
 {
     public interface IVertexSkinning
@@ -58,10 +60,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_SHORT, false)]
+        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints;
 
-        [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights;
 
         public int MaxBindings => 4;
@@ -158,16 +160,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
-        [VertexAttribute("JOINTS_0", Schema2.EncodingType.UNSIGNED_SHORT, false)]
+        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints0;
 
-        [VertexAttribute("JOINTS_1", Schema2.EncodingType.UNSIGNED_SHORT, false)]
+        [VertexAttribute("JOINTS_1", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints1;
 
-        [VertexAttribute("WEIGHTS_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights0;
 
-        [VertexAttribute("WEIGHTS_1", Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        [VertexAttribute("WEIGHTS_1")]
         public Vector4 Weights1;
 
         public int MaxBindings => 8;

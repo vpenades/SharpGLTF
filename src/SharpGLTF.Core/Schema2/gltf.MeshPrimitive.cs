@@ -151,7 +151,7 @@ namespace SharpGLTF.Schema2
 
         public Memory.MemoryAccessor GetVertices(string attributeKey)
         {
-            return GetVertexAccessor(attributeKey)._GetMemoryAccessor();
+            return GetVertexAccessor(attributeKey)._GetMemoryAccessor(attributeKey);
         }
 
         #endregion
@@ -323,7 +323,7 @@ namespace SharpGLTF.Schema2
                 if (incompatibleMode) result.AddLinkWarning("Indices", $"Number of vertices or indices({IndexAccessor.Count}) is not compatible with used drawing mode('{this.DrawPrimitiveType}').");
             }
 
-            // check attributes accessors
+            // check vertex attributes accessors
 
             foreach (var group in this.VertexAccessors.Values.GroupBy(item => item.SourceBufferView))
             {
@@ -357,11 +357,22 @@ namespace SharpGLTF.Schema2
                 }
             }
 
+            if (DrawPrimitiveType == PrimitiveType.POINTS)
+            {
+                if (this.VertexAccessors.Keys.Contains("NORMAL")) result.AddSemanticWarning("NORMAL", $"attribute defined for {DrawPrimitiveType} rendering mode.");
+                if (this.VertexAccessors.Keys.Contains("TANGENT")) result.AddSemanticWarning("TANGENT", $"attribute defined for {DrawPrimitiveType} rendering mode.");
+            }
+
             // check vertex attributes
 
-            _ValidatePositions(result);
-            _ValidateNormals(result);
-            _ValidateTangents(result);
+            if (result.TryFix)
+            {
+                var vattributes = this.VertexAccessors
+                .Select(item => item.Value._GetMemoryAccessor(item.Key))
+                .ToArray();
+
+                Memory.MemoryAccessor.SanitizeVertexAttributes(vattributes);
+            }
 
             // find skins using this mesh primitive:
 
@@ -370,65 +381,12 @@ namespace SharpGLTF.Schema2
                 .LogicalNodes
                 .Where(item => item.Mesh == this.LogicalParent)
                 .Select(item => item.Skin)
-                .ToList();
+                .Where(item => item != null)
+                .Select(item => item.JointsCount);
 
-            _ValidateJoints(result, skins, "JOINTS_0");
-            _ValidateJoints(result, skins, "JOINTS_1");
-        }
+            var maxJoints = skins.Any() ? skins.Max() : 0;
 
-        private void _ValidatePositions(Validation.ValidationContext result)
-        {
-            var positions = GetVertexAccessor("POSITION");
-            if (positions == null)
-            {
-                result.AddSemanticWarning("No POSITION attribute found.");
-                return;
-            }
-
-            positions.ValidatePositions(result);
-        }
-
-        private void _ValidateNormals(Validation.ValidationContext result)
-        {
-            var normals = GetVertexAccessor("NORMAL");
-            if (normals == null) return;
-
-            normals.ValidateNormals(result);
-        }
-
-        private void _ValidateTangents(Validation.ValidationContext result)
-        {
-            var tangents = GetVertexAccessor("TANGENT");
-            if (tangents == null) return;
-
-            if (GetVertexAccessor("NORMAL") == null) result.AddSemanticWarning("TANGENT", "attribute without NORMAL found.");
-            if (DrawPrimitiveType == PrimitiveType.POINTS) result.AddSemanticWarning("TANGENT", "attribute defined for POINTS rendering mode.");
-
-            tangents.ValidateTangents(result);
-        }
-
-        private void _ValidateJoints(Validation.ValidationContext result, IEnumerable<Skin> skins, string attributeName)
-        {
-            var joints = GetVertexAccessor(attributeName);
-
-            if (joints == null) return;
-
-            joints.ValidateJoints(result, attributeName);
-
-            int max = 0;
-            foreach (var jjjj in joints.AsVector4Array())
-            {
-                max = Math.Max(max, (int)jjjj.X);
-                max = Math.Max(max, (int)jjjj.Y);
-                max = Math.Max(max, (int)jjjj.Z);
-                max = Math.Max(max, (int)jjjj.W);
-            }
-
-            foreach (var skin in skins.Where(item => item != null))
-            {
-                var skinJoints = new int[skin.JointsCount];
-                result.CheckArrayIndexAccess(attributeName, max, skinJoints);
-            }
+            Accessor.ValidateVertexAttributes(result, this.VertexAccessors, maxJoints);
         }
 
         #endregion

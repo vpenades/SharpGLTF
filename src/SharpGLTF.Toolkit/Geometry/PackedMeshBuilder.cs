@@ -21,9 +21,9 @@ namespace SharpGLTF.Geometry
         /// ensuring that the resources are shared across all meshes.
         /// </summary>
         /// <param name="meshBuilders">A collection of <see cref="IMeshBuilder{TMaterial}"/> meshes.</param>
-        /// <param name="prefferStrided">true to create strided vertex buffers.</param>
+        /// <param name="settings">Mesh packaging settings.</param>
         /// <returns>A collectio of <see cref="PackedMeshBuilder{TMaterial}"/> meshes.</returns>
-        internal static IEnumerable<PackedMeshBuilder<TMaterial>> CreatePackedMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders, bool prefferStrided)
+        internal static IEnumerable<PackedMeshBuilder<TMaterial>> CreatePackedMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders, Scenes.SceneBuilderSchema2Settings settings)
         {
             try
             {
@@ -34,7 +34,10 @@ namespace SharpGLTF.Geometry
                 throw new ArgumentException(ex.Message, nameof(meshBuilders), ex);
             }
 
-            var jointEncoding = meshBuilders.GetOptimalJointEncoding();
+            var vertexEncodings = new PackedEncoding();
+            vertexEncodings.JointsEncoding = meshBuilders.GetOptimalJointEncoding();
+            vertexEncodings.WeightsEncoding = settings.CompactVertexWeights ? EncodingType.UNSIGNED_SHORT : EncodingType.FLOAT;
+
             var indexEncoding = meshBuilders.GetOptimalIndexEncoding();
 
             foreach (var srcMesh in meshBuilders)
@@ -47,14 +50,14 @@ namespace SharpGLTF.Geometry
 
                     var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
-                    bool useStrided = prefferStrided;
+                    bool useStrided = settings.UseStridedBuffers;
                     if (srcPrim.MorphTargets.Count > 0) useStrided = false; // if the primitive has morphing, it is better not to use strided vertex buffers.
 
-                    if (useStrided) dstPrim.SetStridedVertices(srcPrim, jointEncoding);
-                    else dstPrim.SetStreamedVertices(srcPrim, jointEncoding);
+                    if (useStrided) dstPrim.SetStridedVertices(srcPrim, vertexEncodings);
+                    else dstPrim.SetStreamedVertices(srcPrim, vertexEncodings);
 
                     dstPrim.SetIndices(srcPrim, indexEncoding);
-                    dstPrim.SetMorphTargets(srcPrim);
+                    dstPrim.SetMorphTargets(srcPrim, vertexEncodings);
                 }
 
                 yield return dstMesh;

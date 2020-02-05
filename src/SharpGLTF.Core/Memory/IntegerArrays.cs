@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 
-using BYTES = System.ArraySegment<byte>;
+using BYTES = System.Memory<byte>;
 
 using ENCODING = SharpGLTF.Schema2.IndexEncodingType;
 
@@ -13,7 +13,7 @@ namespace SharpGLTF.Memory
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{UInt32}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Integer[{Count}]")]
-    public struct IntegerArray : IList<UInt32>, IReadOnlyList<UInt32>
+    public readonly struct IntegerArray : IList<UInt32>, IReadOnlyList<UInt32>
     {
         #region constructors
 
@@ -22,26 +22,8 @@ namespace SharpGLTF.Memory
         /// </summary>
         /// <param name="source">The array range to wrap.</param>
         /// <param name="encoding">Byte encoding.</param>
-        public IntegerArray(Byte[] source, ENCODING encoding = ENCODING.UNSIGNED_INT)
-            : this(source, 0, int.MaxValue, encoding) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
-        /// </summary>
-        /// <param name="source">The array range to wrap.</param>
-        /// <param name="encoding">Byte encoding.</param>
         public IntegerArray(BYTES source, ENCODING encoding = ENCODING.UNSIGNED_INT)
             : this(source, 0, int.MaxValue, encoding) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
-        /// </summary>
-        /// <param name="source">The array to wrap.</param>
-        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
-        /// <param name="itemsCount">The number of <see cref="UInt32"/> items in <paramref name="source"/>.</param>
-        /// <param name="encoding">Byte encoding.</param>
-        public IntegerArray(Byte[] source, int byteOffset, int itemsCount, ENCODING encoding)
-            : this(new BYTES(source), byteOffset, itemsCount, encoding) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IntegerArray"/> struct.
@@ -95,13 +77,13 @@ namespace SharpGLTF.Memory
         private T _GetValue<T>(int index)
             where T : unmanaged
         {
-            return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index];
+            return System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.Span)[index];
         }
 
         private void _SetValue<T>(int index, T value)
             where T : unmanaged
         {
-            System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data)[index] = value;
+            System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, T>(_Data.Span)[index] = value;
         }
 
         #endregion
@@ -135,7 +117,7 @@ namespace SharpGLTF.Memory
         /// Gets the number of elements in the range delimited by the <see cref="IntegerArray"/>
         /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public int Count => _Data.Count / _ByteStride;
+        public int Count => _Data.Length / _ByteStride;
 
         bool ICollection<UInt32>.IsReadOnly => false;
 

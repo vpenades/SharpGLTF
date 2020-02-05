@@ -12,7 +12,7 @@ namespace SharpGLTF
     /// <remarks>
     /// LINUX execution path has not been tested!
     /// </remarks>
-    static class gltf_validator
+    public static class gltf_validator
     {
         static gltf_validator()
         {

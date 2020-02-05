@@ -17,12 +17,22 @@ namespace SharpGLTF.Runtime
             // there's any reference from the template to the source model
             // that prevents the source model to be garbage collected.
 
-            var path = TestFiles.GetSampleModelsPaths()
-                            .FirstOrDefault(item => item.Contains("CesiumMan.glb"));
+            (SceneTemplate, WeakReference<Schema2.ModelRoot>) scopedLoad()
+            {
+                var path = TestFiles.GetSampleModelsPaths()
+                                .FirstOrDefault(item => item.Contains("BrainStem.glb"));
 
-            var result = LoadModelTemplate(path);            
+                var result = LoadModelTemplate(path);
 
-            GC.Collect(0);
+                GC.Collect();
+                GC.WaitForFullGCComplete();
+
+                return result;
+            }
+
+            var result = scopedLoad();
+
+            GC.Collect();
             GC.WaitForFullGCComplete();
 
             Assert.IsFalse(result.Item2.TryGetTarget(out Schema2.ModelRoot model));

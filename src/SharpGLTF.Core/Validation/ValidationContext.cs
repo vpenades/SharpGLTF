@@ -251,7 +251,7 @@ namespace SharpGLTF.Validation
         {
             if (!value.HasValue) return false;
             if (!CheckIsFinite(location, value)) return false;
-            if (value.Value.IsValidNormal()) return false;
+            if (value.Value.IsNormalized()) return false;
 
             return TryFixDataOrError(location, $"is not of unit length: {value.Value.Length()}.");
         }

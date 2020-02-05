@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Collections;
 using System.Linq;
 
-using BYTES = System.ArraySegment<byte>;
+using BYTES = System.Memory<byte>;
 
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
@@ -14,27 +14,9 @@ namespace SharpGLTF.Memory
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Color4[{Count}]")]
-    public struct ColorArray : IList<Vector4>, IReadOnlyList<Vector4>
+    public readonly struct ColorArray : IList<Vector4>, IReadOnlyList<Vector4>
     {
         #region constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ColorArray"/> struct.
-        /// </summary>
-        /// <param name="source">The array to wrap.</param>
-        /// <param name="byteOffset">The zero-based index of the first <see cref="Byte"/> in <paramref name="source"/>.</param>
-        /// <param name="itemsCount">The number of <see cref="Vector4"/> items in <paramref name="source"/>.</param>
-        /// <param name="byteStride">
-        /// The byte stride between elements.
-        /// If the value is zero, the size of the item is used instead.
-        /// </param>
-        /// <param name="dimensions">The number of elements per item. Currently only values 3 and 4 are supported.</param>
-        /// <param name="encoding">A value of <see cref="ENCODING"/>.</param>
-        /// <param name="normalized">True if values are normalized.</param>
-        /// <param name="defaultW">If <paramref name="dimensions"/> is 3, the W values are filled with this value</param>
-        public ColorArray(Byte[] source, int byteOffset, int itemsCount, int byteStride, int dimensions = 4, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false, Single defaultW = 1)
-            : this(new BYTES(source), byteOffset, itemsCount, byteStride, dimensions, encoding, normalized, defaultW)
-        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ColorArray"/> struct.
@@ -81,14 +63,14 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private FloatingAccessor _Accessor;
+        private readonly FloatingAccessor _Accessor;
 
         private readonly int _Dimensions;
 
+        private readonly float _DefaultW;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private Vector4[] _DebugItems => this.ToArray();
-
-        private readonly float _DefaultW;
 
         #endregion
 

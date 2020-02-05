@@ -48,6 +48,12 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("{LightType} {Color} {Intensity} {Range}")]
     public sealed partial class PunctualLight
     {
+        #region constants
+
+        private const Double _rangeDefault = Double.PositiveInfinity;
+
+        #endregion
+
         #region lifecycle
 
         internal PunctualLight() { }
@@ -94,7 +100,7 @@ namespace SharpGLTF.Schema2
         /// to have reached zero. Supported only for point and spot lights. Must be > 0.
         /// When undefined, range is assumed to be infinite.
         /// </param>
-        public void SetColor(Vector3 color, float intensity = 1, float range = 0)
+        public void SetColor(Vector3 color, float intensity = 1, float range = float.PositiveInfinity)
         {
             this.Color = color;
             this.Intensity = intensity;
@@ -163,8 +169,13 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Single Range
         {
-            get => (Single)_range.AsValue(0);
-            set => _range = LightType == PunctualLightType.Directional ? 0 : ((double)value).AsNullable(0, _rangeMinimum, float.MaxValue);
+            get => (Single)_range.AsValue(_rangeDefault);
+            set
+            {
+                if (LightType == PunctualLightType.Directional) { _range = null; return; }
+
+                _range = ((double)value).AsNullable(_rangeDefault, _rangeMinimum + 2e-07, float.MaxValue);
+            }
         }
 
         #endregion
@@ -182,6 +193,52 @@ namespace SharpGLTF.Schema2
         {
             get => (Single)_outerConeAngle.AsValue(_outerConeAngleDefault);
             set => _outerConeAngle = ((Double)value).AsNullable(_outerConeAngleDefault, _outerConeAngleMinimum, _outerConeAngleMaximum);
+        }
+    }
+
+    partial class KHR_lights_punctualnodeextension
+    {
+        internal KHR_lights_punctualnodeextension(Node node)
+        {
+        }
+
+        public int LightIndex
+        {
+            get => _light;
+            set => _light = value;
+        }
+    }
+
+    partial class Node
+    {
+        /// <summary>
+        /// Gets or sets the <see cref="Schema2.PunctualLight"/> of this <see cref="Node"/>.
+        /// </summary>
+        /// <remarks>
+        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
+        /// </remarks>
+        public PunctualLight PunctualLight
+        {
+            get
+            {
+                var ext = this.GetExtension<KHR_lights_punctualnodeextension>();
+                if (ext == null) return null;
+
+                return this.LogicalParent.LogicalPunctualLights[ext.LightIndex];
+            }
+            set
+            {
+                if (value == null) { this.RemoveExtensions<KHR_lights_punctualnodeextension>(); return; }
+
+                Guard.MustShareLogicalParent(this, value, nameof(value));
+
+                this.UsingExtension(typeof(KHR_lights_punctualnodeextension));
+
+                var ext = new KHR_lights_punctualnodeextension(this);
+                ext.LightIndex = value.LogicalIndex;
+
+                this.SetExtension(ext);
+            }
         }
     }
 
@@ -234,52 +291,6 @@ namespace SharpGLTF.Schema2
             }
 
             return ext.CreateLight(name, lightType);
-        }
-    }
-
-    partial class KHR_lights_punctualnodeextension
-    {
-        internal KHR_lights_punctualnodeextension(Node node)
-        {
-        }
-
-        public int LightIndex
-        {
-            get => _light;
-            set => _light = value;
-        }
-    }
-
-    partial class Node
-    {
-        /// <summary>
-        /// Gets or sets the <see cref="Schema2.PunctualLight"/> of this <see cref="Node"/>.
-        /// </summary>
-        /// <remarks>
-        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
-        /// </remarks>
-        public PunctualLight PunctualLight
-        {
-            get
-            {
-                var ext = this.GetExtension<KHR_lights_punctualnodeextension>();
-                if (ext == null) return null;
-
-                return this.LogicalParent.LogicalPunctualLights[ext.LightIndex];
-            }
-            set
-            {
-                if (value == null) { this.RemoveExtensions<KHR_lights_punctualnodeextension>(); return; }
-
-                Guard.MustShareLogicalParent(this, value, nameof(value));
-
-                this.UsingExtension(typeof(KHR_lights_punctualnodeextension));
-
-                var ext = new KHR_lights_punctualnodeextension(this);
-                ext.LightIndex = value.LogicalIndex;
-
-                this.SetExtension(ext);
-            }
         }
     }
 }

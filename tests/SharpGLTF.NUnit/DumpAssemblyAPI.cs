@@ -11,7 +11,7 @@ namespace SharpGLTF
     /// <summary>
     /// Utility class to dump the public API of an assembly
     /// </summary>
-    static class DumpAssemblyAPI
+    public static class DumpAssemblyAPI
     {
         // https://www.hanselman.com/blog/ManagingChangeWithNETAssemblyDiffTools.aspx
 

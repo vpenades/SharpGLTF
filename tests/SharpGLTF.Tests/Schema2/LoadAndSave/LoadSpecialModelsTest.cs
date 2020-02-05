@@ -26,9 +26,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         public void LoadWithCustomImageLoader()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
-            
+            TestContext.CurrentContext.AttachShowDirLink();            
 
             // load Polly model
             var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath());
@@ -40,7 +38,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
 
             // load Polly model
-            var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath());
+            var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
 
             Assert.NotNull(model);
 

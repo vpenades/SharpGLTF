@@ -9,6 +9,13 @@ namespace SharpGLTF
 {
     public static class NumericsAssert
     {
+        public static double UnitError(this Vector3 v) { return v.LengthError(1); }
+        
+        public static double LengthError(this Vector3 v, double expectedLength)
+        {
+            return Math.Abs(Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z) - expectedLength);
+        }
+
         public static void IsFinite(Single value, string message = null)
         {
             // Assert.IsTrue(float.IsFinite(value), message);
@@ -60,6 +67,18 @@ namespace SharpGLTF
             IsFinite(plane.D, "D");
         }
 
+        public static void IsFinite(Matrix3x2 matrix)
+        {
+            IsFinite(matrix.M11, "M11");
+            IsFinite(matrix.M12, "M12");            
+
+            IsFinite(matrix.M21, "M21");
+            IsFinite(matrix.M22, "M22");
+            
+            IsFinite(matrix.M31, "M31");
+            IsFinite(matrix.M32, "M32");
+        }
+
         public static void IsFinite(Matrix4x4 matrix)
         {
             IsFinite(matrix.M11, "M11");
@@ -87,7 +106,7 @@ namespace SharpGLTF
         {
             Assert.AreEqual(0, (double)BigInteger.Abs(actual - expected), tolerance);
         }
-
+        
         public static void AreEqual(Vector2 expected, Vector2 actual, double tolerance = 0)
         {
             Assert.AreEqual(expected.X, actual.X, tolerance, "X");
@@ -117,27 +136,33 @@ namespace SharpGLTF
             Assert.AreEqual(expected.W, actual.W, tolerance, "W");
         }
 
-        public static void AreEqual(Matrix4x4 expected, Matrix4x4 actual, double delta = 0)
+        public static void AreEqual(Matrix4x4 expected, Matrix4x4 actual, double tolerance = 0)
         {
-            Assert.AreEqual(expected.M11, actual.M11, delta, "M11");
-            Assert.AreEqual(expected.M12, actual.M12, delta, "M12");
-            Assert.AreEqual(expected.M13, actual.M13, delta, "M13");
-            Assert.AreEqual(expected.M14, actual.M14, delta, "M14");
+            Assert.AreEqual(expected.M11, actual.M11, tolerance, "M11");
+            Assert.AreEqual(expected.M12, actual.M12, tolerance, "M12");
+            Assert.AreEqual(expected.M13, actual.M13, tolerance, "M13");
+            Assert.AreEqual(expected.M14, actual.M14, tolerance, "M14");
 
-            Assert.AreEqual(expected.M21, actual.M21, delta, "M21");
-            Assert.AreEqual(expected.M22, actual.M22, delta, "M22");
-            Assert.AreEqual(expected.M23, actual.M23, delta, "M23");
-            Assert.AreEqual(expected.M24, actual.M24, delta, "M24");
+            Assert.AreEqual(expected.M21, actual.M21, tolerance, "M21");
+            Assert.AreEqual(expected.M22, actual.M22, tolerance, "M22");
+            Assert.AreEqual(expected.M23, actual.M23, tolerance, "M23");
+            Assert.AreEqual(expected.M24, actual.M24, tolerance, "M24");
 
-            Assert.AreEqual(expected.M31, actual.M31, delta, "M31");
-            Assert.AreEqual(expected.M32, actual.M32, delta, "M32");
-            Assert.AreEqual(expected.M33, actual.M33, delta, "M33");
-            Assert.AreEqual(expected.M34, actual.M34, delta, "M34");
+            Assert.AreEqual(expected.M31, actual.M31, tolerance, "M31");
+            Assert.AreEqual(expected.M32, actual.M32, tolerance, "M32");
+            Assert.AreEqual(expected.M33, actual.M33, tolerance, "M33");
+            Assert.AreEqual(expected.M34, actual.M34, tolerance, "M34");
 
-            Assert.AreEqual(expected.M41, actual.M41, delta, "M41");
-            Assert.AreEqual(expected.M42, actual.M42, delta, "M42");
-            Assert.AreEqual(expected.M43, actual.M43, delta, "M43");
-            Assert.AreEqual(expected.M44, actual.M44, delta, "M44");
+            Assert.AreEqual(expected.M41, actual.M41, tolerance, "M41");
+            Assert.AreEqual(expected.M42, actual.M42, tolerance, "M42");
+            Assert.AreEqual(expected.M43, actual.M43, tolerance, "M43");
+            Assert.AreEqual(expected.M44, actual.M44, tolerance, "M44");
+        }
+
+        public static void IsInvertible(Matrix3x2 matrix)
+        {
+            IsFinite(matrix);
+            Assert.IsTrue(Matrix3x2.Invert(matrix, out Matrix3x2 inverted));
         }
 
         public static void IsInvertible(Matrix4x4 matrix)
@@ -164,30 +189,62 @@ namespace SharpGLTF
             Assert.AreEqual(0, Vector3.Dot(cy, cz), tolerance);
         }
 
-        public static void IsNormalized(Vector2 actual, double delta = 0)
+        public static void Length(Vector2 actual, double length, double tolerance = 0)
         {
             IsFinite(actual);
-            AreEqual(Vector2.Normalize(actual), actual, delta);
+
+            length = Math.Abs(actual.Length() - length);
+
+            Assert.AreEqual(0, length, tolerance);
         }
 
-        public static void IsNormalized(Vector3 actual, double delta = 0)
+        public static void Length(Vector3 actual, double length, double tolerance = 0)
         {
             IsFinite(actual);
-            AreEqual(Vector3.Normalize(actual), actual, delta);
+
+            length = Math.Abs(actual.Length() - length);
+
+            Assert.AreEqual(0, length, tolerance);
         }
 
-        public static void IsNormalized(Vector4 actual, double delta = 0)
+        public static void Length(Vector4 actual, double length, double tolerance = 0)
         {
             IsFinite(actual);
-            AreEqual(Vector4.Normalize(actual), actual, delta);
+
+            length = Math.Abs(actual.Length() - length);
+
+            Assert.AreEqual(0, length, tolerance);
         }
 
-        public static void IsNormalized(Quaternion actual, double delta = 0)
+        public static void Length(Quaternion actual, double length, double tolerance = 0)
         {
             IsFinite(actual);
-            AreEqual(Quaternion.Normalize(actual), actual, delta);
+
+            length = Math.Abs(actual.Length() - length);
+
+            Assert.AreEqual(0, length, tolerance);
         }
 
+        public static void IsNormalized(Vector2 actual, double tolerance = 0)
+        {
+            Length(actual, 1, tolerance);
+        }
+
+        public static void IsNormalized(Vector3 actual, double tolerance = 0)
+        {
+            Length(actual, 1, tolerance);
+        }
+
+        public static void IsNormalized(Vector4 actual, double tolerance = 0)
+        {
+            Length(actual, 1, tolerance);
+        }
+
+        public static void IsNormalized(Quaternion actual, double tolerance = 0)
+        {
+            Length(actual, 1, tolerance);
+        }
+        
         public static void InRange(BigInteger value, BigInteger min, BigInteger max)
         {
             GreaterOrEqual(value, min);
@@ -318,21 +375,21 @@ namespace SharpGLTF
 
         public static void AngleLessOrEqual(Vector2 a, Vector2 b, double radians)
         {
-            var angle = VectorsUtils.GetAngle(a, b);
+            var angle = (a, b).GetAngle();
 
             Assert.LessOrEqual(angle, radians, "Angle");
         }
 
         public static void AngleLessOrEqual(Vector3 a, Vector3 b, double radians)
         {
-            var angle = VectorsUtils.GetAngle(a, b);
+            var angle = (a, b).GetAngle();
 
             Assert.LessOrEqual(angle, radians, "Angle");
         }
 
         public static void AngleLessOrEqual(Quaternion a, Quaternion b, double radians)
         {
-            var angle = VectorsUtils.GetAngle(a, b);
+            var angle = (a, b).GetAngle();
 
             Assert.LessOrEqual(angle, radians, "Angle");
         }

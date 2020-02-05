@@ -13,14 +13,14 @@ namespace SharpGLTF.Memory
         [Test]
         public void CreateInterleaved1()
         {
-            var pos = MemoryEncoding.CreateDefaultElement("POSITION");
-            var nrm = MemoryEncoding.CreateDefaultElement("NORMAL");
+            var pos = MemoryAccessInfo.CreateDefaultElement("POSITION");
+            var nrm = MemoryAccessInfo.CreateDefaultElement("NORMAL");
 
             var attributes = new[] { pos, nrm };
 
             const int baseOffset = 8;
 
-            var byteStride = MemoryEncoding.SetInterleavedInfo(attributes, baseOffset, 5);
+            var byteStride = MemoryAccessInfo.SetInterleavedInfo(attributes, baseOffset, 5);
 
             pos = attributes[0];
             nrm = attributes[1];

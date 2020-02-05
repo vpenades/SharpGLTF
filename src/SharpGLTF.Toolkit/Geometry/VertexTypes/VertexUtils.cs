@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 
 using SharpGLTF.Memory;
+using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
+using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
@@ -99,44 +101,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return vtype.MakeGenericType(tvg, tvm, tvs);
         }
 
-        public static bool SanitizeVertex<TvG>(this TvG inVertex, out TvG outVertex)
-            where TvG : struct, IVertexGeometry
-        {
-            outVertex = inVertex;
-
-            var p = inVertex.GetPosition();
-
-            if (!p._IsFinite()) return false;
-
-            if (inVertex.TryGetNormal(out Vector3 n))
-            {
-                if (!n._IsFinite()) return false;
-                if (n == Vector3.Zero) n = p;
-                if (n == Vector3.Zero) return false;
-
-                var l = n.Length();
-                if (l < 0.99f || l > 0.01f) outVertex.SetNormal(Vector3.Normalize(n));
-            }
-
-            if (inVertex.TryGetTangent(out Vector4 tw))
-            {
-                if (!tw._IsFinite()) return false;
-
-                var t = new Vector3(tw.X, tw.Y, tw.Z);
-                if (t == Vector3.Zero) return false;
-
-                if (tw.W > 0) tw.W = 1;
-                if (tw.W < 0) tw.W = -1;
-
-                var l = t.Length();
-                if (l < 0.99f || l > 0.01f) t = Vector3.Normalize(t);
-
-                outVertex.SetTangent(new Vector4(t, tw.W));
-            }
-
-            return true;
-        }
-
         public static TvP ConvertToGeometry<TvP>(this IVertexGeometry src)
             where TvP : struct, IVertexGeometry
         {
@@ -207,13 +171,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region memory buffers API
 
-        public static MemoryAccessor CreateVertexMemoryAccessor<TVertex>(this IReadOnlyList<TVertex> vertices, string attributeName, Schema2.EncodingType jointEncoding)
+        public static MemoryAccessor CreateVertexMemoryAccessor<TVertex>(this IReadOnlyList<TVertex> vertices, string attributeName, PackedEncoding vertexEncoding)
             where TVertex : IVertexBuilder
         {
             if (vertices == null || vertices.Count == 0) return null;
 
+            vertexEncoding.AdjustJointEncoding(vertices);
+
             // determine the vertex attributes from the first vertex.
-            var attributes = GetVertexAttributes(vertices[0], vertices.Count, jointEncoding);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count, vertexEncoding);
 
             var attribute = attributes.FirstOrDefault(item => item.Name == attributeName);
             if (attribute.Name == null) return null;
@@ -231,20 +197,22 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        public static MemoryAccessor[] CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices, Schema2.EncodingType jointEncoding)
+        public static MemoryAccessor[] CreateVertexMemoryAccessors<TVertex>(this IReadOnlyList<TVertex> vertices, PackedEncoding vertexEncoding)
             where TVertex : IVertexBuilder
         {
             if (vertices == null || vertices.Count == 0) return null;
 
+            vertexEncoding.AdjustJointEncoding(vertices);
+
             // determine the vertex attributes from the first vertex.
-            var attributes = GetVertexAttributes(vertices[0], vertices.Count, jointEncoding);
+            var attributes = GetVertexAttributes(vertices[0], vertices.Count, vertexEncoding);
 
             // create a buffer
             int byteStride = attributes[0].ByteStride;
             var vbuffer = new ArraySegment<byte>(new Byte[byteStride * vertices.Count]);
 
             // fill the buffer with the vertex attributes.
-            var accessors = MemoryEncoding
+            var accessors = MemoryAccessInfo
                 .Slice(attributes, 0, vertices.Count)
                 .Select(item => new MemoryAccessor(vbuffer, item))
                 .ToArray();
@@ -254,6 +222,8 @@ namespace SharpGLTF.Geometry.VertexTypes
                 accessor.FillAccessor(vertices);
             }
 
+            MemoryAccessor.SanitizeVertexAttributes(accessors);
+
             return accessors;
         }
 
@@ -262,20 +232,20 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var columnFunc = _GetVertexBuilderAttributeFunc(dstAccessor.Attribute.Name);
 
-            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.SCALAR) dstAccessor.AsScalarArray().Fill(srcVertices._GetColumn<TVertex, Single>(columnFunc));
-            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC2) dstAccessor.AsVector2Array().Fill(srcVertices._GetColumn<TVertex, Vector2>(columnFunc));
-            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC3) dstAccessor.AsVector3Array().Fill(srcVertices._GetColumn<TVertex, Vector3>(columnFunc));
-            if (dstAccessor.Attribute.Dimensions == Schema2.DimensionType.VEC4) dstAccessor.AsVector4Array().Fill(srcVertices._GetColumn<TVertex, Vector4>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == DIMENSIONS.SCALAR) dstAccessor.AsScalarArray().Fill(srcVertices._GetColumn<TVertex, Single>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == DIMENSIONS.VEC2) dstAccessor.AsVector2Array().Fill(srcVertices._GetColumn<TVertex, Vector2>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == DIMENSIONS.VEC3) dstAccessor.AsVector3Array().Fill(srcVertices._GetColumn<TVertex, Vector3>(columnFunc));
+            if (dstAccessor.Attribute.Dimensions == DIMENSIONS.VEC4) dstAccessor.AsVector4Array().Fill(srcVertices._GetColumn<TVertex, Vector4>(columnFunc));
         }
 
-        public static MemoryAccessor CreateIndexMemoryAccessor(this IReadOnlyList<Int32> indices, Schema2.EncodingType encoding)
+        public static MemoryAccessor CreateIndexMemoryAccessor(this IReadOnlyList<Int32> indices, ENCODING indexEncoding)
         {
             if (indices == null || indices.Count == 0) return null;
 
-            var attribute = new MemoryEncoding("INDEX", 0, indices.Count, 0, Schema2.DimensionType.SCALAR, encoding);
+            var attribute = new MemoryAccessInfo("INDEX", 0, indices.Count, 0, DIMENSIONS.SCALAR, indexEncoding);
 
             // create buffer
-            var ibytes = new Byte[encoding.ByteLength() * indices.Count];
+            var ibytes = new Byte[indexEncoding.ByteLength() * indices.Count];
             var ibuffer = new ArraySegment<byte>(ibytes);
 
             // fill the buffer with indices.
@@ -286,13 +256,13 @@ namespace SharpGLTF.Geometry.VertexTypes
             return accessor;
         }
 
-        public static MemoryEncoding[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, Schema2.EncodingType jointEncoding)
+        public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, PackedEncoding vertexEncoding)
         {
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
 
-            var attributes = new List<MemoryEncoding>();
+            var attributes = new List<MemoryAccessInfo>();
 
             foreach (var finfo in tvg.GetFields())
             {
@@ -312,7 +282,12 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (attribute.HasValue)
                 {
                     var a = attribute.Value;
-                    if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = jointEncoding;
+                    if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
+                    if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
+                    {
+                        a.Encoding = vertexEncoding.WeightsEncoding.Value;
+                        if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
+                    }
 
                     attributes.Add(a);
                 }
@@ -320,12 +295,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var array = attributes.ToArray();
 
-            MemoryEncoding.SetInterleavedInfo(array, 0, vertexCount);
+            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
 
             return array;
         }
 
-        private static MemoryEncoding? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
+        private static MemoryAccessInfo? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
         {
             var attribute = finfo.GetCustomAttributes(true)
                     .OfType<VertexAttributeAttribute>()
@@ -333,18 +308,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (attribute == null) return null;
 
-            var dimensions = (Schema2.DimensionType?)null;
+            var dimensions = (DIMENSIONS?)null;
 
-            if (finfo.FieldType == typeof(Single)) dimensions = Schema2.DimensionType.SCALAR;
-            if (finfo.FieldType == typeof(Vector2)) dimensions = Schema2.DimensionType.VEC2;
-            if (finfo.FieldType == typeof(Vector3)) dimensions = Schema2.DimensionType.VEC3;
-            if (finfo.FieldType == typeof(Vector4)) dimensions = Schema2.DimensionType.VEC4;
-            if (finfo.FieldType == typeof(Quaternion)) dimensions = Schema2.DimensionType.VEC4;
-            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = Schema2.DimensionType.MAT4;
+            if (finfo.FieldType == typeof(Single)) dimensions = DIMENSIONS.SCALAR;
+            if (finfo.FieldType == typeof(Vector2)) dimensions = DIMENSIONS.VEC2;
+            if (finfo.FieldType == typeof(Vector3)) dimensions = DIMENSIONS.VEC3;
+            if (finfo.FieldType == typeof(Vector4)) dimensions = DIMENSIONS.VEC4;
+            if (finfo.FieldType == typeof(Quaternion)) dimensions = DIMENSIONS.VEC4;
+            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = DIMENSIONS.MAT4;
 
             if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
 
-            return new MemoryEncoding(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
+            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
         private static Func<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)

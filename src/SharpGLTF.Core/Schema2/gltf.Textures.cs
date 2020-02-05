@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2
 
             if (primaryImage.IsDds || primaryImage.IsWebp)
             {
-                var fallback = LogicalParent.UseImage(Memory.InMemoryImage.DefaultPngImage.Slice(0));
+                var fallback = LogicalParent.UseImage(Memory.MemoryImage.DefaultPngImage.Slice(0));
                 SetImages(primaryImage, fallback);
             }
             else

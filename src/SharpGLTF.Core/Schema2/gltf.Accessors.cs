@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
-
 using SharpGLTF.Memory;
+using SharpGLTF.Validation;
+
+using VALIDATIONCTX = SharpGLTF.Validation.ValidationContext;
 
 namespace SharpGLTF.Schema2
 {
@@ -90,10 +93,10 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal MemoryAccessor _GetMemoryAccessor()
+        internal MemoryAccessor _GetMemoryAccessor(string name = null)
         {
             var view = SourceBufferView;
-            var info = new MemoryEncoding(null, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            var info = new MemoryAccessInfo(name, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
             return new MemoryAccessor(view.Content, info);
         }
 
@@ -334,7 +337,7 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(VALIDATIONCTX result)
         {
             base.OnValidateReferences(result);
 
@@ -347,7 +350,7 @@ namespace SharpGLTF.Schema2
             _sparse?.ValidateReferences(result);
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidate(VALIDATIONCTX result)
         {
             base.OnValidate(result);
 
@@ -361,7 +364,7 @@ namespace SharpGLTF.Schema2
             // using this accessor to validate the data.
         }
 
-        private void ValidateBounds(Validation.ValidationContext result)
+        private void ValidateBounds(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
@@ -405,7 +408,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidateIndices(Validation.ValidationContext result, uint vertexCount, PrimitiveType drawingType)
+        internal void ValidateIndices(VALIDATIONCTX result, uint vertexCount, PrimitiveType drawingType)
         {
             result = result.GetContext(this);
 
@@ -426,7 +429,34 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidatePositions(Validation.ValidationContext result)
+        internal static void ValidateVertexAttributes(VALIDATIONCTX result, IReadOnlyDictionary<string, Accessor> attributes, int skinsMaxJointCount)
+        {
+            if (result.TryFix)
+            {
+                foreach(var kvp in attributes.Where(item => item.Key != "POSITION"))
+                {
+                    // remove unnecessary bounds
+                    kvp.Value._min.Clear();
+                    kvp.Value._max.Clear();
+                }
+            }
+
+            if (attributes.TryGetValue("POSITION", out Accessor positions)) positions._ValidatePositions(result);
+            else result.AddSemanticWarning("No POSITION attribute found.");
+
+            if (attributes.TryGetValue("NORMAL", out Accessor normals)) normals._ValidateNormals(result);
+            if (attributes.TryGetValue("TANGENT", out Accessor tangents)) tangents._ValidateTangents(result);
+            if (normals == null && tangents != null) result.AddSemanticWarning("TANGENT", "attribute without NORMAL found.");
+
+            if (attributes.TryGetValue("JOINTS_0", out Accessor joints0)) joints0._ValidateJoints(result, "JOINTS_0", skinsMaxJointCount);
+            if (attributes.TryGetValue("JOINTS_1", out Accessor joints1)) joints0._ValidateJoints(result, "JOINTS_1", skinsMaxJointCount);
+
+            attributes.TryGetValue("WEIGHTS_0", out Accessor weights0);
+            attributes.TryGetValue("WEIGHTS_1", out Accessor weights1);
+            _ValidateWeights(result, weights0, weights1);
+        }
+
+        private void _ValidatePositions(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
@@ -446,7 +476,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidateNormals(Validation.ValidationContext result)
+        private void _ValidateNormals(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
@@ -474,7 +504,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidateTangents(Validation.ValidationContext result)
+        private void _ValidateTangents(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
@@ -507,7 +537,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidateJoints(Validation.ValidationContext result, string attributeName)
+        private void _ValidateJoints(VALIDATIONCTX result, string attributeName, int skinsMaxJointCount)
         {
             result = result.GetContext(this);
 
@@ -520,30 +550,34 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < joints.Count; ++i)
             {
-                result.CheckIsFinite(i, joints[i]);
+                var jidx = joints[i];
+
+                result.CheckIsFinite(i, jidx);
+                result.CheckIsInRange(i, jidx, 0, skinsMaxJointCount);
             }
         }
 
-        internal void ValidateWeights(Validation.ValidationContext result, int jwset)
+        private static void _ValidateWeights(VALIDATIONCTX result, Accessor weights0, Accessor weights1)
+        {
+            weights0?._ValidateWeights(result);
+            weights1?._ValidateWeights(result);
+
+            var memory0 = weights0?._GetMemoryAccessor("WEIGHTS_0");
+            var memory1 = weights1?._GetMemoryAccessor("WEIGHTS_1");
+
+            MemoryAccessor.ValidateWeightsSum(result, memory0, memory1);
+        }
+
+        private void _ValidateWeights(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
             SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
             result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
-
-            var weights = this.AsVector4Array();
-
-            for (int i = 0; i < weights.Count; ++i)
-            {
-                result.CheckIsInRange(i, weights[i], 0, 1);
-
-                // theoretically, the sum of all the weights should give 1, ASSUMING there's only one weight set.
-                // but in practice, that seems not to be true.
-            }
         }
 
-        internal void ValidateMatrices(Validation.ValidationContext result)
+        internal void ValidateMatrices(VALIDATIONCTX result)
         {
             result = result.GetContext(this);
 
@@ -558,13 +592,13 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void ValidateAnimationInput(Validation.ValidationContext result)
+        internal void ValidateAnimationInput(VALIDATIONCTX result)
         {
             SourceBufferView.ValidateBufferUsagePlainData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
         }
 
-        internal void ValidateAnimationOutput(Validation.ValidationContext result)
+        internal void ValidateAnimationOutput(VALIDATIONCTX result)
         {
             SourceBufferView.ValidateBufferUsagePlainData(result);
             result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);

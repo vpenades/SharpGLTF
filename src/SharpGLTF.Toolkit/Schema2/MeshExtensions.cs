@@ -57,10 +57,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(materialConverter, nameof(materialConverter));
             Guard.NotNull(meshBuilders, nameof(meshBuilders));
 
-            return root.CreateMeshes(materialConverter, true, meshBuilders);
+            return root.CreateMeshes(materialConverter, Scenes.SceneBuilderSchema2Settings.Default, meshBuilders);
         }
 
-        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial>(this ModelRoot root, Converter<TMaterial, Material> materialConverter, bool strided, params IMeshBuilder<TMaterial>[] meshBuilders)
+        public static IReadOnlyList<Mesh> CreateMeshes<TMaterial>(this ModelRoot root, Converter<TMaterial, Material> materialConverter, Scenes.SceneBuilderSchema2Settings settings, params IMeshBuilder<TMaterial>[] meshBuilders)
         {
             Guard.NotNull(root, nameof(root));
             Guard.NotNull(materialConverter, nameof(materialConverter));
@@ -80,7 +80,7 @@ namespace SharpGLTF.Schema2
             // create Schema2.Mesh collections for every gathered group.
 
             var srcMeshes = PackedMeshBuilder<TMaterial>
-                .CreatePackedMeshes(meshBuilders, strided)
+                .CreatePackedMeshes(meshBuilders, settings)
                 .ToList();
 
             PackedMeshBuilder<TMaterial>.MergeBuffers(srcMeshes);
@@ -263,13 +263,7 @@ namespace SharpGLTF.Schema2
         public static MeshPrimitive WithVertexAccessors<TVertex>(this MeshPrimitive primitive, IReadOnlyList<TVertex> vertices)
             where TVertex : IVertexBuilder
         {
-            var indices = vertices.Select(item => item.GetSkinning().GetWeights().MaxIndex);
-
-            var maxIndex = indices.Any() ? indices.Max() : 0;
-
-            var encoding = maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : EncodingType.UNSIGNED_SHORT;
-
-            var memAccessors = VertexUtils.CreateVertexMemoryAccessors(vertices, encoding);
+            var memAccessors = VertexUtils.CreateVertexMemoryAccessors(vertices, new PackedEncoding());
 
             return primitive.WithVertexAccessors(memAccessors);
         }
