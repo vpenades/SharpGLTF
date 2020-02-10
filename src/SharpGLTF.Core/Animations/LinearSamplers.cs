@@ -6,7 +6,7 @@ using System.Text;
 
 namespace SharpGLTF.Animations
 {
-    struct SingleValueSampler<T> : ICurveSampler<T>, IConvertibleCurve<T>
+    readonly struct SingleValueSampler<T> : ICurveSampler<T>, IConvertibleCurve<T>
     {
         #region lifecycle
 
@@ -64,7 +64,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Vector3"/> curve sampler that can be sampled with STEP or LINEAR interpolations.
     /// </summary>
-    struct Vector3LinearSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
+    readonly struct Vector3LinearSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
     {
         #region lifecycle
 
@@ -130,7 +130,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Quaternion"/> curve sampler that can be sampled with STEP or LINEAR interpolations.
     /// </summary>
-    struct QuaternionLinearSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
+    readonly struct QuaternionLinearSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
     {
         #region lifecycle
 
@@ -196,7 +196,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Transforms.SparseWeight8"/> curve sampler that can be sampled with STEP or LINEAR interpolation.
     /// </summary>
-    struct SparseLinearSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
+    readonly struct SparseLinearSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
     {
         #region lifecycle
 
@@ -263,7 +263,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="float"/>[] curve sampler that can be sampled with STEP or LINEAR interpolations.
     /// </summary>
-    struct ArrayLinearSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
+    readonly struct ArrayLinearSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
     {
         #region lifecycle
 

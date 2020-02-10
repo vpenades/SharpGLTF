@@ -46,18 +46,19 @@ namespace SharpGLTF
             psi.UseShellExecute = false;            
             psi.RedirectStandardError = true;
 
-            var p = System.Diagnostics.Process.Start(psi);
-
-            if (!p.WaitForExit(1000 * 10))
+            using (var p = System.Diagnostics.Process.Start(psi))
             {
-                try { p.Kill(); } catch { }
+                if (!p.WaitForExit(1000 * 10))
+                {
+                    try { p.Kill(); } catch { }
+                }
+
+                var rawReport = p.StandardError.ReadToEnd();
+
+                if (string.IsNullOrWhiteSpace(rawReport)) return null;
+
+                return new ValidationReport(gltfFilePath, rawReport);
             }
-
-            var rawReport = p.StandardError.ReadToEnd();
-
-            if (string.IsNullOrWhiteSpace(rawReport)) return null;
-
-            return new ValidationReport(gltfFilePath, rawReport);
         }
 
         public sealed class ValidationReport

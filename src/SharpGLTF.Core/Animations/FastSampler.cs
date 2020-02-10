@@ -9,7 +9,7 @@ namespace SharpGLTF.Animations
     /// Wraps a collection of samplers split over time to speed up key retrieval.
     /// </summary>
     /// <typeparam name="T">The value sampled at any offset</typeparam>
-    struct FastSampler<T> : ICurveSampler<T>
+    readonly struct FastSampler<T> : ICurveSampler<T>
     {
         public FastSampler(IEnumerable<ICurveSampler<T>> samplers)
         {

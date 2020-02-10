@@ -12,7 +12,7 @@ namespace SharpGLTF.Schema2
     /// to have an homogeneous and easy to use API.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Channel {_Key}")]
-    public struct MaterialChannel
+    public readonly struct MaterialChannel
     {
         #region lifecycle
 
@@ -67,6 +67,13 @@ namespace SharpGLTF.Schema2
         private readonly Vector4 _ParameterDefVal;
         private readonly Func<Vector4> _ParameterGetter;
         private readonly Action<Vector4> _ParameterSetter;
+
+        public override int GetHashCode()
+        {
+            if (_Key == null) return 0;
+
+            return _Key.GetHashCode() ^ _Material.GetHashCode();
+        }
 
         #endregion
 

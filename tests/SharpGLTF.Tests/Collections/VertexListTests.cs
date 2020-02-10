@@ -10,6 +10,7 @@ namespace SharpGLTF.Collections
     [Category("Core")]
     public class VertexListTests
     {
+        [System.Diagnostics.DebuggerDisplay("{Value}")]
         struct _VertexExample
         {
             public static implicit operator _VertexExample(int value)

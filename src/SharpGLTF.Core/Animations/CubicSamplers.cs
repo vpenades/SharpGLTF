@@ -9,7 +9,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Vector3"/> curve sampler that can be sampled with CUBIC interpolation.
     /// </summary>
-    struct Vector3CubicSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
+    readonly struct Vector3CubicSampler : ICurveSampler<Vector3>, IConvertibleCurve<Vector3>
     {
         #region lifecycle
 
@@ -73,7 +73,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Quaternion"/> curve sampler that can be sampled with CUBIC interpolation.
     /// </summary>
-    struct QuaternionCubicSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
+    readonly struct QuaternionCubicSampler : ICurveSampler<Quaternion>, IConvertibleCurve<Quaternion>
     {
         #region lifecycle
 
@@ -137,7 +137,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="Transforms.SparseWeight8"/> curve sampler that can be sampled with CUBIC interpolation.
     /// </summary>
-    struct SparseCubicSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
+    readonly struct SparseCubicSampler : ICurveSampler<Transforms.SparseWeight8>, IConvertibleCurve<Transforms.SparseWeight8>
     {
         #region lifecycle
 
@@ -201,7 +201,7 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Defines a <see cref="float"/>[] curve sampler that can be sampled with CUBIC interpolation.
     /// </summary>
-    struct ArrayCubicSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
+    readonly struct ArrayCubicSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
     {
         #region lifecycle
 

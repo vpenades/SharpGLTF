@@ -8,7 +8,7 @@ using SharpGLTF.Transforms;
 namespace SharpGLTF.Geometry.VertexTypes
 {
     [System.Diagnostics.DebuggerDisplay("Empty")]
-    public struct VertexEmpty : IVertexMaterial, IVertexSkinning
+    public readonly struct VertexEmpty : IVertexMaterial, IVertexSkinning
     {
         public void Validate() { }
 

@@ -111,6 +111,6 @@ namespace SharpGLTF
             }
 
             Warn.If(!backwardsCompatible, "Current API is not backwards compatible");
-        }
+        }        
     }
 }
