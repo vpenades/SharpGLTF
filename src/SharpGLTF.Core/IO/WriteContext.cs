@@ -154,15 +154,11 @@ namespace SharpGLTF.IO
 
             model._PrepareImagesForWriting(this, baseName, ResourceWriteMode.SatelliteFile);
 
+            _ValidateBeforeWriting(model);
+
             using (var m = new MemoryStream())
             {
                 model._WriteJSON(m, this.JsonIndented);
-
-                /*
-                using (var w = new StreamWriter(m))
-                {
-                    model._WriteJSON(w, this.JsonFormatting);
-                }*/
 
                 WriteAllBytesToEnd($"{baseName}.gltf", m.ToArraySegment());
             }
@@ -190,6 +186,8 @@ namespace SharpGLTF.IO
 
             model._PrepareImagesForWriting(this, baseName, ResourceWriteMode.Embedded);
 
+            _ValidateBeforeWriting(model);
+
             using (var m = new MemoryStream())
             {
                 using (var w = new BinaryWriter(m))
@@ -206,6 +204,26 @@ namespace SharpGLTF.IO
         #endregion
 
         #region core
+
+        /// <summary>
+        /// This needs to be called immediately before writing to json,
+        /// but immediately after preprocessing and buffer setup, so we have a valid model.
+        /// </summary>
+        /// <param name="model"></param>
+        private void _ValidateBeforeWriting(SCHEMA2 model)
+        {
+            if (_NoCloneWatchdog) return;
+
+            var vcontext = new Validation.ValidationResult(model, Validation.ValidationMode.Strict);
+
+            model.ValidateReferences(vcontext.GetContext());
+            var ex = vcontext.Errors.FirstOrDefault();
+            if (ex != null) throw ex;
+
+            model.Validate(vcontext.GetContext());
+            ex = vcontext.Errors.FirstOrDefault();
+            if (ex != null) throw ex;
+        }
 
         /// <summary>
         /// Prepares the model for writing with the appropiate settings, creating a defensive copy if neccesary.

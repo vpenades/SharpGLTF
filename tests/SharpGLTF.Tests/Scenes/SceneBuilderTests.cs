@@ -587,5 +587,23 @@ namespace SharpGLTF.Scenes
             }
         }
 
+
+        [Test]
+        public void TestCreateEmptyMesh()
+        {
+            var sb = new SceneBuilder();
+            sb.AddMesh(VPOSNRM.CreateCompatibleMesh("Empty"), Matrix4x4.Identity);
+
+            var schema = sb.ToGltf2();
+
+            Assert.AreEqual(0, schema.LogicalMeshes.Count,"SceneBuilder should detect empty meshes and remove them.");
+
+            schema.CreateMesh("Empty2");
+
+            var fileName = TestContext.CurrentContext.GetAttachmentPath("empty.glb", true);
+
+            Assert.Throws<SharpGLTF.Validation.SchemaException>(() => schema.SaveGLB(fileName));
+        }
+
     }
 }

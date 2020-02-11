@@ -96,6 +96,12 @@ namespace SharpGLTF.Schema2
         protected override void OnValidateReferences(Validation.ValidationContext result)
         {
             base.OnValidateReferences(result);
+            
+            if (this.Primitives.Count == 0)
+            {
+                result.AddSchemaError("Primitives must be defined");
+                return;
+            }
 
             result.CheckLinksInCollection("Primitives", _primitives);
 
