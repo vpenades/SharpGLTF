@@ -377,6 +377,48 @@ namespace SharpGLTF.Scenes
             return this;
         }
 
+        public NodeBuilder WithLocalTranslation(string animTrack, IReadOnlyDictionary<float, Vector3> keyframes)
+        {
+            Guard.NotNull(keyframes, nameof(keyframes));
+
+            var track = this.UseTranslation(animTrack);
+
+            foreach (var kf in keyframes)
+            {
+                track.SetPoint(kf.Key, kf.Value);
+            }
+
+            return this;
+        }
+
+        public NodeBuilder WithLocalRotation(string animTrack, IReadOnlyDictionary<float, Quaternion> keyframes)
+        {
+            Guard.NotNull(keyframes, nameof(keyframes));
+
+            var track = this.UseRotation(animTrack);
+
+            foreach (var kf in keyframes)
+            {
+                track.SetPoint(kf.Key, kf.Value);
+            }
+
+            return this;
+        }
+
+        public NodeBuilder WithLocalScale(string animTrack, IReadOnlyDictionary<float, Vector3> keyframes)
+        {
+            Guard.NotNull(keyframes, nameof(keyframes));
+
+            var track = this.UseScale(animTrack);
+
+            foreach (var kf in keyframes)
+            {
+                track.SetPoint(kf.Key, kf.Value);
+            }
+
+            return this;
+        }
+
         #endregion
     }
 }
