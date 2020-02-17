@@ -36,9 +36,12 @@ namespace SharpGLTF
             _Check();
 
             _SchemaDir = System.IO.Path.Combine(_RootDir, "glTF-Schema");
+            _ValidationDir = System.IO.Path.Combine(_RootDir, "glTF-Validator");
             _SampleModelsDir = System.IO.Path.Combine(_RootDir, "glTF-Sample-Models");
+
             _PollyModelsDir = System.IO.Path.Combine(_RootDir, "glTF-Blender-Exporter");
             _UniVRMModelsDir = System.IO.Path.Combine(_RootDir, "UniVRM");
+
             _BabylonJsMeshesDir = System.IO.Path.Combine(_RootDir, "BabylonJS-MeshesLibrary");
             _BabylonJsPlaygroundDir = System.IO.Path.Combine(_RootDir, "BabylonJS-PlaygroundScenes");
 
@@ -54,7 +57,9 @@ namespace SharpGLTF
         private static readonly string _RootDir;
 
         private static readonly string _SchemaDir;
+        private static readonly string _ValidationDir;
         private static readonly string _SampleModelsDir;
+
         private static readonly string _PollyModelsDir;
         private static readonly string _UniVRMModelsDir;
         private static readonly string _BabylonJsMeshesDir;
@@ -133,6 +138,17 @@ namespace SharpGLTF
             return files
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\glTF-Draco\\"))
+                .ToList();
+        }
+
+        public static IReadOnlyList<string> GetKhronosValidationPaths()
+        {
+            _Check();
+
+            var files = GetModelPathsInDirectory(_ValidationDir, "test");
+
+            return files
+                .OrderBy(item => item)                
                 .ToList();
         }
 

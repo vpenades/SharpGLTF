@@ -315,7 +315,7 @@ namespace SharpGLTF.IO
                 return;
             }
 
-            throw new NotImplementedException();
+            throw new JSONEXCEPTION($"Unexpected token {reader.TokenType}");
         }
 
         protected static Object DeserializeUnknownObject(ref Utf8JsonReader reader)

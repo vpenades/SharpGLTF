@@ -16,12 +16,15 @@ namespace SharpGLTF
         {
             _WorkingDirectory = workingDirectory;            
 
-            _SchemaDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Schema");
-            _SampleModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Sample-Models");
-            _PollyModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Blender-Exporter");
-            _UniVRMModelsDir = System.IO.Path.Combine(_WorkingDirectory, "UniVRM");
+            _KhronosSchemaDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Schema");
+            _KhronosValidatorDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Validator");
+            _KhronosSampleModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Sample-Models");
+
             _BabylonJsMeshesDir = System.IO.Path.Combine(_WorkingDirectory, "BabylonJS-MeshesLibrary");
             _BabylonJsPlaygroundDir = System.IO.Path.Combine(_WorkingDirectory, "BabylonJS-PlaygroundScenes");
+
+            _PollyModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Blender-Exporter");
+            _UniVRMModelsDir = System.IO.Path.Combine(_WorkingDirectory, "UniVRM");            
         }
 
         public void DownloadReferenceModels()
@@ -34,13 +37,16 @@ namespace SharpGLTF
             dstPath = System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
             DownloadUtils.DownloadFile("https://github.com/vrm-c/UniVRMTest/raw/master/Models/Alicia_vrm-0.40/AliciaSolid_vrm-0.40.vrm", dstPath);
 
-            Console.WriteLine("Checking out test files... It might take a while, please, wait...");            
+            Console.WriteLine("Checking out test files... It might take a while, please, wait...");
 
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _SampleModelsDir);
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);            
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _SchemaDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _KhronosSchemaDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Validator.git", _KhronosValidatorDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _KhronosSampleModelsDir);
+            
             DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsMeshesDir);
-            // DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/Babylon.js.git", _BabylonJsPlaygroundDir);
+            // DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/Babylon.js.git", _BabylonJsPlaygroundDir);        
+
+            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Blender-Exporter.git", _PollyModelsDir);
 
             Console.WriteLine("... Download Completed.");
         }
@@ -51,8 +57,10 @@ namespace SharpGLTF
 
         private readonly string _WorkingDirectory;
 
-        private readonly string _SchemaDir;
-        private readonly string _SampleModelsDir;
+        private readonly string _KhronosSchemaDir;
+        private readonly string _KhronosValidatorDir;
+        private readonly string _KhronosSampleModelsDir;
+        
         private readonly string _PollyModelsDir;
         private readonly string _UniVRMModelsDir;
         private readonly string _BabylonJsMeshesDir;

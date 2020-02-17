@@ -404,8 +404,18 @@ namespace SharpGLTF.Schema2
 
             var pidx = thisIndex;
 
+            var sequence = new List<int>();
+
             while (true)
             {
+                if (sequence.Contains(pidx))
+                {
+                    result.AddLinkError("is a part of a node loop.");
+                    break;
+                }
+
+                sequence.Add(pidx);
+
                 result = result.GetContext(result.Root.LogicalNodes[pidx]);
 
                 // every node must have 0 or 1 parents.

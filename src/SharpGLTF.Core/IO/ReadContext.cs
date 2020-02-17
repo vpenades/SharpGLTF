@@ -216,14 +216,14 @@ namespace SharpGLTF.IO
 
             var reader = new Utf8JsonReader(jsonUtf8Bytes);
 
-            if (!reader.Read())
-            {
-                vcontext.AddError(new Validation.ModelException(root, "Json is empty"));
-                return (null, vcontext);
-            }
-
             try
             {
+                if (!reader.Read())
+                {
+                    vcontext.AddError(new Validation.SchemaException(root, "Json is empty"));
+                    return (null, vcontext);
+                }
+
                 root.Deserialize(ref reader);
                 root.OnDeserializationCompleted();
             }
