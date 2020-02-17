@@ -19,8 +19,11 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>SharpGLTF.Tests</_Parameter1>
-    </AssemblyAttribute>    
+      <_Parameter1>SharpGLTF.Core.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>SharpGLTF.Toolkit.Tests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>  
   
   <ItemGroup>
