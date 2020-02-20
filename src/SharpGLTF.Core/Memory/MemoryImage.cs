@@ -25,9 +25,20 @@ namespace SharpGLTF.Memory
         const string MIME_DDS = "image/vnd-ms.dds";
         const string MIME_WEBP = "image/webp";
 
+        /// <summary>
+        /// Represents a 4x4 white PNG image.
+        /// </summary>
         private const string DEFAULT_PNG_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAHXpUWHRUaXRsZQAACJlzSU1LLM0pCUmtKCktSgUAKVIFt/VCuZ8AAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAANElEQVQoz2O8cuUKAwxoa2vD2VevXsUqzsRAIqC9Bsb///8TdDey+CD0Awsx7h6NB5prAADPsx0VAB8VRQAAAABJRU5ErkJggg==";
 
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
+
+        internal static readonly string[] _EmbeddedHeaders =
+                { EMBEDDED_OCTET_STREAM
+                , EMBEDDED_GLTF_BUFFER
+                , EMBEDDED_JPEG_BUFFER
+                , EMBEDDED_PNG_BUFFER
+                , EMBEDDED_DDS_BUFFER
+                , EMBEDDED_WEBP_BUFFER };
 
         public static MemoryImage Empty => default;
 

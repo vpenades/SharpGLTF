@@ -191,30 +191,52 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            var chunks = BinarySerialization.ReadBinaryFile(stream);
+            IReadOnlyDictionary<uint, Byte[]> chunks = null;
+
+            try
+            {
+                chunks = BinarySerialization.ReadBinaryFile(stream);
+            }
+            catch (System.IO.EndOfStreamException ex)
+            {
+                var vr = new Validation.ValidationResult(null, this.Validation);
+                vr.AddError(new Validation.SchemaException(null, "Unexpected EOF"));
+                return (null, vr);
+            }
+            catch (Validation.SchemaException ex)
+            {
+                var vr = new Validation.ValidationResult(null, this.Validation);
+                vr.AddError(ex);
+                return (null, vr);
+            }
 
             var context = this;
 
             if (chunks.ContainsKey(BinarySerialization.CHUNKBIN))
             {
-                context = new ReadContext(context); // clone instance
-                context._BinaryChunk = chunks[BinarySerialization.CHUNKBIN];
+                // clone self
+                var binChunk = chunks[BinarySerialization.CHUNKBIN];
+                context = new ReadContext(context);
+                context._BinaryChunk = binChunk;
             }
 
             var jsonChunk = chunks[BinarySerialization.CHUNKJSON];
 
-            return context._Read(new BYTES(jsonChunk));
+            return context._Read(jsonChunk);
         }
 
-        private (SCHEMA2 Model, Validation.ValidationResult Validation) _Read(BYTES jsonUtf8Bytes)
+        private (SCHEMA2 Model, Validation.ValidationResult Validation) _Read(ReadOnlyMemory<Byte> jsonUtf8Bytes)
         {
-            Guard.NotNull(jsonUtf8Bytes, nameof(jsonUtf8Bytes));
-
             var root = new SCHEMA2();
 
             var vcontext = new Validation.ValidationResult(root, this.Validation);
 
-            var reader = new Utf8JsonReader(jsonUtf8Bytes);
+            if (jsonUtf8Bytes.IsEmpty)
+            {
+                vcontext.AddError(new Validation.SchemaException(null, "JSon is empty."));
+            }
+
+            var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
 
             try
             {
@@ -232,6 +254,10 @@ namespace SharpGLTF.IO
                 vcontext.AddError(new Validation.SchemaException(root, rex));
                 return (null, vcontext);
             }
+
+            // binary chunk check
+
+            foreach (var b in root.LogicalBuffers) b.OnValidateBinaryChunk(vcontext.GetContext(root), this._BinaryChunk);
 
             // schema validation
 
@@ -278,7 +304,7 @@ namespace SharpGLTF.IO
             }
         }
 
-        public static BYTES ReadJsonBytes(Stream stream)
+        public static ReadOnlyMemory<Byte> ReadJsonBytes(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
 
@@ -288,9 +314,7 @@ namespace SharpGLTF.IO
             {
                 var chunks = BinarySerialization.ReadBinaryFile(stream);
 
-                var jsonChunk = chunks[BinarySerialization.CHUNKJSON];
-
-                return new BYTES(jsonChunk);
+                return chunks[BinarySerialization.CHUNKJSON];
             }
 
             return stream.ReadBytesToEnd();

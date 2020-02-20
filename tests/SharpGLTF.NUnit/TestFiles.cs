@@ -145,8 +145,11 @@ namespace SharpGLTF
         {
             _Check();
 
-            var files = GetModelPathsInDirectory(_ValidationDir, "test");
+            var skip = new string[] { "misplaced_bin_chunk.glb", "valid_placeholder.glb" };
 
+            var files = GetModelPathsInDirectory(_ValidationDir, "test")
+                .Where(item => skip.All(f=>!item.EndsWith(f)));
+            
             return files
                 .OrderBy(item => item)                
                 .ToList();

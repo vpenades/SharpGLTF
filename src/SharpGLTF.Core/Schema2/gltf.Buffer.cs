@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerDisplay("Buffer[{LogicalIndex}] {Name} Bytes:{_Data.Length}")]
+    [System.Diagnostics.DebuggerDisplay("Buffer[{LogicalIndex}] {Name} Bytes:{_Content?.Length ?? 0}")]
     public sealed partial class Buffer
     {
         #region lifecycle
@@ -41,12 +41,14 @@ namespace SharpGLTF.Schema2
 
         #region binary read
 
-        const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream;base64,";
-        const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer;base64,";
+        const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream";
+        const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer";
 
         internal void _ResolveUri(IO.ReadContext context)
         {
             _Content = _LoadBinaryBufferUnchecked(_uri, context);
+
+            // if (_uri == null) _byteLength = _Content.Length; // fixes "valid_placeholder.glb" case
 
             _uri = null; // When _Data is not empty, clear URI
         }
@@ -112,12 +114,20 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
+        internal void OnValidateBinaryChunk(Validation.ValidationContext result, Byte[] binaryChunk)
+        {
+            if (_uri == null)
+            {
+                if (binaryChunk == null) { result.GetContext(this).AddSchemaError("Binary chunk not found"); return; }
+                if (_byteLength > binaryChunk.Length) result.GetContext(this).AddSchemaError("Buffer length larger than Binary chunk");
+            }
+        }
+
         protected override void OnValidateReferences(Validation.ValidationContext result)
         {
             base.OnValidateReferences(result);
 
-            result.CheckSchemaIsValidURI("Uri", this._uri);
-
+            result.CheckSchemaIsValidURI("Uri", this._uri, EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
             result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
             // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
         }

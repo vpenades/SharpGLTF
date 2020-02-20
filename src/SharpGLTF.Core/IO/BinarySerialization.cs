@@ -63,7 +63,7 @@ namespace SharpGLTF.Schema2
 
                 var chunks = new Dictionary<uint, Byte[]>();
 
-                // keep reading until EndOfFile exception
+                // keep reading until EndOfFile
                 while (true)
                 {
                     if (binaryReader.PeekChar() < 0) break;
@@ -72,15 +72,20 @@ namespace SharpGLTF.Schema2
 
                     if ((chunkLength & 3) != 0)
                     {
-                        throw new InvalidDataException($"The chunk must be padded to 4 bytes: {chunkLength}");
+                        throw new Validation.SchemaException(null, $"The chunk must be padded to 4 bytes: {chunkLength}");
                     }
 
                     uint chunkId = binaryReader.ReadUInt32();
+
+                    if (chunks.ContainsKey(chunkId)) throw new Validation.SchemaException(null, $"Duplicated chunk found {chunkId}");
 
                     var data = binaryReader.ReadBytes((int)chunkLength);
 
                     chunks[chunkId] = data;
                 }
+
+                if (!chunks.ContainsKey(CHUNKJSON)) throw new Validation.SchemaException(null, "JSON Chunk chunk not found");
+                // if (!chunks.ContainsKey(CHUNKBIN)) throw new Validation.SchemaException(null, "BIN Chunk chunk not found");
 
                 return chunks;
             }
@@ -91,17 +96,15 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(binaryReader, nameof(binaryReader));
 
             uint magic = binaryReader.ReadUInt32();
-
-            Guard.IsTrue(magic == GLTFHEADER, nameof(magic), $"Unexpected magic number: {magic}");
+            if (magic != GLTFHEADER) throw new Validation.SchemaException(null, $"Unexpected magic number: {magic}");
 
             uint version = binaryReader.ReadUInt32();
-
-            Guard.IsTrue(version == GLTFVERSION2, nameof(version), $"Unknown version number: {version}");
+            if (version != GLTFVERSION2) throw new Validation.SchemaException(null, $"Unknown version number: {version}");
 
             uint length = binaryReader.ReadUInt32();
             long fileLength = binaryReader.BaseStream.Length;
 
-            Guard.IsTrue(length == fileLength, nameof(length), $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
+            if (length != fileLength) throw new Validation.SchemaException(null, $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
         }
 
         #endregion

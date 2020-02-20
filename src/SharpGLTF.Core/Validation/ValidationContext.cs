@@ -175,14 +175,13 @@ namespace SharpGLTF.Validation
 
         #pragma warning disable CA1054 // Uri parameters should not be strings
 
-        public void CheckSchemaIsValidURI(ValueLocation location, string gltfURI)
+        public void CheckSchemaIsValidURI(ValueLocation location, string gltfURI, params string[] validHeaders)
         {
             if (string.IsNullOrEmpty(gltfURI)) return;
 
-            if (gltfURI.StartsWith("data:", StringComparison.Ordinal))
+            foreach (var hdr in validHeaders)
             {
-                // check decoding
-                return;
+                if (gltfURI.StartsWith(hdr)) return;
             }
 
             if (Uri.TryCreate(gltfURI, UriKind.Relative, out Uri xuri)) return;

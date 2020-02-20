@@ -8,16 +8,15 @@ namespace SharpGLTF.IO
 {
     static class JsonUtils
     {
-        public static ArraySegment<Byte> ReadBytesToEnd(this System.IO.Stream s)
+        public static Memory<Byte> ReadBytesToEnd(this System.IO.Stream s)
         {
             using (var m = new System.IO.MemoryStream())
             {
                 s.CopyTo(m);
+
                 if (m.TryGetBuffer(out ArraySegment<Byte> segment)) return segment;
 
-                var array = m.ToArray();
-
-                return new ArraySegment<byte>(array);
+                return m.ToArray();
             }
         }
 

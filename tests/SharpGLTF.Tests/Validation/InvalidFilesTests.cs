@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace SharpGLTF.Validation
 {
-    [Category("Invalid files")]
+    [Category("glTF-Validator Files")]
     public class InvalidFilesTests
     {
         [Test]
@@ -20,12 +20,34 @@ namespace SharpGLTF.Validation
 
             foreach (var f in files)
             {
+                var report = ValidationReport.Load(f + ".report.json");
+
                 TestContext.Progress.WriteLine($"{f}...");
                 TestContext.Write($"{f}...");
 
                 var result = Schema2.ModelRoot.Validate(f);
 
-                Assert.IsTrue(result.HasErrors);                
+                Assert.IsTrue(result.HasErrors == report.Issues.NumErrors > 0);
+            }
+        }
+
+        [Test]
+        public void CheckInvalidBinaryFiles()
+        {
+            var files = TestFiles
+                .GetKhronosValidationPaths()
+                .Where(item => item.EndsWith(".glb"));          
+
+            foreach (var f in files)
+            {
+                var report = ValidationReport.Load(f + ".report.json");
+
+                TestContext.Progress.WriteLine($"{f}...");
+                TestContext.WriteLine($"{f}...");
+
+                var result = Schema2.ModelRoot.Validate(f);
+
+                Assert.IsTrue(result.HasErrors == report.Issues.NumErrors > 0);
             }
         }
 
@@ -38,6 +60,8 @@ namespace SharpGLTF.Validation
 
             foreach (var f in files)
             {
+                var report = ValidationReport.Load(f + ".report.json");
+
                 TestContext.Progress.WriteLine($"{f}...");
 
                 TestContext.Write($"{f}...");
@@ -47,7 +71,7 @@ namespace SharpGLTF.Validation
 
                     var result = Schema2.ModelRoot.Validate(f);
 
-                    TestContext.WriteLine($"{result.HasErrors}");
+                    TestContext.WriteLine($"{result.HasErrors == report.Issues.NumErrors > 0}");
                 }
                 catch(Exception ex)
                 {

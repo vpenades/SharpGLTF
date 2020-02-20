@@ -101,6 +101,8 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal int LogicalBufferIndex => this._buffer;
+
         #endregion
 
         #region API

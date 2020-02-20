@@ -18,7 +18,23 @@ namespace SharpGLTF.Schema2
             if (!uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return null;
 
             var content = uri.Substring(prefix.Length);
-            return Convert.FromBase64String(content);
+
+            if (content.StartsWith(";base64,", StringComparison.OrdinalIgnoreCase))
+            {
+                content = content.Substring(";base64,".Length);
+                return Convert.FromBase64String(content);
+            }
+
+            if (content.StartsWith(",", StringComparison.OrdinalIgnoreCase))
+            {
+                content = content.Substring(",".Length);
+
+                if (content.Length == 1) return new Byte[] { Byte.Parse(content,System.Globalization.NumberStyles.HexNumber) };
+
+                throw new NotImplementedException();
+            }
+
+            throw new NotImplementedException();
         }
 
         #endregion

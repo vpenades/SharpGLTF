@@ -148,7 +148,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
-            BYTES json = default;
+            var json = ReadOnlyMemory<byte>.Empty;
 
             using (var s = File.OpenRead(filePath))
             {
@@ -158,7 +158,7 @@ namespace SharpGLTF.Schema2
             return ParseSatellitePaths(json);
         }
 
-        private static string[] ParseSatellitePaths(BYTES json)
+        private static string[] ParseSatellitePaths(ReadOnlyMemory<Byte> json)
         {
             var uris = new HashSet<string>();
 

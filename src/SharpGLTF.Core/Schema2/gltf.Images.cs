@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
         public bool IsSatelliteFile => _SatelliteImageContent != null;
 
         /// <summary>
-        /// Returns the in-memory representation of the image file.
+        /// Gets the in-memory representation of the image file.
         /// </summary>
         public Memory.MemoryImage MemoryImage => new Memory.MemoryImage(GetImageContent());
 
@@ -274,7 +274,7 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
-            result.CheckSchemaIsValidURI("Uri", this._uri);
+            result.CheckSchemaIsValidURI("Uri", this._uri, Memory.MemoryImage._EmbeddedHeaders);
 
             result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
         }
