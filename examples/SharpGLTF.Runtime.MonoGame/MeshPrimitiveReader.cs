@@ -12,6 +12,9 @@ using XYZW = System.Numerics.Vector4;
 
 namespace SharpGLTF.Runtime
 {
+    /// <summary>
+    /// Reads the content of a glTF <see cref="MeshPrimitive"/> object into a structure that's easier to consume.
+    /// </summary>
     class MeshPrimitiveReader
     {
         #region lifecycle
@@ -93,13 +96,13 @@ namespace SharpGLTF.Runtime
 
         public int VertexCount => _Positions?.Count ?? 0;
 
-        public (int, int, int)[] TriangleIndices => _Triangles;
+        public (int A, int B, int C)[] TriangleIndices => _Triangles;
 
         #endregion
 
         #region API        
 
-        public VertexPositionNormalTexture[] ToXnaStatic()
+        public VertexPositionNormalTexture[] ToXnaRigid()
         {
             var dst = new VertexPositionNormalTexture[_Positions.Count];
 

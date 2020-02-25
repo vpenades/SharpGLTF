@@ -131,10 +131,10 @@ namespace SharpGLTF.Runtime
         private readonly TextureFactory _TexFactory;
         private readonly GraphicsResourceTracker _Disposables;
 
-        private readonly Dictionary<Object, Effect> _StaticEffects = new Dictionary<Object, Effect>();
+        private readonly Dictionary<Object, Effect> _RigidEffects = new Dictionary<Object, Effect>();
         private readonly Dictionary<Object, SkinnedEffect> _SkinnedEffects = new Dictionary<Object, SkinnedEffect>();
 
-        private BasicEffect _DefaultStatic;
+        private BasicEffect _DefaultRigid;
         private SkinnedEffect _DefaultSkinned;
 
         #endregion        
@@ -145,26 +145,26 @@ namespace SharpGLTF.Runtime
         // given monogame's limitations, we try to guess the most appropiate values
         // to have a reasonably good looking renders.
 
-        public Effect UseStaticEffect(Schema2.Material srcMaterial)
+        public Effect UseRigidEffect(Schema2.Material srcMaterial)
         {
             if (_Device == null) throw new InvalidOperationException();
 
             if (srcMaterial == null)
             {
-                if (_DefaultStatic == null)
+                if (_DefaultRigid == null)
                 {
-                    _DefaultStatic = new BasicEffect(_Device);
-                    _Disposables.AddDisposable(_DefaultStatic);
+                    _DefaultRigid = new BasicEffect(_Device);
+                    _Disposables.AddDisposable(_DefaultRigid);
                 }
 
-                return _DefaultStatic;
+                return _DefaultRigid;
             }
 
-            if (_StaticEffects.TryGetValue(srcMaterial, out Effect dstMaterial)) return dstMaterial;
+            if (_RigidEffects.TryGetValue(srcMaterial, out Effect dstMaterial)) return dstMaterial;
 
             dstMaterial = srcMaterial.Alpha == Schema2.AlphaMode.MASK ? CreateAlphaTestEffect(srcMaterial) : CreateBasicEffect(srcMaterial);
 
-            _StaticEffects[srcMaterial] = dstMaterial;
+            _RigidEffects[srcMaterial] = dstMaterial;
 
             return dstMaterial;
         }
@@ -225,7 +225,7 @@ namespace SharpGLTF.Runtime
                 if (_DefaultSkinned == null)
                 {
                     _DefaultSkinned = new SkinnedEffect(_Device);
-                    _Disposables.AddDisposable(_DefaultStatic);
+                    _Disposables.AddDisposable(_DefaultRigid);
                 }
 
                 return _DefaultSkinned;

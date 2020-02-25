@@ -6,6 +6,14 @@ using Microsoft.Xna.Framework.Graphics;
 
 using SharpGLTF.Schema2;
 
+#if USINGMONOGAMEMODEL
+using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
+using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
+#else
+using MODELMESH = SharpGLTF.Runtime.ModelMeshReplacement;
+using MODELMESHPART = SharpGLTF.Runtime.ModelMeshPartReplacement;
+#endif
+
 namespace SharpGLTF.Runtime
 {
     /// <summary>
@@ -30,8 +38,8 @@ namespace SharpGLTF.Runtime
         private readonly GraphicsResourceTracker _Disposables = new GraphicsResourceTracker();
         private readonly MaterialFactory _MatFactory;        
 
-        private readonly Dictionary<Mesh, ModelMesh> _StaticMeshes = new Dictionary<Mesh, ModelMesh>();
-        private readonly Dictionary<Mesh, ModelMesh> _SkinnedMeshes = new Dictionary<Mesh, ModelMesh>();
+        private readonly Dictionary<Mesh, MODELMESH> _RigidMeshes = new Dictionary<Mesh, MODELMESH>();
+        private readonly Dictionary<Mesh, MODELMESH> _SkinnedMeshes = new Dictionary<Mesh, MODELMESH>();
         
         #endregion
 
@@ -39,7 +47,7 @@ namespace SharpGLTF.Runtime
 
         public IReadOnlyList<GraphicsResource> Disposables => _Disposables.Disposables;
 
-        #endregion                  
+        #endregion
 
         #region Mesh API
 
@@ -59,13 +67,13 @@ namespace SharpGLTF.Runtime
             }
         }
 
-        public ModelMesh CreateMesh(Schema2.Mesh srcMesh, int maxBones = 72)
+        public MODELMESH CreateMesh(Schema2.Mesh srcMesh, int maxBones = 72)
         {
             if (_Device == null) throw new InvalidOperationException();            
 
             var srcPrims = GetValidPrimitives(srcMesh).ToList();            
 
-            var dstMesh = new ModelMesh(_Device, Enumerable.Range(0, srcPrims.Count).Select(item => new ModelMeshPart()).ToList());
+            var dstMesh = new MODELMESH(_Device, Enumerable.Range(0, srcPrims.Count).Select(item => new MODELMESHPART()).ToList());
 
             dstMesh.Name = srcMesh.Name;
             dstMesh.BoundingSphere = srcMesh.CreateBoundingSphere();
@@ -81,17 +89,17 @@ namespace SharpGLTF.Runtime
             return dstMesh;
         }
 
-        private void CreateMeshPart(ModelMeshPart dstPart, MeshPrimitive srcPart, MeshNormalsFallback normalsFunc, int maxBones)
+        private void CreateMeshPart(MODELMESHPART dstPart, MeshPrimitive srcPart, MeshNormalsFallback normalsFunc, int maxBones)
         {
             var doubleSided = srcPart.Material?.DoubleSided ?? false;
 
             var srcGeometry = new MeshPrimitiveReader(srcPart, doubleSided, normalsFunc);
 
-            var eff = srcGeometry.IsSkinned ? _MatFactory.UseSkinnedEffect(srcPart.Material) : _MatFactory.UseStaticEffect(srcPart.Material);
+            var eff = srcGeometry.IsSkinned ? _MatFactory.UseSkinnedEffect(srcPart.Material) : _MatFactory.UseRigidEffect(srcPart.Material);
 
             dstPart.Effect = eff;            
 
-            var vb = srcGeometry.IsSkinned ? CreateVertexBuffer(srcGeometry.ToXnaSkinned()) : CreateVertexBuffer(srcGeometry.ToXnaStatic());
+            var vb = srcGeometry.IsSkinned ? CreateVertexBuffer(srcGeometry.ToXnaSkinned()) : CreateVertexBuffer(srcGeometry.ToXnaRigid());
 
             dstPart.VertexBuffer = vb;
             dstPart.NumVertices = srcGeometry.VertexCount;
