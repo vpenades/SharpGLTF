@@ -19,6 +19,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness");
 
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit");
+            RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat");
 
             RegisterExtension<ModelRoot, KHR_lights_punctualglTFextension>("KHR_lights_punctual");
             RegisterExtension<Node, KHR_lights_punctualnodeextension>("KHR_lights_punctual");

@@ -106,6 +106,7 @@ namespace SharpGLTF.Schema2
             // if (_pbrMetallicRoughness != null) ++shaderCount; this is the fallback
             if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) ++shaderCount;
             if (this.GetExtension<MaterialUnlit>() != null) ++shaderCount;
+            if (this.GetExtension<MaterialClearCoat>() != null) ++shaderCount;
         }
 
         #endregion

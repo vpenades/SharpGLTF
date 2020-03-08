@@ -19,6 +19,7 @@ namespace SharpGLTF.Schema2
 
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialClearCoat>();
         }
 
         /// <summary>
@@ -37,7 +38,24 @@ namespace SharpGLTF.Schema2
             }
 
             this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialClearCoat>();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
+        }
+
+        public void InitializeClearCoat(bool useFallback = false)
+        {
+            if (useFallback)
+            {
+                if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+            }
+            else
+            {
+                this._pbrMetallicRoughness = null;
+            }
+
+            this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            this.SetExtension(new MaterialClearCoat(this));
         }
 
         /// <summary>
@@ -63,6 +81,13 @@ namespace SharpGLTF.Schema2
             if (pbrSpecGloss != null)
             {
                 var channels = pbrSpecGloss.GetChannels(this);
+                foreach (var c in channels) yield return c;
+            }
+
+            var clearCoat = this.GetExtension<MaterialClearCoat>();
+            if (clearCoat != null)
+            {
+                var channels = clearCoat.GetChannels(this);
                 foreach (var c in channels) yield return c;
             }
 
@@ -261,5 +286,63 @@ namespace SharpGLTF.Schema2
     internal sealed partial class MaterialUnlit
     {
         internal MaterialUnlit(Material material) { }
+    }
+
+    internal sealed partial class MaterialClearCoat
+    {
+        internal MaterialClearCoat(Material material) { }
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatItems(_clearcoatTexture, _clearcoatRoughnessTexture, _clearcoatNormalTexture);
+        }
+
+        private TextureInfo _GetClearCoatTexture(bool create)
+        {
+            if (create && _clearcoatTexture == null) _clearcoatTexture = new TextureInfo();
+            return _clearcoatTexture;
+        }
+
+        private TextureInfo _GetClearCoatRoughnessTexture(bool create)
+        {
+            if (create && _clearcoatRoughnessTexture == null) _clearcoatRoughnessTexture = new TextureInfo();
+            return _clearcoatRoughnessTexture;
+        }
+
+        private MaterialNormalTextureInfo _GetClearCoatNormalTexture(bool create)
+        {
+            if (create && _clearcoatNormalTexture == null) _clearcoatNormalTexture = new MaterialNormalTextureInfo();
+            return _clearcoatNormalTexture;
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            yield return new MaterialChannel
+                (
+                material, "ClearCoat",
+                _GetClearCoatTexture,
+                (float)_clearcoatFactorDefault,
+                () => (float)this._clearcoatFactor.AsValue(_clearcoatFactorDefault),
+                value => this._clearcoatFactor = value
+                );
+
+            yield return new MaterialChannel
+                (
+                material, "ClearCoatRoughness",
+                _GetClearCoatRoughnessTexture,
+                (float)_clearcoatRoughnessFactorDefault,
+                () => (float)this._clearcoatRoughnessFactor.AsValue(_clearcoatRoughnessFactorDefault),
+                value => this._clearcoatRoughnessFactor = value
+                );
+
+            yield return new MaterialChannel
+                (
+                material, "ClearCoatNormal",
+                _GetClearCoatNormalTexture,
+                MaterialNormalTextureInfo.ScaleDefault,
+                () => _GetClearCoatNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
+                value => _GetClearCoatNormalTexture(true).Scale = value
+                );
+        }
     }
 }
