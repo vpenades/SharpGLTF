@@ -10,6 +10,7 @@ namespace SharpGLTF.Validation
     using PARAMNAME = ValueLocation;
 
     [System.Diagnostics.DebuggerDisplay("{_Current}")]
+    [System.Diagnostics.DebuggerStepThrough]
     partial struct ValidationContext
     {
         private readonly IO.JsonSerializable _Current;
@@ -18,6 +19,12 @@ namespace SharpGLTF.Validation
 
         [System.Diagnostics.DebuggerStepThrough]
         internal void _SchemaThrow(PARAMNAME pname, string msg) { throw new SchemaException(_Current, $"{pname}: {msg}"); }
+
+        public OUTTYPE IsTrue(PARAMNAME parameterName, bool value, string msg)
+        {
+            if (!value) _SchemaThrow(parameterName, msg);
+            return this;
+        }
 
         public OUTTYPE NotNull(PARAMNAME parameterName, object target)
         {
@@ -39,9 +46,10 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE IsTrue(PARAMNAME parameterName, bool value, string msg)
+        public OUTTYPE IsUndefined<T>(PARAMNAME parameterName, T value)
+            where T : class
         {
-            if (!value) _SchemaThrow(parameterName, msg);
+            if (value != null) _SchemaThrow(parameterName, "must NOT be defined.");
             return this;
         }
 
@@ -84,6 +92,15 @@ namespace SharpGLTF.Validation
                 where TValue : IComparable<TValue>
         {
             if (value.CompareTo(min) <= 0) _SchemaThrow(parameterName, $"{value} must be greater than {min}.");
+            return this;
+        }
+
+        public OUTTYPE IsDefaultOrWithin<TValue>(PARAMNAME parameterName, TValue? value, TValue minInclusive, TValue maxInclusive)
+                where TValue : unmanaged, IComparable<TValue>
+        {
+            if (!value.HasValue) return this;
+            if (value.Value.CompareTo(minInclusive) < 0) _SchemaThrow(parameterName, $"{value} must be greater or equal to {minInclusive}.");
+            if (value.Value.CompareTo(maxInclusive) > 0) _SchemaThrow(parameterName, $"{value} must be less or equal to {maxInclusive}.");
             return this;
         }
 
@@ -322,6 +339,20 @@ namespace SharpGLTF.Validation
                 if (jjjj.Y < 0 || jjjj.Y >= skinsMaxJointCount) _DataThrow((pname, i), "Is out of bounds");
                 if (jjjj.Z < 0 || jjjj.Z >= skinsMaxJointCount) _DataThrow((pname, i), "Is out of bounds");
                 if (jjjj.W < 0 || jjjj.W >= skinsMaxJointCount) _DataThrow((pname, i), "Is out of bounds");
+            }
+
+            return this;
+        }
+
+        public OUTTYPE That(Action action)
+        {
+            try
+            {
+                action.Invoke();
+            }
+            catch (ArgumentException ex)
+            {
+                _DataThrow(ex.ParamName, ex.Message);
             }
 
             return this;

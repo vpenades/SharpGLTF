@@ -139,7 +139,7 @@ namespace SharpGLTF.Schema2
         public static Node WithPerspectiveCamera(this Node node, float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
         {
             Guard.NotNull(node, nameof(node));
-            CameraPerspective.CheckParameters(aspectRatio, fovy, znear, zfar);
+            CameraPerspective.VerifyParameters(aspectRatio, fovy, znear, zfar);
 
             var camera = node.LogicalParent.CreateCamera();
             camera.SetPerspectiveMode(aspectRatio, fovy, znear, zfar);
@@ -152,7 +152,7 @@ namespace SharpGLTF.Schema2
         public static Node WithOrthographicCamera(this Node node, float xmag, float ymag, float znear, float zfar)
         {
             Guard.NotNull(node, nameof(node));
-            CameraOrthographic.CheckParameters(xmag, ymag, znear, zfar);
+            CameraOrthographic.VerifyParameters(xmag, ymag, znear, zfar);
 
             var camera = node.LogicalParent.CreateCamera();
             camera.SetOrthographicMode(xmag, ymag, znear, zfar);

@@ -180,24 +180,35 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
+        #region API
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            var children = base.GetLogicalChildren();
+
+            if (_spot != null) children = children.Concat(new[] { _spot });
+
+            return children;
+        }
+
+        #endregion
+
         #region Validation
 
         protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(validate);
-
-            if (string.IsNullOrEmpty(_type)) { validate._SchemaThrow("Type", "light Type must be defined"); return; }
+            validate.IsAnyOf("Type", _type, "directional", "point", "spot");
 
             if (LightType == PunctualLightType.Spot) validate.IsDefined("Spot", _spot);
 
-            _spot?.ValidateReferences(validate);
+            base.OnValidateReferences(validate);
         }
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidateContent(validate);
+            validate.IsDefaultOrWithin(nameof(Intensity), _intensity, _intensityMinimum, float.MaxValue);
 
-            _spot?.ValidateContent(validate);
+            base.OnValidateContent(validate);
         }
 
         #endregion
@@ -220,10 +231,8 @@ namespace SharpGLTF.Schema2
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
             validate
-                .IsGreaterOrEqual(nameof(InnerConeAngle), InnerConeAngle, (Single)_innerConeAngleMinimum)
-                .IsLessOrEqual(nameof(InnerConeAngle), InnerConeAngle, (Single)_innerConeAngleMaximum)
-                .IsGreaterOrEqual(nameof(OuterConeAngle), OuterConeAngle, (Single)_outerConeAngleMinimum)
-                .IsLessOrEqual(nameof(OuterConeAngle), OuterConeAngle, (Single)_outerConeAngleMaximum)
+                .IsDefaultOrWithin(nameof(InnerConeAngle), InnerConeAngle, (Single)_innerConeAngleMinimum, (Single)_innerConeAngleMaximum)
+                .IsDefaultOrWithin(nameof(OuterConeAngle), OuterConeAngle, (Single)_outerConeAngleMinimum, (Single)_outerConeAngleMaximum)
                 .IsLess(nameof(InnerConeAngle), InnerConeAngle, OuterConeAngle);
 
             base.OnValidateContent(validate);

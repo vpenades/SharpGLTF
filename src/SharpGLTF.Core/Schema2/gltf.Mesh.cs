@@ -102,18 +102,15 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidateContent(validate);
-
-            var morphTargetsCount = this.Primitives
-                .Select(item => item.MorphTargetsCount)
-                .Distinct();
-
-            validate.AreEqual("Morph targets", morphTargetsCount.Count(), 1);
-
-            if (_weights.Count != 0 && this.Primitives.Count > 0)
+            if (_weights.Count > 0)
             {
-                validate.AreEqual("Morph targets", _weights.Count, this.Primitives[0].MorphTargetsCount);
+                foreach (var p in this.Primitives)
+                {
+                    validate.GetContext(p).AreEqual("MorphTargetsCount", p.MorphTargetsCount, _weights.Count);
+                }
             }
+
+            base.OnValidateContent(validate);
         }
 
         #endregion

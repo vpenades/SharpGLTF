@@ -279,17 +279,13 @@ namespace SharpGLTF.Schema2
 
             // all vertices must have the same vertex count
 
-            var vertexCounts = VertexAccessors
-                .Select(item => item.Value.Count)
-                .Distinct();
+            int vertexCount = -1;
 
-            if (vertexCounts.Skip(1).Any())
+            foreach (var va in VertexAccessors)
             {
-                validate._LinkThrow("Attributes", "All accessors of the same primitive must have the same count.");
-                return;
+                if (vertexCount < 0) { vertexCount = va.Value.Count; continue; }
+                validate.AreEqual(va.Key, va.Value.Count, vertexCount);
             }
-
-            var vertexCount = vertexCounts.First();
 
             // check indices
 

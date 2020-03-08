@@ -10,7 +10,6 @@ namespace SharpGLTF.Validation
     /// <summary>
     /// Utility class used in the process of model validation.
     /// </summary>
-    // [System.Diagnostics.DebuggerStepThrough]
     public readonly partial struct ValidationContext
     {
         #region constructor

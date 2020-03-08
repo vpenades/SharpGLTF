@@ -120,9 +120,7 @@ namespace SharpGLTF.Schema2
             {
                 validate
                     .NotNull(nameof(binaryChunk), binaryChunk)
-                    .IsGreaterOrEqual(nameof(_byteLength), _byteLength, _byteLengthMinimum)
-                    .IsLessOrEqual(nameof(_byteLength), _byteLength, binaryChunk.Length);
-                    // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
+                    .IsLessOrEqual("ByteLength", _byteLength, binaryChunk.Length);
             }
             else
             {
@@ -131,11 +129,21 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
+        {
+            validate.IsGreaterOrEqual("ByteLength", _byteLength, _byteLengthMinimum);
+            // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
+
+            base.OnValidateReferences(validate);
+        }
+
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidateContent(validate);
+            validate
+                .NotNull("Content", _Content)
+                .IsLessOrEqual("ByteLength", _byteLength, _Content.Length);
 
-            validate.IsGreaterOrEqual("ByteLength", _Content.Length, _byteLength); // $"Actual data length {_Content.Length} is less than the declared buffer byteLength {_byteLength}.");
+            base.OnValidateContent(validate);
         }
 
         #endregion

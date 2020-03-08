@@ -240,17 +240,13 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(validate);
-
             validate
                 .IsNullOrIndex("Skeleton", _skeleton, this.LogicalParent.LogicalNodes)
-                .IsNullOrIndex("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
+                .IsNullOrIndex("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors)
+                .IsGreaterOrEqual("Joints", _joints.Count, _jointsMinItems); // althought mathematically correct, there's no point in having a skin with just one node.
 
-            if (_joints.Count < _jointsMinItems)
-            {
-                // result.AddError(this, $"Expected at least {_jointsMinItems} Joints");
-                return;
-            }
+            var ibxAccessor = GetInverseBindMatricesAccessor();
+            if (ibxAccessor != null) validate.AreEqual("InverseBindMatrices", ibxAccessor.Count, _joints.Count);
 
             Node commonRoot = null;
 
@@ -267,12 +263,12 @@ namespace SharpGLTF.Schema2
 
                 validate.GetContext(jroot).AreSameReference("Root", commonRoot, jroot);
             }
+
+            base.OnValidateReferences(validate);
         }
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidateContent(validate);
-
             var ibxAccessor = GetInverseBindMatricesAccessor();
 
             if (ibxAccessor != null)
@@ -296,6 +292,8 @@ namespace SharpGLTF.Schema2
                     // result.AddError(this, $"Skeleton node is not a common ancestor of Joint[{i}]");
                 }
             }
+
+            base.OnValidateContent(validate);
         }
 
         #endregion

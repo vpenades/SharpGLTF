@@ -93,13 +93,10 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateContent(validate);
 
-            if (!Version.TryParse(_version, out Version ver))
-            {
-                validate._SchemaThrow("Version", $"Unknown glTF major asset version: {_version}.");
-                return;
-            }
+            validate.IsTrue(nameof(Version), Version.TryParse(_version, out Version ver), $"Unknown glTF major asset version: {_version}.");
 
-            if (Version < MINVERSION) validate._SchemaThrow("Version", $"Minimum supported version is {MINVERSION} but found:{MinVersion}");
+            validate.IsGreaterOrEqual(nameof(Version), Version, MINVERSION);
+
             // if (MinVersion > MAXVERSION) result.AddSemanticError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
         }
 

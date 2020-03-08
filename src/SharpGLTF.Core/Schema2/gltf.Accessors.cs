@@ -357,14 +357,7 @@ namespace SharpGLTF.Schema2
 
             BufferView.VerifyAccess(validate, this.SourceBufferView, this.ByteOffset, this.Format, this.Count);
 
-            try
-            {
-                MemoryAccessor.VerifyAccessorBounds(_GetMemoryAccessor(), _min, _max);
-            }
-            catch (ArgumentException ex)
-            {
-                validate._DataThrow(ex.ParamName, ex.Message);
-            }
+            validate.That(() => MemoryAccessor.VerifyAccessorBounds(_GetMemoryAccessor(), _min, _max));
 
             // at this point we don't know which kind of data we're accessing, so it's up to the components
             // using this accessor to validate the data.
@@ -379,14 +372,7 @@ namespace SharpGLTF.Schema2
 
             validate.AreEqual(nameof(SourceBufferView.ByteStride), SourceBufferView.ByteStride, 0); // "bufferView.byteStride must not be defined for indices accessor.";
 
-            try
-            {
-                MemoryAccessor.VerifyVertexIndices(_GetMemoryAccessor(), vertexCount);
-            }
-            catch (ArgumentException ex)
-            {
-                validate._DataThrow(ex.ParamName, ex.Message);
-            }
+            validate.That(() => MemoryAccessor.VerifyVertexIndices(_GetMemoryAccessor(), vertexCount));
         }
 
         internal static void ValidateVertexAttributes(VALIDATIONCTX validate, IReadOnlyDictionary<string, Accessor> attributes, int skinsMaxJointCount)
@@ -496,14 +482,7 @@ namespace SharpGLTF.Schema2
             var memory0 = weights0?._GetMemoryAccessor("WEIGHTS_0");
             var memory1 = weights1?._GetMemoryAccessor("WEIGHTS_1");
 
-            try
-            {
-                MemoryAccessor.VerifyWeightsSum(memory0, memory1);
-            }
-            catch (ArgumentException ex)
-            {
-                validate._DataThrow(ex.ParamName, ex.Message);
-            }
+            validate.That(() => MemoryAccessor.VerifyWeightsSum(memory0, memory1));
         }
 
         private void _ValidateWeights(VALIDATIONCTX validate)
