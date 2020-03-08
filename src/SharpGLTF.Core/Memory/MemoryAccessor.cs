@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using BYTES = System.ArraySegment<System.Byte>;
+
 using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
 using ENCODING = SharpGLTF.Schema2.EncodingType;
-
-using BYTES = System.ArraySegment<System.Byte>;
 
 namespace SharpGLTF.Memory
 {
@@ -60,6 +60,17 @@ namespace SharpGLTF.Memory
             }
 
             throw new NotImplementedException();
+        }
+
+        public MemoryAccessInfo(string name, int byteOffset, int itemsCount, int byteStride, AttributeFormat format)
+        {
+            this.Name = name;
+            this.ByteOffset = byteOffset;
+            this.ItemsCount = itemsCount;
+            this.ByteStride = byteStride;
+            this.Dimensions = format.Dimensions;
+            this.Encoding = format.Encoding;
+            this.Normalized = format.Normalized;
         }
 
         public MemoryAccessInfo(string name, int byteOffset, int itemsCount, int byteStride, DIMENSIONS dimensions, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)

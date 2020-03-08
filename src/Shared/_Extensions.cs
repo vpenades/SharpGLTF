@@ -17,8 +17,8 @@ namespace SharpGLTF
 
         // constants from: https://github.com/KhronosGroup/glTF-Validator/blob/master/lib/src/errors.dart
 
-        private const float unitLengthThresholdVec3 = 0.00674f;
-        private const float unitLengthThresholdVec4 = 0.00769f;
+        private const float _UnitLengthThresholdVec3 = 0.00674f;
+        private const float _UnitLengthThresholdVec4 = 0.00769f;
 
         // This value is slightly greater
         // than the maximum error from unsigned 8-bit quantization
@@ -26,7 +26,7 @@ namespace SharpGLTF
         // 3..4 elements - 1 * step
         // 5..6 elements - 2 * step
         // ...
-        private const float unitSumThresholdStep = 0.0039216f;
+        private const float _UnitSumThresholdStep = 0.0039216f;
 
         #endregion
 
@@ -87,16 +87,14 @@ namespace SharpGLTF
         {
             if (!normal._IsFinite()) return false;
 
-            return Math.Abs(normal.Length() - 1) <= unitLengthThresholdVec3;
+            return Math.Abs(normal.Length() - 1) <= _UnitLengthThresholdVec3;
         }
 
-        internal static Boolean IsNormalized(this Quaternion q)
+        internal static Boolean IsNormalized(this Quaternion rotation)
         {
-            // As per: https://github.com/KhronosGroup/glTF-Validator/issues/33 , quaternions need to be normalized.
+            if (!rotation._IsFinite()) return false;
 
-            if (!q._IsFinite()) return false;
-
-            return Math.Abs(q.Length() - 1) <= 0.000005;
+            return Math.Abs(rotation.Length() - 1) <= _UnitLengthThresholdVec4;
         }
 
         internal static Quaternion AsQuaternion(this Vector4 v)
@@ -177,6 +175,17 @@ namespace SharpGLTF
             if (!Matrix4x4.Invert(src, out Matrix4x4 dst)) Guard.IsTrue(false, nameof(src), "Matrix cannot be inverted.");
 
             return dst;
+        }
+
+        internal static bool IsValid(this in Matrix4x4 matrix)
+        {
+            if (!matrix._IsFinite()) return false;
+
+            if (!Matrix4x4.Decompose(matrix, out Vector3 s, out Quaternion r, out Vector3 t)) return false;
+
+            if (!Matrix4x4.Invert(matrix, out Matrix4x4 inverse)) return false;
+
+            return true;
         }
 
         #endregion
@@ -345,6 +354,22 @@ namespace SharpGLTF
         internal static IEnumerable<T> ConcatItems<T>(this IEnumerable<T> collection, params T[] instances)
         {
             return collection.Concat(instances.Where(item => item != null));
+        }
+
+        public static void SanitizeNormals(this IList<Vector3> normals)
+        {
+            for (int i = 0; i < normals.Count; ++i)
+            {
+                if (!normals[i].IsNormalized()) normals[i] = normals[i].SanitizeNormal();
+            }
+        }
+
+        public static void SanitizeTangents(this IList<Vector4> tangents)
+        {
+            for (int i = 0; i < tangents.Count; ++i)
+            {
+                if (!tangents[i].IsValidTangent()) tangents[i] = tangents[i].SanitizeTangent();
+            }
         }
 
         #endregion
@@ -631,6 +656,45 @@ namespace SharpGLTF
             var paddedContent = new Byte[content.Length + rest];
             content.CopyTo(paddedContent, 0);
             return paddedContent;
+        }
+
+        public static Byte[] TryParseBase64Unchecked(this string uri, params string[] prefixes)
+        {
+            if (uri == null) return null;
+
+            if (!uri.StartsWith("data:", StringComparison.OrdinalIgnoreCase)) return null;
+
+            foreach (var prefix in prefixes)
+            {
+                var data = _TryParseBase64Unchecked(uri, prefix);
+                if (data != null) return data;
+            }
+
+            return null;
+        }
+
+        private static Byte[] _TryParseBase64Unchecked(string uri, string prefix)
+        {
+            if (!uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return null;
+
+            var content = uri.Substring(prefix.Length);
+
+            if (content.StartsWith(";base64,", StringComparison.OrdinalIgnoreCase))
+            {
+                content = content.Substring(";base64,".Length);
+                return Convert.FromBase64String(content);
+            }
+
+            if (content.StartsWith(",", StringComparison.OrdinalIgnoreCase))
+            {
+                content = content.Substring(",".Length);
+
+                if (content.Length == 1) return new Byte[] { Byte.Parse(content, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture) };
+
+                throw new NotImplementedException();
+            }
+
+            throw new NotImplementedException();
         }
 
         #endregion

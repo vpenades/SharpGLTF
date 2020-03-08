@@ -15,23 +15,23 @@ namespace SharpGLTF.IO
     {
         #region validation
 
-        internal void ValidateReferences(Validation.ValidationContext context)
+        internal void ValidateReferences(Validation.ValidationContext validate)
         {
-            context = context.Result.GetContext(this);
-            OnValidateReferences(context);
+            validate = validate.GetContext(this);
+
+            OnValidateReferences(validate);
         }
 
-        protected virtual void OnValidateReferences(Validation.ValidationContext result) { }
-
-        internal void Validate(Validation.ValidationContext context)
+        internal void ValidateContent(Validation.ValidationContext validate)
         {
-            context = context.Result.GetContext(this);
-            OnValidate(context);
+            validate = validate.GetContext(this);
+
+            OnValidateContent(validate);
         }
 
-        protected virtual void OnValidate(Validation.ValidationContext result)
-        {
-        }
+        protected virtual void OnValidateReferences(Validation.ValidationContext validate) { }
+
+        protected virtual void OnValidateContent(Validation.ValidationContext validate) { }
 
         #endregion
 
@@ -400,6 +400,8 @@ namespace SharpGLTF.IO
                 // System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
             }
 
+            if (list.Count == 0) throw new JsonException("Empty array found.");
+
             System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndArray);
         }
 
@@ -429,6 +431,8 @@ namespace SharpGLTF.IO
                     // System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
                 }
             }
+
+            if (dict.Count == 0) throw new JsonException("Empty dictionary found.");
         }
 
         private static bool _TryCastValue(ref Utf8JsonReader reader, Type vtype, out Object value)
@@ -510,9 +514,9 @@ namespace SharpGLTF.IO
             {
                 var item = Activator.CreateInstance(vtype, true) as JsonSerializable;
 
-                System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.StartObject);
+                // System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.StartObject);
                 item.Deserialize(ref reader);
-                System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndObject);
+                // System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndObject);
 
                 value = item;
 

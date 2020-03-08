@@ -24,104 +24,66 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         #endregion        
 
-        [Test]
-        public void LoadPositiveModels()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void LoadGeneratedModels(bool isNegativeCase)
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            var files = TestFiles.GetReferenceModelPaths();
+            var files = TestFiles.GetReferenceModelPaths(isNegativeCase);
 
             bool passed = true;
 
-            foreach (var f in files)
+            foreach (var filePath in files)
             {
+                // System.Diagnostics.Debug.Assert(!filePath.EndsWith("Compatibility_05.gltf"));
+
+                var gltfJson = filePath.EndsWith(".gltf") ? System.IO.File.ReadAllText(filePath) : string.Empty;
+
+                var report = gltf_validator.ValidateFile(filePath);                
+
+                if (report == null) continue; // ??
+
+                if (report.Warnings.Any(item => item.Contains("Cannot validate an extension"))) continue;
+
                 try
                 {
-                    var model = ModelRoot.Load(f.Item1);
+                    var model = ModelRoot.Load(filePath);
 
-                    if (!f.ShouldLoad)
+                    if (report.HasErrors)
                     {
-                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should not load!");
+                        TestContext.Error.WriteLine($"{filePath.ToShortDisplayPath()} 👎😦 Should not load!");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");                        
+                        TestContext.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");                        
                     }                    
                 }
                 catch (Exception ex)
                 {
-                    if (f.ShouldLoad)
+                    if (!report.HasErrors)
                     {
-                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should load!");
+                        TestContext.Error.WriteLine($"{filePath.ToShortDisplayPath()} 👎😦 Should load!");
                         TestContext.Error.WriteLine($"   ERROR: {ex.Message}");
                         passed = false;
                     }
                     else
                     {
-                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
+                        TestContext.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");
                         TestContext.WriteLine($"   Exception: {ex.Message}");
                     }                    
                 }
 
-                if (f.ShouldLoad && !f.Path.ToLower().Contains("compatibility"))
+                /*
+                if (ShouldLoad && !filePath.ToLower().Contains("compatibility"))
                 {
-                    var model = ModelRoot.Load(f.Path);
-                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Path), ".obj"));
-                }
+                    var model = ModelRoot.Load(filePath);
+                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".obj"));
+                }*/
             }
 
             Assert.IsTrue(passed);
-        }
-
-        [Test]
-        public void LoadNegativeModels()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
-
-            var files = TestFiles.GetReferenceModelPaths(true);
-
-            bool passed = true;
-
-            foreach (var f in files)
-            {
-                try
-                {
-                    var model = ModelRoot.Load(f.Path);
-
-                    if (!f.ShouldLoad)
-                    {
-                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should not load!");
-                        passed = false;
-                    }
-                    else
-                    {
-                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    if (f.ShouldLoad)
-                    {
-                        TestContext.Error.WriteLine($"{f.Path.ToShortDisplayPath()} 👎😦 Should load!");
-                        TestContext.Error.WriteLine($"   ERROR: {ex.Message}");
-                        passed = false;
-                    }
-                    else
-                    {
-                        TestContext.WriteLine($"{f.Path.ToShortDisplayPath()} 🙂👍");
-                        TestContext.WriteLine($"   Exception: {ex.Message}");
-                    }
-                }
-
-                if (f.ShouldLoad && !f.Path.ToLower().Contains("compatibility"))
-                {
-                    var model = ModelRoot.Load(f.Path);
-                    model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(f.Path), ".obj"));
-                }
-            }
-
-            Assert.IsTrue(passed);
-        }
+        }        
     }
 }

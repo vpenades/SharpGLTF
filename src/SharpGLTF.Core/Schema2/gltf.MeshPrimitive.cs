@@ -252,29 +252,30 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
             var root = this.LogicalParent.LogicalParent;
 
-            result.CheckArrayIndexAccess("Material", _material, root.LogicalMaterials);
-            result.CheckArrayIndexAccess("Indices", _indices, root.LogicalAccessors);
+            validate
+                .IsNullOrIndex("Material", _material, root.LogicalMaterials)
+                .IsNullOrIndex("Indices", _indices, root.LogicalAccessors);
 
             foreach (var idx in _attributes.Values)
             {
-                result.CheckArrayIndexAccess("Attributes", idx, root.LogicalAccessors);
+                validate.IsNullOrIndex("Attributes", idx, root.LogicalAccessors);
             }
 
             foreach (var idx in _targets.SelectMany(item => item.Values))
             {
-                result.CheckArrayIndexAccess("Targets", idx, root.LogicalAccessors);
+                validate.IsNullOrIndex("Targets", idx, root.LogicalAccessors);
             }
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
             // all vertices must have the same vertex count
 
@@ -284,7 +285,7 @@ namespace SharpGLTF.Schema2
 
             if (vertexCounts.Skip(1).Any())
             {
-                result.AddLinkError("Attributes", "All accessors of the same primitive must have the same count.");
+                validate._LinkThrow("Attributes", "All accessors of the same primitive must have the same count.");
                 return;
             }
 
@@ -294,8 +295,7 @@ namespace SharpGLTF.Schema2
 
             if (IndexAccessor != null)
             {
-                if (IndexAccessor.SourceBufferView.ByteStride != 0) result.AddLinkError("bufferView.byteStride must not be defined for indices accessor.");
-                IndexAccessor.ValidateIndices(result, (uint)vertexCount, DrawPrimitiveType);
+                IndexAccessor.ValidateIndices(validate, (uint)vertexCount, DrawPrimitiveType);
 
                 var incompatibleMode = false;
 
@@ -319,8 +319,6 @@ namespace SharpGLTF.Schema2
                         if (!IndexAccessor.Count.IsMultipleOf(3)) incompatibleMode = true;
                         break;
                 }
-
-                if (incompatibleMode) result.AddLinkWarning("Indices", $"Number of vertices or indices({IndexAccessor.Count}) is not compatible with used drawing mode('{this.DrawPrimitiveType}').");
             }
 
             // check vertex attributes accessors
@@ -331,11 +329,7 @@ namespace SharpGLTF.Schema2
                 {
                     // if more than one accessor shares a BufferView, it must define a ByteStride
 
-                    if (group.Key.ByteStride == 0)
-                    {
-                        result.GetContext(group.Key).AddLinkError("ByteStride", " must be defined when two or more accessors use the same BufferView.");
-                        return;
-                    }
+                    validate.IsGreater("ByteStride", group.Key.ByteStride, 0); // " must be defined when two or more accessors use the same BufferView."
 
                     // now, there's two possible outcomes:
                     // - sequential accessors: all accessors's ElementByteStride should be EQUAL to BufferView's ByteStride
@@ -352,20 +346,14 @@ namespace SharpGLTF.Schema2
                     else
                     {
                         var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
-                        result.AddLinkError("Attributes", $"Inconsistent accessors configuration: {accessors}");
+                        validate._LinkThrow("Attributes", $"Inconsistent accessors configuration: {accessors}");
                     }
                 }
             }
 
-            if (DrawPrimitiveType == PrimitiveType.POINTS)
-            {
-                if (this.VertexAccessors.Keys.Contains("NORMAL")) result.AddSemanticWarning("NORMAL", $"attribute defined for {DrawPrimitiveType} rendering mode.");
-                if (this.VertexAccessors.Keys.Contains("TANGENT")) result.AddSemanticWarning("TANGENT", $"attribute defined for {DrawPrimitiveType} rendering mode.");
-            }
-
             // check vertex attributes
 
-            if (result.TryFix)
+            if (validate.TryFix)
             {
                 var vattributes = this.VertexAccessors
                 .Select(item => item.Value._GetMemoryAccessor(item.Key))
@@ -386,7 +374,7 @@ namespace SharpGLTF.Schema2
 
             var maxJoints = skins.Any() ? skins.Max() : 0;
 
-            Accessor.ValidateVertexAttributes(result, this.VertexAccessors, maxJoints);
+            Accessor.ValidateVertexAttributes(validate, this.VertexAccessors, maxJoints);
         }
 
         #endregion

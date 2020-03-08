@@ -130,7 +130,7 @@ namespace SharpGLTF.Memory
 
         #region validate weights sum
 
-        public static void ValidateWeightsSum(Validation.ValidationContext result, MemoryAccessor weights0, MemoryAccessor weights1)
+        public static void VerifyWeightsSum(MemoryAccessor weights0, MemoryAccessor weights1)
         {
             int idx = 0;
 
@@ -142,7 +142,7 @@ namespace SharpGLTF.Memory
                 {
                     if (!_CheckWeightSum(item, weights0.Attribute.Encoding))
                     {
-                        result.AddDataError($"Weight Sum invalid at Index {idx}");
+                        throw new ArgumentException($"Weight Sum invalid at Index {idx}", nameof(weights0));
                     }
 
                     ++idx;
@@ -151,11 +151,7 @@ namespace SharpGLTF.Memory
                 return;
             }
 
-            if (weights0 == null)
-            {
-                result.AddLinkError("");
-                return;
-            }
+            if (weights0 == null) throw new ArgumentNullException(nameof(weights0));
 
             var len = weights0.Attribute.ItemByteLength;
             Span<Byte> dst = stackalloc byte[len * 2];
@@ -169,7 +165,7 @@ namespace SharpGLTF.Memory
 
                 if (!_CheckWeightSum(dst, weights0.Attribute.Encoding))
                 {
-                    result.AddDataError($"Weight Sum invalid at Index {idx}");
+                    throw new ArgumentException($"Weight Sum invalid at Index {idx}", nameof(weights1));
                 }
 
                 ++idx;
@@ -223,6 +219,82 @@ namespace SharpGLTF.Memory
             }
 
             return false;
+        }
+
+        #endregion
+
+        #region bounds validation
+
+        public static void VerifyAccessorBounds(MemoryAccessor memory, IReadOnlyList<double> min, IReadOnlyList<double> max)
+        {
+            Guard.NotNull(memory, nameof(memory));
+            Guard.NotNull(min, nameof(min));
+            Guard.NotNull(max, nameof(max));
+
+            if (min.Count == 0 && max.Count == 0) return;
+
+            var dimensions = memory.Attribute.Dimensions.DimCount();
+
+            if (min.Count != dimensions) throw new ArgumentException($"min size mismatch; expected {dimensions} but found {min.Count}", nameof(min));
+            if (max.Count != dimensions) throw new ArgumentException($"max size mismatch; expected {dimensions} but found {max.Count}", nameof(max));
+
+            for (int i = 0; i < min.Count; ++i)
+            {
+                // if (_min[i] > _max[i]) result.AddError(this, $"min[{i}] is larger than max[{i}]");
+            }
+
+            var minimum = min.Select(item => (float)item).ToArray();
+            var maximum = max.Select(item => (float)item).ToArray();
+
+            var xinfo = memory.Attribute;
+            xinfo.Dimensions = DIMENSIONS.SCALAR;
+            memory = new MemoryAccessor(memory.Data, xinfo);
+
+            var array = new MultiArray(memory.Data, memory.Attribute.ByteOffset, memory.Attribute.ItemsCount, memory.Attribute.ByteStride, dimensions, memory.Attribute.Encoding, memory.Attribute.Normalized);
+
+            var current = new float[dimensions];
+
+            for (int i = 0; i < array.Count; ++i)
+            {
+                array.CopyItemTo(i, current);
+
+                for (int j = 0; j < current.Length; ++j)
+                {
+                    var v = current[j];
+
+                    // if (!v._IsFinite()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
+
+                    var axisMin = minimum[j];
+                    var axisMax = maximum[j];
+
+                    if (v < axisMin || v > axisMax) throw new ArgumentException($"Value[{i}] is out of bounds. {axisMin} <= {v} <= {axisMax}", nameof(memory));
+
+                    // if (v < min || v > max) result.AddError(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}");
+                }
+            }
+        }
+
+        #endregion
+
+        #region vertex index validation
+
+        public static void VerifyVertexIndices(MemoryAccessor memory, uint vertexCount)
+        {
+            uint restart_value = 0xff;
+            if (memory.Attribute.Encoding == ENCODING.UNSIGNED_SHORT) restart_value = 0xffff;
+            if (memory.Attribute.Encoding == ENCODING.UNSIGNED_INT) restart_value = 0xffffffff;
+
+            memory.AsIntegerArray();
+
+            var indices = memory.AsIntegerArray();
+
+            for (int i = 0; i < indices.Count; ++i)
+            {
+                var idx = indices[i];
+
+                if (idx >= vertexCount) throw new ArgumentException($"Value[{i}] is out of bounds {vertexCount}.", nameof(memory));
+                if (idx == restart_value) throw new ArgumentException($"Value[{i}] is restart value.", nameof(memory));
+            }
         }
 
         #endregion

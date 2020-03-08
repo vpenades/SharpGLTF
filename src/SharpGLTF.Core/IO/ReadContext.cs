@@ -191,7 +191,7 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            IReadOnlyDictionary<uint, Byte[]> chunks = null;
+            IReadOnlyDictionary<uint, byte[]> chunks;
 
             try
             {
@@ -200,13 +200,13 @@ namespace SharpGLTF.IO
             catch (System.IO.EndOfStreamException ex)
             {
                 var vr = new Validation.ValidationResult(null, this.Validation);
-                vr.AddError(new Validation.SchemaException(null, "Unexpected EOF"));
+                vr.SetError(new Validation.SchemaException(null, ex.Message));
                 return (null, vr);
             }
             catch (Validation.SchemaException ex)
             {
                 var vr = new Validation.ValidationResult(null, this.Validation);
-                vr.AddError(ex);
+                vr.SetError(ex);
                 return (null, vr);
             }
 
@@ -228,54 +228,60 @@ namespace SharpGLTF.IO
         private (SCHEMA2 Model, Validation.ValidationResult Validation) _Read(ReadOnlyMemory<Byte> jsonUtf8Bytes)
         {
             var root = new SCHEMA2();
-
             var vcontext = new Validation.ValidationResult(root, this.Validation);
-
-            if (jsonUtf8Bytes.IsEmpty)
-            {
-                vcontext.AddError(new Validation.SchemaException(null, "JSon is empty."));
-            }
-
-            var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
 
             try
             {
+                if (jsonUtf8Bytes.IsEmpty) throw new System.Text.Json.JsonException("JSon is empty.");
+
+                var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
+
                 if (!reader.Read())
                 {
-                    vcontext.AddError(new Validation.SchemaException(root, "Json is empty"));
+                    vcontext.SetError(new Validation.SchemaException(root, "Json is empty"));
                     return (null, vcontext);
                 }
 
                 root.Deserialize(ref reader);
                 root.OnDeserializationCompleted();
+
+                // binary chunk check
+
+                foreach (var b in root.LogicalBuffers) b.OnValidateBinaryChunk(vcontext.GetContext(), this._BinaryChunk);
+
+                // schema validation
+
+                root.ValidateReferences(vcontext.GetContext());
+                var ex = vcontext.Errors.FirstOrDefault();
+                if (ex != null) return (null, vcontext);
+
+                // resolve external dependencies
+
+                root._ResolveSatelliteDependencies(this);
+
+                // full validation
+
+                if (this.Validation != VALIDATIONMODE.Skip)
+                {
+                    root.ValidateContent(vcontext.GetContext());
+                    ex = vcontext.Errors.FirstOrDefault();
+                    if (ex != null) return (null, vcontext);
+                }
             }
             catch (JsonException rex)
             {
-                vcontext.AddError(new Validation.SchemaException(root, rex));
+                vcontext.SetError(new Validation.SchemaException(root, rex));
                 return (null, vcontext);
             }
-
-            // binary chunk check
-
-            foreach (var b in root.LogicalBuffers) b.OnValidateBinaryChunk(vcontext.GetContext(root), this._BinaryChunk);
-
-            // schema validation
-
-            root.ValidateReferences(vcontext.GetContext());
-            var ex = vcontext.Errors.FirstOrDefault();
-            if (ex != null) return (null, vcontext);
-
-            // resolve external dependencies
-
-            root._ResolveSatelliteDependencies(this);
-
-            // full validation
-
-            if (this.Validation != VALIDATIONMODE.Skip)
+            catch (System.FormatException fex)
             {
-                root.Validate(vcontext.GetContext());
-                ex = vcontext.Errors.FirstOrDefault();
-                if (ex != null) return (null, vcontext);
+                vcontext.SetError(new Validation.ModelException(null, fex));
+                return (null, vcontext);
+            }
+            catch (Validation.ModelException mex)
+            {
+                vcontext.SetError(mex);
+                return (null, vcontext);
             }
 
             return (root, vcontext);

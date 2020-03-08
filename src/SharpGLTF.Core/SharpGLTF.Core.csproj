@@ -8,16 +8,16 @@
     <DebugSymbols>true</DebugSymbols>    
   </PropertyGroup>  
   
-  <Import Project="..\Version.props" />
-  
+  <Import Project="..\Version.props" />  
   <Import Project="..\PackageInfo.props" />
+  <Import Project="..\Analyzers.props" />
   
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SharpGLTF.Core.Tests</_Parameter1>
     </AssemblyAttribute>
@@ -35,7 +35,9 @@
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </None>
   </ItemGroup>
-  
-  <Import Project="..\..\Analyzers.targets" />
+
+  <ItemGroup>
+    <None Include="..\..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>  
 
 </Project>

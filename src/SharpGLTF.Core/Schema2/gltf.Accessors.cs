@@ -61,7 +61,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the number of bytes, starting at <see cref="ByteOffset"/> use by this <see cref="Accessor"/>
         /// </summary>
-        public int ByteLength                   => SourceBufferView.GetAccessorByteLength(Dimensions, Encoding, Count);
+        public int ByteLength                   => SourceBufferView.GetAccessorByteLength(Format, Count);
 
         /// <summary>
         /// Gets the <see cref="DimensionType"/> of an item.
@@ -83,10 +83,13 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Boolean IsSparse                 => this._sparse != null;
 
+        public AttributeFormat Format => new AttributeFormat(_type, _componentType, this._normalized.AsValue(false));
+
         /// <summary>
         /// Gets the number of bytes required to encode a single item in <see cref="SourceBufferView"/>
         /// Given the current <see cref="Dimensions"/> and <see cref="Encoding"/> states.
         /// </summary>
+        [Obsolete("Use Format.ByteSize instead")]
         public int ElementByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
 
         #endregion
@@ -96,7 +99,7 @@ namespace SharpGLTF.Schema2
         internal MemoryAccessor _GetMemoryAccessor(string name = null)
         {
             var view = SourceBufferView;
-            var info = new MemoryAccessInfo(name, ByteOffset, Count, view.ByteStride, Dimensions, Encoding, Normalized);
+            var info = new MemoryAccessInfo(name, ByteOffset, Count, view.ByteStride, Format);
             return new MemoryAccessor(view.Content, info);
         }
 
@@ -337,103 +340,60 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(VALIDATIONCTX result)
+        protected override void OnValidateReferences(VALIDATIONCTX validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckSchemaIsDefined("BufferView", _bufferView);
-            result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
-
-            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
-            result.CheckSchemaIsInRange("Count", _count, _countMinimum, int.MaxValue);
-
-            _sparse?.ValidateReferences(result);
+            validate
+                .IsDefined(nameof(_bufferView), _bufferView)
+                .NonNegative(nameof(_byteOffset), _byteOffset)
+                .IsGreaterOrEqual(nameof(_count), _count, _countMinimum)
+                .IsNullOrIndex(nameof(_bufferView), _bufferView, this.LogicalParent.LogicalBufferViews);
         }
 
-        protected override void OnValidate(VALIDATIONCTX result)
+        protected override void OnValidateContent(VALIDATIONCTX validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
-            _sparse?.Validate(result);
+            BufferView.VerifyAccess(validate, this.SourceBufferView, this.ByteOffset, this.Format, this.Count);
 
-            BufferView.CheckAccess(result, this.SourceBufferView, this.ByteOffset, this.Dimensions, this.Encoding, this.Normalized, this.Count);
-
-            ValidateBounds(result);
+            try
+            {
+                MemoryAccessor.VerifyAccessorBounds(_GetMemoryAccessor(), _min, _max);
+            }
+            catch (ArgumentException ex)
+            {
+                validate._DataThrow(ex.ParamName, ex.Message);
+            }
 
             // at this point we don't know which kind of data we're accessing, so it's up to the components
             // using this accessor to validate the data.
         }
 
-        private void ValidateBounds(VALIDATIONCTX result)
+        internal void ValidateIndices(VALIDATIONCTX validate, uint vertexCount, PrimitiveType drawingType)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            if (_min.Count != _max.Count) result.AddDataError("Max", $"Min and Max bounds dimension mismatch Min:{_min.Count} Max:{_max.Count}");
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ELEMENT_ARRAY_BUFFER);
+            validate.IsAnyOf("Format", Format, (DimensionType.SCALAR, EncodingType.UNSIGNED_BYTE), (DimensionType.SCALAR, EncodingType.UNSIGNED_SHORT), (DimensionType.SCALAR, EncodingType.UNSIGNED_INT));
 
-            if (_min.Count == 0 && _max.Count == 0) return;
+            validate.AreEqual(nameof(SourceBufferView.ByteStride), SourceBufferView.ByteStride, 0); // "bufferView.byteStride must not be defined for indices accessor.";
 
-            var dimensions = this.Dimensions.DimCount();
-
-            if (_min.Count != dimensions) { result.AddLinkError("Min", $"size mismatch; expected {dimensions} but found {_min.Count}"); return; }
-            if (_max.Count != dimensions) { result.AddLinkError("Max", $"size mismatch; expected {dimensions} but found {_max.Count}"); return; }
-
-            for (int i = 0; i < _min.Count; ++i)
+            try
             {
-                // if (_min[i] > _max[i]) result.AddError(this, $"min[{i}] is larger than max[{i}]");
+                MemoryAccessor.VerifyVertexIndices(_GetMemoryAccessor(), vertexCount);
             }
-
-            if (this.Encoding != EncodingType.FLOAT) return;
-
-            var current = new float[dimensions];
-            var minimum = this._min.ConvertAll(item => (float)item);
-            var maximum = this._max.ConvertAll(item => (float)item);
-
-            var array = new MultiArray(this.SourceBufferView.Content, this.ByteOffset, this.Count, this.SourceBufferView.ByteStride, dimensions, this.Encoding, false);
-
-            for (int i = 0; i < array.Count; ++i)
+            catch (ArgumentException ex)
             {
-                array.CopyItemTo(i, current);
-
-                for (int j = 0; j < current.Length; ++j)
-                {
-                    var v = current[j];
-
-                    // if (!v._IsFinite()) result.AddError(this, $"Item[{j}][{i}] is not a finite number: {v}");
-
-                    var min = minimum[j];
-                    var max = maximum[j];
-
-                    // if (v < min || v > max) result.AddError(this, $"Item[{j}][{i}] is out of bounds. {min} <= {v} <= {max}");
-                }
+                validate._DataThrow(ex.ParamName, ex.Message);
             }
         }
 
-        internal void ValidateIndices(VALIDATIONCTX result, uint vertexCount, PrimitiveType drawingType)
+        internal static void ValidateVertexAttributes(VALIDATIONCTX validate, IReadOnlyDictionary<string, Accessor> attributes, int skinsMaxJointCount)
         {
-            result = result.GetContext(this);
-
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ELEMENT_ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.UNSIGNED_INT);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
-
-            uint restart_value = 0xff;
-            if (this.Encoding == EncodingType.UNSIGNED_SHORT) restart_value = 0xffff;
-            if (this.Encoding == EncodingType.UNSIGNED_INT) restart_value = 0xffffffff;
-
-            var indices = this.AsIndicesArray();
-
-            for (int i = 0; i < indices.Count; ++i)
+            if (validate.TryFix)
             {
-                result.CheckVertexIndex(i, indices[i], vertexCount, restart_value);
-            }
-        }
-
-        internal static void ValidateVertexAttributes(VALIDATIONCTX result, IReadOnlyDictionary<string, Accessor> attributes, int skinsMaxJointCount)
-        {
-            if (result.TryFix)
-            {
-                foreach(var kvp in attributes.Where(item => item.Key != "POSITION"))
+                foreach (var kvp in attributes.Where(item => item.Key != "POSITION"))
                 {
                     // remove unnecessary bounds
                     kvp.Value._min.Clear();
@@ -441,167 +401,148 @@ namespace SharpGLTF.Schema2
                 }
             }
 
-            if (attributes.TryGetValue("POSITION", out Accessor positions)) positions._ValidatePositions(result);
-            else result.AddSemanticWarning("No POSITION attribute found.");
+            if (attributes.TryGetValue("POSITION", out Accessor positions)) positions._ValidatePositions(validate);
 
-            if (attributes.TryGetValue("NORMAL", out Accessor normals)) normals._ValidateNormals(result);
-            if (attributes.TryGetValue("TANGENT", out Accessor tangents)) tangents._ValidateTangents(result);
-            if (normals == null && tangents != null) result.AddSemanticWarning("TANGENT", "attribute without NORMAL found.");
+            if (attributes.TryGetValue("NORMAL", out Accessor normals)) normals._ValidateNormals(validate);
+            if (attributes.TryGetValue("TANGENT", out Accessor tangents)) tangents._ValidateTangents(validate);
 
-            if (attributes.TryGetValue("JOINTS_0", out Accessor joints0)) joints0._ValidateJoints(result, "JOINTS_0", skinsMaxJointCount);
-            if (attributes.TryGetValue("JOINTS_1", out Accessor joints1)) joints0._ValidateJoints(result, "JOINTS_1", skinsMaxJointCount);
+            if (attributes.TryGetValue("JOINTS_0", out Accessor joints0)) joints0._ValidateJoints(validate, "JOINTS_0", skinsMaxJointCount);
+            if (attributes.TryGetValue("JOINTS_1", out Accessor joints1)) joints0._ValidateJoints(validate, "JOINTS_1", skinsMaxJointCount);
 
             attributes.TryGetValue("WEIGHTS_0", out Accessor weights0);
             attributes.TryGetValue("WEIGHTS_1", out Accessor weights1);
-            _ValidateWeights(result, weights0, weights1);
+            _ValidateWeights(validate, weights0, weights1);
         }
 
-        private void _ValidatePositions(VALIDATIONCTX result)
+        private void _ValidatePositions(VALIDATIONCTX validate)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ARRAY_BUFFER);
+
             if (!this.LogicalParent.MeshQuantizationAllowed)
             {
-                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
-            }
-
-            var positions = this.AsVector3Array();
-
-            for (int i = 0; i < positions.Count; ++i)
-            {
-                result.CheckIsFinite(i, positions[i]);
-            }
-        }
-
-        private void _ValidateNormals(VALIDATIONCTX result)
-        {
-            result = result.GetContext(this);
-
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
-            if (!this.LogicalParent.MeshQuantizationAllowed)
-            {
-                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+                validate.IsAnyOf(nameof(Format), Format, DimensionType.VEC3);
             }
             else
             {
-                if (Normalized) result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.BYTE, EncodingType.SHORT);
-                else result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+                validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
             }
 
-            var normals = this.AsVector3Array();
-
-            for (int i = 0; i < normals.Count; ++i)
-            {
-                if (result.TryFixUnitLengthOrError(i, normals[i]))
-                {
-                    normals[i] = normals[i].SanitizeNormal();
-                }
-            }
+            validate.ArePositions("POSITION", this.AsVector3Array());
         }
 
-        private void _ValidateTangents(VALIDATIONCTX result)
+        private void _ValidateNormals(VALIDATIONCTX validate)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3, DimensionType.VEC4);
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ARRAY_BUFFER);
+
             if (!this.LogicalParent.MeshQuantizationAllowed)
             {
-                result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-                result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+                validate.IsAnyOf(nameof(Format), Format, DimensionType.VEC3);
             }
             else
             {
-                if (Normalized) result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.BYTE, EncodingType.SHORT);
-                else result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.FLOAT);
+                validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3);
             }
 
-            // when Dimensions == VEC3, its morph target tangent deltas
+            if (validate.TryFix) this.AsVector3Array().SanitizeNormals();
 
-            if (Dimensions == DimensionType.VEC4)
-            {
-                var tangents = this.AsVector4Array();
-
-                for (int i = 0; i < tangents.Count; ++i)
-                {
-                    if (result.TryFixTangentOrError(i, tangents[i]))
-                    {
-                        tangents[i] = tangents[i].SanitizeTangent();
-                    }
-                }
-            }
+            validate.AreNormals("NORMAL", this.AsVector3Array());
         }
 
-        private void _ValidateJoints(VALIDATIONCTX result, string attributeName, int skinsMaxJointCount)
+        private void _ValidateTangents(VALIDATIONCTX validate)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Normalized), Normalized, false);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ARRAY_BUFFER);
 
-            var joints = this.AsVector4Array();
-
-            for (int i = 0; i < joints.Count; ++i)
+            if (!this.LogicalParent.MeshQuantizationAllowed)
             {
-                var jidx = joints[i];
-
-                result.CheckIsFinite(i, jidx);
-                result.CheckIsInRange(i, jidx, 0, skinsMaxJointCount);
+                validate.IsAnyOf(nameof(Format), Format, DimensionType.VEC3, DimensionType.VEC4);
             }
+            else
+            {
+                validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC3, DimensionType.VEC4);
+            }
+
+            if (validate.TryFix)
+            {
+                if (Dimensions == DimensionType.VEC3) this.AsVector3Array().SanitizeNormals();
+                if (Dimensions == DimensionType.VEC4) this.AsVector4Array().SanitizeTangents();
+            }
+
+            if (Dimensions == DimensionType.VEC3) validate.AreNormals("TANGENT", this.AsVector3Array());
+            if (Dimensions == DimensionType.VEC4) validate.AreTangents("TANGENT", this.AsVector4Array());
         }
 
-        private static void _ValidateWeights(VALIDATIONCTX result, Accessor weights0, Accessor weights1)
+        private void _ValidateJoints(VALIDATIONCTX validate, string attributeName, int skinsMaxJointCount)
         {
-            weights0?._ValidateWeights(result);
-            weights1?._ValidateWeights(result);
+            validate = validate.GetContext(this);
+
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ARRAY_BUFFER);
+
+            validate
+                .IsAnyOf(nameof(Format), Format, (DimensionType.VEC4, EncodingType.UNSIGNED_BYTE), (DimensionType.VEC4, EncodingType.UNSIGNED_SHORT), DimensionType.VEC4)
+                .AreJoints(attributeName, this.AsVector4Array(), skinsMaxJointCount);
+        }
+
+        private static void _ValidateWeights(VALIDATIONCTX validate, Accessor weights0, Accessor weights1)
+        {
+            weights0?._ValidateWeights(validate);
+            weights1?._ValidateWeights(validate);
 
             var memory0 = weights0?._GetMemoryAccessor("WEIGHTS_0");
             var memory1 = weights1?._GetMemoryAccessor("WEIGHTS_1");
 
-            MemoryAccessor.ValidateWeightsSum(result, memory0, memory1);
+            try
+            {
+                MemoryAccessor.VerifyWeightsSum(memory0, memory1);
+            }
+            catch (ArgumentException ex)
+            {
+                validate._DataThrow(ex.ParamName, ex.Message);
+            }
         }
 
-        private void _ValidateWeights(VALIDATIONCTX result)
+        private void _ValidateWeights(VALIDATIONCTX validate)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsageGPU(result, BufferMode.ARRAY_BUFFER);
-            result.CheckLinkMustBeAnyOf(nameof(Encoding), Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.FLOAT);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.VEC4);
+            SourceBufferView.ValidateBufferUsageGPU(validate, BufferMode.ARRAY_BUFFER);
+
+            validate.IsAnyOf(nameof(Format), Format, (DimensionType.VEC4, EncodingType.UNSIGNED_BYTE, true), (DimensionType.VEC4, EncodingType.UNSIGNED_SHORT, true), DimensionType.VEC4);
         }
 
-        internal void ValidateMatrices(VALIDATIONCTX result)
+        internal void ValidateMatrices(VALIDATIONCTX validate)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            SourceBufferView.ValidateBufferUsagePlainData(result);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.MAT4);
+            SourceBufferView.ValidateBufferUsagePlainData(validate);
+
+            validate.IsAnyOf(nameof(Format), Format, (DimensionType.MAT4, EncodingType.BYTE, true), (DimensionType.MAT4, EncodingType.SHORT, true), DimensionType.MAT4);
 
             var matrices = this.AsMatrix4x4Array();
 
             for (int i = 0; i < matrices.Count; ++i)
             {
-                result.CheckIsMatrix(i, matrices[i]);
+                validate.IsNullOrMatrix("Matrices", matrices[i]);
             }
         }
 
-        internal void ValidateAnimationInput(VALIDATIONCTX result)
+        internal void ValidateAnimationInput(VALIDATIONCTX validate)
         {
-            SourceBufferView.ValidateBufferUsagePlainData(result);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
+            SourceBufferView.ValidateBufferUsagePlainData(validate);
+
+            validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
         }
 
-        internal void ValidateAnimationOutput(VALIDATIONCTX result)
+        internal void ValidateAnimationOutput(VALIDATIONCTX validate)
         {
-            SourceBufferView.ValidateBufferUsagePlainData(result);
-            result.CheckLinkMustBeAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
+            SourceBufferView.ValidateBufferUsagePlainData(validate);
+
+            validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
         }
 
         #endregion

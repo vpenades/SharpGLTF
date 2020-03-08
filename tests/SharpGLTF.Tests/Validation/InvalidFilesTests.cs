@@ -52,7 +52,7 @@ namespace SharpGLTF.Validation
         }
 
         [Test]
-        public void CheckExceptionOnInvalidFiles()
+        public void CheckInvalidFiles()
         {
             var files = TestFiles
                 .GetKhronosValidationPaths()
@@ -60,23 +60,21 @@ namespace SharpGLTF.Validation
 
             foreach (var f in files)
             {
+                // System.Diagnostics.Debug.Assert(!f.EndsWith("unresolved_source.gltf"));
+
+                var gltfJson = f.EndsWith(".gltf") ? System.IO.File.ReadAllText(f) : string.Empty;
+
                 var report = ValidationReport.Load(f + ".report.json");
+                
+                var result = Schema2.ModelRoot.Validate(f);
 
-                TestContext.Progress.WriteLine($"{f}...");
-
-                TestContext.Write($"{f}...");
-
-                try
+                if (result.HasErrors != report.Issues.NumErrors > 0)
                 {
-
-                    var result = Schema2.ModelRoot.Validate(f);
-
-                    TestContext.WriteLine($"{result.HasErrors == report.Issues.NumErrors > 0}");
+                    TestContext.WriteLine($"Failed: {f}");
+                    foreach (var e in report.Issues.Messages.Where(item => item.Severity == 0)) TestContext.WriteLine($"    {e.Message}");
                 }
-                catch(Exception ex)
-                {
-                    TestContext.WriteLine("THROW!");
-                }                
+
+                Assert.AreEqual(report.Issues.NumErrors > 0, result.HasErrors);                                
             }
         }        
 

@@ -172,9 +172,9 @@ namespace SharpGLTF.Schema2
         /// taking into account if the source <see cref="BufferView"/> is strided.
         /// </summary>
         /// <returns>The number of bytes to access.</returns>
-        internal int GetAccessorByteLength(DimensionType dim, EncodingType enc, int count)
+        internal int GetAccessorByteLength(in Memory.AttributeFormat fmt, int count)
         {
-            var elementByteSize = dim.DimCount() * enc.ByteLength();
+            var elementByteSize = fmt.ByteSize;
             if (this.ByteStride == 0) return elementByteSize * count;
             return (this.ByteStride * (count - 1)) + elementByteSize;
         }
@@ -183,92 +183,70 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        internal static void CheckAccess(Validation.ValidationContext result, BufferView bv, int accessorByteOffset, DimensionType dim, EncodingType enc, bool nrm, int count)
+        internal static void VerifyAccess(Validation.ValidationContext validate, BufferView bv, int accessorByteOffset, Memory.AttributeFormat format, int count)
         {
-            if (nrm)
+            if (format.Normalized)
             {
-                if (enc != EncodingType.UNSIGNED_BYTE && enc != EncodingType.UNSIGNED_SHORT)
-                {
-                    result.AddDataError("Normalized", "Only (u)byte and (u)short accessors can be normalized.");
-                }
+                validate.IsAnyOf("Encoding", format.Encoding, EncodingType.UNSIGNED_BYTE, EncodingType.UNSIGNED_SHORT, EncodingType.BYTE, EncodingType.SHORT);
             }
-
-            var elementByteSize = dim.DimCount() * enc.ByteLength();
 
             if (bv.IsVertexBuffer)
             {
-                if (bv.ByteStride == 0) result.CheckSchemaIsMultipleOf("ElementByteSize", elementByteSize, 4);
+                if (bv.ByteStride == 0) validate.IsMultipleOf("ElementByteSize", format.ByteSize, 4);
             }
 
             if (bv.IsIndexBuffer)
             {
-                if (bv._byteStride.HasValue) result.AddSemanticError("bufferView: Invalid ByteStride.");
-
-                if (dim != DimensionType.SCALAR) result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor dimensions is: {dim}");
-
-                // TODO: these could by fixed by replacing BYTE by UBYTE, SHORT by USHORT, etc
-                if (enc == EncodingType.BYTE)    result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)byte");
-                if (enc == EncodingType.SHORT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is (s)short");
-                if (enc == EncodingType.FLOAT)   result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor encoding is float");
-                if (nrm)                         result.AddLinkError(("BufferView", bv.LogicalIndex), $"is an IndexBuffer, but accessor is normalized");
+                validate.GetContext(bv).IsUndefined("ByteStride", bv._byteStride);
+                validate.IsAnyOf("Format", format, (DimensionType.SCALAR, EncodingType.UNSIGNED_BYTE), (DimensionType.SCALAR, EncodingType.UNSIGNED_SHORT), (DimensionType.SCALAR, EncodingType.UNSIGNED_INT));
             }
 
-            if (bv.ByteStride > 0)
-            {
-                if (bv.ByteStride < elementByteSize) result.AddLinkError("ElementByteSize", $"Referenced bufferView's byteStride value {bv.ByteStride} is less than accessor element's length {elementByteSize}.");
+            if (bv.ByteStride > 0) validate.IsGreaterOrEqual("ElementByteSize", bv.ByteStride, format.ByteSize);
 
-                return;
-            }
-
-            var accessorByteLength = bv.GetAccessorByteLength(dim, enc, count);
+            var accessorByteLength = bv.GetAccessorByteLength(format, count);
 
             // "Accessor(offset: {0}, length: {1}) does not fit referenced bufferView[% 3] length %4.";
-            result.CheckArrayRangeAccess(("BufferView", bv.LogicalIndex), accessorByteOffset, accessorByteLength, bv.Content);
+            validate.IsNullOrInRange(("BufferView", bv.LogicalIndex), accessorByteOffset, accessorByteLength, bv.Content);
         }
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckArrayIndexAccess(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers);
+            validate
+                .IsNullOrIndex(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers)
+                .NonNegative("ByteOffset", _byteOffset)
+                .IsGreaterOrEqual("ByteLength", _byteLength, _byteLengthMinimum);
 
-            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
+            // ByteStride must defined only with BufferMode.ARRAY_BUFFER, be multiple of 4, and between 4 and 252
+            if (!_byteStride.HasValue) return;
 
-            result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
-
-            // ByteStride must be multiple of 4, between 4 and 252
-            if (_byteStride.HasValue)
-            {
-                result.CheckSchemaIsInRange(nameof(ByteStride), _byteStride.Value, _byteStrideMinimum, _byteStrideMaximum);
-                result.CheckSchemaIsMultipleOf(nameof(ByteStride), _byteStride.Value, 4);
-            }
+            validate
+                .IsAnyOf("Target", _target, null,  BufferMode.ARRAY_BUFFER)
+                .IsInRange(nameof(ByteStride), _byteStride.Value, _byteStrideMinimum, _byteStrideMaximum)
+                .IsMultipleOf(nameof(ByteStride), _byteStride.Value, 4);
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
             var buffer = this.LogicalParent.LogicalBuffers[this._buffer];
             var bcontent = buffer.Content;
 
-            result.CheckArrayRangeAccess("ByteOffset", _byteOffset, _byteLength, buffer.Content);
-
-            if (ByteStride > _byteLength) result.AddSemanticError(nameof(ByteStride), $"value ({ByteStride}) is larger than byteLength ({_byteLength}).");
-
-            // if (this.DeviceBufferTarget.HasValue && this.FindAccessors().Any(item => item.IsSparse)) result.AddError()
+            validate
+                .IsNullOrInRange("ByteOffset", _byteOffset, _byteLength, buffer.Content)
+                .IsLessOrEqual(nameof(ByteStride), ByteStride, _byteLength);
         }
 
-        internal void ValidateBufferUsageGPU(Validation.ValidationContext result, BufferMode usingMode)
+        internal void ValidateBufferUsageGPU(Validation.ValidationContext validate, BufferMode usingMode)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            if (!this._target.HasValue) return;
-            if (usingMode == this._target.Value) return;
-
-            result.AddLinkError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as '{usingMode}'.");
+            if (this._target.HasValue) validate.EnumsAreEqual(nameof(_target), _target.Value, usingMode);
         }
 
-        internal void ValidateBufferUsagePlainData(Validation.ValidationContext result)
+        internal void ValidateBufferUsagePlainData(Validation.ValidationContext validate)
         {
             /*
             if (this._byteStride.HasValue)
@@ -279,14 +257,13 @@ namespace SharpGLTF.Schema2
                 }
             }*/
 
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
             if (!this._target.HasValue) return;
 
-            if (result.TryFixLinkOrError("Device Buffer Target", $"is set as {this._target.Value}. But an accessor wants to use it as a plain data buffer."))
-            {
-                this._target = null;
-            }
+            if (validate.TryFix) this._target = null;
+
+            validate.IsUndefined(nameof(_target), this._target);
         }
 
         #endregion

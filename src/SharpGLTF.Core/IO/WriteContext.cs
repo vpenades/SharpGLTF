@@ -207,9 +207,9 @@ namespace SharpGLTF.IO
 
         /// <summary>
         /// This needs to be called immediately before writing to json,
-        /// but immediately after preprocessing and buffer setup, so we have a valid model.
+        /// but immediately after preprocessing and buffer setup, so the model can be correctly validated.
         /// </summary>
-        /// <param name="model"></param>
+        /// <param name="model">The model to validate.</param>
         private void _ValidateBeforeWriting(SCHEMA2 model)
         {
             if (_NoCloneWatchdog) return;
@@ -220,7 +220,7 @@ namespace SharpGLTF.IO
             var ex = vcontext.Errors.FirstOrDefault();
             if (ex != null) throw ex;
 
-            model.Validate(vcontext.GetContext());
+            model.ValidateContent(vcontext.GetContext());
             ex = vcontext.Errors.FirstOrDefault();
             if (ex != null) throw ex;
         }

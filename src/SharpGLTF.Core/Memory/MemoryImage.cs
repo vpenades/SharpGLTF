@@ -13,12 +13,12 @@ namespace SharpGLTF.Memory
     {
         #region constants
 
-        const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream;base64,";
-        const string EMBEDDED_GLTF_BUFFER = "data:application/gltf-buffer;base64,";
-        const string EMBEDDED_JPEG_BUFFER = "data:image/jpeg;base64,";
-        const string EMBEDDED_PNG_BUFFER = "data:image/png;base64,";
-        const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds;base64,";
-        const string EMBEDDED_WEBP_BUFFER = "data:image/webp;base64,";
+        const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream";
+        const string EMBEDDED_GLTF_BUFFER = "data:application/gltf-buffer";
+        const string EMBEDDED_JPEG_BUFFER = "data:image/jpeg";
+        const string EMBEDDED_PNG_BUFFER = "data:image/png";
+        const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds";
+        const string EMBEDDED_WEBP_BUFFER = "data:image/webp";
 
         const string MIME_PNG = "image/png";
         const string MIME_JPG = "image/jpeg";
@@ -33,12 +33,13 @@ namespace SharpGLTF.Memory
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
         internal static readonly string[] _EmbeddedHeaders =
-                { EMBEDDED_OCTET_STREAM
-                , EMBEDDED_GLTF_BUFFER
-                , EMBEDDED_JPEG_BUFFER
-                , EMBEDDED_PNG_BUFFER
-                , EMBEDDED_DDS_BUFFER
-                , EMBEDDED_WEBP_BUFFER };
+                { EMBEDDED_OCTET_STREAM,
+                EMBEDDED_GLTF_BUFFER,
+                EMBEDDED_JPEG_BUFFER,
+                EMBEDDED_PNG_BUFFER,
+                EMBEDDED_DDS_BUFFER,
+                EMBEDDED_WEBP_BUFFER
+                };
 
         public static MemoryImage Empty => default;
 
@@ -142,6 +143,12 @@ namespace SharpGLTF.Memory
         }
 
         /// <summary>
+        /// Gets the internal buffer.
+        /// </summary>
+        /// <returns>An array buffer.</returns>
+        public BYTES GetBuffer() { return _Image; }
+
+        /// <summary>
         /// Returns this image file, enconded as a Mime64 string.
         /// </summary>
         /// <param name="withPrefix">true to prefix the string with a header.</param>
@@ -157,16 +164,12 @@ namespace SharpGLTF.Memory
                 if (this.IsJpg) mimeContent = EMBEDDED_JPEG_BUFFER;
                 if (this.IsDds) mimeContent = EMBEDDED_DDS_BUFFER;
                 if (this.IsWebp) mimeContent = EMBEDDED_WEBP_BUFFER;
+
+                mimeContent += ";base64,";
             }
 
             return mimeContent + Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
         }
-
-        /// <summary>
-        /// Gets the internal buffer.
-        /// </summary>
-        /// <returns>An array buffer.</returns>
-        public BYTES GetBuffer() { return _Image; }
 
         /// <summary>
         /// Tries to parse a Mime64 string to a Byte array.
@@ -175,12 +178,16 @@ namespace SharpGLTF.Memory
         /// <returns>A byte array representing an image file, or null if the image was not identified.</returns>
         public static Byte[] TryParseBytes(string mime64content)
         {
-            return _TryParseBase64Unchecked(mime64content, EMBEDDED_GLTF_BUFFER)
-                ?? _TryParseBase64Unchecked(mime64content, EMBEDDED_OCTET_STREAM)
-                ?? _TryParseBase64Unchecked(mime64content, EMBEDDED_JPEG_BUFFER)
-                ?? _TryParseBase64Unchecked(mime64content, EMBEDDED_PNG_BUFFER)
-                ?? _TryParseBase64Unchecked(mime64content, EMBEDDED_DDS_BUFFER)
-                ?? null;
+            if (mime64content == null) return null;
+
+            var bytes = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
+
+            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(bytes)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(bytes)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(bytes)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(bytes)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
+
+            return bytes;
         }
 
         /// <summary>
@@ -206,15 +213,6 @@ namespace SharpGLTF.Memory
         #endregion
 
         #region internals
-
-        private static Byte[] _TryParseBase64Unchecked(string uri, string prefix)
-        {
-            if (uri == null) return null;
-            if (!uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return null;
-
-            var content = uri.Substring(prefix.Length);
-            return Convert.FromBase64String(content);
-        }
 
         private static bool _IsPngImage(IReadOnlyList<Byte> data)
         {

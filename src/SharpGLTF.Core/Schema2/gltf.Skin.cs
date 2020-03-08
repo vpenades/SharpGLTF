@@ -238,13 +238,13 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckArrayIndexAccess("Skeleton", _skeleton, this.LogicalParent.LogicalNodes);
-
-            result.CheckArrayIndexAccess("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
+            validate
+                .IsNullOrIndex("Skeleton", _skeleton, this.LogicalParent.LogicalNodes)
+                .IsNullOrIndex("InverseBindMatrices", _inverseBindMatrices, this.LogicalParent.LogicalAccessors);
 
             if (_joints.Count < _jointsMinItems)
             {
@@ -252,25 +252,34 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
+            Node commonRoot = null;
+
             for (int i = 0; i < _joints.Count; ++i)
             {
                 var jidx = _joints[i];
 
-                result.CheckArrayIndexAccess("Joints", _joints[i], this.LogicalParent.LogicalNodes);
+                validate.IsNullOrIndex("Joints", jidx, this.LogicalParent.LogicalNodes);
+
+                var jnode = this.LogicalParent.LogicalNodes[jidx];
+                var jroot = jnode.VisualRoot;
+
+                if (commonRoot == null) { commonRoot = jroot; continue; }
+
+                validate.GetContext(jroot).AreSameReference("Root", commonRoot, jroot);
             }
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
             var ibxAccessor = GetInverseBindMatricesAccessor();
 
             if (ibxAccessor != null)
             {
-                if (_joints.Count != ibxAccessor.Count) result.AddLinkError("InverseBindMatrices", $"has {ibxAccessor.Count} matrices. But expected {_joints.Count}.");
+                validate.AreEqual("InverseBindMatrices", _joints.Count, ibxAccessor.Count);
 
-                ibxAccessor.ValidateMatrices(result);
+                ibxAccessor.ValidateMatrices(validate);
             }
 
             if (_skeleton.HasValue)

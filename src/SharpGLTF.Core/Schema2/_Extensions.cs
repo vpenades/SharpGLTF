@@ -10,31 +10,20 @@ namespace SharpGLTF.Schema2
     /// </summary>
     static class _Schema2Extensions
     {
-        #region base64
+        #region morph weights
 
-        internal static Byte[] _TryParseBase64Unchecked(this string uri, string prefix)
+        public static void SetMorphWeights(this IList<Double> list, int maxCount, Transforms.SparseWeight8 weights)
         {
-            if (uri == null) return null;
-            if (!uri.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return null;
+            while (list.Count > maxCount) list.RemoveAt(list.Count - 1);
+            while (list.Count < maxCount) list.Add(0);
 
-            var content = uri.Substring(prefix.Length);
-
-            if (content.StartsWith(";base64,", StringComparison.OrdinalIgnoreCase))
+            if (list.Count > 0)
             {
-                content = content.Substring(";base64,".Length);
-                return Convert.FromBase64String(content);
+                foreach (var (index, weight) in weights.GetIndexedWeights())
+                {
+                    list[index] = weight;
+                }
             }
-
-            if (content.StartsWith(",", StringComparison.OrdinalIgnoreCase))
-            {
-                content = content.Substring(",".Length);
-
-                if (content.Length == 1) return new Byte[] { Byte.Parse(content,System.Globalization.NumberStyles.HexNumber) };
-
-                throw new NotImplementedException();
-            }
-
-            throw new NotImplementedException();
         }
 
         #endregion

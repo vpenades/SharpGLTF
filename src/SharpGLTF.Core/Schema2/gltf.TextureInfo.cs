@@ -47,6 +47,17 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
+        {
+            validate.IsNullOrIndex("Index", _index, validate.Root.LogicalTextures);
+
+            base.OnValidateReferences(validate);
+        }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("TextureTransform {Offset} {Scale} {Rotation} {TextureCoordinate}")]

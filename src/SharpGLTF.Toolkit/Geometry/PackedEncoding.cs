@@ -7,7 +7,6 @@ using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry
 {
-
     class PackedEncoding
     {
         public ENCODING? JointsEncoding;

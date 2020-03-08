@@ -49,28 +49,25 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            result = result.GetContext(this);
+            base.OnValidateReferences(validate);
 
-            base.OnValidateReferences(result);
+            validate
+                .IsInRange(nameof(Count), _count, _countMinimum, int.MaxValue)
+                .IsDefined("Indices", _indices)
+                .IsDefined("Values", _values);
 
-            result.CheckIsInRange(nameof(Count), _count, _countMinimum, int.MaxValue);
-            result.CheckSchemaIsDefined("Indices", _indices);
-            result.CheckSchemaIsDefined("Values", _values);
-
-            _indices?.ValidateReferences(result);
-            _values?.ValidateReferences(result);
+            _indices?.ValidateReferences(validate);
+            _values?.ValidateReferences(validate);
         }
 
-        protected override void OnValidate(ValidationContext result)
+        protected override void OnValidateContent(ValidationContext validate)
         {
-            result = result.GetContext(this);
+            base.OnValidateContent(validate);
 
-            base.OnValidate(result);
-
-            _indices.Validate(result, _count);
-            _values.Validate(result, _count);
+            _indices.ValidateIndices(validate, _count);
+            _values.ValidateValues(validate, _count);
         }
 
         #endregion
@@ -106,23 +103,22 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            result = result.GetContext(this);
+            base.OnValidateReferences(validate);
 
-            base.OnValidateReferences(result);
-
-            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
-            result.CheckArrayIndexAccess("BufferView", _bufferView, result.Root.LogicalBufferViews);
+            validate
+                .NonNegative("ByteOffset", _byteOffset)
+                .IsNullOrIndex("BufferView", _bufferView, validate.Root.LogicalBufferViews);
         }
 
-        internal void Validate(ValidationContext result, int count)
+        internal void ValidateIndices(ValidationContext validate, int count)
         {
-            result = result.GetContext(this);
+            validate = validate.GetContext(this);
 
-            var bv = result.Root.LogicalBufferViews[_bufferView];
+            var bv = validate.Root.LogicalBufferViews[_bufferView];
 
-            BufferView.CheckAccess(result, bv, _byteOffset ?? _byteOffsetDefault, DimensionType.SCALAR, _componentType.ToComponent(), false, count);
+            BufferView.VerifyAccess(validate, bv, _byteOffset ?? _byteOffsetDefault, (DimensionType.SCALAR, _componentType.ToComponent()), count);
         }
 
         #endregion
@@ -158,19 +154,18 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            result = result.GetContext(this);
+            base.OnValidateReferences(validate);
 
-            base.OnValidateReferences(result);
-
-            result.CheckSchemaNonNegative("ByteOffset", _byteOffset);
-            result.CheckArrayIndexAccess("BufferView", _bufferView, result.Root.LogicalBufferViews);
+            validate
+                .NonNegative("ByteOffset", _byteOffset)
+                .IsNullOrIndex("BufferView", _bufferView, validate.Root.LogicalBufferViews);
         }
 
-        internal void Validate(ValidationContext result, int count)
+        internal void ValidateValues(ValidationContext validate, int count)
         {
-            var bv = result.Root.LogicalBufferViews[_bufferView];
+            var bv = validate.Root.LogicalBufferViews[_bufferView];
 
             // we need the accessor's settings to properly check this.
             // result.CheckAccess(bv, _byteOffset, DimensionType.SCALAR, _componentType, count);

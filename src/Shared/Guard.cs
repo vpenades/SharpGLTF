@@ -179,6 +179,30 @@ namespace SharpGLTF
 
         #region specialised
 
+        public static void IsValidURI(string parameterName, string gltfURI, params string[] validHeaders)
+        {
+            if (string.IsNullOrEmpty(gltfURI)) return;
+
+            foreach (var hdr in validHeaders)
+            {
+                if (gltfURI.StartsWith(hdr, StringComparison.OrdinalIgnoreCase))
+                {
+                    string value = hdr + ",";
+                    if (gltfURI.StartsWith(value, StringComparison.OrdinalIgnoreCase)) return;
+                    if (gltfURI.StartsWith(hdr + ";base64,", StringComparison.OrdinalIgnoreCase)) return;
+
+                    throw new ArgumentException($"{parameterName} has invalid URI '{gltfURI}'.");
+                }
+            }
+
+            if (gltfURI.StartsWith("data:")) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+
+            if (!Uri.IsWellFormedUriString(gltfURI, UriKind.RelativeOrAbsolute)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+            if (!Uri.TryCreate(gltfURI, UriKind.RelativeOrAbsolute, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+
+            return;
+        }
+
         public static void MustShareLogicalParent(Schema2.LogicalChildOfRoot a, Schema2.LogicalChildOfRoot b, string parameterName)
         {
             MustShareLogicalParent(a?.LogicalParent, nameof(a.LogicalParent), b, parameterName);

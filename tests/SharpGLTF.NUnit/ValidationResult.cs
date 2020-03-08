@@ -42,6 +42,7 @@ namespace SharpGLTF
         public bool Truncated { get; set; }
     }
 
+    [System.Diagnostics.DebuggerDisplay("{Code} {Severity} {Message}")]
     public sealed class ValidationMessage
     {
         public string Code { get; set; }

@@ -2,11 +2,11 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)SharpGLTF.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="$(MsBuildThisFileDirectory)stylecop.json" />
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>    

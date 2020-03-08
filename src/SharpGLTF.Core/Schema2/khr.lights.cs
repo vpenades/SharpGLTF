@@ -128,7 +128,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the type of light.
         /// </summary>
-        public PunctualLightType LightType => (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
+        public PunctualLightType LightType => string.IsNullOrEmpty(_type) ? PunctualLightType.Directional : (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);
 
         /// <summary>
         /// Gets the Angle, in radians, from centre of spotlight where falloff begins.
@@ -179,6 +179,28 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region Validation
+
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
+        {
+            base.OnValidateReferences(validate);
+
+            if (string.IsNullOrEmpty(_type)) { validate._SchemaThrow("Type", "light Type must be defined"); return; }
+
+            if (LightType == PunctualLightType.Spot) validate.IsDefined("Spot", _spot);
+
+            _spot?.ValidateReferences(validate);
+        }
+
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            _spot?.ValidateContent(validate);
+        }
+
+        #endregion
     }
 
     partial class PunctualLightSpot
@@ -186,13 +208,25 @@ namespace SharpGLTF.Schema2
         public Single InnerConeAngle
         {
             get => (Single)_innerConeAngle.AsValue(_innerConeAngleDefault);
-            set => _innerConeAngle = ((Double)value).AsNullable(_innerConeAngleDefault, _innerConeAngleMinimum, _innerConeAngleMaximum);
+            set => _innerConeAngle = value.AsNullable((Single)_innerConeAngleDefault, (Single)_innerConeAngleMinimum, (Single)_innerConeAngleMaximum);
         }
 
         public Single OuterConeAngle
         {
             get => (Single)_outerConeAngle.AsValue(_outerConeAngleDefault);
-            set => _outerConeAngle = ((Double)value).AsNullable(_outerConeAngleDefault, _outerConeAngleMinimum, _outerConeAngleMaximum);
+            set => _outerConeAngle = value.AsNullable((Single)_outerConeAngleDefault, (Single)_outerConeAngleMinimum, (Single)_outerConeAngleMaximum);
+        }
+
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            validate
+                .IsGreaterOrEqual(nameof(InnerConeAngle), InnerConeAngle, (Single)_innerConeAngleMinimum)
+                .IsLessOrEqual(nameof(InnerConeAngle), InnerConeAngle, (Single)_innerConeAngleMaximum)
+                .IsGreaterOrEqual(nameof(OuterConeAngle), OuterConeAngle, (Single)_outerConeAngleMinimum)
+                .IsLessOrEqual(nameof(OuterConeAngle), OuterConeAngle, (Single)_outerConeAngleMaximum)
+                .IsLess(nameof(InnerConeAngle), InnerConeAngle, OuterConeAngle);
+
+            base.OnValidateContent(validate);
         }
     }
 

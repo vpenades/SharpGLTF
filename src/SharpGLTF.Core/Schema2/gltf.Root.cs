@@ -149,71 +149,29 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            if (Asset == null) result.AddSchemaError(nameof(Asset), "is missing");
+            validate
+                .NotNull(nameof(Asset), this.Asset)
+                .IsNullOrIndex(nameof(DefaultScene), _scene, this.LogicalScenes);
 
-            result.CheckArrayIndexAccess(nameof(DefaultScene), _scene, this.LogicalScenes);
-
-            foreach (var b in _buffers) b.ValidateReferences(result);
-            foreach (var v in _bufferViews) v.ValidateReferences(result);
-            foreach (var a in _accessors) a.ValidateReferences(result);
-
-            foreach (var i in _images) i.ValidateReferences(result);
-            foreach (var s in _samplers) s.ValidateReferences(result);
-            foreach (var t in _textures) t.ValidateReferences(result);
-            foreach (var m in _materials) m.ValidateReferences(result);
-
-            foreach (var m in _meshes) m.ValidateReferences(result);
-            foreach (var s in _skins) s.ValidateReferences(result);
-            foreach (var c in _cameras) c.ValidateReferences(result);
-
-            foreach (var n in _nodes) n.ValidateReferences(result);
-            foreach (var s in _scenes) s.ValidateReferences(result);
-            foreach (var a in _animations) a.ValidateReferences(result);
-
-            base.OnValidateReferences(result);
-        }
-
-        protected override void OnValidate(Validation.ValidationContext result)
-        {
-            // 1st check version number
-
-            Asset.Validate(result);
-
-            if (result.Result.HasErrors) return;
-
-            // 2nd check incompatible extensions
+            // check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
             {
-                result.UnsupportedExtensionError(iex);
+                validate._LinkThrow("Extensions", iex);
             }
 
-            if (result.Result.HasErrors) return;
+            base.OnValidateReferences(validate);
+        }
 
-            // 3rd check base class
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            // 1st check version number
 
-            base.OnValidate(result);
+            Asset.ValidateContent(validate);
 
-            // 4th check contents
-
-            foreach (var b in _buffers) b.Validate(result);
-            foreach (var v in _bufferViews) v.Validate(result);
-            foreach (var a in _accessors) a.Validate(result);
-
-            foreach (var i in _images) i.Validate(result);
-            foreach (var s in _samplers) s.Validate(result);
-            foreach (var t in _textures) t.Validate(result);
-            foreach (var m in _materials) m.Validate(result);
-
-            foreach (var m in _meshes) m.Validate(result);
-            foreach (var s in _skins) s.Validate(result);
-            foreach (var c in _cameras) c.Validate(result);
-
-            foreach (var n in _nodes) n.Validate(result);
-            foreach (var s in _scenes) s.Validate(result);
-            foreach (var a in _animations) a.Validate(result);
+            base.OnValidateContent(validate);
         }
 
         #endregion

@@ -10,10 +10,10 @@
   </PropertyGroup>
 
   <Import Project="..\Version.props" />
-
   <Import Project="..\PackageInfo.props" />
-  
-  <ItemGroup>
+  <Import Project="..\Analyzers.props" />
+
+  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>SharpGLTF.Core.Tests</_Parameter1>
     </AssemblyAttribute>
@@ -29,8 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpGLTF.Core\SharpGLTF.Core.csproj" />
-  </ItemGroup>
-  
-  <Import Project="..\..\Analyzers.targets" />
+  </ItemGroup>  
   
 </Project>

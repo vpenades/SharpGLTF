@@ -219,23 +219,18 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            validate
+                .IsSetCollection("Samplers", _samplers)
+                .IsSetCollection("Channels", _channels);
 
-            result.CheckLinksInCollection("Samplers", _samplers);
-            result.CheckLinksInCollection("Channels", _channels);
-
-            foreach (var s in _samplers) s.ValidateReferences(result);
-            foreach (var c in _channels) c.ValidateReferences(result);
+            base.OnValidateReferences(validate);
         }
 
-        protected override void OnValidate(ValidationContext result)
+        protected override void OnValidateContent(ValidationContext validate)
         {
-            base.OnValidate(result);
-
-            foreach (var s in _samplers) s.Validate(result);
-            foreach (var c in _channels) c.Validate(result);
+            base.OnValidateContent(validate);
         }
 
         #endregion
@@ -267,11 +262,11 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckArrayIndexAccess("Node", _node, result.Root.LogicalNodes);
+            validate.IsNullOrIndex("Node", _node, validate.Root.LogicalNodes);
         }
 
         #endregion
@@ -331,13 +326,11 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckArrayIndexAccess("Sampler", _sampler, this.LogicalParent._Samplers);
-
-            _target.ValidateReferences(result);
+            validate.IsNullOrIndex("Sampler", _sampler, this.LogicalParent._Samplers);
         }
 
         #endregion
@@ -728,27 +721,28 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(ValidationContext result)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckArrayIndexAccess("Input", _input, this.LogicalParent.LogicalParent.LogicalAccessors);
-            result.CheckArrayIndexAccess("Output", _output, this.LogicalParent.LogicalParent.LogicalAccessors);
+            validate
+                .IsNullOrIndex("Input", _input, this.LogicalParent.LogicalParent.LogicalAccessors)
+                .IsNullOrIndex("Output", _output, this.LogicalParent.LogicalParent.LogicalAccessors);
         }
 
-        protected override void OnValidate(ValidationContext result)
+        protected override void OnValidateContent(ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
             if (Output.Dimensions != DimensionType.SCALAR)
             {
                 var outMult = InterpolationMode == AnimationInterpolationMode.CUBICSPLINE ? 3 : 1;
 
-                if (Input.Count * outMult != Output.Count) result.AddLinkError("Output", $"Input and Output count mismatch; Input: {Input.Count * outMult} Output:{Output.Count}");
+                validate.AreEqual("Output", Output.Count, Input.Count * outMult);
             }
 
-            Input.ValidateAnimationInput(result);
-            Output.ValidateAnimationOutput(result);
+            Input.ValidateAnimationInput(validate);
+            Output.ValidateAnimationOutput(validate);
         }
 
         #endregion

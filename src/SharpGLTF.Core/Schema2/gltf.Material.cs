@@ -95,6 +95,20 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region validation
+
+        protected override void OnValidateContent(Validation.ValidationContext result)
+        {
+            base.OnValidateContent(result);
+
+            var shaderCount = 0;
+            // if (_pbrMetallicRoughness != null) ++shaderCount; this is the fallback
+            if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) ++shaderCount;
+            if (this.GetExtension<MaterialUnlit>() != null) ++shaderCount;
+        }
+
+        #endregion
     }
 
     public partial class ModelRoot

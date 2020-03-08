@@ -52,13 +52,13 @@ namespace SharpGLTF.Schema2
         {
             var ptype = parent.GetType();
 
-            var entry = _Extensions.FirstOrDefault(item => item.Name == key && item.ParentType == ptype);
+            var (name, parentType, extType) = _Extensions.FirstOrDefault(item => item.Name == key && item.ParentType == ptype);
 
-            if (entry.Name == null) return null;
+            if (name == null) return null;
 
             var instance = Activator.CreateInstance
                 (
-                entry.ExtType,
+                extType,
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
                 null,
                 new Object[] { parent },

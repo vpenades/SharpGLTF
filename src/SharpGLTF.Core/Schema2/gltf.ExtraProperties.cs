@@ -126,23 +126,28 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateReferences(result);
 
+            foreach (var lc in this.GetLogicalChildren())
+            {
+                lc.ValidateReferences(result);
+            }
+
             foreach (var ext in this.Extensions) ext.ValidateReferences(result);
 
             if (this._extras is JsonSerializable js) js.ValidateReferences(result);
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
-            foreach (var ext in this.Extensions) ext.Validate(result);
-
-            if (this._extras is JsonSerializable js) js.Validate(result);
-
-            if (this._extras != null)
+            foreach (var lc in this.GetLogicalChildren())
             {
-                result.CheckSchemaIsJsonSerializable("Extras", this._extras);
+                lc.ValidateContent(validate);
             }
+
+            if (this._extras is JsonSerializable js) js.ValidateContent(validate);
+
+            if (this._extras != null) validate.IsJsonSerializable("Extras", this._extras);
         }
 
         #endregion

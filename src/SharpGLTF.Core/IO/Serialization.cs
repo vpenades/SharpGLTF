@@ -38,7 +38,13 @@ namespace SharpGLTF.IO
         {
             if (reader.TokenType == JsonTokenType.String)
             {
-                return Enum.Parse(enumType, reader.GetString(), true);
+                var jsonVal = reader.GetString();
+
+                try { return Enum.Parse(enumType, jsonVal, true); }
+                catch (System.ArgumentException ex)
+                {
+                    throw new System.Text.Json.JsonException($"Value {jsonVal} not found int {enumType}", ex);
+                }
             }
 
             if (reader.TokenType == JsonTokenType.Number)

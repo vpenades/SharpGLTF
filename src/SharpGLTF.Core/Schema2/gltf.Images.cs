@@ -150,8 +150,6 @@ namespace SharpGLTF.Schema2
             var imimg = new Memory.MemoryImage(content);
             if (!imimg.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
-            string imageType = imimg.MimeType;
-
             _DiscardContent();
 
             this._SatelliteImageContent = content;
@@ -183,7 +181,16 @@ namespace SharpGLTF.Schema2
         {
             if (String.IsNullOrWhiteSpace(_uri)) return;
 
-            var data = Memory.MemoryImage.TryParseBytes(_uri);
+            byte[] data = null;
+
+            try
+            {
+                data = Memory.MemoryImage.TryParseBytes(_uri);
+            }
+            catch (ArgumentException argex)
+            {
+                throw new Validation.DataException(this, argex.Message);
+            }
 
             if (data == null)
             {
@@ -270,24 +277,25 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
-            result.CheckSchemaIsValidURI("Uri", this._uri, Memory.MemoryImage._EmbeddedHeaders);
-
-            result.CheckArrayIndexAccess("BufferView", _bufferView, this.LogicalParent.LogicalBufferViews);
+            validate
+                .IsNullOrValidURI(nameof(_uri), this._uri, Memory.MemoryImage._EmbeddedHeaders)
+                .IsNullOrIndex("BufferView", _bufferView, validate.Root.LogicalBufferViews);
         }
 
-        protected override void OnValidate(ValidationContext result)
+        protected override void OnValidateContent(ValidationContext validate)
         {
-            base.OnValidate(result);
-
             if (this._bufferView.HasValue)
             {
-                var bv = result.Root.LogicalBufferViews[this._bufferView ?? 0];
-                if (!bv.IsDataBuffer) result.AddLinkError(("BufferView", this._bufferView), "is a GPU target.");
+                var bv = validate.Root.LogicalBufferViews[this._bufferView ?? 0];
+
+                validate.IsTrue("BufferView", bv.IsDataBuffer, "is a GPU target.");
             }
+
+            validate.IsTrue("MemoryImage", MemoryImage.IsValid, "Invalid image");
         }
 
         #endregion

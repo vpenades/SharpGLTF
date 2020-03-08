@@ -55,9 +55,7 @@ namespace SharpGLTF.Schema2
 
         private static Byte[] _LoadBinaryBufferUnchecked(string uri, IO.ReadContext context)
         {
-            return uri._TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER)
-                ?? uri._TryParseBase64Unchecked(EMBEDDEDOCTETSTREAM)
-                ?? context.ReadAllBytesToEnd(uri).ToArray();
+            return uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM) ?? context.ReadAllBytesToEnd(uri).ToArray();
         }
 
         #endregion
@@ -114,29 +112,30 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        internal void OnValidateBinaryChunk(Validation.ValidationContext result, Byte[] binaryChunk)
+        internal void OnValidateBinaryChunk(Validation.ValidationContext validate, Byte[] binaryChunk)
         {
+            validate = validate.GetContext(this);
+
             if (_uri == null)
             {
-                if (binaryChunk == null) { result.GetContext(this).AddSchemaError("Binary chunk not found"); return; }
-                if (_byteLength > binaryChunk.Length) result.GetContext(this).AddSchemaError("Buffer length larger than Binary chunk");
+                validate
+                    .NotNull(nameof(binaryChunk), binaryChunk)
+                    .IsGreaterOrEqual(nameof(_byteLength), _byteLength, _byteLengthMinimum)
+                    .IsLessOrEqual(nameof(_byteLength), _byteLength, binaryChunk.Length);
+                    // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
+            }
+            else
+            {
+                validate
+                    .IsValidURI(nameof(_uri), _uri, EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
             }
         }
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateContent(validate);
 
-            result.CheckSchemaIsValidURI("Uri", this._uri, EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
-            result.CheckSchemaIsInRange("ByteLength", _byteLength, _byteLengthMinimum, int.MaxValue);
-            // result.CheckSchemaIsMultipleOf("ByteLength", _byteLength, 4);
-        }
-
-        protected override void OnValidate(Validation.ValidationContext result)
-        {
-            base.OnValidate(result);
-
-            if (_Content.Length < _byteLength) result.AddDataError("ByteLength", $"Actual data length {_Content.Length} is less than the declared buffer byteLength {_byteLength}.");
+            validate.IsGreaterOrEqual("ByteLength", _Content.Length, _byteLength); // $"Actual data length {_Content.Length} is less than the declared buffer byteLength {_byteLength}.");
         }
 
         #endregion

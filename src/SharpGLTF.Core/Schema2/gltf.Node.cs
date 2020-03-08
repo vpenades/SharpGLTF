@@ -177,17 +177,9 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets or sets the Morph Weights of this <see cref="Node"/>.
+        /// Gets the Morph Weights of this <see cref="Node"/>.
         /// </summary>
-        public IReadOnlyList<Single> MorphWeights
-        {
-            get => _weights.Count == 0 ? Mesh?.MorphWeights : _weights.Select(item => (float)item).ToList();
-            set
-            {
-                _weights.Clear();
-                if (value != null) _weights.AddRange(value.Select(item => (Double)item));
-            }
-        }
+        public IReadOnlyList<Single> MorphWeights => GetMorphWeights();
 
         #endregion
 
@@ -281,6 +273,24 @@ namespace SharpGLTF.Schema2
             return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
         }
 
+        public IReadOnlyList<Single> GetMorphWeights()
+        {
+            if (!_mesh.HasValue) return Array.Empty<Single>();
+
+            if (_weights == null || _weights.Count == 0) return Mesh.MorphWeights;
+
+            return _weights.Select(item => (float)item).ToList();
+        }
+
+        public void SetMorphWeights(Transforms.SparseWeight8 weights)
+        {
+            Guard.IsTrue(_mesh.HasValue, nameof(weights), "Nodes with no mesh cannot have morph weights");
+
+            int count = Mesh.Primitives.Max(item => item.MorphTargetsCount);
+
+            _weights.SetMorphWeights(count, weights);
+        }
+
         #endregion
 
         #region API - hierarchy
@@ -372,51 +382,50 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
-        protected override void OnValidateReferences(Validation.ValidationContext result)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateReferences(result);
+            base.OnValidateReferences(validate);
 
             // check out of range indices
             foreach (var idx in this._children)
             {
-                result.CheckArrayIndexAccess(nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
+                validate.IsNullOrIndex(nameof(VisualChildren), idx, this.LogicalParent.LogicalNodes);
             }
 
-            result.CheckArrayIndexAccess(nameof(Mesh), _mesh, this.LogicalParent.LogicalMeshes);
-            result.CheckArrayIndexAccess(nameof(Skin), _skin, this.LogicalParent.LogicalSkins);
-            result.CheckArrayIndexAccess(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
+            validate
+                .IsNullOrIndex(nameof(Mesh), _mesh, this.LogicalParent.LogicalMeshes)
+                .IsNullOrIndex(nameof(Skin), _skin, this.LogicalParent.LogicalSkins)
+                .IsNullOrIndex(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
         }
 
-        protected override void OnValidate(Validation.ValidationContext result)
+        protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            base.OnValidate(result);
+            base.OnValidateContent(validate);
 
-            _ValidateHierarchy(result);
-            _ValidateTransforms(result);
-            _ValidateMeshAndSkin(result, Mesh, Skin);
+            _ValidateHierarchy(validate);
+            _ValidateTransforms(validate);
+            _ValidateMeshAndSkin(validate, Mesh, Skin, _weights);
         }
 
-        private void _ValidateHierarchy(Validation.ValidationContext result)
+        private void _ValidateHierarchy(Validation.ValidationContext validate)
         {
             var allNodes = this.LogicalParent.LogicalNodes;
 
-            var thisIndex = this.LogicalIndex;
-
-            var pidx = thisIndex;
+            var pidx = this.LogicalIndex;
 
             var sequence = new List<int>();
 
             while (true)
             {
+                validate = validate.GetContext(allNodes[pidx]);
+
                 if (sequence.Contains(pidx))
                 {
-                    result.AddLinkError("is a part of a node loop.");
+                    validate._LinkThrow("Node", "is a part of a node loop.");
                     break;
                 }
 
                 sequence.Add(pidx);
-
-                result = result.GetContext(result.Root.LogicalNodes[pidx]);
 
                 // every node must have 0 or 1 parents.
 
@@ -426,44 +435,46 @@ namespace SharpGLTF.Schema2
 
                 if (allParents.Count == 0) break; // we're already root
 
-                if (allParents.Count > 1)
-                {
-                    var parents = string.Join(" ", allParents);
+                validate.IsLessOrEqual((nameof(Node), pidx), allParents.Count, 1); // must have 1 parent
 
-                    result.AddLinkError($"is child of nodes {parents}. A node can only have one parent.");
-                    break;
-                }
-
-                if (allParents[0].LogicalIndex == pidx)
-                {
-                    result.AddLinkError("is a part of a node loop.");
-                    break;
-                }
+                // validate.AreEqual((nameof(Node), pidx), allParents[0].LogicalIndex, pidx); // part of node loop
 
                 pidx = allParents[0].LogicalIndex;
             }
         }
 
-        private void _ValidateTransforms(Validation.ValidationContext result)
+        private void _ValidateTransforms(Validation.ValidationContext validate)
         {
-            result.CheckIsFinite("Scale", _scale);
-            result.CheckIsFinite("Rotation", _rotation);
-            result.CheckIsFinite("Translation", _translation);
-            result.CheckIsMatrix("Matrix", _matrix);
+            if (_matrix.HasValue)
+            {
+                validate
+                    .IsUndefined(nameof(_scale), _scale)
+                    .IsUndefined(nameof(_rotation), _rotation)
+                    .IsUndefined(nameof(_translation), _translation);
+            }
+
+            validate
+                .IsNullOrPosition("Scale", _scale)
+                .IsNullOrRotation("Rotation", _rotation)
+                .IsNullOrPosition("Translation", _translation)
+                .IsNullOrMatrix("Rotation", _matrix);
         }
 
-        private static void _ValidateMeshAndSkin(Validation.ValidationContext result, Mesh mesh, Skin skin)
+        private static void _ValidateMeshAndSkin(Validation.ValidationContext validate, Mesh mesh, Skin skin, List<Double> weights)
         {
-            if (mesh == null && skin == null) return;
+            var wcount = weights == null ? 0 : weights.Count;
 
-            if (mesh != null)
-            {
-                if (skin == null && mesh.AllPrimitivesHaveJoints) result.AddLinkWarning("Skin", "Node uses skinned mesh, but has no skin defined.");
-            }
+            if (mesh == null && skin == null && wcount == 0) return;
 
             if (skin != null)
             {
-                if (mesh == null || !mesh.AllPrimitivesHaveJoints) result.AddLinkError("Mesh", "Node has skin defined, but mesh has no joints data.");
+                validate.IsDefined("Mesh", mesh);
+                validate.IsTrue("Mesh", mesh.AllPrimitivesHaveJoints, "Node has skin defined, but mesh has no joints data.");
+            }
+
+            if (mesh == null)
+            {
+                validate.AreEqual("weights", wcount, 0); // , "Morph weights require a mesh."
             }
         }
 

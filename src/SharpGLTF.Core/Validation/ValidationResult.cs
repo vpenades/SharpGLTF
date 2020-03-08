@@ -27,7 +27,6 @@ namespace SharpGLTF.Validation
         private readonly bool _InstantThrow;
 
         private readonly List<Exception> _Errors = new List<Exception>();
-        private readonly List<Exception> _Warnings = new List<Exception>();
 
         #endregion
 
@@ -45,16 +44,9 @@ namespace SharpGLTF.Validation
 
         #region API
 
-        public ValidationContext GetContext() { return new ValidationContext(this, _Root); }
+        public ValidationContext GetContext() { return new ValidationContext(this); }
 
-        public ValidationContext GetContext(TARGET target) { return new ValidationContext(this, target); }
-
-        public void AddWarning(ModelException ex)
-        {
-            _Warnings.Add(ex);
-        }
-
-        public void AddError(ModelException ex)
+        public void SetError(ModelException ex)
         {
             if (_InstantThrow) throw ex;
 

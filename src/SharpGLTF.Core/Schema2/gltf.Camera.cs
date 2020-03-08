@@ -89,6 +89,23 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region validation
+
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
+        {
+            base.OnValidateReferences(validate);
+
+            if (_orthographic == null && _perspective == null) validate._LinkThrow("perspective", "Missing orthographic or perspective");
+
+            if (_orthographic != null && _perspective != null)
+            {
+                if (validate.TryFix) _orthographic = null;
+                else validate._LinkThrow("perspective", "orthographic and perspective are mutually exclusive");
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -166,6 +183,17 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region validation
+
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            validate.IsGreater(nameof(ZFar), ZFar, ZNear); // "ZFar must be greater than ZNear");
+        }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("Perspective {AspectRatio} {VerticalFOV}   {ZNear} < {ZFar}")]
@@ -234,6 +262,17 @@ namespace SharpGLTF.Schema2
             Guard.MustBeGreaterThanOrEqualTo(znear, 0, nameof(znear));
             Guard.MustBeGreaterThanOrEqualTo(zfar, 0, nameof(zfar));
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
+        }
+
+        #endregion
+
+        #region validation
+
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            validate.IsGreater(nameof(ZFar), ZFar, ZNear); // "ZFar must be greater than ZNear");
         }
 
         #endregion
