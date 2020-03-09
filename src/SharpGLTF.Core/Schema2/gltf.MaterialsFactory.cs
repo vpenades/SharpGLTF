@@ -17,9 +17,21 @@ namespace SharpGLTF.Schema2
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
             this.RemoveExtensions<MaterialUnlit>();
             this.RemoveExtensions<MaterialClearCoat>();
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+        }
+
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes and Clear Coat extension.
+        /// </summary>
+        public void InitializePBRMetallicRoughnessClearCoat()
+        {
+            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+
+            this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            this.SetExtension(new MaterialClearCoat(this));
         }
 
         /// <summary>
@@ -40,22 +52,6 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialUnlit>();
             this.RemoveExtensions<MaterialClearCoat>();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
-        }
-
-        public void InitializeClearCoat(bool useFallback = false)
-        {
-            if (useFallback)
-            {
-                if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
-            }
-            else
-            {
-                this._pbrMetallicRoughness = null;
-            }
-
-            this.RemoveExtensions<MaterialUnlit>();
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
-            this.SetExtension(new MaterialClearCoat(this));
         }
 
         /// <summary>
