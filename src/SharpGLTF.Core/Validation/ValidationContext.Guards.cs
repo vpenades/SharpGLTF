@@ -221,7 +221,7 @@ namespace SharpGLTF.Validation
         #region data
 
         [System.Diagnostics.DebuggerStepThrough]
-        internal void _DataThrow(PARAMNAME pname, string msg) { throw new DataException(_Current, $"{pname}: {msg}"); }
+        private void _DataThrow(PARAMNAME pname, string msg) { throw new DataException(_Current, $"{pname}: {msg}"); }
 
         public OUTTYPE IsInRange<T>(PARAMNAME pname, T value, T minInclusive, T maxInclusive)
             where T : IComparable<T>
@@ -229,26 +229,6 @@ namespace SharpGLTF.Validation
             if (value.CompareTo(minInclusive) == -1) _DataThrow(pname, $"is below minimum {minInclusive} value: {value}");
             if (value.CompareTo(maxInclusive) == +1) _DataThrow(pname, $"is above maximum {maxInclusive} value: {value}");
             return this;
-        }
-
-        public OUTTYPE IsInRange(PARAMNAME pname, double? value, double minInclusive, double maxInclusive)
-        {
-            if (!value.HasValue) return this;
-            if (value.Value < minInclusive) _DataThrow(pname, $"is below minimum {minInclusive} value: {value}");
-            if (value.Value > maxInclusive) _DataThrow(pname, $"is above maximum {maxInclusive} value: {value}");
-            return this;
-        }
-
-        public OUTTYPE IsNullOrPosition(PARAMNAME pname, System.Numerics.Vector3? position)
-        {
-            if (!position.HasValue) return this;
-            return IsPosition(pname, position.Value);
-        }
-
-        public OUTTYPE IsNullOrRotation(PARAMNAME pname, System.Numerics.Quaternion? rotation)
-        {
-            if (!rotation.HasValue) return this;
-            return IsRotation(pname, rotation.Value);
         }
 
         public OUTTYPE IsNullOrMatrix(PARAMNAME pname, System.Numerics.Matrix4x4? matrix)
@@ -272,12 +252,6 @@ namespace SharpGLTF.Validation
         public OUTTYPE IsRotation(PARAMNAME pname, in System.Numerics.Quaternion rotation)
         {
             if (!rotation.IsNormalized()) _DataThrow(pname, "Invalid Rotation");
-            return this;
-        }
-
-        public OUTTYPE IsNormal(PARAMNAME pname, in System.Numerics.Vector4 tangent)
-        {
-            if (!tangent.IsValidTangent()) _DataThrow(pname, "Invalid Tangent");
             return this;
         }
 

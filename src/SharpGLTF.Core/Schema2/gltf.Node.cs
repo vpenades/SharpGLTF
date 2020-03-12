@@ -454,9 +454,9 @@ namespace SharpGLTF.Schema2
             }
 
             validate
-                .IsNullOrPosition("Scale", _scale)
-                .IsNullOrRotation("Rotation", _rotation)
-                .IsNullOrPosition("Translation", _translation)
+                .IsPosition("Scale", _scale.AsValue(Vector3.One))
+                .IsRotation("Rotation", _rotation.AsValue(Quaternion.Identity))
+                .IsPosition("Translation", _translation.AsValue(Vector3.Zero))
                 .IsNullOrMatrix("Rotation", _matrix);
         }
 

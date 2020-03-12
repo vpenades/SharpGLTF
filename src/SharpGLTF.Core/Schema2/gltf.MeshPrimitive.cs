@@ -317,7 +317,7 @@ namespace SharpGLTF.Schema2
                 }
             }
 
-            // check vertex attributes accessors
+            // check vertex attributes accessors ByteStride
 
             foreach (var group in this.VertexAccessors.Values.GroupBy(item => item.SourceBufferView))
             {
@@ -331,15 +331,10 @@ namespace SharpGLTF.Schema2
                     // - sequential accessors: all accessors's ElementByteStride should be EQUAL to BufferView's ByteStride
                     // - strided accessors: all accessors's ElementByteStride should SUM to BufferView's ByteStride
 
-                    if (group.All(item => item.ElementByteSize.WordPadded() == group.Key.ByteStride))
-                    {
-                        // sequential format.
-                    }
-                    else if (group.Sum(item => item.ElementByteSize.WordPadded()) == group.Key.ByteStride)
-                    {
-                        // strided format.
-                    }
-                    else
+                    bool isSequential = group.All(item => item.Format.ByteSizePadded == group.Key.ByteStride);
+                    bool isStrided    = group.Sum(item => item.Format.ByteSizePadded) == group.Key.ByteStride;
+
+                    if (!(isSequential || isStrided))
                     {
                         var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
                         validate._LinkThrow("Attributes", $"Inconsistent accessors configuration: {accessors}");
@@ -352,8 +347,8 @@ namespace SharpGLTF.Schema2
             if (validate.TryFix)
             {
                 var vattributes = this.VertexAccessors
-                .Select(item => item.Value._GetMemoryAccessor(item.Key))
-                .ToArray();
+                    .Select(item => item.Value._GetMemoryAccessor(item.Key))
+                    .ToArray();
 
                 Memory.MemoryAccessor.SanitizeVertexAttributes(vattributes);
             }
