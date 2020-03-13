@@ -233,6 +233,7 @@ namespace SharpGLTF.Schema2
             {
                 dstMaterial.WithMetallicRoughnessShader();
                 srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
+                srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
             }
 
             if (srcMaterial.FindChannel("Diffuse") != null || srcMaterial.FindChannel("SpecularGlossiness") != null)
@@ -313,6 +314,10 @@ namespace SharpGLTF.Schema2
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 
+            var hasClearCoat = srcMaterial.GetChannel("ClearCoat") != null
+                || srcMaterial.GetChannel("ClearCoatRoughness") != null
+                || srcMaterial.GetChannel("ClearCoatNormal") != null;
+
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
 
             Materials.MaterialBuilder defMaterial = null;
@@ -326,7 +331,8 @@ namespace SharpGLTF.Schema2
 
             if (srcMaterial.ShaderStyle == "PBRMetallicRoughness")
             {
-                dstMaterial.InitializePBRMetallicRoughness();
+                if (hasClearCoat) dstMaterial.InitializePBRMetallicRoughnessClearCoat();
+                else dstMaterial.InitializePBRMetallicRoughness();
                 defMaterial = srcMaterial;
             }
 
@@ -341,6 +347,7 @@ namespace SharpGLTF.Schema2
             {
                 if (defMaterial.ShaderStyle != "PBRMetallicRoughness") throw new ArgumentException(nameof(srcMaterial.CompatibilityFallback.ShaderStyle));
                 srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
+                srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
             }
         }
 

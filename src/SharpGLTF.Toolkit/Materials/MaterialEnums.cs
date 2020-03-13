@@ -25,5 +25,9 @@ namespace SharpGLTF.Materials
 
         Diffuse,
         SpecularGlossiness,
+
+        ClearCoat,
+        ClearCoatNormal,
+        ClearCoatRoughness,
     }
 }
