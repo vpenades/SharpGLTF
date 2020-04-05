@@ -218,6 +218,12 @@ namespace SharpGLTF.Transforms
             Weight7 = sparse.Weight7 * scale;
         }
 
+
+        internal static (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut) AsTuple(float[] tangentIn, float[] value, float[] tangentOut)
+        {
+            return (Create(tangentIn), Create(value), Create(tangentOut));
+        }
+
         #endregion
 
         #region data

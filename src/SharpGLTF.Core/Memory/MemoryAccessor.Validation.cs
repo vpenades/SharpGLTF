@@ -280,6 +280,8 @@ namespace SharpGLTF.Memory
 
         public static void VerifyVertexIndices(MemoryAccessor memory, uint vertexCount)
         {
+            Guard.NotNull(memory, nameof(memory));
+
             uint restart_value = 0xff;
             if (memory.Attribute.Encoding == ENCODING.UNSIGNED_SHORT) restart_value = 0xffff;
             if (memory.Attribute.Encoding == ENCODING.UNSIGNED_INT) restart_value = 0xffffffff;

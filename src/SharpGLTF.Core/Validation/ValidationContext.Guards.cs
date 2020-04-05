@@ -168,7 +168,11 @@ namespace SharpGLTF.Validation
             this.NonNegative($"{parameterName}.offset", offset.Value);
             this.IsGreater($"{parameterName}.length", length, 0);
 
-            if (array == null) _LinkThrow(parameterName, $".{offset} exceeds the number of available items (null).");
+            if (array == null)
+            {
+                _LinkThrow(parameterName, $".{offset} exceeds the number of available items (null).");
+                return this;
+            }
 
             if (offset > array.Count - length)
             {
@@ -263,6 +267,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE ArePositions(PARAMNAME pname, IList<System.Numerics.Vector3> positions)
         {
+            Guard.NotNull(positions, nameof(positions));
+
             for (int i = 0; i < positions.Count; ++i)
             {
                 IsPosition((pname, i), positions[i]);
@@ -273,6 +279,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE AreNormals(PARAMNAME pname, IList<System.Numerics.Vector3> normals)
         {
+            Guard.NotNull(normals, nameof(normals));
+
             for (int i = 0; i < normals.Count; ++i)
             {
                 IsNormal((pname, i), normals[i]);
@@ -283,6 +291,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE AreTangents(PARAMNAME pname, IList<System.Numerics.Vector4> tangents)
         {
+            Guard.NotNull(tangents, nameof(tangents));
+
             for (int i = 0; i < tangents.Count; ++i)
             {
                 if (!tangents[i].IsValidTangent()) _DataThrow((pname, i), "Invalid Tangent");
@@ -293,6 +303,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE AreRotations(PARAMNAME pname, IList<System.Numerics.Quaternion> rotations)
         {
+            Guard.NotNull(rotations, nameof(rotations));
+
             for (int i = 0; i < rotations.Count; ++i)
             {
                 if (!rotations[i].IsNormalized()) _DataThrow((pname, i), "Invalid Rotation");
@@ -303,6 +315,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE AreJoints(PARAMNAME pname, IList<System.Numerics.Vector4> joints, int skinsMaxJointCount)
         {
+            Guard.NotNull(joints, nameof(joints));
+
             for (int i = 0; i < joints.Count; ++i)
             {
                 var jjjj = joints[i];

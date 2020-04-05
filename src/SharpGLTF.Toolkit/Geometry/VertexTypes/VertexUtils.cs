@@ -322,7 +322,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
         }
 
-        private static Func<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
+        private static Converter<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
         {
             if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
             if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
@@ -351,7 +351,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return v => v.GetMaterial().GetCustomAttribute(attributeName);
         }
 
-        private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Func<IVertexBuilder, Object> func)
+        private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Converter<IVertexBuilder, Object> func)
             where TVertex : IVertexBuilder
         {
             var dst = new TColumn[vertices.Count];

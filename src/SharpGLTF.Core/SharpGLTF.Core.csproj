@@ -34,10 +34,6 @@
     <None Include="Schema2\Generated\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>  
 
 </Project>

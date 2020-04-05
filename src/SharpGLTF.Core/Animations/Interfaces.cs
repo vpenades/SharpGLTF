@@ -10,7 +10,7 @@ namespace SharpGLTF.Animations
     /// <typeparam name="T">The type of a point in the curve.</typeparam>
     public interface ICurveSampler<T>
     {
-        T GetPoint(float offset);
+        T GetPoint(Single offset);
     }
 
     /// <summary>
@@ -27,8 +27,8 @@ namespace SharpGLTF.Animations
         /// </summary>
         int MaxDegree { get; }
 
-        IReadOnlyDictionary<float, T> ToStepCurve();
-        IReadOnlyDictionary<float, T> ToLinearCurve();
-        IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve();
+        IReadOnlyDictionary<Single, T> ToStepCurve();
+        IReadOnlyDictionary<Single, T> ToLinearCurve();
+        IReadOnlyDictionary<Single, (T TangentIn, T Value, T TangentOut)> ToSplineCurve();
     }
 }

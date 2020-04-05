@@ -52,7 +52,7 @@ namespace SharpGLTF.Animations
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<float, (Vector3, Vector3, Vector3)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }
@@ -116,7 +116,7 @@ namespace SharpGLTF.Animations
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }
@@ -180,7 +180,7 @@ namespace SharpGLTF.Animations
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Transforms.SparseWeight8 TangentIn, Transforms.SparseWeight8 Value, Transforms.SparseWeight8 TangentOut)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }
@@ -244,7 +244,7 @@ namespace SharpGLTF.Animations
             throw new NotImplementedException();
         }
 
-        public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()
+        public IReadOnlyDictionary<float, (float[] TangentIn, float[] Value, float[] TangentOut)> ToSplineCurve()
         {
             return _Sequence.ToDictionary(pair => pair.Item1, pair => pair.Item2);
         }

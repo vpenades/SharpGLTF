@@ -16,6 +16,7 @@ namespace SharpGLTF.Validation
 
         public ValidationContext(ValidationResult result)
         {
+            Guard.NotNull(result, nameof(result));
             _Root = result.Root;
             _Mode = result.Mode;
             _Current = null;

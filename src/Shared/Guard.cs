@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace SharpGLTF
@@ -63,12 +64,22 @@ namespace SharpGLTF
 
         #region null / empty
 
-        public static void NotNull(object target, string parameterName, string message = "")
+        // Preventing CA1062...
+        // https://github.com/dotnet/roslyn-analyzers/issues/2691
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotNull(object target, string parameterName)
         {
-            if (target != null) return;
-            throw new ArgumentNullException(parameterName, message);
+            if (target == null) throw new ArgumentNullException(parameterName);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void NotNull(object target, string parameterName, string message)
+        {
+            if (target == null) throw new ArgumentNullException(parameterName, message);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void MustBeNull(object target, string parameterName, string message = "")
         {
             if (target == null) return;

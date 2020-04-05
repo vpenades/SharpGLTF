@@ -48,9 +48,9 @@ namespace SharpGLTF.Animations
             return new Dictionary<float, T> { [0] = _Value };
         }
 
-        public IReadOnlyDictionary<float, (T, T, T)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (T TangentIn, T Value, T TangentOut)> ToSplineCurve()
         {
-            return new Dictionary<float, (T, T, T)> { [0] = (default, _Value, default) };
+            return new Dictionary<float, (T TangentIn, T Value, T TangentOut)> { [0] = (default, _Value, default) };
         }
 
         public IReadOnlyDictionary<float, T> ToStepCurve()
@@ -108,7 +108,7 @@ namespace SharpGLTF.Animations
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
-        public IReadOnlyDictionary<float, (Vector3, Vector3, Vector3)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> ToSplineCurve()
         {
             throw new NotImplementedException();
         }
@@ -174,7 +174,7 @@ namespace SharpGLTF.Animations
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
-        public IReadOnlyDictionary<float, (Quaternion, Quaternion, Quaternion)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> ToSplineCurve()
         {
             throw new NotImplementedException();
         }
@@ -241,7 +241,7 @@ namespace SharpGLTF.Animations
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
-        public IReadOnlyDictionary<float, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8)> ToSplineCurve()
+        public IReadOnlyDictionary<float, (Transforms.SparseWeight8 TangentIn, Transforms.SparseWeight8 Value, Transforms.SparseWeight8 TangentOut)> ToSplineCurve()
         {
             throw new NotImplementedException();
         }
@@ -307,7 +307,7 @@ namespace SharpGLTF.Animations
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
-        public IReadOnlyDictionary<float, (float[], float[], float[])> ToSplineCurve()
+        public IReadOnlyDictionary<float, (float[] TangentIn, float[] Value, float[] TangentOut)> ToSplineCurve()
         {
             throw new NotImplementedException();
         }

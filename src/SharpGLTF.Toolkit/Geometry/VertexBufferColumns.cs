@@ -191,7 +191,7 @@ namespace SharpGLTF.Geometry
             Weights1 = null;
         }
 
-        private void _FillMorphData(Vector3[] array, Func<VertexBufferColumns, Vector3> selector)
+        private void _FillMorphData(Vector3[] array, Converter<VertexBufferColumns, Vector3> selector)
         {
             if (array == null) return;
 
@@ -201,7 +201,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private void _FillMorphData(Vector3[] array, Func<VertexBufferColumns, Vector4> selector)
+        private void _FillMorphData(Vector3[] array, Converter<VertexBufferColumns, Vector4> selector)
         {
             if (array == null) return;
 
@@ -212,7 +212,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private void _FillMorphData(Vector4[] array, Func<VertexBufferColumns, Vector4> selector)
+        private void _FillMorphData(Vector4[] array, Converter<VertexBufferColumns, Vector4> selector)
         {
             if (array == null) return;
 

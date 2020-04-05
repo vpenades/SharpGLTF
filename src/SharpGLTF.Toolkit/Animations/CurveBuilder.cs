@@ -280,7 +280,7 @@ namespace SharpGLTF.Animations
             return d;
         }
 
-        IReadOnlyDictionary<float, (T, T, T)> IConvertibleCurve<T>.ToSplineCurve()
+        IReadOnlyDictionary<float, (T TangentIn, T Value, T TangentOut)> IConvertibleCurve<T>.ToSplineCurve()
         {
             var d = new Dictionary<float, (T, T, T)>();
 

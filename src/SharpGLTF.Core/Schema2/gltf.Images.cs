@@ -159,7 +159,7 @@ namespace SharpGLTF.Schema2
         /// If the image is stored externaly as an image file,
         /// it creates a new BufferView and stores the image in the BufferView.
         /// </summary>
-        public void TransferToInternalBuffer()
+        internal void TransferToInternalBuffer()
         {
             if (this._SatelliteImageContent == null) return;
 

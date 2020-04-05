@@ -143,6 +143,25 @@ namespace SharpGLTF.Memory
         }
 
         /// <summary>
+        /// Saves the image stored in this <see cref="MemoryImage"/> to a file.
+        /// </summary>
+        /// <param name="filePath">A destination file path, with an extension matching <see cref="FileExtension"/></param>
+        public void SaveToFile(string filePath)
+        {
+            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+            Guard.IsTrue(filePath.EndsWith("." + this.FileExtension, StringComparison.OrdinalIgnoreCase), nameof(filePath), $"{nameof(filePath)} must use extension '.{this.FileExtension}'");
+
+            using (var dst = System.IO.File.Create(filePath))
+            {
+                using (var src = Open())
+                {
+                    src.CopyTo(dst);
+                }
+            }
+
+        }
+
+        /// <summary>
         /// Gets the internal buffer.
         /// </summary>
         /// <returns>An array buffer.</returns>
