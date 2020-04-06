@@ -117,9 +117,9 @@ namespace SharpGLTF.Runtime
 
             var bounds = default(BoundingSphere);
 
-            foreach (var d in instance.DrawableReferences)
+            foreach (var d in instance.DrawableInstances)
             {
-                var b = _Meshes[d.MeshIndex].BoundingSphere;
+                var b = _Meshes[d.Template.LogicalMeshIndex].BoundingSphere;
 
                 if (d.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
 

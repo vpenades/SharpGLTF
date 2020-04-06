@@ -58,9 +58,9 @@ namespace SharpGLTF.Runtime
         /// <param name="world">The world matrix.</param>
         public void Draw(Matrix projection, Matrix view, Matrix world)
         {
-            foreach (var d in _Controller.DrawableReferences)
+            foreach (var d in _Controller.DrawableInstances)
             {
-                Draw(_Template._Meshes[d.MeshIndex], projection, view, world, d.Transform);
+                Draw(_Template._Meshes[d.Template.LogicalMeshIndex], projection, view, world, d.Transform);
             }
         }
 

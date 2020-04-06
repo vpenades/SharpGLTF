@@ -63,7 +63,7 @@ namespace SharpGLTF.Runtime
                 .Where(item => item.Mesh != null)
                 .ToList();
 
-            var drawables = new DrawableReference[instances.Count];
+            var drawables = new DrawableTemplate[instances.Count];
 
             for (int i = 0; i < drawables.Length; ++i)
             {
@@ -71,9 +71,9 @@ namespace SharpGLTF.Runtime
 
                 drawables[i] = srcInstance.Skin != null
                     ?
-                    (DrawableReference)new SkinnedDrawableReference(srcInstance, indexSolver)
+                    (DrawableTemplate)new SkinnedDrawableTemplate(srcInstance, indexSolver)
                     :
-                    (DrawableReference)new RigidDrawableReference(srcInstance, indexSolver);
+                    (DrawableTemplate)new RigidDrawableTemplate(srcInstance, indexSolver);
             }
 
             // gather animation durations.
@@ -93,7 +93,7 @@ namespace SharpGLTF.Runtime
             return new SceneTemplate(srcScene.Name, dstNodes, drawables, dstTracks);
         }
 
-        private SceneTemplate(string name, NodeTemplate[] nodes, DrawableReference[] drawables, Collections.NamedList<float> animTracks)
+        private SceneTemplate(string name, NodeTemplate[] nodes, DrawableTemplate[] drawables, Collections.NamedList<float> animTracks)
         {
             _Name = name;
             _NodeTemplates = nodes;
@@ -108,7 +108,7 @@ namespace SharpGLTF.Runtime
         private readonly String _Name;
 
         private readonly NodeTemplate[] _NodeTemplates;
-        private readonly DrawableReference[] _DrawableReferences;
+        private readonly DrawableTemplate[] _DrawableReferences;
 
         private readonly Collections.NamedList<float> _AnimationTracks;
 

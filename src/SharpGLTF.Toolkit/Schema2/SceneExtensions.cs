@@ -229,9 +229,9 @@ namespace SharpGLTF.Schema2
             var meshes = scene.LogicalParent.LogicalMeshes;
 
             return instance
-                .DrawableReferences
+                .DrawableInstances
                 .Where(item => item.Transform.Visible)
-                .SelectMany(item => meshes[item.MeshIndex].EvaluateTriangles(item.Transform));
+                .SelectMany(item => meshes[item.Template.LogicalMeshIndex].EvaluateTriangles(item.Transform));
         }
 
         /// <summary>
@@ -265,9 +265,9 @@ namespace SharpGLTF.Schema2
             var meshes = scene.LogicalParent.LogicalMeshes;
 
             return instance
-                .DrawableReferences
+                .DrawableInstances
                 .Where(item => item.Transform.Visible)
-                .SelectMany(item => meshes[item.MeshIndex].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Transform));
+                .SelectMany(item => meshes[item.Template.LogicalMeshIndex].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Transform));
         }
 
         public static Scenes.SceneBuilder ToSceneBuilder(this Scene srcScene)

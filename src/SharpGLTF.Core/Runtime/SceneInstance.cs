@@ -17,7 +17,7 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal SceneInstance(NodeTemplate[] nodeTemplates, DrawableReference[] drawables, Collections.NamedList<float> tracks)
+        internal SceneInstance(NodeTemplate[] nodeTemplates, DrawableTemplate[] drawables, Collections.NamedList<float> tracks)
         {
             _AnimationTracks = tracks;
 
@@ -52,7 +52,7 @@ namespace SharpGLTF.Runtime
         private readonly NodeTemplate[] _NodeTemplates;
         private readonly NodeInstance[] _NodeInstances;
 
-        private readonly DrawableReference[] _DrawableReferences;
+        private readonly DrawableTemplate[] _DrawableReferences;
         private readonly IGeometryTransform[] _DrawableTransforms;
 
         private readonly Collections.NamedList<float> _AnimationTracks;
@@ -79,7 +79,13 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// Gets the number of drawable references.
         /// </summary>
+        [Obsolete("Use DrawableInstancesCount")]
         public int DrawableReferencesCount => _DrawableTransforms.Length;
+
+        /// <summary>
+        /// Gets the number of drawable instances.
+        /// </summary>
+        public int DrawableInstancesCount => _DrawableTransforms.Length;
 
         /// <summary>
         /// Gets a collection of drawable references, where:
@@ -94,6 +100,7 @@ namespace SharpGLTF.Runtime
         /// </item>
         /// </list>
         /// </summary>
+        [Obsolete("Use DrawableInstances.")]
         public IEnumerable<(int MeshIndex, IGeometryTransform Transform)> DrawableReferences
         {
             get
@@ -101,6 +108,17 @@ namespace SharpGLTF.Runtime
                 for (int i = 0; i < _DrawableTransforms.Length; ++i)
                 {
                     yield return GetDrawableReference(i);
+                }
+            }
+        }
+
+        public IEnumerable<DrawableInstance> DrawableInstances
+        {
+            get
+            {
+                for (int i = 0; i < _DrawableTransforms.Length; ++i)
+                {
+                    yield return GetDrawableInstance(i);
                 }
             }
         }
@@ -191,6 +209,7 @@ namespace SharpGLTF.Runtime
         /// </summary>
         /// <param name="index">The index of the drawable reference, from 0 to <see cref="DrawableReferencesCount"/></param>
         /// <returns>A drawable reference</returns>
+        [Obsolete("Use GetDrawableInstance")]
         public (int MeshIndex, IGeometryTransform Transform) GetDrawableReference(int index)
         {
             var dref = _DrawableReferences[index];
@@ -198,6 +217,23 @@ namespace SharpGLTF.Runtime
             dref.UpdateGeometryTransform(_DrawableTransforms[index], _NodeInstances);
 
             return (dref.LogicalMeshIndex, _DrawableTransforms[index]);
+        }
+
+        /// <summary>
+        /// Gets a <see cref="DrawableInstance"/> object, where:
+        /// - Name is the name of this drawable instance. Originally, it was the name of <see cref="Schema2.Node"/>.
+        /// - MeshIndex is the logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.
+        /// - Transform is an <see cref="IGeometryTransform"/> that can be used to transform the <see cref="Schema2.Mesh"/> into world space.
+        /// </summary>
+        /// <param name="index">The index of the drawable reference, from 0 to <see cref="DrawableInstancesCount"/></param>
+        /// <returns><see cref="DrawableInstance"/> object.</returns>
+        public DrawableInstance GetDrawableInstance(int index)
+        {
+            var dref = _DrawableReferences[index];
+
+            dref.UpdateGeometryTransform(_DrawableTransforms[index], _NodeInstances);
+
+            return new DrawableInstance(dref, _DrawableTransforms[index]);
         }
 
         #endregion

@@ -5,27 +5,40 @@ using System.Text;
 
 namespace SharpGLTF.Runtime
 {
+    public interface IDrawableTemplate
+    {
+        string NodeName { get; }
+
+        int LogicalMeshIndex { get; }
+    }
+
     /// <summary>
     /// Defines a reference to a drawable mesh
     /// </summary>
-    abstract class DrawableReference
+    abstract class DrawableTemplate : IDrawableTemplate
     {
         #region lifecycle
 
-        protected DrawableReference(Schema2.Node node)
+        protected DrawableTemplate(Schema2.Node node)
         {
             _LogicalMeshIndex = node.Mesh.LogicalIndex;
+
+            _NodeName = node.Name;
         }
 
         #endregion
 
         #region data
 
+        private readonly String _NodeName;
+
         private readonly int _LogicalMeshIndex;
 
         #endregion
 
         #region properties
+
+        public String NodeName => _NodeName;
 
         /// <summary>
         /// Gets the index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
@@ -46,11 +59,11 @@ namespace SharpGLTF.Runtime
     /// <summary>
     /// Defines a reference to a drawable rigid mesh
     /// </summary>
-    sealed class RigidDrawableReference : DrawableReference
+    sealed class RigidDrawableTemplate : DrawableTemplate
     {
         #region lifecycle
 
-        internal RigidDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+        internal RigidDrawableTemplate(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
             : base(node)
         {
             _NodeIndex = indexFunc(node);
@@ -83,11 +96,11 @@ namespace SharpGLTF.Runtime
     /// <summary>
     /// Defines a reference to a drawable skinned mesh
     /// </summary>
-    sealed class SkinnedDrawableReference : DrawableReference
+    sealed class SkinnedDrawableTemplate : DrawableTemplate
     {
         #region lifecycle
 
-        internal SkinnedDrawableReference(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+        internal SkinnedDrawableTemplate(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
             : base(node)
         {
             var skin = node.Skin;
