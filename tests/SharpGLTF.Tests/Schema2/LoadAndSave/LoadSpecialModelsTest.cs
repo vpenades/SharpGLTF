@@ -24,6 +24,19 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         #endregion
 
+        [Test]
+        public void LoadWithWhiteSpaceTexture()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\white space.gltf");
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            model.AttachToCurrentTest("white space.glb");
+        }
+
         public void LoadWithCustomImageLoader()
         {
             TestContext.CurrentContext.AttachShowDirLink();            

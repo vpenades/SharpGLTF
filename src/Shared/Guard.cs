@@ -208,6 +208,8 @@ namespace SharpGLTF
 
             if (gltfURI.StartsWith("data:")) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
 
+            gltfURI = Uri.EscapeUriString(gltfURI);
+
             if (!Uri.IsWellFormedUriString(gltfURI, UriKind.RelativeOrAbsolute)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
             if (!Uri.TryCreate(gltfURI, UriKind.RelativeOrAbsolute, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
 

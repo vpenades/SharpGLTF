@@ -5,11 +5,15 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup> 
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="..\Assets\**" LinkBase="Assets" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 
   <ItemGroup>    
     <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     
@@ -23,12 +27,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Assets\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>    
-  </ItemGroup>
+  </ItemGroup>  
 
 </Project>
