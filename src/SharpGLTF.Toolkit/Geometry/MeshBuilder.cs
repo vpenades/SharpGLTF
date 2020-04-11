@@ -125,9 +125,9 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public MorphTargetBuilder<TMaterial, TvG, TvS, TvM> UseMorphTarget(int index)
+        public MorphTargetBuilder UseMorphTarget(int index)
         {
-            return new MorphTargetBuilder<TMaterial, TvG, TvS, TvM>(this, index);
+            return new MorphTargetBuilder(this.Primitives.Select(p => ((IPrimitiveBuilder)p, (IReadOnlyList<IVertexBuilder>)p.Vertices)), index);
         }
 
         private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial Material, int PrimType) key)

@@ -71,6 +71,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         Type VertexType { get; }
 
+        void SetVertex(int morphTargetIndex, int vertexIndex, IVertexGeometry morphVertex);
         void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta);
 
         int AddPoint(IVertexBuilder a);
@@ -134,7 +135,7 @@ namespace SharpGLTF.Geometry
 
             foreach (var otherMT in other._MorphTargets)
             {
-                var thisMT = new PrimitiveMorphTargetBuilder<TvG>(idx => this._Vertices[idx].Geometry, otherMT);
+                var thisMT = new PrimitiveMorphTargetBuilder(idx => this._Vertices[idx].Geometry, otherMT);
                 this._MorphTargets.Add(otherMT);
             }
         }
@@ -151,7 +152,7 @@ namespace SharpGLTF.Geometry
 
         private readonly VertexListWrapper _Vertices = new VertexListWrapper();
 
-        private readonly List<PrimitiveMorphTargetBuilder<TvG>> _MorphTargets = new List<PrimitiveMorphTargetBuilder<TvG>>();
+        private readonly List<PrimitiveMorphTargetBuilder> _MorphTargets = new List<PrimitiveMorphTargetBuilder>();
 
         #endregion
 
@@ -189,9 +190,9 @@ namespace SharpGLTF.Geometry
 
         #region API - morph targets
 
-        internal PrimitiveMorphTargetBuilder<TvG> _UseMorphTarget(int morphTargetIndex)
+        internal PrimitiveMorphTargetBuilder _UseMorphTarget(int morphTargetIndex)
         {
-            while (this._MorphTargets.Count <= morphTargetIndex) this._MorphTargets.Add(new PrimitiveMorphTargetBuilder<TvG>(idx => _Vertices[idx].Geometry));
+            while (this._MorphTargets.Count <= morphTargetIndex) this._MorphTargets.Add(new PrimitiveMorphTargetBuilder(idx => _Vertices[idx].Geometry));
 
             return this._MorphTargets[morphTargetIndex];
         }
@@ -228,6 +229,11 @@ namespace SharpGLTF.Geometry
         protected int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
         {
             return _Vertices.Use(vertex);
+        }
+
+        void IPrimitiveBuilder.SetVertex(int morphTargetIndex, int vertexIndex, IVertexGeometry morphVertex)
+        {
+            _UseMorphTarget(morphTargetIndex).SetVertex(vertexIndex, morphVertex);
         }
 
         void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta)
@@ -311,7 +317,7 @@ namespace SharpGLTF.Geometry
         {
             _Vertices.TransformVertices(vertexTransformFunc);
 
-            TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
+            IVertexGeometry geoFunc(IVertexGeometry g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g.ConvertToGeometry<TvG>(), default, default(TvS))).Geometry;
 
             foreach (var mt in _MorphTargets) mt.TransformVertices(geoFunc);
         }
@@ -380,7 +386,7 @@ namespace SharpGLTF.Geometry
                 }
             }
 
-            TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
+            IVertexGeometry geoFunc(IVertexGeometry g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g.ConvertToGeometry<TvG>(), default, default(TvS))).Geometry;
 
             for (int i = 0; i < primitive._MorphTargets.Count; ++i)
             {

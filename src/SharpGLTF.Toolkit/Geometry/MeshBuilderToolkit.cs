@@ -16,6 +16,7 @@ namespace SharpGLTF.Geometry
 
         IReadOnlyCollection<IPrimitiveReader<TMaterial>> Primitives { get; }
 
+        MorphTargetBuilder UseMorphTarget(int index);
         IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
 
         IMeshBuilder<TMaterial> Clone(Func<TMaterial, TMaterial> materialCloneCallback = null);
