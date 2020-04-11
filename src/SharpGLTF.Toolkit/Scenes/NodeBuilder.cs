@@ -261,9 +261,12 @@ namespace SharpGLTF.Scenes
         private void _DecomposeMatrix()
         {
             if (!_Matrix.HasValue) return;
-            if (_Matrix.Value == Matrix4x4.Identity) return;
-            _DecomposeMatrix(_Matrix.Value);
+
+            var m = _Matrix.Value;
             _Matrix = null;
+
+            // we do the decomposition AFTER setting _Matrix to null to prevent an infinite recursive loop. Fixes #37
+            if (m != Matrix4x4.Identity) _DecomposeMatrix(m);
         }
 
         private void _DecomposeMatrix(Matrix4x4 matrix)
