@@ -130,6 +130,11 @@ namespace SharpGLTF.Geometry
             return new MorphTargetBuilder<TMaterial, TvG, TvS, TvM>(this, index);
         }
 
+        IMorphTargetBuilder IMeshBuilder<TMaterial>.UseMorphTarget(int index)
+        {
+            return UseMorphTarget(index);
+        }
+
         private PrimitiveBuilder<TMaterial, TvG, TvM, TvS> _UsePrimitive((TMaterial Material, int PrimType) key)
         {
             if (!_Primitives.TryGetValue(key, out PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive))
