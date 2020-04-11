@@ -613,5 +613,17 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("scene.glb");
         }
 
+
+        [Test(Description ="Regression test for #37")]
+        public void CreateNodeBuilderWithWorldMatrix()
+        {
+            var nbr = new NodeBuilder("Dummy1");
+            var nb = nbr.CreateNode("Dummy2");
+            nb.WorldMatrix = new Matrix4x4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 1);
+            nb.UseTranslation().UseTrackBuilder("Default");
+            nb.UseRotation().UseTrackBuilder("Default");
+            nb.UseScale().UseTrackBuilder("Default");
+        }
+
     }
 }
