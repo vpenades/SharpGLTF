@@ -18,6 +18,8 @@ namespace SharpGLTF.Geometry
 
         IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
 
+        IMorphTargetBuilder UseMorphTarget(int index);
+
         IMeshBuilder<TMaterial> Clone(Func<TMaterial, TMaterial> materialCloneCallback = null);
 
         void Validate();

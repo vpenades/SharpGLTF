@@ -153,10 +153,21 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
+    public interface IMorphTargetBuilder
+    {
+        IReadOnlyCollection<Vector3> Positions { get; }
+        IReadOnlyCollection<IVertexGeometry> Vertices { get; }
+        IReadOnlyList<IVertexGeometry> GetVertices(Vector3 position);
+
+        void SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex);
+        void SetVertexDelta(Vector3 key, VertexGeometryDelta delta);
+        void SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta delta);
+    }
+
     /// <summary>
     /// Utility class to edit the Morph targets of a mesh.
     /// </summary>
-    public sealed class MorphTargetBuilder<TMaterial, TvG, TvS, TvM>
+    public sealed class MorphTargetBuilder<TMaterial, TvG, TvS, TvM> : IMorphTargetBuilder
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
@@ -210,6 +221,8 @@ namespace SharpGLTF.Geometry
 
         public IReadOnlyCollection<TvG> Vertices => _Vertices.Keys;
 
+        IReadOnlyCollection<IVertexGeometry> IMorphTargetBuilder.Vertices => (IReadOnlyList<IVertexGeometry>)(IReadOnlyCollection<TvG>)_Vertices.Keys;
+
         #endregion
 
         #region API
@@ -217,6 +230,11 @@ namespace SharpGLTF.Geometry
         public IReadOnlyList<TvG> GetVertices(Vector3 position)
         {
             return _Positions.TryGetValue(position, out List<TvG> geos) ? (IReadOnlyList<TvG>)geos : Array.Empty<TvG>();
+        }
+
+        IReadOnlyList<IVertexGeometry> IMorphTargetBuilder.GetVertices(Vector3 position)
+        {
+            return _Positions.TryGetValue(position, out List<TvG> geos) ? (IReadOnlyList<IVertexGeometry>)geos : Array.Empty<IVertexGeometry>();
         }
 
         public void SetVertexDelta(Vector3 key, VertexGeometryDelta delta)
@@ -240,6 +258,11 @@ namespace SharpGLTF.Geometry
             }
         }
 
+        void IMorphTargetBuilder.SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex)
+        {
+            SetVertex(meshVertex.ConvertToGeometry<TvG>(), morphVertex.ConvertToGeometry<TvG>());
+        }
+
         public void SetVertexDelta(TvG meshVertex, VertexGeometryDelta delta)
         {
             if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
@@ -251,6 +274,11 @@ namespace SharpGLTF.Geometry
                         .SetVertexDelta(entry.Item2, delta);
                 }
             }
+        }
+
+        void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta delta)
+        {
+            SetVertexDelta(meshVertex.ConvertToGeometry<TvG>(), delta);
         }
 
         #endregion
