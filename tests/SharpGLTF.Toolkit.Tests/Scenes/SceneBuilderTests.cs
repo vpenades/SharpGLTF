@@ -542,7 +542,7 @@ namespace SharpGLTF.Scenes
             // create a scenebuilder with an empty mesh
             var sb = new SceneBuilder();
 
-            sb.AddMesh(VPOSNRM.CreateCompatibleMesh("Empty"), Matrix4x4.Identity);
+            sb.AddRigidMesh(VPOSNRM.CreateCompatibleMesh("Empty"), Matrix4x4.Identity);
 
             var schema = sb.ToGltf2();
 

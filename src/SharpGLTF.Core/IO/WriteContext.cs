@@ -46,11 +46,19 @@ namespace SharpGLTF.IO
             return CreateFromDirectory(dir);
         }
 
-        public static WriteContext CreateFromDirectory(string dirPath)
+        public static WriteContext CreateFromDirectory(string directoryPath)
         {
-            Guard.DirectoryPathMustExist(dirPath, nameof(dirPath));
+            Guard.DirectoryPathMustExist(directoryPath, nameof(directoryPath));
 
-            var context = Create((fn, d) => File.WriteAllBytes(Path.Combine(dirPath, fn), d.ToArray()));
+            void _saveFile(string rawUri, BYTES data)
+            {
+                var path = Uri.UnescapeDataString(rawUri);
+                path = Path.Combine(directoryPath, path);
+
+                File.WriteAllBytes(path, data.ToUnderlayingArray());
+            }
+
+            var context = Create(_saveFile);
             context.ImageWriting = ResourceWriteMode.SatelliteFile;
             context.JsonIndented = true;
             return context;
@@ -60,7 +68,7 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(dict, nameof(dict));
 
-            var context = Create((fn, buff) => dict[fn] = buff);
+            var context = Create((rawUri, data) => dict[rawUri] = data);
             context.ImageWriting = ResourceWriteMode.SatelliteFile;
             context.MergeBuffers = false;
             context.JsonIndented = false;

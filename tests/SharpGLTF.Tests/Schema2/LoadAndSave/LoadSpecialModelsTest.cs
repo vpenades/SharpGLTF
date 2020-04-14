@@ -25,7 +25,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         #endregion
 
         [Test]
-        public void LoadWithWhiteSpaceTexture()
+        public void LoadEscapedUriModel()
         {
             TestContext.CurrentContext.AttachShowDirLink();
 

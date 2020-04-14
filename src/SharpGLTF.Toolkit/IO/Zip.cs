@@ -79,8 +79,10 @@ namespace SharpGLTF.IO
             }
         }
 
-        private ArraySegment<Byte> _ReadAsset(string filePath)
+        private ArraySegment<Byte> _ReadAsset(string rawUri)
         {
+            var filePath = Uri.UnescapeDataString(rawUri);
+
             System.IO.Compression.ZipArchiveEntry entry = _FindEntry(filePath);
 
             using (var s = entry.Open())

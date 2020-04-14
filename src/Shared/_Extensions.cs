@@ -638,6 +638,13 @@ namespace SharpGLTF
 
         #region serialization
 
+        public static Byte[] ToUnderlayingArray(this ArraySegment<Byte> segment)
+        {
+            if (segment.Offset == 0 && segment.Count == segment.Array.Length) return segment.Array;
+
+            return segment.ToArray();
+        }
+
         public static ArraySegment<Byte> ToArraySegment(this System.IO.MemoryStream m)
         {
             if (m.TryGetBuffer(out ArraySegment<Byte> data)) return data;

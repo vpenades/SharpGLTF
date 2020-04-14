@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .PunctualLight = root.CreatePunctualLight(PunctualLightType.Directional)
                 .WithColor(Vector3.UnitX, 2);
 
-            var node2 = scene.CreateNode()
+            scene.CreateNode()
                 .PunctualLight = root.CreatePunctualLight(PunctualLightType.Spot)
                 .WithColor(Vector3.UnitY, 3, 10)
                 .WithSpotCone(0.2f, 0.3f);
@@ -79,7 +79,7 @@ namespace SharpGLTF.Schema2.Authoring
                 );
 
             var scene = new Scenes.SceneBuilder();
-            scene.AddMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");
@@ -115,7 +115,7 @@ namespace SharpGLTF.Schema2.Authoring
                 );
 
             var scene = new Scenes.SceneBuilder();
-            scene.AddMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");

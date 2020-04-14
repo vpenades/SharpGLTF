@@ -48,14 +48,17 @@ namespace SharpGLTF.Schema2
         {
             _Content = _LoadBinaryBufferUnchecked(_uri, context);
 
-            // if (_uri == null) _byteLength = _Content.Length; // fixes "valid_placeholder.glb" case
-
             _uri = null; // When _Data is not empty, clear URI
         }
 
         private static Byte[] _LoadBinaryBufferUnchecked(string uri, IO.ReadContext context)
         {
-            return uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM) ?? context.ReadAllBytesToEnd(uri).ToArray();
+            var data = uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
+            if (data != null) return data;
+
+            return context
+                .ReadAllBytesToEnd(uri)
+                .ToUnderlayingArray();
         }
 
         #endregion
@@ -69,10 +72,10 @@ namespace SharpGLTF.Schema2
         /// <param name="satelliteUri">A local satellite URI</param>
         internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
         {
-            this._uri = satelliteUri;
-            this._byteLength = _Content.Length;
+            writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()));
 
-            writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()) );
+            this._uri = Uri.EscapeDataString(satelliteUri);
+            this._byteLength = _Content.Length;
         }
 
         /// <summary>

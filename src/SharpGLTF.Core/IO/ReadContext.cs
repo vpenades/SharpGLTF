@@ -46,12 +46,22 @@ namespace SharpGLTF.IO
 
         public static ReadContext CreateFromDirectory(string directoryPath)
         {
-            return new ReadContext(assetFileName => new BYTES(File.ReadAllBytes(Path.Combine(directoryPath, assetFileName))));
+            BYTES _loadFile(string rawUri)
+            {
+                var path = Uri.UnescapeDataString(rawUri);
+                path = Path.Combine(directoryPath, path);
+
+                var content = File.ReadAllBytes(path);
+
+                return new BYTES(content);
+            }
+
+            return new ReadContext(_loadFile);
         }
 
         public static ReadContext CreateFromDictionary(IReadOnlyDictionary<string, BYTES> dictionary)
         {
-            return new ReadContext(fn => dictionary[fn]);
+            return new ReadContext(rawUri => dictionary[rawUri]);
         }
 
         private ReadContext(FileReaderCallback reader)

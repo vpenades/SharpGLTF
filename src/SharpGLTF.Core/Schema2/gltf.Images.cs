@@ -181,27 +181,17 @@ namespace SharpGLTF.Schema2
         {
             if (String.IsNullOrWhiteSpace(_uri)) return;
 
-            byte[] data = null;
-
-            try
-            {
-                data = Memory.MemoryImage.TryParseBytes(_uri);
-            }
-            catch (ArgumentException argex)
-            {
-                throw new Validation.DataException(this, argex.Message);
-            }
+            var data = Memory.MemoryImage.TryParseBytes(_uri);
 
             if (data == null)
             {
-                var bytes = context.ReadAllBytesToEnd(_uri);
-
-                // let's try to avoid making a copy if it's not neccesary.
-                if (bytes.Offset == 0 && bytes.Array.Length == bytes.Count) data = bytes.Array;
-                else data = bytes.ToArray();
+                data = context
+                    .ReadAllBytesToEnd(_uri)
+                    .ToUnderlayingArray();
             }
 
             _SatelliteImageContent = data;
+
             _uri = null;
             _mimeType = null;
         }
@@ -226,8 +216,9 @@ namespace SharpGLTF.Schema2
             if (_SatelliteImageContent == null) { _WriteAsBufferView(); return; }
 
             var imimg = new Memory.MemoryImage(_SatelliteImageContent);
-            _mimeType = imimg.MimeType;
+
             _uri = imimg.ToMime64();
+            _mimeType = imimg.MimeType;
         }
 
         /// <summary>
@@ -243,13 +234,15 @@ namespace SharpGLTF.Schema2
                 return;
             }
 
-            _mimeType = null;
-
             var imimg = new Memory.MemoryImage(_SatelliteImageContent);
             if (!imimg.IsValid) throw new InvalidOperationException();
 
-            _uri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
-            writer.WriteAllBytesToEnd(_uri, imimg.GetBuffer());
+            satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+
+            writer.WriteAllBytesToEnd(satelliteUri, imimg.GetBuffer());
+
+            _uri = Uri.EscapeDataString(satelliteUri);
+            _mimeType = null;
         }
 
         private void _WriteAsBufferView()
@@ -259,6 +252,7 @@ namespace SharpGLTF.Schema2
             var imimg = this.MemoryImage;
             if (!imimg.IsValid) throw new InvalidOperationException();
 
+            _uri = null;
             _mimeType = imimg.MimeType;
         }
 
@@ -269,8 +263,8 @@ namespace SharpGLTF.Schema2
         /// </summary>
         internal void _ClearAfterWrite()
         {
-            _mimeType = null;
             _uri = null;
+            _mimeType = null;
         }
 
         #endregion

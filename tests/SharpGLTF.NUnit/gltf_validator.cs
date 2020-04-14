@@ -97,7 +97,7 @@ namespace SharpGLTF
             public bool HasWarnings => Warnings.Count > 0;
             public bool HasErrors => Errors.Count > 0;
 
-            public string ToString()
+            public override string ToString()
             {
                 return RawReport;
 

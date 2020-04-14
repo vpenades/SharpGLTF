@@ -26,8 +26,8 @@ and how you want to render it, so every AddMesh method adds an mesh instance to 
 
 ```c#
 scene = new SceneBuilder();
-scene.AddMesh(...);
-scene.AddMesh(...);
+scene.AddRigidMesh(...);
+scene.AddRigidMesh(...);
 scene.AddSkinnedMesh(...);
 scene.SaveGLB("scene.glb");
 ```

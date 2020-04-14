@@ -60,7 +60,7 @@ namespace SharpGLTF.Validation
 
             foreach (var f in files)
             {
-                // System.Diagnostics.Debug.Assert(!f.EndsWith("unresolved_source.gltf"));
+                // System.Diagnostics.Debug.Assert(!f.EndsWith("invalid_uri_scheme.gltf"));
 
                 var gltfJson = f.EndsWith(".gltf") ? System.IO.File.ReadAllText(f) : string.Empty;
 
@@ -76,7 +76,6 @@ namespace SharpGLTF.Validation
 
                 Assert.AreEqual(report.Issues.NumErrors > 0, result.HasErrors);                                
             }
-        }        
-
+        }
     }
 }

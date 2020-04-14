@@ -190,6 +190,11 @@ namespace SharpGLTF
 
         #region specialised
 
+        private static readonly IReadOnlyList<Char> _InvalidRelativePathChars =
+            System.IO.Path.GetInvalidFileNameChars()
+            .Where(c => c != '/' && c != '\\')
+            .ToArray();
+
         public static void IsValidURI(string parameterName, string gltfURI, params string[] validHeaders)
         {
             if (string.IsNullOrEmpty(gltfURI)) return;
@@ -206,12 +211,11 @@ namespace SharpGLTF
                 }
             }
 
-            if (gltfURI.StartsWith("data:")) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+            if (gltfURI.Any(c => _InvalidRelativePathChars.Contains(c))) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
 
-            gltfURI = Uri.EscapeUriString(gltfURI);
+            if (gltfURI.Any(chr => char.IsWhiteSpace(chr))) gltfURI = Uri.EscapeUriString(gltfURI);
 
-            if (!Uri.IsWellFormedUriString(gltfURI, UriKind.RelativeOrAbsolute)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
-            if (!Uri.TryCreate(gltfURI, UriKind.RelativeOrAbsolute, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+            if (!Uri.TryCreate(gltfURI, UriKind.Relative, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
 
             return;
         }

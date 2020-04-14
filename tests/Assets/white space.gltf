@@ -5,6 +5,9 @@
     "images": [
         {
             "uri": "white space.jpg"
+        },
+{
+            "uri": "white%20space.jpg"
         }
     ]
 }
