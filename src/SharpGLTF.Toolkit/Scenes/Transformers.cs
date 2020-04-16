@@ -53,6 +53,8 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
+        public abstract String Name { get; }
+
         public Object Content => _Content;
 
         public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
@@ -99,10 +101,11 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal FixedTransformer(Object content, Matrix4x4 xform)
+        internal FixedTransformer(Object content, Matrix4x4 xform, string nodeName = null)
             : base(content)
         {
             _WorldTransform = xform;
+            _NodeName = nodeName;
         }
 
         protected FixedTransformer(FixedTransformer other)
@@ -110,6 +113,7 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(other, nameof(other));
 
+            this._NodeName = other._NodeName;
             this._WorldTransform = other._WorldTransform;
         }
 
@@ -122,11 +126,15 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        private String _NodeName;
+
         private Matrix4x4 _WorldTransform;
 
         #endregion
 
         #region properties
+
+        public override String Name => _NodeName;
 
         public Matrix4x4 WorldTransform
         {
@@ -179,6 +187,8 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
+        public override String Name => _Node.Name;
+
         public NodeBuilder Transform
         {
             get => _Node;
@@ -201,15 +211,17 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
+        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints, string nodeName = null)
             : base(mesh)
         {
+            _NodeName = nodeName;
             SetJoints(meshWorldMatrix, joints);
         }
 
-        internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
+        internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints, string nodeName = null)
             : base(mesh)
         {
+            _NodeName = nodeName;
             SetJoints(joints);
         }
 
@@ -218,6 +230,7 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(other, nameof(other));
 
+            this._NodeName = other._NodeName;
             this._TargetBindMatrix = other._TargetBindMatrix;
             this._Joints.AddRange(other._Joints);
         }
@@ -231,10 +244,18 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        private String _NodeName;
+
         private Matrix4x4? _TargetBindMatrix;
 
         // condition: all NodeBuilder objects must have the same root.
         private readonly List<(NodeBuilder Joints, Matrix4x4? InverseBindMatrix)> _Joints = new List<(NodeBuilder, Matrix4x4?)>();
+
+        #endregion
+
+        #region properties
+
+        public override String Name => _NodeName;
 
         #endregion
 

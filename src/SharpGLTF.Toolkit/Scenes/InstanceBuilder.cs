@@ -19,8 +19,6 @@ namespace SharpGLTF.Scenes
 
         #region data
 
-        private string _Name;
-
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private SceneBuilder _Parent;
 
@@ -31,11 +29,7 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
-        public string Name
-        {
-            get => _Name;
-            set => _Name = value;
-        }
+        public string Name => _ContentTransformer?.Name;
 
         public ContentTransformer Content
         {
@@ -58,7 +52,7 @@ namespace SharpGLTF.Scenes
         internal InstanceBuilder _CopyTo(SceneBuilder other)
         {
             var clone = new InstanceBuilder(other);
-            clone._Name = this._Name;
+
             clone._ContentTransformer = this._ContentTransformer?.DeepClone();
 
             return clone;

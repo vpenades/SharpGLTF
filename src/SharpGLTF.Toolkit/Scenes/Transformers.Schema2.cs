@@ -18,6 +18,7 @@ namespace SharpGLTF.Scenes
 
             var dstNode = dstScene.CreateNode();
 
+            dstNode.Name = _NodeName;
             dstNode.LocalMatrix = _WorldTransform;
 
             schema2Target.Setup(dstNode, context);
@@ -48,24 +49,26 @@ namespace SharpGLTF.Scenes
 
             var skinnedMeshNode = dstScene.CreateNode();
 
+            skinnedMeshNode.Name = _NodeName;
+
             if (_TargetBindMatrix.HasValue)
             {
                 var dstNodes = new Node[_Joints.Count];
 
                 for (int i = 0; i < dstNodes.Length; ++i)
                 {
-                    var srcNode = _Joints[i];
+                    var (joints, inverseBindMatrix) = _Joints[i];
 
-                    System.Diagnostics.Debug.Assert(!srcNode.InverseBindMatrix.HasValue);
+                    System.Diagnostics.Debug.Assert(!inverseBindMatrix.HasValue);
 
-                    dstNodes[i] = context.GetNode(srcNode.Joints);
+                    dstNodes[i] = context.GetNode(joints);
                 }
 
                 #if DEBUG
                 for (int i = 0; i < dstNodes.Length; ++i)
                 {
-                    var srcNode = _Joints[i];
-                    System.Diagnostics.Debug.Assert(dstNodes[i].WorldMatrix == srcNode.Joints.WorldMatrix);
+                    var (joints, inverseBindMatrix) = _Joints[i];
+                    System.Diagnostics.Debug.Assert(dstNodes[i].WorldMatrix == joints.WorldMatrix);
                 }
                 #endif
 
