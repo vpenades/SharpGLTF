@@ -95,4 +95,16 @@ namespace SharpGLTF.Debug
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public Schema2.MeshPrimitive[] Primitives => _Value.Primitives.ToArray();
     }
+
+    internal sealed class _Matrix4x4DoubleProxy
+    {
+        public _Matrix4x4DoubleProxy(Transforms.Matrix4x4Double value) { _Value = value; }
+
+        private Transforms.Matrix4x4Double _Value;
+
+        public (Double X, Double Y, Double Z, Double W) Row1 => (_Value.M11, _Value.M12, _Value.M13, _Value.M14);
+        public (Double X, Double Y, Double Z, Double W) Row2 => (_Value.M21, _Value.M22, _Value.M23, _Value.M24);
+        public (Double X, Double Y, Double Z, Double W) Row3 => (_Value.M31, _Value.M32, _Value.M33, _Value.M34);
+        public (Double X, Double Y, Double Z, Double W) Row4 => (_Value.M41, _Value.M42, _Value.M43, _Value.M44);
+    }
 }

@@ -386,11 +386,18 @@ namespace SharpGLTF.Transforms
         /// <returns>A <see cref="TRANSFORM"/> representing the inverse bind transform.</returns>
         public static TRANSFORM CalculateInverseBinding(TRANSFORM meshWorldTransform, TRANSFORM jointWorldTransform)
         {
-            // var xform = meshWorldTransform.Inverse();
-            // xform = jointWorldTransform * xform;
-            // return xform.Inverse();
-
             var invJoint = jointWorldTransform.Inverse();
+
+            if (meshWorldTransform == TRANSFORM.Identity) return invJoint;
+
+            return meshWorldTransform * invJoint;
+        }
+
+        public static Matrix4x4Double CalculateInverseBinding(Matrix4x4Double meshWorldTransform, Matrix4x4Double jointWorldTransform)
+        {
+            if (!Matrix4x4Double.Invert(jointWorldTransform, out Matrix4x4Double invJoint)) Guard.IsTrue(false, nameof(jointWorldTransform), "Matrix cannot be inverted.");
+
+            if (meshWorldTransform == Matrix4x4Double.Identity) return invJoint;
 
             return meshWorldTransform * invJoint;
         }

@@ -115,6 +115,25 @@ namespace SharpGLTF.Scenes
             }
         }
 
+        internal Transforms.Matrix4x4Double LocalMatrixPrecise
+        {
+            get
+            {
+                if (_Matrix.HasValue) return new Transforms.Matrix4x4Double(_Matrix.Value);
+
+                var s = _Scale?.Value ?? Vector3.One;
+                var r = _Rotation?.Value ?? Quaternion.Identity;
+                var t = _Translation?.Value ?? Vector3.Zero;
+
+                return
+                    Transforms.Matrix4x4Double.CreateScale(s.X, s.Y, s.Z)
+                    *
+                    Transforms.Matrix4x4Double.CreateFromQuaternion(r.Sanitized())
+                    *
+                    Transforms.Matrix4x4Double.CreateTranslation(t.X, t.Y, t.Z);
+            }
+        }
+
         #pragma warning disable CA1721 // Property names should not match get methods
 
         /// <summary>
@@ -153,6 +172,15 @@ namespace SharpGLTF.Scenes
             {
                 var vs = this.Parent;
                 LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+            }
+        }
+
+        internal Transforms.Matrix4x4Double WorldMatrixPrecise
+        {
+            get
+            {
+                var vs = this.Parent;
+                return vs == null ? LocalMatrixPrecise : LocalMatrixPrecise * vs.WorldMatrixPrecise;
             }
         }
 
@@ -356,6 +384,13 @@ namespace SharpGLTF.Scenes
             var vs = Parent;
             var lm = GetLocalTransform(animationTrack, time).Matrix;
             return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
+        }
+
+        public Matrix4x4 GetInverseBindMatrix(Matrix4x4? meshWorldMatrix = null)
+        {
+            Transforms.Matrix4x4Double mwx = meshWorldMatrix ?? Matrix4x4.Identity;
+
+            return (Matrix4x4)Transforms.SkinnedTransform.CalculateInverseBinding(mwx, this.WorldMatrixPrecise);
         }
 
         #endregion

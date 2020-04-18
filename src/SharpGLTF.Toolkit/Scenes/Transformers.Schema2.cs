@@ -48,7 +48,6 @@ namespace SharpGLTF.Scenes
             if (!(Content is SCHEMA2NODE schema2Target)) return;
 
             var skinnedMeshNode = dstScene.CreateNode();
-
             skinnedMeshNode.Name = _NodeName;
 
             if (_TargetBindMatrix.HasValue)

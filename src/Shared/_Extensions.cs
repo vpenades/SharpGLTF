@@ -180,10 +180,8 @@ namespace SharpGLTF
         internal static bool IsValid(this in Matrix4x4 matrix)
         {
             if (!matrix._IsFinite()) return false;
-
-            if (!Matrix4x4.Decompose(matrix, out Vector3 s, out Quaternion r, out Vector3 t)) return false;
-
-            if (!Matrix4x4.Invert(matrix, out Matrix4x4 inverse)) return false;
+            if (!Matrix4x4.Decompose(matrix, out _, out _, out _)) return false;
+            if (!Matrix4x4.Invert(matrix, out _)) return false;
 
             return true;
         }

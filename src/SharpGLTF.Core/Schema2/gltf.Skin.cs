@@ -104,7 +104,7 @@ namespace SharpGLTF.Schema2
             {
                 Guard.NotNull(joints[i], nameof(joints));
 
-                var xform = Transforms.SkinnedTransform.CalculateInverseBinding(meshBindTransform, joints[i].WorldMatrix);
+                var xform = (Matrix4x4)Transforms.SkinnedTransform.CalculateInverseBinding((Transforms.Matrix4x4Double)meshBindTransform, joints[i].WorldMatrixPrecise);
 
                 pairs[i] = (joints[i], xform);
             }

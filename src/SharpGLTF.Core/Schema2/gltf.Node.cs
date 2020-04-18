@@ -232,6 +232,25 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal Transforms.Matrix4x4Double LocalMatrixPrecise
+        {
+            get
+            {
+                if (_matrix.HasValue) return new Transforms.Matrix4x4Double(_matrix.Value);
+
+                var s = _scale ?? Vector3.One;
+                var r = _rotation ?? Quaternion.Identity;
+                var t = _translation ?? Vector3.Zero;
+
+                return
+                    Transforms.Matrix4x4Double.CreateScale(s.X, s.Y, s.Z)
+                    *
+                    Transforms.Matrix4x4Double.CreateFromQuaternion(r.Sanitized())
+                    *
+                    Transforms.Matrix4x4Double.CreateTranslation(t.X, t.Y, t.Z);
+            }
+        }
+
         #pragma warning disable CA1721 // Property names should not match get methods
 
         /// <summary>
@@ -248,6 +267,15 @@ namespace SharpGLTF.Schema2
             {
                 var vs = VisualParent;
                 LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+            }
+        }
+
+        internal Transforms.Matrix4x4Double WorldMatrixPrecise
+        {
+            get
+            {
+                var vs = this.VisualParent;
+                return vs == null ? LocalMatrixPrecise : LocalMatrixPrecise * vs.WorldMatrixPrecise;
             }
         }
 
