@@ -41,6 +41,8 @@ namespace SharpGLTF.IO
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
+            if (!Path.IsPathRooted(filePath)) filePath = Path.GetFullPath(filePath);
+
             var dir = Path.GetDirectoryName(filePath);
 
             return CreateFromDirectory(dir);
