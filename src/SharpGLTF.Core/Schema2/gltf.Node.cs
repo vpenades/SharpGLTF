@@ -485,7 +485,7 @@ namespace SharpGLTF.Schema2
                 .IsPosition("Scale", _scale.AsValue(Vector3.One))
                 .IsRotation("Rotation", _rotation.AsValue(Quaternion.Identity))
                 .IsPosition("Translation", _translation.AsValue(Vector3.Zero))
-                .IsNullOrMatrix("Rotation", _matrix);
+                .IsNullOrMatrix("Rotation", _matrix, true, true);
         }
 
         private static void _ValidateMeshAndSkin(Validation.ValidationContext validate, Mesh mesh, Skin skin, List<Double> weights)

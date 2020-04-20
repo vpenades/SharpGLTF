@@ -158,7 +158,6 @@ namespace SharpGLTF.Memory
                     src.CopyTo(dst);
                 }
             }
-
         }
 
         /// <summary>

@@ -235,10 +235,10 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE IsNullOrMatrix(PARAMNAME pname, System.Numerics.Matrix4x4? matrix)
+        public OUTTYPE IsNullOrMatrix(PARAMNAME pname, System.Numerics.Matrix4x4? matrix, bool mustDecompose = true, bool mustInvert = true)
         {
             if (!matrix.HasValue) return this;
-            return IsMatrix(pname, matrix.Value);
+            return IsMatrix(pname, matrix.Value, mustDecompose, mustInvert);
         }
 
         public OUTTYPE IsPosition(PARAMNAME pname, in System.Numerics.Vector3 position)
@@ -259,9 +259,9 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix)
+        public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustDecompose = true, bool mustInvert = true)
         {
-            if (!matrix.IsValid()) _DataThrow(pname, "Invalid Matrix");
+            if (!matrix.IsValid(mustDecompose, mustInvert)) _DataThrow(pname, "Invalid Matrix");
             return this;
         }
 

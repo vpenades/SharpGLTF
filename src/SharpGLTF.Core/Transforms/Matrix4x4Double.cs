@@ -7,6 +7,8 @@ using System.Text;
 
 namespace SharpGLTF.Transforms
 {
+    #pragma warning disable SA1407 // Arithmetic expressions should declare precedence
+
     // stripped from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Numerics/Matrix4x4.cs
 
     [StructLayout(LayoutKind.Sequential)]
@@ -253,85 +255,81 @@ namespace SharpGLTF.Transforms
         /// <summary>
         /// Value at row 1, column 1 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M11;
+
         /// <summary>
         /// Value at row 1, column 2 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M12;
+
         /// <summary>
         /// Value at row 1, column 3 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M13;
+
         /// <summary>
         /// Value at row 1, column 4 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M14;
 
         /// <summary>
         /// Value at row 2, column 1 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M21;
+
         /// <summary>
         /// Value at row 2, column 2 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M22;
+
         /// <summary>
         /// Value at row 2, column 3 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M23;
+
         /// <summary>
         /// Value at row 2, column 4 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M24;
 
         /// <summary>
         /// Value at row 3, column 1 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M31;
+
         /// <summary>
         /// Value at row 3, column 2 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M32;
+
         /// <summary>
         /// Value at row 3, column 3 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M33;
+
         /// <summary>
         /// Value at row 3, column 4 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M34;
 
         /// <summary>
         /// Value at row 4, column 1 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M41;
+
         /// <summary>
         /// Value at row 4, column 2 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M42;
+
         /// <summary>
         /// Value at row 4, column 3 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M43;
+
         /// <summary>
         /// Value at row 4, column 4 of the matrix.
         /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public Double M44;
 
         /// <summary>
@@ -610,6 +608,7 @@ namespace SharpGLTF.Transforms
             Matrix4x4Double m;
 
             // First row
+
             m.M11 = value1.M11 * value2.M11 + value1.M12 * value2.M21 + value1.M13 * value2.M31 + value1.M14 * value2.M41;
             m.M12 = value1.M11 * value2.M12 + value1.M12 * value2.M22 + value1.M13 * value2.M32 + value1.M14 * value2.M42;
             m.M13 = value1.M11 * value2.M13 + value1.M12 * value2.M23 + value1.M13 * value2.M33 + value1.M14 * value2.M43;
@@ -638,4 +637,6 @@ namespace SharpGLTF.Transforms
 
         #endregion
     }
+
+    #pragma warning restore SA1407 // Arithmetic expressions should declare precedence
 }

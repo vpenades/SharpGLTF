@@ -275,7 +275,7 @@ namespace SharpGLTF.Schema2
             {
                 validate.AreEqual("InverseBindMatrices", _joints.Count, ibxAccessor.Count);
 
-                ibxAccessor.ValidateMatrices(validate);
+                ibxAccessor.ValidateMatrices(validate, false, true);
             }
 
             if (_skeleton.HasValue)

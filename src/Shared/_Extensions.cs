@@ -177,11 +177,11 @@ namespace SharpGLTF
             return dst;
         }
 
-        internal static bool IsValid(this in Matrix4x4 matrix)
+        internal static bool IsValid(this in Matrix4x4 matrix, bool mustDecompose = true, bool mustInvert = true)
         {
             if (!matrix._IsFinite()) return false;
-            if (!Matrix4x4.Decompose(matrix, out _, out _, out _)) return false;
-            if (!Matrix4x4.Invert(matrix, out _)) return false;
+            if (mustDecompose && !Matrix4x4.Decompose(matrix, out _, out _, out _)) return false;
+            if (mustInvert && !Matrix4x4.Invert(matrix, out _)) return false;
 
             return true;
         }
