@@ -224,7 +224,9 @@ namespace SharpGLTF.IO
         {
             if (_NoCloneWatchdog) return;
 
-            var vcontext = new Validation.ValidationResult(model, Validation.ValidationMode.Strict);
+            if (this.Validation == SharpGLTF.Validation.ValidationMode.Skip) return;
+
+            var vcontext = new Validation.ValidationResult(model, this.Validation);
 
             model.ValidateReferences(vcontext.GetContext());
             var ex = vcontext.Errors.FirstOrDefault();

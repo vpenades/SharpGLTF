@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 
 using BYTES = System.ArraySegment<byte>;
+using VALIDATIONMODE = SharpGLTF.Validation.ValidationMode;
 
 namespace SharpGLTF.Schema2
 {
@@ -66,6 +67,11 @@ namespace SharpGLTF.Schema2
         /// Gets or sets a value indicating how to format the JSON document of the glTF.
         /// </summary>
         public Boolean JsonIndented { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating the level of validation applied when loading a file.
+        /// </summary>
+        public VALIDATIONMODE Validation { get; set; } = VALIDATIONMODE.Strict;
 
         #endregion
 
