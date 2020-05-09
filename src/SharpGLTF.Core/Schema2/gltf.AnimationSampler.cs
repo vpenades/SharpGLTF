@@ -459,5 +459,4 @@ namespace SharpGLTF.Schema2
 
         #endregion
     }
-
 }

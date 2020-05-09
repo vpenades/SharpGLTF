@@ -103,7 +103,7 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public Matrix4x4 LocalMatrix
         {
-            get => Transforms.AffineTransform.Evaluate(_Matrix, Scale?.Value, Rotation?.Value, Translation?.Value);
+            get => Transforms.Matrix4x4Factory.CreateFrom(_Matrix, Scale?.Value, Rotation?.Value, Translation?.Value);
             set
             {
                 if (HasAnimations) { _DecomposeMatrix(value); return; }
@@ -166,12 +166,12 @@ namespace SharpGLTF.Scenes
             get
             {
                 var vs = this.Parent;
-                return vs == null ? LocalMatrix : Transforms.AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
+                return vs == null ? LocalMatrix : Transforms.Matrix4x4Factory.LocalToWorld(vs.WorldMatrix, LocalMatrix);
             }
             set
             {
                 var vs = this.Parent;
-                LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+                LocalMatrix = vs == null ? value : Transforms.Matrix4x4Factory.WorldToLocal(vs.WorldMatrix, value);
             }
         }
 
@@ -383,7 +383,7 @@ namespace SharpGLTF.Scenes
 
             var vs = Parent;
             var lm = GetLocalTransform(animationTrack, time).Matrix;
-            return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
+            return vs == null ? lm : Transforms.Matrix4x4Factory.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
         }
 
         public Matrix4x4 GetInverseBindMatrix(Matrix4x4? meshWorldMatrix = null)

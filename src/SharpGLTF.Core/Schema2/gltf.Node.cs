@@ -213,7 +213,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Matrix4x4 LocalMatrix
         {
-            get => Transforms.AffineTransform.Evaluate(_matrix, _scale, _rotation, _translation);
+            get => Transforms.Matrix4x4Factory.CreateFrom(_matrix, _scale, _rotation, _translation);
             set
             {
                 if (value == Matrix4x4.Identity)
@@ -261,12 +261,12 @@ namespace SharpGLTF.Schema2
             get
             {
                 var vs = VisualParent;
-                return vs == null ? LocalMatrix : Transforms.AffineTransform.LocalToWorld(vs.WorldMatrix, LocalMatrix);
+                return vs == null ? LocalMatrix : Transforms.Matrix4x4Factory.LocalToWorld(vs.WorldMatrix, LocalMatrix);
             }
             set
             {
                 var vs = VisualParent;
-                LocalMatrix = vs == null ? value : Transforms.AffineTransform.WorldToLocal(vs.WorldMatrix, value);
+                LocalMatrix = vs == null ? value : Transforms.Matrix4x4Factory.WorldToLocal(vs.WorldMatrix, value);
             }
         }
 
@@ -298,7 +298,7 @@ namespace SharpGLTF.Schema2
 
             var vs = VisualParent;
             var lm = GetLocalTransform(animation, time).Matrix;
-            return vs == null ? lm : Transforms.AffineTransform.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
+            return vs == null ? lm : Transforms.Matrix4x4Factory.LocalToWorld(vs.GetWorldMatrix(animation, time), lm);
         }
 
         public IReadOnlyList<Single> GetMorphWeights()

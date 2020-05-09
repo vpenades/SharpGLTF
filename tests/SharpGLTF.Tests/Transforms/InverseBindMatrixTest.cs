@@ -33,5 +33,59 @@ namespace SharpGLTF.Transforms
         }
 
 
-    }
+        [Test]
+        public void TestMatrixNormalization()
+        {
+            void testMatrix(Matrix4x4 m, float tolerance = 0)
+            {
+                var o = m;
+
+                Matrix4x4Factory.NormalizeMatrix(ref m);
+
+                NumericsAssert.AreEqual(o, m, tolerance);
+
+                Assert.IsTrue(Matrix4x4.Decompose(m, out _, out _, out _));
+                Assert.IsTrue(Matrix4x4.Invert(m, out _));
+            }
+
+            void testSkewed(Func<Matrix4x4, Matrix4x4> mf, float tolerance = 0)
+            {
+                var m = Matrix4x4.Identity;
+
+                var o = m = mf(m);
+
+                Assert.IsFalse(Matrix4x4.Decompose(m, out _, out _, out _));
+
+                Matrix4x4Factory.NormalizeMatrix(ref m);
+
+                NumericsAssert.AreEqual(o, m, tolerance);                
+
+                Assert.IsTrue(Matrix4x4.Decompose(m, out _, out _, out _));
+                Assert.IsTrue(Matrix4x4.Invert(m, out _));               
+            }
+            
+            testSkewed(m => { m.M12 += 0.34f; return m; }, 0.34f);
+            testSkewed(m => { m.M13 += 0.34f; return m; }, 0.34f);
+            testSkewed(m => { m.M21 += 0.34f; return m; }, 0.34f);
+            testSkewed(m => { m.M23 += 0.34f; return m; }, 0.34f);
+            testSkewed(m => { m.M31 += 0.34f; return m; }, 0.34f);
+            testSkewed(m => { m.M32 += 0.34f; return m; }, 0.34f);
+
+            testSkewed(m => { m.M12 += 0.1f; m.M23 -= 0.1f; m.M31 += 0.05f; return m; }, 0.20f);
+
+            // test normalization with uneven scaling
+
+            testMatrix(Matrix4x4.CreateScale(0.0001f) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3), 0.0001f);
+            testMatrix(Matrix4x4.CreateScale(1000) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3), 0.0001f);
+
+            var SxR = Matrix4x4.CreateScale(5, 1, 1) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3);   // Decomposable
+            var RxS = Matrix4x4.CreateFromYawPitchRoll(1, 2, 3) * Matrix4x4.CreateScale(5, 1, 1);   // Not Decomposable            
+
+            Assert.IsTrue(Matrix4x4.Decompose(SxR, out _, out _, out _));
+            testMatrix(SxR, 0.0001f);
+
+            Assert.IsFalse(Matrix4x4.Decompose(RxS, out _, out _, out _));
+            testMatrix(RxS, 100);           
+        }
+    }    
 }

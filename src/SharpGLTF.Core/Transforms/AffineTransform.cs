@@ -113,31 +113,6 @@ namespace SharpGLTF.Transforms
 
         #region API
 
-        /// <summary>
-        /// Evaluates a <see cref="Matrix4x4"/> transform based on the available parameters.
-        /// </summary>
-        /// <param name="transform">A <see cref="Matrix4x4"/> instance, or null.</param>
-        /// <param name="scale">A <see cref="Vector3"/> instance, or null.</param>
-        /// <param name="rotation">A <see cref="Quaternion"/> instance, or null.</param>
-        /// <param name="translation">A <see cref="Vector3"/> instance, or null.</param>
-        /// <returns>A <see cref="Matrix4x4"/> transform.</returns>
-        public static Matrix4x4 Evaluate(Matrix4x4? transform, Vector3? scale, Quaternion? rotation, Vector3? translation)
-        {
-            if (transform.HasValue) return transform.Value;
-
-            return new AffineTransform(null, scale, rotation, translation).Matrix;
-        }
-
-        public static Matrix4x4 LocalToWorld(Matrix4x4 parentWorld, Matrix4x4 childLocal)
-        {
-            return childLocal * parentWorld;
-        }
-
-        public static Matrix4x4 WorldToLocal(Matrix4x4 parentWorld, Matrix4x4 childWorld)
-        {
-            return childWorld * parentWorld.Inverse();
-        }
-
         public static AffineTransform Blend(ReadOnlySpan<AffineTransform> transforms, ReadOnlySpan<float> weights)
         {
             var s = Vector3.Zero;

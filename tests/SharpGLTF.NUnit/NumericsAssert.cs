@@ -7,6 +7,7 @@ using NUnit.Framework;
 
 namespace SharpGLTF
 {
+    [System.Diagnostics.DebuggerStepThrough]
     public static class NumericsAssert
     {
         public static double UnitError(this Vector3 v) { return v.LengthError(1); }
