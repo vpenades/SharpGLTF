@@ -87,5 +87,19 @@ namespace SharpGLTF.Transforms
             Assert.IsFalse(Matrix4x4.Decompose(RxS, out _, out _, out _));
             testMatrix(RxS, 100);           
         }
+
+        [Test]
+        public void TestAffineTransformMult()
+        {
+            var a = Matrix4x4.CreateScale(1,2,4) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3);
+            var b = Matrix4x4.CreateFromYawPitchRoll(1, 0, 2) * Matrix4x4.CreateTranslation(3, -4, 2);
+            var r = Matrix4x4.Multiply(a, b);
+
+            var aa = new AffineTransform(a);
+            var bb = new AffineTransform(b);
+            var rr = AffineTransform.Multiply(aa, bb);
+
+            NumericsAssert.AreEqual(r, rr.Matrix, 0.0001f);
+        }
     }    
 }

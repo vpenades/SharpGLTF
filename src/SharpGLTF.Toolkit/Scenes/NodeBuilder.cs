@@ -141,11 +141,7 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public Transforms.AffineTransform LocalTransform
         {
-            get => _Matrix.HasValue
-                ?
-                Transforms.AffineTransform.Create(_Matrix.Value)
-                :
-                Transforms.AffineTransform.Create(Scale?.Value, Rotation?.Value, Translation?.Value);
+            get => Transforms.AffineTransform.CreateFromAny(_Matrix, _Scale.Value, _Rotation.Value, Translation.Value);
             set
             {
                 Guard.IsTrue(value.IsValid, nameof(value));
@@ -299,7 +295,7 @@ namespace SharpGLTF.Scenes
 
         private void _DecomposeMatrix(Matrix4x4 matrix)
         {
-            var affine = Transforms.AffineTransform.Create(matrix);
+            var affine = new Transforms.AffineTransform(matrix);
 
             UseScale().Value = affine.Scale;
             UseRotation().Value = affine.Rotation;
@@ -374,7 +370,7 @@ namespace SharpGLTF.Scenes
             var rotation = Rotation?.GetValueAt(animationTrack, time);
             var translation = Translation?.GetValueAt(animationTrack, time);
 
-            return Transforms.AffineTransform.Create(scale, rotation, translation);
+            return new Transforms.AffineTransform(scale, rotation, translation);
         }
 
         public Matrix4x4 GetWorldMatrix(string animationTrack, float time)

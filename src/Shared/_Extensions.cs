@@ -170,7 +170,7 @@ namespace SharpGLTF
             return new Vector4(n, s > 0 ? 1 : -1);
         }
 
-        internal static Matrix4x4 Inverse(this Matrix4x4 src)
+        internal static Matrix4x4 Inverse(this in Matrix4x4 src)
         {
             if (!Matrix4x4.Invert(src, out Matrix4x4 dst)) Guard.IsTrue(false, nameof(src), "Matrix cannot be inverted.");
 

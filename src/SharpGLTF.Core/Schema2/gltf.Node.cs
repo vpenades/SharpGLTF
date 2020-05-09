@@ -192,7 +192,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Transforms.AffineTransform LocalTransform
         {
-            get => new Transforms.AffineTransform(_matrix, _scale, _rotation, _translation);
+            get => Transforms.AffineTransform.CreateFromAny(_matrix, _scale, _rotation, _translation);
             set
             {
                 Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);

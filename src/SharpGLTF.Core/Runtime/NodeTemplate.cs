@@ -134,7 +134,7 @@ namespace SharpGLTF.Runtime
             var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
             var t = _Translation?.GetValueAt(trackLogicalIndex, time);
 
-            return Transforms.AffineTransform.Create(s, r, t);
+            return new Transforms.AffineTransform(s, r, t);
         }
 
         public Transforms.AffineTransform GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)

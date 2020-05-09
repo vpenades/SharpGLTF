@@ -23,15 +23,15 @@ namespace SharpGLTF.Transforms
                 return transform.Value;
             }
 
-            return new AffineTransform(null, scale, rotation, translation).Matrix;
+            return new AffineTransform(scale, rotation, translation).Matrix;
         }
 
-        public static Matrix4x4 LocalToWorld(Matrix4x4 parentWorld, Matrix4x4 childLocal)
+        public static Matrix4x4 LocalToWorld(in Matrix4x4 parentWorld, in Matrix4x4 childLocal)
         {
             return childLocal * parentWorld;
         }
 
-        public static Matrix4x4 WorldToLocal(Matrix4x4 parentWorld, Matrix4x4 childWorld)
+        public static Matrix4x4 WorldToLocal(in Matrix4x4 parentWorld, in Matrix4x4 childWorld)
         {
             return childWorld * parentWorld.Inverse();
         }
