@@ -93,7 +93,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             }
         }
 
-        // [Test]
+        [Test]
         public void LoadUniVRM()
         {
             TestContext.CurrentContext.AttachShowDirLink();
@@ -102,6 +102,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             
             var model = ModelRoot.Load(path);
             Assert.NotNull(model);
+
+            var flattenExtensions = model.RetrieveUsedExtensions().ToArray();
 
             model.AttachToCurrentTest("AliceModel.glb");
         }

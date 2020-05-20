@@ -129,7 +129,7 @@ namespace SharpGLTF.Schema2
         internal IEnumerable<string> RetrieveUsedExtensions()
         {
             // retrieve ALL the property based objects of the whole model.
-            var allObjects = GetLogicalChildrenFlattened();
+            var allObjects = new[] { this }.Concat(GetLogicalChildrenFlattened());
 
             // check all the extensions used by each object
             var used = new HashSet<string>();

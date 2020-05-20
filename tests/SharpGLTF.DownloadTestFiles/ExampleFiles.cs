@@ -34,8 +34,8 @@ namespace SharpGLTF
             var dstPath = System.IO.Path.Combine(_WorkingDirectory, "GeneratedReferenceModels", "v_0_6_1.zip");
             _GeneratedModelsDir = DownloadUtils.DownloadFile("https://github.com/KhronosGroup/glTF-Asset-Generator/releases/download/v0.6.1/GeneratedAssets-0.6.1.zip", dstPath);
 
-            dstPath = System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
-            DownloadUtils.DownloadFile("https://github.com/vrm-c/UniVRMTest/raw/master/Models/Alicia_vrm-0.40/AliciaSolid_vrm-0.40.vrm", dstPath);
+            dstPath = System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.51.vrm");
+            DownloadUtils.DownloadFile("https://github.com/vrm-c/UniVRM/raw/master/Tests/Models/Alicia_vrm-0.51/AliciaSolid_vrm-0.51.vrm", dstPath);
 
             Console.WriteLine("Checking out test files... It might take a while, please, wait...");
 

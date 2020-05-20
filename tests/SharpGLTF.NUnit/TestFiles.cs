@@ -225,7 +225,7 @@ namespace SharpGLTF
         {
             _Check();
 
-            return System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.40.vrm");
+            return System.IO.Path.Combine(_UniVRMModelsDir, "AliciaSolid_vrm-0.51.vrm");
         }
 
         private static IReadOnlyList<string> GetModelPathsInDirectory(params string[] paths)
