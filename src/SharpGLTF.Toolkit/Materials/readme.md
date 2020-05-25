@@ -48,5 +48,5 @@ var material = new Materials.MaterialBuilder("material1")
 
 MaterialBuilder also supports a fallback material that will be used in case the main material is not
 supported by the rendering engine. But due to glTF limitations, this feature is restricted only to
-a main material using SpecularGlossiness shader, and the fallback material using MatellicRoughness
+a main material using SpecularGlossiness shader, and the fallback material using MetallicRoughness
 shader.
