@@ -62,8 +62,8 @@ namespace SharpGLTF.Schema2
         {
             if (value.Equals(defval)) return null;
 
-            value = Vector2.Min(value, minval);
-            value = Vector2.Max(value, maxval);
+            value = Vector2.Min(value, maxval);
+            value = Vector2.Max(value, minval);
 
             return value.Equals(defval) ? (Vector2?)null : value;
         }
@@ -72,8 +72,8 @@ namespace SharpGLTF.Schema2
         {
             if (value.Equals(defval)) return null;
 
-            value = Vector3.Min(value, minval);
-            value = Vector3.Max(value, maxval);
+            value = Vector3.Min(value, maxval);
+            value = Vector3.Max(value, minval);
 
             return value.Equals(defval) ? (Vector3?)null : value;
         }
@@ -82,8 +82,8 @@ namespace SharpGLTF.Schema2
         {
             if (value.Equals(defval)) return (Vector4?)null;
 
-            value = Vector4.Min(value, minval);
-            value = Vector4.Max(value, maxval);
+            value = Vector4.Min(value, maxval);
+            value = Vector4.Max(value, minval);
 
             return value.Equals(defval) ? (Vector4?)null : value;
         }

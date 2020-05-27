@@ -141,7 +141,7 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public Transforms.AffineTransform LocalTransform
         {
-            get => Transforms.AffineTransform.CreateFromAny(_Matrix, _Scale.Value, _Rotation.Value, Translation.Value);
+            get => Transforms.AffineTransform.CreateFromAny(_Matrix, _Scale?.Value, _Rotation?.Value, Translation?.Value);
             set
             {
                 Guard.IsTrue(value.IsValid, nameof(value));

@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Numerics;
 
 using NUnit.Framework;
 
 
 namespace SharpGLTF
 {
+    using System.Numerics;
+
     using Schema2;
 
     [TestFixture]
@@ -45,11 +48,27 @@ namespace SharpGLTF
             Assert.AreEqual(null, 3.AsNullable(3, 1, 5));
             Assert.AreEqual(4,    4.AsNullable(3, 1, 5));
             Assert.AreEqual(5,    5.AsNullable(3, 1, 5));
-            Assert.AreEqual(5,    6.AsNullable(3, 1, 5));
+            Assert.AreEqual(5,    6.AsNullable(3, 1, 5));            
+
+            // vectors
+
+            Assert.AreEqual(null, Vector2.Zero.AsNullable(Vector2.One, Vector2.One, Vector2.One * 2));
+            Assert.AreEqual(new Vector2(2), new Vector2(3).AsNullable(Vector2.One, Vector2.One, Vector2.One * 2));
+
+            Assert.AreEqual(null, Vector3.Zero.AsNullable(Vector3.One, Vector3.One, Vector3.One * 2));
+            Assert.AreEqual(new Vector3(2), new Vector3(3).AsNullable(Vector3.One, Vector3.One, Vector3.One * 2));
+
+            Assert.AreEqual(null, Vector4.Zero.AsNullable(Vector4.One, Vector4.One, Vector4.One * 2));
+            Assert.AreEqual(new Vector4(2), new Vector4(3).AsNullable(Vector4.One, Vector4.One, Vector4.One * 2));
+
 
             // special case: default values outside the min-max range should also return null
             Assert.AreEqual(null,  0.AsNullable( 0, 1, 5));
             Assert.AreEqual(null, 10.AsNullable(10, 1, 5));
-        }
+
+            Assert.AreEqual(null, Vector2.Zero.AsNullable(Vector2.Zero, Vector2.One, Vector2.One * 5));
+            Assert.AreEqual(null, Vector3.Zero.AsNullable(Vector3.Zero, Vector3.One, Vector3.One * 5));
+            Assert.AreEqual(null, Vector4.Zero.AsNullable(Vector4.Zero, Vector4.One, Vector4.One * 5));
+        }        
     }
 }

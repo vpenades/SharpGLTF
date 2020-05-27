@@ -288,6 +288,11 @@ namespace SharpGLTF.IO
                 vcontext.SetError(new Validation.ModelException(null, fex));
                 return (null, vcontext);
             }
+            catch (ArgumentException aex)
+            {
+                vcontext.SetError(new Validation.ModelException(root, aex));
+                return (null, vcontext);
+            }
             catch (Validation.ModelException mex)
             {
                 vcontext.SetError(mex);

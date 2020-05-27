@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Materials;
+
 namespace SharpGLTF.Schema2
 {
     public static partial class Schema2Toolkit
@@ -215,7 +217,50 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial)
+        public static void CopyTo(this Material srcMaterial, MaterialBuilder dstMaterial)
+        {
+            _CopyDefaultTo(srcMaterial, dstMaterial);
+
+            if (srcMaterial.Unlit)
+            {
+                dstMaterial.WithUnlitShader();
+                srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor");
+                return;
+            }
+
+            if (srcMaterial.FindChannel("Diffuse") != null || srcMaterial.FindChannel("SpecularGlossiness") != null)
+            {
+                dstMaterial.WithSpecularGlossinessShader();
+                srcMaterial.CopyChannelsTo(dstMaterial, "Diffuse", "SpecularGlossiness");
+                // srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
+
+                if (srcMaterial.FindChannel("BaseColor") != null || srcMaterial.FindChannel("MetallicRoughness") != null)
+                {
+                    var fallback = new MaterialBuilder(srcMaterial.Name);
+
+                    _CopyDefaultTo(srcMaterial, fallback);
+                    _CopyMetallicRoughnessTo(srcMaterial, fallback);
+
+                    dstMaterial.WithFallback(fallback);
+                }
+
+                return;
+            }
+
+            if (srcMaterial.FindChannel("BaseColor") != null || srcMaterial.FindChannel("MetallicRoughness") != null)
+            {
+                _CopyMetallicRoughnessTo(srcMaterial, dstMaterial);
+            }
+        }
+
+        private static void _CopyMetallicRoughnessTo(Material srcMaterial, MaterialBuilder dstMaterial)
+        {
+            dstMaterial.WithMetallicRoughnessShader();
+            srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
+            srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
+        }
+
+        private static void _CopyDefaultTo(Material srcMaterial, MaterialBuilder dstMaterial)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
@@ -226,33 +271,9 @@ namespace SharpGLTF.Schema2
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
 
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
-
-            if (srcMaterial.Unlit) dstMaterial.WithUnlitShader();
-
-            if (srcMaterial.FindChannel("BaseColor") != null || srcMaterial.FindChannel("MetallicRoughness") != null)
-            {
-                dstMaterial.WithMetallicRoughnessShader();
-                srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
-                srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
-            }
-
-            if (srcMaterial.FindChannel("Diffuse") != null || srcMaterial.FindChannel("SpecularGlossiness") != null)
-            {
-                dstMaterial = new Materials.MaterialBuilder(srcMaterial.Name).WithFallback(dstMaterial);
-
-                dstMaterial.Name = srcMaterial.Name;
-                dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
-                dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
-                dstMaterial.DoubleSided = srcMaterial.DoubleSided;
-
-                srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
-
-                dstMaterial.WithSpecularGlossinessShader();
-                srcMaterial.CopyChannelsTo(dstMaterial, "Diffuse", "SpecularGlossiness");
-            }
         }
 
-        public static void CopyChannelsTo(this Material srcMaterial, Materials.MaterialBuilder dstMaterial, params string[] channelKeys)
+        public static void CopyChannelsTo(this Material srcMaterial, MaterialBuilder dstMaterial, params string[] channelKeys)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
@@ -271,7 +292,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this MaterialChannel srcChannel, Materials.ChannelBuilder dstChannel)
+        public static void CopyTo(this MaterialChannel srcChannel, ChannelBuilder dstChannel)
         {
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));
@@ -303,7 +324,7 @@ namespace SharpGLTF.Schema2
             dstChannel.Texture.FallbackImage = srcChannel.Texture.FallbackImage?.MemoryImage ?? Memory.MemoryImage.Empty;
         }
 
-        public static void CopyTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial)
+        public static void CopyTo(this MaterialBuilder srcMaterial, Material dstMaterial)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
@@ -320,11 +341,11 @@ namespace SharpGLTF.Schema2
 
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
 
-            Materials.MaterialBuilder defMaterial = null;
+            MaterialBuilder defMaterial = null;
 
             if (srcMaterial.ShaderStyle == "Unlit")
             {
-                dstMaterial.InitializePBRMetallicRoughness();
+                dstMaterial.InitializeUnlit();
                 srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor");
                 return;
             }
@@ -346,12 +367,12 @@ namespace SharpGLTF.Schema2
             if (defMaterial != null)
             {
                 if (defMaterial.ShaderStyle != "PBRMetallicRoughness") throw new ArgumentException(nameof(srcMaterial.CompatibilityFallback.ShaderStyle));
-                srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
-                srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
+                defMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
+                defMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
             }
         }
 
-        public static void CopyChannelsTo(this Materials.MaterialBuilder srcMaterial, Material dstMaterial, params string[] channelKeys)
+        public static void CopyChannelsTo(this MaterialBuilder srcMaterial, Material dstMaterial, params string[] channelKeys)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
@@ -368,14 +389,14 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static void CopyTo(this Materials.ChannelBuilder srcChannel, MaterialChannel dstChannel)
+        public static void CopyTo(this ChannelBuilder srcChannel, MaterialChannel dstChannel)
         {
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));
 
             dstChannel.Parameter = srcChannel.Parameter;
 
-            var srcTex = srcChannel.Texture;
+            var srcTex = srcChannel.GetValidTexture();
             if (srcTex == null) return;
 
             Image primary = null;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using BYTES = System.ArraySegment<System.Byte>;
@@ -9,8 +10,24 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Represents an image file stored as an in-memory byte array
     /// </summary>
-    public readonly struct MemoryImage
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
+    public readonly struct MemoryImage : IEquatable<MemoryImage>
     {
+        #region debug
+
+        private string _DebuggerDisplay()
+        {
+            if (IsEmpty) return "Empty";
+            if (!IsValid) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
+            return "Undefined";
+        }
+
+        #endregion
+
         #region constants
 
         const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream";
@@ -43,6 +60,8 @@ namespace SharpGLTF.Memory
 
         public static MemoryImage Empty => default;
 
+        private const string GuardError_MustBeValidImage = "Must be a valid image: Png, Jpg, etc...";
+
         #endregion
 
         #region constructor
@@ -51,14 +70,36 @@ namespace SharpGLTF.Memory
 
         public static implicit operator MemoryImage(Byte[] image) { return new MemoryImage(image); }
 
-        public MemoryImage(BYTES image) { _Image = image; }
+        public static implicit operator MemoryImage(string filePath) { return new MemoryImage(filePath); }
 
-        public MemoryImage(Byte[] image) { _Image = image == null ? default : new BYTES(image); }
+        public MemoryImage(BYTES image)
+        {
+            Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
+
+            _Image = image;
+        }
+
+        public MemoryImage(Byte[] image)
+        {
+            if (image != null) Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
+
+            _Image = image == null ? default : new BYTES(image);
+        }
 
         public MemoryImage(string filePath)
         {
-            var data = System.IO.File.ReadAllBytes(filePath);
-            _Image = new BYTES(data);
+            if (string.IsNullOrEmpty(filePath))
+            {
+                _Image = default;
+            }
+            else
+            {
+                var data = System.IO.File.ReadAllBytes(filePath);
+
+                Guard.IsTrue(_IsImage(data), nameof(filePath), GuardError_MustBeValidImage);
+
+                _Image = new BYTES(data);
+            }
         }
 
         #endregion
@@ -66,6 +107,29 @@ namespace SharpGLTF.Memory
         #region data
 
         private readonly BYTES _Image;
+
+        public override int GetHashCode()
+        {
+            // since this object stores the file of an image,
+            // using the file size as a hash is as good as anything else
+
+            return _Image.Count.GetHashCode();
+        }
+
+        public static bool AreEqual(MemoryImage a, MemoryImage b)
+        {
+            if (a.GetHashCode() != b.GetHashCode()) return false;
+            if (a._Image.Equals(b._Image)) return true;
+            return a._Image.AsSpan().SequenceEqual(b._Image);
+        }
+
+        public override bool Equals(object obj) { return obj is MemoryImage other && AreEqual(this, other); }
+
+        public bool Equals(MemoryImage other) { return AreEqual(this, other); }
+
+        public static bool operator ==(MemoryImage left, MemoryImage right) { return AreEqual(left, right); }
+
+        public static bool operator !=(MemoryImage left, MemoryImage right) { return !AreEqual(left, right); }
 
         #endregion
 
@@ -105,6 +169,7 @@ namespace SharpGLTF.Memory
         {
             get
             {
+                if (IsEmpty) return null;
                 if (IsPng) return "png";
                 if (IsJpg) return "jpg";
                 if (IsDds) return "dds";
@@ -120,11 +185,12 @@ namespace SharpGLTF.Memory
         {
             get
             {
+                if (IsEmpty) return null;
                 if (IsPng) return MIME_PNG;
                 if (IsJpg) return MIME_JPG;
                 if (IsDds) return MIME_DDS;
                 if (IsWebp) return MIME_WEBP;
-                return "raw";
+                throw new NotImplementedException();
             }
         }
 

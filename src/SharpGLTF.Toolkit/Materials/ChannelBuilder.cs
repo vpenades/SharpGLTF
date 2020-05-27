@@ -6,16 +6,29 @@ using System.Text;
 
 namespace SharpGLTF.Materials
 {
-    [System.Diagnostics.DebuggerDisplay("{Key} {Parameter}")]
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public class ChannelBuilder
     {
+        #region debug
+
+        private string _GetDebuggerDisplay()
+        {
+            var txt = Key.ToString();
+            if (Parameter != _GetDefaultParameter(_Key)) txt += $" {Parameter}";
+
+            var tex = GetValidTexture();
+            if (tex != null) txt += $" 🖼{tex.PrimaryImage.FileExtension}";
+
+            return txt;
+        }
+
+        #endregion
+
         #region lifecycle
 
-        internal ChannelBuilder(MaterialBuilder parent, string key)
+        internal ChannelBuilder(MaterialBuilder parent, KnownChannel key)
         {
             Guard.NotNull(parent, nameof(parent));
-            Guard.NotNullOrEmpty(key, nameof(key));
-            Guard.IsTrue(Enum.GetNames(typeof(KnownChannel)).Contains(key), nameof(key), $"{nameof(key)} must be a name of {nameof(KnownChannel)}.");
 
             _Parent = parent;
             _Key = key;
@@ -27,9 +40,11 @@ namespace SharpGLTF.Materials
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly MaterialBuilder _Parent;
 
-        private readonly String _Key;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly KnownChannel _Key;
 
         /// <summary>
         /// Gets or sets the <see cref="ChannelBuilder"/> paramenter.
@@ -39,7 +54,7 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder Texture { get; private set; }
 
-        public static bool AreEqual(ChannelBuilder a, ChannelBuilder b)
+        public static bool AreEqualByContent(ChannelBuilder a, ChannelBuilder b)
         {
             #pragma warning disable IDE0041 // Use 'is null' check
             if (Object.ReferenceEquals(a, b)) return true;
@@ -47,13 +62,11 @@ namespace SharpGLTF.Materials
             if (Object.ReferenceEquals(b, null)) return false;
             #pragma warning restore IDE0041 // Use 'is null' check
 
-            if (!Object.ReferenceEquals(a._Parent, b._Parent)) return false;
-
             if (a._Key != b._Key) return false;
 
             if (a.Parameter != b.Parameter) return false;
 
-            if (!TextureBuilder.AreEqual(a.Texture, b.Texture)) return false;
+            if (!TextureBuilder.AreEqualByContent(a.Texture, b.Texture)) return false;
 
             return true;
         }
@@ -78,13 +91,21 @@ namespace SharpGLTF.Materials
         /// <summary>
         /// Gets the <see cref="ChannelBuilder"/> name. It must be a name of <see cref="KnownChannel"/>.
         /// </summary>
-        public String Key => _Key;
+        public KnownChannel Key => _Key;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public static IEqualityComparer<ChannelBuilder> ContentComparer => _ContentComparer.Default;
 
         #endregion
 
         #region API
+
+        public TextureBuilder GetValidTexture()
+        {
+            if (Texture == null) return null;
+            if (Texture.PrimaryImage.IsEmpty) return null;
+            return Texture;
+        }
 
         internal void CopyTo(ChannelBuilder other)
         {
@@ -102,21 +123,31 @@ namespace SharpGLTF.Materials
 
         public void SetDefaultParameter()
         {
-            switch (_Key)
+            this.Parameter = _GetDefaultParameter(_Key);
+        }
+
+        private static Vector4 _GetDefaultParameter(KnownChannel key)
+        {
+            switch (key)
             {
-                case "Emissive": Parameter = Vector4.Zero; break;
+                case KnownChannel.Emissive: return Vector4.Zero;
 
-                case "Normal":
-                case "Occlusion":
-                    Parameter = new Vector4(1, 0, 0, 0); break;
+                case KnownChannel.Normal:
+                case KnownChannel.ClearCoatNormal:
+                case KnownChannel.Occlusion:
+                    return  Vector4.UnitX;
 
-                case "BaseColor":
-                case "Diffuse":
-                    Parameter = Vector4.One; break;
+                case KnownChannel.BaseColor:
+                case KnownChannel.Diffuse:
+                    return Vector4.One;
 
-                case "MetalicRoughness": Parameter = new Vector4(1, 1, 0, 0); break;
+                case KnownChannel.MetallicRoughness: return new Vector4(1, 1, 0, 0);
+                case KnownChannel.SpecularGlossiness: return Vector4.One;
 
-                case "SpecularGlossiness": Parameter = Vector4.One; break;
+                case KnownChannel.ClearCoat: return Vector4.Zero;
+                case KnownChannel.ClearCoatRoughness: return Vector4.Zero;
+
+                default: throw new NotImplementedException();
             }
         }
 
@@ -138,7 +169,7 @@ namespace SharpGLTF.Materials
 
             public bool Equals(ChannelBuilder x, ChannelBuilder y)
             {
-                return ChannelBuilder.AreEqual(x, y);
+                return ChannelBuilder.AreEqualByContent(x, y);
             }
 
             public int GetHashCode(ChannelBuilder obj)

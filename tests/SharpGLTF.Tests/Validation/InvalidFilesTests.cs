@@ -64,7 +64,7 @@ namespace SharpGLTF.Validation
 
                 var gltfJson = f.EndsWith(".gltf") ? System.IO.File.ReadAllText(f) : string.Empty;
 
-                var report = ValidationReport.Load(f + ".report.json");
+                var report = ValidationReport.Load($"{f}.report.json");
                 
                 var result = Schema2.ModelRoot.Validate(f);
 

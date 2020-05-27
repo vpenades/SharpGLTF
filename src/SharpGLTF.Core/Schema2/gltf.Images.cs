@@ -96,16 +96,6 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Opens the image file.
-        /// </summary>
-        /// <returns>A <see cref="System.IO.Stream"/> containing the image file.</returns>
-        [Obsolete("Use MemoryImage property")]
-        public System.IO.Stream OpenImageFile()
-        {
-            return this.MemoryImage.Open();
-        }
-
-        /// <summary>
         /// Retrieves the image file as a segment of bytes.
         /// </summary>
         /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS or WEBP format.</returns>
@@ -318,19 +308,18 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="imageContent">An image encoded in PNG, JPEG or DDS</param>
         /// <returns>A <see cref="Image"/> instance.</returns>
-        public Image UseImage(BYTES imageContent)
+        public Image UseImage(Memory.MemoryImage imageContent)
         {
-            Guard.NotNullOrEmpty(imageContent, nameof(imageContent));
-            Guard.IsTrue(new Memory.MemoryImage(imageContent).IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
+            Guard.IsTrue(imageContent.IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
 
             foreach (var img in this.LogicalImages)
             {
                 var existingContent = img.GetImageContent();
-                if (Enumerable.SequenceEqual(existingContent, imageContent)) return img;
+                if (Memory.MemoryImage.AreEqual(imageContent, existingContent)) return img;
             }
 
             var image = this.CreateImage();
-            image.SetSatelliteContent(imageContent.ToArray());
+            image.SetSatelliteContent(imageContent.GetBuffer().ToArray());
             return image;
         }
 
