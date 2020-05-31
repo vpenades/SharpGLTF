@@ -7,9 +7,18 @@ using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerDisplay("Image[{LogicalIndex}] {Name}")]
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public sealed partial class Image
     {
+        #region debug
+
+        internal string _DebuggerDisplay()
+        {
+            return $"Image[{LogicalIndex}] {Name} = {Content.DisplayText}";
+        }
+
+        #endregion
+
         #region lifecycle
 
         internal Image() { }
@@ -28,7 +37,7 @@ namespace SharpGLTF.Schema2
         /// fields are briefly reassigned so the JSON can be serialized correctly.
         /// After serialization <see cref="Image._uri"/> and <see cref="Image._mimeType"/> fields are set back to null.
         /// </remarks>
-        private Byte[] _SatelliteImageContent;
+        private Memory.MemoryImage? _SatelliteContent;
 
         #endregion
 
@@ -40,44 +49,23 @@ namespace SharpGLTF.Schema2
         public int LogicalIndex => this.LogicalParent.LogicalImages.IndexOfReference(this);
 
         /// <summary>
-        /// Gets a value indicating whether the contained image is stored in a satellite file when loaded or saved.
+        /// Gets or sets the in-memory representation of the image file.
         /// </summary>
-        public bool IsSatelliteFile => _SatelliteImageContent != null;
+        [Obsolete("Use Content property instead.")]
+        public Memory.MemoryImage MemoryImage
+        {
+            get => Content;
+            set => Content = value;
+        }
 
         /// <summary>
-        /// Gets the in-memory representation of the image file.
+        /// Gets or sets the in-memory representation of the image file.
         /// </summary>
-        public Memory.MemoryImage MemoryImage => new Memory.MemoryImage(GetImageContent());
-
-        /// <summary>
-        /// Gets a value indicating whether the contained image is a PNG image.
-        /// </summary>
-        [Obsolete("Use MemoryImage property")]
-        public bool IsPng => this.MemoryImage.IsPng;
-
-        /// <summary>
-        /// Gets a value indicating whether the contained image is a JPEG image.
-        /// </summary>
-        [Obsolete("Use MemoryImage property")]
-        public bool IsJpeg => this.MemoryImage.IsJpg;
-
-        /// <summary>
-        /// Gets a value indicating whether the contained image is a DDS image.
-        /// </summary>
-        [Obsolete("Use MemoryImage property")]
-        public bool IsDds => this.MemoryImage.IsDds;
-
-        /// <summary>
-        /// Gets a value indicating whether the contained image is a WEBP image.
-        /// </summary>
-        [Obsolete("Use MemoryImage property")]
-        public bool IsWebp => this.MemoryImage.IsWebp;
-
-        /// <summary>
-        /// Gets the filename extension of the image that can be retrieved with <see cref="GetImageContent"/>
-        /// </summary>
-        [Obsolete("Use MemoryImage property")]
-        public string FileExtension => this.MemoryImage.FileExtension;
+        public Memory.MemoryImage Content
+        {
+            get => GetSatelliteContent();
+            set => SetSatelliteContent(value);
+        }
 
         internal int _SourceBufferViewIndex => _bufferView.AsValue(-1);
 
@@ -86,8 +74,7 @@ namespace SharpGLTF.Schema2
             get
             {
                 if (_bufferView != null) return true;
-                if (_SatelliteImageContent != null) return true;
-                return false;
+                return _SatelliteContent?.IsValid ?? false;
             }
         }
 
@@ -99,10 +86,10 @@ namespace SharpGLTF.Schema2
         /// Retrieves the image file as a segment of bytes.
         /// </summary>
         /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS or WEBP format.</returns>
-        public BYTES GetImageContent()
+        private Memory.MemoryImage GetSatelliteContent()
         {
             // the image is stored locally in a temporary buffer
-            if (_SatelliteImageContent != null) return new BYTES(_SatelliteImageContent);
+            if (_SatelliteContent.HasValue) return _SatelliteContent.Value;
 
             // the image is stored in a BufferView
             if (this._bufferView.HasValue)
@@ -120,29 +107,16 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Initializes this <see cref="Image"/> with an image loaded from a file.
-        /// </summary>
-        /// <param name="filePath">A valid path to an image file.</param>
-        public void SetSatelliteFile(string filePath)
-        {
-            var content = System.IO.File.ReadAllBytes(filePath);
-            SetSatelliteContent(content);
-        }
-
-        /// <summary>
         /// Initializes this <see cref="Image"/> with an image stored in a <see cref="Byte"/> array.
         /// </summary>
         /// <param name="content">A <see cref="Byte"/> array containing a PNG or JPEG image.</param>
-        public void SetSatelliteContent(Byte[] content)
+        private void SetSatelliteContent(Memory.MemoryImage content)
         {
-            Guard.NotNull(content, nameof(content));
-
-            var imimg = new Memory.MemoryImage(content);
-            if (!imimg.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
+            if (!content.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
 
             _DiscardContent();
 
-            this._SatelliteImageContent = content;
+            this._SatelliteContent = content.GetBuffer();
         }
 
         /// <summary>
@@ -151,16 +125,16 @@ namespace SharpGLTF.Schema2
         /// </summary>
         internal void TransferToInternalBuffer()
         {
-            if (this._SatelliteImageContent == null) return;
+            if (!this._SatelliteContent.HasValue) return;
 
             // transfer the external image content to a buffer.
             this._bufferView = this.LogicalParent
-                .UseBufferView(this._SatelliteImageContent)
+                .UseBufferView(this._SatelliteContent.Value.GetBuffer())
                 .LogicalIndex;
 
             this._uri = null;
             this._mimeType = null;
-            this._SatelliteImageContent = null;
+            this._SatelliteContent = default;
         }
 
         #endregion
@@ -169,18 +143,30 @@ namespace SharpGLTF.Schema2
 
         internal void _ResolveUri(IO.ReadContext context)
         {
+            // No uri to decode.
             if (String.IsNullOrWhiteSpace(_uri)) return;
 
-            var data = Memory.MemoryImage.TryParseBytes(_uri);
-
-            if (data == null)
+            // Try decode Base64 embedded image.
+            if (Memory.MemoryImage.TryParseMime64(_uri, out byte[] data))
             {
-                data = context
-                    .ReadAllBytesToEnd(_uri)
-                    .ToUnderlayingArray();
+                _SatelliteContent = data;
             }
 
-            _SatelliteImageContent = data;
+            // Then it's a regular URI
+            else
+            {
+                // try resolve the full path
+                if (context.TryGetFullPath(_uri, out string fullPath))
+                {
+                    _SatelliteContent = fullPath;
+                }
+
+                // full path could not be resolved, use direct load instead.
+                else
+                {
+                    _SatelliteContent = context.ReadAllBytesToEnd(_uri);
+                }
+            }
 
             _uri = null;
             _mimeType = null;
@@ -191,7 +177,7 @@ namespace SharpGLTF.Schema2
             this._uri = null;
             this._mimeType = null;
             this._bufferView = null;
-            this._SatelliteImageContent = null;
+            this._SatelliteContent = null;
         }
 
         #endregion
@@ -203,9 +189,10 @@ namespace SharpGLTF.Schema2
         /// </summary>
         internal void _WriteToInternal()
         {
-            if (_SatelliteImageContent == null) { _WriteAsBufferView(); return; }
+            if (!_SatelliteContent.HasValue) { _WriteAsBufferView(); return; }
 
-            var imimg = new Memory.MemoryImage(_SatelliteImageContent);
+            var imimg = _SatelliteContent.Value;
+            if (!imimg.IsValid) throw new InvalidOperationException();
 
             _uri = imimg.ToMime64();
             _mimeType = imimg.MimeType;
@@ -218,13 +205,13 @@ namespace SharpGLTF.Schema2
         /// <param name="satelliteUri">A local satellite URI</param>
         internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
         {
-            if (_SatelliteImageContent == null)
+            if (!_SatelliteContent.HasValue)
             {
                 _WriteAsBufferView();
                 return;
             }
 
-            var imimg = new Memory.MemoryImage(_SatelliteImageContent);
+            var imimg = _SatelliteContent.Value;
             if (!imimg.IsValid) throw new InvalidOperationException();
 
             satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
@@ -239,7 +226,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.IsTrue(_bufferView.HasValue, nameof(_bufferView));
 
-            var imimg = this.MemoryImage;
+            var imimg = this.Content;
             if (!imimg.IsValid) throw new InvalidOperationException();
 
             _uri = null;
@@ -279,7 +266,7 @@ namespace SharpGLTF.Schema2
                 validate.IsTrue("BufferView", bv.IsDataBuffer, "is a GPU target.");
             }
 
-            validate.IsTrue("MemoryImage", MemoryImage.IsValid, "Invalid image");
+            validate.IsTrue("MemoryImage", Content.IsValid, "Invalid image");
         }
 
         #endregion
@@ -312,14 +299,14 @@ namespace SharpGLTF.Schema2
         {
             Guard.IsTrue(imageContent.IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
 
+            // If we find an image with the same content, let's reuse it.
             foreach (var img in this.LogicalImages)
             {
-                var existingContent = img.GetImageContent();
-                if (Memory.MemoryImage.AreEqual(imageContent, existingContent)) return img;
+                if (img.Content.Equals(imageContent)) return img;
             }
 
             var image = this.CreateImage();
-            image.SetSatelliteContent(imageContent.GetBuffer().ToArray());
+            image.Content = imageContent;
             return image;
         }
 

@@ -18,6 +18,7 @@ namespace SharpGLTF.Transforms
     /// represented by a <see cref="AffineTransform"/>.
     /// </remarks>
     /// <see href="https://github.com/vpenades/SharpGLTF/issues/41"/>
+    [System.Diagnostics.DebuggerDisplay("AffineTransform 𝐒:{Scale} 𝐑:{Rotation} 𝚻:{Translation}")]
     public struct AffineTransform
     {
         #region lifecycle

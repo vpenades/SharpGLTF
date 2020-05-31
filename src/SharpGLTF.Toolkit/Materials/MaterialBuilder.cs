@@ -9,9 +9,27 @@ using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
 
 namespace SharpGLTF.Materials
 {
-    [System.Diagnostics.DebuggerDisplay("{Name} {ShaderStyle}")]
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public class MaterialBuilder
     {
+        #region debug
+
+        internal string _DebuggerDisplay()
+        {
+            var txt = "MatBuilder ";
+            if (!string.IsNullOrWhiteSpace(Name)) txt += $" \"{Name}\"";
+
+            txt += $" {_ShaderStyle}";
+
+            if (AlphaMode == AlphaMode.BLEND) txt += " AlphaBlend";
+            if (AlphaMode == AlphaMode.MASK) txt += $" AlphaMask({AlphaCutoff})";
+            if (DoubleSided) txt += " DoubleSided";
+
+            return txt;
+        }
+
+        #endregion
+
         #region constants
 
         public const string SHADERUNLIT = "Unlit";
@@ -179,6 +197,7 @@ namespace SharpGLTF.Materials
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyCollection<ChannelBuilder> Channels => _Channels;
 
         public MaterialBuilder CompatibilityFallback

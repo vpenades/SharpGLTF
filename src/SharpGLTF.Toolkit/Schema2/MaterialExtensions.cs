@@ -320,8 +320,8 @@ namespace SharpGLTF.Schema2
                 dstChannel.Texture.WithTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.TextureCoordinateOverride);
             }
 
-            dstChannel.Texture.PrimaryImage = srcChannel.Texture.PrimaryImage?.MemoryImage ?? Memory.MemoryImage.Empty;
-            dstChannel.Texture.FallbackImage = srcChannel.Texture.FallbackImage?.MemoryImage ?? Memory.MemoryImage.Empty;
+            dstChannel.Texture.PrimaryImage = srcChannel.Texture.PrimaryImage?.Content ?? Memory.MemoryImage.Empty;
+            dstChannel.Texture.FallbackImage = srcChannel.Texture.FallbackImage?.Content ?? Memory.MemoryImage.Empty;
         }
 
         public static void CopyTo(this MaterialBuilder srcMaterial, Material dstMaterial)

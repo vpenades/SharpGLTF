@@ -10,24 +10,9 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Represents an image file stored as an in-memory byte array
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
+    [System.Diagnostics.DebuggerDisplay("{DisplayText,nq}")]
     public readonly struct MemoryImage : IEquatable<MemoryImage>
     {
-        #region debug
-
-        private string _DebuggerDisplay()
-        {
-            if (IsEmpty) return "Empty";
-            if (!IsValid) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
-            if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
-            if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
-            if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
-            if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
-            return "Undefined";
-        }
-
-        #endregion
-
         #region constants
 
         const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream";
@@ -77,6 +62,7 @@ namespace SharpGLTF.Memory
             Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
 
             _Image = image;
+            _SourcePathHint = null;
         }
 
         public MemoryImage(Byte[] image)
@@ -84,6 +70,7 @@ namespace SharpGLTF.Memory
             if (image != null) Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
 
             _Image = image == null ? default : new BYTES(image);
+            _SourcePathHint = null;
         }
 
         public MemoryImage(string filePath)
@@ -91,15 +78,31 @@ namespace SharpGLTF.Memory
             if (string.IsNullOrEmpty(filePath))
             {
                 _Image = default;
+                _SourcePathHint = null;
             }
             else
             {
+                filePath = System.IO.Path.GetFullPath(filePath);
+
                 var data = System.IO.File.ReadAllBytes(filePath);
 
                 Guard.IsTrue(_IsImage(data), nameof(filePath), GuardError_MustBeValidImage);
 
                 _Image = new BYTES(data);
+                _SourcePathHint = filePath;
             }
+        }
+
+        internal MemoryImage(BYTES image, string filePath)
+            : this(image)
+        {
+            _SourcePathHint = filePath;
+        }
+
+        internal MemoryImage(Byte[] image, string filePath)
+            : this(image)
+        {
+            _SourcePathHint = filePath;
         }
 
         #endregion
@@ -107,6 +110,8 @@ namespace SharpGLTF.Memory
         #region data
 
         private readonly BYTES _Image;
+
+        private readonly String _SourcePathHint;
 
         public override int GetHashCode()
         {
@@ -118,6 +123,12 @@ namespace SharpGLTF.Memory
 
         public static bool AreEqual(MemoryImage a, MemoryImage b)
         {
+            // This compares the actual image contents, which means
+            // that _SourcePathHint must not be taken into account.
+            // For example, comparing two images from different paths
+            // that represent the same image byte by byte should
+            // return true.
+
             if (a.GetHashCode() != b.GetHashCode()) return false;
             if (a._Image.Equals(b._Image)) return true;
             return a._Image.AsSpan().SequenceEqual(b._Image);
@@ -136,6 +147,11 @@ namespace SharpGLTF.Memory
         #region properties
 
         public bool IsEmpty => _Image.Count == 0;
+
+        /// <summary>
+        /// Gets the source path of this image, or null if the image cannot be tracked to a file path (as it is the case of embedded images)
+        /// </summary>
+        public string SourcePath => _SourcePathHint;
 
         /// <summary>
         /// Gets a value indicating whether this object represents a valid PNG image.
@@ -194,6 +210,21 @@ namespace SharpGLTF.Memory
             }
         }
 
+        public string DisplayText
+        {
+            get {
+                if (!string.IsNullOrWhiteSpace(_SourcePathHint)) return System.IO.Path.GetFileName(_SourcePathHint);
+
+                if (IsEmpty) return "Empty";
+                if (!IsValid) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
+                if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
+                if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
+                if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
+                if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
+                return "Undefined";
+            }
+        }
+
         #endregion
 
         #region API
@@ -237,7 +268,7 @@ namespace SharpGLTF.Memory
         /// </summary>
         /// <param name="withPrefix">true to prefix the string with a header.</param>
         /// <returns>A mime64 string.</returns>
-        public string ToMime64(bool withPrefix = true)
+        internal string ToMime64(bool withPrefix = true)
         {
             if (!this.IsValid) return null;
 
@@ -259,19 +290,21 @@ namespace SharpGLTF.Memory
         /// Tries to parse a Mime64 string to a Byte array.
         /// </summary>
         /// <param name="mime64content">The Mime64 string source.</param>
-        /// <returns>A byte array representing an image file, or null if the image was not identified.</returns>
-        public static Byte[] TryParseBytes(string mime64content)
+        /// <param name="data">if decoding succeeds, it will contain the decoded data</param>
+        /// <returns>true if decoding succeeded.</returns>
+        internal static bool TryParseMime64(string mime64content, out Byte[] data)
         {
-            if (mime64content == null) return null;
+            if (mime64content == null) { data = null; return false; }
 
-            var bytes = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
+            data = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
+            if (data == null) return false;
 
-            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(bytes)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(bytes)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(bytes)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(bytes)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
 
-            return bytes;
+            return true;
         }
 
         /// <summary>

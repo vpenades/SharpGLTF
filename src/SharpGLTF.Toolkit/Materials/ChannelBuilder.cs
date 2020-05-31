@@ -14,10 +14,47 @@ namespace SharpGLTF.Materials
         private string _GetDebuggerDisplay()
         {
             var txt = Key.ToString();
-            if (Parameter != _GetDefaultParameter(_Key)) txt += $" {Parameter}";
+
+            var hasParam = false;
+
+            if (Parameter != _GetDefaultParameter(_Key))
+            {
+                hasParam = true;
+
+                var rgb = $"𝐑 {Parameter.X} 𝐆 {Parameter.Y} 𝐁 {Parameter.Z}";
+                var rgba = $"{rgb} 𝐀 {Parameter.W}";
+
+                switch (Key)
+                {
+                    case KnownChannel.Normal:
+                    case KnownChannel.ClearCoatNormal:
+                    case KnownChannel.Occlusion:
+                        txt += $" {Parameter.X}"; break;
+
+                    case KnownChannel.Emissive:
+                        txt += $" ({rgb})"; break;
+
+                    case KnownChannel.Diffuse:
+                    case KnownChannel.BaseColor:
+                        txt += $" ({rgba})"; break;
+
+                    case KnownChannel.MetallicRoughness:
+                        txt += $" 𝐌 {Parameter.X} 𝐑 {Parameter.Y}"; break;
+
+                    case KnownChannel.SpecularGlossiness:
+                        txt += $" 𝐒 ({rgb}) 𝐆 {Parameter.Y}"; break;
+
+                    default:
+                        txt += $" {Parameter}"; break;
+                }
+            }
 
             var tex = GetValidTexture();
-            if (tex != null) txt += $" 🖼{tex.PrimaryImage.FileExtension}";
+            if (tex != null)
+            {
+                if (hasParam) txt += " ×";
+                txt += $" {tex.PrimaryImage.DisplayText}";
+            }
 
             return txt;
         }
@@ -169,12 +206,12 @@ namespace SharpGLTF.Materials
 
             public bool Equals(ChannelBuilder x, ChannelBuilder y)
             {
-                return ChannelBuilder.AreEqualByContent(x, y);
+                return AreEqualByContent(x, y);
             }
 
             public int GetHashCode(ChannelBuilder obj)
             {
-                return ChannelBuilder.GetContentHashCode(obj);
+                return GetContentHashCode(obj);
             }
         }
 

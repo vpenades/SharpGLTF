@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -11,9 +12,30 @@ using TEXWRAP = SharpGLTF.Schema2.TextureWrapMode;
 
 namespace SharpGLTF.Materials
 {
-    [System.Diagnostics.DebuggerDisplay("Texture {CoordinateSet} Min:{MinFilter} Mag:{MagFilter} Ws:{WrapS} Wt:{WrapT}")]
+    [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public class TextureBuilder
     {
+        #region Debug
+
+        internal string _DebuggerDisplay()
+        {
+            var txt = "Texture ";
+            if (CoordinateSet != 0) txt += $" {CoordinateSet}ˢᵉᵗ";
+
+            if (MinFilter != TEXMIPMAP.DEFAULT) txt += $" {MinFilter}ᴹⁱⁿ";
+            if (MagFilter != TEXLERP.DEFAULT) txt += $" {MagFilter}ᴹᵃᵍ";
+
+            if (WrapS != TEXWRAP.REPEAT) txt += $" {WrapS}↔";
+            if (WrapT != TEXWRAP.REPEAT) txt += $" {WrapT}↕";
+
+            if (_PrimaryImageContent.IsValid) txt += $" {_PrimaryImageContent.DisplayText}";
+            if (_FallbackImageContent.IsValid) txt += $" => {_FallbackImageContent.DisplayText}";
+
+            return txt;
+        }
+
+        #endregion
+
         #region lifecycle
 
         internal TextureBuilder(ChannelBuilder parent)
@@ -27,10 +49,17 @@ namespace SharpGLTF.Materials
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly ChannelBuilder _Parent;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private IMAGEFILE _PrimaryImageContent;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private IMAGEFILE _FallbackImageContent;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private TextureTransformBuilder _Transform;
 
         public int CoordinateSet { get; set; } = 0;
 
@@ -41,8 +70,6 @@ namespace SharpGLTF.Materials
         public TEXWRAP WrapS { get; set; } = TEXWRAP.REPEAT;
 
         public TEXWRAP WrapT { get; set; } = TEXWRAP.REPEAT;
-
-        private TextureTransformBuilder _Transform;
 
         public static bool AreEqualByContent(TextureBuilder a, TextureBuilder b)
         {
@@ -210,7 +237,7 @@ namespace SharpGLTF.Materials
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("Transform {Scale} {Rotation} {Offset}")]
+    [System.Diagnostics.DebuggerDisplay("Transform 𝐒:{Scale} 𝐑:{Rotation} 𝚻:{Offset}")]
     public class TextureTransformBuilder
     {
         #region lifecycle

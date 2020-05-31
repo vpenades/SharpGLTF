@@ -21,6 +21,8 @@ namespace SharpGLTF.IO
     /// <returns>The file contents as a <see cref="byte"/> array.</returns>
     public delegate BYTES FileReaderCallback(String assetName);
 
+    public delegate String UriResolver(String relativeUri);
+
     /// <summary>
     /// Context for reading a <see cref="SCHEMA2"/>.
     /// </summary>
@@ -38,25 +40,28 @@ namespace SharpGLTF.IO
         public static ReadContext CreateFromFile(string filePath)
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
-
             var dir = Path.GetDirectoryName(filePath);
-
             return CreateFromDirectory(dir);
         }
 
         public static ReadContext CreateFromDirectory(string directoryPath)
         {
-            BYTES _loadFile(string rawUri)
+            directoryPath = System.IO.Path.GetFullPath(directoryPath);
+
+            string _uriSolver(string rawUri)
             {
                 var path = Uri.UnescapeDataString(rawUri);
-                path = Path.Combine(directoryPath, path);
+                return Path.Combine(directoryPath, path);
+            }
 
+            BYTES _loadFile(string rawUri)
+            {
+                var path = _uriSolver(rawUri);
                 var content = File.ReadAllBytes(path);
-
                 return new BYTES(content);
             }
 
-            return new ReadContext(_loadFile);
+            return new ReadContext(_loadFile, _uriSolver);
         }
 
         public static ReadContext CreateFromDictionary(IReadOnlyDictionary<string, BYTES> dictionary)
@@ -64,9 +69,10 @@ namespace SharpGLTF.IO
             return new ReadContext(rawUri => dictionary[rawUri]);
         }
 
-        private ReadContext(FileReaderCallback reader)
+        private ReadContext(FileReaderCallback reader, UriResolver uriResolver = null)
         {
             _FileReader = reader;
+            _UriResolver = uriResolver;
         }
 
         internal ReadContext(ReadContext other)
@@ -81,6 +87,7 @@ namespace SharpGLTF.IO
         #region data
 
         private FileReaderCallback _FileReader;
+        private UriResolver _UriResolver;
 
         /// <summary>
         /// When loading a GLB, this represents the internal binary data chunk.
@@ -90,6 +97,13 @@ namespace SharpGLTF.IO
         #endregion
 
         #region API - File System
+
+        public bool TryGetFullPath(string relativeUri, out string fullPath)
+        {
+            if (_UriResolver == null) { fullPath = null; return false; }
+            fullPath = _UriResolver(relativeUri);
+            return true;
+        }
 
         public BYTES ReadAllBytesToEnd(string fileName)
         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
@@ -14,13 +15,54 @@ namespace SharpGLTF.Materials
     public class MaterialBuilderTests
     {
         [Test]
-        public void CreateUnlit()
+        public void TestMaterialEquality()
         {
+            // Checking if two materials are the same or not is conceptually ambiguous.
+            // The static method AreEqualByContent allows to check if two materials represent
+            // the same physical material, even if they're two different references.
+            // ... And we could use it for general equality checks, but then, since
+            // MaterialBuilder is NOT inmutable, it can mean that two materials can be equal
+            // at a given time, and non equal at another. Furthermore, it would imply having
+            // a hash code that changes over time. As a consequence, it could be impossible
+            // to use MaterialBuilder as a dictionary Key.
+            
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
             var srcMaterial = new MaterialBuilder()
                 .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
                 .WithAlpha(AlphaMode.MASK, 0.7f)
                 .WithUnlitShader()
-                .WithBaseColor(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0f, 0.8f));
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f));
+
+            var clnMaterial = srcMaterial.Clone();
+
+            // srcMaterial and clnMaterial are two different objects, so plain equality checks must apply to reference checks
+            Assert.IsFalse(srcMaterial == clnMaterial);
+            Assert.AreNotEqual(srcMaterial, clnMaterial);
+            Assert.AreNotEqual(srcMaterial.GetHashCode(), clnMaterial.GetHashCode());
+
+            // checking the materials represent the same "material" must be made with AreEqualByContent method.
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, clnMaterial));
+
+            var bag = new HashSet<MaterialBuilder>();
+            bag.Add(srcMaterial);
+            bag.Add(clnMaterial);
+
+            Assert.AreEqual(2, bag.Count);
+        }
+
+        [Test]
+        public void CreateUnlit()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var srcMaterial = new MaterialBuilder()
+                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
+                .WithAlpha(AlphaMode.MASK, 0.7f)
+                .WithUnlitShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f));
 
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
@@ -29,18 +71,20 @@ namespace SharpGLTF.Materials
         [Test]
         public void CreateMetallicRoughness()
         {
-            var srcMaterial = new MaterialBuilder()
-                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var srcMaterial = new MaterialBuilder()                
                 .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(Memory.MemoryImage.DefaultPngImage, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(Memory.MemoryImage.DefaultPngImage, 0.3f)
-                .WithOcclusion(Memory.MemoryImage.DefaultPngImage, 0.4f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f)
 
                 .WithMetallicRoughnessShader()
-                    .WithBaseColor(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithMetallicRoughness(Memory.MemoryImage.DefaultPngImage, 0.2f, 0.4f);
+                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                    .WithMetallicRoughness(tex1, 0.2f, 0.4f);
 
-            // example of setting additional additional parameters for a given channel.
+            // example of setting additional parameters for a given channel.
             srcMaterial.GetChannel(KnownChannel.BaseColor)
                 .Texture
                 .WithCoordinateSet(1)
@@ -55,20 +99,22 @@ namespace SharpGLTF.Materials
         [Test]
         public void CreateClearCoat()
         {
-            var srcMaterial = new MaterialBuilder()
-                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var srcMaterial = new MaterialBuilder()                
                 .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(Memory.MemoryImage.DefaultPngImage, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(Memory.MemoryImage.DefaultPngImage, 0.3f)
-                .WithOcclusion(Memory.MemoryImage.DefaultPngImage, 0.4f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f)
 
                 .WithMetallicRoughnessShader()
-                    .WithBaseColor(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithMetallicRoughness(Memory.MemoryImage.DefaultPngImage, 0.2f, 0.4f)
+                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                    .WithMetallicRoughness(tex1, 0.2f, 0.4f)
 
-                .WithClearCoat(Memory.MemoryImage.DefaultPngImage, 1)
-                .WithClearCoatNormal(Memory.MemoryImage.DefaultPngImage)
-                .WithClearCoatRoughness(Memory.MemoryImage.DefaultPngImage, 1);
+                .WithClearCoat(tex1, 1)
+                .WithClearCoatNormal(tex1)
+                .WithClearCoatRoughness(tex1, 1);
 
 
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
@@ -78,16 +124,18 @@ namespace SharpGLTF.Materials
         [Test]
         public void CreateSpecularGlossiness()
         {
-            var srcMaterial = new MaterialBuilder()
-                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var srcMaterial = new MaterialBuilder()                
                 .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(Memory.MemoryImage.DefaultPngImage, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(Memory.MemoryImage.DefaultPngImage, 0.3f)
-                .WithOcclusion(Memory.MemoryImage.DefaultPngImage, 0.4f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f)
 
                 .WithSpecularGlossinessShader()
-                    .WithDiffuse(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithSpecularGlossiness(Memory.MemoryImage.DefaultPngImage, new Vector3(0.7f, 0, 0f), 0.8f);
+                    .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                    .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
                 
             
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
@@ -97,22 +145,36 @@ namespace SharpGLTF.Materials
         [Test]
         public void CreateSpecularGlossinessWithFallback()
         {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.webp");
+            var tex2 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
             var primary = new MaterialBuilder("primary")
 
                 // fallback and primary material must have exactly the same properties
                 .WithDoubleSide(true)
                 .WithAlpha(AlphaMode.MASK, 0.75f)
-                .WithEmissive(Memory.MemoryImage.DefaultPngImage, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(Memory.MemoryImage.DefaultPngImage, 0.3f)
-                .WithOcclusion(Memory.MemoryImage.DefaultPngImage, 0.4f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f)
 
                 // primary must use Specular Glossiness shader.
                 .WithSpecularGlossinessShader()
-                    .WithDiffuse(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0f, 1.0f))
-                    .WithSpecularGlossiness(Memory.MemoryImage.DefaultPngImage, new Vector3(0.7f, 0, 0f), 0.8f)                
+                    .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 1.0f))
+                    .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
+            
+            // set fallback textures for engines that don't support WEBP texture format
+            primary.GetChannel(KnownChannel.Normal).Texture.FallbackImage = tex2;
+            primary.GetChannel(KnownChannel.Emissive).Texture.FallbackImage = tex2;
+            primary.GetChannel(KnownChannel.Occlusion).Texture.FallbackImage = tex2;
+            primary.GetChannel(KnownChannel.Diffuse).Texture.FallbackImage = tex2;
+            primary.GetChannel(KnownChannel.SpecularGlossiness).Texture.FallbackImage = tex2;
 
-                .WithMetallicRoughnessFallback(Memory.MemoryImage.DefaultPngImage, new Vector4(0.7f, 0, 0, 1), String.Empty, 0.6f, 0.7f);
+            // set fallback material for engines that don't support Specular Glossiness shader.
+            primary.WithMetallicRoughnessFallback(tex1, new Vector4(0.7f, 0, 0, 1), String.Empty, 0.6f, 0.7f);
+            primary.CompatibilityFallback.GetChannel(KnownChannel.BaseColor).Texture.FallbackImage = tex2;
 
+            // check
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(primary, Schema2Roundtrip(primary)));
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(primary, primary.Clone()));
         }

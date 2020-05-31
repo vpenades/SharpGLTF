@@ -52,7 +52,7 @@ namespace SharpGLTF.Schema2.Authoring
             var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
 
             // first, create a default material
-            var material = new Materials.MaterialBuilder("material1 fallback")
+            var material = new Materials.MaterialBuilder("material1")
                 .WithMetallicRoughnessShader()
                 .WithChannelImage(Materials.KnownChannel.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
                 .WithChannelImage(Materials.KnownChannel.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))

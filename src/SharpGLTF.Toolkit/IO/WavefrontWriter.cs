@@ -31,7 +31,7 @@ namespace SharpGLTF.IO
         {
             public Vector3 DiffuseColor;
             public Vector3 SpecularColor;
-            public BYTES DiffuseTexture;
+            public Memory.MemoryImage DiffuseTexture;
         }
 
         private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY>();
@@ -71,46 +71,20 @@ namespace SharpGLTF.IO
             return files;
         }
 
-        // internal class to compare the content of two array segments
-        private class _ArraySegmentEqualityComparer<T> : IEqualityComparer<ArraySegment<T>>
-        {
-            public bool Equals(ArraySegment<T> x, ArraySegment<T> y)
-            {
-                return x.SequenceEqual(y);
-            }
-
-            public int GetHashCode(ArraySegment<T> obj)
-            {
-                int h = 0;
-
-                foreach (var item in obj)
-                {
-                    h ^= obj.GetHashCode();
-                    h *= 17;
-                }
-
-                return h;
-            }
-        }
-
         private static IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
             var images = materials
                 .Select(item => item.DiffuseTexture)
-                .Where(item => item.Array != null)
-                .Distinct(new _ArraySegmentEqualityComparer<Byte>() );
+                .Where(item => item.IsValid)
+                .Distinct();
 
             bool firstImg = true;
 
             foreach (var img in images)
             {
-                var imimg = new Memory.MemoryImage(img);
-
-                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}.{imimg.FileExtension}";
-
-                files[imgName] = img;
-
+                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}.{img.FileExtension}";
+                files[imgName] = img.GetBuffer();
                 firstImg = false;
             }
 
@@ -130,9 +104,9 @@ namespace SharpGLTF.IO
                 sb.AppendLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
                 sb.AppendLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
 
-                if (m.DiffuseTexture.Array != null)
+                if (m.DiffuseTexture.IsValid)
                 {
-                    var imgName = files.FirstOrDefault(kvp => kvp.Value.SequenceEqual(m.DiffuseTexture) ).Key;
+                    var imgName = files.FirstOrDefault(kvp => new Memory.MemoryImage(kvp.Value) == m.DiffuseTexture ).Key;
                     sb.AppendLine($"map_Kd {imgName}");
                 }
 
@@ -236,21 +210,7 @@ namespace SharpGLTF.IO
         {
             foreach (var triangle in Schema2Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene))
             {
-                var dstMaterial = default(Material);
-
-                var srcMaterial = triangle.Item4;
-                if (srcMaterial != null)
-                {
-                    // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
-
-                    var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
-
-                    dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
-                    dstMaterial.SpecularColor = new Vector3(0.2f);
-
-                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
-                }
-
+                var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
             }
         }
@@ -259,23 +219,27 @@ namespace SharpGLTF.IO
         {
             foreach (var triangle in Schema2Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, animation, time))
             {
-                var dstMaterial = default(Material);
-
-                var srcMaterial = triangle.Item4;
-                if (srcMaterial != null)
-                {
-                    // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
-
-                    var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
-
-                    dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
-                    dstMaterial.SpecularColor = new Vector3(0.2f);
-
-                    dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.GetImageContent() ?? default;
-                }
-
+                var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
             }
+        }
+
+        private static Material GetMaterialFromTriangle(Schema2.Material srcMaterial)
+        {
+            if (srcMaterial == null) return default;
+
+            // https://stackoverflow.com/questions/36510170/how-to-calculate-specular-contribution-in-pbr
+
+            var diffuse = srcMaterial.GetDiffuseColor(Vector4.One);
+
+            var dstMaterial = default(Material);
+
+            dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
+            dstMaterial.SpecularColor = new Vector3(0.2f);
+
+            dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.Content ?? default;
+
+            return dstMaterial;
         }
 
         #endregion
