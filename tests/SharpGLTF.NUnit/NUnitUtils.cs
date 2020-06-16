@@ -64,5 +64,16 @@ namespace SharpGLTF
 
             TestContext.AddTestAttachment(linkPath);
         }
+
+        public static string AttachToCurrentTest(this Byte[] data, string fileName)
+        {
+            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+
+            System.IO.File.WriteAllBytes(fileName, data);
+
+            TestContext.AddTestAttachment(fileName);
+
+            return fileName;
+        }
     }
 }

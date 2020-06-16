@@ -197,6 +197,7 @@ namespace SharpGLTF
                 .OrderBy(item => item)
                 .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
                 .Where(item => !item.Contains("\\Sheen\\"))
+                .Where(item => !item.Contains("\\Demos\\retargeting\\riggedMesh.glb"))
                 .Where(item => !_BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))                
                 .ToList();
         }

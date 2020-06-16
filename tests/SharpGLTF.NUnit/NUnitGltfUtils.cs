@@ -6,6 +6,8 @@ using System.Text;
 
 using NUnit.Framework;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF
 {
     public static class NUnitGltfUtils
@@ -53,18 +55,20 @@ namespace SharpGLTF
             gl2model.AttachToCurrentTest(fileName);
         }
 
-        public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName)
+        public static string AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, WriteSettings settings = null)
         {
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
 
             if (fileName.ToLower().EndsWith(".glb"))
             {
-                model.SaveGLB(fileName);
+                model.SaveGLB(fileName, settings);
             }
             else if (fileName.ToLower().EndsWith(".gltf"))
             {
-                model.Save(fileName, new Schema2.WriteSettings { JsonIndented = true });
+                if (settings == null) settings = new WriteSettings { JsonIndented = true };
+
+                model.Save(fileName, settings);
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
@@ -75,10 +79,10 @@ namespace SharpGLTF
             // Attach the saved file to the current test
             TestContext.AddTestAttachment(fileName);
 
-            if (fileName.ToLower().EndsWith(".obj")) return;
+            if (fileName.ToLower().EndsWith(".obj")) return fileName;
 
             var report = gltf_validator.ValidateFile(fileName);
-            if (report == null) return;
+            if (report == null) return fileName;
 
             if (report.HasErrors || report.HasWarnings)
             {
@@ -86,6 +90,8 @@ namespace SharpGLTF
             }
 
             Assert.IsFalse(report.HasErrors);
+
+            return fileName;
         }
     }
 

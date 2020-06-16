@@ -321,24 +321,31 @@ namespace SharpGLTF.Schema2
 
             foreach (var group in this.VertexAccessors.Values.GroupBy(item => item.SourceBufferView))
             {
-                if (group.Skip(1).Any())
+                if (!group.Skip(1).Any()) continue;
+
+                // if more than one accessor shares a BufferView, it must define a ByteStride
+
+                validate.IsGreater("ByteStride", group.Key.ByteStride, 0); // " must be defined when two or more accessors use the same BufferView."
+
+                // determine if we're sequential or strided by checking if the memory buffers overlap
+                var memories = group.Select(item => item._GetMemoryAccessor());
+                var overlap = Memory.MemoryAccessor.HaveOverlappingBuffers(memories);
+
+                bool ok = false;
+
+                if (overlap) // strided buffer detected
                 {
-                    // if more than one accessor shares a BufferView, it must define a ByteStride
+                    ok = group.Sum(item => item.Format.ByteSizePadded) == group.Key.ByteStride;
+                }
+                else // sequential buffer detected
+                {
+                    ok = group.All(item => item.Format.ByteSizePadded <= group.Key.ByteStride);
+                }
 
-                    validate.IsGreater("ByteStride", group.Key.ByteStride, 0); // " must be defined when two or more accessors use the same BufferView."
-
-                    // now, there's two possible outcomes:
-                    // - sequential accessors: all accessors's ElementByteStride should be EQUAL to BufferView's ByteStride
-                    // - strided accessors: all accessors's ElementByteStride should SUM to BufferView's ByteStride
-
-                    bool isSequential = group.All(item => item.Format.ByteSizePadded == group.Key.ByteStride);
-                    bool isStrided    = group.Sum(item => item.Format.ByteSizePadded) == group.Key.ByteStride;
-
-                    if (!(isSequential || isStrided))
-                    {
-                        var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
-                        validate._LinkThrow("Attributes", $"Inconsistent accessors configuration: {accessors}");
-                    }
+                if (!ok)
+                {
+                    var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
+                    validate._LinkThrow("Attributes", $"Inconsistent accessors configuration: {accessors}");
                 }
             }
 

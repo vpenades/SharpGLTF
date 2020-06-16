@@ -109,7 +109,7 @@ namespace SharpGLTF
         {
             if (value.CompareTo(expected) == 0) return;
 
-            throw new ArgumentOutOfRangeException(parameterName, $"{parameterName} {value} must be equal to {expected}.");
+            throw new ArgumentException(parameterName, $"{parameterName} {value} must be equal to {expected}.");
         }
 
         public static void MustBePositiveAndMultipleOf(int value, int padding, string parameterName, string message = "")

@@ -55,7 +55,7 @@ namespace SharpGLTF.Debug
 
         public Schema2.BufferView Source => _Value.SourceBufferView;
 
-        public (Schema2.DimensionType, Schema2.EncodingType, bool) Format => (_Value.Dimensions, _Value.Encoding, _Value.Normalized);
+        public (Schema2.DimensionType Dimensions, Schema2.EncodingType Encoding, bool Normalized) Format => (_Value.Dimensions, _Value.Encoding, _Value.Normalized);
 
         public Object[] Items
         {
