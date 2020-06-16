@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 using NUnit.Framework;
@@ -91,6 +92,19 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 TestContext.WriteLine($"Triangle {ap} {an} {bp} {bn} {cp} {cn}");
             }
+
+            // create a clone and apply a global axis transform.
+
+            var clonedModel = model.DeepClone();
+
+            var basisTransform
+                = Matrix4x4.CreateScale(1, 2, 1)
+                * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3)                
+                * Matrix4x4.CreateTranslation(10,5,2);
+
+            clonedModel.ApplyBasisTransform(basisTransform);
+
+            clonedModel.AttachToCurrentTest("polly_out_transformed.glb");
         }
 
         [Test]

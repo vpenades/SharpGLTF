@@ -201,15 +201,6 @@ namespace SharpGLTF.Scenes
             return dstModel;
         }
 
-        [Obsolete("Use ToGltf2")]
-        public ModelRoot ToSchema2(bool useStridedBuffers = true)
-        {
-            var settings = SceneBuilderSchema2Settings.Default;
-            settings.UseStridedBuffers = useStridedBuffers;
-
-            return ToGltf2(settings);
-        }
-
         /// <summary>
         /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
         /// </summary>

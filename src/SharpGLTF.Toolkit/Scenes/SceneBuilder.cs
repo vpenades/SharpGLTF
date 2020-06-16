@@ -4,10 +4,13 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Schema2;
+
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
 
 namespace SharpGLTF.Scenes
 {
+    [System.Diagnostics.DebuggerDisplay("Scene {_Name}")]
     public partial class SceneBuilder
     {
         #region lifecycle
@@ -19,27 +22,51 @@ namespace SharpGLTF.Scenes
             _Name = name;
         }
 
-        public SceneBuilder DeepClone()
+        public SceneBuilder DeepClone(bool cloneArmatures = true)
         {
             var clone = new SceneBuilder();
 
             clone._Name = this._Name;
 
+            var nodeMap = new Dictionary<NodeBuilder, NodeBuilder>();
+
+            if (cloneArmatures)
+            {
+                foreach (var root in FindArmatures())
+                {
+                    var dict = root.DeepClone();
+
+                    foreach (var pair in dict) nodeMap[pair.Key] = pair.Value;
+                }
+            }
+
+            var args = new ContentTransformer.DeepCloneContext(nodeMap);
+
             foreach (var inst in this._Instances)
             {
-                inst._CopyTo(clone);
+                var cloneInst = inst._CopyTo(clone, args);
+
+                clone._Instances.Add(cloneInst);
+
             }
 
             return clone;
+        }
+
+        public static SceneBuilder Load(string filePath, ReadSettings settings = null)
+        {
+            var mdl = ModelRoot.Load(filePath, settings);
+            return mdl.DefaultScene.ToSceneBuilder();
         }
 
         #endregion
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private String _Name;
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal readonly List<InstanceBuilder> _Instances = new List<InstanceBuilder>();
 
         #endregion
@@ -52,24 +79,12 @@ namespace SharpGLTF.Scenes
             set => _Name = value;
         }
 
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;
 
         #endregion
 
         #region API
-
-        [Obsolete("Use AddRigidMesh")]
-        public InstanceBuilder AddMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
-        {
-            return AddRigidMesh(mesh, meshWorldMatrix);
-        }
-
-        [Obsolete("Use AddRigidMesh")]
-        public InstanceBuilder AddMesh(MESHBUILDER mesh, NodeBuilder node)
-        {
-            return AddRigidMesh(mesh, node);
-        }
 
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
         {
@@ -208,18 +223,6 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        /// <summary>
-        /// Adds an instance from this or other <see cref="SceneBuilder"/>
-        /// by making a copy of <paramref name="other"/>.
-        /// </summary>
-        /// <param name="other">The source <see cref="InstanceBuilder"/>.</param>
-        /// <returns>The new <see cref="InstanceBuilder"/> added to this scene.</returns>
-        public InstanceBuilder AddInstance(InstanceBuilder other)
-        {
-            if (other == null) return null;
-            return other._CopyTo(this);
-        }
-
         public void RenameAllNodes(string namePrefix)
         {
             var allNodes = Instances
@@ -230,6 +233,75 @@ namespace SharpGLTF.Scenes
                 .ToList();
 
             NodeBuilder.Rename(allNodes, namePrefix);
+        }
+
+        /// <summary>
+        /// Gets all the unique armatures used by this <see cref="SceneBuilder"/>.
+        /// </summary>
+        /// <returns>A collection of <see cref="NodeBuilder"/> objects representing the root of each armature.</returns>
+        public IReadOnlyList<NodeBuilder> FindArmatures()
+        {
+            return _Instances
+                .Select(item => item.Content.GetArmatureRoot())
+                .Distinct()
+                .ToList();
+        }
+
+        public void ApplyBasisTransform(Matrix4x4 basisTransform, string basisNodeName = "BasisTransform")
+        {
+            // gather all root nodes:
+            var rootNodes = this.FindArmatures();
+
+            // find all the nodes that cannot be modified
+            bool isSensible(NodeBuilder node)
+            {
+                if (node.Scale != null) return true;
+                if (node.Rotation != null) return true;
+                if (node.Translation != null) return true;
+                if (node.HasAnimations) return true;
+                return false;
+            }
+
+            var sensibleNodes = rootNodes
+                .Where(item => isSensible(item))
+                .ToList();
+
+            // find all the nodes that we can change their transform matrix safely.
+            var intrinsicNodes = rootNodes
+                .Except(sensibleNodes)
+                .ToList();
+
+            // apply the transform to the nodes that are safe to change.
+            foreach (var n in intrinsicNodes)
+            {
+                n.LocalMatrix *= basisTransform;
+            }
+
+            if (sensibleNodes.Count == 0) return;
+
+            // create a proxy node to be used as the root for all sensible nodes.
+            var basisNode = new NodeBuilder();
+            basisNode.Name = basisNodeName;
+            basisNode.LocalMatrix = basisTransform;
+
+            // assign all the sensible nodes to the basis node.
+            foreach (var n in sensibleNodes)
+            {
+                basisNode.AddNode(n);
+            }
+        }
+
+        public IReadOnlyList<InstanceBuilder> AddScene(SceneBuilder scene, Matrix4x4 sceneTransform)
+        {
+            Guard.NotNull(scene, nameof(scene));
+
+            scene = scene.DeepClone();
+
+            if (sceneTransform != Matrix4x4.Identity) scene.ApplyBasisTransform(sceneTransform);
+
+            this._Instances.AddRange(scene._Instances);
+
+            return scene._Instances;
         }
 
         #endregion

@@ -232,25 +232,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal Transforms.Matrix4x4Double LocalMatrixPrecise
-        {
-            get
-            {
-                if (_matrix.HasValue) return new Transforms.Matrix4x4Double(_matrix.Value);
-
-                var s = _scale ?? Vector3.One;
-                var r = _rotation ?? Quaternion.Identity;
-                var t = _translation ?? Vector3.Zero;
-
-                return
-                    Transforms.Matrix4x4Double.CreateScale(s.X, s.Y, s.Z)
-                    *
-                    Transforms.Matrix4x4Double.CreateFromQuaternion(r.Sanitized())
-                    *
-                    Transforms.Matrix4x4Double.CreateTranslation(t.X, t.Y, t.Z);
-            }
-        }
-
         #pragma warning disable CA1721 // Property names should not match get methods
 
         /// <summary>
@@ -270,6 +251,25 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal Transforms.Matrix4x4Double LocalMatrixPrecise
+        {
+            get
+            {
+                if (_matrix.HasValue) return new Transforms.Matrix4x4Double(_matrix.Value);
+
+                var s = _scale ?? Vector3.One;
+                var r = _rotation ?? Quaternion.Identity;
+                var t = _translation ?? Vector3.Zero;
+
+                return
+                    Transforms.Matrix4x4Double.CreateScale(s.X, s.Y, s.Z)
+                    *
+                    Transforms.Matrix4x4Double.CreateFromQuaternion(r.Sanitized())
+                    *
+                    Transforms.Matrix4x4Double.CreateTranslation(t.X, t.Y, t.Z);
+            }
+        }
+
         internal Transforms.Matrix4x4Double WorldMatrixPrecise
         {
             get
@@ -280,6 +280,37 @@ namespace SharpGLTF.Schema2
         }
 
         #pragma warning restore CA1721 // Property names should not match get methods
+
+        /// <summary>
+        /// Gets a value indicating whether this transform is affected by any animation.
+        /// </summary>
+        public bool IsTransformAnimated
+        {
+            get
+            {
+                var root = this.LogicalParent;
+
+                if (root.LogicalAnimations.Count == 0) return false;
+
+                // check if it's affected by animations.
+                if (root.LogicalAnimations.Any(anim => anim.FindScaleSampler(this) != null)) return true;
+                if (root.LogicalAnimations.Any(anim => anim.FindRotationSampler(this) != null)) return true;
+                if (root.LogicalAnimations.Any(anim => anim.FindTranslationSampler(this) != null)) return true;
+
+                return false;
+            }
+        }
+
+        internal bool IsTransformDecomposed
+        {
+            get
+            {
+                if (_scale.HasValue) return true;
+                if (_rotation.HasValue) return true;
+                if (_translation.HasValue) return true;
+                return false;
+            }
+        }
 
         #endregion
 
@@ -404,6 +435,32 @@ namespace SharpGLTF.Schema2
             var allChildren = _children.Select(idx => LogicalParent.LogicalNodes[idx]);
 
             return allChildren;
+        }
+
+        internal void _SetVisualParent(Node parentNode)
+        {
+            Guard.MustShareLogicalParent(this, parentNode, nameof(parentNode));
+            Guard.IsFalse(_ContainsVisualNode(parentNode, true), nameof(parentNode));
+
+            // remove from all the scenes
+            foreach (var s in LogicalParent.LogicalScenes)
+            {
+                s._RemoveVisualNode(this);
+            }
+
+            // remove from current parent
+            _RemoveFromVisualParent();
+
+            // add to parent node.
+            parentNode._children.Add(this.LogicalIndex);
+        }
+
+        internal void _RemoveFromVisualParent()
+        {
+            var oldParent = this.VisualParent;
+            if (oldParent == null) return;
+
+            oldParent._children.Remove(this.LogicalIndex);
         }
 
         #endregion
@@ -542,6 +599,73 @@ namespace SharpGLTF.Schema2
             var n = CreateLogicalNode();
             parentChildren.Add(n.LogicalIndex);
             return n;
+        }
+
+        /// <summary>
+        /// Applies a world transform to all the scenes of the model.
+        /// </summary>
+        /// <param name="basisTransform">The transform to apply.</param>
+        /// <param name="basisNodeName">The name of the new root node, if it needs to be created.</param>
+        /// <remarks>
+        /// This method is appropiate to apply a general axis or scale change to the whole model.
+        /// Animations are preserved by encapsulating animated nodes inside a master basis transform node.
+        /// Meanwhile, unanimated nodes are transformed directly.
+        /// If the determinant of <paramref name="basisTransform"/> is negative, the face culling should be
+        /// flipped when rendering.
+        /// </remarks>
+        public void ApplyBasisTransform(Matrix4x4 basisTransform, string basisNodeName = "BasisTransform")
+        {
+            // TODO: nameless nodes with decomposed transform
+            // could be considered intrinsic.
+
+            Guard.IsTrue(basisTransform.IsValid(true, true), nameof(basisTransform));
+
+            // gather all root nodes:
+            var rootNodes = this.LogicalNodes
+                .Where(item => item.VisualRoot == item)
+                .ToList();
+
+            // find all the nodes that cannot be modified
+            bool isSensible(Node node)
+            {
+                if (node.IsTransformAnimated) return true;
+                if (node.IsTransformDecomposed) return true;
+                return false;
+            }
+
+            var sensibleNodes = rootNodes
+                .Where(item => isSensible(item))
+                .ToList();
+
+            // find all the nodes that we can change their transform matrix safely.
+            var intrinsicNodes = rootNodes
+                .Except(sensibleNodes)
+                .ToList();
+
+            // apply the transform to the nodes that are safe to change.
+            foreach (var n in intrinsicNodes)
+            {
+                n.LocalMatrix *= basisTransform;
+            }
+
+            if (sensibleNodes.Count == 0) return;
+
+            // create a proxy node to be used as the root for all sensible nodes.
+            var basisNode = CreateLogicalNode();
+            basisNode.Name = basisNodeName;
+            basisNode.LocalMatrix = basisTransform;
+
+            // add the basis node to all scenes
+            foreach (var scene in this.LogicalScenes)
+            {
+                scene._UseVisualNode(basisNode);
+            }
+
+            // assign all the sensible nodes to the basis node.
+            foreach (var n in sensibleNodes)
+            {
+                n._SetVisualParent(basisNode);
+            }
         }
     }
 }

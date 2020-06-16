@@ -57,6 +57,29 @@ namespace SharpGLTF.Schema2
             return VisualChildren.Any(item => item._ContainsVisualNode(node, true));
         }
 
+        internal void _RemoveVisualNode(Node node)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            _nodes.Remove(node.LogicalIndex);
+        }
+
+        internal void _UseVisualNode(Node node)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            var lidx = node.LogicalIndex;
+
+            if (_nodes.Contains(lidx)) return; // already in.
+
+            // a root node cannot be a child of another node.
+            node._RemoveFromVisualParent();
+
+            _nodes.Add(lidx);
+        }
+
         #endregion
 
         #region Validation

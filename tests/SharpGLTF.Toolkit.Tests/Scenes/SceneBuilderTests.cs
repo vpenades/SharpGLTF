@@ -11,7 +11,6 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
 
-
 namespace SharpGLTF.Scenes
 {
     using VPOSNRM = VertexBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty>;
@@ -464,8 +463,7 @@ namespace SharpGLTF.Scenes
         [TestCase("BoxAnimated.glb")]
         [TestCase("BrainStem.glb")]
         [TestCase("CesiumMan.glb")]
-        [TestCase("GearboxAssy.glb")]
-        // [TestCase("Monster.glb")]
+        [TestCase("GearboxAssy.glb")]        
         [TestCase("OrientationTest.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
@@ -535,6 +533,40 @@ namespace SharpGLTF.Scenes
             }
         }
 
+        
+        [TestCase("GearboxAssy.glb")]        
+        public void ExportMeshes(string path)
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains(path));
+
+            // load the glTF model
+            var srcModel = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
+            Assert.NotNull(srcModel);
+
+            // convert it to a SceneBuilder so we can manipulate it:
+            var srcScene = srcModel.DefaultScene.ToSceneBuilder();
+
+            // export all the individual meshes to OBJ:            
+            for(int i=0; i < srcScene.Instances.Count; ++i)
+            {
+                var inst = srcScene.Instances[i].Content;
+
+                // scan for meshes:
+                if (inst.Content is MeshContent mesh)
+                {
+                    var newScene = new SceneBuilder();
+
+                    newScene.AddRigidMesh(mesh.Mesh, inst.GetPoseWorldMatrix());
+
+                    newScene.AttachToCurrentTest($"result_{i}.obj");
+                }                
+            }
+        }
 
         [Test]
         public void TestCreateEmptyMesh()
@@ -623,6 +655,24 @@ namespace SharpGLTF.Scenes
             nb.UseTranslation().UseTrackBuilder("Default");
             nb.UseRotation().UseTrackBuilder("Default");
             nb.UseScale().UseTrackBuilder("Default");
+        }
+
+        [Test(Description = "Creates a new scene by merging multiple scenes")]
+        public void CreateSceneComposition()
+        {
+            // load Polly model
+            var polly = SceneBuilder.Load(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
+            
+            var xform0 = Matrix4x4.CreateFromYawPitchRoll(1, 0, 0) * Matrix4x4.CreateTranslation(1.5f, 0, 0);
+            var xform1 = Matrix4x4.CreateFromYawPitchRoll(0, 1, 0) * Matrix4x4.CreateTranslation(-1.5f, 1, 0);
+
+            var scene = new SceneBuilder();
+
+            scene.AddScene(polly, xform0);
+            scene.AddScene(polly, xform1);
+
+            scene.AttachToCurrentTest("construction.glb");
+
         }
 
     }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Scenes
 {
     /// <summary>
@@ -53,16 +55,40 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder(string name) { Name = name; }
 
-        private NodeBuilder(NodeBuilder parent)
+        public Dictionary<NodeBuilder, NodeBuilder> DeepClone()
         {
-            _Parent = parent;
+            var dict = new Dictionary<NodeBuilder, NodeBuilder>();
+
+            DeepClone(dict);
+
+            return dict;
+        }
+
+        private NodeBuilder DeepClone(IDictionary<NodeBuilder, NodeBuilder> nodeMap)
+        {
+            var clone = new NodeBuilder();
+
+            nodeMap[this] = clone;
+
+            clone.Name = this.Name;
+            clone._Matrix = this._Matrix;
+            clone._Scale = this._Scale?.Clone();
+            clone._Rotation = this._Rotation?.Clone();
+            clone._Translation = this._Translation?.Clone();
+
+            foreach (var c in _Children)
+            {
+                clone.AddNode(c.DeepClone(nodeMap));
+            }
+
+            return clone;
         }
 
         #endregion
 
         #region data
 
-        private readonly NodeBuilder _Parent;
+        private NodeBuilder _Parent;
 
         private readonly List<NodeBuilder> _Children = new List<NodeBuilder>();
 
@@ -188,10 +214,23 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder CreateNode(string name = null)
         {
-            var c = new NodeBuilder(this);
-            _Children.Add(c);
+            var c = new NodeBuilder();
             c.Name = name;
+            AddNode(c);
             return c;
+        }
+
+        public void AddNode(NodeBuilder node)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.IsFalse(Object.ReferenceEquals(this, node), "cannot add to itself");
+
+            if (node._Parent == this) return; // already added to this node.
+
+            Guard.MustBeNull(node._Parent, nameof(node), "is child of another node.");
+
+            node._Parent = this;
+            _Children.Add(node);
         }
 
         /// <summary>

@@ -50,7 +50,7 @@ namespace SharpGLTF.Scenes
             var skinnedMeshNode = dstScene.CreateNode();
             skinnedMeshNode.Name = _NodeName;
 
-            if (_TargetBindMatrix.HasValue)
+            if (_MeshPoseWorldMatrix.HasValue)
             {
                 var dstNodes = new Node[_Joints.Count];
 
@@ -71,12 +71,12 @@ namespace SharpGLTF.Scenes
                 }
                 #endif
 
-                skinnedMeshNode.WithSkinBinding(_TargetBindMatrix.Value, dstNodes);
+                skinnedMeshNode.WithSkinBinding(_MeshPoseWorldMatrix.Value, dstNodes);
             }
             else
             {
                 var skinnedJoints = _Joints
-                .Select(j => (context.GetNode(j.Joints), j.InverseBindMatrix.Value))
+                .Select(j => (context.GetNode(j.Joint), j.InverseBindMatrix.Value))
                 .ToArray();
 
                 skinnedMeshNode.WithSkinBinding(skinnedJoints);

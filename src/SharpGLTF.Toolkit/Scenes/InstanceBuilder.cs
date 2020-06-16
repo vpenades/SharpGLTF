@@ -6,6 +6,7 @@ using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Sc
 
 namespace SharpGLTF.Scenes
 {
+    [System.Diagnostics.DebuggerDisplay("{Content}")]
     public sealed class InstanceBuilder : SCHEMA2SCENE
     {
         #region lifecycle
@@ -29,6 +30,10 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
+        /// <summary>
+        /// Gets The name of this instance.
+        /// This name represents the name that will take the <see cref="Schema2.Node"/> containing this content.
+        /// </summary>
         public string Name => _ContentTransformer?.Name;
 
         public ContentTransformer Content
@@ -41,6 +46,9 @@ namespace SharpGLTF.Scenes
 
         #region API
 
+        /// <summary>
+        /// Removes this instance from its parent <see cref="SceneBuilder"/>.
+        /// </summary>
         public void Remove()
         {
             if (_Parent == null) return;
@@ -49,11 +57,15 @@ namespace SharpGLTF.Scenes
             _Parent = null;
         }
 
-        internal InstanceBuilder _CopyTo(SceneBuilder other)
+        #endregion
+
+        #region internals
+
+        internal InstanceBuilder _CopyTo(SceneBuilder other, ContentTransformer.DeepCloneContext args)
         {
             var clone = new InstanceBuilder(other);
 
-            clone._ContentTransformer = this._ContentTransformer?.DeepClone();
+            clone._ContentTransformer = this._ContentTransformer?.DeepClone(args);
 
             return clone;
         }

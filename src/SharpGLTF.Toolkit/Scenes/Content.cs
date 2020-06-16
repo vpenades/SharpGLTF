@@ -12,6 +12,7 @@ namespace SharpGLTF.Scenes
         MESHBUILDER GetGeometryAsset();
     }
 
+    [System.Diagnostics.DebuggerDisplay("Mesh")]
     partial class MeshContent
         : IRenderableContent
         , ICloneable
@@ -37,7 +38,18 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private MESHBUILDER _Mesh;
+
+        #endregion
+
+        #region properties
+
+        public MESHBUILDER Mesh
+        {
+            get => _Mesh;
+            set => _Mesh = value;
+        }
 
         #endregion
 
@@ -52,8 +64,10 @@ namespace SharpGLTF.Scenes
     {
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private IRenderableContent _Target;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly List<Animations.AnimatableProperty<float>> _MorphWeights = new List<Animations.AnimatableProperty<float>>();
 
         #endregion
@@ -65,6 +79,7 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    [System.Diagnostics.DebuggerDisplay("Camera")]
     partial class CameraContent : ICloneable
     {
         #region lifecycle
@@ -88,11 +103,23 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private CameraBuilder _Camera;
+
+        #endregion
+
+        #region properties
+
+        public CameraBuilder Camera
+        {
+            get => _Camera;
+            set => _Camera = value;
+        }
 
         #endregion
     }
 
+    [System.Diagnostics.DebuggerDisplay("Light")]
     partial class LightContent : ICloneable
     {
         #region lifecycle
@@ -116,7 +143,18 @@ namespace SharpGLTF.Scenes
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private LightBuilder _Light;
+
+        #endregion
+
+        #region properties
+
+        public LightBuilder Light
+        {
+            get => _Light;
+            set => _Light = value;
+        }
 
         #endregion
     }
