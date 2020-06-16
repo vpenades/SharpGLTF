@@ -153,16 +153,16 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Creates or reuses an <see cref="Image"/> with the image content set by <paramref name="imageContent"/>
+        /// Creates or reuses an <see cref="Image"/> with the image content set by <paramref name="image"/>
         /// </summary>
         /// <param name="root">The <see cref="ModelRoot"/> root instance.</param>
-        /// <param name="imageContent">A buffer containing the bytes of the image file.</param>
+        /// <param name="image">A buffer containing the bytes of the image file.</param>
         /// <returns>A <see cref="Image"/> instance.</returns>
-        public static Image UseImageWithContent(this ModelRoot root, Byte[] imageContent)
+        public static Image UseImageWithContent(this ModelRoot root, Memory.MemoryImage image)
         {
             Guard.NotNull(root, nameof(root));
 
-            return root.UseImage(new ArraySegment<byte>(imageContent));
+            return root.UseImage(image);
         }
 
         #endregion
@@ -407,7 +407,7 @@ namespace SharpGLTF.Schema2
                 primary = dstChannel
                 .LogicalParent
                 .LogicalParent
-                .UseImageWithContent(srcTex.PrimaryImage.GetBuffer().ToArray());
+                .UseImageWithContent(srcTex.PrimaryImage);
             }
 
             if (srcTex.FallbackImage.IsValid)
@@ -415,7 +415,7 @@ namespace SharpGLTF.Schema2
                 fallback = dstChannel
                 .LogicalParent
                 .LogicalParent
-                .UseImageWithContent(srcTex.FallbackImage.GetBuffer().ToArray());
+                .UseImageWithContent(srcTex.FallbackImage);
             }
 
             dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);

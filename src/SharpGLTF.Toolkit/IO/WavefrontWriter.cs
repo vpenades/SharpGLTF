@@ -84,7 +84,7 @@ namespace SharpGLTF.IO
             foreach (var img in images)
             {
                 var imgName = firstImg ? baseName : $"{baseName}_{files.Count}.{img.FileExtension}";
-                files[imgName] = img.GetBuffer();
+                files[imgName] = new BYTES(img.Content.ToArray());
                 firstImg = false;
             }
 

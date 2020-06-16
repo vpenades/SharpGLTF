@@ -116,7 +116,7 @@ namespace SharpGLTF.Schema2
 
             _DiscardContent();
 
-            this._SatelliteContent = content.GetBuffer();
+            this._SatelliteContent = content;
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace SharpGLTF.Schema2
 
             // transfer the external image content to a buffer.
             this._bufferView = this.LogicalParent
-                .UseBufferView(this._SatelliteContent.Value.GetBuffer())
+                .UseBufferView(this._SatelliteContent.Value._GetBuffer())
                 .LogicalIndex;
 
             this._uri = null;
@@ -216,9 +216,10 @@ namespace SharpGLTF.Schema2
 
             satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
 
-            writer.WriteAllBytesToEnd(satelliteUri, imimg.GetBuffer());
+            satelliteUri = writer.WriteImage(satelliteUri, imimg);
 
-            _uri = Uri.EscapeDataString(satelliteUri);
+            satelliteUri = satelliteUri.Replace("\\", "/");
+            _uri = Uri.EscapeUriString(satelliteUri);
             _mimeType = null;
         }
 

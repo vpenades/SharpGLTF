@@ -111,6 +111,7 @@ namespace SharpGLTF.Memory
 
         private readonly BYTES _Image;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly String _SourcePathHint;
 
         public override int GetHashCode()
@@ -147,6 +148,11 @@ namespace SharpGLTF.Memory
         #region properties
 
         public bool IsEmpty => _Image.Count == 0;
+
+        /// <summary>
+        /// Gets the file bytes of the image.
+        /// </summary>
+        public ReadOnlySpan<Byte> Content => _Image;
 
         /// <summary>
         /// Gets the source path of this image, or null if the image cannot be tracked to a file path (as it is the case of embedded images)
@@ -261,7 +267,7 @@ namespace SharpGLTF.Memory
         /// Gets the internal buffer.
         /// </summary>
         /// <returns>An array buffer.</returns>
-        public BYTES GetBuffer() { return _Image; }
+        internal BYTES _GetBuffer() { return _Image; }
 
         /// <summary>
         /// Returns this image file, enconded as a Mime64 string.

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 
 using BYTES = System.ArraySegment<byte>;
@@ -19,17 +20,26 @@ namespace SharpGLTF.IO
     public delegate void FileWriterCallback(String assetName, BYTES assetData);
 
     /// <summary>
+    /// Callback to control the image writing behavior.
+    /// </summary>
+    /// <param name="context">The current model writing context.</param>
+    /// <param name="assetName">The default gltf URI used to reference the image.</param>
+    /// <param name="image">The image to write.</param>
+    /// <returns>The final glTF URI. If it didn't change, return the value of <para name="assetName"/>.</returns>
+    public delegate string ImageWriterCallback(WriteContext context, String assetName, MemoryImage image);
+
+    /// <summary>
     /// Configuration settings for writing model files.
     /// </summary>
     public class WriteContext : WriteSettings
     {
         #region lifecycle
 
-        public static WriteContext Create(FileWriterCallback callback)
+        public static WriteContext Create(FileWriterCallback fileCallback)
         {
-            Guard.NotNull(callback, nameof(callback));
+            Guard.NotNull(fileCallback, nameof(fileCallback));
 
-            var context = new WriteContext(callback)
+            var context = new WriteContext(fileCallback)
             {
                 _UpdateSupportedExtensions = true
             };
@@ -52,10 +62,12 @@ namespace SharpGLTF.IO
         {
             Guard.DirectoryPathMustExist(directoryPath, nameof(directoryPath));
 
+            var dinfo = new DirectoryInfo(directoryPath);
+
             void _saveFile(string rawUri, BYTES data)
             {
                 var path = Uri.UnescapeDataString(rawUri);
-                path = Path.Combine(directoryPath, path);
+                path = Path.Combine(dinfo.FullName, path);
 
                 File.WriteAllBytes(path, data.ToUnderlayingArray());
             }
@@ -63,6 +75,7 @@ namespace SharpGLTF.IO
             var context = Create(_saveFile);
             context.ImageWriting = ResourceWriteMode.SatelliteFile;
             context.JsonIndented = true;
+            context.CurrentDirectory = dinfo;
             return context;
         }
 
@@ -113,9 +126,9 @@ namespace SharpGLTF.IO
             return this;
         }
 
-        private WriteContext(FileWriterCallback callback)
+        private WriteContext(FileWriterCallback fileCallback)
         {
-            _FileWriter = callback;
+            _FileWriter = fileCallback;
         }
 
         #endregion
@@ -127,6 +140,8 @@ namespace SharpGLTF.IO
         #endregion
 
         #region properties
+
+        public System.IO.DirectoryInfo CurrentDirectory { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether to scan the whole model for used extensions.
@@ -145,6 +160,14 @@ namespace SharpGLTF.IO
         public void WriteAllBytesToEnd(string fileName, BYTES data)
         {
             this._FileWriter(fileName, data);
+        }
+
+        public string WriteImage(string assetName, MemoryImage image)
+        {
+            var callback = this.ImageWriteCallback;
+            if (callback == null) callback = (ctx, apath, img) => { ctx.WriteAllBytesToEnd(apath, img._GetBuffer()); return apath; };
+
+            return callback(this, assetName, image);
         }
 
         /// <summary>

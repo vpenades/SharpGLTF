@@ -139,9 +139,9 @@ namespace SharpGLTF.Memory
         #region properties
 
         /// <summary>
-        /// Gets the number of bytes of the current encoded Item, padded to 4 bytes.
+        /// number of bytes to advance to the next item.
         /// </summary>
-        public int PaddedByteLength => _GetRowByteLength();
+        public int StepByteLength => _GetRowByteLength();
 
         public int ItemByteLength => _GetItemByteLength();
 
@@ -157,7 +157,7 @@ namespace SharpGLTF.Memory
                 if (this.ByteStride < 0) return false;
                 if (!this.ByteStride.IsMultipleOf(4)) return false;
 
-                if (this.ByteStride > 0 && this.ByteStride < this.PaddedByteLength) return false;
+                if (this.ByteStride > 0 && this.ByteStride < this.StepByteLength) return false;
 
                 return true;
             }
@@ -188,7 +188,7 @@ namespace SharpGLTF.Memory
         {
             var xlen = Encoding.ByteLength();
 
-            if (Dimensions != Schema2.DimensionType.SCALAR || Name != "INDEX")
+            if (Dimensions != DIMENSIONS.SCALAR || Name != "INDEX")
             {
                 xlen *= this.Dimensions.DimCount();
                 xlen = xlen.WordPadded();
@@ -215,10 +215,10 @@ namespace SharpGLTF.Memory
                 a.ByteOffset = byteOffset;
                 a.ItemsCount = itemsCount;
 
-                var attributeStride = a.PaddedByteLength;
+                var step = a.StepByteLength;
 
-                byteStride += attributeStride;
-                byteOffset += attributeStride;
+                byteStride += step;
+                byteOffset += step;
 
                 attributes[i] = a;
             }
@@ -480,13 +480,25 @@ namespace SharpGLTF.Memory
         public IEnumerable<BYTES> GetItemsAsRawBytes()
         {
             var rowOffset = this._Slicer.ByteOffset;
-            var rowStride = this._Slicer.PaddedByteLength;
+            var rowStride = this._Slicer.StepByteLength;
             var itemSize = this._Slicer.Dimensions.DimCount() * _Slicer.Encoding.ByteLength();
 
             for (int i = 0; i < this._Slicer.ItemsCount; ++i)
             {
                 yield return this._Data.Slice((i * rowStride) + rowOffset, itemSize);
             }
+        }
+
+        internal BYTES _GetBytes()
+        {
+            var o = this._Slicer.ByteOffset;
+            var l = this._Slicer.StepByteLength * this._Slicer.ItemsCount;
+
+            var data = _Data.Slice(o);
+
+            data = data.Slice(0, Math.Min(data.Count, l));
+
+            return data;
         }
 
         #endregion

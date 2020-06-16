@@ -187,7 +187,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             attribute.ByteStride = 0;
 
             // create a buffer
-            var vbuffer = new ArraySegment<byte>(new Byte[attribute.PaddedByteLength * vertices.Count]);
+            var vbuffer = new ArraySegment<byte>(new Byte[attribute.StepByteLength * vertices.Count]);
 
             // fill the buffer with the vertex attributes.
             var accessor = new MemoryAccessor(vbuffer, attribute);

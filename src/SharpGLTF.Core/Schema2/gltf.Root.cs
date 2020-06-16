@@ -53,6 +53,7 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public ModelRoot DeepClone()
         {
+            // prepare the in-memory temporary storage
             var dict = new Dictionary<string, ArraySegment<Byte>>();
             var wcontext = IO.WriteContext
                 .CreateFromDictionary(dict)
@@ -60,11 +61,25 @@ namespace SharpGLTF.Schema2
 
             System.Diagnostics.Debug.Assert(wcontext._NoCloneWatchdog, "invalid clone settings");
 
+            // write the model to the temporary storage
+
             wcontext.WriteTextSchema2("deepclone", this);
+
+            // restore the model from the temporary storage
 
             var rcontext = IO.ReadContext.CreateFromDictionary(dict);
             rcontext.Validation = Validation.ValidationMode.Strict;
-            return rcontext._ReadFromDictionary("deepclone.gltf");
+            var cloned = rcontext._ReadFromDictionary("deepclone.gltf");
+
+            // Restore MemoryImage source URIs (they're not cloned as part of the serialization)
+            foreach (var srcImg in this.LogicalImages)
+            {
+                var dstImg = cloned.LogicalImages[srcImg.LogicalIndex];
+                var img = dstImg.MemoryImage;
+                dstImg.MemoryImage = new Memory.MemoryImage(img._GetBuffer(), srcImg.MemoryImage.SourcePath);
+            }
+
+            return cloned;
         }
 
         #endregion

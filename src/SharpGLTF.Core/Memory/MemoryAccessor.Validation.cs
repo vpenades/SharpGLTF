@@ -23,6 +23,34 @@ namespace SharpGLTF.Memory
             SanitizeWeightsSum(weights0, weights1);
         }
 
+        public static bool HaveOverlappingBuffers(MemoryAccessor a, MemoryAccessor b)
+        {
+            var aa = a._GetBytes();
+            var bb = b._GetBytes();
+
+            if (aa.Array != bb.Array) return false;
+
+            if (aa.Offset >= bb.Offset + bb.Count) return false;
+            if (bb.Offset >= aa.Offset + aa.Count) return false;
+
+            return true;
+        }
+
+        public static bool HaveOverlappingBuffers(IEnumerable<MemoryAccessor> abc)
+        {
+            var items = abc.ToList();
+
+            for (int i = 0; i < items.Count - 1; ++i)
+            {
+                for (int j = i + 1; j < items.Count; ++j)
+                {
+                    if (HaveOverlappingBuffers(items[i], items[j])) return true;
+                }
+            }
+
+            return false;
+        }
+
         #endregion
 
         #region sanitize weights sum

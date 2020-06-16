@@ -59,6 +59,11 @@ namespace SharpGLTF.Schema2
         public ResourceWriteMode ImageWriting { get; set; } = ResourceWriteMode.Default;
 
         /// <summary>
+        /// Gets or sets a callback hook that controls the image writing behavior.
+        /// </summary>
+        public IO.ImageWriterCallback ImageWriteCallback { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether to merge all the buffers in <see cref="MODEL.LogicalBuffers"/> into a single buffer.
         /// </summary>
         public Boolean MergeBuffers { get; set; } = true;
@@ -80,9 +85,12 @@ namespace SharpGLTF.Schema2
         public void CopyTo(WriteSettings other)
         {
             Guard.NotNull(other, nameof(other));
-            this.ImageWriting = other.ImageWriting;
-            this.MergeBuffers = other.MergeBuffers;
-            this.JsonIndented = other.JsonIndented;
+
+            other.ImageWriting = this.ImageWriting;
+            other.ImageWriteCallback = this.ImageWriteCallback;
+            other.MergeBuffers = this.MergeBuffers;
+            other.JsonIndented = this.JsonIndented;
+            other.Validation = this.Validation;
         }
 
         #endregion

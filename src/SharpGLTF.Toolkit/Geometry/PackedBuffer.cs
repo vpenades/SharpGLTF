@@ -18,7 +18,7 @@ namespace SharpGLTF.Geometry
             {
                 if (_Accessors.Count == 0) return null;
 
-                return _Accessors[0].Attribute.PaddedByteLength;
+                return _Accessors[0].Attribute.StepByteLength;
             }
         }
 
@@ -31,7 +31,7 @@ namespace SharpGLTF.Geometry
                 // ensure that all accessors have the same byte stride
                 if (this.ByteStride.HasValue)
                 {
-                    var astride = a.Attribute.PaddedByteLength;
+                    var astride = a.Attribute.StepByteLength;
                     Guard.IsTrue(this.ByteStride.Value == astride, nameof(accessors));
                 }
 
