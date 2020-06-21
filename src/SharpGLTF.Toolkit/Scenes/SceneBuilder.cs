@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Materials;
 using SharpGLTF.Schema2;
 
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
@@ -47,7 +48,6 @@ namespace SharpGLTF.Scenes
                 var cloneInst = inst._CopyTo(clone, args);
 
                 clone._Instances.Add(cloneInst);
-
             }
 
             return clone;
@@ -81,6 +81,8 @@ namespace SharpGLTF.Scenes
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;
+
+        public IEnumerable<MaterialBuilder> Materials => _Instances.SelectMany(item => item.Materials).Distinct(MaterialBuilder.ReferenceComparer);
 
         #endregion
 

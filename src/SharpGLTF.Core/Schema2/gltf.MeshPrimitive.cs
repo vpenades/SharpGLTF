@@ -333,11 +333,14 @@ namespace SharpGLTF.Schema2
 
                 bool ok = false;
 
-                if (overlap) // strided buffer detected
+                // strided buffer detected
+                if (overlap)
                 {
                     ok = group.Sum(item => item.Format.ByteSizePadded) == group.Key.ByteStride;
                 }
-                else // sequential buffer detected
+
+                // sequential buffer detected
+                else
                 {
                     ok = group.All(item => item.Format.ByteSizePadded <= group.Key.ByteStride);
                 }

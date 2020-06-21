@@ -23,7 +23,7 @@ namespace SharpGLTF.Scenes
 
             schema2Target.Setup(dstNode, context);
 
-            context.SetMorphAnimation(dstNode, this.Morphings);
+            Schema2SceneBuilder.SetMorphAnimation(dstNode, this.Morphings);
         }
     }
 
@@ -37,7 +37,7 @@ namespace SharpGLTF.Scenes
 
             schema2Target.Setup(dstNode, context);
 
-            context.SetMorphAnimation(dstNode, this.Morphings);
+            Schema2SceneBuilder.SetMorphAnimation(dstNode, this.Morphings);
         }
     }
 
@@ -88,7 +88,7 @@ namespace SharpGLTF.Scenes
 
             schema2Target.Setup(skinnedMeshNode, context);
 
-            context.SetMorphAnimation(skinnedMeshNode, this.Morphings);
+            Schema2SceneBuilder.SetMorphAnimation(skinnedMeshNode, this.Morphings);
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+
+using SharpGLTF.Collections;
 
 using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Schema2.Scene>;
 
@@ -40,6 +43,15 @@ namespace SharpGLTF.Scenes
         {
             get => _ContentTransformer;
             set => _ContentTransformer = value;
+        }
+
+        public IEnumerable<Materials.MaterialBuilder> Materials
+        {
+            get
+            {
+                var asset = Content.GetGeometryAsset();
+                return asset != null ? asset.Materials : Enumerable.Empty<Materials.MaterialBuilder>();
+            }
         }
 
         #endregion

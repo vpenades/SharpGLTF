@@ -89,9 +89,9 @@ namespace SharpGLTF.Schema2
 
         #region Validation
 
-        protected override void OnValidateContent(Validation.ValidationContext validate)
+        protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
-            base.OnValidateContent(validate);
+            base.OnValidateReferences(validate);
 
             validate.IsTrue(nameof(Version), Version.TryParse(_version, out Version ver), $"Unknown glTF major asset version: {_version}.");
 

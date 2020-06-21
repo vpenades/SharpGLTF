@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
@@ -211,6 +212,8 @@ namespace SharpGLTF.Materials
         }
 
         public static IEqualityComparer<MaterialBuilder> ContentComparer => _ContentComparer.Default;
+
+        public static IEqualityComparer<MaterialBuilder> ReferenceComparer => _ReferenceComparer.Default;
 
         #endregion
 
@@ -549,7 +552,7 @@ namespace SharpGLTF.Materials
 
         #endregion
 
-        #region support types
+        #region nested types
 
         sealed class _ContentComparer : IEqualityComparer<MaterialBuilder>
         {
@@ -563,6 +566,21 @@ namespace SharpGLTF.Materials
             public int GetHashCode(MaterialBuilder obj)
             {
                 return GetContentHashCode(obj);
+            }
+        }
+
+        sealed class _ReferenceComparer : IEqualityComparer<MaterialBuilder>
+        {
+            public static readonly _ReferenceComparer Default = new _ReferenceComparer();
+
+            public bool Equals(MaterialBuilder x, MaterialBuilder y)
+            {
+                return Object.ReferenceEquals(x, y);
+            }
+
+            public int GetHashCode(MaterialBuilder obj)
+            {
+                return RuntimeHelpers.GetHashCode(obj);
             }
         }
 

@@ -87,7 +87,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the visual root <see cref="Node"/> instance that contains this <see cref="Node"/>.
         /// </summary>
-        public Node VisualRoot => this.LogicalParent._FindVisualRootNode(this);
+        public Node VisualRoot => _FindVisualRootNode(this);
 
         /// <summary>
         /// Gets the collection of <see cref="Scene"/> instances that reference this <see cref="Node"/>.
@@ -354,6 +354,16 @@ namespace SharpGLTF.Schema2
 
         #region API - hierarchy
 
+        internal static Node _FindVisualRootNode(Node childNode)
+        {
+            while (true)
+            {
+                var parent = childNode.VisualParent;
+                if (parent == null) return childNode;
+                childNode = parent;
+            }
+        }
+
         /// <summary>
         /// Creates a new <see cref="Node"/> instance,
         /// adds it to <see cref="ModelRoot.LogicalNodes"/>
@@ -483,49 +493,61 @@ namespace SharpGLTF.Schema2
                 .IsNullOrIndex(nameof(Camera), _camera, this.LogicalParent.LogicalCameras);
         }
 
+        internal static void _ValidateParentHierarchy(IEnumerable<Node> nodes, Validation.ValidationContext validate)
+        {
+            var childRefs = new List<int>();
+
+            // in order to check if one node has more than two parents we simply need to check if its
+            // index is repeated among the combined list of children indices.
+
+            foreach (var n in nodes)
+            {
+                childRefs.AddRange(n._children);
+            }
+
+            var uniqueCount = childRefs.Distinct().Count();
+
+            if (uniqueCount == childRefs.Count) return;
+
+            var dupes = childRefs
+                .GroupBy(item => item)
+                .Where(group => group.Count() > 1);
+
+            foreach (var dupe in dupes)
+            {
+                validate._LinkThrow($"LogicalNode[{dupe.Key}]", "has more than one parent.");
+            }
+        }
+
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
             base.OnValidateContent(validate);
 
-            _ValidateHierarchy(validate);
+            _ValidateChildrenHierarchy(validate);
             _ValidateTransforms(validate);
             _ValidateMeshAndSkin(validate, Mesh, Skin, _weights);
         }
 
-        private void _ValidateHierarchy(Validation.ValidationContext validate)
+        private void _ValidateChildrenHierarchy(Validation.ValidationContext validate)
         {
             var allNodes = this.LogicalParent.LogicalNodes;
 
-            var pidx = this.LogicalIndex;
+            var nodePath = new Stack<int>();
 
-            var sequence = new List<int>();
-
-            while (true)
+            void checkTree(Node n)
             {
-                validate = validate.GetContext(allNodes[pidx]);
+                var nidx = n.LogicalIndex;
 
-                if (sequence.Contains(pidx))
-                {
-                    validate._LinkThrow("Node", "is a part of a node loop.");
-                    break;
-                }
+                if (nodePath.Contains(nidx)) validate._LinkThrow($"LogicalNode[{nidx}]", "has a circular reference.");
 
-                sequence.Add(pidx);
+                nodePath.Push(nidx);
 
-                // every node must have 0 or 1 parents.
+                foreach (var cidx in n._children) checkTree(allNodes[cidx]);
 
-                var allParents = allNodes
-                    .Where(n => n._HasVisualChild(pidx))
-                    .ToList();
-
-                if (allParents.Count == 0) break; // we're already root
-
-                validate.IsLessOrEqual((nameof(Node), pidx), allParents.Count, 1); // must have 1 parent
-
-                // validate.AreEqual((nameof(Node), pidx), allParents[0].LogicalIndex, pidx); // part of node loop
-
-                pidx = allParents[0].LogicalIndex;
+                nodePath.Pop();
             }
+
+            checkTree(this);
         }
 
         private void _ValidateTransforms(Validation.ValidationContext validate)
@@ -575,16 +597,6 @@ namespace SharpGLTF.Schema2
 
             // find the logical owner
             return _nodes.FirstOrDefault(item => item._HasVisualChild(childIdx));
-        }
-
-        internal Node _FindVisualRootNode(Node childNode)
-        {
-            while (true)
-            {
-                var parent = childNode.VisualParent;
-                if (parent == null) return childNode;
-                childNode = parent;
-            }
         }
 
         public Node CreateLogicalNode()

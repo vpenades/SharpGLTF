@@ -68,15 +68,15 @@ namespace SharpGLTF.Schema2
             // restore the model from the temporary storage
 
             var rcontext = IO.ReadContext.CreateFromDictionary(dict);
-            rcontext.Validation = Validation.ValidationMode.Strict;
+            rcontext.Validation = Validation.ValidationMode.Skip;
             var cloned = rcontext._ReadFromDictionary("deepclone.gltf");
 
             // Restore MemoryImage source URIs (they're not cloned as part of the serialization)
             foreach (var srcImg in this.LogicalImages)
             {
                 var dstImg = cloned.LogicalImages[srcImg.LogicalIndex];
-                var img = dstImg.MemoryImage;
-                dstImg.MemoryImage = new Memory.MemoryImage(img._GetBuffer(), srcImg.MemoryImage.SourcePath);
+                var img = dstImg.Content;
+                dstImg.Content = new Memory.MemoryImage(img._GetBuffer(), srcImg.Content.SourcePath);
             }
 
             return cloned;
@@ -170,6 +170,8 @@ namespace SharpGLTF.Schema2
                 .NotNull(nameof(Asset), this.Asset)
                 .IsNullOrIndex(nameof(DefaultScene), _scene, this.LogicalScenes);
 
+            Asset.ValidateReferences(validate);
+
             // check incompatible extensions
 
             foreach (var iex in this.IncompatibleExtensions)
@@ -178,12 +180,12 @@ namespace SharpGLTF.Schema2
             }
 
             base.OnValidateReferences(validate);
+
+            Node._ValidateParentHierarchy(this.LogicalNodes, validate);
         }
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
         {
-            // 1st check version number
-
             Asset.ValidateContent(validate);
 
             base.OnValidateContent(validate);

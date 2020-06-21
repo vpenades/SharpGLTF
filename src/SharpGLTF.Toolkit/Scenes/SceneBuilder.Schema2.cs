@@ -119,7 +119,7 @@ namespace SharpGLTF.Scenes
             foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode.CreateNode, c);
         }
 
-        public void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
+        public static void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
         {
             if (animation == null) return;
 

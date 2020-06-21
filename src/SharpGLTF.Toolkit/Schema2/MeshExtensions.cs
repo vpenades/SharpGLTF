@@ -29,10 +29,10 @@ namespace SharpGLTF.Schema2
         public static IReadOnlyList<Mesh> CreateMeshes(this ModelRoot root, params IMeshBuilder<Materials.MaterialBuilder>[] meshBuilders)
         {
             // until this point, even if the multiple material instances used by the meshes have the same content definition,
-            // we must handling material equality by its object reference and nothing else, because Materials.MaterialBuilder
-            // is a mutable object, and we cannot guarantee two material instances will keep having the same content.
+            // we must handle material equality by its object reference and nothing else, because Materials.MaterialBuilder
+            // is a mutable object, and we cannot guarantee two material instances will keep having the same content over time.
 
-            // it is at this point where we can coalesce materials with the same content.
+            // * it is at this point where we can coalesce materials with the same content.
 
             // TODO: in order to coalesce MaterialBuilder instances with same content
             // an IMeshBuilder could wrap the incoming mesh, and merge primitives with shared meshes.

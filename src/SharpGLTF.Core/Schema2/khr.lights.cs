@@ -241,9 +241,9 @@ namespace SharpGLTF.Schema2
 
     partial class KHR_lights_punctualnodeextension
     {
-        internal KHR_lights_punctualnodeextension(Node node)
-        {
-        }
+        #pragma warning disable CA1801 // Review unused parameters
+        internal KHR_lights_punctualnodeextension(Node node) { }
+        #pragma warning restore CA1801 // Review unused parameters
 
         public int LightIndex
         {

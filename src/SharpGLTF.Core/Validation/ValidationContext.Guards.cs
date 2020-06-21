@@ -202,7 +202,11 @@ namespace SharpGLTF.Validation
         {
             int idx = 0;
 
-            if (collection == null) _LinkThrow(parameterName, "must not be null.");
+            if (collection == null)
+            {
+                _LinkThrow(parameterName, "must not be null.");
+                return this;
+            }
 
             var uniqueInstances = new HashSet<T>();
 
@@ -334,6 +338,8 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE That(Action action)
         {
+            Guard.NotNull(action, nameof(action));
+
             try
             {
                 action.Invoke();

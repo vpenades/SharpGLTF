@@ -65,7 +65,9 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
+        #pragma warning disable CA1801 // Review unused parameters
         internal TextureTransform(TextureInfo parent) { }
+        #pragma warning restore CA1801 // Review unused parameters
 
         #endregion
 

@@ -41,6 +41,14 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
+        public static implicit operator WriteSettings(VALIDATIONMODE vmode)
+        {
+            return new WriteSettings
+            {
+                Validation = vmode
+            };
+        }
+
         public WriteSettings() { }
 
         public WriteSettings(WriteSettings other)

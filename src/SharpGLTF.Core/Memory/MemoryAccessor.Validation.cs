@@ -25,6 +25,9 @@ namespace SharpGLTF.Memory
 
         public static bool HaveOverlappingBuffers(MemoryAccessor a, MemoryAccessor b)
         {
+            Guard.NotNull(a, nameof(a));
+            Guard.NotNull(b, nameof(b));
+
             var aa = a._GetBytes();
             var bb = b._GetBytes();
 

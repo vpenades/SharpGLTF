@@ -213,7 +213,9 @@ namespace SharpGLTF.Schema2
 
     internal sealed partial class MaterialPBRSpecularGlossiness
     {
+        #pragma warning disable CA1801 // Review unused parameters
         internal MaterialPBRSpecularGlossiness(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
@@ -281,12 +283,16 @@ namespace SharpGLTF.Schema2
 
     internal sealed partial class MaterialUnlit
     {
+        #pragma warning disable CA1801 // Review unused parameters
         internal MaterialUnlit(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
     }
 
     internal sealed partial class MaterialClearCoat
     {
+        #pragma warning disable CA1801 // Review unused parameters
         internal MaterialClearCoat(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
