@@ -152,7 +152,7 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// Gets the file bytes of the image.
         /// </summary>
-        public ReadOnlySpan<Byte> Content => _Image;
+        public ReadOnlyMemory<Byte> Content => _Image;
 
         /// <summary>
         /// Gets the source path of this image, or null if the image cannot be tracked to a file path (as it is the case of embedded images)
