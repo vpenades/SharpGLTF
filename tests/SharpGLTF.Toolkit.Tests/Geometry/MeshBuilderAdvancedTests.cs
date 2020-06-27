@@ -51,6 +51,7 @@ namespace SharpGLTF.Geometry
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");
+            scene.AttachToCurrentTest("result.plotly");
         }
 
         [Test(Description = "Creates a scene with 4 meshes, where the meshes have been initialized so they can share the same vertex and index buffers")]
@@ -115,6 +116,7 @@ namespace SharpGLTF.Geometry
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
+            scene.AttachToCurrentTest("result.plotly");
         }
 
         [Test(Description = "Creates a node animated scene.")]
@@ -283,6 +285,7 @@ namespace SharpGLTF.Geometry
 
             // save the model as GLB
             model.AttachToCurrentTest("terrain.glb");
+            model.AttachToCurrentTest("result.plotly");
         }
 
         [Test(Description = "Creates a scene with 1 million points cloud.")]        
@@ -376,6 +379,7 @@ namespace SharpGLTF.Geometry
             // save the model as GLB
             scene.AttachToCurrentTest("cubes.glb");
             scene.AttachToCurrentTest("cubes.gltf");
+            scene.AttachToCurrentTest("cubes.plotly");
         }
 
         [Test(Description ="Simulates animating mesh visibility by setting scale to (0,0,0)")]

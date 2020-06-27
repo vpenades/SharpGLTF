@@ -37,6 +37,7 @@ namespace SharpGLTF.Scenes
 
             scene.AttachToCurrentTest("cube.glb");
             scene.AttachToCurrentTest("cube.gltf");
+            scene.AttachToCurrentTest("cube.plotly");
         }
 
         [Test(Description ="Creates a cube attached to an animated node.")]
@@ -159,6 +160,7 @@ namespace SharpGLTF.Scenes
             // save the model as GLB
 
             scene.AttachToCurrentTest("shapes.glb");
+            scene.AttachToCurrentTest("shapes.plotly");
         }
 
         [Test]
@@ -477,7 +479,7 @@ namespace SharpGLTF.Scenes
                 .FirstOrDefault(item => item.Contains(path));
 
             var srcModel = Schema2.ModelRoot.Load(path, Validation.ValidationMode.TryFix);
-            Assert.NotNull(srcModel);
+            Assert.NotNull(srcModel);            
 
             // perform roundtrip
 
@@ -512,6 +514,9 @@ namespace SharpGLTF.Scenes
             // save file
 
             path = System.IO.Path.GetFileNameWithoutExtension(path);
+
+            srcModel.AttachToCurrentTest(path + "_src" + ".plotly");
+
             srcModel.AttachToCurrentTest(path + "_src" + ".glb");
             rowModel.AttachToCurrentTest(path + "_row" + ".glb");
             colModel.AttachToCurrentTest(path + "_col" + ".glb");
@@ -672,7 +677,6 @@ namespace SharpGLTF.Scenes
             scene.AddScene(polly, xform1);
 
             scene.AttachToCurrentTest("construction.glb");
-
         }
 
     }

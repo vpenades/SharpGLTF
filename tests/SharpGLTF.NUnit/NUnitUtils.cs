@@ -75,5 +75,16 @@ namespace SharpGLTF
 
             return fileName;
         }
+
+        public static T AttachToCurrentTest<T>(this T target, string fileName, Action<T, string> onSave)
+        {
+            var filePath = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
+
+            onSave(target, filePath);
+
+            if (System.IO.File.Exists(filePath)) TestContext.AddTestAttachment(filePath);
+
+            return target;
+        }
     }
 }

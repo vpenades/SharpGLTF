@@ -118,14 +118,14 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.01f)
             {
-                var hermite = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+                var (startPosition, endPosition, startTangent, endTangent) = Animations.SamplerFactory.CreateHermitePointWeights(amount);
 
                 var p = Vector2.Zero;
 
-                p += p1 * hermite.StartPosition;
-                p += p4 * hermite.EndPosition;
-                p += (p2 - p1) * 4 * hermite.StartTangent;
-                p += (p4 - p3) * 4 * hermite.EndTangent;
+                p += p1 * startPosition;
+                p += p4 * endPosition;
+                p += (p2 - p1) * 4 * startTangent;
+                p += (p4 - p3) * 4 * endTangent;
 
                 ppp.Add(p);
             }
@@ -142,11 +142,11 @@ namespace SharpGLTF
 
             // plotting
 
-            var series1 = ppp.ToPointSeries();
-            var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries();
-            var series3 = new[] { pp, pp + pt }.ToLineSeries();
+            var series1 = ppp.ToPointSeries("sampling");
+            var series2 = new[] { p1, p2, p3, p4 }.ToLineSeries("source");
+            var series3 = new[] { pp, pp + pt }.ToLineSeries("tangent");
 
-            new[] { series1, series2, series3 }.AttachToCurrentTest("plot.png");
+            new[] { series1, series2, series3 }.AttachToCurrentTest("plot.html");
         }
 
         [Test]
@@ -160,21 +160,21 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.1f)
             {
-                var hermite = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+                var (startPosition, endPosition, startTangent, endTangent) = Animations.SamplerFactory.CreateHermitePointWeights(amount);
 
                 var p = Vector2.Zero;
 
-                p += p1 * hermite.StartPosition;
-                p += p2 * hermite.EndPosition;
-                p += t * hermite.StartTangent;
-                p += t * hermite.EndTangent;
+                p += p1 * startPosition;
+                p += p2 * endPosition;
+                p += t * startTangent;
+                p += t * endTangent;
 
                 ppp.Add(p);
             }
 
             var series1 = ppp.ToPointSeries().WithLineType(Plotting.LineType.Star);
 
-            new[] { series1 }.AttachToCurrentTest("plot.png");
+            new[] { series1 }.AttachToCurrentTest("plot.html");
         }
 
         [Test]
@@ -224,7 +224,7 @@ namespace SharpGLTF
 
             angles.ToPointSeries()
                 .WithLineType(Plotting.LineType.Continuous)
-                .AttachToCurrentTest("plot.png");
+                .AttachToCurrentTest("plot.html");
         
         }
 
@@ -261,7 +261,7 @@ namespace SharpGLTF
             points
                 .Select(p => new Vector2(p.X, p.Y))
                 .ToPointSeries()                
-                .AttachToCurrentTest("plot.png");            
+                .AttachToCurrentTest("plot.html");            
         }
 
         [Test]

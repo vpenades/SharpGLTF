@@ -8,13 +8,13 @@ namespace SharpGLTF
 {
     public static class Plotting
     {
-        public static Point2Series ToPointSeries(this IEnumerable<Single> points) { return Point2Series.Create(points); }
+        public static Point2Series ToPointSeries(this IEnumerable<Single> points, string name = null) { return Point2Series.Create(points).WithName(name); }
 
-        public static Point2Series ToPointSeries(this IEnumerable<Double> points) { return Point2Series.Create(points); }
+        public static Point2Series ToPointSeries(this IEnumerable<Double> points, string name = null) { return Point2Series.Create(points).WithName(name); }
 
-        public static Point2Series ToPointSeries(this IEnumerable<Vector2> points) { return Point2Series.Create(points); }
+        public static Point2Series ToPointSeries(this IEnumerable<Vector2> points, string name = null) { return Point2Series.Create(points).WithName(name); }
 
-        public static Point2Series ToLineSeries(this IEnumerable<Vector2> points) { return Point2Series.Create(points, LineType.Continuous); }
+        public static Point2Series ToLineSeries(this IEnumerable<Vector2> points, string name = null) { return Point2Series.Create(points, LineType.Continuous).WithName(name); }
 
         public enum LineType
         {
@@ -89,6 +89,8 @@ namespace SharpGLTF
                 return ps;
             }
 
+            public Point2Series WithName(string name) { Name = name; return this; }
+
             #endregion
 
             #region data
@@ -99,17 +101,31 @@ namespace SharpGLTF
 
             #region properties
 
+            public string Name { get; set; }
+
             public LineType LineType { get; set; }
 
             #endregion
 
             #region API
 
-            public Point2Series WithLineType(LineType t) { LineType = t; return this; }
+            public Point2Series WithLineType(LineType t) { LineType = t; return this; }            
 
             public void DrawToFile(string filePath)
             {
                 DrawToFile(filePath, this);
+            }
+
+            private Plotly.Box<Plotly.Types.ITracesProperty> GetTrace()
+            {
+                var x = Plotly.Scatter.x(_Points.Select(item => (float)item.X));
+                var y = Plotly.Scatter.y(_Points.Select(item => (float)item.Y));
+
+                var mode = LineType == LineType.Continuous ? Plotly.Scatter.Mode.lines() : Plotly.Scatter.Mode.markers();
+
+                var name = Plotly.Scatter.name(this.Name);
+
+                return Plotly.Traces.scatter(x, y, mode, name);
             }
 
             public static (Point2, Point2) GetBounds(params Point2Series[] series)
@@ -127,51 +143,18 @@ namespace SharpGLTF
 
             public static void DrawToFile(string filePath, params Point2Series[] series)
             {
-                // arguments check
-                if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentNullException(nameof(filePath));
+                var traces = series
+                    .Select(item => item.GetTrace())
+                    .ToArray();
 
-                var bounds = GetBounds(series);
+                var plot = Plotly.Plot.traces(traces);
 
-                try
-                {
-                    using (var pl = new PLplot.PLStream())
-                    {
-                        pl.sdev("pngcairo");
-                        pl.sfnam(filePath);
-                        pl.spal0("cmap0_alternate.pal");
+                var chart = new Plotly.Plot(plot);
 
-                        pl.init();
+                var html = chart.Render().ToString();
 
-                        pl.env(bounds.Item1.X, bounds.Item2.X, bounds.Item1.Y, bounds.Item2.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
-
-                        for (int i = 0; i < series.Length; ++i)
-                        {
-                            var ps = series[i];
-                            var s = ps._Points;
-
-                            var seriesX = new double[s.Count];
-                            var seriesY = new double[s.Count];
-
-                            for (int j = 0; j < s.Count; ++j)
-                            {
-                                seriesX[j] = s[j].X;
-                                seriesY[j] = s[j].Y;
-                            }
-
-                            pl.col0(i + 2);
-
-                            if (ps.LineType == LineType.Continuous) pl.line(seriesX, seriesY);
-                            else pl.poin(seriesX, seriesY, (char)ps.LineType);
-                        }
-
-                        pl.eop(); // write to disk
-                    }
-                }
-                catch
-                {
-                    NUnit.Framework.TestContext.WriteLine("PLPlot not supported.");
-                }
-            }
+                System.IO.File.WriteAllText(filePath, html);
+            }            
 
             #endregion
         }
@@ -200,12 +183,7 @@ namespace SharpGLTF
             #endregion
 
             #region API
-
-            public void DrawToFile(string filePath)
-            {
-                DrawToFile(filePath, this);
-            }
-
+            
             public static (Vector3 Min,  Vector3 Max) GetBounds(params Point3Series[] series)
             {
                 var xmin = series.SelectMany(item => item._Points).Min(item => item.X);
@@ -223,65 +201,34 @@ namespace SharpGLTF
                 return (new Vector3(xmin, ymin,zmin), new Vector3(xmax, ymax, zmax));
             }
 
-            public static void DrawToFile(string filePath, params Point3Series[] series)
+            private Plotly.Box<Plotly.Types.ITracesProperty> GetTrace()
             {
-                // arguments check
-                if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentNullException(nameof(filePath));
-
-                var plen = series
-                    .Select(item => item._Points.Count)
-                    .Max();
-
-                if (plen < 1) throw new ArgumentOutOfRangeException($"The series only has {plen} values", nameof(series));
-
-                if (series.Any(item => item._Lines))
-                {
-                    plen = series
-                        .Where(item => item._Lines)
-                        .Select(item => item._Points.Count)
-                        .Max();
-
-                    if (plen < 2) throw new ArgumentOutOfRangeException($"The series only has {plen} values", nameof(series));
-                }
-
-                var bounds = GetBounds(series);
-
-                using (var pl = new PLplot.PLStream())
-                {
-                    pl.sdev("pngcairo");
-                    pl.sfnam(filePath);
-                    pl.spal0("cmap0_alternate.pal");
-
-                    pl.init();
-
-                    pl.env(bounds.Min.X, bounds.Max.X, bounds.Min.Y, bounds.Max.Y, PLplot.AxesScale.Independent, PLplot.AxisBox.BoxTicksLabelsAxes);
-
-                    for (int i = 0; i < series.Length; ++i)
-                    {
-                        var ps = series[i];
-                        var s = ps._Points;
-
-                        var seriesX = new double[s.Count];
-                        var seriesY = new double[s.Count];
-                        var seriesZ = new double[s.Count];
-
-                        for (int j = 0; j < s.Count; ++i)
-                        {
-                            seriesX[j] = s[j].X;
-                            seriesY[j] = s[j].Y;
-                            seriesZ[j] = s[j].Z;
-                        }
-
-                        pl.col0(i + 2);
-
-                        if (ps._Lines) pl.line3(seriesX, seriesY, seriesZ);
-                        else pl.poin3(seriesX, seriesY, seriesZ, ps._PointGlyph);
-                    }
-
-                    pl.eop(); // write to disk
-                }
+                var x = Plotly.Scatter3d.x(_Points.Select(item => (float)item.X));
+                var y = Plotly.Scatter3d.y(_Points.Select(item => (float)item.Y));
+                var z = Plotly.Scatter3d.z(_Points.Select(item => (float)item.Z));
+                return Plotly.Traces.scatter3d(x, y, z);
             }
 
+            public void DrawToFile(string filePath)
+            {
+                DrawToFile(filePath, this);
+            }
+
+            public static void DrawToFile(string filePath, params Point3Series[] series)
+            {
+                var traces = series
+                    .Select(item => item.GetTrace())
+                    .ToArray();
+
+                var plot = Plotly.Plot.traces(traces);
+
+                var chart = new Plotly.Plot(plot);
+
+                var html = chart.Render().ToString();
+
+                System.IO.File.WriteAllText(filePath, html);
+            }
+            
             #endregion
         }
     }

@@ -16,13 +16,13 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>    
-    <PackageReference Include="nunit" Version="3.12.0" />    
-    <PackageReference Include="PLplot" Version="5.13.7" />
+  <ItemGroup>
+    <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>    
+    <ProjectReference Include="..\..\examples\SharpGLTF.Plotly\SharpGLTF.Plotly.csproj" />    
     <ProjectReference Include="..\..\src\SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj" />
   </ItemGroup>
 
