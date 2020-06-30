@@ -79,31 +79,11 @@ namespace SharpGLTF
             {
                 fileName = fileName.Replace(".plotly", ".html");
 
-                
+                var html = model.DefaultScene
+                    .ToPlotly()
+                    .ToHtml();
 
-                var trace = model.DefaultScene.ToTrace();
-                var plot = Plotly.Plot.traces(trace);
-
-                var xaxis = Plotly.Scene.xaxis(Plotly.Xaxis.color("red"));
-                var yaxis = Plotly.Scene.yaxis(Plotly.Yaxis.color("green"));
-                var zaxis = Plotly.Scene.zaxis(Plotly.Zaxis.color("blue"));
-                var camera = Plotly.Camera.up(Plotly.Up.x(0), Plotly.Up.y(1), Plotly.Up.z(0));
-                var scene = Plotly.Layout.scene(Plotly.Scene.Aspectmode.data(), Plotly.Scene.camera(camera) ,xaxis,yaxis,zaxis );
-
-                var layout = Plotly.Plot.layout
-                    ( Plotly.Layout.autosize(true)
-                    // , Plotly.Layout.width(0)
-                    , Plotly.Layout.height(920)
-                    // , Plotly.Layout.margin(Plotly.Margin.autoexpand(true))
-                    // , Plotly.Layout.margin(Plotly.Margin.pad(5))                    
-                    // , Plotly.Layout.margin(Plotly.Margin.t(5), Plotly.Margin.b(5))                    
-                    , scene
-                    );                
-
-                var document = new Plotly.Plot(plot, layout);                
-                var render = document.Render().ToString();
-
-                System.IO.File.WriteAllText(fileName, render);
+                System.IO.File.WriteAllText(fileName, html);
             }
 
             // Attach the saved file to the current test

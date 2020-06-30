@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using TRACES = Plotly.Box<Plotly.Types.ITracesProperty>;
+
 namespace SharpGLTF
 {
     public static class Plotting
@@ -116,7 +118,7 @@ namespace SharpGLTF
                 DrawToFile(filePath, this);
             }
 
-            private Plotly.Box<Plotly.Types.ITracesProperty> GetTrace()
+            private TRACES GetTrace()
             {
                 var x = Plotly.Scatter.x(_Points.Select(item => (float)item.X));
                 var y = Plotly.Scatter.y(_Points.Select(item => (float)item.Y));

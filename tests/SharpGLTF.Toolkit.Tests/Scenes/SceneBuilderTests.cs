@@ -553,6 +553,8 @@ namespace SharpGLTF.Scenes
             var srcModel = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
             Assert.NotNull(srcModel);
 
+            srcModel.AttachToCurrentTest("GearBoxAssy.plotly");
+
             // convert it to a SceneBuilder so we can manipulate it:
             var srcScene = srcModel.DefaultScene.ToSceneBuilder();
 
