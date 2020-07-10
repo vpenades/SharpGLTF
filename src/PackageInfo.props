@@ -4,7 +4,7 @@
   <PropertyGroup>
     
     <Authors>Vicente Penades</Authors>
-    <Copyright>Copyright (c) 2019 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) 2020 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>
     
     <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>

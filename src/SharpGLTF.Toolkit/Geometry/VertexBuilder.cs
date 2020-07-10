@@ -212,9 +212,9 @@ namespace SharpGLTF.Geometry
             return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvS Mat) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvS Skin) tuple)
         {
-            return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat);
+            return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Skin);
         }
 
         public static implicit operator VertexBuilder<TvG, TvM, TvS>(TvG g)
