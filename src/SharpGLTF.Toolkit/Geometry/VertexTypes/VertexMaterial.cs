@@ -27,8 +27,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a material Color.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐂:{Color}")]
-    public struct VertexColor1 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor1 : IVertexMaterial, IEquatable<VertexColor1>
     {
         #region debug
 
@@ -66,6 +66,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 0;
 
+        public override bool Equals(object obj) { return obj is VertexColor1 other && AreEqual(this, other); }
+        public bool Equals(VertexColor1 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor1 a, in VertexColor1 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor1 a, in VertexColor1 b) { return !AreEqual(a, b); }
+
+        public static bool AreEqual(in VertexColor1 a, in VertexColor1 b)
+        {
+            return a.Color == b.Color;
+        }
+
+        public override int GetHashCode() { return Color.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -95,8 +107,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a two material Colors.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐂₀:{Color0} 𝐂₁:{Color1}")]
-    public struct VertexColor2 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor2 : IVertexMaterial, IEquatable<VertexColor2>
     {
         #region debug
 
@@ -139,6 +151,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 0;
 
+        public override bool Equals(object obj) { return obj is VertexColor2 other && AreEqual(this, other); }
+        public bool Equals(VertexColor2 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor2 a, in VertexColor2 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor2 a, in VertexColor2 b) { return !AreEqual(a, b); }
+
+        public static bool AreEqual(in VertexColor2 a, in VertexColor2 b)
+        {
+            return a.Color0 == b.Color0 && a.Color1 == b.Color1;
+        }
+
+        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -170,8 +194,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Texture Coordinate.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐔𝐕:{TexCoord}")]
-    public struct VertexTexture1 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexTexture1 : IVertexMaterial, IEquatable<VertexTexture1>
     {
         #region debug
 
@@ -209,6 +233,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 1;
 
+        public override bool Equals(object obj) { return obj is VertexTexture1 other && AreEqual(this, other); }
+        public bool Equals(VertexTexture1 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexTexture1 a, in VertexTexture1 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexTexture1 a, in VertexTexture1 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexTexture1 a, in VertexTexture1 b)
+        {
+            return a.TexCoord == b.TexCoord;
+        }
+
+        public override int GetHashCode() { return TexCoord.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -238,8 +273,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two Texture Coordinates.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
-    public struct VertexTexture2 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexTexture2 : IVertexMaterial, IEquatable<VertexTexture2>
     {
         #region debug
 
@@ -282,6 +317,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 2;
 
+        public override bool Equals(object obj) { return obj is VertexTexture2 other && AreEqual(this, other); }
+        public bool Equals(VertexTexture2 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexTexture2 a, in VertexTexture2 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexTexture2 a, in VertexTexture2 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexTexture2 a, in VertexTexture2 b)
+        {
+            return a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
+        }
+
+        public override int GetHashCode() { return TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -316,8 +362,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
-    public struct VertexColor1Texture1 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor1Texture1 : IVertexMaterial, IEquatable<VertexColor1Texture1>
     {
         #region debug
 
@@ -360,6 +406,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 1;
 
+        public override bool Equals(object obj) { return obj is VertexColor1Texture1 other && AreEqual(this, other); }
+        public bool Equals(VertexColor1Texture1 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexColor1Texture1 a, in VertexColor1Texture1 b)
+        {
+            return a.TexCoord == b.TexCoord && a.Color == b.Color;
+        }
+
+        public override int GetHashCode() { return TexCoord.GetHashCode() ^ Color.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -390,8 +447,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a material Colors and two Texture Coordinates.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
-    public struct VertexColor1Texture2 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor1Texture2 : IVertexMaterial, IEquatable<VertexColor1Texture2>
     {
         #region debug
 
@@ -439,6 +496,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public int MaxTextCoords => 2;
 
+        public override bool Equals(object obj) { return obj is VertexColor1Texture2 other && AreEqual(this, other); }
+        public bool Equals(VertexColor1Texture2 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexColor1Texture2 a, in VertexColor1Texture2 b)
+        {
+            return a.Color == b.Color && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
+        }
+
+        public override int GetHashCode() { return Color.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -477,8 +545,8 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}")]
-    public struct VertexColor2Texture2 : IVertexMaterial
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor2Texture2 : IVertexMaterial, IEquatable<VertexColor2Texture2>
     {
         #region debug
 
@@ -530,6 +598,18 @@ namespace SharpGLTF.Geometry.VertexTypes
         public int MaxColors => 2;
 
         public int MaxTextCoords => 2;
+
+        public override bool Equals(object obj) { return obj is VertexColor2Texture2 other && AreEqual(this, other); }
+        public bool Equals(VertexColor2Texture2 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return !AreEqual(a, b); }
+
+        public static bool AreEqual(in VertexColor2Texture2 a, in VertexColor2Texture2 b)
+        {
+            return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
+        }
+
+        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
 
         #endregion
 

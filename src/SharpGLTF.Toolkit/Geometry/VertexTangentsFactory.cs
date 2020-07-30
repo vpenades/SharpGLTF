@@ -6,9 +6,9 @@ using System.Text;
 
 namespace SharpGLTF.Geometry
 {
-    using VERTEXKEY = System.ValueTuple<System.Numerics.Vector3, System.Numerics.Vector3, System.Numerics.Vector2>;
+    using VERTEXKEY = System.ValueTuple<Vector3, Vector3, Vector2>;
 
-    class VertexTangentsFactory
+    static class VertexTangentsFactory
     {
         // https://gamedev.stackexchange.com/questions/128023/how-does-mikktspace-work-for-calculating-the-tangent-space-during-normal-mapping
         // https://stackoverflow.com/questions/25349350/calculating-per-vertex-tangents-for-glsl
@@ -17,6 +17,9 @@ namespace SharpGLTF.Geometry
         // https://www.marti.works/calculating-tangents-for-your-mesh/
         // https://www.html5gamedevs.com/topic/34364-gltf-support-and-mikkt-space/
 
+        /// <summary>
+        /// this interface must be defined by the input primitive to which we want to add tangents
+        /// </summary>
         public interface IMeshPrimitive
         {
             int VertexCount { get; }

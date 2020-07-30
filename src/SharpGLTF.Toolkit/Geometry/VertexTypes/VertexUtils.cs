@@ -104,7 +104,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static TvP ConvertToGeometry<TvP>(this IVertexGeometry src)
             where TvP : struct, IVertexGeometry
         {
-            if (src.GetType() == typeof(TvP)) return (TvP)src;
+            if (src is TvP srcTyped) return srcTyped;
 
             var dst = default(TvP);
 
@@ -118,7 +118,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static TvM ConvertToMaterial<TvM>(this IVertexMaterial src)
             where TvM : struct, IVertexMaterial
         {
-            if (src.GetType() == typeof(TvM)) return (TvM)src;
+            if (src is TvM srcTyped) return srcTyped;
 
             var dst = default(TvM);
 
@@ -156,7 +156,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static TvS ConvertToSkinning<TvS>(this IVertexSkinning src)
             where TvS : struct, IVertexSkinning
         {
-            if (src.GetType() == typeof(TvS)) return (TvS)src;
+            if (src is TvS srcTyped) return srcTyped;
 
             var sparse = src.MaxBindings > 0 ? src.GetWeights() : default;
 

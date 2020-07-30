@@ -200,6 +200,14 @@ namespace SharpGLTF.Geometry
 
         #region API
 
+        public void Validate()
+        {
+            foreach (var v in _Vertices)
+            {
+                v.Validate();
+            }
+        }
+
         /// <summary>
         /// Checks if <paramref name="vertex"/> is a compatible vertex and casts it, or converts it if it is not.
         /// </summary>
@@ -207,12 +215,7 @@ namespace SharpGLTF.Geometry
         /// <returns>A vertex compatible with this primitive.</returns>
         private static VertexBuilder<TvG, TvM, TvS> ConvertVertex(IVertexBuilder vertex)
         {
-            Guard.NotNull(vertex, nameof(vertex));
-
-            var vv = vertex.ConvertTo<TvG, TvM, TvS>();
-            System.Diagnostics.Debug.Assert(vv.Position == vertex.GetGeometry().GetPosition());
-
-            return vv;
+            return VertexBuilder<TvG, TvM, TvS>.CreateFrom(vertex);
         }
 
         /// <summary>
@@ -299,31 +302,24 @@ namespace SharpGLTF.Geometry
             return AddQuadrangle(ConvertVertex(a), ConvertVertex(b), ConvertVertex(c), ConvertVertex(d));
         }
 
-        public void Validate()
-        {
-            foreach (var v in _Vertices)
-            {
-                v.Validate();
-            }
-        }
-
-        public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
-        {
-            _Vertices.TransformVertices(vertexTransformFunc);
-
-            TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
-
-            foreach (var mt in _MorphTargets) mt.TransformVertices(geoFunc);
-        }
-
         internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
         {
             if (primitive == null) return;
 
             if (vertexTransformFunc == null) vertexTransformFunc = v => v;
 
-            // vertex-vertex map so we can know where to set the morph targets.
-            var vmap = new Dictionary<int, int>();
+            AddPrimitive<TMaterial>(primitive, v => vertexTransformFunc((VertexBuilder<TvG, TvM, TvS>)v));
+        }
+
+        internal void AddPrimitive<TAnyMaterial>(IPrimitiveReader<TAnyMaterial> primitive, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
+        {
+            if (primitive == null) return;
+
+            Guard.NotNull(vertexTransformFunc, nameof(vertexTransformFunc));
+
+            // if the input primitive has morph targets, we need to keep track of the new index location
+            // of the vertices in the destination primitive, so we can retarget the mopth target indices.
+            var vmap = primitive.MorphTargets.Count == 0 ? null : new Dictionary<int, int>();
 
             if (this.VerticesPerPrimitive == 1)
             {
@@ -333,7 +329,7 @@ namespace SharpGLTF.Geometry
 
                     var idx = AddPoint(vrt);
 
-                    vmap[src] = idx;
+                    if (vmap != null) vmap[src] = idx;
                 }
             }
 
@@ -346,8 +342,11 @@ namespace SharpGLTF.Geometry
 
                     var (dstA, dstB) = AddLine(vrtA, vrtB);
 
-                    vmap[srcA] = dstA;
-                    vmap[srcB] = dstB;
+                    if (vmap != null)
+                    {
+                        vmap[srcA] = dstA;
+                        vmap[srcB] = dstB;
+                    }
                 }
             }
 
@@ -364,28 +363,47 @@ namespace SharpGLTF.Geometry
                         var vrtD = vertexTransformFunc(primitive.Vertices[srcD.Value]);
                         var (dstA, dstB, dstC, dstD) = AddQuadrangle(vrtA, vrtB, vrtC, vrtD);
 
-                        vmap[srcA] = dstA;
-                        vmap[srcB] = dstB;
-                        vmap[srcC] = dstC;
-                        vmap[srcD.Value] = dstD;
+                        if (vmap != null)
+                        {
+                            vmap[srcA] = dstA;
+                            vmap[srcB] = dstB;
+                            vmap[srcC] = dstC;
+                            vmap[srcD.Value] = dstD;
+                        }
                     }
                     else
                     {
                         var (dstA, dstB, dstC) = AddTriangle(vrtA, vrtB, vrtC);
 
-                        vmap[srcA] = dstA;
-                        vmap[srcB] = dstB;
-                        vmap[srcC] = dstC;
+                        if (vmap != null)
+                        {
+                            vmap[srcA] = dstA;
+                            vmap[srcB] = dstB;
+                            vmap[srcC] = dstC;
+                        }
                     }
                 }
             }
 
+            if (vmap != null)
+            {
+                TvG geoTransformFunc(IVertexGeometry g) => vertexTransformFunc(new VertexBuilder(g)).Geometry;
+
+                for (int i = 0; i < primitive.MorphTargets.Count; ++i)
+                {
+                    var smt = primitive.MorphTargets[i];
+                    _UseMorphTarget(i).SetMorphTargets(smt, vmap, geoTransformFunc);
+                }
+            }
+        }
+
+        public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
+        {
+            _Vertices.TransformVertices(vertexTransformFunc);
+
             TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
 
-            for (int i = 0; i < primitive._MorphTargets.Count; ++i)
-            {
-                _UseMorphTarget(i).SetMorphTargets(primitive._MorphTargets[i], vmap, geoFunc);
-            }
+            foreach (var mt in _MorphTargets) mt.TransformVertices(geoFunc);
         }
 
         #endregion

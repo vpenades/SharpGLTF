@@ -64,9 +64,7 @@ namespace SharpGLTF
         private static readonly string _UniVRMModelsDir;
         private static readonly string _BabylonJsMeshesDir;
         private static readonly string _BabylonJsPlaygroundDir;
-        private static readonly string _GeneratedModelsDir;
-
-        private static readonly string[] _BabylonJsInvalidFiles = { };        
+        private static readonly string _GeneratedModelsDir;        
 
         #endregion
 
@@ -187,33 +185,32 @@ namespace SharpGLTF
                 .ToList();
         }
 
-        public static IReadOnlyList<string> GetBabylonJSValidModelsPaths()
+        public static IReadOnlyList<string> GetBabylonJSModelsPaths(bool validOrInvalid = true)
         {
             _Check();
+
+            var skipAlways = new string[]
+            {
+                "\\Sheen\\Cloth.gltf", // still a pull request https://github.com/KhronosGroup/glTF/pull/1688
+                "\\Tests\\AssetGenerator\\",
+                "\\Demos\\retargeting\\riggedMesh.glb",
+                "\\Demos\\retargeting\\riggedMesh-recycled.glb",
+                "\\Demos\\retargeting\\riggedMesh-source.glb"
+            };
+
+            var invalid = new string[]
+            {                
+                
+            };
 
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
                 .OrderBy(item => item)
-                .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
-                .Where(item => !item.Contains("\\Sheen\\"))
-                .Where(item => !item.Contains("\\Demos\\retargeting\\riggedMesh.glb"))
-                .Where(item => !_BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))                
+                .Where(item => skipAlways.All(f => !item.Contains(f)))
+                .Where(item => validOrInvalid == invalid.All(f => !item.EndsWith(f)))
                 .ToList();
-        }
-
-        public static IReadOnlyList<string> GetBabylonJSInvalidModelsPaths()
-        {
-            _Check();
-
-            var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
-
-            return files
-                .OrderBy(item => item)
-                .Where(item => !item.Contains("\\AssetGenerator\\0.6\\"))
-                .Where(item => _BabylonJsInvalidFiles.Any(ff => item.EndsWith(ff)))
-                .ToList();
-        }
+        }        
 
         public static string GetPollyFileModelPath()
         {

@@ -11,16 +11,23 @@ namespace SharpGLTF.Geometry
     public interface IPrimitiveMorphTargetReader
     {
         /// <summary>
-        /// Gets the collection of vertex indices that have deltas.
+        /// Gets the collection of vertex indices that have morph target deltas.
         /// </summary>
         /// <returns>A collection of vertex indices.</returns>
         IReadOnlyCollection<int> GetTargetIndices();
 
         /// <summary>
+        /// Gets the vertex for the given <paramref name="vertexIndex"/> morphed by the current morph target (if any).
+        /// </summary>
+        /// <param name="vertexIndex">The index of the vertex.</param>
+        /// <returns>If the given index has a morphed vertex, it will return it, else ir will return the base vertex.</returns>
+        IVertexGeometry GetVertex(int vertexIndex);
+
+        /// <summary>
         /// Gets the <see cref="VertexGeometryDelta"/> of a given vertex for a given morph target.
         /// </summary>
         /// <param name="vertexIndex">The index of the vertex.</param>
-        /// <returns>A Vertex delta.</returns>
+        /// <returns>A Vertex delta (Morphed vertex minus base vertex).</returns>
         VertexGeometryDelta GetVertexDelta(int vertexIndex);
     }
 
@@ -82,14 +89,14 @@ namespace SharpGLTF.Geometry
             _SetVertex(vertexIndex, vertex);
         }
 
+        IVertexGeometry IPrimitiveMorphTargetReader.GetVertex(int vertexIndex)
+        {
+            return _MorphVertices.TryGetValue(vertexIndex, out TvG value) ? value : _BaseVertexFunc(vertexIndex);
+        }
+
         public TvG GetVertex(int vertexIndex)
         {
-            if (_MorphVertices.TryGetValue(vertexIndex, out TvG value))
-            {
-                return value;
-            }
-
-            return _BaseVertexFunc(vertexIndex);
+            return _MorphVertices.TryGetValue(vertexIndex, out TvG value) ? value : _BaseVertexFunc(vertexIndex);
         }
 
         public void SetVertex(int vertexIndex, TvG value)
@@ -129,15 +136,15 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        internal void SetMorphTargets(PrimitiveMorphTargetBuilder<TvG> other, IReadOnlyDictionary<int, int> vertexMap, Func<TvG, TvG> vertexFunc)
+        internal void SetMorphTargets(IPrimitiveMorphTargetReader other, IReadOnlyDictionary<int, int> vertexMap, Func<IVertexGeometry, TvG> vertexFunc)
         {
+            Guard.NotNull(vertexFunc, nameof(vertexFunc));
+
             var indices = other.GetTargetIndices();
 
             foreach (var srcVidx in indices)
             {
-                var g = other.GetVertex(srcVidx);
-
-                if (vertexFunc != null) g = vertexFunc(g);
+                var g = vertexFunc(other.GetVertex(srcVidx));
 
                 var dstVidx = srcVidx;
 

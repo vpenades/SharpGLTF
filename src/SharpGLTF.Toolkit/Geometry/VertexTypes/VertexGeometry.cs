@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Runtime.Serialization;
 using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
@@ -28,7 +29,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexPosition : IVertexGeometry
+    public struct VertexPosition : IVertexGeometry, IEquatable<VertexPosition>
     {
         #region debug
 
@@ -65,6 +66,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("POSITION")]
         public Vector3 Position;
+        public override bool Equals(object obj) { return obj is VertexPosition other && AreEqual(this, other); }
+        public bool Equals(VertexPosition other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexPosition a, in VertexPosition b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexPosition a, in VertexPosition b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexPosition a, in VertexPosition b)
+        {
+            return a.Position == b.Position;
+        }
+
+        public override int GetHashCode() { return Position.GetHashCode(); }
 
         #endregion
 
@@ -106,7 +117,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position and a Normal.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexPositionNormal : IVertexGeometry
+    public struct VertexPositionNormal : IVertexGeometry, IEquatable<VertexPositionNormal>
     {
         #region debug
 
@@ -151,6 +162,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("NORMAL")]
         public Vector3 Normal;
 
+        public override bool Equals(object obj) { return obj is VertexPositionNormal other && AreEqual(this, other); }
+        public bool Equals(VertexPositionNormal other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexPositionNormal a, in VertexPositionNormal b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexPositionNormal a, in VertexPositionNormal b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexPositionNormal a, in VertexPositionNormal b)
+        {
+            return a.Position == b.Position && a.Normal == b.Normal;
+        }
+
+        public override int GetHashCode() { return Position.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -193,7 +215,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexPositionNormalTangent : IVertexGeometry
+    public struct VertexPositionNormalTangent : IVertexGeometry, IEquatable<VertexPositionNormalTangent>
     {
         #region debug
 
@@ -236,6 +258,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
+
+        public override bool Equals(object obj) { return obj is VertexPositionNormalTangent other && AreEqual(this, other); }
+        public bool Equals(VertexPositionNormalTangent other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b)
+        {
+            return a.Position == b.Position && a.Normal == b.Normal && a.Tangent == b.Tangent;
+        }
+
+        public override int GetHashCode() { return Position.GetHashCode(); }
 
         #endregion
 
@@ -284,7 +317,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexGeometryDelta : IVertexGeometry
+    public struct VertexGeometryDelta : IVertexGeometry, IEquatable<VertexGeometryDelta>
     {
         #region debug
 
@@ -369,6 +402,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("TANGENTDELTA")]
         public Vector3 TangentDelta;
+
+        public override bool Equals(object obj) { return obj is VertexGeometryDelta other && AreEqual(this, other); }
+        public bool Equals(VertexGeometryDelta other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexGeometryDelta a, in VertexGeometryDelta b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexGeometryDelta a, in VertexGeometryDelta b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexGeometryDelta a, in VertexGeometryDelta b)
+        {
+            return a.PositionDelta == b.PositionDelta && a.NormalDelta == b.NormalDelta && a.TangentDelta == b.TangentDelta;
+        }
+
+        public override int GetHashCode() { return PositionDelta.GetHashCode(); }
 
         #endregion
 

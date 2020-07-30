@@ -26,7 +26,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         #region helpers
 
-        private static void _LoadModel(string f, bool tryFix = false)
+        private static ModelRoot _LoadModel(string f, bool tryFix = false)
         {
             var perf = System.Diagnostics.Stopwatch.StartNew();
 
@@ -70,6 +70,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var perf_glb = perf.ElapsedMilliseconds;
 
             TestContext.Progress.WriteLine($"processed {f.ToShortDisplayPath()} - Load:{perf_load}ms Clone:{perf_clone}ms S.obj:{perf_wavefront}ms S.glb:{perf_glb}ms");
+
+            return model;
         }
 
         private static void _AssertAreEqual(ModelRoot a, ModelRoot b)
@@ -113,7 +115,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetBabylonJSValidModelsPaths())
+            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
             {
                 TestContext.Progress.WriteLine(f);
 
@@ -127,14 +129,15 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetBabylonJSInvalidModelsPaths())
+            foreach (var f in TestFiles.GetBabylonJSModelsPaths(false))
             {
                 TestContext.Progress.WriteLine(f);
 
                 try
                 {
-                    var model = ModelRoot.Load(f);
-                    Assert.Fail("Should throw");
+                    var model = ModelRoot.Load(f, Validation.ValidationMode.Strict);
+                    
+                    Assert.Fail($"{f} Should throw");
                 }
                 catch(Exception ex)
                 {
@@ -356,7 +359,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetBabylonJSValidModelsPaths())
+            foreach (var f in TestFiles.GetBabylonJSModelsPaths())
             {
                 TestContext.WriteLine(f);
 

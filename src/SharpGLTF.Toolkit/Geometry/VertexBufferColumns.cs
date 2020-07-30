@@ -311,13 +311,7 @@ namespace SharpGLTF.Geometry
             var m = GetVertexMaterial<VertexColor2Texture2>(index);
             var s = GetVertexSkinning<VertexJoints8>(index);
 
-            var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
-
-            v.SetGeometry(g);
-            v.SetMaterial(m);
-            v.SetSkinning(s);
-
-            return v;
+            return new VertexBuilder(g, m, s).ConvertToType(vertexType);
         }
 
         public VertexBuilder<TvG, TvM, VertexEmpty> GetVertex<TvG, TvM>(int index)
@@ -345,6 +339,32 @@ namespace SharpGLTF.Geometry
         #endregion
 
         #region utilites
+
+        public static void CalculateSmoothNormals(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
+        {
+            Guard.NotNull(primitives, nameof(primitives));
+
+            var agents = primitives
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
+                .ToList();
+
+            VertexNormalsFactory.CalculateSmoothNormals(agents);
+        }
+
+        public static void CalculateTangents(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
+        {
+            Guard.NotNull(primitives, nameof(primitives));
+
+            var agents = primitives
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
+                .ToList();
+
+            VertexTangentsFactory.CalculateTangents(agents);
+        }
+
+        #endregion
+
+        #region nested types
 
         struct _NormalTangentAgent : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
         {
@@ -380,28 +400,6 @@ namespace SharpGLTF.Geometry
 
                 _Vertices.Tangents[idx] = tangent;
             }
-        }
-
-        public static void CalculateSmoothNormals(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
-        {
-            Guard.NotNull(primitives, nameof(primitives));
-
-            var agents = primitives
-                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
-                .ToList();
-
-            VertexNormalsFactory.CalculateSmoothNormals(agents);
-        }
-
-        public static void CalculateTangents(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
-        {
-            Guard.NotNull(primitives, nameof(primitives));
-
-            var agents = primitives
-                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
-                .ToList();
-
-            VertexTangentsFactory.CalculateTangents(agents);
         }
 
         #endregion

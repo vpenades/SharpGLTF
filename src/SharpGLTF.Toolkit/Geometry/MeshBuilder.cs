@@ -170,7 +170,41 @@ namespace SharpGLTF.Geometry
         public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             if (mesh == null) return;
+
+            if (materialTransform == null) materialTransform = m => m;
+            if (vertexTransform == null) vertexTransform = v => v;
+
+            AddMesh<TMaterial>(mesh, materialTransform, v => vertexTransform(VertexBuilder<TvG, TvM, TvS>.CreateFrom(v)));
+        }
+
+        public void AddMesh(IMeshBuilder<TMaterial> mesh, Matrix4x4 vertexTransform)
+        {
+            if (mesh == null) return;
+
+            if (vertexTransform == Matrix4x4.Identity)
+            {
+                AddMesh<TMaterial>(mesh, m => m, null);
+                return;
+            }
+
+            AddMesh<TMaterial>(mesh, m => m, v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v).TransformedBy(vertexTransform));
+        }
+
+        public void AddMesh(IMeshBuilder<TMaterial> mesh, Func<TMaterial, TMaterial> materialTransform, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        {
+            if (mesh == null) return;
+
+            if (materialTransform == null) materialTransform = m => m;
+
+            AddMesh<TMaterial>(mesh, materialTransform, vertexTransform);
+        }
+
+        public void AddMesh<TSourceMaterial>(IMeshBuilder<TSourceMaterial> mesh, Func<TSourceMaterial, TMaterial> materialTransform, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        {
+            if (mesh == null) return;
+
             Guard.NotNull(materialTransform, nameof(materialTransform));
+            if (vertexTransform == null) vertexTransform = v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
 
             foreach (var p in mesh.Primitives)
             {
