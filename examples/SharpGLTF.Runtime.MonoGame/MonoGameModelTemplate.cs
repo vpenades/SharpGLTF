@@ -9,8 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
 using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
 #else
-using MODELMESH = SharpGLTF.Runtime.ModelMeshReplacement;
-using MODELMESHPART = SharpGLTF.Runtime.ModelMeshPartReplacement;
+using MODELMESH = SharpGLTF.Runtime.RuntimeModelMesh;
+using MODELMESHPART = SharpGLTF.Runtime.RuntimeModelMeshPart;
 #endif
 
 namespace SharpGLTF.Runtime
@@ -19,28 +19,36 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath)
+        public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath, LoaderContext context = null)
         {
             var model = Schema2.ModelRoot.Load(filePath, Validation.ValidationMode.TryFix);
 
-            return CreateDeviceModel(device, model);
+            return CreateDeviceModel(device, model, context);
         }
 
-        public static MonoGameDeviceContent<MonoGameModelTemplate> CreateDeviceModel(GraphicsDevice device, Schema2.ModelRoot srcModel)
+        public static MonoGameDeviceContent<MonoGameModelTemplate> CreateDeviceModel(GraphicsDevice device, Schema2.ModelRoot srcModel, LoaderContext context = null)
         {
-            srcModel.FixTextureSampler();
+            if (context == null) context = new BasicEffectsLoaderContext(device);
+
+            context.Reset();
 
             var templates = srcModel.LogicalScenes
                 .Select(item => SceneTemplate.Create(item, true))
-                .ToArray();
-            
-            var context = new LoaderContext(device);
+                .ToArray();            
 
-            var meshes = templates
-                .SelectMany(item => item.LogicalMeshIds)                
-                .ToDictionary(k => k, k => context.CreateMesh(srcModel.LogicalMeshes[k]));            
+            var srcMeshes = templates
+                .SelectMany(item => item.LogicalMeshIds)
+                .Distinct()
+                .Select(idx => srcModel.LogicalMeshes[idx]);
 
-            var mdl = new MonoGameModelTemplate(templates,srcModel.DefaultScene.LogicalIndex, meshes);
+            foreach(var srcMesh in srcMeshes)
+            {
+                context._WriteMesh(srcMesh);
+            }
+
+            var dstMeshes = context.CreateRuntimeModels();
+
+            var mdl = new MonoGameModelTemplate(templates,srcModel.DefaultScene.LogicalIndex, dstMeshes);
 
             return new MonoGameDeviceContent<MonoGameModelTemplate>(mdl, context.Disposables.ToArray());
         }

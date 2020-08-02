@@ -9,12 +9,37 @@ namespace SharpGLTF.Runtime
 {
     /// <summary>
     /// Replaces <see cref="ModelMeshPart"/>.
-    /// </summary>
-    sealed class ModelMeshPartReplacement
+    /// </summary>    
+    sealed class RuntimeModelMeshPart
     {
-        internal ModelMeshReplacement _Parent;
+        #region lifecycle
+
+        internal RuntimeModelMeshPart(RuntimeModelMesh parent)
+        {
+            _Parent = parent;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly RuntimeModelMesh _Parent;
 
         private Effect _Effect;
+
+        private IndexBuffer _IndexBuffer;
+        private int _IndexOffset;
+        private int _PrimitiveCount;        
+
+        private VertexBuffer _VertexBuffer;
+        private int _VertexOffset;
+        private int _VertexCount;
+
+        public object Tag { get; set; }
+
+        #endregion
+
+        #region properties
 
         public Effect Effect
         {
@@ -23,43 +48,75 @@ namespace SharpGLTF.Runtime
             {
                 if (_Effect == value) return;
                 _Effect = value;
-                _Parent.InvalidateEffectsCollection(); // if we change this property, we need to invalidate the parent's effect collection.
+                _Parent.InvalidateEffectCollection(); // if we change this property, we need to invalidate the parent's effect collection.
             }
         }
 
-        public IndexBuffer IndexBuffer { get; set; }
+        public GraphicsDevice Device => _Parent._GraphicsDevice;
 
-        public int NumVertices { get; set; }
+        #endregion
 
-        public int PrimitiveCount { get; set; }
+        #region API
 
-        public int StartIndex { get; set; }
+        public void SetVertexBuffer(VertexBuffer vb, int offset, int count)
+        {
+            this._VertexBuffer = vb;
+            this._VertexOffset = offset;
+            this._VertexCount = count;            
+        }
 
-        public object Tag { get; set; }
+        public void SetIndexBuffer(IndexBuffer ib, int offset, int count)
+        {
+            this._IndexBuffer = ib;
+            this._IndexOffset = offset;
+            this._PrimitiveCount = count;            
+        }
 
-        public VertexBuffer VertexBuffer { get; set; }
+        public void Draw(GraphicsDevice device)
+        {
+            if (_PrimitiveCount > 0)
+            {
+                device.SetVertexBuffer(_VertexBuffer);
+                device.Indices = _IndexBuffer;
 
-        public int VertexOffset { get; set; }
+                for (int j = 0; j < _Effect.CurrentTechnique.Passes.Count; j++)
+                {
+                    _Effect.CurrentTechnique.Passes[j].Apply();
+                    device.DrawIndexedPrimitives(PrimitiveType.TriangleList, _VertexOffset, _IndexOffset, _PrimitiveCount);
+                }
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
     /// Replaces <see cref="ModelMesh"/>
     /// </summary>
-    sealed class ModelMeshReplacement
+    sealed class RuntimeModelMesh
     {
-        private GraphicsDevice graphicsDevice;
+        #region lifecycle
 
-        public ModelMeshReplacement(GraphicsDevice graphicsDevice, List<ModelMeshPartReplacement> parts)
+        public RuntimeModelMesh(GraphicsDevice graphicsDevice)
         {
-            // TODO: Complete member initialization
-            this.graphicsDevice = graphicsDevice;
-
-            MeshParts = parts.ToArray();
-
-            foreach (var mp in MeshParts) mp._Parent = this;
+            this._GraphicsDevice = graphicsDevice;
         }
 
+        #endregion
+
+        #region data        
+
+        internal GraphicsDevice _GraphicsDevice;
+
+        private readonly List<RuntimeModelMeshPart> _Primitives = new List<RuntimeModelMeshPart>();
+
         private IReadOnlyList<Effect> _Effects;
+
+        private Microsoft.Xna.Framework.BoundingSphere? _Sphere;
+
+        #endregion
+
+        #region  properties
 
         public IReadOnlyCollection<Effect> Effects
         {
@@ -67,8 +124,9 @@ namespace SharpGLTF.Runtime
             {
                 if (_Effects != null) return _Effects;
 
-                // effects collection has changed since last call, so we reconstruct the collection.
-                _Effects = MeshParts
+                // Create the shared effects collection on demand.
+
+                _Effects = _Primitives
                     .Select(item => item.Effect)
                     .Distinct()
                     .ToArray();
@@ -77,9 +135,20 @@ namespace SharpGLTF.Runtime
             }
         }
 
-        public Microsoft.Xna.Framework.BoundingSphere BoundingSphere { get; set; }
+        public Microsoft.Xna.Framework.BoundingSphere BoundingSphere
+        {
+            set => _Sphere = value;
 
-        public IList<ModelMeshPartReplacement> MeshParts { get; set; }
+            get
+            {
+                if (_Sphere.HasValue) return _Sphere.Value;
+
+                return default;
+            }
+            
+        }
+
+        public IReadOnlyList<RuntimeModelMeshPart> MeshParts => _Primitives;
 
         public string Name { get; set; }
 
@@ -87,27 +156,32 @@ namespace SharpGLTF.Runtime
 
         public object Tag { get; set; }
 
-        internal void InvalidateEffectsCollection() { _Effects = null; }
+        #endregion
+
+        #region API
+
+        internal void InvalidateEffectCollection() { _Effects = null; }
+
+        public RuntimeModelMeshPart CreateMeshPart()
+        {
+            var primitive = new RuntimeModelMeshPart(this);
+
+            _Primitives.Add(primitive);
+            InvalidateEffectCollection();
+
+            _Sphere = null;
+
+            return primitive;
+        }
 
         public void Draw()
         {
-            for (int i = 0; i < MeshParts.Count; i++)
+            for (int i = 0; i < _Primitives.Count; i++)
             {
-                var part = MeshParts[i];
-                var effect = part.Effect;
-
-                if (part.PrimitiveCount > 0)
-                {
-                    this.graphicsDevice.SetVertexBuffer(part.VertexBuffer);
-                    this.graphicsDevice.Indices = part.IndexBuffer;
-
-                    for (int j = 0; j < effect.CurrentTechnique.Passes.Count; j++)
-                    {
-                        effect.CurrentTechnique.Passes[j].Apply();
-                        graphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, part.VertexOffset, part.StartIndex, part.PrimitiveCount);
-                    }
-                }
+                _Primitives[i].Draw(_GraphicsDevice);
             }
         }
+
+        #endregion
     }
 }

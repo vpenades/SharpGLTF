@@ -6,27 +6,24 @@ using Microsoft.Xna.Framework.Graphics;
 
 using SharpGLTF.Schema2;
 
-#if USINGMONOGAMEMODEL
-using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
-using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
-#else
-using MODELMESH = SharpGLTF.Runtime.ModelMeshReplacement;
-using MODELMESHPART = SharpGLTF.Runtime.ModelMeshPartReplacement;
-#endif
+using SRCMESH = SharpGLTF.Schema2.Mesh;
+using SRCPRIM = SharpGLTF.Schema2.MeshPrimitive;
+using SRCMATERIAL = SharpGLTF.Schema2.Material;
+
+using MODELMESH = SharpGLTF.Runtime.RuntimeModelMesh;
 
 namespace SharpGLTF.Runtime
 {
     /// <summary>
-    /// Helper class used to import a glTF model into MonoGame
+    /// Helper class used to import a glTF meshes and materials into MonoGame
     /// </summary>
-    class LoaderContext
+    public abstract class LoaderContext
     {
         #region lifecycle
 
         public LoaderContext(GraphicsDevice device)
         {
             _Device = device;
-            _MatFactory = new MaterialFactory(device, _Disposables);
         }
 
         #endregion
@@ -35,23 +32,56 @@ namespace SharpGLTF.Runtime
 
         private GraphicsDevice _Device;
 
-        private readonly GraphicsResourceTracker _Disposables = new GraphicsResourceTracker();
-        private readonly MaterialFactory _MatFactory;        
-
-        private readonly Dictionary<Mesh, MODELMESH> _RigidMeshes = new Dictionary<Mesh, MODELMESH>();
-        private readonly Dictionary<Mesh, MODELMESH> _SkinnedMeshes = new Dictionary<Mesh, MODELMESH>();
+        private GraphicsResourceTracker _Disposables;
         
+        private EffectsFactory _MatFactory;
+
+        // gathers all meshes using shared vertex and index buffers whenever possible.
+        private MeshPrimitiveWriter _MeshWriter;
+
+        // used as a container to a default material;
+        private SharpGLTF.Schema2.ModelRoot _DummyModel; 
+
         #endregion
 
         #region properties
 
-        public IReadOnlyList<GraphicsResource> Disposables => _Disposables.Disposables;
+        protected GraphicsDevice Device => _Device;
+
+        internal IReadOnlyList<GraphicsResource> Disposables => _Disposables.Disposables;
+
+        #endregion
+
+        #region API
+
+        internal void Reset()
+        {
+            _Disposables = new GraphicsResourceTracker();
+            _MatFactory = new EffectsFactory(_Device, _Disposables);
+            _MeshWriter = new MeshPrimitiveWriter();
+        }
 
         #endregion
 
         #region Mesh API
 
-        private static IEnumerable<Schema2.MeshPrimitive> GetValidPrimitives(Schema2.Mesh srcMesh)
+        internal void _WriteMesh(SRCMESH srcMesh)
+        {
+            if (_Device == null) throw new InvalidOperationException();            
+
+            var srcPrims = _GetValidPrimitives(srcMesh)
+                .ToDictionary(item => item, item => new MeshPrimitiveReader(item, item.Material?.DoubleSided ?? false));
+
+            VertexNormalsFactory.CalculateSmoothNormals(srcPrims.Values.ToList());
+            VertexTangentsFactory.CalculateTangents(srcPrims.Values.ToList());
+            
+            foreach (var srcPrim in srcPrims)
+            {
+                _WriteMeshPrimitive(srcMesh.LogicalIndex, srcPrim.Value, srcPrim.Key.Material);                
+            }            
+        }
+
+        private static IEnumerable<SRCPRIM> _GetValidPrimitives(SRCMESH srcMesh)
         {
             foreach (var srcPrim in srcMesh.Primitives)
             {
@@ -67,90 +97,68 @@ namespace SharpGLTF.Runtime
             }
         }
 
-        public MODELMESH CreateMesh(Schema2.Mesh srcMesh, int maxBones = 72)
+        private void _WriteMeshPrimitive(int logicalMeshIndex, MeshPrimitiveReader srcPrim, SRCMATERIAL srcMaterial)
         {
-            if (_Device == null) throw new InvalidOperationException();            
+            if (srcMaterial == null) srcMaterial = GetDefaultMaterial();
 
-            var srcPrims = GetValidPrimitives(srcMesh).ToList();            
+            var effect = _MatFactory.GetMaterial(srcMaterial, srcPrim.IsSkinned);
 
-            var dstMesh = new MODELMESH(_Device, Enumerable.Range(0, srcPrims.Count).Select(item => new MODELMESHPART()).ToList());
-
-            dstMesh.Name = srcMesh.Name;
-            dstMesh.BoundingSphere = srcMesh.CreateBoundingSphere();
-
-            var srcNormals = new MeshNormalsFallback(srcMesh);
-
-            var idx = 0;
-            foreach (var srcPrim in srcPrims)
+            if (effect == null)
             {
-                CreateMeshPart(dstMesh.MeshParts[idx++], srcPrim, srcNormals, maxBones);
+                effect = CreateEffect(srcMaterial, srcPrim.IsSkinned);
+                _MatFactory.Register(srcMaterial, srcPrim.IsSkinned, effect);
             }
 
-            return dstMesh;
-        }
+            WriteMeshPrimitive(logicalMeshIndex, srcPrim, effect);
+        }        
 
-        private void CreateMeshPart(MODELMESHPART dstPart, MeshPrimitive srcPart, MeshNormalsFallback normalsFunc, int maxBones)
+        protected abstract void WriteMeshPrimitive(int logicalMeshIndex, MeshPrimitiveReader srcPrimitive, Effect effect);
+
+        protected void WriteMeshPrimitive<TVertex>(int logicalMeshIndex, Effect effect, MeshPrimitiveReader primitive)
+            where TVertex : unmanaged, IVertexType
         {
-            var doubleSided = srcPart.Material?.DoubleSided ?? false;
-
-            var srcGeometry = new MeshPrimitiveReader(srcPart, doubleSided, normalsFunc);
-
-            var eff = srcGeometry.IsSkinned ? _MatFactory.UseSkinnedEffect(srcPart.Material) : _MatFactory.UseRigidEffect(srcPart.Material);
-
-            dstPart.Effect = eff;            
-
-            var vb = srcGeometry.IsSkinned ? CreateVertexBuffer(srcGeometry.ToXnaSkinned()) : CreateVertexBuffer(srcGeometry.ToXnaRigid());
-
-            dstPart.VertexBuffer = vb;
-            dstPart.NumVertices = srcGeometry.VertexCount;
-            dstPart.VertexOffset = 0;
-
-            dstPart.IndexBuffer = CreateIndexBuffer(srcGeometry.TriangleIndices);
-            dstPart.PrimitiveCount = srcGeometry.TriangleIndices.Length;
-            dstPart.StartIndex = 0;
+            _MeshWriter.WriteMeshPrimitive<TVertex>(logicalMeshIndex, effect, primitive);
         }
-        
+
+        #endregion
+
+        #region EFfects API
+
+        /// <summary>
+        /// Called when finding a new material that needs to be converted to an Effect.
+        /// </summary>
+        /// <param name="srcMaterial">The material to convert.</param>
+        /// <param name="isSkinned">Indicates that the material is used in a skinned mesh.</param>
+        /// <returns>An effect to be used in place of <paramref name="srcMaterial"/>. </returns>
+        protected abstract Effect CreateEffect(Material srcMaterial, bool isSkinned);
+
+        protected virtual Texture2D UseTexture(MaterialChannel? channel, string name)
+        {
+            return _MatFactory.UseTexture(channel, name);
+        }
+
         #endregion
 
         #region resources API
 
-        private VertexBuffer CreateVertexBuffer<T>(T[] dstVertices) where T:struct, IVertexType
+        internal IReadOnlyDictionary<int, MODELMESH> CreateRuntimeModels()
         {
-            var vb = new VertexBuffer(_Device, typeof(T), dstVertices.Length, BufferUsage.None);
-            _Disposables.AddDisposable(vb);
-
-            vb.SetData(dstVertices);
-            return vb;
+            return _MeshWriter.GetRuntimeMeshes(_Device, _Disposables);
         }
 
-        private IndexBuffer CreateIndexBuffer(IEnumerable<(int A, int B, int C)> triangles)
+        private Material GetDefaultMaterial()
         {
-            var sequence32 = triangles
-                .SelectMany(item => new[] { (UInt32)item.C, (UInt32)item.B, (UInt32)item.A })
-                .ToArray();
-
-            var max = sequence32.Max();
-
-            if (max > 65535)
+            if (_DummyModel != null)
             {
-                var indices = new IndexBuffer(_Device, typeof(UInt32), sequence32.Length, BufferUsage.None);
-                _Disposables.AddDisposable(indices);
-
-                indices.SetData(sequence32);
-                return indices;
+                _DummyModel = ModelRoot.CreateModel();
+                _DummyModel.CreateMaterial("Default");
             }
-            else
-            {
-                var sequence16 = sequence32.Select(item => (UInt16)item).ToArray();                
-
-                var indices = new IndexBuffer(_Device, typeof(UInt16), sequence16.Length, BufferUsage.None);
-                _Disposables.AddDisposable(indices);
-
-                indices.SetData(sequence16);
-                return indices;
-            }
-        }        
+            
+            return _DummyModel.LogicalMaterials[0];
+        }           
 
         #endregion
-    }    
+    }
+
+    
 }

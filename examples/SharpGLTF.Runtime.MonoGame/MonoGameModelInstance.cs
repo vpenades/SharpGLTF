@@ -9,8 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
 using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
 #else
-using MODELMESH = SharpGLTF.Runtime.ModelMeshReplacement;
-using MODELMESHPART = SharpGLTF.Runtime.ModelMeshPartReplacement;
+using MODELMESH = SharpGLTF.Runtime.RuntimeModelMesh;
+using MODELMESHPART = SharpGLTF.Runtime.RuntimeModelMeshPart;
 #endif
 
 namespace SharpGLTF.Runtime
@@ -106,8 +106,20 @@ namespace SharpGLTF.Runtime
 
                 skin.SetBoneTransforms(skinTransforms);
             }
+
+            if (effect is IEffectBones iskin && skinTransforms != null)
+            {
+                var xposed = skinTransforms.Select(item => Matrix.Transpose(item)).ToArray();
+
+                iskin.SetBoneTransforms(skinTransforms);
+            }            
         }
 
         #endregion
+    }
+
+    public interface IEffectBones // it could be great if SkinnedEffect implemented this.
+    {        
+        void SetBoneTransforms(Matrix[] boneTransforms);
     }
 }

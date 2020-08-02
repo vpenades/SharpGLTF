@@ -32,28 +32,7 @@ namespace SharpGLTF.Runtime
                 m.M31, m.M32, m.M33, m.M34,
                 m.M41, m.M42, m.M43, m.M44
                 );
-        }
-
-        public static void FixTextureSampler(this Schema2.ModelRoot root)
-        {
-            // SharpGLTF 1.0.0-Alpha10 has an issue with TextureSamplers, it's fixed in newer versions
-
-            foreach(var t in root.LogicalTextures)
-            {
-                if (t.Sampler == null)
-                {
-                    var sampler = root.UseTextureSampler
-                        (
-                        Schema2.TextureWrapMode.REPEAT,
-                        Schema2.TextureWrapMode.REPEAT,
-                        Schema2.TextureMipMapFilter.DEFAULT,
-                        Schema2.TextureInterpolationFilter.LINEAR
-                        );
-
-                    t.Sampler = sampler;
-                }
-            }
-        }
+        }       
 
         public static BoundingSphere CreateBoundingSphere(this Schema2.Mesh mesh)
         {

@@ -10,19 +10,9 @@ namespace SharpGLTF.Runtime
 {
     struct VertexSkinned : IVertexType
     {
-        #region data
+        #region static
 
-        public Vector3 Position;
-        public Vector3 Normal;
-        public Vector2 TextureCoordinate;
-        public Microsoft.Xna.Framework.Graphics.PackedVector.Byte4 BlendIndices;
-        public Vector4 BlendWeight;
-        
-        #endregion
-
-        #region API
-
-        public VertexDeclaration VertexDeclaration => CreateVertexDeclaration();
+        private static VertexDeclaration _VDecl = CreateVertexDeclaration();
 
         public static VertexDeclaration CreateVertexDeclaration()
         {
@@ -46,6 +36,18 @@ namespace SharpGLTF.Runtime
             return new VertexDeclaration(a, b, c, d, e);
         }
 
+        #endregion
+
+        #region data
+
+        public VertexDeclaration VertexDeclaration => _VDecl;
+
+        public Vector3 Position;
+        public Vector3 Normal;
+        public Vector2 TextureCoordinate;
+        public Microsoft.Xna.Framework.Graphics.PackedVector.Byte4 BlendIndices;
+        public Vector4 BlendWeight;
+        
         #endregion
     }
 }
