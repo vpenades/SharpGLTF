@@ -111,6 +111,9 @@ namespace SharpGLTF.Memory
 
         private readonly BYTES _Image;
 
+        /// <remarks>
+        /// This field must NOT be used for equality checks, it has the same face value as a code comment.
+        /// </remarks>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly String _SourcePathHint;
 
