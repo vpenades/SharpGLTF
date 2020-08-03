@@ -50,4 +50,9 @@ namespace SharpGLTF.Runtime
         
         #endregion
     }
+
+    public interface IEffectBones // it could be great if SkinnedEffect implemented this.
+    {
+        void SetBoneTransforms(Matrix[] boneTransforms, int boneStart, int boneCount);
+    }
 }

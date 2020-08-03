@@ -38,6 +38,7 @@ namespace SharpGLTF.Runtime
 
         // gathers all meshes using shared vertex and index buffers whenever possible.
         private MeshPrimitiveWriter _MeshWriter;
+        private int _CurrentMeshIndex;
 
         // used as a container to a default material;
         private SharpGLTF.Schema2.ModelRoot _DummyModel; 
@@ -77,7 +78,9 @@ namespace SharpGLTF.Runtime
             
             foreach (var srcPrim in srcPrims)
             {
-                _WriteMeshPrimitive(srcMesh.LogicalIndex, srcPrim.Value, srcPrim.Key.Material);                
+                _CurrentMeshIndex = srcMesh.LogicalIndex;
+
+                _WriteMeshPrimitive(srcPrim.Value, srcPrim.Key.Material);                
             }            
         }
 
@@ -97,7 +100,7 @@ namespace SharpGLTF.Runtime
             }
         }
 
-        private void _WriteMeshPrimitive(int logicalMeshIndex, MeshPrimitiveReader srcPrim, SRCMATERIAL srcMaterial)
+        private void _WriteMeshPrimitive(MeshPrimitiveReader srcPrim, SRCMATERIAL srcMaterial)
         {
             if (srcMaterial == null) srcMaterial = GetDefaultMaterial();
 
@@ -109,15 +112,15 @@ namespace SharpGLTF.Runtime
                 _MatFactory.Register(srcMaterial, srcPrim.IsSkinned, effect);
             }
 
-            WriteMeshPrimitive(logicalMeshIndex, srcPrim, effect);
+            WriteMeshPrimitive(srcPrim, effect);
         }        
 
-        protected abstract void WriteMeshPrimitive(int logicalMeshIndex, MeshPrimitiveReader srcPrimitive, Effect effect);
+        protected abstract void WriteMeshPrimitive(MeshPrimitiveReader srcPrimitive, Effect effect);
 
-        protected void WriteMeshPrimitive<TVertex>(int logicalMeshIndex, Effect effect, MeshPrimitiveReader primitive)
+        protected void WriteMeshPrimitive<TVertex>(Effect effect, MeshPrimitiveReader primitive)
             where TVertex : unmanaged, IVertexType
         {
-            _MeshWriter.WriteMeshPrimitive<TVertex>(logicalMeshIndex, effect, primitive);
+            _MeshWriter.WriteMeshPrimitive<TVertex>(_CurrentMeshIndex, effect, primitive);
         }
 
         #endregion

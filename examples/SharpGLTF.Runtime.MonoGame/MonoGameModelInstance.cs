@@ -111,15 +111,10 @@ namespace SharpGLTF.Runtime
             {
                 var xposed = skinTransforms.Select(item => Matrix.Transpose(item)).ToArray();
 
-                iskin.SetBoneTransforms(skinTransforms);
+                iskin.SetBoneTransforms(skinTransforms, 0, skinTransforms.Length);
             }            
         }
 
         #endregion
-    }
-
-    public interface IEffectBones // it could be great if SkinnedEffect implemented this.
-    {        
-        void SetBoneTransforms(Matrix[] boneTransforms);
-    }
+    }    
 }
