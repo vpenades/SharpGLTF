@@ -6,7 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		Analyzers.targets = Analyzers.targets
+		src\Analyzers.props = src\Analyzers.props
 		README.md = README.md
 		SharpGLTF.ruleset = SharpGLTF.ruleset
 	EndProjectSection
@@ -43,7 +43,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Core.Tests", "tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Toolkit.Tests", "tests\SharpGLTF.Toolkit.Tests\SharpGLTF.Toolkit.Tests.csproj", "{7FEFC259-51D6-4409-8724-8DE0EA8D5CD9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.Plotly", "examples\SharpGLTF.Plotly\SharpGLTF.Plotly.csproj", "{A63C2A2D-950F-4C76-9299-2B2D325A8653}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Plotly", "examples\SharpGLTF.Plotly\SharpGLTF.Plotly.csproj", "{A63C2A2D-950F-4C76-9299-2B2D325A8653}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

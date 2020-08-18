@@ -148,7 +148,18 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         [TestCase("SpecGlossVsMetalRough.gltf")]
         [TestCase(@"TextureTransformTest.gltf")]
-        [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]        
+        [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\Avocado.gltf")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\BarramundiFish.gltf")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\BoomBox.gltf")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\Corset.gltf")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\Lantern.gltf")]
+        [TestCase(@"glTF-pbrSpecularGlossiness\WaterBottle.gltf")]
+        [TestCase(@"glTF-Quantized\Avocado.gltf")]
+        [TestCase(@"glTF-Quantized\AnimatedMorphCube.gltf")]
+        [TestCase(@"glTF-Quantized\AnimatedMorphCube.gltf")]
+        [TestCase(@"glTF-Quantized\Duck.gltf")]
+        [TestCase(@"glTF-Quantized\Lantern.gltf")]
         public void LoadModelsWithExtensions(string filePath)
         {
             TestContext.CurrentContext.AttachShowDirLink();

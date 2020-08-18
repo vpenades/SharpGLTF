@@ -40,7 +40,9 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public static IEnumerable<string> SupportedExtensions => _Extensions.Select(item => item.Name);
+        public static IEnumerable<string> SupportedExtensions => _Extensions
+            .Select(item => item.Name)
+            .Concat(new[] { "KHR_mesh_quantization" });
 
         public static void RegisterExtension<TParent, TExtension>(string persistentName)
             where TParent : JsonSerializable
@@ -93,7 +95,8 @@ namespace SharpGLTF.Schema2
         #region API
 
         /// <summary>
-        /// Immediatelly called after deserialization, it assigns
+        /// Immediatelly called after deserialization, it enables <see cref="MeshQuantizationAllowed"/>
+        /// to prevent validators to throw errors
         /// </summary>
         private void _FindMeshQuantizationExtension()
         {
@@ -113,10 +116,15 @@ namespace SharpGLTF.Schema2
 
         private void _SetRequiredExtension(string extension, bool enabled)
         {
-            if (!enabled) { this._extensionsRequired.Remove(extension); return; }
+            if (!enabled)
+            {
+                this._extensionsUsed.Remove(extension);
+                this._extensionsRequired.Remove(extension);
+                return;
+            }
 
-            if (this._extensionsRequired.Contains(extension)) return;
-            this._extensionsRequired.Add(extension);
+            if (!this._extensionsUsed.Contains(extension)) this._extensionsUsed.Add(extension);
+            if (!this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
         }
 
         internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()

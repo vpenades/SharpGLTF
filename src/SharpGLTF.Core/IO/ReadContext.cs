@@ -254,43 +254,47 @@ namespace SharpGLTF.IO
             var root = new SCHEMA2();
             var vcontext = new Validation.ValidationResult(root, this.Validation);
 
-            try
+            #if !SUPRESSTRYCATCH
+            try {
+            #endif
+
+            if (jsonUtf8Bytes.IsEmpty) throw new System.Text.Json.JsonException("JSon is empty.");
+
+            var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
+
+            if (!reader.Read())
             {
-                if (jsonUtf8Bytes.IsEmpty) throw new System.Text.Json.JsonException("JSon is empty.");
+                vcontext.SetError(new Validation.SchemaException(root, "Json is empty"));
+                return (null, vcontext);
+            }
 
-                var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
+            root.Deserialize(ref reader);
+            root.OnDeserializationCompleted();
 
-                if (!reader.Read())
-                {
-                    vcontext.SetError(new Validation.SchemaException(root, "Json is empty"));
-                    return (null, vcontext);
-                }
+            // binary chunk check
 
-                root.Deserialize(ref reader);
-                root.OnDeserializationCompleted();
+            foreach (var b in root.LogicalBuffers) b.OnValidateBinaryChunk(vcontext.GetContext(), this._BinaryChunk);
 
-                // binary chunk check
+            // schema validation
 
-                foreach (var b in root.LogicalBuffers) b.OnValidateBinaryChunk(vcontext.GetContext(), this._BinaryChunk);
+            root.ValidateReferences(vcontext.GetContext());
+            var ex = vcontext.Errors.FirstOrDefault();
+            if (ex != null) return (null, vcontext);
 
-                // schema validation
+            // resolve external dependencies
 
-                root.ValidateReferences(vcontext.GetContext());
-                var ex = vcontext.Errors.FirstOrDefault();
+            root._ResolveSatelliteDependencies(this);
+
+            // full validation
+
+            if (this.Validation != VALIDATIONMODE.Skip)
+            {
+                root.ValidateContent(vcontext.GetContext());
+                ex = vcontext.Errors.FirstOrDefault();
                 if (ex != null) return (null, vcontext);
+            }
 
-                // resolve external dependencies
-
-                root._ResolveSatelliteDependencies(this);
-
-                // full validation
-
-                if (this.Validation != VALIDATIONMODE.Skip)
-                {
-                    root.ValidateContent(vcontext.GetContext());
-                    ex = vcontext.Errors.FirstOrDefault();
-                    if (ex != null) return (null, vcontext);
-                }
+            #if !SUPRESSTRYCATCH
             }
             catch (JsonException rex)
             {
@@ -312,6 +316,7 @@ namespace SharpGLTF.IO
                 vcontext.SetError(mex);
                 return (null, vcontext);
             }
+            #endif
 
             return (root, vcontext);
         }
@@ -355,6 +360,6 @@ namespace SharpGLTF.IO
             return stream.ReadBytesToEnd();
         }
 
-        #endregion
+#endregion
     }
 }
