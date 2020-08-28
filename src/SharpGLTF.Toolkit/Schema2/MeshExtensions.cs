@@ -742,8 +742,6 @@ namespace SharpGLTF.Schema2
         public static void SaveAsWavefront(this ModelRoot model, string filePath)
         {
             Guard.NotNull(model, nameof(model));
-            Guard.NotNullOrEmpty(filePath, nameof(filePath));
-            Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
 
             var wf = new IO.WavefrontWriter();
             wf.AddModel(model);
@@ -753,8 +751,6 @@ namespace SharpGLTF.Schema2
         public static void SaveAsWavefront(this ModelRoot model, string filePath, Animation animation, float time)
         {
             Guard.NotNull(model, nameof(model));
-            Guard.NotNullOrEmpty(filePath, nameof(filePath));
-            Guard.IsFalse(filePath.Any(c => char.IsWhiteSpace(c)), nameof(filePath), "Whitespace characters not allowed in filename");
 
             var wf = new IO.WavefrontWriter();
             wf.AddModel(model, animation, time);

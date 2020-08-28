@@ -47,9 +47,11 @@ namespace SharpGLTF.IO
 
         public void WriteFiles(string filePath)
         {
-            var dir = System.IO.Path.GetDirectoryName(filePath);
+            Guard.NotNullOrEmpty(filePath, nameof(filePath));
 
             var files = GetFiles(System.IO.Path.GetFileNameWithoutExtension(filePath));
+
+            var dir = System.IO.Path.GetDirectoryName(filePath);
 
             foreach (var f in files)
             {
@@ -60,6 +62,8 @@ namespace SharpGLTF.IO
 
         public IReadOnlyDictionary<String, BYTES> GetFiles(string baseName)
         {
+            Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
+
             var files = new Dictionary<String, BYTES>();
 
             var materials = _WriteMaterials(files, baseName, _Mesh.Primitives.Select(item => item.Material));
