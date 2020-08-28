@@ -51,11 +51,17 @@ namespace SharpGLTF.Schema2
             _Extensions.Add( (persistentName, typeof(TParent), typeof(TExtension)) );
         }
 
-        internal static JsonSerializable Create(JsonSerializable parent, string key)
+        /// <summary>
+        /// Creates an extension object based on the parent object and the extension code.
+        /// </summary>
+        /// <param name="parent">The parent object that will own the created object.</param>
+        /// <param name="extensionName">The extension code, like "KHR_texture_transform".</param>
+        /// <returns>The created object, or null.</returns>
+        internal static JsonSerializable Create(JsonSerializable parent, string extensionName)
         {
             var ptype = parent.GetType();
 
-            var (name, parentType, extType) = _Extensions.FirstOrDefault(item => item.Name == key && item.ParentType == ptype);
+            var (name, parentType, extType) = _Extensions.FirstOrDefault(item => item.Name == extensionName && item.ParentType.IsAssignableFrom(ptype));
 
             if (name == null) return null;
 
@@ -71,11 +77,17 @@ namespace SharpGLTF.Schema2
             return instance as JsonSerializable;
         }
 
+        /// <summary>
+        /// Given a parentType and an extensionType, it identifies the extension code.
+        /// </summary>
+        /// <param name="parentType">The type of the parent object.</param>
+        /// <param name="extensionType">The type of the extension object.</param>
+        /// <returns>An extension identifier code, like "KHR_texture_transform".</returns>
         internal static string Identify(Type parentType, Type extensionType)
         {
-            foreach (var entry in _Extensions)
+            foreach (var (name, baseType, extType) in _Extensions)
             {
-                if (entry.ParentType == parentType && entry.ExtType == extensionType) return entry.Name;
+                if (baseType.IsAssignableFrom(parentType) && extType == extensionType) return name;
             }
 
             return null;

@@ -238,8 +238,20 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex => this.LogicalParent.LogicalTextureSamplers.IndexOfReference(this);
 
+        /// <summary>
+        /// Gets the texture minification filter.
+        /// </summary>
+        /// <remarks>
+        /// If value is Default, it must be interpreted by the runtime as "best fit"
+        /// </remarks>
         public TEXMIPMAP MinFilter => _minFilter.AsValue(TEXMIPMAP.DEFAULT);
 
+        /// <summary>
+        /// Gets the texture magnification filter.
+        /// </summary>
+        /// <remarks>
+        /// If value is Default, it must be interpreted by the runtime as "best fit"
+        /// </remarks>
         public TEXLERP MagFilter => _magFilter.AsValue(TEXLERP.DEFAULT);
 
         public TEXWRAP WrapS => _wrapS.AsValue(_wrapSDefault);
@@ -257,6 +269,61 @@ namespace SharpGLTF.Schema2
             if (ws != _wrapSDefault) return false;
             if (wt != _wrapTDefault) return false;
             return true;
+        }
+
+        public static bool AreEqualByContent(TextureSampler x, TextureSampler y)
+        {
+            #pragma warning disable IDE0041 // Use 'is null' check
+            if (Object.ReferenceEquals(x, y)) return true;
+            if (Object.ReferenceEquals(x, null)) return false;
+            if (Object.ReferenceEquals(y, null)) return false;
+            #pragma warning restore IDE0041 // Use 'is null' check
+
+            if (x._minFilter != y._minFilter) return false;
+            if (x._magFilter != y._magFilter) return false;
+            if (x._wrapS != y._wrapS) return false;
+            if (x._wrapT != y._wrapT) return false;
+
+            return true;
+        }
+
+        internal bool IsEqualTo(TEXMIPMAP min, TEXLERP mag, TEXWRAP ws, TEXWRAP wt)
+        {
+            if (this._minFilter != min) return false;
+            if (this._magFilter != mag) return false;
+            if (this._wrapS != ws) return false;
+            if (this._wrapT != wt) return false;
+
+            return true;
+        }
+
+        public int GetContentHashCode()
+        {
+            var h = 0;
+            h ^= this.MinFilter.GetHashCode();
+            h ^= this.MagFilter.GetHashCode();
+            h ^= this.WrapS.GetHashCode();
+            h ^= this.WrapT.GetHashCode();
+            return h;
+        }
+
+        #endregion
+
+        #region nested types
+
+        public static IEqualityComparer<TextureSampler> ContentComparer { get; private set; } = new _ContentComparer();
+
+        private class _ContentComparer : IEqualityComparer<TextureSampler>
+        {
+            public bool Equals(TextureSampler x, TextureSampler y)
+            {
+                return AreEqualByContent(x, y);
+            }
+
+            public int GetHashCode(TextureSampler obj)
+            {
+                return obj == null ? 0 : obj.GetContentHashCode();
+            }
         }
 
         #endregion
@@ -279,7 +346,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var s in this._samplers)
             {
-                if (s.MinFilter == min && s.MagFilter == mag && s.WrapS == ws && s.WrapT == wt) return s;
+                if (s.IsEqualTo(min, mag, ws, wt)) return s;
             }
 
             var ss = new TextureSampler(min, mag, ws, wt);

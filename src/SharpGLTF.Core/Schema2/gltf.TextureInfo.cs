@@ -112,6 +112,18 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public Matrix3x2 Matrix
+        {
+            get
+            {
+                var s = Matrix3x2.CreateScale(Scale);
+                var r = Matrix3x2.CreateRotation(-Rotation);
+                var t = Matrix3x2.CreateTranslation(Offset);
+
+                return s * r * t;
+            }
+        }
+
         #endregion
     }
 

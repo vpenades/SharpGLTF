@@ -362,7 +362,26 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         }
 
+        [Test]
+        public void LoadMultiUVTexture()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
 
+            var path = TestFiles
+                .GetSampleModelsPaths()
+                .FirstOrDefault(item => item.Contains("TextureTransformMultiTest.glb"));
+
+            var model = ModelRoot.Load(path);
+            Assert.NotNull(model);
+
+            var materials = model.LogicalMaterials;
+
+            var normalTest0Mat = materials.FirstOrDefault(item => item.Name == "NormalTest0Mat");
+            var normalTest0Mat_normal = normalTest0Mat.FindChannel("Normal").Value;
+            var normalTest0Mat_normal_xform = normalTest0Mat_normal.TextureTransform;            
+
+            Assert.NotNull(normalTest0Mat_normal_xform);
+        }
 
         [Test]
         public void FindDependencyFiles()
