@@ -483,7 +483,7 @@ namespace SharpGLTF.Scenes
 
             // perform roundtrip
 
-            var srcScene = Schema2Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
+            var srcScene = Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
 
             var rowModel = srcScene.ToGltf2();
 
@@ -491,8 +491,8 @@ namespace SharpGLTF.Scenes
             settings.UseStridedBuffers = false;
             var colModel = srcScene.ToGltf2(settings);
 
-            var rowScene = Schema2Toolkit.ToSceneBuilder(rowModel.DefaultScene);
-            var colScene = Schema2Toolkit.ToSceneBuilder(colModel.DefaultScene);
+            var rowScene = Toolkit.ToSceneBuilder(rowModel.DefaultScene);
+            var colScene = Toolkit.ToSceneBuilder(colModel.DefaultScene);
 
             // compare files
 

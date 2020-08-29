@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
-    public static partial class Schema2Toolkit
+    public static partial class Toolkit
     {
         /// <summary>
         /// Sets the cone angles for the <see cref="PunctualLightType.Spot"/> light.

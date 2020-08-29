@@ -12,7 +12,7 @@ using MESHXFORM = SharpGLTF.Transforms.IGeometryTransform;
 
 namespace SharpGLTF.Schema2
 {
-    public static partial class Schema2Toolkit
+    public static partial class Toolkit
     {
         #region meshes
 

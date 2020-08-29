@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
-    public static partial class Schema2Toolkit
+    public static partial class Toolkit
     {
         public static Accessor CreateVertexAccessor(this ModelRoot root, Memory.MemoryAccessor memAccessor)
         {

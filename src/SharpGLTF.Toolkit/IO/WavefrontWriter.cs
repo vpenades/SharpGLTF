@@ -212,7 +212,7 @@ namespace SharpGLTF.IO
 
         public void AddModel(ModelRoot model)
         {
-            foreach (var triangle in Schema2Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene))
+            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene))
             {
                 var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
@@ -221,7 +221,7 @@ namespace SharpGLTF.IO
 
         public void AddModel(ModelRoot model, Animation animation, float time)
         {
-            foreach (var triangle in Schema2Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, animation, time))
+            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, animation, time))
             {
                 var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);

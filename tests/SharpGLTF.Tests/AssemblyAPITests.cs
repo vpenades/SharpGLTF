@@ -84,7 +84,7 @@ namespace SharpGLTF
         {
             TestContext.CurrentContext.AttachShowDirLink();
 
-            var assembly = typeof(Schema2.Schema2Toolkit).Assembly;
+            var assembly = typeof(Schema2.Toolkit).Assembly;
 
             var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToArray();
 

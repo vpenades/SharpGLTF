@@ -27,14 +27,14 @@ namespace SharpGLTF
             model.AttachToCurrentTest(fileName);
         }
 
-        public static void AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, Schema2.Animation animation, float time)
+        public static void AttachToCurrentTest(this ModelRoot model, string fileName, Animation animation, float time)
         {
             fileName = fileName.Replace(" ", "_");
 
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
 
-            Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName, animation, time);
+            model.SaveAsWavefront(fileName, animation, time);
 
             // Attach the saved file to the current test
             TestContext.AddTestAttachment(fileName);
@@ -45,9 +45,9 @@ namespace SharpGLTF
             where TvM : struct, Geometry.VertexTypes.IVertexMaterial
             where TvS : struct, Geometry.VertexTypes.IVertexSkinning
         {
-            var gl2model = Schema2.ModelRoot.CreateModel();
+            var gl2model = ModelRoot.CreateModel();
 
-            var gl2mesh = Schema2.Schema2Toolkit.CreateMeshes(gl2model, mesh).First();
+            var gl2mesh = gl2model.CreateMeshes(mesh).First();
 
             var node = gl2model.UseScene(0).CreateNode();
             node.Mesh = gl2mesh;
@@ -55,7 +55,7 @@ namespace SharpGLTF
             gl2model.AttachToCurrentTest(fileName);
         }
 
-        public static string AttachToCurrentTest(this Schema2.ModelRoot model, string fileName, WriteSettings settings = null)
+        public static string AttachToCurrentTest(this ModelRoot model, string fileName, WriteSettings settings = null)
         {
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
@@ -73,7 +73,7 @@ namespace SharpGLTF
             else if (fileName.ToLower().EndsWith(".obj"))
             {
                 fileName = fileName.Replace(" ", "_");
-                Schema2.Schema2Toolkit.SaveAsWavefront(model, fileName);
+                model.SaveAsWavefront(fileName);
             }
             else if (fileName.ToLower().EndsWith(".plotly"))
             {
