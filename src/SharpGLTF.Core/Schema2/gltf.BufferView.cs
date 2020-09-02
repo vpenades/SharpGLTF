@@ -322,7 +322,7 @@ namespace SharpGLTF.Schema2
 
             var content = new BYTES(buffer.Content, byteOffset, byteLength.AsValue(buffer.Content.Length - byteOffset) );
 
-            if(searchForExisting)
+            if (searchForExisting)
             {
                 foreach (var bv in this.LogicalBufferViews)
                 {
