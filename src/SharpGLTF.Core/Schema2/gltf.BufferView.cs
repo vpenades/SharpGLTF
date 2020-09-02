@@ -279,11 +279,12 @@ namespace SharpGLTF.Schema2
         /// <param name="data">The array range to wrap.</param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
+        /// <param name="searchForExisting">Whether the function should search for an already existing buffer with the same content</param>
         /// <returns>A <see cref="BufferView"/> instance.</returns>
-        public BufferView UseBufferView(BYTES data, int byteStride = 0, BufferMode? target = null)
+        public BufferView UseBufferView(BYTES data, int byteStride = 0, BufferMode? target = null, bool searchForExisting = true)
         {
             Guard.NotNull(data.Array, nameof(data));
-            return UseBufferView(data.Array, data.Offset, data.Count, byteStride, target);
+            return UseBufferView(data.Array, data.Offset, data.Count, byteStride, target, searchForExisting);
         }
 
         /// <summary>
@@ -295,11 +296,12 @@ namespace SharpGLTF.Schema2
         /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
+        /// <param name="searchForExisting">Whether the function should search for an already existing buffer with the same content</param>
         /// <returns>A <see cref="BufferView"/> instance.</returns>
-        public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
+        public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null, bool searchForExisting = true)
         {
             Guard.NotNull(buffer, nameof(buffer));
-            return UseBufferView(UseBuffer(buffer), byteOffset, byteLength, byteStride, target);
+            return UseBufferView(UseBuffer(buffer), byteOffset, byteLength, byteStride, target, searchForExisting);
         }
 
         /// <summary>
@@ -311,17 +313,21 @@ namespace SharpGLTF.Schema2
         /// <param name="byteLength">The number of elements in <paramref name="buffer"/></param>
         /// <param name="byteStride">For strided vertex buffers, it must be a value multiple of 4, 0 otherwise</param>
         /// <param name="target">The type hardware device buffer, or null</param>
+        /// <param name="searchForExisting">Whether the function should search for an already existing buffer with the same content</param>
         /// <returns>A <see cref="BufferView"/> instance.</returns>
-        public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null)
+        public BufferView UseBufferView(Buffer buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null, bool searchForExisting = true)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, "this", buffer, nameof(buffer));
 
             var content = new BYTES(buffer.Content, byteOffset, byteLength.AsValue(buffer.Content.Length - byteOffset) );
 
-            foreach (var bv in this.LogicalBufferViews)
+            if(searchForExisting)
             {
-                if (BufferView.AreEqual(bv, content, byteStride, target)) return bv;
+                foreach (var bv in this.LogicalBufferViews)
+                {
+                    if (BufferView.AreEqual(bv, content, byteStride, target)) return bv;
+                }
             }
 
             var newbv = new BufferView(buffer, byteOffset, byteLength, byteStride, target);
