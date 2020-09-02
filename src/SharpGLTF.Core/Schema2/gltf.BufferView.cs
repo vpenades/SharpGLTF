@@ -301,7 +301,7 @@ namespace SharpGLTF.Schema2
         public BufferView UseBufferView(Byte[] buffer, int byteOffset = 0, int? byteLength = null, int byteStride = 0, BufferMode? target = null, bool searchForExisting = true)
         {
             Guard.NotNull(buffer, nameof(buffer));
-            return UseBufferView(UseBuffer(buffer), byteOffset, byteLength, byteStride, target, searchForExisting);
+            return UseBufferView(UseBuffer(buffer, false), byteOffset, byteLength, byteStride, target, searchForExisting);
         }
 
         /// <summary>

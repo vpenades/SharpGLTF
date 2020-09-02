@@ -177,11 +177,26 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Buffer"/> instance.</returns>
         public Buffer UseBuffer(Byte[] content)
         {
+            return UseBuffer(content, true);
+        }
+
+        /// <summary>
+        /// Creates or reuses a <see cref="Buffer"/> instance
+        /// at <see cref="ModelRoot.LogicalBuffers"/>.
+        /// </summary>
+        /// <param name="content">the byte array to be wrapped as a buffer</param>
+        /// <param name="reuse">whether the method should try to reuse an already existing buffer</param>
+        /// <returns>A <see cref="Buffer"/> instance.</returns>
+        public Buffer UseBuffer(Byte[] content, bool reuse)
+        {
             Guard.IsFalse(content == null, nameof(content));
 
-            foreach (var b in this.LogicalBuffers)
+            if (reuse)
             {
-                if (b.Content == content) return b;
+                foreach (var b in this.LogicalBuffers)
+                {
+                    if (b.Content == content) return b;
+                }
             }
 
             var buffer = new Buffer(content);
