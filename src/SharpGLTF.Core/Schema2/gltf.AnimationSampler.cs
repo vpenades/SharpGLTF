@@ -95,15 +95,14 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        private Accessor _CreateInputAccessor(IEnumerable<Single> input)
+        private Accessor _CreateInputAccessor(IEnumerable<Single> input, int count)
         {
             var root = LogicalParent.LogicalParent;
-            int inputCount = input.Count();
 
-            var buffer = root.UseBufferView(new Byte[inputCount * 4], searchForExisting: false);
+            var buffer = root.UseBufferView(new Byte[count * 4], searchForExisting: false);
             var accessor = root.CreateAccessor("Animation.Input");
 
-            accessor.SetData(buffer, 0, inputCount, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, count, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils._CopyTo(input, accessor.AsScalarArray());
 
@@ -112,18 +111,17 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(IEnumerable<Vector3> output)
+        private Accessor _CreateOutputAccessor(IEnumerable<Vector3> output, int count)
         {
             var root = LogicalParent.LogicalParent;
-            int outputCount = output.Count();
 
-            var buffer = root.UseBufferView(new Byte[outputCount * 4 * 3], searchForExisting: false);
+            var buffer = root.UseBufferView(new Byte[count * 4 * 3], searchForExisting: false);
 
             System.Diagnostics.Debug.Assert(buffer.ByteStride == 0);
 
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, outputCount, DimensionType.VEC3, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, count, DimensionType.VEC3, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsVector3Array());
 
@@ -132,15 +130,14 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(IEnumerable<Quaternion> output)
+        private Accessor _CreateOutputAccessor(IEnumerable<Quaternion> output, int count)
         {
             var root = LogicalParent.LogicalParent;
-            int outputCount = output.Count();
 
-            var buffer = root.UseBufferView(new Byte[outputCount * 4 * 4], searchForExisting: false);
+            var buffer = root.UseBufferView(new Byte[count * 4 * 4], searchForExisting: false);
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, outputCount, DimensionType.VEC4, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, count, DimensionType.VEC4, EncodingType.FLOAT, false);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsQuaternionArray());
 
@@ -149,26 +146,26 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(IEnumerable<SparseWeight8> output, int expandedCount)
+        private Accessor _CreateOutputAccessor(IEnumerable<SparseWeight8> output, int count, int expandedCount)
         {
             var root = LogicalParent.LogicalParent;
-            int outputCount = output.Count();
 
-            var buffer = root.UseBufferView(new Byte[outputCount * 4 * expandedCount], searchForExisting: false);
+            var buffer = root.UseBufferView(new Byte[count * 4 * expandedCount], searchForExisting: false);
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, outputCount * expandedCount, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, count * expandedCount, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
             var dst = accessor.AsScalarArray();
 
-            for (int i = 0; i < outputCount; ++i)
+            int i = 0;
+            foreach (var src in output)
             {
-                var src = output.ElementAt(i);
-
                 for (int j = 0; j < expandedCount; ++j)
                 {
                     dst[(i * expandedCount) + j] = src[j];
                 }
+
+                i++;
             }
 
             accessor.UpdateBounds();
@@ -176,54 +173,55 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private static (IEnumerable<Single> Keys, IEnumerable<TValue> Values) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
+        private static (Single[], TValue[]) _Split<TValue>(IReadOnlyDictionary<Single, (TValue TangentIn, TValue Value, TValue TangentOut)> keyframes)
         {
-            var sorted = keyframes
-                .OrderBy(item => item.Key)
-                .ToDictionary(x => x.Key, x => x.Value);
+            var sortedKeyframes = keyframes
+                .OrderBy(item => item.Key);
 
-            return (sorted.Keys, sorted.Values);
-        }
-
-        private static (Single[] Keys, TValue[] Values) _Split<TValue>(IReadOnlyDictionary<Single, (TValue TangentIn, TValue Value, TValue TangentOut)> keyframes)
-        {
-            var sorted = keyframes
-                .OrderBy(item => item.Key)
-                .ToList();
-
-            var keys = new Single[sorted.Count];
-            var vals = new TValue[sorted.Count * 3];
-
-            for (int i = 0; i < keys.Length; ++i)
+            var keys = new Single[keyframes.Count];
+            var values = new TValue[keyframes.Count];
+            int i = 0;
+            foreach (var sortedKeyframe in sortedKeyframes)
             {
-                keys[i] = sorted[i].Key;
-                vals[(i * 3) + 0] = sorted[i].Value.TangentIn;
-                vals[(i * 3) + 1] = sorted[i].Value.Value;
-                vals[(i * 3) + 2] = sorted[i].Value.TangentOut;
+                keys[i] = sortedKeyframe.Key;
+                values[(i * 3)] = sortedKeyframe.Value.TangentIn;
+                values[(i * 3) + 1] = sortedKeyframe.Value.Value;
+                values[(i * 3) + 2] = sortedKeyframe.Value.TangentOut;
+
+                i++;
             }
 
-            return (keys, vals);
+            return (keys, values);
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, Vector3> keyframes)
         {
-            var (keys, values) = _Split(keyframes);
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values).LogicalIndex;
+            var sortedKeyframes = keyframes
+                .OrderBy(item => item.Key)
+                .ToDictionary(item => item.Key, item => item.Value);
+
+            _input = this._CreateInputAccessor(sortedKeyframes.Keys, sortedKeyframes.Count).LogicalIndex;
+            _output = this._CreateOutputAccessor(sortedKeyframes.Values, sortedKeyframes.Count).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
-            var (keys, values) = _Split(keyframes);
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values).LogicalIndex;
+            var sortedKeyframes = keyframes
+                .OrderBy(item => item.Key)
+                .ToDictionary(item => item.Key, item => item.Value);
+
+            _input = this._CreateInputAccessor(sortedKeyframes.Keys, sortedKeyframes.Count).LogicalIndex;
+            _output = this._CreateOutputAccessor(sortedKeyframes.Values, sortedKeyframes.Count).LogicalIndex;
         }
 
-        internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int expandedCount)
+        internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount)
         {
-            var (keys, values) = _Split(keyframes);
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
+            var sortedKeyframes = keyframes
+                .OrderBy(item => item.Key)
+                .ToDictionary(item => item.Key, item => item.Value);
+
+            _input = this._CreateInputAccessor(sortedKeyframes.Keys, sortedKeyframes.Count).LogicalIndex;
+            _output = this._CreateOutputAccessor(sortedKeyframes.Values, sortedKeyframes.Count, morphCount).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
@@ -234,8 +232,8 @@ namespace SharpGLTF.Schema2
             values[0] = Vector3.Zero;
             values[values.Length - 1] = Vector3.Zero;
 
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values).LogicalIndex;
+            _input = this._CreateInputAccessor(keys, keys.Length).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, values.Length).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
@@ -246,8 +244,8 @@ namespace SharpGLTF.Schema2
             values[0] = default;
             values[values.Length - 1] = default;
 
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values).LogicalIndex;
+            _input = this._CreateInputAccessor(keys, keys.Length).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, values.Length).LogicalIndex;
         }
 
         internal void SetKeys(IReadOnlyDictionary<Single, (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut)> keyframes, int expandedCount)
@@ -258,8 +256,8 @@ namespace SharpGLTF.Schema2
             values[0] = default;
             values[values.Length - 1] = default;
 
-            _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
+            _input = this._CreateInputAccessor(keys, keys.Length).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, values.Length, expandedCount).LogicalIndex;
         }
 
         IEnumerable<(Single, Vector3)> IAnimationSampler<Vector3>.GetLinearKeys()
