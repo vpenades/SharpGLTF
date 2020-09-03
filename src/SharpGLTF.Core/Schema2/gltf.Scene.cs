@@ -17,12 +17,6 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region properties
-
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Scene"/> at <see cref="ModelRoot.LogicalScenes"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalScenes.IndexOfReference(this);
-
         internal IReadOnlyList<int> _VisualChildrenIndices => _nodes;
 
         public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent.LogicalNodes[idx]);

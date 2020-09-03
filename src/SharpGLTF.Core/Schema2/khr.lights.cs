@@ -121,11 +121,6 @@ namespace SharpGLTF.Schema2
         public static Vector3 LocalDirection => -Vector3.UnitZ;
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="PunctualLight"/> at <see cref="ModelRoot.LogicalPunctualLights"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalPunctualLights.IndexOfReference(this);
-
-        /// <summary>
         /// Gets the type of light.
         /// </summary>
         public PunctualLightType LightType => string.IsNullOrEmpty(_type) ? PunctualLightType.Directional : (PunctualLightType)Enum.Parse(typeof(PunctualLightType), _type, true);

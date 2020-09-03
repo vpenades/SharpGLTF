@@ -41,12 +41,12 @@ namespace SharpGLTF.Collections
                 }
 
                 // orphan the current child
-                if (this._Child != null) { this._Child._SetLogicalParent(null); }
+                if (this._Child != null) { this._Child._SetLogicalParent(null, -1); }
                 this._Child = null;
 
                 // adopt the new child
                 this._Child = value;
-                if (this._Child != null) { this._Child._SetLogicalParent(_Parent); }
+                if (this._Child != null) { this._Child._SetLogicalParent(_Parent, 0); }
             }
         }
 

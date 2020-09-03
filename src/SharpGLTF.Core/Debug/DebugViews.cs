@@ -33,7 +33,7 @@ namespace SharpGLTF.Debug
     {
         public _BufferViewDebugProxy(Schema2.BufferView value) { _Value = value; }
 
-        public int LogicalIndex => _Value.LogicalParent.LogicalBufferViews.IndexOfReference(_Value);
+        public int LogicalIndex => _Value.LogicalIndex;
 
         private readonly Schema2.BufferView _Value;
 

@@ -62,11 +62,6 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="BufferView"/> at <see cref="ModelRoot.LogicalBufferViews"/>
-        /// </summary>
-        public int LogicalIndex                 => this.LogicalParent.LogicalBufferViews.IndexOfReference(this);
-
-        /// <summary>
         /// Gets a value indicating whether this <see cref="BufferView"/> defines a GPU Ready Vertex Buffer.
         /// </summary>
         public bool IsVertexBuffer              => this._target == BufferMode.ARRAY_BUFFER;

@@ -52,12 +52,23 @@ namespace SharpGLTF.Collections
                 if (_Collection[index] == value) return; // nothing to do
 
                 // orphan the current child
-                if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(null); }
+                if (_Collection[index] != null)
+                {
+                    _Collection[index]._SetLogicalParent(null, -1);
+                    System.Diagnostics.Debug.Assert(_Collection[index].LogicalParent == null);
+                    System.Diagnostics.Debug.Assert(_Collection[index].LogicalIndex == -1);
+                }
+
                 _Collection[index] = null;
 
                 // adopt the new child
                 _Collection[index] = value;
-                if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(_Parent); }
+                if (_Collection[index] != null)
+                {
+                    _Collection[index]._SetLogicalParent(_Parent, index);
+                    System.Diagnostics.Debug.Assert(_Collection[index].LogicalParent == _Parent);
+                    System.Diagnostics.Debug.Assert(_Collection[index].LogicalIndex == index);
+                }
             }
         }
 
@@ -75,10 +86,13 @@ namespace SharpGLTF.Collections
             // new value must be an orphan
             Guard.NotNull(item, nameof(item));
             Guard.MustBeNull(item.LogicalParent, nameof(item.LogicalParent));
+            Guard.MustBeEqualTo(-1, item.LogicalIndex, nameof(item.LogicalIndex));
 
             if (_Collection == null) _Collection = new List<T>();
 
-            item._SetLogicalParent(_Parent);
+            item._SetLogicalParent(_Parent, _Collection.Count);
+            System.Diagnostics.Debug.Assert(item.LogicalParent == _Parent);
+            System.Diagnostics.Debug.Assert(item.LogicalIndex == _Collection.Count);
 
             _Collection.Add(item);
         }
@@ -89,7 +103,9 @@ namespace SharpGLTF.Collections
 
             foreach (var item in _Collection)
             {
-                item._SetLogicalParent(null);
+                item._SetLogicalParent(null, -1);
+                System.Diagnostics.Debug.Assert(item.LogicalParent == null);
+                System.Diagnostics.Debug.Assert(item.LogicalIndex == -1);
             }
 
             _Collection = null;
@@ -116,10 +132,19 @@ namespace SharpGLTF.Collections
             // new value must be an orphan
             Guard.NotNull(item, nameof(item));
             Guard.MustBeNull(item.LogicalParent, nameof(item.LogicalParent));
+            Guard.MustBeEqualTo(-1, item.LogicalIndex, nameof(item.LogicalIndex));
 
             if (_Collection == null) _Collection = new List<T>();
 
             _Collection.Insert(index, item);
+
+            // fix indices of upper items
+            for (int i = index; i < _Collection.Count; ++i)
+            {
+                _Collection[i]._SetLogicalParent(_Parent, i);
+                System.Diagnostics.Debug.Assert(_Collection[i].LogicalParent == _Parent);
+                System.Diagnostics.Debug.Assert(_Collection[i].LogicalIndex == i);
+            }
         }
 
         public bool Remove(T item)
@@ -136,11 +161,20 @@ namespace SharpGLTF.Collections
         public void RemoveAt(int index)
         {
             if (_Collection == null) throw new ArgumentOutOfRangeException(nameof(index));
+            if (index < 0 || index >= _Collection.Count) throw new ArgumentOutOfRangeException(nameof(index));
 
             // orphan the current child
-            if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(null); }
+            if (_Collection[index] != null) { _Collection[index]._SetLogicalParent(null, -1); }
 
             _Collection.RemoveAt(index);
+
+            // fix indices of upper items
+            for (int i = index; i < _Collection.Count; ++i)
+            {
+                _Collection[i]._SetLogicalParent(_Parent, i);
+                System.Diagnostics.Debug.Assert(_Collection[i].LogicalParent == _Parent);
+                System.Diagnostics.Debug.Assert(_Collection[i].LogicalIndex == i);
+            }
 
             if (_Collection.Count == 0) _Collection = null;
         }
@@ -153,22 +187,6 @@ namespace SharpGLTF.Collections
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _Collection == null ? Enumerable.Empty<T>().GetEnumerator() : _Collection.GetEnumerator();
-        }
-
-        public int Use(T item)
-        {
-            Guard.NotNull(item, nameof(item));
-
-            // in this case we delay the LogicalParent==null check to the "Add" method below
-
-            var idx = this.IndexOf(item);
-            if (idx >= 0) return idx;
-
-            idx = this.Count;
-
-            Add(item);
-
-            return idx;
         }
 
         #endregion

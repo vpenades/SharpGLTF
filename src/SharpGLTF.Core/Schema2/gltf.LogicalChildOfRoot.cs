@@ -28,7 +28,16 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public ModelRoot LogicalParent { get; private set; }
 
-        void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }
+        /// <summary>
+        /// Gets the zero-based index of this object in the Logical resources of <see cref="ModelRoot"/>.
+        /// </summary>
+        public int LogicalIndex { get; private set; } = -1;
+
+        void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent, int index)
+        {
+            LogicalParent = parent;
+            LogicalIndex = index;
+        }
 
         #endregion
 

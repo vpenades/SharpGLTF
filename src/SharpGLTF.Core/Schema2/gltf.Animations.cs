@@ -26,11 +26,6 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Animation"/> at <see cref="ModelRoot.LogicalAnimations"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalAnimations.IndexOfReference(this);
-
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
 
         internal IReadOnlyList<AnimationChannel> _Channels => _channels;
@@ -298,12 +293,21 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
+        /// Gets the zero-based index of this <see cref="Animation"/> at <see cref="ModelRoot.LogicalAnimations"/>
+        /// </summary>
+        public int LogicalIndex { get; private set; } = -1;
+
+        /// <summary>
         /// Gets the <see cref="Animation"/> instance that owns this object.
         /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Animation LogicalParent { get; private set; }
 
-        void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }
+        void IChildOf<Animation>._SetLogicalParent(Animation parent, int index)
+        {
+            LogicalParent = parent;
+            LogicalIndex = index;
+        }
 
         /// <summary>
         /// Gets the <see cref="AnimationSampler"/> instance used by this <see cref="AnimationChannel"/>.

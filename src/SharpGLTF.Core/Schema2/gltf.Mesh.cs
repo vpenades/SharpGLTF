@@ -37,11 +37,6 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Mesh"/> at <see cref="ModelRoot.LogicalMeshes"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalMeshes.IndexOfReference(this);
-
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingMesh(this);
 
         public IReadOnlyList<MeshPrimitive> Primitives => _primitives;

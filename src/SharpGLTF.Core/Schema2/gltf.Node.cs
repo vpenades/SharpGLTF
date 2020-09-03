@@ -75,11 +75,6 @@ namespace SharpGLTF.Schema2
         #region properties - hierarchy
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="Node"/> at <see cref="ModelRoot.LogicalNodes"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalNodes.IndexOfReference(this);
-
-        /// <summary>
         /// Gets the visual parent <see cref="Node"/> instance that contains this <see cref="Node"/>.
         /// </summary>
         public Node VisualParent => this.LogicalParent._FindVisualParentNode(this);

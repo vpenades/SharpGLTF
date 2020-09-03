@@ -18,11 +18,6 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="Material"/> at <see cref="ModelRoot.LogicalMaterials"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalMaterials.IndexOfReference(this);
-
-        /// <summary>
         /// Gets or sets the <see cref="AlphaMode"/>.
         /// </summary>
         public AlphaMode Alpha

@@ -28,11 +28,6 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="Skin"/> at <see cref="ModelRoot.LogicalSkins"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalSkins.IndexOfReference(this);
-
-        /// <summary>
         /// Gets a collection of <see cref="Node"/> instances using this <see cref="Skin"/>.
         /// </summary>
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingSkin(this);

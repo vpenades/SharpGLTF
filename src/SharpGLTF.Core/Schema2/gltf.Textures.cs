@@ -22,11 +22,6 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Texture"/> at <see cref="ModelRoot.LogicalTextures"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalTextures.IndexOfReference(this);
-
         public TextureSampler Sampler
         {
             get => _sampler.HasValue ? LogicalParent.LogicalTextureSamplers[_sampler.Value] : null;
@@ -232,11 +227,6 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region properties
-
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="TextureSampler"/> at <see cref="ModelRoot.LogicalTextureSamplers"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalTextureSamplers.IndexOfReference(this);
 
         /// <summary>
         /// Gets the texture minification filter.

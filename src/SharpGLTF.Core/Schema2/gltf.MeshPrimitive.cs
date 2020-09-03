@@ -35,14 +35,18 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the zero-based index of this <see cref="MeshPrimitive"/> at <see cref="Mesh.Primitives"/>.
         /// </summary>
-        public int LogicalIndex => this.LogicalParent.Primitives.IndexOfReference(this);
+        public int LogicalIndex { get; private set; } = -1;
 
         /// <summary>
         /// Gets the <see cref="Mesh"/> instance that owns this <see cref="MeshPrimitive"/> instance.
         /// </summary>
         public Mesh LogicalParent { get; private set; }
 
-        void IChildOf<Mesh>._SetLogicalParent(Mesh parent) { LogicalParent = parent; }
+        void IChildOf<Mesh>._SetLogicalParent(Mesh parent, int index)
+        {
+            LogicalParent = parent;
+            LogicalIndex = index;
+        }
 
         /// <summary>
         /// Gets or sets the <see cref="Material"/> instance, or null.

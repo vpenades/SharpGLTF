@@ -28,11 +28,6 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Buffer"/> at <see cref="ModelRoot.LogicalBuffers"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalBuffers.IndexOfReference(this);
-
         #pragma warning disable CA1819 // Properties should not return arrays
         public Byte[] Content => _Content;
         #pragma warning restore CA1819 // Properties should not return arrays

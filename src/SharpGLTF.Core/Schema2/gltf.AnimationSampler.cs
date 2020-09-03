@@ -75,9 +75,13 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the zero-based index of this <see cref="AnimationSampler"/> at <see cref="Animation._samplers"/>.
         /// </summary>
-        public int LogicalIndex => LogicalParent._Samplers.IndexOfReference(this);
+        public int LogicalIndex { get; private set; } = -1;
 
-        void IChildOf<Animation>._SetLogicalParent(Animation parent) { LogicalParent = parent; }
+        void IChildOf<Animation>._SetLogicalParent(Animation parent, int index)
+        {
+            LogicalParent = parent;
+            LogicalIndex = index;
+        }
 
         public AnimationInterpolationMode InterpolationMode
         {

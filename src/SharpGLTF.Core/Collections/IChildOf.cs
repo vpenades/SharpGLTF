@@ -7,8 +7,10 @@ namespace SharpGLTF.Collections
     interface IChildOf<TParent>
         where TParent : class
     {
+        int LogicalIndex { get; }
+
         TParent LogicalParent { get; }
 
-        void _SetLogicalParent(TParent parent);
+        void _SetLogicalParent(TParent parent, int index);
     }
 }

@@ -14,12 +14,6 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region properties
-
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Camera"/> at <see cref="ModelRoot.LogicalCameras"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalCameras.IndexOfReference(this);
-
         public ICamera Settings => GetCamera();
 
         /// <summary>

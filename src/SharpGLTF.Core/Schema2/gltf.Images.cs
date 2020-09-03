@@ -44,11 +44,6 @@ namespace SharpGLTF.Schema2
         #region properties
 
         /// <summary>
-        /// Gets the zero-based index of this <see cref="Image"/> at <see cref="ModelRoot.LogicalImages"/>
-        /// </summary>
-        public int LogicalIndex => this.LogicalParent.LogicalImages.IndexOfReference(this);
-
-        /// <summary>
         /// Gets or sets the in-memory representation of the image file.
         /// </summary>
         [Obsolete("Use Content property instead.")]

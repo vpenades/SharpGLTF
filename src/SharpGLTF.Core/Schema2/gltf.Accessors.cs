@@ -36,11 +36,6 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Accessor"/> at <see cref="ModelRoot.LogicalAccessors"/>
-        /// </summary>
-        public int LogicalIndex                 => this.LogicalParent.LogicalAccessors.IndexOfReference(this);
-
         internal int _SourceBufferViewIndex => this._bufferView.AsValue(-1);
 
         /// <summary>

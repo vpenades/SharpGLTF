@@ -287,19 +287,6 @@ namespace SharpGLTF
             return -1;
         }
 
-        internal static int IndexOfReference<T>(this IReadOnlyList<T> collection, T value)
-            where T : class
-        {
-            var l = collection.Count;
-
-            for (int i = 0; i < l; ++i)
-            {
-                if (Object.ReferenceEquals(collection[i], value)) return i;
-            }
-
-            return -1;
-        }
-
         internal static int IndexOf<T>(this IReadOnlyList<T> collection, T[] subset)
             where T : IEquatable<T>
         {
