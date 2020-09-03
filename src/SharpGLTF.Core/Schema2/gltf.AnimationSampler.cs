@@ -103,7 +103,7 @@ namespace SharpGLTF.Schema2
         {
             var root = LogicalParent.LogicalParent;
 
-            var buffer = root.UseBufferView(new Byte[input.Count * 4]);
+            var buffer = root.CreateBufferView(input.Count * 4);
             var accessor = root.CreateAccessor("Animation.Input");
 
             accessor.SetData(buffer, 0, input.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
@@ -119,7 +119,7 @@ namespace SharpGLTF.Schema2
         {
             var root = LogicalParent.LogicalParent;
 
-            var buffer = root.UseBufferView(new Byte[output.Count * 4 * 3]);
+            var buffer = root.CreateBufferView(output.Count * 4 * 3);
 
             System.Diagnostics.Debug.Assert(buffer.ByteStride == 0);
 
@@ -138,7 +138,7 @@ namespace SharpGLTF.Schema2
         {
             var root = LogicalParent.LogicalParent;
 
-            var buffer = root.UseBufferView(new Byte[output.Count * 4 * 4]);
+            var buffer = root.CreateBufferView(output.Count * 4 * 4);
             var accessor = root.CreateAccessor("Animation.Output");
 
             accessor.SetData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
@@ -154,7 +154,7 @@ namespace SharpGLTF.Schema2
         {
             var root = LogicalParent.LogicalParent;
 
-            var buffer = root.UseBufferView(new Byte[output.Count * 4 * expandedCount]);
+            var buffer = root.CreateBufferView(output.Count * 4 * expandedCount);
             var accessor = root.CreateAccessor("Animation.Output");
 
             accessor.SetData(buffer, 0, output.Count * expandedCount, DimensionType.SCALAR, EncodingType.FLOAT, false);

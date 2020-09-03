@@ -267,6 +267,19 @@ namespace SharpGLTF.Schema2
 
     public partial class ModelRoot
     {
+        public BufferView CreateBufferView(int byteSize, int byteStride = 0, BufferMode? target = null)
+        {
+            Guard.MustBeGreaterThan(byteSize, 0, nameof(byteSize));
+
+            var buffer = CreateBuffer(byteSize);
+
+            var buffView = new BufferView(buffer, 0, null, byteStride, target);
+
+            this._bufferViews.Add(buffView);
+
+            return buffView;
+        }
+
         /// <summary>
         /// Creates or reuses a <see cref="BufferView"/> instance
         /// at <see cref="ModelRoot.LogicalBufferViews"/>.

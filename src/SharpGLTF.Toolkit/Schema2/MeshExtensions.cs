@@ -123,7 +123,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             // create an index buffer and fill it
-            var view = root.UseBufferView(new Byte[4 * values.Count], 0, null, 0, BufferMode.ELEMENT_ARRAY_BUFFER);
+            var view = root.CreateBufferView(4 * values.Count, 0, BufferMode.ELEMENT_ARRAY_BUFFER);
             var array = new IntegerArray(view.Content);
             array.Fill(values);
 
@@ -145,7 +145,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
-            var view = root.UseBufferView(new Byte[4 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var view = root.CreateBufferView(4 * values.Count, 0, BufferMode.ARRAY_BUFFER);
             var array = new ScalarArray(view.Content);
             array.Fill(values);
 
@@ -165,7 +165,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
-            var view = root.UseBufferView(new Byte[8 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var view = root.CreateBufferView(8 * values.Count, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector2Array(view.Content);
             array.Fill(values);
 
@@ -185,7 +185,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
-            var view = root.UseBufferView(new Byte[12 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var view = root.CreateBufferView(12 * values.Count, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector3Array(view.Content);
             array.Fill(values);
 
@@ -206,7 +206,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             // create a vertex buffer and fill it
-            var view = root.UseBufferView(new Byte[16 * values.Count], 0, null, 0, BufferMode.ARRAY_BUFFER);
+            var view = root.CreateBufferView(16 * values.Count, 0, BufferMode.ARRAY_BUFFER);
             var array = new Vector4Array(view.Content);
             array.Fill(values);
 
