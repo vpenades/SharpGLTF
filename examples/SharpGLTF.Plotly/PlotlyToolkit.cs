@@ -42,7 +42,7 @@ namespace SharpGLTF
                 var mesh = meshes[instance.Template.LogicalMeshIndex];
                 var tris = mesh.EvaluateTriangles(instance.Transform);
 
-                dstScene.AppendTriangles(tris, Matrix4x4.Identity, GetMaterialColor);
+                dstScene.AppendTriangles(tris, GetMaterialColor);
             }
 
             return dstScene;            
@@ -51,7 +51,7 @@ namespace SharpGLTF
         public static PlotlyScene ToPlotly(this Schema2.Mesh mesh)
         {
             var dstScene = new PlotlyScene();
-            dstScene.AppendTriangles(mesh.EvaluateTriangles(), Matrix4x4.Identity, GetMaterialColor);
+            dstScene.AppendTriangles(mesh.EvaluateTriangles(), GetMaterialColor);
             return dstScene;
         }
 
@@ -73,7 +73,7 @@ namespace SharpGLTF
             }
 
             var scene = new PlotlyScene();
-            scene.AppendTriangles(_enumTris(), Matrix4x4.Identity, GetMaterialColor);
+            scene.AppendTriangles(_enumTris(), GetMaterialColor);
             return scene;
         }
 

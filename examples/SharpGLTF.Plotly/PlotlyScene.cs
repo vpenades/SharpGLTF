@@ -18,15 +18,15 @@ namespace SharpGLTF
         #region data
 
         private readonly List<TRACES> _Traces = new List<TRACES>();
-        private readonly Dictionary<Object, int> mats = new Dictionary<Object, int>();                // materials to color mapping
+        private readonly Dictionary<Object, int> _Materials = new Dictionary<Object, int>();                // materials to color mapping
 
         #endregion
 
         #region API
 
-        public void AppendTriangles<TMaterial>(IEnumerable<(VERTEX A, VERTEX B, VERTEX C, TMaterial Material)> tris, Matrix4x4 xform, Func<TMaterial, int> materialColorFunc)
+        public void AppendTriangles<TMaterial>(IEnumerable<(VERTEX A, VERTEX B, VERTEX C, TMaterial Material)> tris, Func<TMaterial, int> materialColorFunc)
         {
-            var trace = _CreateTrace(tris, xform, materialColorFunc);
+            var trace = _CreateTrace(tris, materialColorFunc);
 
             _Traces.Add(trace);
         }
@@ -71,7 +71,7 @@ namespace SharpGLTF
                 );
         }
 
-        private TRACES _CreateTrace<TMaterial>(IEnumerable<(VERTEX A, VERTEX B, VERTEX C, TMaterial Material)> tris, Matrix4x4 xform, Func<TMaterial, int> materialColorFunc)
+        private TRACES _CreateTrace<TMaterial>(IEnumerable<(VERTEX A, VERTEX B, VERTEX C, TMaterial Material)> tris, Func<TMaterial, int> materialColorFunc)
         {
             var vrts = new List<(Vector3 p, Vector3 n)>();              // vertex list
             var vrtm = new Dictionary<(Vector3 p, Vector3 n), int>();   // vertex sharing map
@@ -94,9 +94,9 @@ namespace SharpGLTF
 
             foreach (var (A, B, C, Material) in tris)
             {
-                if (!mats.TryGetValue(Material, out int color))
+                if (!_Materials.TryGetValue(Material, out int color))
                 {
-                    mats[Material] = color = materialColorFunc(Material);
+                    _Materials[Material] = color = materialColorFunc(Material);
                 }
 
                 var ap = _useSharedVertex(A);
