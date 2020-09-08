@@ -355,9 +355,7 @@ namespace SharpGLTF.Schema2
 
             if (srcMaterial.ShaderStyle == "PBRMetallicRoughness")
             {
-                if (hasClearCoat) dstMaterial.InitializePBRClearCoat();
-                else if (hasTransmission) dstMaterial.InitializePBRTransmission();
-                else dstMaterial.InitializePBRMetallicRoughness();
+                dstMaterial.InitializePBRMetallicRoughness(hasClearCoat, hasTransmission);
                 defMaterial = srcMaterial;
             }
 

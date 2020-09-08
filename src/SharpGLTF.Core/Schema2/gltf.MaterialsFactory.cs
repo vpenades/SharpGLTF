@@ -19,35 +19,28 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
+        /// Initializes this <see cref="Material"/> instance with Unlit attributes.
+        /// </summary>
+        public void InitializeUnlit()
+        {
+            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+
+            ClearExtensions();
+            this.SetExtension(new MaterialUnlit(this));
+        }
+
+        /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
         /// </summary>
-        public void InitializePBRMetallicRoughness()
+        /// <param name="useClearCoat">True to enable CleatCoat extension.</param>
+        /// <param name="useTransmission">True to enable Transmission extension.</param>
+        public void InitializePBRMetallicRoughness(bool useClearCoat = false, bool useTransmission = false)
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
-        }
-
-        /// <summary>
-        /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes and Clear Coat extension.
-        /// </summary>
-        public void InitializePBRClearCoat()
-        {
-            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
-
-            ClearExtensions();
-            this.SetExtension(new MaterialClearCoat(this));
-        }
-
-        /// <summary>
-        /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes and Transmission extension.
-        /// </summary>
-        public void InitializePBRTransmission()
-        {
-            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
-
-            ClearExtensions(); // TODO: Notice that ClearCoat specification does not exclude ClearCoat
-            this.SetExtension(new MaterialTransmission(this));
+            if (useClearCoat) this.SetExtension(new MaterialClearCoat(this));
+            if (useTransmission) this.SetExtension(new MaterialTransmission(this));
         }
 
         /// <summary>
@@ -67,17 +60,6 @@ namespace SharpGLTF.Schema2
 
             ClearExtensions();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
-        }
-
-        /// <summary>
-        /// Initializes this <see cref="Material"/> instance with Unlit attributes.
-        /// </summary>
-        public void InitializeUnlit()
-        {
-            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
-
-            ClearExtensions();
-            this.SetExtension(new MaterialUnlit(this));
         }
 
         #endregion
