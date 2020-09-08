@@ -12,7 +12,13 @@ namespace SharpGLTF.Schema2
 {
     using MODEL = ModelRoot;
 
-    public delegate Boolean ImageReaderCallback(Image image);
+    /// <summary>
+    /// Callback used to intercept the loading of textures so they can be decoded by the client
+    /// engine and uploaded to the GPU if neccesary.
+    /// </summary>
+    /// <param name="image">The Image containing the texture</param>
+    /// <returns>true if we want to keep the image memory data in Image. Otherwise the memory will be cleared.</returns>    
+    public delegate Boolean ImageDecodeCallback(Image image);
 
     /// <summary>
     /// Settings to customize how <see cref="MODEL"/> files are read.
@@ -46,7 +52,10 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public VALIDATIONMODE Validation { get; set; } = VALIDATIONMODE.Strict;
 
-        public ImageReaderCallback ImageReader { get; set; }
+        /// <summary>
+        /// Gets or sets the callback used to decode the textures as they're loaded.
+        /// </summary>
+        public ImageDecodeCallback ImageDecoder { get; set; }
 
         #endregion
 
@@ -56,7 +65,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(other, nameof(other));
             other.Validation = this.Validation;
-            other.ImageReader = this.ImageReader;
+            other.ImageDecoder = this.ImageDecoder;
         }
 
         #endregion
@@ -216,11 +225,13 @@ namespace SharpGLTF.Schema2
 
             foreach (var image in this._images)
             {
+                // reads the image file into the current object.
                 image._ResolveUri(context);
 
-                if (context.ImageReader != null)
+                // if we have a decoder hook, call the decoder, and free the memory.
+                if (context.ImageDecoder != null)
                 {
-                    if (!context.ImageReader(image))
+                    if (!context.ImageDecoder(image))
                     {
                         image._DiscardContent();
                     }

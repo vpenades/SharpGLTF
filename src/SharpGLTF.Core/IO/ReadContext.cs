@@ -79,7 +79,7 @@ namespace SharpGLTF.IO
             : base(other)
         {
             this._FileReader = other._FileReader;
-            this.ImageReader = other.ImageReader;
+            this.ImageDecoder = other.ImageDecoder;
         }
 
         #endregion
