@@ -8,7 +8,15 @@ namespace SharpGLTF.Schema2
 {
     public partial class Material
     {
-        #region API
+        #region factory
+
+        internal void ClearExtensions()
+        {
+            this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialClearCoat>();
+            this.RemoveExtensions<MaterialTransmission>();
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+        }
 
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
@@ -17,21 +25,29 @@ namespace SharpGLTF.Schema2
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
-            this.RemoveExtensions<MaterialUnlit>();
-            this.RemoveExtensions<MaterialClearCoat>();
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            ClearExtensions();
         }
 
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes and Clear Coat extension.
         /// </summary>
-        public void InitializePBRMetallicRoughnessClearCoat()
+        public void InitializePBRClearCoat()
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
-            this.RemoveExtensions<MaterialUnlit>();
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            ClearExtensions();
             this.SetExtension(new MaterialClearCoat(this));
+        }
+
+        /// <summary>
+        /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes and Transmission extension.
+        /// </summary>
+        public void InitializePBRTransmission()
+        {
+            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+
+            ClearExtensions(); // TODO: Notice that ClearCoat specification does not exclude ClearCoat
+            this.SetExtension(new MaterialTransmission(this));
         }
 
         /// <summary>
@@ -49,8 +65,7 @@ namespace SharpGLTF.Schema2
                 this._pbrMetallicRoughness = null;
             }
 
-            this.RemoveExtensions<MaterialUnlit>();
-            this.RemoveExtensions<MaterialClearCoat>();
+            ClearExtensions();
             this.SetExtension(new MaterialPBRSpecularGlossiness(this));
         }
 
@@ -61,9 +76,13 @@ namespace SharpGLTF.Schema2
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+            ClearExtensions();
             this.SetExtension(new MaterialUnlit(this));
         }
+
+        #endregion
+
+        #region channels API
 
         private IEnumerable<MaterialChannel> _GetChannels()
         {
@@ -84,6 +103,13 @@ namespace SharpGLTF.Schema2
             if (clearCoat != null)
             {
                 var channels = clearCoat.GetChannels(this);
+                foreach (var c in channels) yield return c;
+            }
+
+            var transmission = this.GetExtension<MaterialTransmission>();
+            if (transmission != null)
+            {
+                var channels = transmission.GetChannels(this);
                 foreach (var c in channels) yield return c;
             }
 
@@ -345,6 +371,36 @@ namespace SharpGLTF.Schema2
                 () => _GetClearCoatNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
                 value => _GetClearCoatNormalTexture(true).Scale = value
                 );
+        }
+    }
+
+    internal sealed partial class MaterialTransmission
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialTransmission(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatItems(_transmissionTexture);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            yield return new MaterialChannel
+                (
+                material, "Transmission",
+                _GetTransmissionTexture,
+                (float)_transmissionFactorDefault,
+                () => (float)this._transmissionFactor.AsValue(_transmissionFactorDefault),
+                value => this._transmissionFactor = value
+                );
+        }
+
+        private TextureInfo _GetTransmissionTexture(bool create)
+        {
+            if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
+            return _transmissionTexture;
         }
     }
 }

@@ -32,6 +32,12 @@ namespace SharpGLTF.Validation
             return this;
         }
 
+        public OUTTYPE MustBeNull(PARAMNAME parameterName, object target)
+        {
+            if (target != null) _SchemaThrow(parameterName, "must be null.");
+            return this;
+        }
+
         public OUTTYPE IsDefined<T>(PARAMNAME parameterName, T value)
             where T : class
         {

@@ -48,7 +48,8 @@ namespace SharpGLTF.Materials
             KnownChannel.Emissive,
             KnownChannel.ClearCoat,
             KnownChannel.ClearCoatNormal,
-            KnownChannel.ClearCoatRoughness
+            KnownChannel.ClearCoatRoughness,
+            KnownChannel.Transmission,
         };
 
         private static readonly KnownChannel[] _SpeGloChannels = new[]
@@ -58,9 +59,6 @@ namespace SharpGLTF.Materials
             KnownChannel.Normal,
             KnownChannel.Occlusion,
             KnownChannel.Emissive,
-            // KnownChannel.ClearCoat,
-            // KnownChannel.ClearCoatNormal,
-            // KnownChannel.ClearCoatRoughness
         };
 
         #endregion
@@ -294,9 +292,12 @@ namespace SharpGLTF.Materials
                 || this.GetChannel("ClearCoatRoughness") != null
                 || this.GetChannel("ClearCoatNormal") != null;
 
+            var hasTransmission = this.GetChannel("Transmission") != null;
+
             if (this.ShaderStyle == SHADERPBRSPECULARGLOSSINESS)
             {
                 Guard.IsFalse(hasClearCoat, KnownChannel.ClearCoat.ToString(), "Clear Coat not supported for Specular Glossiness materials.");
+                Guard.IsFalse(hasTransmission, KnownChannel.Transmission.ToString(), "Transmission not supported for Specular Glossiness materials.");
 
                 if (this.CompatibilityFallback != null)
                 {
@@ -381,6 +382,12 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        public MaterialBuilder WithChannelParam(string channelKey, Vector4 parameter)
+        {
+            this.UseChannel(channelKey).Parameter = parameter;
+            return this;
+        }
+
         public MaterialBuilder WithChannelImage(KnownChannel channelKey, IMAGEFILE primaryImage)
         {
             if (primaryImage.IsEmpty)
@@ -393,12 +400,6 @@ namespace SharpGLTF.Materials
                 .UseTexture()
                 .WithPrimaryImage(primaryImage);
 
-            return this;
-        }
-
-        public MaterialBuilder WithChannelParam(string channelKey, Vector4 parameter)
-        {
-            this.UseChannel(channelKey).Parameter = parameter;
             return this;
         }
 
@@ -547,6 +548,13 @@ namespace SharpGLTF.Materials
         {
             WithChannelImage(KnownChannel.ClearCoatRoughness, imageFile);
             WithChannelParam(KnownChannel.ClearCoatRoughness, new Vector4(roughness, 0, 0, 0));
+            return this;
+        }
+
+        public MaterialBuilder WithTransmission(IMAGEFILE imageFile, float intensity)
+        {
+            WithChannelImage(KnownChannel.Transmission, imageFile);
+            WithChannelParam(KnownChannel.Transmission, new Vector4(intensity, 0, 0, 0));
             return this;
         }
 

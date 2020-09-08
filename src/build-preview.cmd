@@ -13,7 +13,4 @@ dotnet build -c:Release --version-suffix %VERSIONSUFFIX% /p:Authors=vpenades Sha
 dotnet nuget push "SharpGLTF.Core/bin/Release/SharpGLTF.Core.1.0.0-%VERSIONSUFFIX%.nupkg" -s "github" --force-english-output
 dotnet nuget push "SharpGLTF.Toolkit/bin/Release/SharpGLTF.Toolkit.1.0.0-%VERSIONSUFFIX%.nupkg" -s "github" --force-english-output
 
-rem nuget push "SharpGLTF.Core/bin/Release/SharpGLTF.Core.1.0.0-%VERSIONSUFFIX%.nupkg" -src "github"
-rem nuget push "SharpGLTF.Toolkit/bin/Release/SharpGLTF.Toolkit.1.0.0-%VERSIONSUFFIX%.nupkg" -src "github"
-
 pause

@@ -24,11 +24,17 @@ namespace SharpGLTF
 
             _ProcessMainSchema();
 
-            _ProcessKhronosSpecularGlossinessExtension();
+            // material extensions
             _ProcessKhronosUnlitExtension();
             _ProcessKhronosClearCoatExtension();
+            _ProcessKhronosTransmissionExtension();
+            _ProcessKhronosSpecularGlossinessExtension();
+
+            // lights
             _ProcessKhronosModelLightsPunctualExtension();
             _ProcessKhronosNodeLightsPunctualExtension();
+
+            // textures
             _ProcessKhronosTextureTransformExtension();
             _ProcessMicrosoftTextureDDSExtension();
             _ProcessTextureWebpExtension();
@@ -147,6 +153,17 @@ namespace SharpGLTF
             ProcessSchema("ext.ClearCoat.g", ctx);
         }
 
+        private static void _ProcessKhronosTransmissionExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosPbrTransmissionSchemaFile);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            ctx.IgnoredByCodeEmitter("Texture Info");
+            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");            
+
+            ProcessSchema("ext.Transmission.g", ctx);
+        }
+
         private static void _ProcessKhronosModelLightsPunctualExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosModelLightsPunctualSchemaFile);            
@@ -257,6 +274,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness");
             newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");
             newEmitter.SetRuntimeName("KHR_materials_clearcoat glTF extension", "MaterialClearCoat");
+            newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
 
 
 
