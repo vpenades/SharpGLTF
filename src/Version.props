@@ -15,6 +15,13 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <SignAssembly>true</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)SharpGLTF.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+
   <!--
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <VersionSuffix>dev-$([System.DateTime]::UtcNow.ToString(yyyyMMdd-HHmm))</VersionSuffix>
