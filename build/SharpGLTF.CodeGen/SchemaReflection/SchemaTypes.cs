@@ -244,7 +244,7 @@ namespace SharpGLTF.SchemaReflection
 
         public String Description { get; set; }
 
-        public string PersistentName => _PersistentName;                
+        public String PersistentName => _PersistentName;
 
         public SchemaType FieldType { get => _FieldType; set => _FieldType = value; }
 

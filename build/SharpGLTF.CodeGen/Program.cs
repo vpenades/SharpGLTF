@@ -24,6 +24,9 @@ namespace SharpGLTF
 
             _ProcessMainSchema();
 
+            // XMP
+            _ProcessKhronosXMPExtension();            
+
             // material extensions
             _ProcessKhronosUnlitExtension();
             _ProcessKhronosClearCoatExtension();
@@ -31,8 +34,7 @@ namespace SharpGLTF
             _ProcessKhronosSpecularGlossinessExtension();
 
             // lights
-            _ProcessKhronosModelLightsPunctualExtension();
-            _ProcessKhronosNodeLightsPunctualExtension();
+            _ProcessKhronosLightsPunctualExtension();
 
             // textures
             _ProcessKhronosTextureTransformExtension();
@@ -98,6 +100,43 @@ namespace SharpGLTF
 
         #region Extensions code generation
 
+        private static void _ProcessKhronosXMPExtension()
+        {
+            // Model extension
+
+            var ctx = LoadSchemaContext(Constants.KhronosModelXMPSchemaFile);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            /*
+            var jdict = ctx.UseClass("JsonDictionary");
+            var jlist = ctx.UseClass("JsonList");
+
+            ctx.FindClass("KHR_xmp glTF extension")
+                .GetField("@context")
+                .SetDataType(jdict);
+
+            ctx.FindClass("KHR_xmp glTF extension")
+                .GetField("packets")
+                .SetDataType(jlist);*/
+
+            /*
+            ctx.FindClass("KHR_xmp glTF extension")
+                .GetField("@context")
+                .SetDataType(typeof(Dictionary<string,Object>), true);
+            */
+
+            ProcessSchema("ext.XMP.Model.g", ctx);
+
+            // Node extension
+
+            ctx = LoadSchemaContext(Constants.KhronosNodeXMPSchemaFile);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.XMP.Node.g", ctx);
+        }        
+
         private static void _ProcessKhronosSpecularGlossinessExtension()
         {
             var ctx = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
@@ -135,20 +174,7 @@ namespace SharpGLTF
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
-            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");
-
-            /*
-            ctx.FindClass("KHR_materials_pbrSpecularGlossiness glTF extension")
-                .GetField("diffuseFactor")
-                .SetDataType(typeof(System.Numerics.Vector4), true)
-                .SetDefaultValue("Vector4.One")
-                .SetItemsRange(0);
-
-            ctx.FindClass("KHR_materials_pbrSpecularGlossiness glTF extension")
-                .GetField("specularFactor")
-                .SetDataType(typeof(System.Numerics.Vector3), true)
-                .SetDefaultValue("Vector3.One")
-                .SetItemsRange(0);*/
+            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");            
 
             ProcessSchema("ext.ClearCoat.g", ctx);
         }
@@ -164,8 +190,10 @@ namespace SharpGLTF
             ProcessSchema("ext.Transmission.g", ctx);
         }
 
-        private static void _ProcessKhronosModelLightsPunctualExtension()
+        private static void _ProcessKhronosLightsPunctualExtension()
         {
+            // Model
+
             var ctx = LoadSchemaContext(Constants.KhronosModelLightsPunctualSchemaFile);            
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
@@ -177,11 +205,10 @@ namespace SharpGLTF
                 .SetItemsRange(0);
 
             ProcessSchema("ext.ModelLightsPunctual.g", ctx);
-        }
 
-        private static void _ProcessKhronosNodeLightsPunctualExtension()
-        {
-            var ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
+            // Node
+
+            ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -272,9 +299,12 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST", "TextureMipMapFilter");
 
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness");
-            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");
+            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");            
             newEmitter.SetRuntimeName("KHR_materials_clearcoat glTF extension", "MaterialClearCoat");
             newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
+
+            newEmitter.SetRuntimeName("KHR_xmp glTF extension", "XMPPacketsCollection");
+            newEmitter.SetRuntimeName("KHR_xmp node extension", "XMPPacketReference");
 
 
 

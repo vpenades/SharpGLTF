@@ -151,7 +151,7 @@ namespace SharpGLTF.CodeGen
 
             foreach(var f in type.Fields)
             {
-                var runtimeName = _SanitizeName(f.PersistentName);
+                var runtimeName = _SanitizeName(f.PersistentName).Replace("@","at");
 
                 SetFieldName(f, $"_{runtimeName}");
                 SetPropertyName(f, runtimeName);
