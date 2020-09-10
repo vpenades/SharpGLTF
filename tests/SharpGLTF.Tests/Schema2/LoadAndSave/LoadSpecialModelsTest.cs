@@ -156,6 +156,21 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest("mouse_01.obj", model.LogicalAnimations[1], 1f);
         }
 
+        [TestCase("SketchfabExport-WhatIsPBR.glb")] // model has exported tangents in the form <0,0,0,1>
+        public void LoadSketchfabModels(string path)
+        {
+            // this model has several nodes with curve animations containing a single animation key,
+            // which is causing some problems to the interpolator.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+
+            path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, $"Assets\\SpecialCases\\{path}");
+
+            var model = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
+
+            model.AttachToCurrentTest("output.glb");            
+        }
+
         // these models show normal mapping but lack tangents, which are expected to be
         // generated at runtime; These tests generate the tangents and check them against the baseline.
         [TestCase("NormalTangentTest.glb")]

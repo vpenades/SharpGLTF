@@ -153,6 +153,7 @@ namespace SharpGLTF
 
         internal static Vector3 SanitizeNormal(this Vector3 normal)
         {
+            if (normal == Vector3.Zero) return Vector3.UnitX;
             return normal.IsNormalized() ? normal : Vector3.Normalize(normal);
         }
 
