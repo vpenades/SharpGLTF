@@ -75,7 +75,7 @@ namespace SharpGLTF.Runtime
 
             if (_Animations == null) _Animations = new Collections.NamedList<ICurveSampler<T>>();
 
-            _Animations.SetValue(logicalIndex, name, sampler);
+            _Animations.SetName(logicalIndex, name, sampler);
         }
 
         #endregion

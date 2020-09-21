@@ -23,7 +23,7 @@ namespace SharpGLTF
 
             // set the node animations for our scene instance-
             if (animation == null) { sceneInstance.SetPoseTransforms(); }
-            else { sceneInstance.SetAnimationFrame(animation.Name, time); }
+            else { sceneInstance.SetAnimationFrame(animation.LogicalIndex, time); }
 
             // keep source meshes.
             var meshes = srcScene.LogicalParent.LogicalMeshes;

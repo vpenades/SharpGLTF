@@ -223,7 +223,7 @@ namespace SharpGLTF.Schema2
             }
             else
             {
-                instance.SetAnimationFrame(animation.Name, time);
+                instance.SetAnimationFrame(animation.LogicalIndex, time);
             }
 
             var meshes = scene.LogicalParent.LogicalMeshes;
@@ -259,7 +259,7 @@ namespace SharpGLTF.Schema2
             }
             else
             {
-                instance.SetAnimationFrame(animation.Name, time);
+                instance.SetAnimationFrame(animation.LogicalIndex, time);
             }
 
             var meshes = scene.LogicalParent.LogicalMeshes;

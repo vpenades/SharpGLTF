@@ -87,7 +87,7 @@ namespace SharpGLTF.Runtime
 
                 float duration = dstTracks.Count <= index ? 0 : dstTracks[index];
                 duration = Math.Max(duration, anim.Duration);
-                dstTracks.SetValue(index, name, anim.Duration);
+                dstTracks.SetName(index, name, anim.Duration);
             }
 
             return new SceneTemplate(srcScene.Name, dstNodes, drawables, dstTracks);
@@ -122,12 +122,7 @@ namespace SharpGLTF.Runtime
         /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
         /// </summary>
         public IEnumerable<int> LogicalMeshIds => _DrawableReferences.Select(item => item.LogicalMeshIndex).Distinct();
-
-        /// <summary>
-        /// Gets A collection of animation track names.
-        /// </summary>
-        public IEnumerable<string> AnimationTracks => _AnimationTracks.Names;
-
+        
         #endregion
 
         #region API

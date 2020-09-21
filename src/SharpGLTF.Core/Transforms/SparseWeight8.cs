@@ -16,6 +16,7 @@ namespace SharpGLTF.Transforms
     /// - As an animation key in morph targets; a mesh can have many morph targets, but realistically and due to GPU limitations, only up to 8 morph targets can be blended at the same time.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public readonly struct SparseWeight8
     {
         #region debug
@@ -228,21 +229,27 @@ namespace SharpGLTF.Transforms
         #region data
 
         public readonly int Index0;
-        public readonly int Index1;
-        public readonly int Index2;
-        public readonly int Index3;
-        public readonly int Index4;
-        public readonly int Index5;
-        public readonly int Index6;
-        public readonly int Index7;
-
         public readonly float Weight0;
+
+        public readonly int Index1;
         public readonly float Weight1;
+
+        public readonly int Index2;
         public readonly float Weight2;
+
+        public readonly int Index3;
         public readonly float Weight3;
+
+        public readonly int Index4;
         public readonly float Weight4;
+
+        public readonly int Index5;
         public readonly float Weight5;
+
+        public readonly int Index6;
         public readonly float Weight6;
+
+        public readonly int Index7;
         public readonly float Weight7;
 
         public static bool AreWeightsEqual(in SparseWeight8 x, in SparseWeight8 y)
@@ -458,6 +465,22 @@ namespace SharpGLTF.Transforms
             }
 
             return r;
+        }
+
+        public SparseWeight8 GetReducedWeights(int maxWeights)
+        {
+            Span<IndexWeight> entries = stackalloc IndexWeight[8];
+
+            IndexWeight.CopyTo(this, entries);
+            IndexWeight.BubbleSortByWeight(entries);
+
+            for (int i = maxWeights; i < entries.Length; ++i) entries[i] = default;
+
+            var reduced = new SparseWeight8(entries);
+
+            var scale = reduced.WeightSum == 0f ? 0f : this.WeightSum / reduced.WeightSum;
+
+            return Multiply(reduced, scale);
         }
 
         public override string ToString()

@@ -32,11 +32,34 @@ namespace SharpGLTF.Transforms
         /// </remarks>
         bool FlipFaces { get; }
 
-        V3 TransformPosition(V3 position, V3[] morphTargets, in SparseWeight8 skinWeights);
-        V3 TransformNormal(V3 normal, V3[] morphTargets, in SparseWeight8 skinWeights);
-        V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights);
+        /// <summary>
+        /// Transforms a vertex position from local mesh space to world space.
+        /// </summary>
+        /// <param name="position">The local position of the vertex.</param>
+        /// <param name="positionDeltas">The local position deltas of the vertex, one for each morph target, or null.</param>
+        /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
+        /// <returns>A position in world space.</returns>
+        V3 TransformPosition(V3 position, IReadOnlyList<V3> positionDeltas, in SparseWeight8 skinWeights);
 
-        V4 MorphColors(V4 color, V4[] morphTargets);
+        /// <summary>
+        /// Transforms a vertex normal from local mesh space to world space.
+        /// </summary>
+        /// <param name="normal">The local normal of the vertex.</param>
+        /// <param name="normalDeltas">The local normal deltas of the vertex, one for each morph target, or null.</param>
+        /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
+        /// <returns>A normal in world space.</returns>
+        V3 TransformNormal(V3 normal, IReadOnlyList<V3> normalDeltas, in SparseWeight8 skinWeights);
+
+        /// <summary>
+        /// Transforms a vertex tangent from local mesh space to world space.
+        /// </summary>
+        /// <param name="tangent">The tangent normal of the vertex.</param>
+        /// <param name="tangentDeltas">The local tangent deltas of the vertex, one for each morph target, or null.</param>
+        /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
+        /// <returns>A tangent in world space.</returns>
+        V4 TransformTangent(V4 tangent, IReadOnlyList<V3> tangentDeltas, in SparseWeight8 skinWeights);
+
+        V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets);
     }
 
     public abstract class MorphTransform
@@ -103,39 +126,39 @@ namespace SharpGLTF.Transforms
             _Weights = morphWeights.GetNormalizedWithComplement(COMPLEMENT_INDEX);
         }
 
-        protected V3 MorphVectors(V3 value, V3[] morphTargets)
+        protected V3 MorphVectors(V3 value, IReadOnlyList<V3> morphTargets)
         {
-            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+            if (morphTargets == null || morphTargets.Count == 0) return value;
 
-            if (morphTargets == null) return value;
+            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             var p = V3.Zero;
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetNonZeroWeights())
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Index == COMPLEMENT_INDEX ? value : morphTargets[pair.Index];
-                    p += val * pair.Weight;
+                    var val = index == COMPLEMENT_INDEX ? value : morphTargets[index];
+                    p += val * weight;
                 }
             }
             else
             {
-                foreach (var pair in _Weights.GetNonZeroWeights())
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Index == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Index];
-                    p += val * pair.Weight;
+                    var val = index == COMPLEMENT_INDEX ? value : value + morphTargets[index];
+                    p += val * weight;
                 }
             }
 
             return p;
         }
 
-        protected V4 MorphVectors(V4 value, V4[] morphTargets)
+        protected V4 MorphVectors(V4 value, IReadOnlyList<V4> morphTargets)
         {
-            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+            if (morphTargets == null || morphTargets.Count == 0) return value;
 
-            if (morphTargets == null) return value;
+            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
 
             var p = V4.Zero;
 
@@ -159,7 +182,7 @@ namespace SharpGLTF.Transforms
             return p;
         }
 
-        public V4 MorphColors(V4 color, V4[] morphTargets)
+        public V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets)
         {
             return MorphVectors(color, morphTargets);
         }
@@ -228,21 +251,21 @@ namespace SharpGLTF.Transforms
             _FlipFaces = determinant3x3 < 0;
         }
 
-        public V3 TransformPosition(V3 position, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformPosition(V3 position, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             position = MorphVectors(position, morphTargets);
 
             return V3.Transform(position, _WorldMatrix);
         }
 
-        public V3 TransformNormal(V3 normal, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformNormal(V3 normal, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             normal = MorphVectors(normal, morphTargets);
 
             return V3.Normalize(V3.TransformNormal(normal, _WorldMatrix));
         }
 
-        public V4 TransformTangent(V4 tangent, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V4 TransformTangent(V4 tangent, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             var t = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
 
@@ -322,7 +345,7 @@ namespace SharpGLTF.Transforms
 
         public bool FlipFaces => false;
 
-        public V3 TransformPosition(V3 localPosition, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -332,15 +355,15 @@ namespace SharpGLTF.Transforms
 
             var wnrm = 1.0f / skinWeights.WeightSum;
 
-            foreach (var jw in skinWeights.GetIndexedWeights())
+            foreach (var (jidx, jweight) in skinWeights.GetIndexedWeights())
             {
-                worldPosition += V3.Transform(localPosition, _SkinTransforms[jw.Index]) * jw.Weight * wnrm;
+                worldPosition += V3.Transform(localPosition, _SkinTransforms[jidx]) * jweight * wnrm;
             }
 
             return worldPosition;
         }
 
-        public V3 TransformNormal(V3 localNormal, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -348,15 +371,15 @@ namespace SharpGLTF.Transforms
 
             var worldNormal = V3.Zero;
 
-            foreach (var jw in skinWeights.GetIndexedWeights())
+            foreach (var (jidx, jweight) in skinWeights.GetIndexedWeights())
             {
-                worldNormal += V3.TransformNormal(localNormal, _SkinTransforms[jw.Index]) * jw.Weight;
+                worldNormal += V3.TransformNormal(localNormal, _SkinTransforms[jidx]) * jweight;
             }
 
             return V3.Normalize(localNormal);
         }
 
-        public V4 TransformTangent(V4 localTangent, V3[] morphTargets, in SparseWeight8 skinWeights)
+        public V4 TransformTangent(V4 localTangent, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
             Guard.NotNull(skinWeights, nameof(skinWeights));
 
@@ -364,9 +387,9 @@ namespace SharpGLTF.Transforms
 
             var worldTangent = V3.Zero;
 
-            foreach (var jw in skinWeights.GetIndexedWeights())
+            foreach (var (jidx, jweight) in skinWeights.GetIndexedWeights())
             {
-                worldTangent += V3.TransformNormal(localTangentV, _SkinTransforms[jw.Index]) * jw.Weight;
+                worldTangent += V3.TransformNormal(localTangentV, _SkinTransforms[jidx]) * jweight;
             }
 
             worldTangent = V3.Normalize(worldTangent);

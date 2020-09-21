@@ -47,5 +47,24 @@ namespace SharpGLTF.Runtime
 
             return (template, new WeakReference<Schema2.ModelRoot>(model));
         }
+
+        [Test]
+        public static void TestMeshDecoding()
+        {
+            var modelPath = TestFiles.GetSampleModelsPaths()
+                                .FirstOrDefault(item => item.Contains("BrainStem.glb"));
+
+            var model = Schema2.ModelRoot.Load(modelPath);
+
+            var (center, radius) = model.DefaultScene.EvaluateBoundingSphere(1.0f);
+            
+            // precission needs to be fairly low because calculation results
+            // in NetCore and NetFramework are amazingly different.
+            Assert.AreEqual(-0.07429607f, center.X, 0.0001f);
+            Assert.AreEqual( 0.8432209f, center.Y, 0.0001f);
+            Assert.AreEqual(-0.04639983f, center.Z, 0.0001f);
+            Assert.AreEqual( 2.528468f, radius, 0.0001f);
+        }
+
     }
 }

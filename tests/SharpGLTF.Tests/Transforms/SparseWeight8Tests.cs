@@ -212,5 +212,19 @@ namespace SharpGLTF.Transforms
             Assert.AreEqual(lr[6], cr[6], 0.000001f);
             Assert.AreEqual(lr[7], cr[7], 0.000001f);
         }
+
+        [Test]
+        public void TestSparseWeightReduction()
+        {
+            var a = SparseWeight8.Create(5, 3, 2, 4, 0, 4, 2);
+
+            var b = a.GetReducedWeights(4);
+
+            Assert.AreEqual(0, b.Weight4);
+            Assert.AreEqual(0, b.Weight5);
+            Assert.AreEqual(0, b.Weight6);
+            Assert.AreEqual(0, b.Weight7);
+            Assert.AreEqual(a.WeightSum, b.WeightSum, 0.00001f);
+        }
     }
 }

@@ -83,7 +83,6 @@ namespace SharpGLTF.Runtime
         /// </summary>
         private readonly Effect[] _Effects;
 
-
         private readonly SceneTemplate[] _Scenes;
         private readonly BoundingSphere[] _Bounds;
 
@@ -97,19 +96,15 @@ namespace SharpGLTF.Runtime
 
         public IReadOnlyList<Effect> Effects => _Effects;
 
-        public BoundingSphere Bounds => GetBounds(_DefaultSceneIndex);
-
-        public IEnumerable<string> AnimationTracks => GetAnimationTracks(_DefaultSceneIndex);
-
+        public BoundingSphere Bounds => GetBounds(_DefaultSceneIndex);        
+        
         #endregion
 
         #region API
 
         public int IndexOfScene(string sceneName) => Array.FindIndex(_Scenes, item => item.Name == sceneName);
 
-        public BoundingSphere GetBounds(int sceneIndex) => _Bounds[sceneIndex];
-
-        public IEnumerable<string> GetAnimationTracks(int sceneIndex) => _Scenes[sceneIndex].AnimationTracks;
+        public BoundingSphere GetBounds(int sceneIndex) => _Bounds[sceneIndex];        
 
         public MonoGameModelInstance CreateInstance() => CreateInstance(_DefaultSceneIndex);
 

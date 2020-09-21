@@ -72,15 +72,9 @@ namespace SharpGLTF.Runtime
         public IEnumerable<NodeInstance> VisualNodes => _NodeInstances.Where(item => item.VisualParent == null);
 
         /// <summary>
-        /// Gets all the names of the animations tracks.
+        /// Gets the total number of animation tracks for this instance.
         /// </summary>
-        public IEnumerable<String> AnimationTracks => _AnimationTracks.Names;
-
-        /// <summary>
-        /// Gets the number of drawable references.
-        /// </summary>
-        [Obsolete("Use DrawableInstancesCount")]
-        public int DrawableReferencesCount => _DrawableTransforms.Length;
+        public int AnimationTracksCount => _AnimationTracks.Count;
 
         /// <summary>
         /// Gets the number of drawable instances.
@@ -88,35 +82,13 @@ namespace SharpGLTF.Runtime
         public int DrawableInstancesCount => _DrawableTransforms.Length;
 
         /// <summary>
-        /// Gets a collection of drawable references, where:
-        /// <list type="bullet">
-        /// <item>
-        /// <term>MeshIndex</term>
-        /// <description>The logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.</description>
-        /// </item>
-        /// <item>
-        /// <term>Transform</term>
-        /// <description>An <see cref="IGeometryTransform"/> that can be used to transform the <see cref="Schema2.Mesh"/> into world space.</description>
-        /// </item>
-        /// </list>
+        /// Gets the current sequence of drawing commands.
         /// </summary>
-        [Obsolete("Use DrawableInstances.")]
-        public IEnumerable<(int MeshIndex, IGeometryTransform Transform)> DrawableReferences
-        {
-            get
-            {
-                for (int i = 0; i < _DrawableTransforms.Length; ++i)
-                {
-                    yield return GetDrawableReference(i);
-                }
-            }
-        }
-
         public IEnumerable<DrawableInstance> DrawableInstances
         {
             get
             {
-                for (int i = 0; i < _DrawableTransforms.Length; ++i)
+                for (int i = 0; i < _DrawableReferences.Length; ++i)
                 {
                     yield return GetDrawableInstance(i);
                 }
@@ -146,17 +118,22 @@ namespace SharpGLTF.Runtime
             foreach (var n in _NodeInstances) n.SetPoseTransform();
         }
 
+        public string NameOfTrack(int trackIndex)
+        {
+            return _AnimationTracks.NameOf(trackIndex);
+        }
+
+        public int IndexOfTrack(string name)
+        {
+            return _AnimationTracks.IndexOf(name);
+        }
+
         public float GetAnimationDuration(int trackLogicalIndex)
         {
             if (trackLogicalIndex < 0) return 0;
             if (trackLogicalIndex >= _AnimationTracks.Count) return 0;
 
             return _AnimationTracks[trackLogicalIndex];
-        }
-
-        public float GetAnimationDuration(string trackName)
-        {
-            return GetAnimationDuration(_AnimationTracks.IndexOf(trackName));
         }
 
         public void SetAnimationFrame(int trackLogicalIndex, float time, bool looped = true)
@@ -168,11 +145,6 @@ namespace SharpGLTF.Runtime
             }
 
             foreach (var n in _NodeInstances) n.SetAnimationFrame(trackLogicalIndex, time);
-        }
-
-        public void SetAnimationFrame(string trackName, float time, bool looped = true)
-        {
-            SetAnimationFrame(_AnimationTracks.IndexOf(trackName), time, looped);
         }
 
         public void SetAnimationFrame(params (int TrackIdx, float Time, float Weight)[] blended)
