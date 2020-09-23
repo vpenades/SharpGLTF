@@ -76,11 +76,13 @@ namespace SharpGLTF
             return fileName;
         }
 
-        public static T AttachToCurrentTest<T>(this T target, string fileName, Action<T, string> onSave)
+        public static T AttachToCurrentTest<T>(this T target, string fileName, Action<T, System.IO.FileInfo> onSave)
         {
             var filePath = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
 
-            onSave(target, filePath);
+            var finfo = new System.IO.FileInfo(filePath);
+
+            onSave(target, finfo);
 
             if (System.IO.File.Exists(filePath)) TestContext.AddTestAttachment(filePath);
 

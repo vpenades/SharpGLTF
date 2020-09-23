@@ -209,14 +209,24 @@ namespace SharpGLTF.Runtime
 
         public int MorphTargetsCount => _MorphTargets.Count;
 
+        public bool IsPointIndices => this._PrimitiveType.GetPrimitiveVertexSize() == 1;
+
+        public IEnumerable<(int A, int B)> LineIndices
+        {
+            get
+            {
+                if (this._PrimitiveType.GetPrimitiveVertexSize() != 2) return Enumerable.Empty<(int, int)>();
+                if (this._PrimitiveIndices == null) return this._PrimitiveType.GetLinesIndices(VertexCount);
+                return this._PrimitiveType.GetLinesIndices(this._PrimitiveIndices);
+            }
+        }
+
         public IEnumerable<(int A, int B, int C)> TriangleIndices
         {
             get
             {
                 if (this._PrimitiveType.GetPrimitiveVertexSize() != 3) return Enumerable.Empty<(int, int, int)>();
-
                 if (this._PrimitiveIndices == null) return this._PrimitiveType.GetTrianglesIndices(VertexCount);
-
                 return this._PrimitiveType.GetTrianglesIndices(this._PrimitiveIndices);
             }
         }
@@ -265,18 +275,6 @@ namespace SharpGLTF.Runtime
             if (set == 0 && _Color0 != null) return _Color0[vertexIndex];
 
             return XYZW.One;
-        }
-
-        public XYZW GetJoints(int vertexIndex)
-        {
-            if (_Joints0 != null) return _Joints0[vertexIndex];
-            return XYZW.Zero;
-        }
-
-        public XYZW GetWeights(int vertexIndex)
-        {
-            if (_Weights0 != null) return _Weights0[vertexIndex];
-            return XYZW.UnitX;
         }
 
         public Transforms.SparseWeight8 GetSkinWeights(int vertexIndex)

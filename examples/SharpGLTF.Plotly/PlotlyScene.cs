@@ -10,6 +10,7 @@ using Plotly.Types;
 using TRACES = Plotly.Box<Plotly.Types.ITracesProperty>;
 
 using VERTEX = SharpGLTF.Geometry.IVertexBuilder;
+using VERTEXBUILDER = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPositionNormal, SharpGLTF.Geometry.VertexTypes.VertexEmpty, SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 
 namespace SharpGLTF
 {
@@ -27,6 +28,26 @@ namespace SharpGLTF
         public void AppendTriangles<TMaterial>(IEnumerable<(VERTEX A, VERTEX B, VERTEX C, TMaterial Material)> tris, Func<TMaterial, int> materialColorFunc)
         {
             var trace = _CreateTrace(tris, materialColorFunc);
+
+            _Traces.Add(trace);
+        }
+
+        public void AppendTriangles<TMaterial>(IEnumerable<(Vector3 A, Vector3 B, Vector3 C, TMaterial Material)> tris, Func<TMaterial, int> materialColorFunc)
+        {
+            (VERTEX A, VERTEX B, VERTEX C, TMaterial Material) _Convert((Vector3 A, Vector3 B, Vector3 C, TMaterial Material) tri)
+            {
+                var ab = tri.B - tri.A;
+                var ac = tri.C - tri.A;
+                var n = Vector3.Normalize(Vector3.Cross(ab, ac));
+
+                var aa = new VERTEXBUILDER((tri.A, n));
+                var bb = new VERTEXBUILDER((tri.B, n));
+                var cc = new VERTEXBUILDER((tri.C, n));
+
+                return (aa, bb, cc, tri.Material);
+            }
+
+            var trace = _CreateTrace(tris.Select(_Convert), materialColorFunc);
 
             _Traces.Add(trace);
         }

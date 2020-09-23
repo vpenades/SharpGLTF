@@ -21,16 +21,42 @@ namespace SharpGLTF.Runtime
     {
         #region properties
 
+        /// <summary>
+        /// Gets a value indicating the total number of vertices for this primitive.
+        /// </summary>
         int VertexCount { get; }
 
+        /// <summary>
+        /// Gets a value indicating the total number of morph targets for this primitive.
+        /// </summary>
         int MorphTargetsCount { get; }
 
+        /// <summary>
+        /// Gets a value indicating the number of color vertex attributes.
+        /// In the range of 0 to 2.
+        /// </summary>
         int ColorsCount { get; }
 
+        /// <summary>
+        /// Gets a value indicating the number of texture coordinate vertex attributes.
+        /// In the range of 0 to 2.
+        /// </summary>
         int TexCoordsCount { get; }
 
+        /// <summary>
+        /// Gets a value indicating the number of skinning joint-weight attributes.
+        /// The values can be 0, 4 or 8.
+        /// </summary>
         int JointsWeightsCount { get; }
 
+        /// <summary>
+        /// Gets a sequence of tuples where each item represents the vertex indices of a line.
+        /// </summary>
+        IEnumerable<(int A, int B)> LineIndices { get; }
+
+        /// <summary>
+        /// Gets a sequence of tuples where each item represents the vertex indices of a triangle.
+        /// </summary>
         IEnumerable<(int A, int B, int C)> TriangleIndices { get; }
 
         #endregion
@@ -52,10 +78,6 @@ namespace SharpGLTF.Runtime
         XY GetTextureCoord(int vertexIndex, int textureSetIndex);
 
         XYZW GetColor(int vertexIndex, int colorSetIndex);
-
-        XYZW GetJoints(int vertexIndex);
-
-        XYZW GetWeights(int vertexIndex);
 
         Transforms.SparseWeight8 GetSkinWeights(int vertexIndex);
 
@@ -189,26 +211,7 @@ namespace SharpGLTF.Runtime
                     sceneInstance.SetAnimationFrame(trackIdx, time);
                     var (fc, fr) = sceneInstance.EvaluateBoundingSphere(decodedMeshes);
 
-                    if (radius < 0) { center = fc; radius = fr; continue; }
-
-                    // combine spheres
-
-                    var direction = fc - center;
-                    var distance = direction.Length();
-
-                    // check if current frame is already contained in master sphere.
-                    if (radius >= (fr + distance)) continue;
-
-                    // check if master sphere is already contained in current frame.
-                    if (fr >= (radius + distance)) { center = fc; radius = fr; continue; }
-
-                    // combine
-                    direction = XYZ.Normalize(direction);
-                    var p0 = center - (direction * radius);
-                    var p1 = fc + (direction * fr);
-
-                    center = (p0 + p1) / 2;
-                    radius = (p0 - p1).Length() / 2;
+                    _MergeSphere(ref center, ref radius, fc, fr);
                 }
             }
 
@@ -244,16 +247,55 @@ namespace SharpGLTF.Runtime
 
             foreach (var p1 in instance.GetWorldVertices(meshes))
             {
-                if (radius < 0) { center = p1; radius = 0; continue; }
-
-                var dir = XYZ.Normalize(p1 - center);
-                var p2 = center - (dir * radius);
-
-                center = (p1 + p2) / 2;
-                radius = (p1 - p2).Length() / 2;
+                _AddPointToSphere(ref center, ref radius, p1);
             }
 
             return (center, radius);
+        }
+
+        private static void _AddPointToSphere(ref XYZ c1, ref float r1, XYZ c2)
+        {
+            if (r1 < 0) { c1 = c2; r1 = 0; return; }
+
+            var dir = c2 - c1;
+            var len = dir.Length();
+            if (len <= r1) return; // if inside, exit.
+
+            dir /= len;
+            var p1 = c1 - (dir * r1);
+
+            c1 = (p1 + c2) / 2;
+            r1 = (p1 - c2).Length() / 2;
+
+            #if DEBUG
+            var dist = (c2 - c1).Length();
+            System.Diagnostics.Debug.Assert(dist <= (r1 + 0.001f));
+            dist = (p1 - c1).Length();
+            System.Diagnostics.Debug.Assert(dist <= (r1 + 0.001f));
+            #endif
+        }
+
+        private static void _MergeSphere(ref XYZ c1, ref float r1, XYZ c2, float r2)
+        {
+            if (r1 < 0) { c1 = c2; r1 = r2; return; }
+
+            var dir = c2 - c1;
+            var len = dir.Length();
+            if (r1 >= (r2 + len)) return; // new inside current, exit.
+            if (r2 >= (r1 + len)) { c1 = c2; r1 = r2; return; } // current inside new, update & exit.
+
+            // combine
+            dir /= len;
+            var p1 = c1 - (dir * r1);
+            var p2 = c2 + (dir * r2);
+
+            c1 = (p1 + p2) / 2;
+            r1 = (p1 - p2).Length() / 2;
+
+            #if DEBUG
+            var dist = (c2 - c1).Length() + r2;
+            System.Diagnostics.Debug.Assert(dist <= (r1 + 0.001f));
+            #endif
         }
 
         public static IEnumerable<XYZ> GetWorldVertices<TMaterial>(this SceneInstance instance, IReadOnlyList<IMeshDecoder<TMaterial>> meshes)

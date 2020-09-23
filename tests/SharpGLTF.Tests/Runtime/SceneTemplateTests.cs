@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 using NUnit.Framework;
+
+using Plotly;
 
 namespace SharpGLTF.Runtime
 {
@@ -56,14 +59,66 @@ namespace SharpGLTF.Runtime
 
             var model = Schema2.ModelRoot.Load(modelPath);
 
-            var (center, radius) = model.DefaultScene.EvaluateBoundingSphere(1.0f);
+            model.AttachToCurrentTest("reference.plotly");
+
+
+            var scene = model.DefaultScene;
             
-            // precission needs to be fairly low because calculation results
-            // in NetCore and NetFramework are amazingly different.
-            Assert.AreEqual(-0.07429607f, center.X, 0.0001f);
-            Assert.AreEqual( 0.8432209f, center.Y, 0.0001f);
-            Assert.AreEqual(-0.04639983f, center.Z, 0.0001f);
-            Assert.AreEqual( 2.528468f, radius, 0.0001f);
+            var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
+            var sceneTemplate = SceneTemplate.Create(scene, false);
+            var sceneInstance = sceneTemplate.CreateInstance();
+
+            var duration = sceneInstance.GetAnimationDuration(0);
+            sceneInstance.SetAnimationFrame(0, duration/2);
+
+            IEnumerable<(Vector3,Vector3,Vector3, int)> evaluateTriangles(DrawableInstance inst)
+            {
+                var mesh = decodedMeshes[inst.Template.LogicalMeshIndex];
+
+                foreach(var prim in mesh.Primitives)
+                {
+                    foreach(var (idxA, idxB, idxC) in prim.TriangleIndices)
+                    {
+                        var posA = prim.GetPosition(idxA, inst.Transform);
+                        var posB = prim.GetPosition(idxB, inst.Transform);
+                        var posC = prim.GetPosition(idxC, inst.Transform);
+
+                        yield return (posA, posB, posC, 0xb0b0b0);
+                    }
+                }
+            }
+
+            var worldTriangles = sceneInstance.DrawableInstances.SelectMany(item => evaluateTriangles(item));            
+
+            var scenePlot = new PlotlyScene();
+            scenePlot.AppendTriangles(worldTriangles, c=>c);
+
+            scenePlot
+                .ToHtml()
+                .AttachToCurrentTest("result.html", (content, finfo) => System.IO.File.WriteAllText(finfo.FullName, content));
+        }
+
+        [Test]
+        public static void TestMeshDecodingBounds()
+        {
+            var modelPath = TestFiles.GetSampleModelsPaths()
+                                .FirstOrDefault(item => item.Contains("BrainStem.glb"));
+
+            var model = Schema2.ModelRoot.Load(modelPath);
+
+            var (center, radius) = model.DefaultScene.EvaluateBoundingSphere(0.25f);           
+            
+            var sceneTemplate = SceneTemplate.Create(model.DefaultScene, false);
+            var sceneInstance = sceneTemplate.CreateInstance();
+            sceneInstance.SetAnimationFrame(0, 0.1f);
+
+            var vertices = sceneInstance.GetWorldVertices(model.LogicalMeshes.Decode()).ToList();
+
+            foreach(var p in vertices)
+            {
+                var d = (p - center).Length();
+                Assert.LessOrEqual(d, radius + 0.0001f);
+            }
         }
 
     }

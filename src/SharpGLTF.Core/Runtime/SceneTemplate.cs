@@ -122,7 +122,7 @@ namespace SharpGLTF.Runtime
         /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
         /// </summary>
         public IEnumerable<int> LogicalMeshIds => _DrawableReferences.Select(item => item.LogicalMeshIndex).Distinct();
-        
+
         #endregion
 
         #region API

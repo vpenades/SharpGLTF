@@ -50,9 +50,9 @@ namespace SharpGLTF.Runtime
                 if (mrpAnim != null) _Morphing.AddCurve(index, name, mrpAnim);
             }
 
-            _UsePrecomputed = !(_Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated);
+            _UseAnimatedTransforms = _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;
 
-            if (_UsePrecomputed)
+            if (!_UseAnimatedTransforms)
             {
                 _Scale = null;
                 _Rotation = null;
@@ -64,15 +64,21 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        /// <summary>
+        /// the index of this node within <see cref="SceneTemplate._NodeTemplates"/>
+        /// </summary>
         private readonly int _LogicalSourceIndex;
 
+        /// <summary>
+        /// the index of the parent node within <see cref="SceneTemplate._NodeTemplates"/>
+        /// </summary>
         private readonly int _ParentIndex;
         private readonly int[] _ChildIndices;
 
-        private readonly bool _UsePrecomputed;
         private readonly Matrix4x4 _LocalMatrix;
         private readonly Transforms.AffineTransform _LocalTransform;
 
+        private readonly bool _UseAnimatedTransforms;
         private readonly AnimatableProperty<Vector3> _Scale;
         private readonly AnimatableProperty<Quaternion> _Rotation;
         private readonly AnimatableProperty<Vector3> _Translation;
@@ -128,7 +134,7 @@ namespace SharpGLTF.Runtime
 
         public Transforms.AffineTransform GetLocalTransform(int trackLogicalIndex, float time)
         {
-            if (_UsePrecomputed || trackLogicalIndex < 0) return _LocalTransform;
+            if (!_UseAnimatedTransforms || trackLogicalIndex < 0) return _LocalTransform;
 
             var s = _Scale?.GetValueAt(trackLogicalIndex, time);
             var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
@@ -139,7 +145,7 @@ namespace SharpGLTF.Runtime
 
         public Transforms.AffineTransform GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
-            if (_UsePrecomputed) return _LocalTransform;
+            if (!_UseAnimatedTransforms) return _LocalTransform;
 
             Span<Transforms.AffineTransform> xforms = stackalloc Transforms.AffineTransform[track.Length];
 
@@ -153,14 +159,14 @@ namespace SharpGLTF.Runtime
 
         public Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
         {
-            if (_UsePrecomputed || trackLogicalIndex < 0) return _LocalMatrix;
+            if (!_UseAnimatedTransforms || trackLogicalIndex < 0) return _LocalMatrix;
 
             return GetLocalTransform(trackLogicalIndex, time).Matrix;
         }
 
         public Matrix4x4 GetLocalMatrix(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
-            if (_UsePrecomputed) return _LocalMatrix;
+            if (!_UseAnimatedTransforms) return _LocalMatrix;
 
             return GetLocalTransform(track, time, weight).Matrix;
         }

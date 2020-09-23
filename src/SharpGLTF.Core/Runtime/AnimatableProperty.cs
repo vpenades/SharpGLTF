@@ -47,18 +47,11 @@ namespace SharpGLTF.Runtime
         #region API
 
         /// <summary>
-        /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="trackName"/>.
+        /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="trackLogicalIndex"/>.
         /// </summary>
-        /// <param name="trackName">An animation track name, or null.</param>
-        /// <param name="offset">A time offset within the given animation track.</param>
-        /// <returns>The evaluated value taken from the animation <paramref name="trackName"/>, or <see cref="Value"/> if a track was not found.</returns>
-        public T GetValueAt(string trackName, float offset)
-        {
-            var idx = _Animations?.IndexOf(trackName) ?? -1;
-
-            return GetValueAt(idx, offset);
-        }
-
+        /// <param name="trackLogicalIndex">The index of the animation track</param>
+        /// <param name="offset">The time offset within the curve</param>
+        /// <returns>The evaluated value taken from the animation <paramref name="trackLogicalIndex"/>, or <see cref="Value"/> if a track was not found.</returns>
         public T GetValueAt(int trackLogicalIndex, float offset)
         {
             if (_Animations == null) return this.Value;

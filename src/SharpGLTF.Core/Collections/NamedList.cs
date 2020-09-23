@@ -23,7 +23,7 @@ namespace SharpGLTF.Collections
             {
                 if (_ByName == null) _ByName = new Dictionary<string, int>();
                 if (_ByIndex == null) _ByIndex = new List<string>();
-                if (_ByIndex.Count <= index) _ByIndex.Add(null);
+                while (_ByIndex.Count <= index) _ByIndex.Add(null);
 
                 _ByName[name] = index;
                 _ByIndex[index] = name;
