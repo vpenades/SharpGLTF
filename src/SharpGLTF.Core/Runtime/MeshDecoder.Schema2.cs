@@ -52,6 +52,7 @@ namespace SharpGLTF.Runtime
         public string Name => _Name;
         public int LogicalIndex => _LogicalIndex;
         public IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives => _Primitives;
+        public Object Extras => _Extras;
 
         #endregion
 

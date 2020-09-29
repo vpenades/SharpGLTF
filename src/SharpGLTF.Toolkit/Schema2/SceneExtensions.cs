@@ -219,11 +219,11 @@ namespace SharpGLTF.Schema2
 
             if (animation == null)
             {
-                instance.SetPoseTransforms();
+                instance.Armature.SetPoseTransforms();
             }
             else
             {
-                instance.SetAnimationFrame(animation.LogicalIndex, time);
+                instance.Armature.SetAnimationFrame(animation.LogicalIndex, time);
             }
 
             var meshes = scene.LogicalParent.LogicalMeshes;
@@ -255,11 +255,11 @@ namespace SharpGLTF.Schema2
 
             if (animation == null)
             {
-                instance.SetPoseTransforms();
+                instance.Armature.SetPoseTransforms();
             }
             else
             {
-                instance.SetAnimationFrame(animation.LogicalIndex, time);
+                instance.Armature.SetAnimationFrame(animation.LogicalIndex, time);
             }
 
             var meshes = scene.LogicalParent.LogicalMeshes;

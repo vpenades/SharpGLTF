@@ -227,7 +227,7 @@ namespace SharpGLTF.Transforms
 
         public Boolean FlipFaces => _FlipFaces;
 
-        public Matrix4x4 WorldMatrix => _WorldMatrix;
+        public TRANSFORM WorldMatrix => _WorldMatrix;
 
         #endregion
 

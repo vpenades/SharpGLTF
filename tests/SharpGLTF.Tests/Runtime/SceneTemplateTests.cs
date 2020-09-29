@@ -68,8 +68,8 @@ namespace SharpGLTF.Runtime
             var sceneTemplate = SceneTemplate.Create(scene, false);
             var sceneInstance = sceneTemplate.CreateInstance();
 
-            var duration = sceneInstance.GetAnimationDuration(0);
-            sceneInstance.SetAnimationFrame(0, duration/2);
+            var duration = sceneInstance.Armature.AnimationTracks[0].Duration;
+            sceneInstance.Armature.SetAnimationFrame(0, duration/2);
 
             IEnumerable<(Vector3,Vector3,Vector3, int)> evaluateTriangles(DrawableInstance inst)
             {
@@ -110,7 +110,7 @@ namespace SharpGLTF.Runtime
             
             var sceneTemplate = SceneTemplate.Create(model.DefaultScene, false);
             var sceneInstance = sceneTemplate.CreateInstance();
-            sceneInstance.SetAnimationFrame(0, 0.1f);
+            sceneInstance.Armature.SetAnimationFrame(0, 0.1f);
 
             var vertices = sceneInstance.GetWorldVertices(model.LogicalMeshes.Decode()).ToList();
 

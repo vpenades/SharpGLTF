@@ -26,7 +26,7 @@ namespace SharpGLTF.Runtime
 
         #region data
 
-        private Collections.NamedList<ICurveSampler<T>> _Animations;
+        private List<ICurveSampler<T>> _Curves;
 
         /// <summary>
         /// Gets the default value of this instance.
@@ -38,9 +38,7 @@ namespace SharpGLTF.Runtime
 
         #region properties
 
-        public bool IsAnimated => _Animations == null ? false : _Animations.Count > 0;
-
-        public IReadOnlyCollection<string> Tracks => _Animations?.Names;
+        public bool IsAnimated => _Curves == null ? false : _Curves.Count > 0;
 
         #endregion
 
@@ -54,21 +52,22 @@ namespace SharpGLTF.Runtime
         /// <returns>The evaluated value taken from the animation <paramref name="trackLogicalIndex"/>, or <see cref="Value"/> if a track was not found.</returns>
         public T GetValueAt(int trackLogicalIndex, float offset)
         {
-            if (_Animations == null) return this.Value;
+            if (_Curves == null) return this.Value;
 
-            if (trackLogicalIndex < 0 || trackLogicalIndex >= _Animations.Count) return this.Value;
+            if (trackLogicalIndex < 0 || trackLogicalIndex >= _Curves.Count) return this.Value;
 
-            return _Animations[trackLogicalIndex]?.GetPoint(offset) ?? this.Value;
+            return _Curves[trackLogicalIndex]?.GetPoint(offset) ?? this.Value;
         }
 
-        public void AddCurve(int logicalIndex, string name, ICurveSampler<T> sampler)
+        public void SetCurve(int logicalIndex, ICurveSampler<T> curveSampler)
         {
-            Guard.NotNull(sampler, nameof(sampler));
+            Guard.NotNull(curveSampler, nameof(curveSampler));
             Guard.MustBeGreaterThanOrEqualTo(logicalIndex, 0, nameof(logicalIndex));
 
-            if (_Animations == null) _Animations = new Collections.NamedList<ICurveSampler<T>>();
+            if (_Curves == null) _Curves = new List<ICurveSampler<T>>();
+            while (_Curves.Count <= logicalIndex) _Curves.Add(null);
 
-            _Animations.SetName(logicalIndex, name, sampler);
+            _Curves[logicalIndex] = curveSampler;
         }
 
         #endregion

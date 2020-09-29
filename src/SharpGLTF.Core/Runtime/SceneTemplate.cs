@@ -25,6 +25,8 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
+            var armature = ArmatureTemplate.Create(srcScene, isolateMemory);
+
             // gather scene nodes.
 
             var srcNodes = Schema2.Node.Flatten(srcScene)
@@ -35,26 +37,6 @@ namespace SharpGLTF.Runtime
             {
                 if (srcNode == null) return -1;
                 return srcNodes[srcNode];
-            }
-
-            // create bones.
-
-            var dstNodes = new NodeTemplate[srcNodes.Count];
-
-            foreach (var srcNode in srcNodes)
-            {
-                var nidx = srcNode.Value;
-
-                // parent index
-                var pidx = indexSolver(srcNode.Key.VisualParent);
-                if (pidx >= nidx) throw new InvalidOperationException("parent indices should be below child indices");
-
-                // child indices
-                var cidx = srcNode.Key.VisualChildren
-                    .Select(n => indexSolver(n))
-                    .ToArray();
-
-                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, isolateMemory);
             }
 
             // create drawables.
@@ -71,34 +53,19 @@ namespace SharpGLTF.Runtime
 
                 drawables[i] = srcInstance.Skin != null
                     ?
-                    (DrawableTemplate)new SkinnedDrawableTemplate(srcInstance, indexSolver)
+                    new SkinnedDrawableTemplate(srcInstance, indexSolver)
                     :
                     (DrawableTemplate)new RigidDrawableTemplate(srcInstance, indexSolver);
             }
 
-            // gather animation durations.
-
-            var dstTracks = new Collections.NamedList<float>();
-
-            foreach (var anim in srcScene.LogicalParent.LogicalAnimations)
-            {
-                var index = anim.LogicalIndex;
-                var name = anim.Name;
-
-                float duration = dstTracks.Count <= index ? 0 : dstTracks[index];
-                duration = Math.Max(duration, anim.Duration);
-                dstTracks.SetName(index, name, anim.Duration);
-            }
-
-            return new SceneTemplate(srcScene.Name, dstNodes, drawables, dstTracks);
+            return new SceneTemplate(srcScene.Name, armature, drawables);
         }
 
-        private SceneTemplate(string name, NodeTemplate[] nodes, DrawableTemplate[] drawables, Collections.NamedList<float> animTracks)
+        private SceneTemplate(string name, ArmatureTemplate armature, DrawableTemplate[] drawables)
         {
             _Name = name;
-            _NodeTemplates = nodes;
+            _Armature = armature;
             _DrawableReferences = drawables;
-            _AnimationTracks = animTracks;
         }
 
         #endregion
@@ -106,11 +73,8 @@ namespace SharpGLTF.Runtime
         #region data
 
         private readonly String _Name;
-
-        private readonly NodeTemplate[] _NodeTemplates;
+        private readonly ArmatureTemplate _Armature;
         private readonly DrawableTemplate[] _DrawableReferences;
-
-        private readonly Collections.NamedList<float> _AnimationTracks;
 
         #endregion
 
@@ -134,9 +98,9 @@ namespace SharpGLTF.Runtime
         /// <returns>A new <see cref="SceneInstance"/> object.</returns>
         public SceneInstance CreateInstance()
         {
-            var inst = new SceneInstance(_NodeTemplates, _DrawableReferences, _AnimationTracks);
+            var inst = new SceneInstance(_Armature, _DrawableReferences);
 
-            inst.SetPoseTransforms();
+            inst.Armature.SetPoseTransforms();
 
             return inst;
         }

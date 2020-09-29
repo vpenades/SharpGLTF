@@ -115,8 +115,7 @@ namespace SharpGLTF.Runtime
 
         private BoundingSphere CalculateBounds(SceneTemplate scene)
         {
-            var instance = scene.CreateInstance();
-            instance.SetPoseTransforms();
+            var instance = scene.CreateInstance();            
 
             var bounds = default(BoundingSphere);
 

@@ -15,6 +15,7 @@ namespace SharpGLTF.Runtime
         string Name { get; }
         int LogicalIndex { get; }
         IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives { get; }
+        Object Extras { get; }
     }
 
     public interface IMeshPrimitiveDecoder
@@ -158,23 +159,24 @@ namespace SharpGLTF.Runtime
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
             var sceneTemplate = SceneTemplate.Create(scene, false);
             var sceneInstance = sceneTemplate.CreateInstance();
+            var armatureInst = sceneInstance.Armature;
 
-            if (sceneInstance.AnimationTracksCount == 0)
+            if (armatureInst.AnimationTracks.Count == 0)
             {
-                sceneInstance.SetPoseTransforms();
+                armatureInst.SetPoseTransforms();
                 return sceneInstance.EvaluateBoundingBox(decodedMeshes);
             }
 
             var min = new XYZ(float.PositiveInfinity);
             var max = new XYZ(float.NegativeInfinity);
 
-            for (int trackIdx = 0; trackIdx < sceneInstance.AnimationTracksCount; ++trackIdx)
+            for (int trackIdx = 0; trackIdx < armatureInst.AnimationTracks.Count; ++trackIdx)
             {
-                var duration = sceneInstance.GetAnimationDuration(trackIdx);
+                var duration = armatureInst.AnimationTracks[trackIdx].Duration;
 
                 for (float time = 0; time < duration; time += samplingTimeStep)
                 {
-                    sceneInstance.SetAnimationFrame(trackIdx, time);
+                    armatureInst.SetAnimationFrame(trackIdx, time);
                     var (fMin, fMax) = sceneInstance.EvaluateBoundingBox(decodedMeshes);
 
                     min = XYZ.Min(min, fMin);
@@ -192,23 +194,24 @@ namespace SharpGLTF.Runtime
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
             var sceneTemplate = SceneTemplate.Create(scene, false);
             var sceneInstance = sceneTemplate.CreateInstance();
+            var armatureInst = sceneInstance.Armature;
 
-            if (sceneInstance.AnimationTracksCount == 0)
+            if (armatureInst.AnimationTracks.Count == 0)
             {
-                sceneInstance.SetPoseTransforms();
+                armatureInst.SetPoseTransforms();
                 return sceneInstance.EvaluateBoundingSphere(decodedMeshes);
             }
 
             var center = XYZ.Zero;
             float radius = -1f;
 
-            for (int trackIdx = 0; trackIdx < sceneInstance.AnimationTracksCount; ++trackIdx)
+            for (int trackIdx = 0; trackIdx < armatureInst.AnimationTracks.Count; ++trackIdx)
             {
-                var duration = sceneInstance.GetAnimationDuration(trackIdx);
+                var duration = armatureInst.AnimationTracks[trackIdx].Duration;
 
                 for (float time = 0; time < duration; time += samplingTimeStep)
                 {
-                    sceneInstance.SetAnimationFrame(trackIdx, time);
+                    armatureInst.SetAnimationFrame(trackIdx, time);
                     var (fc, fr) = sceneInstance.EvaluateBoundingSphere(decodedMeshes);
 
                     _MergeSphere(ref center, ref radius, fc, fr);

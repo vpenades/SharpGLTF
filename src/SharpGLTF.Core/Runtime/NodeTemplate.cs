@@ -35,19 +35,18 @@ namespace SharpGLTF.Runtime
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
                 var index = anim.LogicalIndex;
-                var name = anim.Name;
 
                 var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (scaAnim != null) _Scale.AddCurve(index, name, scaAnim);
+                if (scaAnim != null) _Scale.SetCurve(index, scaAnim);
 
                 var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (rotAnim != null) _Rotation.AddCurve(index, name, rotAnim);
+                if (rotAnim != null) _Rotation.SetCurve(index, rotAnim);
 
                 var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (traAnim != null) _Translation.AddCurve(index, name, traAnim);
+                if (traAnim != null) _Translation.SetCurve(index, traAnim);
 
                 var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (mrpAnim != null) _Morphing.AddCurve(index, name, mrpAnim);
+                if (mrpAnim != null) _Morphing.SetCurve(index, mrpAnim);
             }
 
             _UseAnimatedTransforms = _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;

@@ -145,6 +145,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var model = ModelRoot.Load(path);
 
+            var boundingSphere = Runtime.MeshDecoder.EvaluateBoundingSphere(model.DefaultScene);
+
             var channel = model.LogicalAnimations[1].FindRotationSampler(model.LogicalNodes[5]);
 
             var node5_R_00 = channel.CreateCurveSampler(true).GetPoint(0);

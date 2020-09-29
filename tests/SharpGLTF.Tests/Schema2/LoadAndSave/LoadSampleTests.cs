@@ -330,7 +330,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             for (float t = 0; t < 5; t+=0.25f)
             {
-                instance.SetAnimationFrame(anim.LogicalIndex, t);
+                instance.Armature.SetAnimationFrame(anim.LogicalIndex, t);
 
                 var nodexform = instance.GetDrawableInstance(0).Transform;
 
