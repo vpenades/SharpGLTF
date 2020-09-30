@@ -19,6 +19,9 @@ namespace SharpGLTF.Runtime
 
         internal SceneInstance(ArmatureTemplate armature, DrawableTemplate[] drawables)
         {
+            Guard.NotNull(armature, nameof(armature));
+            Guard.NotNull(drawables, nameof(drawables));
+
             _Armature = new ArmatureInstance(armature);
 
             _DrawableReferences = drawables;
@@ -34,6 +37,9 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        /// <summary>
+        /// Represents the skeleton that's going to be used by each drawing command to draw the model matrices.
+        /// </summary>
         private readonly ArmatureInstance _Armature;
 
         private readonly DrawableTemplate[] _DrawableReferences;
@@ -69,23 +75,6 @@ namespace SharpGLTF.Runtime
         #region API
 
         /// <summary>
-        /// Gets a drawable reference pair, where:
-        /// - MeshIndex is the logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.
-        /// - Transform is an <see cref="IGeometryTransform"/> that can be used to transform the <see cref="Schema2.Mesh"/> into world space.
-        /// </summary>
-        /// <param name="index">The index of the drawable reference, from 0 to <see cref="DrawableInstancesCount"/></param>
-        /// <returns>A drawable reference</returns>
-        [Obsolete("Use GetDrawableInstance")]
-        public (int MeshIndex, IGeometryTransform Transform) GetDrawableReference(int index)
-        {
-            var dref = _DrawableReferences[index];
-
-            dref.UpdateGeometryTransform(_DrawableTransforms[index], _Armature.LogicalNodes);
-
-            return (dref.LogicalMeshIndex, _DrawableTransforms[index]);
-        }
-
-        /// <summary>
         /// Gets a <see cref="DrawableInstance"/> object, where:
         /// - Name is the name of this drawable instance. Originally, it was the name of <see cref="Schema2.Node"/>.
         /// - MeshIndex is the logical Index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>.
@@ -97,7 +86,7 @@ namespace SharpGLTF.Runtime
         {
             var dref = _DrawableReferences[index];
 
-            dref.UpdateGeometryTransform(_DrawableTransforms[index], _Armature.LogicalNodes);
+            dref.UpdateGeometryTransform(_DrawableTransforms[index], _Armature);
 
             return new DrawableInstance(dref, _DrawableTransforms[index]);
         }

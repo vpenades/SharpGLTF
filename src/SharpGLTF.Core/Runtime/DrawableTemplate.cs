@@ -51,7 +51,7 @@ namespace SharpGLTF.Runtime
 
         public abstract Transforms.IGeometryTransform CreateGeometryTransform();
 
-        public abstract void UpdateGeometryTransform(Transforms.IGeometryTransform geoxform, IReadOnlyList<NodeInstance> instances);
+        public abstract void UpdateGeometryTransform(Transforms.IGeometryTransform geoxform, ArmatureInstance armature);
 
         #endregion
     }
@@ -81,12 +81,12 @@ namespace SharpGLTF.Runtime
 
         public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.RigidTransform(); }
 
-        public override void UpdateGeometryTransform(Transforms.IGeometryTransform rigidTransform, IReadOnlyList<NodeInstance> instances)
+        public override void UpdateGeometryTransform(Transforms.IGeometryTransform rigidTransform, ArmatureInstance armature)
         {
-            var node = instances[_NodeIndex];
+            var node = armature.LogicalNodes[_NodeIndex];
 
             var statxform = (Transforms.RigidTransform)rigidTransform;
-            statxform.Update(node.WorldMatrix);
+            statxform.Update(node.ModelMatrix);
             statxform.Update(node.MorphWeights, false);
         }
 
@@ -133,11 +133,11 @@ namespace SharpGLTF.Runtime
 
         public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.SkinnedTransform(); }
 
-        public override void UpdateGeometryTransform(Transforms.IGeometryTransform skinnedTransform, IReadOnlyList<NodeInstance> instances)
+        public override void UpdateGeometryTransform(Transforms.IGeometryTransform skinnedTransform, ArmatureInstance armature)
         {
             var skinxform = (Transforms.SkinnedTransform)skinnedTransform;
-            skinxform.Update(_JointsNodeIndices.Length, idx => _BindMatrices[idx], idx => instances[_JointsNodeIndices[idx]].WorldMatrix);
-            skinxform.Update(instances[_MorphNodeIndex].MorphWeights, false);
+            skinxform.Update(_JointsNodeIndices.Length, idx => _BindMatrices[idx], idx => armature.LogicalNodes[_JointsNodeIndices[idx]].ModelMatrix);
+            skinxform.Update(armature.LogicalNodes[_MorphNodeIndex].MorphWeights, false);
         }
 
         #endregion

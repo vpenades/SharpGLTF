@@ -5,15 +5,24 @@ using System.Text;
 
 namespace SharpGLTF.Runtime
 {
+    /// <summary>
+    /// Represents a flattened collection of nodes/joints/bones, which define a Skeleton when correlated.
+    /// </summary>
+    /// /// <remarks>
+    /// Only the nodes used by a given <see cref="Schema2.Scene"/> will be copied.
+    /// Also, nodes will be reordered so children nodes always come after their parents (for fast evaluation),
+    /// so it's important to keek in mind that <see cref="NodeTemplate"/> indices will differ from those
+    /// in <see cref="Schema2.Scene"/>.
+    /// </remarks>
     class ArmatureTemplate
     {
         #region lifecycle
 
         /// <summary>
-        /// Creates a new <see cref="ArmatureTemplate"/> from a given <see cref="Schema2.Scene"/>.
+        /// Creates a new <see cref="ArmatureTemplate"/> based on the nodes of <see cref="Schema2.Scene"/>.
         /// </summary>
-        /// <param name="srcScene">The source <see cref="Schema2.Scene"/> to templatize.</param>
-        /// <param name="isolateMemory">True if we want to copy data instead of sharing it.</param>
+        /// <param name="srcScene">The source <see cref="Schema2.Scene"/> from where to take the nodes.</param>
+        /// <param name="isolateMemory">True if we want to copy the source data instead of share it.</param>
         /// <returns>A new <see cref="ArmatureTemplate"/> instance.</returns>
         public static ArmatureTemplate Create(Schema2.Scene srcScene, bool isolateMemory)
         {
@@ -41,7 +50,6 @@ namespace SharpGLTF.Runtime
 
                 // parent index
                 var pidx = indexSolver(srcNode.Key.VisualParent);
-                if (pidx >= nidx) throw new InvalidOperationException("parent indices should be below child indices");
 
                 // child indices
                 var cidx = srcNode.Key.VisualChildren
@@ -63,6 +71,23 @@ namespace SharpGLTF.Runtime
 
         private ArmatureTemplate(NodeTemplate[] nodes, AnimationTrackInfo[] animTracks)
         {
+            // check that child nodes always follow parent nodes
+
+            for (int idx = 0; idx < nodes.Length; ++idx)
+            {
+                var n = nodes[idx];
+
+                if (n == null) throw new ArgumentNullException(nameof(nodes));
+                if (n.ParentIndex >= idx) throw new ArgumentOutOfRangeException(nameof(nodes), $"[{idx}].ParentIndex must be lower than {idx}, but found {n.ParentIndex}");
+
+                for (int j = 0; j < n.ChildIndices.Count; ++j)
+                {
+                    var cidx = n.ChildIndices[j];
+                    if (cidx >= nodes.Length) throw new ArgumentOutOfRangeException(nameof(nodes), $"[{idx}].ChildIndices[{j}] must be lower than {nodes.Length}, but found {cidx}");
+                    if (cidx <= idx) throw new ArgumentOutOfRangeException(nameof(nodes), $"[{idx}].ChildIndices[{j}] must be heigher than {idx}, but found {cidx}");
+                }
+            }
+
             _NodeTemplates = nodes;
             _AnimationTracks = animTracks;
         }
@@ -78,7 +103,7 @@ namespace SharpGLTF.Runtime
 
         #region properties
 
-        public NodeTemplate[] Nodes => _NodeTemplates;
+        public IReadOnlyList<NodeTemplate> Nodes => _NodeTemplates;
 
         public AnimationTrackInfo[] Tracks => _AnimationTracks;
 

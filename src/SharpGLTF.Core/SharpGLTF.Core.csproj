@@ -6,10 +6,10 @@
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>7.3</LangVersion>
     <DebugSymbols>true</DebugSymbols>    
-  </PropertyGroup>  
-  
-  <Import Project="..\Version.props" />  
+  </PropertyGroup>
+
   <Import Project="..\PackageInfo.props" />
+  <Import Project="..\Version.props" />
   <Import Project="..\Analyzers.props" />
   
   <ItemGroup>

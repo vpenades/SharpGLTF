@@ -48,6 +48,9 @@ namespace SharpGLTF.Runtime
             set => _MorphWeights = value;
         }
 
+        /// <summary>
+        /// Gets or sets the transform matrix of this node in Local Space.
+        /// </summary>
         public XFORM LocalMatrix
         {
             get => _LocalMatrix;
@@ -58,10 +61,13 @@ namespace SharpGLTF.Runtime
             }
         }
 
-        public XFORM WorldMatrix
+        /// <summary>
+        /// Gets or sets the transform matrix of this node in Model Space.
+        /// </summary>
+        public XFORM ModelMatrix
         {
-            get => _GetWorldMatrix();
-            set => _SetWorldMatrix(value);
+            get => _GetModelMatrix();
+            set => _SetModelMatrix(value);
         }
 
         /// <summary>
@@ -81,20 +87,20 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        private XFORM _GetWorldMatrix()
+        private XFORM _GetModelMatrix()
         {
             if (!TransformChainIsDirty) return _WorldMatrix.Value;
 
-            _WorldMatrix = _Parent == null ? _LocalMatrix : XFORM.Multiply(_LocalMatrix, _Parent.WorldMatrix);
+            _WorldMatrix = _Parent == null ? _LocalMatrix : XFORM.Multiply(_LocalMatrix, _Parent.ModelMatrix);
 
             return _WorldMatrix.Value;
         }
 
-        private void _SetWorldMatrix(XFORM xform)
+        private void _SetModelMatrix(XFORM xform)
         {
             if (_Parent == null) { LocalMatrix = xform; return; }
 
-            XFORM.Invert(_Parent._GetWorldMatrix(), out XFORM ipwm);
+            XFORM.Invert(_Parent._GetModelMatrix(), out XFORM ipwm);
 
             LocalMatrix = XFORM.Multiply(xform, ipwm);
         }

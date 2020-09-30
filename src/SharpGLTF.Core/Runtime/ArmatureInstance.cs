@@ -15,30 +15,29 @@ namespace SharpGLTF.Runtime
 
         internal ArmatureInstance(ArmatureTemplate template)
         {
-            _AnimationTracks = template.Tracks;
-
             _NodeTemplates = template.Nodes;
-            _NodeInstances = new NodeInstance[_NodeTemplates.Length];
 
-            for (var i = 0; i < _NodeInstances.Length; ++i)
+            var ni = new NodeInstance[_NodeTemplates.Count];
+
+            for (var i = 0; i < ni.Length; ++i)
             {
                 var n = _NodeTemplates[i];
-                var pidx = _NodeTemplates[i].ParentIndex;
+                var p = n.ParentIndex < 0 ? null : ni[n.ParentIndex];
 
-                if (pidx >= i) throw new ArgumentException("invalid parent index", nameof(template.Nodes));
-
-                var p = pidx < 0 ? null : _NodeInstances[pidx];
-
-                _NodeInstances[i] = new NodeInstance(n, p);
+                ni[i] = new NodeInstance(n, p);
             }
+
+            _NodeInstances = ni;
+
+            _AnimationTracks = template.Tracks;
         }
 
         #endregion
 
         #region data
 
-        private readonly NodeTemplate[] _NodeTemplates;
-        private readonly NodeInstance[] _NodeInstances;
+        private readonly IReadOnlyList<NodeTemplate> _NodeTemplates;
+        private readonly IReadOnlyList<NodeInstance> _NodeInstances;
 
         private readonly AnimationTrackInfo[] _AnimationTracks;
 
@@ -81,7 +80,7 @@ namespace SharpGLTF.Runtime
         {
             var n = LogicalNodes.FirstOrDefault(item => item.Name == name);
             if (n == null) return;
-            n.WorldMatrix = worldMatrix;
+            n.ModelMatrix = worldMatrix;
         }
 
         public void SetPoseTransforms()

@@ -9,8 +9,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
   </PropertyGroup>
 
-  <Import Project="..\Version.props" />
   <Import Project="..\PackageInfo.props" />
+  <Import Project="..\Version.props" />
   <Import Project="..\Analyzers.props" />
 
   <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
