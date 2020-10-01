@@ -59,6 +59,9 @@ namespace SharpGLTF.Schema2
             var wbpimg = this.GetExtension<TextureWEBP>()?.Image;
             if (wbpimg != null) return wbpimg;
 
+            var ktximg = this.GetExtension<TextureKTX2>()?.Image;
+            if (ktximg != null) return ktximg;
+
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }
 
@@ -75,6 +78,7 @@ namespace SharpGLTF.Schema2
             _source = null;
             this.RemoveExtensions<TextureDDS>();
             this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureKTX2>();
         }
 
         public void SetImage(Image primaryImage)
@@ -82,7 +86,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
 
-            if (primaryImage.Content.IsDds || primaryImage.Content.IsWebp)
+            if (primaryImage.Content.IsExtendedFormat)
             {
                 var fallback = LogicalParent.UseImage(Memory.MemoryImage.DefaultPngImage.Slice(0));
                 SetImages(primaryImage, fallback);
@@ -100,20 +104,14 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(fallbackImage, nameof(fallbackImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
-            Guard.IsTrue(primaryImage.Content.IsDds || primaryImage.Content.IsWebp, "Primary image must be DDS or WEBP");
+            Guard.IsTrue(primaryImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP or KTX2");
             Guard.IsTrue(fallbackImage.Content.IsJpg || fallbackImage.Content.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
 
             ClearImages();
 
-            if (primaryImage.Content.IsDds)
-            {
-                _UseDDSTexture().Image = primaryImage;
-            }
-
-            if (primaryImage.Content.IsWebp)
-            {
-                _UseWEBPTexture().Image = primaryImage;
-            }
+            if (primaryImage.Content.IsDds) { _UseDDSTexture().Image = primaryImage; }
+            if (primaryImage.Content.IsWebp) { _UseWEBPTexture().Image = primaryImage; }
+            if (primaryImage.Content.IsKtx2) { _UseKTX2Texture().Image = primaryImage; }
 
             _source = fallbackImage.LogicalIndex;
         }
@@ -130,6 +128,14 @@ namespace SharpGLTF.Schema2
         {
             var primary = this.GetExtension<TextureWEBP>();
             if (primary == null) { primary = new TextureWEBP(this); this.SetExtension(primary); }
+
+            return primary;
+        }
+
+        private TextureKTX2 _UseKTX2Texture()
+        {
+            var primary = this.GetExtension<TextureKTX2>();
+            if (primary == null) { primary = new TextureKTX2(this); this.SetExtension(primary); }
 
             return primary;
         }
@@ -202,6 +208,31 @@ namespace SharpGLTF.Schema2
                 {
                     Guard.MustShareLogicalParent(_Parent, value, nameof(value));
                     Guard.IsTrue(value.Content.IsWebp, nameof(value));
+                }
+
+                _source = value?.LogicalIndex;
+            }
+        }
+    }
+
+    partial class TextureKTX2
+    {
+        internal TextureKTX2(Texture parent)
+        {
+            _Parent = parent;
+        }
+
+        private readonly Texture _Parent;
+
+        public Image Image
+        {
+            get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
+            set
+            {
+                if (value != null)
+                {
+                    Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                    Guard.IsTrue(value.Content.IsKtx2, nameof(value));
                 }
 
                 _source = value?.LogicalIndex;

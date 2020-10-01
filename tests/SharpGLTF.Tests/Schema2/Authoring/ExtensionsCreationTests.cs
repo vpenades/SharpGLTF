@@ -164,6 +164,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [TestCase("shannon-dxt5.dds")]
         [TestCase("shannon.webp")]
+        [TestCase("CesiumLogoFlat.ktx2")]
         public void CreateSceneWithTextureImageExtension(string textureFileName)
         {
             TestContext.CurrentContext.AttachShowDirLink();

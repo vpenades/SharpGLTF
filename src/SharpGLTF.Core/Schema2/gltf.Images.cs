@@ -80,7 +80,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Retrieves the image file as a segment of bytes.
         /// </summary>
-        /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS or WEBP format.</returns>
+        /// <returns>A <see cref="BYTES"/> segment containing the image file, which can be a PNG, JPG, DDS, WEBP or KTX2 format.</returns>
         private Memory.MemoryImage GetSatelliteContent()
         {
             // the image is stored locally in a temporary buffer
@@ -107,7 +107,7 @@ namespace SharpGLTF.Schema2
         /// <param name="content">A <see cref="Byte"/> array containing a PNG or JPEG image.</param>
         private void SetSatelliteContent(Memory.MemoryImage content)
         {
-            if (!content.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS or WEBP image", nameof(content));
+            if (!content.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS, WEBP or KTX2 image", nameof(content));
 
             _DiscardContent();
 

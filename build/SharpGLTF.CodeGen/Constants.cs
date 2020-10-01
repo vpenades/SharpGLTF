@@ -6,12 +6,18 @@ namespace SharpGLTF
 {
     static class Constants
     {
+        #region root paths
+
         public static string RemoteSchemaRepo = "https://github.com/KhronosGroup/glTF.git";
 
         /// <summary>
         /// Directory where the schema is downloaded and used as source
         /// </summary>
         public static string LocalRepoDirectory => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location), "glTF");
+
+        #endregion
+
+        #region main schema paths
 
         /// <summary>
         /// Directory of the main schema within the download repo directory
@@ -22,6 +28,10 @@ namespace SharpGLTF
         /// schema source code file path
         /// </summary>
         public static string MainSchemaFile => System.IO.Path.Combine(MainSchemaDir, "glTF.schema.json");
+
+        #endregion
+
+        #region extension paths
 
 
         public static string KhronosSchemaDir => System.IO.Path.Combine(Constants.LocalRepoDirectory, "extensions", "2.0", "Khronos");
@@ -44,6 +54,11 @@ namespace SharpGLTF
 
         public static string TextureWebpSchemaFile => System.IO.Path.Combine(VendorSchemaDir, "EXT_texture_webp", "schema", "glTF.EXT_texture_webp.schema.json");
 
+        public static string TextureKtx2SchemaFile => System.IO.Path.Combine(KhronosSchemaDir, "KHR_texture_basisu", "schema", "texture.KHR_texture_basisu.schema.json");
+
+        #endregion
+
+        #region code generation output paths
 
         /// <summary>
         /// directory within the solution where the generated code is emitted
@@ -55,5 +70,6 @@ namespace SharpGLTF
         /// </summary>
         public static string OutputNamespace => "SharpGLTF.Schema2";
 
+        #endregion
     }
 }

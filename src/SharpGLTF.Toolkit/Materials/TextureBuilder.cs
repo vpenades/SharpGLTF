@@ -116,7 +116,7 @@ namespace SharpGLTF.Materials
 
         /// <summary>
         /// Gets or sets the default image bytes to use by this <see cref="TextureBuilder"/>,
-        /// Supported formats are: PNG, JPG, DDS and WEBP
+        /// Supported formats are: PNG, JPG, DDS, WEBP and KTX2
         /// </summary>
         public IMAGEFILE PrimaryImage
         {
@@ -164,7 +164,7 @@ namespace SharpGLTF.Materials
         {
             if (!image.IsEmpty)
             {
-                Guard.IsTrue(image.IsValid, nameof(image), "Must be JPG, PNG, DDS or WEBP");
+                Guard.IsTrue(image.IsValid, nameof(image), "Must be JPG, PNG, DDS, WEBP or KTX2");
             }
             else
             {

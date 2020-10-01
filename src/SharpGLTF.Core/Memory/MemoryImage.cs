@@ -21,11 +21,13 @@ namespace SharpGLTF.Memory
         const string EMBEDDED_PNG_BUFFER = "data:image/png";
         const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds";
         const string EMBEDDED_WEBP_BUFFER = "data:image/webp";
+        const string EMBEDDED_KTX2_BUFFER = "data:image/ktx2";
 
         const string MIME_PNG = "image/png";
         const string MIME_JPG = "image/jpeg";
         const string MIME_DDS = "image/vnd-ms.dds";
         const string MIME_WEBP = "image/webp";
+        const string MIME_KTX2 = "image/ktx2";
 
         /// <summary>
         /// Represents a 4x4 white PNG image.
@@ -35,12 +37,13 @@ namespace SharpGLTF.Memory
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
         internal static readonly string[] _EmbeddedHeaders =
-                { EMBEDDED_OCTET_STREAM,
-                EMBEDDED_GLTF_BUFFER,
-                EMBEDDED_JPEG_BUFFER,
-                EMBEDDED_PNG_BUFFER,
-                EMBEDDED_DDS_BUFFER,
-                EMBEDDED_WEBP_BUFFER
+                { EMBEDDED_OCTET_STREAM
+                , EMBEDDED_GLTF_BUFFER
+                , EMBEDDED_JPEG_BUFFER
+                , EMBEDDED_PNG_BUFFER
+                , EMBEDDED_DDS_BUFFER
+                , EMBEDDED_WEBP_BUFFER
+                , EMBEDDED_KTX2_BUFFER
                 };
 
         public static MemoryImage Empty => default;
@@ -183,6 +186,16 @@ namespace SharpGLTF.Memory
         public bool IsWebp => _IsWebpImage(_Image);
 
         /// <summary>
+        /// Gets a value indicating whether this object represents a valid KTX2 image.
+        /// </summary>
+        public bool IsKtx2 => _IsKtx2Image(_Image);
+
+        /// <summary>
+        /// Gets a value indicating whether this object represents an image backed by a glTF extension.
+        /// </summary>
+        public bool IsExtendedFormat => IsDds || IsWebp || IsKtx2;
+
+        /// <summary>
         /// Gets a value indicating whether this object represents a valid image.
         /// </summary>
         public bool IsValid => _IsImage(_Image);
@@ -199,6 +212,7 @@ namespace SharpGLTF.Memory
                 if (IsJpg) return "jpg";
                 if (IsDds) return "dds";
                 if (IsWebp) return "webp";
+                if (IsKtx2) return "ktx2";
                 throw new NotImplementedException();
             }
         }
@@ -215,6 +229,7 @@ namespace SharpGLTF.Memory
                 if (IsJpg) return MIME_JPG;
                 if (IsDds) return MIME_DDS;
                 if (IsWebp) return MIME_WEBP;
+                if (IsKtx2) return MIME_KTX2;
                 throw new NotImplementedException();
             }
         }
@@ -230,6 +245,7 @@ namespace SharpGLTF.Memory
                 if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
                 if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
                 if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
+                if (IsKtx2) return $"KTX2 {_Image.Count}ᴮʸᵗᵉˢ";
                 return "Undefined";
             }
         }
@@ -288,6 +304,7 @@ namespace SharpGLTF.Memory
                 if (this.IsJpg) mimeContent = EMBEDDED_JPEG_BUFFER;
                 if (this.IsDds) mimeContent = EMBEDDED_DDS_BUFFER;
                 if (this.IsWebp) mimeContent = EMBEDDED_WEBP_BUFFER;
+                if (this.IsKtx2) mimeContent = EMBEDDED_KTX2_BUFFER;
 
                 mimeContent += ";base64,";
             }
@@ -312,6 +329,7 @@ namespace SharpGLTF.Memory
             if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data)) throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
 
             return true;
         }
@@ -332,6 +350,7 @@ namespace SharpGLTF.Memory
             if (format.EndsWith("jpeg", StringComparison.OrdinalIgnoreCase)) return IsJpg;
             if (format.EndsWith("dds", StringComparison.OrdinalIgnoreCase)) return IsDds;
             if (format.EndsWith("webp", StringComparison.OrdinalIgnoreCase)) return IsWebp;
+            if (format.EndsWith("ktx2", StringComparison.OrdinalIgnoreCase)) return IsKtx2;
 
             return false;
         }
@@ -384,6 +403,26 @@ namespace SharpGLTF.Memory
             return true;
         }
 
+        private static bool _IsKtx2Image(IReadOnlyList<Byte> data)
+        {
+            if (data[0] != 0xAB) return false;
+            if (data[1] != 0x4B) return false;
+            if (data[2] != 0x54) return false;
+            if (data[3] != 0x58) return false;
+
+            if (data[4] != 0x20) return false;
+            if (data[5] != 0x32) return false;
+            if (data[6] != 0x30) return false;
+            if (data[7] != 0xBB) return false;
+
+            if (data[8] != 0x0D) return false;
+            if (data[9] != 0x0A) return false;
+            if (data[10] != 0x1A) return false;
+            if (data[11] != 0x0A) return false;
+
+            return true;
+        }
+
         private static bool _IsImage(IReadOnlyList<Byte> data)
         {
             if (data == null) return false;
@@ -393,6 +432,7 @@ namespace SharpGLTF.Memory
             if (_IsJpgImage(data)) return true;
             if (_IsPngImage(data)) return true;
             if (_IsWebpImage(data)) return true;
+            if (_IsKtx2Image(data)) return true;
 
             return false;
         }
