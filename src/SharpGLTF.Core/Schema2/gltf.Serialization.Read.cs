@@ -17,7 +17,7 @@ namespace SharpGLTF.Schema2
     /// engine and uploaded to the GPU if neccesary.
     /// </summary>
     /// <param name="image">The Image containing the texture</param>
-    /// <returns>true if we want to keep the image memory data in Image. Otherwise the memory will be cleared.</returns>    
+    /// <returns>true if we want to keep the image memory data in Image. Otherwise the memory will be cleared.</returns>
     public delegate Boolean ImageDecodeCallback(Image image);
 
     /// <summary>

@@ -39,7 +39,7 @@ namespace SharpGLTF.Runtime
         private readonly IReadOnlyList<NodeTemplate> _NodeTemplates;
         private readonly IReadOnlyList<NodeInstance> _NodeInstances;
 
-        private readonly AnimationTrackInfo[] _AnimationTracks;
+        private readonly IReadOnlyList<AnimationTrackInfo> _AnimationTracks;
 
         #endregion
 
@@ -64,9 +64,19 @@ namespace SharpGLTF.Runtime
 
         #region API
 
+        /// <summary>
+        /// Finds the index of a named animation track.
+        /// </summary>
+        /// <param name="name">The animation name</param>
+        /// <returns>The index of the animation track, or -1 if not found.</returns>
         public int IndexOfTrack(string name)
         {
-            return Array.FindIndex(_AnimationTracks, item => item.Name == name);
+            for (int i = 0; i < _AnimationTracks.Count; ++i)
+            {
+                if (_AnimationTracks[i].Name == name) return i;
+            }
+
+            return -1;
         }
 
         public void SetLocalMatrix(string name, XFORM localMatrix)

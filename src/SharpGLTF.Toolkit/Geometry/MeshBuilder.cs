@@ -167,7 +167,7 @@ namespace SharpGLTF.Geometry
             return _UsePrimitive((material, primitiveVertexCount));
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Converter<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             if (mesh == null) return;
 
@@ -190,7 +190,7 @@ namespace SharpGLTF.Geometry
             AddMesh<TMaterial>(mesh, m => m, v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v).TransformedBy(vertexTransform));
         }
 
-        public void AddMesh(IMeshBuilder<TMaterial> mesh, Func<TMaterial, TMaterial> materialTransform, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        public void AddMesh(IMeshBuilder<TMaterial> mesh, Func<TMaterial, TMaterial> materialTransform, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             if (mesh == null) return;
 
@@ -199,7 +199,7 @@ namespace SharpGLTF.Geometry
             AddMesh<TMaterial>(mesh, materialTransform, vertexTransform);
         }
 
-        public void AddMesh<TSourceMaterial>(IMeshBuilder<TSourceMaterial> mesh, Func<TSourceMaterial, TMaterial> materialTransform, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        public void AddMesh<TSourceMaterial>(IMeshBuilder<TSourceMaterial> mesh, Func<TSourceMaterial, TMaterial> materialTransform, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             if (mesh == null) return;
 

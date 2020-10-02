@@ -103,11 +103,16 @@ namespace SharpGLTF.Runtime
 
         #region properties
 
+        /// <summary>
+        /// Gets the flattened list of nodes, ordered so parents appear before children.
+        /// </summary>
         public IReadOnlyList<NodeTemplate> Nodes => _NodeTemplates;
 
-        public AnimationTrackInfo[] Tracks => _AnimationTracks;
+        /// <summary>
+        /// Gets the animations tracks info.
+        /// </summary>
+        public IReadOnlyList<AnimationTrackInfo> Tracks => _AnimationTracks;
 
         #endregion
-
     }
 }

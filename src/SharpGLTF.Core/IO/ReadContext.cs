@@ -325,11 +325,25 @@ namespace SharpGLTF.IO
 
         #region extras
 
+        /// <summary>
+        /// Tries to identify a stream as a text (glTF) or binary (GLB) format.
+        /// </summary>
+        /// <param name="stream">An open <see cref="Stream"/> where <see cref="Stream.CanSeek"/> must be true.</param>
+        /// <returns>True if it's a binary GLB format.</returns>
+        /// <remarks>
+        /// After identification, the <see cref="Stream.Position"/> will be reset to the position it had before calling this method.
+        /// </remarks>
+        public static bool IdentifyBinaryContainer(Stream stream)
+        {
+            Guard.NotNull(stream, nameof(stream));
+            return BinarySerialization._Identify(stream);
+        }
+
         public static String ReadJson(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
 
-            bool binaryFile = BinarySerialization._Identify(stream);
+            bool binaryFile = IdentifyBinaryContainer(stream);
 
             if (binaryFile)
             {
@@ -348,7 +362,7 @@ namespace SharpGLTF.IO
         {
             Guard.NotNull(stream, nameof(stream));
 
-            bool binaryFile = BinarySerialization._Identify(stream);
+            bool binaryFile = IdentifyBinaryContainer(stream);
 
             if (binaryFile)
             {
@@ -360,6 +374,6 @@ namespace SharpGLTF.IO
             return stream.ReadBytesToEnd();
         }
 
-#endregion
+        #endregion
     }
 }

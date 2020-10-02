@@ -302,7 +302,7 @@ namespace SharpGLTF.Geometry
             return AddQuadrangle(ConvertVertex(a), ConvertVertex(b), ConvertVertex(c), ConvertVertex(d));
         }
 
-        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
+        internal void AddPrimitive(PrimitiveBuilder<TMaterial, TvG, TvM, TvS> primitive, Converter<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
         {
             if (primitive == null) return;
 
@@ -311,7 +311,7 @@ namespace SharpGLTF.Geometry
             AddPrimitive<TMaterial>(primitive, v => vertexTransformFunc((VertexBuilder<TvG, TvM, TvS>)v));
         }
 
-        internal void AddPrimitive<TAnyMaterial>(IPrimitiveReader<TAnyMaterial> primitive, Func<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
+        internal void AddPrimitive<TAnyMaterial>(IPrimitiveReader<TAnyMaterial> primitive, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
         {
             if (primitive == null) return;
 
@@ -399,6 +399,8 @@ namespace SharpGLTF.Geometry
 
         public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransformFunc)
         {
+            Guard.NotNull(vertexTransformFunc, nameof(vertexTransformFunc));
+
             _Vertices.TransformVertices(vertexTransformFunc);
 
             TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
