@@ -4,26 +4,17 @@
     <TargetFrameworks>netstandard2.0;netcoreapp3.1</TargetFrameworks>
     <AssemblyName>SharpGLTF.Core</AssemblyName>
     <RootNamespace>SharpGLTF</RootNamespace>
-    <LangVersion>7.3</LangVersion>
-    <DebugSymbols>true</DebugSymbols>    
+    <LangVersion>7.3</LangVersion>    
   </PropertyGroup>
 
   <Import Project="..\PackageInfo.props" />
   <Import Project="..\Version.props" />
   <Import Project="..\Analyzers.props" />
+  <Import Project="..\Testing.props" />
   
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>SharpGLTF.Core.Tests</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>SharpGLTF.Toolkit.Tests</_Parameter1>
-    </AssemblyAttribute>
   </ItemGroup>  
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

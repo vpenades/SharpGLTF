@@ -64,12 +64,12 @@ namespace SharpGLTF.Runtime
         #region data
 
         /// <summary>
-        /// the index of this node within <see cref="SceneTemplate._NodeTemplates"/>
+        /// the index of this node within <see cref="SceneTemplate._Armature"/>
         /// </summary>
         private readonly int _LogicalSourceIndex;
 
         /// <summary>
-        /// the index of the parent node within <see cref="SceneTemplate._NodeTemplates"/>
+        /// the index of the parent node within <see cref="SceneTemplate._Armature"/>
         /// </summary>
         private readonly int _ParentIndex;
         private readonly int[] _ChildIndices;
@@ -95,12 +95,12 @@ namespace SharpGLTF.Runtime
         public int LogicalNodeIndex => _LogicalSourceIndex;
 
         /// <summary>
-        /// Gets the index of the parent <see cref="NodeTemplate"/> in <see cref="SceneTemplate._NodeTemplates"/>
+        /// Gets the index of the parent <see cref="NodeTemplate"/> in <see cref="SceneTemplate._Armature"/>
         /// </summary>
         public int ParentIndex => _ParentIndex;
 
         /// <summary>
-        /// Gets the list of indices of the children <see cref="NodeTemplate"/> in <see cref="SceneTemplate._NodeTemplates"/>
+        /// Gets the list of indices of the children <see cref="NodeTemplate"/> in <see cref="SceneTemplate._Armature"/>
         /// </summary>
         public IReadOnlyList<int> ChildIndices => _ChildIndices;
 

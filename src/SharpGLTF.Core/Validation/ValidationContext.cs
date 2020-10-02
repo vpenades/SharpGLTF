@@ -10,6 +10,7 @@ namespace SharpGLTF.Validation
     /// <summary>
     /// Utility class used in the process of model validation.
     /// </summary>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Auto)]
     public readonly partial struct ValidationContext
     {
         #region constructor

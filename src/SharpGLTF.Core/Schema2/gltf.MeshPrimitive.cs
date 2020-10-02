@@ -293,32 +293,38 @@ namespace SharpGLTF.Schema2
 
             // check indices
 
-            if (IndexAccessor != null)
+            if (IndexAccessor != null && IndexAccessor.Count > 0)
             {
                 IndexAccessor.ValidateIndices(validate, (uint)vertexCount, DrawPrimitiveType);
 
-                var incompatibleMode = false;
+                var incompatiblePrimitiveCount = false;
 
                 switch (this.DrawPrimitiveType)
                 {
+                    case PrimitiveType.POINTS:
+                        if (IndexAccessor.Count < 1) incompatiblePrimitiveCount = true;
+                        break;
+
                     case PrimitiveType.LINE_LOOP:
                     case PrimitiveType.LINE_STRIP:
-                        if (IndexAccessor.Count < 2) incompatibleMode = true;
+                        if (IndexAccessor.Count < 2) incompatiblePrimitiveCount = true;
                         break;
 
                     case PrimitiveType.TRIANGLE_FAN:
                     case PrimitiveType.TRIANGLE_STRIP:
-                        if (IndexAccessor.Count < 3) incompatibleMode = true;
+                        if (IndexAccessor.Count < 3) incompatiblePrimitiveCount = true;
                         break;
 
                     case PrimitiveType.LINES:
-                        if (!IndexAccessor.Count.IsMultipleOf(2)) incompatibleMode = true;
+                        if (!IndexAccessor.Count.IsMultipleOf(2)) incompatiblePrimitiveCount = true;
                         break;
 
                     case PrimitiveType.TRIANGLES:
-                        if (!IndexAccessor.Count.IsMultipleOf(3)) incompatibleMode = true;
+                        if (!IndexAccessor.Count.IsMultipleOf(3)) incompatiblePrimitiveCount = true;
                         break;
                 }
+
+                validate.IsTrue(nameof(_indices), !incompatiblePrimitiveCount, "Mismatch between indices count and PrimitiveType");
             }
 
             // check vertex attributes accessors ByteStride

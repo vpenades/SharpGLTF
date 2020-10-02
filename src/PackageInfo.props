@@ -7,11 +7,11 @@
     <Copyright>Copyright (c) 2020 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>
 
-    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
-
-    <PackageTags>C# glTF 3D</PackageTags>
+    <RepositoryUrl>https://github.com/vpenades/SharpGLTF</RepositoryUrl>    
     <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
+
+    <PackageTags>C# glTF 3D</PackageTags>    
     <PackageIcon>glTF2Sharp.png</PackageIcon>
 
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>

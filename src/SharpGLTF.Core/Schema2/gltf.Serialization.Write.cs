@@ -77,9 +77,9 @@ namespace SharpGLTF.Schema2
         public Boolean MergeBuffers { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets a value indicating how to format the JSON document of the glTF.
+        /// Gets or sets a value indicating whether the JSON formatting will include indentation.
         /// </summary>
-        public Boolean JsonIndented { get; set; } = false;
+        public Boolean JsonIndented { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the level of validation applied when loading a file.
