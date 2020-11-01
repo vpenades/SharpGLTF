@@ -240,7 +240,7 @@ namespace SharpGLTF.Memory
                 if (!string.IsNullOrWhiteSpace(_SourcePathHint)) return System.IO.Path.GetFileName(_SourcePathHint);
 
                 if (IsEmpty) return "Empty";
-                if (!IsValid) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
+                if (!_IsImage(_Image)) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
                 if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
                 if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
                 if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
@@ -253,6 +253,13 @@ namespace SharpGLTF.Memory
         #endregion
 
         #region API
+
+        public static void Verify(MemoryImage image, string paramName)
+        {
+            Guard.IsTrue(_IsImage(image._Image), paramName, $"{paramName} must be a valid image byte stream.");
+
+            if (image.IsKtx2) Ktx2Header.Verify(image._Image, paramName);
+        }
 
         /// <summary>
         /// Opens the image file for reading its contents
@@ -295,7 +302,7 @@ namespace SharpGLTF.Memory
         /// <returns>A mime64 string.</returns>
         internal string ToMime64(bool withPrefix = true)
         {
-            if (!this.IsValid) return null;
+            if (!_IsImage(_Image)) return null;
 
             var mimeContent = string.Empty;
             if (withPrefix)
@@ -343,7 +350,7 @@ namespace SharpGLTF.Memory
         {
             Guard.NotNullOrEmpty(format, nameof(format));
 
-            if (!IsValid) return false;
+            if (!_IsImage(_Image)) return false;
 
             if (format.EndsWith("png", StringComparison.OrdinalIgnoreCase)) return IsPng;
             if (format.EndsWith("jpg", StringComparison.OrdinalIgnoreCase)) return IsJpg;
@@ -405,22 +412,8 @@ namespace SharpGLTF.Memory
 
         private static bool _IsKtx2Image(IReadOnlyList<Byte> data)
         {
-            if (data[0] != 0xAB) return false;
-            if (data[1] != 0x4B) return false;
-            if (data[2] != 0x54) return false;
-            if (data[3] != 0x58) return false;
-
-            if (data[4] != 0x20) return false;
-            if (data[5] != 0x32) return false;
-            if (data[6] != 0x30) return false;
-            if (data[7] != 0xBB) return false;
-
-            if (data[8] != 0x0D) return false;
-            if (data[9] != 0x0A) return false;
-            if (data[10] != 0x1A) return false;
-            if (data[11] != 0x0A) return false;
-
-            return true;
+            if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) return false;
+            return header.IsValidHeader;
         }
 
         private static bool _IsImage(IReadOnlyList<Byte> data)
@@ -438,5 +431,61 @@ namespace SharpGLTF.Memory
         }
 
         #endregion
+    }
+
+    readonly struct Ktx2Header
+    {
+        // http://github.khronos.org/KTX-Specification/
+
+        public readonly UInt64 Header0;
+        public readonly UInt32 Header1;
+
+        public readonly UInt32 vkFormat;
+        public readonly UInt32 typeSize;
+        public readonly UInt32 pixelWidth;
+        public readonly UInt32 pixelHeight;
+        public readonly UInt32 pixelDepth;
+        public readonly UInt32 layerCount;
+        public readonly UInt32 faceCount;
+        public readonly UInt32 levelCount;
+        public readonly UInt32 supercompressionScheme;
+
+        public static bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
+        {
+            if (data.Count < 12) { header = default; return false; }
+            header = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Ktx2Header>(data.ToArray())[0];
+            return true;
+        }
+
+        public bool IsValidHeader
+        {
+            get
+            {
+                if (Header0 != 0xbb30322058544BAb) return false;
+                if (Header1 != 0x0A1A0A0D) return false;
+                return true;
+            }
+        }
+
+        public static void Verify(IReadOnlyList<Byte> data, string paramName)
+        {
+            // https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_texture_basisu#ktx-v2-images-with-basis-universal-supercompression
+
+            Guard.IsTrue(TryGetHeader(data, out Ktx2Header header), paramName);
+
+            // header must be valid
+            Guard.IsTrue(header.IsValidHeader, paramName + ".Header");
+
+            // pixelWidth and pixelHeight MUST be multiples of 4. 
+            Guard.MustBePositiveAndMultipleOf((int)header.pixelWidth, 4, $"{paramName}.{nameof(pixelWidth)}");
+            Guard.MustBePositiveAndMultipleOf((int)header.pixelHeight, 4, $"{paramName}.{nameof(pixelHeight)}");
+
+            // For 2D and cubemap textures, pixelDepth must be 0.
+            Guard.MustBeEqualTo((int)header.pixelDepth, 0, $"{paramName}.{nameof(pixelDepth)}");
+
+            Guard.MustBeLessThan((int)header.supercompressionScheme, 3, $"{paramName}.{nameof(supercompressionScheme)}");
+
+            // TODO: more checks required
+        }
     }
 }

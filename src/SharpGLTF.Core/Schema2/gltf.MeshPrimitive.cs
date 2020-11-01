@@ -383,7 +383,8 @@ namespace SharpGLTF.Schema2
                 .Where(item => item != null)
                 .Select(item => item.JointsCount);
 
-            var maxJoints = skins.Any() ? skins.Max() : 0;
+            // if no skins found, use a max joint value that essentially skips max joint validation
+            var maxJoints = skins.Any() ? skins.Max() : int.MaxValue;
 
             Accessor.ValidateVertexAttributes(validate, this.VertexAccessors, maxJoints);
         }

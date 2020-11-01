@@ -20,6 +20,18 @@ namespace SharpGLTF.Schema2
 
         #region read
 
+        public static Memory<Byte> ReadBytesToEnd(this Stream s)
+        {
+            using (var m = new MemoryStream())
+            {
+                s.CopyTo(m);
+
+                if (m.TryGetBuffer(out ArraySegment<Byte> segment)) return segment;
+
+                return m.ToArray();
+            }
+        }
+
         public static bool IsBinaryHeader(Byte a, Byte b, Byte c, Byte d)
         {
             uint magic = 0;

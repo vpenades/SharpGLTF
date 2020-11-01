@@ -305,6 +305,10 @@ namespace SharpGLTF.Transforms
 
         #region properties
 
+        public bool Visible => true;
+
+        public bool FlipFaces => false;
+
         /// <summary>
         /// Gets the collection of the current, final matrices to use for skinning
         /// </summary>
@@ -341,14 +345,8 @@ namespace SharpGLTF.Transforms
             }
         }
 
-        public bool Visible => true;
-
-        public bool FlipFaces => false;
-
         public V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
-            Guard.NotNull(skinWeights, nameof(skinWeights));
-
             localPosition = MorphVectors(localPosition, morphTargets);
 
             var worldPosition = V3.Zero;
@@ -365,8 +363,6 @@ namespace SharpGLTF.Transforms
 
         public V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
-            Guard.NotNull(skinWeights, nameof(skinWeights));
-
             localNormal = MorphVectors(localNormal, morphTargets);
 
             var worldNormal = V3.Zero;
@@ -381,8 +377,6 @@ namespace SharpGLTF.Transforms
 
         public V4 TransformTangent(V4 localTangent, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
         {
-            Guard.NotNull(skinWeights, nameof(skinWeights));
-
             var localTangentV = MorphVectors(new V3(localTangent.X, localTangent.Y, localTangent.Z), morphTargets);
 
             var worldTangent = V3.Zero;

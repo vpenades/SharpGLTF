@@ -107,7 +107,7 @@ namespace SharpGLTF.Schema2
         /// <param name="content">A <see cref="Byte"/> array containing a PNG or JPEG image.</param>
         private void SetSatelliteContent(Memory.MemoryImage content)
         {
-            if (!content.IsValid) throw new ArgumentException($"{nameof(content)} must be a PNG, JPG, DDS, WEBP or KTX2 image", nameof(content));
+            Memory.MemoryImage.Verify(content, nameof(content));
 
             _DiscardContent();
 
@@ -187,7 +187,7 @@ namespace SharpGLTF.Schema2
             if (!_SatelliteContent.HasValue) { _WriteAsBufferView(); return; }
 
             var imimg = _SatelliteContent.Value;
-            if (!imimg.IsValid) throw new InvalidOperationException();
+            Memory.MemoryImage.Verify(imimg, nameof(imimg));
 
             _uri = imimg.ToMime64();
             _mimeType = imimg.MimeType;
@@ -207,7 +207,7 @@ namespace SharpGLTF.Schema2
             }
 
             var imimg = _SatelliteContent.Value;
-            if (!imimg.IsValid) throw new InvalidOperationException();
+            Memory.MemoryImage.Verify(imimg, nameof(imimg));
 
             satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
 
@@ -223,7 +223,7 @@ namespace SharpGLTF.Schema2
             Guard.IsTrue(_bufferView.HasValue, nameof(_bufferView));
 
             var imimg = this.Content;
-            if (!imimg.IsValid) throw new InvalidOperationException();
+            Memory.MemoryImage.Verify(imimg, nameof(imimg));
 
             _uri = null;
             _mimeType = imimg.MimeType;
@@ -262,7 +262,7 @@ namespace SharpGLTF.Schema2
                 validate.IsTrue("BufferView", bv.IsDataBuffer, "is a GPU target.");
             }
 
-            validate.IsTrue("MemoryImage", Content.IsValid, "Invalid image");
+            Memory.MemoryImage.Verify(Content, nameof(Content));
         }
 
         #endregion
@@ -293,7 +293,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Image"/> instance.</returns>
         public Image UseImage(Memory.MemoryImage imageContent)
         {
-            Guard.IsTrue(imageContent.IsValid, nameof(imageContent), $"{nameof(imageContent)} must be a valid image byte stream.");
+            Memory.MemoryImage.Verify(imageContent, nameof(imageContent));
 
             // If we find an image with the same content, let's reuse it.
             foreach (var img in this.LogicalImages)
