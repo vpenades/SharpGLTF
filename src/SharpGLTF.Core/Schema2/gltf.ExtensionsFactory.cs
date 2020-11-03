@@ -17,6 +17,7 @@ namespace SharpGLTF.Schema2
         static ExtensionsFactory()
         {
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit");
+            RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen");
             RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat");
             RegisterExtension<Material, MaterialTransmission>("KHR_materials_transmission");
             RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness");

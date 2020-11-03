@@ -6,6 +6,9 @@ using System.Text;
 
 using SharpGLTF.Materials;
 
+using ALPHAMODE = SharpGLTF.Materials.AlphaMode;
+using ALPHAMODEGLTF2 = SharpGLTF.Schema2.AlphaMode;
+
 namespace SharpGLTF.Schema2
 {
     public static partial class Toolkit
@@ -169,7 +172,7 @@ namespace SharpGLTF.Schema2
 
         #region creation API
 
-        public static Material CreateMaterial(this ModelRoot root, Materials.MaterialBuilder mb)
+        public static Material CreateMaterial(this ModelRoot root, MaterialBuilder mb)
         {
             Guard.NotNull(root, nameof(root));
             Guard.NotNull(mb, nameof(mb));
@@ -181,7 +184,7 @@ namespace SharpGLTF.Schema2
             return m;
         }
 
-        public static Materials.MaterialBuilder ToMaterialBuilder(this Material srcMaterial)
+        public static MaterialBuilder ToMaterialBuilder(this Material srcMaterial)
         {
             if (srcMaterial == null) return Materials.MaterialBuilder.CreateDefault();
             var dstMaterial = new Materials.MaterialBuilder(srcMaterial.Name);
@@ -195,30 +198,33 @@ namespace SharpGLTF.Schema2
 
         #region transfer API
 
-        public static Schema2.AlphaMode ToSchema2(this Materials.AlphaMode alpha)
+        public static ALPHAMODEGLTF2 ToSchema2(this ALPHAMODE alpha)
         {
             switch (alpha)
             {
-                case Materials.AlphaMode.BLEND: return Schema2.AlphaMode.BLEND;
-                case Materials.AlphaMode.MASK: return Schema2.AlphaMode.MASK;
-                case Materials.AlphaMode.OPAQUE: return Schema2.AlphaMode.OPAQUE;
+                case ALPHAMODE.BLEND: return ALPHAMODEGLTF2.BLEND;
+                case ALPHAMODE.MASK: return ALPHAMODEGLTF2.MASK;
+                case ALPHAMODE.OPAQUE: return ALPHAMODEGLTF2.OPAQUE;
                 default: throw new NotImplementedException(alpha.ToString());
             }
         }
 
-        public static Materials.AlphaMode ToToolkit(this Schema2.AlphaMode alpha)
+        public static ALPHAMODE ToToolkit(this ALPHAMODEGLTF2 alpha)
         {
             switch (alpha)
             {
-                case Schema2.AlphaMode.BLEND: return Materials.AlphaMode.BLEND;
-                case Schema2.AlphaMode.MASK: return Materials.AlphaMode.MASK;
-                case Schema2.AlphaMode.OPAQUE: return Materials.AlphaMode.OPAQUE;
+                case ALPHAMODEGLTF2.BLEND: return ALPHAMODE.BLEND;
+                case ALPHAMODEGLTF2.MASK: return ALPHAMODE.MASK;
+                case ALPHAMODEGLTF2.OPAQUE: return ALPHAMODE.OPAQUE;
                 default: throw new NotImplementedException(alpha.ToString());
             }
         }
 
         public static void CopyTo(this Material srcMaterial, MaterialBuilder dstMaterial)
         {
+            Guard.NotNull(srcMaterial, nameof(srcMaterial));
+            Guard.NotNull(dstMaterial, nameof(dstMaterial));
+
             _CopyDefaultTo(srcMaterial, dstMaterial);
 
             if (srcMaterial.Unlit)
@@ -259,6 +265,7 @@ namespace SharpGLTF.Schema2
             srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
             srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
             srcMaterial.CopyChannelsTo(dstMaterial, "Transmission");
+            srcMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
         }
 
         private static void _CopyDefaultTo(Material srcMaterial, MaterialBuilder dstMaterial)
@@ -342,6 +349,9 @@ namespace SharpGLTF.Schema2
 
             var hasTransmission = srcMaterial.GetChannel("Transmission") != null;
 
+            var hasSheen = srcMaterial.GetChannel("SheenColor") != null
+                || srcMaterial.GetChannel("SheenRoughness") != null;
+
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
 
             MaterialBuilder defMaterial = null;
@@ -355,7 +365,12 @@ namespace SharpGLTF.Schema2
 
             if (srcMaterial.ShaderStyle == "PBRMetallicRoughness")
             {
-                dstMaterial.InitializePBRMetallicRoughness(hasClearCoat, hasTransmission);
+                dstMaterial.InitializePBRMetallicRoughness
+                    (
+                    hasClearCoat ? "ClearCoat" : null,
+                    hasTransmission ? "Transmission" : null,
+                    hasSheen ? "Sheen" : null);
+
                 defMaterial = srcMaterial;
             }
 
@@ -372,6 +387,7 @@ namespace SharpGLTF.Schema2
                 defMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
                 defMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
                 defMaterial.CopyChannelsTo(dstMaterial, "Transmission");
+                defMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
             }
         }
 

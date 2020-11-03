@@ -162,6 +162,48 @@ namespace SharpGLTF.Schema2.Authoring
             scene.AttachToCurrentTest("result.gltf");            
         }
 
+        [Test(Description = "Creates a quad mesh with a complex material")]
+        public void CreateSceneWithsSheenExtension()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+
+            var material = new Materials.MaterialBuilder("material")
+                .WithMetallicRoughnessShader()
+                .WithChannelImage(Materials.KnownChannel.Normal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"))
+                .WithChannelImage(Materials.KnownChannel.Emissive, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelImage(Materials.KnownChannel.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
+                .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"))
+                .WithChannelImage(Materials.KnownChannel.SheenColor, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
+                .WithChannelParam(Materials.KnownChannel.SheenColor, new Vector4(1,1,1,0))
+                .WithChannelImage(Materials.KnownChannel.SheenRoughness, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
+                .WithChannelParam(Materials.KnownChannel.SheenRoughness, new Vector4(0.5f, 0, 0, 0));
+
+            var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
+            mesh.UsePrimitive(material).AddQuadrangle
+                ((new Vector3(-10, 10, 0), new Vector2(1, 0))
+                , (new Vector3(10, 10, 0), new Vector2(0, 0))
+                , (new Vector3(10, -10, 0), new Vector2(0, 1))
+                , (new Vector3(-10, -10, 0), new Vector2(1, 1))
+                );
+
+            var scene = new Scenes.SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var gltf2 = scene.ToGltf2();
+            var sheenColorFactor = gltf2.LogicalMaterials[0].FindChannel("SheenColor").Value.Parameter;
+            Assert.AreEqual(new Vector4(1, 1, 1, 0), sheenColorFactor);
+
+            var sheenRoughnessFactor = gltf2.LogicalMaterials[0].FindChannel("SheenRoughness").Value.Parameter;
+            Assert.AreEqual(new Vector4(0.5f, 0, 0, 0), sheenRoughnessFactor);
+
+            scene.AttachToCurrentTest("result.glb");
+            scene.AttachToCurrentTest("result.gltf");
+        }
+
         [TestCase("shannon-dxt5.dds")]
         [TestCase("shannon.webp")]
         [TestCase("FlightHelmet_baseColor_basis.ktx2")]

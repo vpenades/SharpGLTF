@@ -186,6 +186,9 @@ namespace SharpGLTF.Materials
 
                 case KnownChannel.Transmission: return Vector4.Zero;
 
+                case KnownChannel.SheenColor: return Vector4.Zero;
+                case KnownChannel.SheenRoughness: return Vector4.Zero;
+
                 default: throw new NotImplementedException();
             }
         }

@@ -25,10 +25,11 @@ namespace SharpGLTF
             _ProcessMainSchema();
 
             // XMP
-            _ProcessKhronosXMPExtension();            
+            _ProcessKhronosXMPExtension();
 
-            // material extensions
+            // material extensions            
             _ProcessKhronosUnlitExtension();
+            _ProcessKhronosSheenExtension();
             _ProcessKhronosClearCoatExtension();
             _ProcessKhronosTransmissionExtension();
             _ProcessKhronosSpecularGlossinessExtension();
@@ -191,6 +192,29 @@ namespace SharpGLTF
             ProcessSchema("ext.Transmission.g", ctx);
         }
 
+        private static void _ProcessKhronosSheenExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosPbrSheenSchemaFile);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            ctx.IgnoredByCodeEmitter("Texture Info");
+            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");
+
+            
+            ctx.FindClass("KHR_materials_sheen glTF extension")
+                .GetField("sheenColorFactor")
+                .SetDataType(typeof(System.Numerics.Vector3), true)
+                .SetDefaultValue("Vector3.Zero")
+                .SetItemsRange(0);
+
+            ctx.FindClass("KHR_materials_sheen glTF extension")
+                .GetField("sheenRoughnessFactor")
+                .SetDataType(typeof(float), true)                
+                .SetItemsRange(0);
+
+            ProcessSchema("ext.Sheen.g", ctx);
+        }
+
         private static void _ProcessKhronosLightsPunctualExtension()
         {
             // Model
@@ -311,6 +335,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");            
             newEmitter.SetRuntimeName("KHR_materials_clearcoat glTF extension", "MaterialClearCoat");
             newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
+            newEmitter.SetRuntimeName("KHR_materials_sheen glTF extension", "MaterialSheen");
 
             newEmitter.SetRuntimeName("KHR_xmp glTF extension", "XMPPacketsCollection");
             newEmitter.SetRuntimeName("KHR_xmp node extension", "XMPPacketReference");

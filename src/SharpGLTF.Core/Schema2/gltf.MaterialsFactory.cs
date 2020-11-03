@@ -13,6 +13,7 @@ namespace SharpGLTF.Schema2
         internal void ClearExtensions()
         {
             this.RemoveExtensions<MaterialUnlit>();
+            this.RemoveExtensions<MaterialSheen>();
             this.RemoveExtensions<MaterialClearCoat>();
             this.RemoveExtensions<MaterialTransmission>();
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
@@ -32,15 +33,22 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Initializes this <see cref="Material"/> instance with PBR Metallic Roughness attributes.
         /// </summary>
-        /// <param name="useClearCoat">True to enable CleatCoat extension.</param>
-        /// <param name="useTransmission">True to enable Transmission extension.</param>
-        public void InitializePBRMetallicRoughness(bool useClearCoat = false, bool useTransmission = false)
+        /// <param name="extensionNames">
+        /// Extension names.
+        /// Current valid names are: "ClearCoat", "Transmission", "Sheen"
+        /// </param>
+        public void InitializePBRMetallicRoughness(params string[] extensionNames)
         {
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
-            if (useClearCoat) this.SetExtension(new MaterialClearCoat(this));
-            if (useTransmission) this.SetExtension(new MaterialTransmission(this));
+
+            foreach (var extn in extensionNames)
+            {
+                if (extn == "ClearCoat") this.SetExtension(new MaterialClearCoat(this));
+                if (extn == "Transmission") this.SetExtension(new MaterialTransmission(this));
+                if (extn == "Sheen") this.SetExtension(new MaterialSheen(this));
+            }
         }
 
         /// <summary>
@@ -92,6 +100,13 @@ namespace SharpGLTF.Schema2
             if (transmission != null)
             {
                 var channels = transmission.GetChannels(this);
+                foreach (var c in channels) yield return c;
+            }
+
+            var sheen = this.GetExtension<MaterialSheen>();
+            if (sheen != null)
+            {
+                var channels = sheen.GetChannels(this);
                 foreach (var c in channels) yield return c;
             }
 
@@ -242,12 +257,6 @@ namespace SharpGLTF.Schema2
             return _specularGlossinessTexture;
         }
 
-        public Vector4 Color
-        {
-            get => _diffuseFactor.AsValue(_diffuseFactorDefault);
-            set => _diffuseFactor = value.AsNullable(_diffuseFactorDefault);
-        }
-
         public static Vector4 ParameterDefault => new Vector4(_specularFactorDefault, (float)_glossinessFactorDefault);
 
         public Vector4 Parameter
@@ -274,8 +283,8 @@ namespace SharpGLTF.Schema2
                 material, "Diffuse",
                 _GetDiffuseTexture,
                 _diffuseFactorDefault,
-                () => this.Color,
-                value => this.Color = value
+                () => _diffuseFactor.AsValue(_diffuseFactorDefault),
+                value => _diffuseFactor = value.AsNullable(_diffuseFactorDefault)
                 );
 
             yield return new MaterialChannel
@@ -333,7 +342,7 @@ namespace SharpGLTF.Schema2
                 _GetClearCoatTexture,
                 (float)_clearcoatFactorDefault,
                 () => (float)this._clearcoatFactor.AsValue(_clearcoatFactorDefault),
-                value => this._clearcoatFactor = value
+                value => this._clearcoatFactor = value.AsNullable((float)_clearcoatFactorDefault)
                 );
 
             yield return new MaterialChannel
@@ -342,7 +351,7 @@ namespace SharpGLTF.Schema2
                 _GetClearCoatRoughnessTexture,
                 (float)_clearcoatRoughnessFactorDefault,
                 () => (float)this._clearcoatRoughnessFactor.AsValue(_clearcoatRoughnessFactorDefault),
-                value => this._clearcoatRoughnessFactor = value
+                value => this._clearcoatRoughnessFactor = value.AsNullable((float)_clearcoatRoughnessFactorDefault)
                 );
 
             yield return new MaterialChannel
@@ -375,7 +384,7 @@ namespace SharpGLTF.Schema2
                 _GetTransmissionTexture,
                 (float)_transmissionFactorDefault,
                 () => (float)this._transmissionFactor.AsValue(_transmissionFactorDefault),
-                value => this._transmissionFactor = value
+                value => this._transmissionFactor = value.AsNullable((float)_transmissionFactorDefault)
                 );
         }
 
@@ -383,6 +392,51 @@ namespace SharpGLTF.Schema2
         {
             if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
             return _transmissionTexture;
+        }
+    }
+
+    internal sealed partial class MaterialSheen
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialSheen(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatItems(_sheenColorTexture, _sheenRoughnessTexture);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            yield return new MaterialChannel
+                (
+                material, "SheenColor",
+                _GetSheenColorTexture,
+                _sheenColorFactorDefault,
+                () => _sheenColorFactor.AsValue(_sheenColorFactorDefault),
+                value => this._sheenColorFactor = value.AsNullable(_sheenColorFactorDefault)
+                );
+
+            yield return new MaterialChannel
+                (
+                material, "SheenRoughness",
+                _GetSheenRoughnessTexture,
+                _sheenRoughnessFactorDefault,
+                () => _sheenRoughnessFactor.AsValue(_sheenRoughnessFactorDefault),
+                value => this._sheenRoughnessFactor = value.AsNullable(_sheenRoughnessFactorDefault)
+                );
+        }
+
+        private TextureInfo _GetSheenColorTexture(bool create)
+        {
+            if (create && _sheenColorTexture == null) _sheenColorTexture = new TextureInfo();
+            return _sheenColorTexture;
+        }
+
+        private TextureInfo _GetSheenRoughnessTexture(bool create)
+        {
+            if (create && _sheenRoughnessTexture == null) _sheenRoughnessTexture = new TextureInfo();
+            return _sheenRoughnessTexture;
         }
     }
 }

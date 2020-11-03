@@ -31,5 +31,8 @@ namespace SharpGLTF.Materials
         ClearCoatRoughness,
 
         Transmission,
+
+        SheenColor,
+        SheenRoughness
     }
 }

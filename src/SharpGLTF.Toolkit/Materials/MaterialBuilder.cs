@@ -50,6 +50,8 @@ namespace SharpGLTF.Materials
             KnownChannel.ClearCoatNormal,
             KnownChannel.ClearCoatRoughness,
             KnownChannel.Transmission,
+            KnownChannel.SheenColor,
+            KnownChannel.SheenRoughness,
         };
 
         private static readonly KnownChannel[] _SpeGloChannels = new[]

@@ -191,7 +191,6 @@ namespace SharpGLTF
 
             var skipAlways = new string[]
             {
-                "\\Sheen\\Cloth.gltf", // still a pull request https://github.com/KhronosGroup/glTF/pull/1688
                 "\\Tests\\AssetGenerator\\",
                 "\\Demos\\retargeting\\riggedMesh.glb",
                 "\\Demos\\retargeting\\riggedMesh-recycled.glb",

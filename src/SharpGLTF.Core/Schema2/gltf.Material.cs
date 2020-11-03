@@ -101,6 +101,7 @@ namespace SharpGLTF.Schema2
             {
                 result.MustBeNull("ClearCoat", this.GetExtension<MaterialClearCoat>());
                 result.MustBeNull("Transmission", this.GetExtension<MaterialTransmission>());
+                result.MustBeNull("Sheen", this.GetExtension<MaterialSheen>());
             }
         }
 

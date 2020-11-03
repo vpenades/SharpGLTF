@@ -27,6 +27,17 @@ namespace SharpGLTF.Schema2
             _ParameterSetter = value => csetter(value.X);
         }
 
+        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Vector3 defval, Func<Vector3> cgetter, Action<Vector3> csetter)
+            : this(m, key, texInfo)
+        {
+            Guard.NotNull(cgetter, nameof(cgetter));
+            Guard.NotNull(csetter, nameof(csetter));
+
+            _ParameterDefVal = new Vector4(defval, 0);
+            _ParameterGetter = () => new Vector4(cgetter(), 0);
+            _ParameterSetter = value => csetter(new Vector3(value.X, value.Y, value.Z));
+        }
+
         internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Vector4 defval, Func<Vector4> cgetter, Action<Vector4> csetter)
             : this(m, key, texInfo)
         {
