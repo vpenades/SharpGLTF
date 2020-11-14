@@ -435,7 +435,7 @@ namespace SharpGLTF
         {
             public MyReferenceResolver(NJsonSchema.JsonSchemaAppender resolver) : base(resolver) { }
 
-            public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath)
+            public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath, System.Threading.CancellationToken cancellationToken)
             {
                 if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath);
 
