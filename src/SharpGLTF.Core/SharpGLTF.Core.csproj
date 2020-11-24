@@ -24,13 +24,18 @@
   </ItemGroup>  
   
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Schema2\Generated\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.1" />
+    <PackageReference Update="Microsoft.CodeQuality.Analyzers" Version="3.3.1" />
   </ItemGroup>  
 
 </Project>

@@ -476,7 +476,7 @@ namespace SharpGLTF.Memory
             // header must be valid
             Guard.IsTrue(header.IsValidHeader, paramName + ".Header");
 
-            // pixelWidth and pixelHeight MUST be multiples of 4. 
+            // pixelWidth and pixelHeight MUST be multiples of 4.
             Guard.MustBePositiveAndMultipleOf((int)header.pixelWidth, 4, $"{paramName}.{nameof(pixelWidth)}");
             Guard.MustBePositiveAndMultipleOf((int)header.pixelHeight, 4, $"{paramName}.{nameof(pixelHeight)}");
 

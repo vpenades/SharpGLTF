@@ -12,6 +12,8 @@ namespace SharpGLTF.Geometry
     {
         string Name { get; set; }
 
+        IO.JsonContent Extras { get; set; }
+
         IEnumerable<TMaterial> Materials { get; }
 
         IReadOnlyCollection<IPrimitiveReader<TMaterial>> Primitives { get; }

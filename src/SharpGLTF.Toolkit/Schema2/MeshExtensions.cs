@@ -612,6 +612,7 @@ namespace SharpGLTF.Schema2
 
             var dstMesh = MeshBuilderToolkit.CreateMeshBuilderFromVertexAttributes<Materials.MaterialBuilder>(vertexAttributes);
             dstMesh.Name = srcMesh.Name;
+            dstMesh.Extras = srcMesh.Extras.DeepClone();
 
             Materials.MaterialBuilder defMat = null;
 

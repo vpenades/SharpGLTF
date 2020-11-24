@@ -11,13 +11,19 @@ using JsonToken = System.Text.Json.JsonTokenType;
 
 namespace SharpGLTF.Schema2
 {
+    /// <summary>
+    /// Represents the base class for all glTF 2 Schema objects.
+    /// </summary>
+    /// <remarks>
+    /// Defines the <see cref="Extras"/> property for every glTF object.
+    /// </remarks>
     public abstract class ExtraProperties : JsonSerializable
     {
         #region data
 
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
-        private Object _extras;
+        private IO.JsonContent _extras;
 
         #endregion
 
@@ -29,9 +35,16 @@ namespace SharpGLTF.Schema2
         public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
 
         /// <summary>
-        /// Gets the extras value, where the value can be either an intrinsic type <see cref="TypeCode"/> , a <see cref="JsonList"/> or a <see cref="JsonDictionary"/>
+        /// Gets the extras of this instance, where the value can be
+        /// an <see cref="IConvertible"/>,
+        /// a <see cref="IReadOnlyList{Object}"/> or
+        /// a <see cref="IReadOnlyDictionary{String, Object}"/>.
         /// </summary>
-        public Object Extras => _extras;
+        public IO.JsonContent Extras
+        {
+            get => _extras;
+            set => _extras = value.DeepClone();
+        }
 
         #endregion
 
@@ -90,34 +103,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        /// <summary>
-        /// Gets the Extras property as a <see cref="JsonDictionary"/>
-        /// </summary>
-        /// <param name="overwrite">true if the current value is to be replaced by a <see cref="JsonDictionary"/> instance.</param>
-        /// <returns>A <see cref="JsonDictionary"/> instance or null.</returns>
-        public JsonDictionary TryUseExtrasAsDictionary(bool overwrite)
-        {
-            if (this._extras is JsonDictionary dict) return dict;
-
-            if (overwrite) this._extras = new JsonDictionary();
-
-            return this._extras as JsonDictionary;
-        }
-
-        /// <summary>
-        /// Gets the Extras property as a <see cref="JsonList"/>
-        /// </summary>
-        /// <param name="overwrite">true if the current value is to be replaced by a <see cref="JsonList"/> instance.</param>
-        /// <returns>A <see cref="JsonDictionary"/> instance or null.</returns>
-        public JsonList TryUseExtrasAsList(bool overwrite)
-        {
-            if (this._extras is JsonList list) return list;
-
-            if (overwrite) this._extras = new JsonList();
-
-            return this._extras as JsonList;
-        }
-
         #endregion
 
         #region validation
@@ -133,7 +118,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var ext in this.Extensions) ext.ValidateReferences(validate);
 
-            if (this._extras is JsonSerializable js) js.ValidateReferences(validate);
+            if (this._extras.Content is JsonSerializable js) js.ValidateReferences(validate);
         }
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
@@ -145,9 +130,9 @@ namespace SharpGLTF.Schema2
                 lc.ValidateContent(validate);
             }
 
-            if (this._extras is JsonSerializable js) js.ValidateContent(validate);
+            if (this._extras.Content is JsonSerializable js) js.ValidateContent(validate);
 
-            if (this._extras != null) validate.IsJsonSerializable("Extras", this._extras);
+            if (this._extras.Content != null) validate.IsJsonSerializable("Extras", this._extras.Content);
         }
 
         #endregion
@@ -166,16 +151,12 @@ namespace SharpGLTF.Schema2
                 SerializeProperty(writer, "extensions", dict);
             }
 
-            if (_extras == null) return;
-
             // todo, only write _extras if it's a known serializable type.
+            var content = _extras.Content;
+            if (content == null) return;
+            if (!IO.JsonContent.IsJsonSerializable(content)) return;
 
-            if (!(_extras is String) && _extras is System.Collections.IEnumerable collection)
-            {
-                if (!collection.Cast<Object>().Any()) return;
-            }
-
-            SerializeProperty(writer, "extras", _extras);
+            SerializeProperty(writer, "extras", content);
         }
 
         private static IReadOnlyDictionary<string, JsonSerializable> _ToDictionary(JsonSerializable context, IEnumerable<JsonSerializable> serializables)
@@ -211,7 +192,12 @@ namespace SharpGLTF.Schema2
             {
                 case "extensions": _DeserializeExtensions(this, ref reader, _extensions); break;
 
-                case "extras": _extras = DeserializeUnknownObject(ref reader); break;
+                case "extras":
+                    {
+                        var content = DeserializeUnknownObject(ref reader);
+                        _extras = JsonContent._Wrap(content);
+                        break;
+                    }
 
                 default: reader.Skip(); break;
             }

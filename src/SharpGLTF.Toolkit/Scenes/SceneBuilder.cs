@@ -79,6 +79,8 @@ namespace SharpGLTF.Scenes
             set => _Name = value;
         }
 
+        public IO.JsonContent Extras { get; set; }
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;
 

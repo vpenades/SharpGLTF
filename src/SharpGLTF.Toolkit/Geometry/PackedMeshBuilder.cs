@@ -42,7 +42,7 @@ namespace SharpGLTF.Geometry
 
             foreach (var srcMesh in meshBuilders)
             {
-                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name);
+                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name, srcMesh.Extras);
 
                 foreach (var srcPrim in srcMesh.Primitives)
                 {
@@ -64,13 +64,19 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private PackedMeshBuilder(string name) { _MeshName = name; }
+        private PackedMeshBuilder(string name, IO.JsonContent extras)
+        {
+            _MeshName = name;
+            _MeshExtras = extras;
+        }
 
         #endregion
 
         #region data
 
         private readonly string _MeshName;
+
+        private readonly IO.JsonContent _MeshExtras;
 
         private readonly List<PackedPrimitiveBuilder<TMaterial>> _Primitives = new List<PackedPrimitiveBuilder<TMaterial>>();
 
@@ -91,6 +97,7 @@ namespace SharpGLTF.Geometry
             if (_Primitives.Count == 0) return null;
 
             var dstMesh = root.CreateMesh(_MeshName);
+            dstMesh.Extras = _MeshExtras.DeepClone();
 
             foreach (var p in _Primitives)
             {

@@ -1,6 +1,9 @@
-﻿using System.Numerics;
+﻿using System.Collections.Generic;
+using System.Numerics;
 
 using NUnit.Framework;
+
+using SharpGLTF.IO;
 
 namespace SharpGLTF.Schema2.Authoring
 {
@@ -28,43 +31,40 @@ namespace SharpGLTF.Schema2.Authoring
             var root = ModelRoot.CreateModel();
             var scene = root.UseScene("Empty Scene");
 
-            var dict = root.TryUseExtrasAsDictionary(true);
+            var dict = new Dictionary<string, object>();
 
             dict["author"] = "me";
 
             dict["value1"] = 17;
-            dict["array1"] = new IO.JsonList { 1, 2, 3 };
-            dict["dict1"] = new IO.JsonDictionary
+            dict["array1"] = new List<int> { 1, 2, 3 };
+            dict["dict1"] = new Dictionary<string, object>
             {
                 ["A"] = 16,
                 ["B"] = "delta",
-                ["C"] = new IO.JsonList { 4, 6, 7 },
-                ["D"] = new IO.JsonDictionary { ["S"]= 1, ["T"] = 2 }
+                ["C"] = new List<int> { 4, 6, 7 },
+                ["D"] = new Dictionary<string, int> { ["S"]= 1, ["T"] = 2 }
             };
+            dict["dict2"] = new Dictionary<string, int> { ["2"] = 2, ["3"] = 3 };
+
+            JsonContent extras = dict;
+
+            root.Extras = extras;
 
             var json = root.GetJSON(true);
-
             var bytes = root.WriteGLB();
             var rootBis = ModelRoot.ParseGLB(bytes);
 
-            var adict = root.TryUseExtrasAsDictionary(false);
-            var bdict = rootBis.TryUseExtrasAsDictionary(false);
+            var a = root.Extras;
+            var b = rootBis.Extras;
+            json = rootBis.Extras.ToJson();
+            var c = IO.JsonContent.Parse(json);
 
-            CollectionAssert.AreEqual(adict, bdict);
+            Assert.IsTrue(JsonContentTests.AreEqual(a,b));
+            Assert.IsTrue(JsonContentTests.AreEqual(a, extras));
+            Assert.IsTrue(JsonContentTests.AreEqual(b, extras));
+            Assert.IsTrue(JsonContentTests.AreEqual(c, extras));
 
-            Assert.AreEqual(adict["author"], bdict["author"]);
-            Assert.AreEqual(adict["value1"], bdict["value1"]);
-            CollectionAssert.AreEqual
-                (
-                adict["array1"] as IO.JsonList,
-                bdict["array1"] as IO.JsonList
-                );
-
-            CollectionAssert.AreEqual
-                (
-                adict["dict1"] as IO.JsonDictionary,
-                bdict["dict1"] as IO.JsonDictionary
-                );
+            Assert.AreEqual(2, c.GetValue<int>("dict1","D","T"));
         }
 
         [Test(Description = "Creates a model with a triangle mesh")]

@@ -144,7 +144,7 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsJsonSerializable(PARAMNAME parameterName, Object value)
         {
-            if (!IO.JsonValue.IsJsonSerializable(value)) _SchemaThrow(parameterName, "cannot be serialized to Json");
+            if (!IO.JsonContent.IsJsonSerializable(value, out Object invalidValue)) _SchemaThrow(parameterName, $"{invalidValue?.GetType()?.Name} cannot be serialized to Json");
             return this;
         }
 

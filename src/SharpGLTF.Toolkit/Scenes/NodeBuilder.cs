@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -76,6 +77,8 @@ namespace SharpGLTF.Scenes
             clone._Rotation = this._Rotation?.Clone();
             clone._Translation = this._Translation?.Clone();
 
+            clone.Extras = this.Extras.DeepClone();
+
             foreach (var c in _Children)
             {
                 clone.AddNode(c.DeepClone(nodeMap));
@@ -99,10 +102,15 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
-        #region properties - hierarchy
+        #region properties
 
         public String Name { get; set; }
 
+        public IO.JsonContent Extras { get; set; }
+
+        #endregion
+
+        #region properties - hierarchy
         public NodeBuilder Parent => _Parent;
 
         public NodeBuilder Root => _Parent == null ? this : _Parent.Root;
@@ -489,6 +497,12 @@ namespace SharpGLTF.Scenes
                 track.SetPoint(kf.Key, kf.Value);
             }
 
+            return this;
+        }
+
+        public NodeBuilder WithExtras(IO.JsonContent content)
+        {
+            Extras = content;
             return this;
         }
 

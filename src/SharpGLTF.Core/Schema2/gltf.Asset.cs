@@ -65,28 +65,6 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
-
-        private string _GetExtraInfo(string key)
-        {
-            if (this.Extras is IReadOnlyDictionary<string, Object> dict)
-            {
-                return dict.TryGetValue(key, out Object val) ? val as String : null;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        private void _SetExtraInfo(string key, string val)
-        {
-            throw new NotImplementedException();
-            // if (this.Extras == null) this.Extras = new Dictionary<string, Object>();
-        }
-
-        #endregion
-
         #region Validation
 
         protected override void OnValidateReferences(Validation.ValidationContext validate)

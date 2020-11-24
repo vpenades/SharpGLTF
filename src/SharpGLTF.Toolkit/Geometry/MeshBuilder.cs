@@ -68,6 +68,7 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(other, nameof(other));
 
             this.Name = other.Name;
+            this.Extras = other.Extras.DeepClone();
             this._VertexPreprocessor = other._VertexPreprocessor;
 
             foreach (var kvp in other._Primitives)
@@ -108,6 +109,8 @@ namespace SharpGLTF.Geometry
         #region properties
 
         public string Name { get; set; }
+
+        public IO.JsonContent Extras { get; set; }
 
         public VertexPreprocessor<TvG, TvM, TvS> VertexPreprocessor
         {

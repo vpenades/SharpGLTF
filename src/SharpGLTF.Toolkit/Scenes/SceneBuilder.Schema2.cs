@@ -116,6 +116,8 @@ namespace SharpGLTF.Scenes
                 dstNode.LocalMatrix = srcNode.LocalMatrix;
             }
 
+            dstNode.Extras = srcNode.Extras.DeepClone();
+
             foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode.CreateNode, c);
         }
 
@@ -216,6 +218,7 @@ namespace SharpGLTF.Scenes
             var dstScene = dstModel.UseScene(0);
 
             dstScene.Name = this.Name;
+            dstScene.Extras = this.Extras.DeepClone();
 
             context.AddScene(dstScene, this);
 
@@ -252,6 +255,7 @@ namespace SharpGLTF.Scenes
             var dstScene = new SceneBuilder();
 
             dstScene.Name = srcScene.Name;
+            dstScene.Extras = srcScene.Extras.DeepClone();
 
             // process mesh instances
             var srcMeshInstances = Node.Flatten(srcScene)
@@ -355,6 +359,8 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(dstNode, nameof(dstNode));
 
             dstNode.Name = srcNode.Name;
+            dstNode.Extras = srcNode.Extras.DeepClone();
+
             dstNode.LocalTransform = srcNode.LocalTransform;
 
             _CopyTransformAnimation(dstNode, srcNode);

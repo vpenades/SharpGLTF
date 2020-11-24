@@ -11,6 +11,10 @@ using JSONTOKEN = System.Text.Json.JsonTokenType;
 
 namespace SharpGLTF.IO
 {
+    /// <summary>
+    /// Represents the base class of a serializable glTF schema2 object.
+    /// Inherited by <see cref="Schema2.ExtraProperties"/>.
+    /// </summary>
     public abstract class JsonSerializable
     {
         #region validation
@@ -225,10 +229,19 @@ namespace SharpGLTF.IO
             Guard.NotNull(writer, nameof(writer));
             Guard.NotNull(value, nameof(value));
 
+            if (_IsNullOrEmpty(value)) return;
+
             if (writer.TryWriteProperty(name, value)) return;
 
             writer.WritePropertyName(name);
             _SerializeValue(writer, value);
+        }
+
+        private static bool _IsNullOrEmpty(Object value)
+        {
+            if (value == null) return true;
+            if (value is System.Collections.ICollection c && c.Count == 0) return true;
+            return false;
         }
 
         private static void _SerializeValue(Utf8JsonWriter writer, Object value)
@@ -324,7 +337,7 @@ namespace SharpGLTF.IO
 
             if (reader.TokenType == JSONTOKEN.StartArray)
             {
-                var list = new JsonList();
+                var list = new List<Object>();
 
                 while (reader.Read() && reader.TokenType != JSONTOKEN.EndArray)
                 {
@@ -336,7 +349,7 @@ namespace SharpGLTF.IO
 
             if (reader.TokenType == JSONTOKEN.StartObject)
             {
-                var dict = new JsonDictionary();
+                var dict = new Dictionary<String, Object>();
 
                 while (reader.Read() && reader.TokenType != JSONTOKEN.EndObject)
                 {
