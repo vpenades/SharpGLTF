@@ -32,9 +32,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             ModelRoot model = null;
 
-            var settings = tryFix ? Validation.ValidationMode.TryFix : Validation.ValidationMode.Strict;
-
-            model = ModelRoot.Load(f, settings);
+            var settings = tryFix ? Validation.ValidationMode.TryFix : Validation.ValidationMode.Strict;            
 
             try
             {
