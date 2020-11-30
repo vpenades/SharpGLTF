@@ -8,8 +8,27 @@ namespace SharpGLTF.Animations
     /// <summary>
     /// Utility class to create samplers from curve collections.
     /// </summary>
-    public static class SamplerFactory
+    public static class CurveSampler
     {
+        #region constants
+
+        internal const string StepCurveError = "This is a step curve (MaxDegree = 0), use ToStepCurve(); instead.";
+        internal const string LinearCurveError = "This is a linear curve (MaxDegree = 1), use ToLinearCurve(); instead.";
+        internal const string SplineCurveError = "This is a spline curve (MaxDegree = 3), use ToSplineCurve(); instead.";
+
+        internal static string CurveError(int maxDegree)
+        {
+            switch (maxDegree)
+            {
+                case 0: return StepCurveError;
+                case 1: return LinearCurveError;
+                case 3: return SplineCurveError;
+                default: return "Invalid curve degree";
+            }
+        }
+
+        #endregion
+
         #region sampler utils
 
         public static Vector3 CreateTangent(Vector3 fromValue, Vector3 toValue, Single scale = 1)
@@ -125,7 +144,7 @@ namespace SharpGLTF.Animations
         /// <param name="sequence">A sequence of float+<typeparamref name="T"/> pairs sorted in ascending order.</param>
         /// <param name="offset">the offset to look for in the sequence.</param>
         /// <returns>Two consecutive <typeparamref name="T"/> values and a float amount to LERP amount.</returns>
-        public static (T A, T B, Single Amount) FindPairContainingOffset<T>(this IEnumerable<(float Key, T Value)> sequence, float offset)
+        public static (T A, T B, Single Amount) FindRangeContainingOffset<T>(this IEnumerable<(float Key, T Value)> sequence, float offset)
         {
             Guard.NotNull(sequence, nameof(sequence));
 
@@ -135,12 +154,12 @@ namespace SharpGLTF.Animations
             (float Key, T Value)? right = null;
             (float Key, T Value)? prev = null;
 
-            var first = sequence.First();
-            if (offset < first.Key) offset = first.Key;
+            var (firstKey, _) = sequence.First();
+            if (offset < firstKey) offset = firstKey;
 
             foreach (var item in sequence)
             {
-                System.Diagnostics.Debug.Assert(condition: !prev.HasValue || prev.Value.Key < item.Key, "Values in the sequence must be sorted ascending.");
+                System.Diagnostics.Debug.Assert(!prev.HasValue || prev.Value.Key < item.Key, "Values in the sequence must be sorted ascending.");
 
                 if (item.Key == offset)
                 {
@@ -179,7 +198,7 @@ namespace SharpGLTF.Animations
         /// <param name="sequence">A sequence of offsets sorted in ascending order.</param>
         /// <param name="offset">the offset to look for in the sequence.</param>
         /// <returns>Two consecutive offsets and a LERP amount.</returns>
-        public static (Single A, Single B, Single Amount) FindPairContainingOffset(IEnumerable<float> sequence, float offset)
+        public static (Single A, Single B, Single Amount) FindRangeContainingOffset(IEnumerable<float> sequence, float offset)
         {
             Guard.NotNull(sequence, nameof(sequence));
 
@@ -226,6 +245,15 @@ namespace SharpGLTF.Animations
             return (left.Value, right.Value, amount);
         }
 
+        /// <summary>
+        /// Splits the input sequence into chunks of 1 second for faster access
+        /// </summary>
+        /// <remarks>
+        ///  The first and last keys outside the range of each chunk are duplicated, so each chunk can be evaluated for the whole second.
+        /// </remarks>
+        /// <typeparam name="T">The curve key type.</typeparam>
+        /// <param name="sequence">A timed sequence of curve keys.</param>
+        /// <returns>A sequence of 1 second chunks.</returns>
         internal static IEnumerable<(float, T)[]> SplitByTime<T>(this IEnumerable<(Single Time, T Value)> sequence)
         {
             if (!sequence.Any()) yield break;
@@ -322,12 +350,6 @@ namespace SharpGLTF.Animations
         #endregion
 
         #region sampler creation
-
-        internal static IEnumerable<T> Isolate<T>(this IEnumerable<T> collection, bool isolateMemory)
-        {
-            if (isolateMemory) collection = collection.ToArray();
-            return collection;
-        }
 
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true, bool optimize = false)
         {

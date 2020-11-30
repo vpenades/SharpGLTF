@@ -30,6 +30,7 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateScaleChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateScaleChannel(node, curve.ToSplineCurve());
             }
+            else throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
 
             return node;
         }
@@ -47,6 +48,7 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateTranslationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateTranslationChannel(node, curve.ToSplineCurve());
             }
+            else throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
 
             return node;
         }
@@ -83,12 +85,16 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateRotationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateRotationChannel(node, curve.ToSplineCurve());
             }
+            else throw new ArgumentException("Must implement IConvertibleCurve<Quaternion>", nameof(sampler));
 
             return node;
         }
 
         public static Node WithScaleAnimation(this Node node, string animationName, params (Single Key, Vector3 Value)[] keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithScaleAnimation(animationName, keys);
@@ -96,6 +102,9 @@ namespace SharpGLTF.Schema2
 
         public static Node WithRotationAnimation(this Node node, string animationName, params (Single Key, Quaternion Value)[] keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithRotationAnimation(animationName, keys);
@@ -103,6 +112,9 @@ namespace SharpGLTF.Schema2
 
         public static Node WithTranslationAnimation(this Node node, string animationName, params (Single Key, Vector3 Value)[] keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var keys = keyframes.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             return node.WithTranslationAnimation(animationName, keys);
@@ -111,6 +123,7 @@ namespace SharpGLTF.Schema2
         public static Node WithScaleAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var root = node.LogicalParent;
 
@@ -124,6 +137,7 @@ namespace SharpGLTF.Schema2
         public static Node WithRotationAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var root = node.LogicalParent;
 
@@ -137,6 +151,7 @@ namespace SharpGLTF.Schema2
         public static Node WithTranslationAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, Vector3> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var root = node.LogicalParent;
 

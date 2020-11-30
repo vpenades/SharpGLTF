@@ -101,7 +101,7 @@ namespace SharpGLTF.Debug
 
         protected override Quaternion GetTangent(Quaternion a, Quaternion b)
         {
-            return Animations.SamplerFactory.CreateTangent(a, b);
+            return Animations.CurveSampler.CreateTangent(a, b);
         }
     }
 

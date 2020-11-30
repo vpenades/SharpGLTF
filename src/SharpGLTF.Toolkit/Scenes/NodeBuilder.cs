@@ -286,6 +286,12 @@ namespace SharpGLTF.Scenes
         /// </summary>
         /// <param name="collection">A collection of <see cref="NodeBuilder"/> elements.</param>
         /// <param name="namePrefix">The name prefix.</param>
+        /// <remarks>
+        /// This was originally intended to help in solving the problem that many engines don't
+        /// support two nodes to have the same name. But ultimately, it's these engine's responsability
+        /// to deal with glTF specifications.
+        /// </remarks>
+        [Obsolete("It does not belong here.")]
         public static void Rename(IEnumerable<NodeBuilder> collection, string namePrefix)
         {
             if (collection == null) return;

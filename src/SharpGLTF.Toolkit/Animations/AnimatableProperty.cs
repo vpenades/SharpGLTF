@@ -92,16 +92,14 @@ namespace SharpGLTF.Animations
         /// Assigns an animation curve to a given track.
         /// </summary>
         /// <param name="track">The name of the track.</param>
-        /// <param name="curve">A <see cref="ICurveSampler{T}"/> instance, or null to remove a track.</param>
+        /// <param name="curve">
+        /// A <see cref="ICurveSampler{T}"/> instance which also
+        /// implements <see cref="IConvertibleCurve{T}"/>,
+        /// or null to remove a track.
+        /// </param>
         public void SetTrack(string track, ICurveSampler<T> curve)
         {
             Guard.NotNullOrEmpty(track, nameof(track));
-
-            if (curve != null)
-            {
-                var convertible = curve as IConvertibleCurve<T>;
-                Guard.NotNull(convertible, nameof(curve), $"Provided {nameof(ICurveSampler<T>)} {nameof(curve)} must implement {nameof(IConvertibleCurve<T>)} interface.");
-            }
 
             // remove track
             if (curve == null)
@@ -111,6 +109,9 @@ namespace SharpGLTF.Animations
                 if (_Tracks.Count == 0) _Tracks = null;
                 return;
             }
+
+            curve.GetPoint(0); // make a single evaluation to ensure it's an evaluable curve.
+            Guard.IsTrue(curve is IConvertibleCurve<T>, nameof(curve), $"Provided {nameof(ICurveSampler<T>)} {nameof(curve)} must implement {nameof(IConvertibleCurve<T>)} interface.");
 
             // insert track
             if (_Tracks == null) _Tracks = new Dictionary<string, ICurveSampler<T>>();
@@ -124,13 +125,13 @@ namespace SharpGLTF.Animations
 
             if (_Tracks == null || !_Tracks.TryGetValue(track, out ICurveSampler<T> sampler))
             {
-                sampler = CurveFactory.CreateCurveBuilder<T>() as ICurveSampler<T>;
+                sampler = CurveFactory.CreateCurveBuilder<T>();
                 SetTrack(track, sampler);
             }
 
             if (sampler is CurveBuilder<T> builder) return builder;
 
-            throw new NotImplementedException();
+            throw new NotImplementedException($"Underlaying curve must be of type CurveBuilder<{nameof(T)}>");
 
             // TODO: CurveFactory.CreateCurveBuilder(sampler);
         }

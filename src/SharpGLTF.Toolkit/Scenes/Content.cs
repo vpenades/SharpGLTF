@@ -158,4 +158,18 @@ namespace SharpGLTF.Scenes
 
         #endregion
     }
+
+    [System.Diagnostics.DebuggerDisplay("Custom")]
+    partial class EmptyContent : ICloneable
+    {
+        #region lifecycle
+
+        public EmptyContent() { }
+
+        public Object Clone() { return new EmptyContent(this); }
+
+        private EmptyContent(EmptyContent other) {  }
+
+        #endregion
+    }
 }

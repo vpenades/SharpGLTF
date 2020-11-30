@@ -32,9 +32,9 @@ namespace SharpGLTF.Animations
 
         public Vector3 GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.InterpolateCubic
+            return CurveSampler.InterpolateCubic
                 (
                 valA.Item2, valA.Item3,   // start, startTangentOut
                 valB.Item2, valB.Item1,   // end, endTangentIn
@@ -42,14 +42,14 @@ namespace SharpGLTF.Animations
                 );
         }
 
-        public IReadOnlyDictionary<float, Vector3> ToStepCurve()
+        IReadOnlyDictionary<float, Vector3> IConvertibleCurve<Vector3>.ToStepCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
-        public IReadOnlyDictionary<float, Vector3> ToLinearCurve()
+        IReadOnlyDictionary<float, Vector3> IConvertibleCurve<Vector3>.ToLinearCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
         public IReadOnlyDictionary<float, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> ToSplineCurve()
@@ -59,12 +59,7 @@ namespace SharpGLTF.Animations
 
         public ICurveSampler<Vector3> ToFastSampler()
         {
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new Vector3CubicSampler(item))
-                .Cast<ICurveSampler<Vector3>>();
-
-            return new FastSampler<Vector3>(split);
+            return FastCurveSampler<Vector3>.CreateFrom(_Sequence, chunk => new Vector3CubicSampler(chunk)) ?? this;
         }
 
         #endregion
@@ -96,9 +91,9 @@ namespace SharpGLTF.Animations
 
         public Quaternion GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.InterpolateCubic
+            return CurveSampler.InterpolateCubic
                 (
                 valA.Item2, valA.Item3,   // start, startTangentOut
                 valB.Item2, valB.Item1,   // end, endTangentIn
@@ -106,14 +101,14 @@ namespace SharpGLTF.Animations
                 );
         }
 
-        public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
+        IReadOnlyDictionary<float, Quaternion> IConvertibleCurve<Quaternion>.ToStepCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
-        public IReadOnlyDictionary<float, Quaternion> ToLinearCurve()
+        IReadOnlyDictionary<float, Quaternion> IConvertibleCurve<Quaternion>.ToLinearCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
         public IReadOnlyDictionary<float, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> ToSplineCurve()
@@ -123,12 +118,7 @@ namespace SharpGLTF.Animations
 
         public ICurveSampler<Quaternion> ToFastSampler()
         {
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new QuaternionCubicSampler(item))
-                .Cast<ICurveSampler<Quaternion>>();
-
-            return new FastSampler<Quaternion>(split);
+            return FastCurveSampler<Quaternion>.CreateFrom(_Sequence, chunk => new QuaternionCubicSampler(chunk)) ?? this;
         }
 
         #endregion
@@ -160,7 +150,7 @@ namespace SharpGLTF.Animations
 
         public Transforms.SparseWeight8 GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
             return Transforms.SparseWeight8.InterpolateCubic
                 (
@@ -170,14 +160,14 @@ namespace SharpGLTF.Animations
                 );
         }
 
-        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToStepCurve()
+        IReadOnlyDictionary<float, Transforms.SparseWeight8> IConvertibleCurve<Transforms.SparseWeight8>.ToStepCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
-        public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToLinearCurve()
+        IReadOnlyDictionary<float, Transforms.SparseWeight8> IConvertibleCurve<Transforms.SparseWeight8>.ToLinearCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
         public IReadOnlyDictionary<float, (Transforms.SparseWeight8 TangentIn, Transforms.SparseWeight8 Value, Transforms.SparseWeight8 TangentOut)> ToSplineCurve()
@@ -187,21 +177,16 @@ namespace SharpGLTF.Animations
 
         public ICurveSampler<Transforms.SparseWeight8> ToFastSampler()
         {
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new SparseCubicSampler(item))
-                .Cast<ICurveSampler<Transforms.SparseWeight8>>();
-
-            return new FastSampler<Transforms.SparseWeight8>(split);
+            return FastCurveSampler<Transforms.SparseWeight8>.CreateFrom(_Sequence, chunk => new SparseCubicSampler(chunk)) ?? this;
         }
 
         #endregion
     }
 
     /// <summary>
-    /// Defines a <see cref="float"/>[] curve sampler that can be sampled with CUBIC interpolation.
+    /// Defines a <see cref="Single"/>[] curve sampler that can be sampled with CUBIC interpolation.
     /// </summary>
-    readonly struct ArrayCubicSampler : ICurveSampler<float[]>, IConvertibleCurve<float[]>
+    readonly struct ArrayCubicSampler : ICurveSampler<Single[]>, IConvertibleCurve<Single[]>
     {
         #region lifecycle
 
@@ -224,9 +209,9 @@ namespace SharpGLTF.Animations
 
         public float[] GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
-            return SamplerFactory.InterpolateCubic
+            return CurveSampler.InterpolateCubic
                 (
                 valA.Item2, valA.Item3,   // start, startTangentOut
                 valB.Item2, valB.Item1,   // end, endTangentIn
@@ -234,14 +219,14 @@ namespace SharpGLTF.Animations
                 );
         }
 
-        public IReadOnlyDictionary<float, float[]> ToStepCurve()
+        IReadOnlyDictionary<float, float[]> IConvertibleCurve<Single[]>.ToStepCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
-        public IReadOnlyDictionary<float, float[]> ToLinearCurve()
+        IReadOnlyDictionary<float, float[]> IConvertibleCurve<Single[]>.ToLinearCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.SplineCurveError);
         }
 
         public IReadOnlyDictionary<float, (float[] TangentIn, float[] Value, float[] TangentOut)> ToSplineCurve()
@@ -251,12 +236,7 @@ namespace SharpGLTF.Animations
 
         public ICurveSampler<float[]> ToFastSampler()
         {
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new ArrayCubicSampler(item))
-                .Cast<ICurveSampler<float[]>>();
-
-            return new FastSampler<float[]>(split);
+            return FastCurveSampler<float[]>.CreateFrom(_Sequence, chunk => new ArrayCubicSampler(chunk)) ?? this;
         }
 
         #endregion

@@ -5,11 +5,16 @@ using System.Text;
 namespace SharpGLTF.Animations
 {
     /// <summary>
-    /// Defines a curve that can be sampled at specific points.
+    /// Defines a curve that can be sampled at any point.
     /// </summary>
     /// <typeparam name="T">The type of a point in the curve.</typeparam>
     public interface ICurveSampler<T>
     {
+        /// <summary>
+        /// Samples the curve at the given offset.
+        /// </summary>
+        /// <param name="offset">The curve offset to sample.</param>
+        /// <returns>The value of the curve at <paramref name="offset"/>.</returns>
         T GetPoint(Single offset);
     }
 
@@ -27,8 +32,22 @@ namespace SharpGLTF.Animations
         /// </summary>
         int MaxDegree { get; }
 
+        /// <summary>
+        /// Gets a STEP interpolated curve. Use only when <see cref="MaxDegree"/> is 0.
+        /// </summary>
+        /// <returns>A Time-Value dictionary</returns>
         IReadOnlyDictionary<Single, T> ToStepCurve();
+
+        /// <summary>
+        /// Gets a LINEAR interpolated curve. Use only when <see cref="MaxDegree"/> is 1.
+        /// </summary>
+        /// <returns>A Time-Value dictionary</returns>
         IReadOnlyDictionary<Single, T> ToLinearCurve();
+
+        /// <summary>
+        /// Gets a CUBIC interpolated curve. Use only when <see cref="MaxDegree"/> is 3.
+        /// </summary>
+        /// <returns>A Time-Value dictionary</returns>
         IReadOnlyDictionary<Single, (T TangentIn, T Value, T TangentOut)> ToSplineCurve();
     }
 }

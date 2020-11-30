@@ -102,7 +102,7 @@ namespace SharpGLTF.Animations
 
             offset -= float.Epsilon;
 
-            var (keyA, keyB, _) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, _) = CurveSampler.FindRangeContainingOffset(_Keys.Keys, offset);
 
             var a = _Keys[keyA];
             var b = _Keys[keyB];
@@ -126,7 +126,7 @@ namespace SharpGLTF.Animations
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
 
-            var (keyA, keyB, _) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, _) = CurveSampler.FindRangeContainingOffset(_Keys.Keys, offset);
 
             var a = _Keys[keyA];
             var b = _Keys[keyB];
@@ -148,7 +148,7 @@ namespace SharpGLTF.Animations
         {
             if (_Keys.Count == 0) return (default(_CurveNode<T>), default(_CurveNode<T>), 0);
 
-            var (keyA, keyB, amount) = SamplerFactory.FindPairContainingOffset(_Keys.Keys, offset);
+            var (keyA, keyB, amount) = CurveSampler.FindRangeContainingOffset(_Keys.Keys, offset);
 
             return (_Keys[keyA], _Keys[keyB], amount);
         }
@@ -239,6 +239,15 @@ namespace SharpGLTF.Animations
         IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToLinearCurve()
         {
             var d = new Dictionary<float, T>();
+
+            if (_Keys.Count == 0) return d;
+
+            if (Keys.Count == 1)
+            {
+                var k = _Keys.First();
+                d[k.Key] = k.Value.Point;
+                return d;
+            }
 
             var orderedKeys = _Keys.Keys.ToList();
 

@@ -93,7 +93,14 @@ namespace SharpGLTF.Schema2
 
         public Accessor Output => this.LogicalParent.LogicalParent.LogicalAccessors[this._output];
 
-        public float Duration { get { var keys = Input.AsScalarArray(); return keys.Count == 0 ? 0 : keys[keys.Count - 1]; } }
+        public float Duration
+        {
+            get
+            {
+                var keys = Input.AsScalarArray();
+                return keys.Count == 0 ? 0 : keys[keys.Count - 1];
+            }
+        }
 
         #endregion
 
@@ -101,6 +108,9 @@ namespace SharpGLTF.Schema2
 
         private Accessor _CreateInputAccessor(IReadOnlyList<Single> input)
         {
+            Guard.NotNull(input, nameof(input));
+            Guard.MustBeGreaterThan(input.Count, 0, nameof(input.Count));
+
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.CreateBufferView(input.Count * 4);
@@ -117,6 +127,9 @@ namespace SharpGLTF.Schema2
 
         private Accessor _CreateOutputAccessor(IReadOnlyList<Vector3> output)
         {
+            Guard.NotNull(output, nameof(output));
+            Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
+
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.CreateBufferView(output.Count * 4 * 3);
@@ -136,6 +149,9 @@ namespace SharpGLTF.Schema2
 
         private Accessor _CreateOutputAccessor(IReadOnlyList<Quaternion> output)
         {
+            Guard.NotNull(output, nameof(output));
+            Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
+
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.CreateBufferView(output.Count * 4 * 4);
@@ -152,6 +168,10 @@ namespace SharpGLTF.Schema2
 
         private Accessor _CreateOutputAccessor(IReadOnlyList<SparseWeight8> output, int expandedCount)
         {
+            Guard.NotNull(output, nameof(output));
+            Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
+            Guard.MustBeGreaterThan(expandedCount, 0, nameof(expandedCount));
+
             var root = LogicalParent.LogicalParent;
 
             var buffer = root.CreateBufferView(output.Count * 4 * expandedCount);
@@ -178,6 +198,8 @@ namespace SharpGLTF.Schema2
 
         private static (Single[] Keys, TValue[] Values) _Split<TValue>(IReadOnlyDictionary<Single, TValue> keyframes)
         {
+            Guard.NotNull(keyframes, nameof(keyframes));
+
             var sorted = keyframes
                 .OrderBy(item => item.Key)
                 .ToList();
@@ -196,6 +218,8 @@ namespace SharpGLTF.Schema2
 
         private static (Single[] Keys, TValue[] Values) _Split<TValue>(IReadOnlyDictionary<Single, (TValue TangentIn, TValue Value, TValue TangentOut)> keyframes)
         {
+            Guard.NotNull(keyframes, nameof(keyframes));
+
             var sorted = keyframes
                 .OrderBy(item => item.Key)
                 .ToList();
@@ -216,6 +240,8 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, Vector3> keyframes)
         {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var (keys, values) = _Split(keyframes);
             _input = this._CreateInputAccessor(keys).LogicalIndex;
             _output = this._CreateOutputAccessor(values).LogicalIndex;
@@ -223,6 +249,8 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, Quaternion> keyframes)
         {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var (keys, values) = _Split(keyframes);
             _input = this._CreateInputAccessor(keys).LogicalIndex;
             _output = this._CreateOutputAccessor(values).LogicalIndex;
@@ -230,6 +258,8 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int expandedCount)
         {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var (keys, values) = _Split(keyframes);
             _input = this._CreateInputAccessor(keys).LogicalIndex;
             _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
@@ -237,8 +267,14 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
-            var (keys, values) = _Split(keyframes);
+            Guard.NotNull(keyframes, nameof(keyframes));
+            Guard.MustBeGreaterThan(keyframes.Count, 0, nameof(keyframes.Count));
 
+            // splits the dictionary into separated input/output collections, also, the output will be flattened to plain Vector3 values.
+            var (keys, values) = _Split(keyframes);
+            System.Diagnostics.Debug.Assert(keys.Length * 3 == values.Length, "keys and values must have 1 to 3 ratio");
+
+            // fix for first incoming tangent and last outgoing tangent
             // this might not be true for a looped animation, where first and last might be the same
             values[0] = Vector3.Zero;
             values[values.Length - 1] = Vector3.Zero;
@@ -249,8 +285,13 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
         {
-            var (keys, values) = _Split(keyframes);
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
+            // splits the dictionary into separated input/output collections, also, the output will be flattened to plain Vector3 values.
+            var (keys, values) = _Split(keyframes);
+            System.Diagnostics.Debug.Assert(keys.Length * 3 == values.Length, "keys and values must have 1 to 3 ratio");
+
+            // fix for first incoming tangent and last outgoing tangent
             // this might not be true for a looped animation, where first and last might be the same
             values[0] = default;
             values[values.Length - 1] = default;
@@ -261,8 +302,14 @@ namespace SharpGLTF.Schema2
 
         internal void SetKeys(IReadOnlyDictionary<Single, (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut)> keyframes, int expandedCount)
         {
-            var (keys, values) = _Split(keyframes);
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+            Guard.MustBeGreaterThan(expandedCount, 0, nameof(expandedCount));
 
+            // splits the dictionary into separated input/output collections, also, the output will be flattened to plain Vector3 values.
+            var (keys, values) = _Split(keyframes);
+            System.Diagnostics.Debug.Assert(keys.Length * 3 == values.Length, "keys and values must have 1 to 3 ratio");
+
+            // fix for first incoming tangent and last outgoing tangent
             // this might not be true for a looped animation, where first and last might be the same
             values[0] = default;
             values[values.Length - 1] = default;

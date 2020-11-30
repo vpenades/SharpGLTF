@@ -43,6 +43,11 @@ namespace SharpGLTF.Animations
 
         public T GetPoint(float offset) { return _Value; }
 
+        public IReadOnlyDictionary<float, T> ToStepCurve()
+        {
+            return new Dictionary<float, T> { [0] = _Value };
+        }
+
         public IReadOnlyDictionary<float, T> ToLinearCurve()
         {
             return new Dictionary<float, T> { [0] = _Value };
@@ -51,11 +56,6 @@ namespace SharpGLTF.Animations
         public IReadOnlyDictionary<float, (T TangentIn, T Value, T TangentOut)> ToSplineCurve()
         {
             return new Dictionary<float, (T TangentIn, T Value, T TangentOut)> { [0] = (default, _Value, default) };
-        }
-
-        public IReadOnlyDictionary<float, T> ToStepCurve()
-        {
-            return new Dictionary<float, T> { [0] = _Value };
         }
 
         #endregion
@@ -89,7 +89,7 @@ namespace SharpGLTF.Animations
 
         public Vector3 GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
             if (!_Linear) return valA;
 
@@ -98,30 +98,25 @@ namespace SharpGLTF.Animations
 
         public IReadOnlyDictionary<float, Vector3> ToStepCurve()
         {
-            Guard.IsFalse(_Linear, nameof(_Linear));
+            Guard.IsFalse(_Linear, nameof(MaxDegree), CurveSampler.StepCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, Vector3> ToLinearCurve()
         {
-            Guard.IsTrue(_Linear, nameof(_Linear));
+            Guard.IsTrue(_Linear, nameof(MaxDegree), CurveSampler.LinearCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> ToSplineCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public ICurveSampler<Vector3> ToFastSampler()
         {
             var linear = _Linear;
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new Vector3LinearSampler(item, linear))
-                .Cast<ICurveSampler<Vector3>>();
-
-            return new FastSampler<Vector3>(split);
+            return FastCurveSampler<Vector3>.CreateFrom(_Sequence, chunk => new Vector3LinearSampler(chunk, linear)) ?? this;
         }
 
         #endregion
@@ -155,7 +150,7 @@ namespace SharpGLTF.Animations
 
         public Quaternion GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
             if (!_Linear) return valA;
 
@@ -164,30 +159,25 @@ namespace SharpGLTF.Animations
 
         public IReadOnlyDictionary<float, Quaternion> ToStepCurve()
         {
-            Guard.IsFalse(_Linear, nameof(_Linear));
+            Guard.IsFalse(_Linear, nameof(MaxDegree), CurveSampler.StepCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, Quaternion> ToLinearCurve()
         {
-            Guard.IsTrue(_Linear, nameof(_Linear));
+            Guard.IsTrue(_Linear, nameof(MaxDegree), CurveSampler.LinearCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> ToSplineCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public ICurveSampler<Quaternion> ToFastSampler()
         {
             var linear = _Linear;
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new QuaternionLinearSampler(item, linear))
-                .Cast<ICurveSampler<Quaternion>>();
-
-            return new FastSampler<Quaternion>(split);
+            return FastCurveSampler<Quaternion>.CreateFrom(_Sequence, chunk => new QuaternionLinearSampler(chunk, linear)) ?? this;
         }
 
         #endregion
@@ -221,7 +211,7 @@ namespace SharpGLTF.Animations
 
         public Transforms.SparseWeight8 GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
             if (!_Linear) return valA;
 
@@ -232,29 +222,24 @@ namespace SharpGLTF.Animations
 
         public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToStepCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public IReadOnlyDictionary<float, Transforms.SparseWeight8> ToLinearCurve()
         {
-            Guard.IsTrue(_Linear, nameof(_Linear));
+            Guard.IsTrue(_Linear, nameof(MaxDegree), CurveSampler.LinearCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (Transforms.SparseWeight8 TangentIn, Transforms.SparseWeight8 Value, Transforms.SparseWeight8 TangentOut)> ToSplineCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public ICurveSampler<Transforms.SparseWeight8> ToFastSampler()
         {
             var linear = _Linear;
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new SparseLinearSampler(item, linear))
-                .Cast<ICurveSampler<Transforms.SparseWeight8>>();
-
-            return new FastSampler<Transforms.SparseWeight8>(split);
+            return FastCurveSampler<Transforms.SparseWeight8>.CreateFrom(_Sequence, chunk => new SparseLinearSampler(chunk, linear)) ?? this;
         }
 
         #endregion
@@ -288,39 +273,34 @@ namespace SharpGLTF.Animations
 
         public float[] GetPoint(float offset)
         {
-            var (valA, valB, amount) = SamplerFactory.FindPairContainingOffset(_Sequence, offset);
+            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
 
             if (!_Linear) return valA;
 
-            return SamplerFactory.InterpolateLinear(valA, valB, amount);
+            return CurveSampler.InterpolateLinear(valA, valB, amount);
         }
 
         public IReadOnlyDictionary<float, float[]> ToStepCurve()
         {
-            Guard.IsFalse(_Linear, nameof(_Linear));
+            Guard.IsFalse(_Linear, nameof(MaxDegree), CurveSampler.StepCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, float[]> ToLinearCurve()
         {
-            Guard.IsTrue(_Linear, nameof(_Linear));
+            Guard.IsTrue(_Linear, nameof(MaxDegree), CurveSampler.LinearCurveError);
             return _Sequence.ToDictionary(pair => pair.Key, pair => pair.Value);
         }
 
         public IReadOnlyDictionary<float, (float[] TangentIn, float[] Value, float[] TangentOut)> ToSplineCurve()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public ICurveSampler<float[]> ToFastSampler()
         {
             var linear = _Linear;
-            var split = _Sequence
-                .SplitByTime()
-                .Select(item => new ArrayLinearSampler(item, linear))
-                .Cast<ICurveSampler<float[]>>();
-
-            return new FastSampler<float[]>(split);
+            return FastCurveSampler<float[]>.CreateFrom(_Sequence, chunk => new ArrayLinearSampler(chunk, linear)) ?? this;
         }
 
         #endregion

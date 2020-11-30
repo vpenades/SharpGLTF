@@ -227,6 +227,18 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
+        public InstanceBuilder AddNode(NodeBuilder node)
+        {
+            Guard.NotNull(node, nameof(node));
+
+            var content = new EmptyContent();
+            var instance = new InstanceBuilder(this);
+            _Instances.Add(instance);
+            instance.Content = new RigidTransformer(content, node);
+            return instance;
+        }
+
+        [Obsolete("It does not belong here.")]
         public void RenameAllNodes(string namePrefix)
         {
             var allNodes = Instances

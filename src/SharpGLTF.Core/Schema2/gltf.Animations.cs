@@ -69,6 +69,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
             sampler.SetKeys(keyframes);
@@ -79,6 +82,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
             sampler.SetKeys(keyframes);
@@ -89,6 +95,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, Quaternion> keyframes, bool linear = true)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
             sampler.SetKeys(keyframes);
@@ -99,6 +108,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
             sampler.SetKeys(keyframes);
@@ -109,6 +121,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
             sampler.SetKeys(keyframes);
@@ -119,6 +134,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
             sampler.SetKeys(keyframes);
@@ -129,6 +147,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount, bool linear = true)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 
             sampler.SetKeys(keyframes, morphCount);
@@ -139,6 +160,9 @@ namespace SharpGLTF.Schema2
 
         public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut)> keyframes, int morphCount)
         {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
             sampler.SetKeys(keyframes, morphCount);

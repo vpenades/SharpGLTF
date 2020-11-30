@@ -54,7 +54,7 @@ namespace SharpGLTF.Animations
 
         protected override Vector3 GetTangent(Vector3 fromValue, Vector3 toValue)
         {
-            return SamplerFactory.CreateTangent(fromValue, toValue);
+            return CurveSampler.CreateTangent(fromValue, toValue);
         }
 
         public override Vector3 GetPoint(Single offset)
@@ -70,7 +70,7 @@ namespace SharpGLTF.Animations
                     return Vector3.Lerp(sample.A.Point, sample.B.Point, sample.Amount);
 
                 case 3:
-                    return SamplerFactory.InterpolateCubic
+                    return CurveSampler.InterpolateCubic
                             (
                             sample.A.Point, sample.A.OutgoingTangent,
                             sample.B.Point, sample.B.IncomingTangent,
@@ -110,7 +110,7 @@ namespace SharpGLTF.Animations
 
         protected override Quaternion GetTangent(Quaternion fromValue, Quaternion toValue)
         {
-            return SamplerFactory.CreateTangent(fromValue, toValue);
+            return CurveSampler.CreateTangent(fromValue, toValue);
         }
 
         public override Quaternion GetPoint(float offset)
@@ -126,7 +126,7 @@ namespace SharpGLTF.Animations
                     return Quaternion.Slerp(sample.A.Point, sample.B.Point, sample.Amount);
 
                 case 3:
-                    return SamplerFactory.InterpolateCubic
+                    return CurveSampler.InterpolateCubic
                             (
                             sample.A.Point, sample.A.OutgoingTangent,
                             sample.B.Point, sample.B.IncomingTangent,

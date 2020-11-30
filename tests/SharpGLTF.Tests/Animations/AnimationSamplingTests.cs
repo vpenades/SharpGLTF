@@ -54,22 +54,22 @@ namespace SharpGLTF
             }
 
 
-            var r0 = Animations.SamplerFactory.SplitByTime(anim0).ToArray();
+            var r0 = Animations.CurveSampler.SplitByTime(anim0).ToArray();
             Assert.AreEqual(1, r0.Length);
             Assert.AreEqual(1, r0[0].Length);
 
-            var r1 = Animations.SamplerFactory.SplitByTime(anim1).ToArray();
+            var r1 = Animations.CurveSampler.SplitByTime(anim1).ToArray();
             Assert.AreEqual(1, r1.Length);
             Assert.AreEqual(2, r1[0].Length);
 
-            var r2 = Animations.SamplerFactory.SplitByTime(anim2).ToArray();
+            var r2 = Animations.CurveSampler.SplitByTime(anim2).ToArray();
             Assert.AreEqual(4, r2.Length);
             Assert.AreEqual(3, r2[0].Length); 
             Assert.AreEqual(2, r2[1].Length); checkSegment(1, r2[1]);
             Assert.AreEqual(2, r2[2].Length); checkSegment(2, r2[2]);
             Assert.AreEqual(3, r2[3].Length); checkSegment(3, r2[3]);
 
-            var r3 = Animations.SamplerFactory.SplitByTime(anim3).ToArray();
+            var r3 = Animations.CurveSampler.SplitByTime(anim3).ToArray();
             Assert.AreEqual(6, r3.Length);
             Assert.AreEqual(1, r3[0].Length); 
             Assert.AreEqual(1, r3[1].Length); 
@@ -118,7 +118,7 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.01f)
             {
-                var (startPosition, endPosition, startTangent, endTangent) = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+                var (startPosition, endPosition, startTangent, endTangent) = Animations.CurveSampler.CreateHermitePointWeights(amount);
 
                 var p = Vector2.Zero;
 
@@ -134,8 +134,8 @@ namespace SharpGLTF
 
             float k = 0.3f;
 
-            var hb = Animations.SamplerFactory.CreateHermitePointWeights(k);
-            var ht = Animations.SamplerFactory.CreateHermiteTangentWeights(k);
+            var hb = Animations.CurveSampler.CreateHermitePointWeights(k);
+            var ht = Animations.CurveSampler.CreateHermiteTangentWeights(k);
 
             var pp = p1 * hb.StartPosition + p4 * hb.EndPosition + (p2 - p1) * 4 * hb.StartTangent + (p4 - p3) * 4 * hb.EndTangent;
             var pt = p1 * ht.StartPosition + p4 * ht.EndPosition + (p2 - p1) * 4 * ht.StartTangent + (p4 - p3) * 4 * ht.EndTangent;
@@ -160,7 +160,7 @@ namespace SharpGLTF
 
             for (float amount = 0; amount <= 1; amount += 0.1f)
             {
-                var (startPosition, endPosition, startTangent, endTangent) = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+                var (startPosition, endPosition, startTangent, endTangent) = Animations.CurveSampler.CreateHermitePointWeights(amount);
 
                 var p = Vector2.Zero;
 
@@ -195,7 +195,7 @@ namespace SharpGLTF
             var qt = Quaternion.Concatenate(q2, Quaternion.Conjugate(q1));            
             var q2bis = Quaternion.Concatenate(qt, q1); // roundtrip; Q2 == Q2BIS
 
-            NumericsAssert.AreEqual(qt, Animations.SamplerFactory.CreateTangent(q1, q2), 0.000001f);
+            NumericsAssert.AreEqual(qt, Animations.CurveSampler.CreateTangent(q1, q2), 0.000001f);
 
             var angles = new List<Vector2>();
 
@@ -205,7 +205,7 @@ namespace SharpGLTF
                 var sq = Quaternion.Normalize(Quaternion.Slerp(q1, q2, amount));
 
                 // hermite interpolation with a unit tangent
-                var hermite = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+                var hermite = Animations.CurveSampler.CreateHermitePointWeights(amount);
                 var hq = default(Quaternion);
                 hq += q1 * hermite.StartPosition;
                 hq += q2 * hermite.EndPosition;
@@ -248,7 +248,7 @@ namespace SharpGLTF
         [Test]
         public void TestVector3CubicSplineSampling()
         {
-            var sampler = Animations.SamplerFactory.CreateSampler(_TransAnim);
+            var sampler = Animations.CurveSampler.CreateSampler(_TransAnim);
 
             var points = new List<Vector3>();
 
@@ -267,7 +267,7 @@ namespace SharpGLTF
         [Test]
         public void TestQuaternionCubicSplineSampling()
         {
-            var sampler = Animations.SamplerFactory.CreateSampler(_RotAnim);
+            var sampler = Animations.CurveSampler.CreateSampler(_RotAnim);
 
             var a = sampler.GetPoint(0);
             var b = sampler.GetPoint(1);

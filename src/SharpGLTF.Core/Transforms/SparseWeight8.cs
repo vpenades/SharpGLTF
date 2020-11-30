@@ -428,7 +428,7 @@ namespace SharpGLTF.Transforms
         /// <returns>A new <see cref="SparseWeight8"/></returns>
         public static SparseWeight8 InterpolateCubic(in SparseWeight8 x, in SparseWeight8 xt, in SparseWeight8 y, in SparseWeight8 yt, float amount)
         {
-            var basis = Animations.SamplerFactory.CreateHermitePointWeights(amount);
+            var basis = Animations.CurveSampler.CreateHermitePointWeights(amount);
 
             return _OperateCubic(x, xt, y, yt, (xx, xxt, yy, yyt) => (xx * basis.StartPosition) + (yy * basis.EndPosition) + (xxt * basis.StartTangent) + (yyt * basis.EndTangent));
         }

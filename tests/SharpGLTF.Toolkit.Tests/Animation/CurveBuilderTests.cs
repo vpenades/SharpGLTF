@@ -163,4 +163,34 @@ namespace SharpGLTF.Animations
                 .AttachToCurrentTest("plot.png");
         }
     }
+
+    [Category("Toolkit.Animations")]
+    public class TrackBuilderTests
+    {
+        [Test]
+        public void CreateOneKey()
+        {
+            var node = new Scenes.NodeBuilder("someNode");
+
+            var tb = node.UseTranslation().UseTrackBuilder("track1");
+
+            tb.SetPoint(0, new Vector3(1,2,3));
+
+            var scene = new Scenes.SceneBuilder();
+            scene.AddNode(node);            
+
+            var glTF = scene.ToGltf2();
+
+            var runtime = Runtime.SceneTemplate.Create(glTF.DefaultScene, true);
+            var instance = runtime.CreateInstance();
+
+            var instanceNode = instance.Armature.LogicalNodes.First(n => n.Name == "someNode");
+
+            instanceNode.SetAnimationFrame(0, 7);
+            var nodeMatrix = instanceNode.LocalMatrix;
+
+            Assert.AreEqual(new Vector3(1, 2, 3), nodeMatrix.Translation);
+        }
+
+    }
 }
