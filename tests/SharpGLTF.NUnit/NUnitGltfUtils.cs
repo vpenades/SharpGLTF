@@ -60,15 +60,19 @@ namespace SharpGLTF
             // find the output path for the current test
             fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
 
+            string validationPath = null;
+
             if (fileName.ToLower().EndsWith(".glb"))
             {
                 model.SaveGLB(fileName, settings);
+                validationPath = fileName;
             }
             else if (fileName.ToLower().EndsWith(".gltf"))
             {
                 if (settings == null) settings = new WriteSettings { JsonIndented = true };
 
                 model.Save(fileName, settings);
+                validationPath = fileName;
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
@@ -87,19 +91,20 @@ namespace SharpGLTF
             }
 
             // Attach the saved file to the current test
-            TestContext.AddTestAttachment(fileName);
+            TestContext.AddTestAttachment(fileName);            
 
-            if (fileName.ToLower().EndsWith(".obj")) return fileName;
-
-            var report = gltf_validator.ValidateFile(fileName);
-            if (report == null) return fileName;
-
-            if (report.HasErrors || report.HasWarnings)
+            if (validationPath != null)
             {
-                TestContext.WriteLine(report.ToString());
-            }
+                var report = gltf_validator.ValidateFile(fileName);
+                if (report == null) return fileName;
 
-            Assert.IsFalse(report.HasErrors);
+                if (report.HasErrors || report.HasWarnings)
+                {
+                    TestContext.WriteLine(report.ToString());
+                }
+
+                Assert.IsFalse(report.HasErrors);
+            }
 
             return fileName;
         }

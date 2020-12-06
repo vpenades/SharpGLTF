@@ -177,12 +177,12 @@ namespace SharpGLTF.Scenes
         #region from SceneBuilder to Schema2
 
         /// <summary>
-        /// Convertes a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
+        /// Converts a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
         /// </summary>
         /// <param name="srcScenes">A collection of scenes</param>
         /// <param name="settings">Conversion settings.</param>
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public static ModelRoot ToSchema2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
+        public static ModelRoot ToGltf2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
         {
             Guard.NotNull(srcScenes, nameof(srcScenes));
 
@@ -196,9 +196,12 @@ namespace SharpGLTF.Scenes
                 var dstScene = dstModel.UseScene(dstModel.LogicalScenes.Count);
 
                 dstScene.Name = srcScene.Name;
+                dstScene.Extras = srcScene.Extras.DeepClone();
 
                 context.AddScene(dstScene, srcScene);
             }
+
+            dstModel.DefaultScene = dstModel.LogicalScenes[0];
 
             return dstModel;
         }
@@ -210,26 +213,16 @@ namespace SharpGLTF.Scenes
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
         {
-            var context = new Schema2SceneBuilder();
-
-            var dstModel = ModelRoot.CreateModel();
-            context.AddGeometryResources(dstModel, new[] { this }, settings);
-
-            var dstScene = dstModel.UseScene(0);
-
-            dstScene.Name = this.Name;
-            dstScene.Extras = this.Extras.DeepClone();
-
-            context.AddScene(dstScene, this);
-
-            dstModel.DefaultScene = dstScene;
-
-            return dstModel;
+            return ToGltf2(new[] { this }, settings);
         }
 
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public ModelRoot ToGltf2()
         {
-            return ToGltf2(SceneBuilderSchema2Settings.Default);
+            return ToGltf2(new[] { this }, SceneBuilderSchema2Settings.Default);
         }
 
         #endregion
