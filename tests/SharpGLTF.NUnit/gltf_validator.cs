@@ -50,12 +50,14 @@ namespace SharpGLTF
 
             using (var p = System.Diagnostics.Process.Start(psi))
             {
+                // To avoid deadlocks, always read the output stream first and then wait.  
+                var mainReport = p.StandardOutput.ReadToEnd();
+
                 if (!p.WaitForExit(1000 * 10)) // wait for a reasonable timeout
                 {
                     try { p.Kill(); } catch { return null; }
-                }
+                }                
 
-                var mainReport = p.StandardOutput.ReadToEnd();
                 if (string.IsNullOrWhiteSpace(mainReport)) return null;
                 var report = ValidationReport.Parse(mainReport);
                 
