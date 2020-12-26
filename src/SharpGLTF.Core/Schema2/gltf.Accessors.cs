@@ -109,7 +109,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_sparse);
+            return base.GetLogicalChildren().ConcatElements(_sparse);
         }
 
         public void UpdateBounds()

@@ -95,6 +95,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase("\\glTF-IBL\\")]
         [TestCase("\\glTF-Binary\\")]
         [TestCase("\\glTF-Embedded\\")]
+        [TestCase("\\glTF-Quantized\\")]
         [TestCase("\\glTF-pbrSpecularGlossiness\\")]
         public void LoadModelsFromKhronosSamples(string section)
         {

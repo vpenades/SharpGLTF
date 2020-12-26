@@ -64,15 +64,16 @@ namespace SharpGLTF.IO
             return new ReadContext(_loadFile, _uriSolver);
         }
 
-        public static ReadContext CreateFromDictionary(IReadOnlyDictionary<string, BYTES> dictionary)
+        public static ReadContext CreateFromDictionary(IReadOnlyDictionary<string, BYTES> dictionary, bool checkExtensions = true)
         {
-            return new ReadContext(rawUri => dictionary[rawUri]);
+            return new ReadContext(rawUri => dictionary[rawUri], null, checkExtensions);
         }
 
-        private ReadContext(FileReaderCallback reader, UriResolver uriResolver = null)
+        private ReadContext(FileReaderCallback reader, UriResolver uriResolver = null, bool checkExtensions = true)
         {
             _FileReader = reader;
             _UriResolver = uriResolver;
+            _CheckSupportedExtensions = checkExtensions;
         }
 
         internal ReadContext(ReadContext other)
@@ -93,6 +94,11 @@ namespace SharpGLTF.IO
         /// When loading a GLB, this represents the internal binary data chunk.
         /// </summary>
         private Byte[] _BinaryChunk;
+
+        /// <summary>
+        /// Gets a value indicating whether to check used/required extensions.
+        /// </summary>
+        internal Boolean _CheckSupportedExtensions { get; private set; } = true;
 
         #endregion
 
@@ -277,9 +283,21 @@ namespace SharpGLTF.IO
 
             // schema validation
 
-            root.ValidateReferences(vcontext.GetContext());
-            var ex = vcontext.Errors.FirstOrDefault();
-            if (ex != null) return (null, vcontext);
+            if (this._CheckSupportedExtensions)
+            {
+                root._ValidateExtensions(vcontext.GetContext());
+                var ex = vcontext.Errors.FirstOrDefault();
+                if (ex != null) return (null, vcontext);
+            }
+
+            // we must do a basic validation before resolving external dependencies
+
+            if (true)
+            {
+                root.ValidateReferences(vcontext.GetContext());
+                var ex = vcontext.Errors.FirstOrDefault();
+                if (ex != null) return (null, vcontext);
+            }
 
             // resolve external dependencies
 
@@ -290,7 +308,7 @@ namespace SharpGLTF.IO
             if (this.Validation != VALIDATIONMODE.Skip)
             {
                 root.ValidateContent(vcontext.GetContext());
-                ex = vcontext.Errors.FirstOrDefault();
+                var ex = vcontext.Errors.FirstOrDefault();
                 if (ex != null) return (null, vcontext);
             }
 

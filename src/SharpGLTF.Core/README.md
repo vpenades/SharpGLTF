@@ -18,8 +18,15 @@ represent the bulk of the low level API to access glTF2 documents.
 
 It also contains the main entry point Object that represents a glTF2 model: `ModelRoot`
 
-
 [Additional info](Schema2/README.md)
+
+##### .Runtime
+
+Contains classes and types that can help evaluating a model.
+
+Model evaluation can be useful for these tasks:
+- Dumping a raw list of triangles of the whole scene, in their final positions.
+- Rendering the model on a graphics engine.
 
 ##### .Memory
 

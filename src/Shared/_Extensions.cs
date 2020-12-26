@@ -338,9 +338,9 @@ namespace SharpGLTF
             }
         }
 
-        internal static IEnumerable<T> ConcatItems<T>(this IEnumerable<T> collection, params T[] instances)
+        internal static IEnumerable<T> ConcatElements<T>(this IEnumerable<T> collection, params T[] elements)
         {
-            return collection.Concat(instances.Where(item => item != null));
+            return collection.Concat(elements.Where(item => item != null));
         }
 
         public static void SanitizeNormals(this IList<Vector3> normals)

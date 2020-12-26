@@ -60,7 +60,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_normalTexture, _emissiveTexture, _occlusionTexture, _pbrMetallicRoughness);
+            return base.GetLogicalChildren().ConcatElements(_normalTexture, _emissiveTexture, _occlusionTexture, _pbrMetallicRoughness);
         }
 
         /// <summary>

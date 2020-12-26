@@ -102,20 +102,11 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
-        public bool MeshQuantizationAllowed { get; private set; }
+        public bool MeshQuantizationAllowed => this._extensionsRequired.Contains("KHR_mesh_quantization");
 
         #endregion
 
         #region API
-
-        /// <summary>
-        /// Immediatelly called after deserialization, it enables <see cref="MeshQuantizationAllowed"/>
-        /// to prevent validators to throw errors
-        /// </summary>
-        private void _FindMeshQuantizationExtension()
-        {
-            MeshQuantizationAllowed = this._extensionsRequired.Contains("KHR_mesh_quantization");
-        }
 
         internal void UpdateExtensionsSupport()
         {
@@ -125,12 +116,12 @@ namespace SharpGLTF.Schema2
             this._extensionsUsed.Clear();
             this._extensionsUsed.AddRange(used);
 
-            _SetRequiredExtension("KHR_mesh_quantization", MeshQuantizationAllowed);
+            _SetExtensionUsage("KHR_mesh_quantization", this._extensionsUsed.Contains("KHR_mesh_quantization"), true);
         }
 
-        private void _SetRequiredExtension(string extension, bool enabled)
+        private void _SetExtensionUsage(string extension, bool used, bool required)
         {
-            if (!enabled)
+            if (!used)
             {
                 this._extensionsUsed.Remove(extension);
                 this._extensionsRequired.Remove(extension);
@@ -138,20 +129,15 @@ namespace SharpGLTF.Schema2
             }
 
             if (!this._extensionsUsed.Contains(extension)) this._extensionsUsed.Add(extension);
-            if (!this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
-        }
-
-        internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()
-        {
-            return GetLogicalChildren()
-                .SelectMany(item => ExtraProperties.Flatten(item)
-                .ToList());
+            if (required && !this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
         }
 
         internal IEnumerable<string> RetrieveUsedExtensions()
         {
             // retrieve ALL the property based objects of the whole model.
-            var allObjects = new[] { this }.Concat(GetLogicalChildrenFlattened());
+            var allObjects = new[] { this }
+                .Concat(GetLogicalChildrenFlattened())
+                .ToList();
 
             // check all the extensions used by each object
             var used = new HashSet<string>();
@@ -172,6 +158,11 @@ namespace SharpGLTF.Schema2
                 used.Add(unk.Name);
             }
 
+            // search for special cases
+
+            var isQuantized = MeshPrimitive.CheckAttributesQuantizationRequired(this);
+            if (isQuantized) used.Add("KHR_mesh_quantization");
+
             return used;
         }
 
@@ -183,6 +174,19 @@ namespace SharpGLTF.Schema2
             if (this._extensionsUsed.Contains(id)) return;
 
             this._extensionsUsed.Add(id);
+        }
+
+        internal void _ValidateExtensions(Validation.ValidationContext validate)
+        {
+            foreach (var iex in this.IncompatibleExtensions)
+            {
+                validate._LinkThrow("Extensions", iex);
+            }
+
+            foreach (var ext in RetrieveUsedExtensions())
+            {
+                if (!this._extensionsUsed.Contains(ext)) validate._LinkThrow("Extensions", ext);
+            }
         }
 
         #endregion

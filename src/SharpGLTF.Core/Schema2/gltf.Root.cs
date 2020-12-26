@@ -49,7 +49,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         /// <remarks>
         /// Deep cloning is performed as a brute force operation; by serializing
-        /// the whole model to GLTF into memory, and then deserializing it back.
+        /// the whole model to GLTF into memory, and then deserializing it back to DOM.
         /// </remarks>
         public ModelRoot DeepClone()
         {
@@ -67,7 +67,7 @@ namespace SharpGLTF.Schema2
 
             // restore the model from the temporary storage
 
-            var rcontext = IO.ReadContext.CreateFromDictionary(dict);
+            var rcontext = IO.ReadContext.CreateFromDictionary(dict, wcontext._UpdateSupportedExtensions);
             rcontext.Validation = Validation.ValidationMode.Skip;
             var cloned = rcontext._ReadFromDictionary("deepclone.gltf");
 
@@ -121,7 +121,7 @@ namespace SharpGLTF.Schema2
         {
             var containers = base.GetLogicalChildren();
 
-            containers = containers.ConcatItems(this.Asset);
+            containers = containers.ConcatElements(this.Asset);
             containers = containers.Concat(this.LogicalAccessors);
             containers = containers.Concat(this.LogicalAnimations);
             containers = containers.Concat(this.LogicalBuffers);
@@ -137,6 +137,11 @@ namespace SharpGLTF.Schema2
             containers = containers.Concat(this.LogicalTextures);
 
             return containers;
+        }
+
+        internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()
+        {
+            return GetLogicalChildren().SelectMany(item => Flatten(item));
         }
 
         #endregion
@@ -171,13 +176,6 @@ namespace SharpGLTF.Schema2
                 .IsNullOrIndex(nameof(DefaultScene), _scene, this.LogicalScenes);
 
             Asset.ValidateReferences(validate);
-
-            // check incompatible extensions
-
-            foreach (var iex in this.IncompatibleExtensions)
-            {
-                validate._LinkThrow("Extensions", iex);
-            }
 
             base.OnValidateReferences(validate);
 

@@ -58,7 +58,7 @@ namespace SharpGLTF
 
         private static readonly string _SchemaDir;
         private static readonly string _ValidationDir;
-        private static readonly string _SampleModelsDir;
+        internal static readonly string _SampleModelsDir;
 
         private static readonly string _PollyModelsDir;
         private static readonly string _UniVRMModelsDir;
@@ -131,12 +131,13 @@ namespace SharpGLTF
         {
             _Check();
 
-            var files = GetModelPathsInDirectory(_SampleModelsDir, "2.0");
+            var entries = KhronosSampleModel.Load();
 
-            return files
-                .OrderBy(item => item)
-                .Where(item => !item.Contains("\\glTF-Draco\\"))
+            var files = entries
+                .SelectMany(item => item.GetPaths(_SampleModelsDir, "2.0"))
                 .ToList();
+
+            return files;            
         }
 
         public static IReadOnlyList<string> GetKhronosValidationPaths()
@@ -243,5 +244,43 @@ namespace SharpGLTF
         }        
 
         #endregion
+    }
+
+    [System.Diagnostics.DebuggerDisplay("{Name}")]
+    class KhronosSampleModel
+    {
+        public static KhronosSampleModel[] Load()
+        {
+            var path = System.IO.Path.Combine(TestFiles._SampleModelsDir, "2.0", "model-index.json");
+            var text = System.IO.File.ReadAllText(path);
+            return Read(text);
+        }
+
+        public static KhronosSampleModel[] Read(string json)
+        {
+            var opts = new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                PropertyNameCaseInsensitive = true
+            };
+
+            return System.Text.Json.JsonSerializer.Deserialize<KhronosSampleModel[]>(json, opts);
+        }
+
+        public string Name { get; set; }
+        public string Screenshot { get; set; }
+        public Dictionary<string, string> Variants { get; set; } = new Dictionary<string, string>();
+
+        public IEnumerable<string> GetPaths(params string[] basePath)
+        {
+            var rootPath = System.IO.Path.Combine(basePath);
+
+            foreach(var variant in Variants)
+            {
+                if (variant.Key == "glTF-Draco") continue; // draco is not supported by SharpGLTF
+
+                yield return System.IO.Path.Combine(rootPath, Name, variant.Key, variant.Value);
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_orthographic, _perspective);
+            return base.GetLogicalChildren().ConcatElements(_orthographic, _perspective);
         }
 
         internal ICamera GetCamera()

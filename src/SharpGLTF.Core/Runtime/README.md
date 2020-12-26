@@ -10,7 +10,7 @@ var model = SharpGLTF.Schema2.ModelRoot.Load("model.gltf");
 ```
 
 Now, lets say you have an __AwesomeEngine__ which defines an __AwesomeMesh__ that
-is the equivalent of a __glTF Mesh__, so for each glTF Mesh we find in Model.LogicalMeshes,
+is the equivalent of a __glTF Mesh__, so for each _logical_ glTF Mesh we find in Model.LogicalMeshes,
 we create the equivalent AwesomeMesh:
 ```c#
 var gpuMeshes = new AwesomeMesh[model.LogicalMeshes.Count];
@@ -53,18 +53,18 @@ Finally, we render the instances like this:
 ```c#
 void RenderInstance(SharpGLTF.Runtime.SceneInstance modelInstance, Matrix4x4 modelMatrix)
 {
-    foreach(var drawable in modelInstance.DrawableReferences)
+    foreach(var drawable in modelInstance.DrawableInstances)
     {
-        var gpuMesh = gpuMeshes[drawable.Item1];
+        var gpuMesh = gpuMeshes[drawable.Template.LogicalMeshIndex];
 
-        if (drawable.Item2 is SharpGLTF.Transforms.StaticTransform statXform)
+        if (drawable.Transform is SharpGLTF.Transforms.RigidTransform statXform)
         {
-            AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
+            AwesomeEngine.DrawRigidMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
         }
 
-        if (drawable.Item2 is SharpGLTF.Transforms.SkinTransform skinXform)
+        if (drawable.Transform is SharpGLTF.Transforms.SkinnedLogicalMeshIndexTransform skinXform)
         {
-            AwesomeEngine.DrawMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
+            AwesomeEngine.DrawSkinnedMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
         }
     }
 }

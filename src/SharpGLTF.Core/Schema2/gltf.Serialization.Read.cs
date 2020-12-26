@@ -209,7 +209,7 @@ namespace SharpGLTF.Schema2
 
         internal void OnDeserializationCompleted()
         {
-            _FindMeshQuantizationExtension();
+            
         }
 
         internal void _ResolveSatelliteDependencies(IO.ReadContext context)

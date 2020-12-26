@@ -36,7 +36,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             foreach (var filePath in files)
             {
-                // System.Diagnostics.Debug.Assert(!filePath.EndsWith("Compatibility_05.gltf"));
+                // System.Diagnostics.Debug.Assert(!filePath.EndsWith("Buffer_Interleaved_03.gltf"));
 
                 var gltfJson = filePath.EndsWith(".gltf") ? System.IO.File.ReadAllText(filePath) : string.Empty;
 
@@ -71,7 +71,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     else
                     {
                         TestContext.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");
-                        TestContext.WriteLine($"   Exception: {ex.Message}");
+                        TestContext.WriteLine($"   Expected Exception: {ex.Message}");
                     }                    
                 }
 

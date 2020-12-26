@@ -30,7 +30,10 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateScaleChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateScaleChannel(node, curve.ToSplineCurve());
             }
-            else throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
+            else
+            {
+                throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
+            }
 
             return node;
         }
@@ -48,7 +51,10 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateTranslationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateTranslationChannel(node, curve.ToSplineCurve());
             }
-            else throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
+            else
+            {
+                throw new ArgumentException("Must implement IConvertibleCurve<Vector3>", nameof(sampler));
+            }
 
             return node;
         }
@@ -85,7 +91,10 @@ namespace SharpGLTF.Schema2
                 if (degree == 1) animation.CreateRotationChannel(node, curve.ToLinearCurve(), true);
                 if (degree == 3) animation.CreateRotationChannel(node, curve.ToSplineCurve());
             }
-            else throw new ArgumentException("Must implement IConvertibleCurve<Quaternion>", nameof(sampler));
+            else
+            {
+                throw new ArgumentException("Must implement IConvertibleCurve<Quaternion>", nameof(sampler));
+            }
 
             return node;
         }

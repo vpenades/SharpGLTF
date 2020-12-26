@@ -169,7 +169,7 @@ namespace SharpGLTF.Schema2
     {
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_baseColorTexture, _metallicRoughnessTexture);
+            return base.GetLogicalChildren().ConcatElements(_baseColorTexture, _metallicRoughnessTexture);
         }
 
         private TextureInfo _GetBaseTexture(bool create)
@@ -242,7 +242,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_diffuseTexture, _specularGlossinessTexture);
+            return base.GetLogicalChildren().ConcatElements(_diffuseTexture, _specularGlossinessTexture);
         }
 
         private TextureInfo _GetDiffuseTexture(bool create)
@@ -313,7 +313,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_clearcoatTexture, _clearcoatRoughnessTexture, _clearcoatNormalTexture);
+            return base.GetLogicalChildren().ConcatElements(_clearcoatTexture, _clearcoatRoughnessTexture, _clearcoatNormalTexture);
         }
 
         private TextureInfo _GetClearCoatTexture(bool create)
@@ -373,7 +373,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_transmissionTexture);
+            return base.GetLogicalChildren().ConcatElements(_transmissionTexture);
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
@@ -403,7 +403,7 @@ namespace SharpGLTF.Schema2
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
-            return base.GetLogicalChildren().ConcatItems(_sheenColorTexture, _sheenRoughnessTexture);
+            return base.GetLogicalChildren().ConcatElements(_sheenColorTexture, _sheenRoughnessTexture);
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)

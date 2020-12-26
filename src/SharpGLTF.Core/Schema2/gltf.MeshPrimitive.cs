@@ -256,6 +256,47 @@ namespace SharpGLTF.Schema2
 
         #region validation
 
+        internal static bool CheckAttributesQuantizationRequired(ModelRoot root)
+        {
+            return root
+                .LogicalMeshes
+                .SelectMany(item => item.Primitives)
+                .Any(prim => prim.CheckAttributesQuantizationRequired());
+        }
+
+        private bool CheckAttributesQuantizationRequired()
+        {
+            bool _checkAccessors(IReadOnlyDictionary<string, Accessor> accessors)
+            {
+                foreach (var va in accessors)
+                {
+                    if (va.Value.Encoding == EncodingType.FLOAT) continue;
+
+                    if (va.Key == "POSITION") return true;
+                    if (va.Key == "NORMAL") return true;
+                    if (va.Key == "TANGENT") return true;
+
+                    if (va.Value.Encoding == EncodingType.UNSIGNED_BYTE) continue;
+                    if (va.Value.Encoding == EncodingType.UNSIGNED_SHORT) continue;
+
+                    if (va.Key.StartsWith("TEXCOORD_")) return true;
+                }
+
+                return false;
+            }
+
+            if (_checkAccessors(this.VertexAccessors)) return true;
+
+            for (int midx = 0; midx < this.MorphTargetsCount; ++midx)
+            {
+                var mt = this.GetMorphTargetAccessors(midx);
+
+                if (_checkAccessors(mt)) return true;
+            }
+
+            return false;
+        }
+
         protected override void OnValidateReferences(Validation.ValidationContext validate)
         {
             base.OnValidateReferences(validate);
