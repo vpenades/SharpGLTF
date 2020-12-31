@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
         /// Gets the cubic animation entries fot <see cref="AnimationInterpolationMode.CUBICSPLINE"/> mode.
         /// </summary>
         /// <returns>A sequence of Time-(TangentIn,Value,TangentOut) keys.</returns>
-        IEnumerable<(Single Key, (T TangentIn, T Value, T TangentOut))> GetCubicKeys();
+        IEnumerable<(Single Key, (T TangentIn, T Value, T TangentOut) Value)> GetCubicKeys();
 
         /// <summary>
         /// Creates an interpolation sampler that can be used to query the value of the curve at any time.

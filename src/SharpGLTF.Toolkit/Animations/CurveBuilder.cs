@@ -176,9 +176,9 @@ namespace SharpGLTF.Animations
                     var spline = convertible.ToSplineCurve();
                     foreach (var ppp in spline)
                     {
-                        this.SetPoint(ppp.Key, ppp.Value.Item2);
-                        this.SetIncomingTangent(ppp.Key, ppp.Value.Item1);
-                        this.SetOutgoingTangent(ppp.Key, ppp.Value.Item3);
+                        this.SetPoint(ppp.Key, ppp.Value.Value);
+                        this.SetIncomingTangent(ppp.Key, ppp.Value.TangentIn);
+                        this.SetOutgoingTangent(ppp.Key, ppp.Value.TangentOut);
                     }
 
                     return;
@@ -186,6 +186,39 @@ namespace SharpGLTF.Animations
             }
 
             throw new NotImplementedException();
+        }
+
+        public void SetCurve(Schema2.IAnimationSampler<T> curve)
+        {
+            switch (curve.InterpolationMode)
+            {
+                case Schema2.AnimationInterpolationMode.STEP:
+                case Schema2.AnimationInterpolationMode.LINEAR:
+                    {
+                        var isLinear = curve.InterpolationMode == Schema2.AnimationInterpolationMode.LINEAR;
+
+                        foreach (var (key, value) in curve.GetLinearKeys())
+                        {
+                            this.SetPoint(key, value, isLinear);
+                        }
+
+                        break;
+                    }
+
+                case Schema2.AnimationInterpolationMode.CUBICSPLINE:
+                    {
+                        foreach (var (key, value) in curve.GetCubicKeys())
+                        {
+                            this.SetPoint(key, value.Value);
+                            this.SetIncomingTangent(key, value.TangentIn);
+                            this.SetOutgoingTangent(key, value.TangentOut);
+                        }
+
+                        break;
+                    }
+
+                default: throw new NotImplementedException();
+            }
         }
 
         #endregion

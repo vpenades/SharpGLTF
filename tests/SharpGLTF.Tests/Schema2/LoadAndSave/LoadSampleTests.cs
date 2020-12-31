@@ -337,13 +337,21 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 TestContext.WriteLine($"Animation at {t}");
 
+                var curves = node.GetCurveSamplers(anim);
+
                 if (t < anim.Duration)
                 {
-                    var mw = anim.GetMorphWeights(node, t);
+                    var mw = curves.Morphing
+                        .CreateCurveSampler()
+                        .GetPoint(t);            
+                    
                     TestContext.WriteLine($"    Morph Weights: {mw[0]} {mw[1]}");
                 }
 
-                var msw = anim.GetSparseMorphWeights(node, t);
+                var msw = curves.MorphingSparse
+                    .CreateCurveSampler()
+                    .GetPoint(t);
+
                 TestContext.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
 
                 var triangles = model.DefaultScene

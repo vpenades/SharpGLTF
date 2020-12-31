@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -36,17 +37,12 @@ namespace SharpGLTF.Runtime
             {
                 var index = anim.LogicalIndex;
 
-                var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (scaAnim != null) _Scale.SetCurve(index, scaAnim);
+                var curves = srcNode.GetCurveSamplers(anim);
 
-                var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (rotAnim != null) _Rotation.SetCurve(index, rotAnim);
-
-                var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (traAnim != null) _Translation.SetCurve(index, traAnim);
-
-                var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler(isolateMemory);
-                if (mrpAnim != null) _Morphing.SetCurve(index, mrpAnim);
+                _Scale.SetCurve(index, curves.Scale?.CreateCurveSampler(isolateMemory));
+                _Rotation.SetCurve(index, curves.Rotation?.CreateCurveSampler(isolateMemory));
+                _Translation.SetCurve(index, curves.Translation?.CreateCurveSampler(isolateMemory));
+                _Morphing.SetCurve(index, curves.MorphingSparse?.CreateCurveSampler(isolateMemory));
             }
 
             _UseAnimatedTransforms = _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;

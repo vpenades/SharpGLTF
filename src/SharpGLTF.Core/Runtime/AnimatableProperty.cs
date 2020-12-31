@@ -47,7 +47,7 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// Evaluates the value of this <see cref="AnimatableProperty{T}"/> at a given <paramref name="offset"/> for a given <paramref name="trackLogicalIndex"/>.
         /// </summary>
-        /// <param name="trackLogicalIndex">The index of the animation track</param>
+        /// <param name="trackLogicalIndex">The index of the animation track.</param>
         /// <param name="offset">The time offset within the curve</param>
         /// <returns>The evaluated value taken from the animation <paramref name="trackLogicalIndex"/>, or <see cref="Value"/> if a track was not found.</returns>
         public T GetValueAt(int trackLogicalIndex, float offset)
@@ -59,15 +59,30 @@ namespace SharpGLTF.Runtime
             return _Curves[trackLogicalIndex]?.GetPoint(offset) ?? this.Value;
         }
 
-        public void SetCurve(int logicalIndex, ICurveSampler<T> curveSampler)
+        /// <summary>
+        /// Sets the animation curves for this property.
+        /// </summary>
+        /// <param name="trackLogicalIndex">The index of the animation track.</param>
+        /// <param name="curveSampler">A curve sampler, or null if the curve is to be removed.</param>
+        public void SetCurve(int trackLogicalIndex, ICurveSampler<T> curveSampler)
         {
-            Guard.NotNull(curveSampler, nameof(curveSampler));
-            Guard.MustBeGreaterThanOrEqualTo(logicalIndex, 0, nameof(logicalIndex));
+            Guard.MustBeGreaterThanOrEqualTo(trackLogicalIndex, 0, nameof(trackLogicalIndex));
+
+            if (curveSampler == null)
+            {
+                if (_Curves != null && trackLogicalIndex < _Curves.Count)
+                {
+                    _Curves[trackLogicalIndex] = null;
+                    if (_Curves.All(item => item == null)) _Curves = null;
+                }
+
+                return;
+            }
 
             if (_Curves == null) _Curves = new List<ICurveSampler<T>>();
-            while (_Curves.Count <= logicalIndex) _Curves.Add(null);
+            while (_Curves.Count <= trackLogicalIndex) _Curves.Add(null);
 
-            _Curves[logicalIndex] = curveSampler;
+            _Curves[trackLogicalIndex] = curveSampler;
         }
 
         #endregion

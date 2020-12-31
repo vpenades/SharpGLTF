@@ -5,6 +5,10 @@ using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
+    /// <summary>
+    /// Represents an abstract interface for a visual hierarchy.
+    /// Implemented by <see cref="Node"/> and <see cref="Scene"/>.
+    /// </summary>
     public interface IVisualNodeContainer
     {
         IEnumerable<Node> VisualChildren { get; }
@@ -287,12 +291,22 @@ namespace SharpGLTF.Schema2
 
                 if (root.LogicalAnimations.Count == 0) return false;
 
-                // check if it's affected by animations.
-                if (root.LogicalAnimations.Any(anim => anim.FindScaleSampler(this) != null)) return true;
-                if (root.LogicalAnimations.Any(anim => anim.FindRotationSampler(this) != null)) return true;
-                if (root.LogicalAnimations.Any(anim => anim.FindTranslationSampler(this) != null)) return true;
+                // check if it's affected by any animation channel.
 
-                return false;
+                bool _isTransformPath(PropertyPath path)
+                {
+                    if (path == PropertyPath.scale) return true;
+                    if (path == PropertyPath.rotation) return true;
+                    if (path == PropertyPath.translation) return true;
+                    // since morph weights are not part of the node transform, they're not handled here.
+                    return false;
+                }
+
+                return root
+                    .LogicalAnimations
+                    .SelectMany(item => item.FindChannels(this))
+                    .Where(item => _isTransformPath(item.TargetNodePath))
+                    .Any();
             }
         }
 
@@ -315,7 +329,7 @@ namespace SharpGLTF.Schema2
         {
             if (animation == null) return this.LocalTransform;
 
-            return animation.GetLocalTransform(this, time);
+            return this.GetCurveSamplers(animation).GetLocalTransform(time);
         }
 
         public Matrix4x4 GetWorldMatrix(Animation animation, float time)
@@ -331,6 +345,7 @@ namespace SharpGLTF.Schema2
         {
             if (!_mesh.HasValue) return Array.Empty<Single>();
 
+            // if the node doesn't have default morph weights, fall back to mesh weights.
             if (_weights == null || _weights.Count == 0) return Mesh.MorphWeights;
 
             return _weights.Select(item => (float)item).ToList();
@@ -466,6 +481,18 @@ namespace SharpGLTF.Schema2
             if (oldParent == null) return;
 
             oldParent._children.Remove(this.LogicalIndex);
+        }
+
+        #endregion
+
+        #region API
+
+        public NodeCurveSamplers GetCurveSamplers(Animation animation)
+        {
+            Guard.NotNull(animation, nameof(animation));
+            Guard.MustShareLogicalParent(this, animation, nameof(animation));
+
+            return new NodeCurveSamplers(this, animation);
         }
 
         #endregion
@@ -674,5 +701,147 @@ namespace SharpGLTF.Schema2
                 n._SetVisualParent(basisNode);
             }
         }
+    }
+
+    /// <summary>
+    /// Represents an proxy to acccess the animation curves of a <see cref="Node"/>.
+    /// Use <see cref="Node.GetCurveSamplers(Animation)"/> for access.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public readonly struct NodeCurveSamplers
+    {
+        #region debug
+
+        private string _GetDebuggerDisplay()
+        {
+            if (TargetNode == null || Animation == null) return "Null";
+
+            var txt = $"Node[{TargetNode.LogicalIndex}ᴵᵈˣ]";
+            if (!string.IsNullOrWhiteSpace(this.TargetNode.Name)) txt += $" {this.TargetNode.Name}";
+
+            txt += " <<< ";
+
+            txt += $"Animation[{Animation.LogicalIndex}ᴵᵈˣ]";
+            if (!string.IsNullOrWhiteSpace(this.Animation.Name)) txt += $" {this.Animation.Name}";
+
+            return txt;
+        }
+
+        #endregion
+
+        #region constructor
+
+        internal NodeCurveSamplers(Node node, Animation animation)
+        {
+            TargetNode = node;
+            Animation = animation;
+
+            Scale = null;
+            Rotation = null;
+            Translation = null;
+            Morphing = null;
+            MorphingSparse = null;
+
+            foreach (var c in animation.FindChannels(node))
+            {
+                switch (c.TargetNodePath)
+                {
+                    case PropertyPath.scale: Scale = c.GetScaleSampler(); break;
+                    case PropertyPath.rotation: Rotation = c.GetRotationSampler(); break;
+                    case PropertyPath.translation: Translation = c.GetTranslationSampler(); break;
+                    case PropertyPath.weights:
+                        Morphing = c.GetMorphSampler();
+                        MorphingSparse = c.GetSparseMorphSampler();
+                        break;
+                }
+            }
+
+            // if we have morphing animation, we might require to check this...
+            // var morphWeights = node.MorphWeights;
+            // if (morphWeights == null || morphWeights.Count == 0) { Morphing = null; MorphingSparse = null; }
+        }
+
+        #endregion
+
+        #region data
+
+        public readonly Node TargetNode;
+        public readonly Animation Animation;
+
+        #endregion
+
+        #region  properties
+
+        /// <summary>
+        /// True if any of <see cref="Scale"/>, <see cref="Rotation"/> or <see cref="Translation"/> is defined.
+        /// </summary>
+        public bool HasTransformCurves => Scale != null || Rotation != null || Translation != null;
+
+        /// <summary>
+        /// True if there's a morphing curve.
+        /// </summary>
+        public bool HasMorphingCurves => Morphing != null || MorphingSparse != null;
+
+        /// <summary>
+        /// Gets the Scale sampler, or null if there's no curve defined.
+        /// </summary>
+        public readonly IAnimationSampler<Vector3> Scale;
+
+        /// <summary>
+        /// Gets the Rotation sampler, or null if there's no curve defined.
+        /// </summary>
+        public readonly IAnimationSampler<Quaternion> Rotation;
+
+        /// <summary>
+        /// Gets the Translation sampler, or null if there's no curve defined.
+        /// </summary>
+        public readonly IAnimationSampler<Vector3> Translation;
+
+        /// <summary>
+        /// Gets the raw Morphing sampler, or null if there's no curve defined.
+        /// </summary>
+        public readonly IAnimationSampler<Single[]> Morphing;
+
+        /// <summary>
+        /// Gets the SparseWeight8 Morphing sampler, or null if there's no curve defined.
+        /// </summary>
+        public readonly IAnimationSampler<Transforms.SparseWeight8> MorphingSparse;
+
+        #endregion
+
+        #region API
+
+        public Transforms.AffineTransform GetLocalTransform(Single time)
+        {
+            var xform = TargetNode.LocalTransform;
+
+            var sfunc = Scale?.CreateCurveSampler();
+            var rfunc = Rotation?.CreateCurveSampler();
+            var tfunc = Translation?.CreateCurveSampler();
+
+            if (sfunc != null) xform.Scale = sfunc.GetPoint(time);
+            if (rfunc != null) xform.Rotation = rfunc.GetPoint(time);
+            if (tfunc != null) xform.Translation = tfunc.GetPoint(time);
+
+            return xform;
+        }
+
+        public IReadOnlyList<float> GetMorphingWeights(Single time)
+        {
+            return Morphing
+                ?.CreateCurveSampler()
+                ?.GetPoint(time)
+                ?? TargetNode.MorphWeights;
+        }
+
+        public Transforms.SparseWeight8 GetSparseMorphingWeights(Single time)
+        {
+            return MorphingSparse
+                ?.CreateCurveSampler()
+                ?.GetPoint(time)
+                ?? Transforms.SparseWeight8.Create(TargetNode.MorphWeights);
+        }
+
+        #endregion
     }
 }

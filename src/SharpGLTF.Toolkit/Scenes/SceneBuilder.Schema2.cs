@@ -376,14 +376,11 @@ namespace SharpGLTF.Scenes
                 var name = anim.Name;
                 if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-                var scaAnim = anim.FindScaleSampler(srcNode)?.CreateCurveSampler();
-                if (scaAnim != null) dstNode.UseScale(name).SetCurve(scaAnim);
+                var curves = srcNode.GetCurveSamplers(anim);
 
-                var rotAnim = anim.FindRotationSampler(srcNode)?.CreateCurveSampler();
-                if (rotAnim != null) dstNode.UseRotation(name).SetCurve(rotAnim);
-
-                var traAnim = anim.FindTranslationSampler(srcNode)?.CreateCurveSampler();
-                if (traAnim != null) dstNode.UseTranslation(name).SetCurve(traAnim);
+                if (curves.Scale != null) dstNode.UseScale(name).SetCurve(curves.Scale);
+                if (curves.Rotation != null) dstNode.UseRotation(name).SetCurve(curves.Rotation);
+                if (curves.Translation != null) dstNode.UseTranslation(name).SetCurve(curves.Translation);
             }
         }
 
@@ -394,8 +391,9 @@ namespace SharpGLTF.Scenes
                 var name = anim.Name;
                 if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
-                var mrpAnim = anim.FindSparseMorphSampler(srcNode)?.CreateCurveSampler();
-                if (mrpAnim != null) dstInst.Content.UseMorphing(name).SetCurve(mrpAnim);
+                var curves = srcNode.GetCurveSamplers(anim);
+
+                if (curves.MorphingSparse != null) dstInst.Content.UseMorphing(name).SetCurve(curves.MorphingSparse);
             }
         }
 

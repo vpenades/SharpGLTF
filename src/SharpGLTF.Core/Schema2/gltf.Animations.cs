@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2
 
         internal IReadOnlyList<AnimationSampler> _Samplers => _samplers;
 
-        internal IReadOnlyList<AnimationChannel> _Channels => _channels;
+        public IReadOnlyList<AnimationChannel> Channels => _channels;
 
         public float Duration => _samplers.Select(item => item.Duration).Max();
 
@@ -40,6 +40,28 @@ namespace SharpGLTF.Schema2
         {
             return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
         }
+
+        public IEnumerable<AnimationChannel> FindChannels(Node node)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            return Channels.Where(item => item.TargetNode == node);
+        }
+
+        private AnimationChannel _FindChannel(Node node, PropertyPath path)
+        {
+            return FindChannels(node).FirstOrDefault(item => item.TargetNodePath == path);
+        }
+
+        public AnimationChannel FindScaleChannel(Node node) => _FindChannel(node, PropertyPath.scale);
+        public AnimationChannel FindRotationChannel(Node node) => _FindChannel(node, PropertyPath.rotation);
+        public AnimationChannel FindTranslationChannel(Node node) => _FindChannel(node, PropertyPath.translation);
+        public AnimationChannel FindMorphChannel(Node node) => _FindChannel(node, PropertyPath.weights);
+
+        #endregion
+
+        #region API - Create
 
         private AnimationSampler _CreateSampler(AnimationInterpolationMode interpolation)
         {
@@ -55,6 +77,7 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         private AnimationChannel _UseChannel(Node node, PropertyPath path)
         {
+            Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             var channel = _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == path);
@@ -70,6 +93,7 @@ namespace SharpGLTF.Schema2
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
@@ -83,6 +107,7 @@ namespace SharpGLTF.Schema2
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
@@ -96,6 +121,7 @@ namespace SharpGLTF.Schema2
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, Quaternion> keyframes, bool linear = true)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
@@ -109,6 +135,7 @@ namespace SharpGLTF.Schema2
         public void CreateRotationChannel(Node node, IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
@@ -122,6 +149,7 @@ namespace SharpGLTF.Schema2
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
@@ -135,6 +163,7 @@ namespace SharpGLTF.Schema2
         public void CreateTranslationChannel(Node node, IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
@@ -148,6 +177,7 @@ namespace SharpGLTF.Schema2
         public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, SparseWeight8> keyframes, int morphCount, bool linear = true)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
@@ -161,6 +191,7 @@ namespace SharpGLTF.Schema2
         public void CreateMorphChannel(Node node, IReadOnlyDictionary<Single, (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut)> keyframes, int morphCount)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
@@ -169,69 +200,6 @@ namespace SharpGLTF.Schema2
 
             this._UseChannel(node, PropertyPath.weights)
                 .SetSampler(sampler);
-        }
-
-        private AnimationChannel FindChannel(Node node, PropertyPath path)
-        {
-            return _channels.FirstOrDefault(item => item.TargetNode == node && item.TargetNodePath == path);
-        }
-
-        public IAnimationSampler<Vector3> FindScaleSampler(Node node) { return FindChannel(node, PropertyPath.scale)?.Sampler; }
-
-        public IAnimationSampler<Quaternion> FindRotationSampler(Node node) { return FindChannel(node, PropertyPath.rotation)?.Sampler; }
-
-        public IAnimationSampler<Vector3> FindTranslationSampler(Node node) { return FindChannel(node, PropertyPath.translation)?.Sampler; }
-
-        public IAnimationSampler<Single[]> FindMorphSampler(Node node) { return FindChannel(node, PropertyPath.weights)?.Sampler; }
-
-        public IAnimationSampler<SparseWeight8> FindSparseMorphSampler(Node node) { return FindChannel(node, PropertyPath.weights)?.Sampler; }
-
-        public AffineTransform GetLocalTransform(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            var xform = node.LocalTransform;
-
-            var sfunc = FindScaleSampler(node)?.CreateCurveSampler();
-            var rfunc = FindRotationSampler(node)?.CreateCurveSampler();
-            var tfunc = FindTranslationSampler(node)?.CreateCurveSampler();
-
-            if (sfunc != null) xform.Scale = sfunc.GetPoint(time);
-            if (rfunc != null) xform.Rotation = rfunc.GetPoint(time);
-            if (tfunc != null) xform.Translation = tfunc.GetPoint(time);
-
-            return xform;
-        }
-
-        public IReadOnlyList<float> GetMorphWeights(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-
-            var morphWeights = node.MorphWeights;
-            if (morphWeights == null || morphWeights.Count == 0) return morphWeights;
-
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            var mfunc = FindMorphSampler(node)?.CreateCurveSampler();
-            if (mfunc == null) return morphWeights;
-
-            return mfunc.GetPoint(time);
-        }
-
-        public SparseWeight8 GetSparseMorphWeights(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-
-            var morphWeights = node.MorphWeights;
-            if (morphWeights == null || morphWeights.Count == 0) return default;
-
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            var mfunc = FindSparseMorphSampler(node)?.CreateCurveSampler();
-            if (mfunc == null) return default;
-
-            return mfunc.GetPoint(time);
         }
 
         #endregion
@@ -253,112 +221,65 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
-    }
 
-    sealed partial class AnimationChannelTarget
-    {
-        #region lifecycle
+        #region obsolete
 
-        internal AnimationChannelTarget() { }
+        [Obsolete("Use FindScaleChannel(node)?.GetScaleSampler()")]
+        public IAnimationSampler<Vector3> FindScaleSampler(Node node) => FindScaleChannel(node)?.GetScaleSampler();
 
-        internal AnimationChannelTarget(Node targetNode, PropertyPath targetPath)
+        [Obsolete("Use FindRotationChannel(node)?.GetRotationSampler()")]
+        public IAnimationSampler<Quaternion> FindRotationSampler(Node node) => FindRotationChannel(node)?.GetRotationSampler();
+
+        [Obsolete("Use FindTranslationChannel(node)?.GetTranslationSampler()")]
+        public IAnimationSampler<Vector3> FindTranslationSampler(Node node) => FindTranslationChannel(node)?.GetTranslationSampler();
+
+        [Obsolete("Use FindMorphChannel(node)?.GetMorphSampler()")]
+        public IAnimationSampler<Single[]> FindMorphSampler(Node node) => FindMorphChannel(node)?.GetMorphSampler();
+
+        [Obsolete("Use FindMorphChannel(node)?.GetSparseMorphSampler()")]
+        public IAnimationSampler<SparseWeight8> FindSparseMorphSampler(Node node) => FindMorphChannel(node)?.GetSparseMorphSampler();
+
+        [Obsolete("Use node.GetCurveSamplers(anim).GetLocalTransform(time)")]
+        public AffineTransform GetLocalTransform(Node node, Single time)
         {
-            _node = targetNode.LogicalIndex;
-            _path = targetPath;
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            return node.GetCurveSamplers(this).GetLocalTransform(time);
         }
 
-        #endregion
-
-        #region data
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal int? _NodeId => this._node;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal PropertyPath _NodePath => this._path;
-
-        #endregion
-
-        #region Validation
-
-        protected override void OnValidateReferences(ValidationContext validate)
+        [Obsolete("Use node.GetCurveSamplers(anim).GetMorphingWeights(time)")]
+        public IReadOnlyList<float> GetMorphWeights(Node node, Single time)
         {
-            base.OnValidateReferences(validate);
+            Guard.NotNull(node, nameof(node));
 
-            validate.IsNullOrIndex("Node", _node, validate.Root.LogicalNodes);
+            var morphWeights = node.MorphWeights;
+            if (morphWeights == null || morphWeights.Count == 0) return morphWeights;
+
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+
+            return FindMorphChannel(node)
+                ?.GetMorphSampler()
+                ?.CreateCurveSampler()
+                ?.GetPoint(time)
+                ?? default;
         }
 
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("AnimChannel LogicalNode[{TargetNode.LogicalIndex}].{TargetNodePath}")]
-    sealed partial class AnimationChannel : IChildOf<Animation>
-    {
-        #region lifecycle
-
-        internal AnimationChannel() { }
-
-        internal AnimationChannel(Node targetNode, PropertyPath targetPath)
+        [Obsolete("Use node.GetCurveSamplers(anim).GetSparseMorphingWeights(time)")]
+        public SparseWeight8 GetSparseMorphWeights(Node node, Single time)
         {
-            _target = new AnimationChannelTarget(targetNode, targetPath);
-            _sampler = -1;
-        }
+            Guard.NotNull(node, nameof(node));
 
-        internal void SetSampler(AnimationSampler sampler)
-        {
-            Guard.NotNull(sampler, nameof(sampler));
-            Guard.IsTrue(this.LogicalParent == sampler.LogicalParent, nameof(sampler));
+            var morphWeights = node.MorphWeights;
+            if (morphWeights == null || morphWeights.Count == 0) return default;
 
-            _sampler = sampler.LogicalIndex;
-        }
+            Guard.MustShareLogicalParent(this, node, nameof(node));
 
-        #endregion
-
-        #region properties
-
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="Animation"/> at <see cref="ModelRoot.LogicalAnimations"/>
-        /// </summary>
-        public int LogicalIndex { get; private set; } = -1;
-
-        /// <summary>
-        /// Gets the <see cref="Animation"/> instance that owns this object.
-        /// </summary>
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        public Animation LogicalParent { get; private set; }
-
-        void IChildOf<Animation>._SetLogicalParent(Animation parent, int index)
-        {
-            LogicalParent = parent;
-            LogicalIndex = index;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="AnimationSampler"/> instance used by this <see cref="AnimationChannel"/>.
-        /// </summary>
-        public AnimationSampler Sampler => this.LogicalParent._Samplers[this._sampler];
-
-        public Node TargetNode
-        {
-            get
-            {
-                var idx = this._target?._NodeId ?? -1;
-                if (idx < 0) return null;
-                return this.LogicalParent.LogicalParent.LogicalNodes[idx];
-            }
-        }
-
-        public PropertyPath TargetNodePath => this._target?._NodePath ?? PropertyPath.translation;
-
-        #endregion
-
-        #region Validation
-
-        protected override void OnValidateReferences(ValidationContext validate)
-        {
-            base.OnValidateReferences(validate);
-
-            validate.IsNullOrIndex("Sampler", _sampler, this.LogicalParent._Samplers);
+            return FindMorphChannel(node)
+                ?.GetSparseMorphSampler()
+                ?.CreateCurveSampler()
+                ?.GetPoint(time)
+                ?? default;
         }
 
         #endregion

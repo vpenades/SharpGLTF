@@ -11,13 +11,21 @@ using JsonToken = System.Text.Json.JsonTokenType;
 
 namespace SharpGLTF.Schema2
 {
+    public interface IExtraProperties
+    {
+        IReadOnlyCollection<JsonSerializable> Extensions { get; }
+
+        IO.JsonContent Extras { get; set; }
+    }
+
     /// <summary>
     /// Represents the base class for all glTF 2 Schema objects.
     /// </summary>
     /// <remarks>
     /// Defines the <see cref="Extras"/> property for every glTF object.
     /// </remarks>
-    public abstract class ExtraProperties : JsonSerializable
+    public abstract class ExtraProperties : JsonSerializable,
+        IExtraProperties
     {
         #region data
 
