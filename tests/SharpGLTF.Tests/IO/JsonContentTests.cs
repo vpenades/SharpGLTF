@@ -152,4 +152,17 @@ namespace SharpGLTF.IO
         }
 
     }
+
+    [Category("Core.IO")]
+    public class ContextTests
+    {
+        [Test]
+        public void TestCurrentDirectoryLoad()
+        {
+            // for some reason, System.IO.Path.GetFullPath() does not recogninze an empty string as the current directory.
+
+            var currDirContext0 = ReadContext.CreateFromDirectory(string.Empty);
+            Assert.NotNull(currDirContext0);            
+        }
+    }
 }

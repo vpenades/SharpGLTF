@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
 
         public static Mesh CreateMesh<TMaterial>(this ModelRoot root, Converter<TMaterial, Material> materialEvaluator, IMeshBuilder<TMaterial> mesh)
         {
-            return root.CreateMeshes<TMaterial>(materialEvaluator, mesh)[0];
+            return root.CreateMeshes(materialEvaluator, mesh)[0];
         }
 
         public static IReadOnlyList<Mesh> CreateMeshes(this ModelRoot root, params IMeshBuilder<Materials.MaterialBuilder>[] meshBuilders)
@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2
 
             Material matFactory(Materials.MaterialBuilder srcMat)
             {
-                if (materials.TryGetValue(srcMat, out Schema2.Material dstMat)) return dstMat;
+                if (materials.TryGetValue(srcMat, out Material dstMat)) return dstMat;
                 return materials[srcMat] = root.CreateMaterial(srcMat);
             }
 
