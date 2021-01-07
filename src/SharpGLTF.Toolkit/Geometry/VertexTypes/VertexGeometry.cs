@@ -14,15 +14,15 @@ namespace SharpGLTF.Geometry.VertexTypes
         Boolean TryGetNormal(out Vector3 normal);
         Boolean TryGetTangent(out Vector4 tangent);
 
-        void SetPosition(Vector3 position);
-        void SetNormal(Vector3 normal);
-        void SetTangent(Vector4 tangent);
+        void SetPosition(in Vector3 position);
+        void SetNormal(in Vector3 normal);
+        void SetTangent(in Vector4 tangent);
 
-        void ApplyTransform(Matrix4x4 xform);
+        void ApplyTransform(in Matrix4x4 xform);
 
         VertexGeometryDelta Subtract(IVertexGeometry baseValue);
 
-        void Add(VertexGeometryDelta delta);
+        void Add(in VertexGeometryDelta delta);
     }
 
     /// <summary>
@@ -39,7 +39,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region constructors
 
-        public VertexPosition(Vector3 position)
+        public VertexPosition(in Vector3 position)
         {
             this.Position = position;
         }
@@ -55,7 +55,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Position = src.GetPosition();
         }
 
-        public static implicit operator VertexPosition(Vector3 position)
+        public static implicit operator VertexPosition(in Vector3 position)
         {
             return new VertexPosition(position);
         }
@@ -81,18 +81,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(in Vector3 position) { this.Position = position; }
 
-        void IVertexGeometry.SetNormal(Vector3 normal) { }
+        void IVertexGeometry.SetNormal(in Vector3 normal) { }
 
-        void IVertexGeometry.SetTangent(Vector4 tangent) { }
+        void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPosition)baseValue, this);
         }
 
-        public void Add(VertexGeometryDelta delta)
+        public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
         }
@@ -103,7 +103,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void ApplyTransform(Matrix4x4 xform)
+        public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
         }
@@ -127,7 +127,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region constructors
 
-        public VertexPositionNormal(Vector3 p, Vector3 n)
+        public VertexPositionNormal(in Vector3 p, in Vector3 n)
         {
             this.Position = p;
             this.Normal = n;
@@ -147,7 +147,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetNormal(out this.Normal);
         }
 
-        public static implicit operator VertexPositionNormal((Vector3 Pos, Vector3 Nrm) tuple)
+        public static implicit operator VertexPositionNormal(in (Vector3 Pos, Vector3 Nrm) tuple)
         {
             return new VertexPositionNormal(tuple.Pos, tuple.Nrm);
         }
@@ -177,18 +177,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(in Vector3 position) { this.Position = position; }
 
-        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
+        void IVertexGeometry.SetNormal(in Vector3 normal) { this.Normal = normal; }
 
-        void IVertexGeometry.SetTangent(Vector4 tangent) { }
+        void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormal)baseValue, this);
         }
 
-        public void Add(VertexGeometryDelta delta)
+        public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
             this.Normal += delta.NormalDelta;
@@ -200,7 +200,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
-        public void ApplyTransform(Matrix4x4 xform)
+        public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
@@ -225,7 +225,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region constructors
 
-        public VertexPositionNormalTangent(Vector3 p, Vector3 n, Vector4 t)
+        public VertexPositionNormalTangent(in Vector3 p, in Vector3 n, in Vector4 t)
         {
             this.Position = p;
             this.Normal = n;
@@ -241,7 +241,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             src.TryGetTangent(out this.Tangent);
         }
 
-        public static implicit operator VertexPositionNormalTangent((Vector3 Pos, Vector3 Nrm, Vector4 Tgt) tuple)
+        public static implicit operator VertexPositionNormalTangent(in (Vector3 Pos, Vector3 Nrm, Vector4 Tgt) tuple)
         {
             return new VertexPositionNormalTangent(tuple.Pos, tuple.Nrm, tuple.Tgt);
         }
@@ -274,18 +274,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexGeometry.SetPosition(Vector3 position) { this.Position = position; }
+        void IVertexGeometry.SetPosition(in Vector3 position) { this.Position = position; }
 
-        void IVertexGeometry.SetNormal(Vector3 normal) { this.Normal = normal; }
+        void IVertexGeometry.SetNormal(in Vector3 normal) { this.Normal = normal; }
 
-        void IVertexGeometry.SetTangent(Vector4 tangent) { this.Tangent = tangent; }
+        void IVertexGeometry.SetTangent(in Vector4 tangent) { this.Tangent = tangent; }
 
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormalTangent)baseValue, this);
         }
 
-        public void Add(VertexGeometryDelta delta)
+        public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
             this.Normal += delta.NormalDelta;
@@ -298,7 +298,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
 
-        public void ApplyTransform(Matrix4x4 xform)
+        public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
@@ -327,17 +327,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region constructors
 
-        public static implicit operator VertexGeometryDelta(Vector3 position)
+        public static implicit operator VertexGeometryDelta(in Vector3 position)
         {
             return new VertexGeometryDelta(position, Vector3.Zero, Vector3.Zero);
         }
 
-        public static implicit operator VertexGeometryDelta((Vector3 Pos, Vector3 Nrm) tuple)
+        public static implicit operator VertexGeometryDelta(in (Vector3 Pos, Vector3 Nrm) tuple)
         {
             return new VertexGeometryDelta(tuple.Pos, tuple.Nrm, Vector3.Zero);
         }
 
-        public static implicit operator VertexGeometryDelta((Vector3 Pos, Vector3 Nrm, Vector3 tgt) tuple)
+        public static implicit operator VertexGeometryDelta(in (Vector3 Pos, Vector3 Nrm, Vector3 tgt) tuple)
         {
             return new VertexGeometryDelta(tuple.Pos, tuple.Nrm, tuple.tgt);
         }
@@ -353,28 +353,28 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TangentDelta = new Vector3(t.X, t.Y, t.Z);
         }
 
-        public VertexGeometryDelta(Vector3 p, Vector3 n, Vector3 t)
+        public VertexGeometryDelta(in Vector3 p, in Vector3 n, in Vector3 t)
         {
             this.PositionDelta = p;
             this.NormalDelta = n;
             this.TangentDelta = t;
         }
 
-        internal VertexGeometryDelta(VertexPosition rootVal, VertexPosition morphVal)
+        internal VertexGeometryDelta(in VertexPosition rootVal, in VertexPosition morphVal)
         {
             PositionDelta = morphVal.Position - rootVal.Position;
             NormalDelta = Vector3.Zero;
             TangentDelta = Vector3.Zero;
         }
 
-        internal VertexGeometryDelta(VertexPositionNormal rootVal, VertexPositionNormal morphVal)
+        internal VertexGeometryDelta(in VertexPositionNormal rootVal, in VertexPositionNormal morphVal)
         {
             PositionDelta = morphVal.Position - rootVal.Position;
             NormalDelta = morphVal.Normal - rootVal.Normal;
             TangentDelta = Vector3.Zero;
         }
 
-        internal VertexGeometryDelta(VertexPositionNormalTangent rootVal, VertexPositionNormalTangent morphVal)
+        internal VertexGeometryDelta(in VertexPositionNormalTangent rootVal, in VertexPositionNormalTangent morphVal)
         {
             PositionDelta = morphVal.Position - rootVal.Position;
             NormalDelta = morphVal.Normal - rootVal.Normal;
@@ -383,7 +383,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             TangentDelta = new Vector3(dt.X, dt.Y, dt.Z);
         }
 
-        internal VertexGeometryDelta(VertexGeometryDelta rootVal, VertexGeometryDelta morphVal)
+        internal VertexGeometryDelta(in VertexGeometryDelta rootVal, in VertexGeometryDelta morphVal)
         {
             PositionDelta = morphVal.PositionDelta - rootVal.PositionDelta;
             NormalDelta = morphVal.NormalDelta - rootVal.NormalDelta;
@@ -418,11 +418,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        void IVertexGeometry.SetPosition(Vector3 position) { this.PositionDelta = position; }
+        void IVertexGeometry.SetPosition(in Vector3 position) { this.PositionDelta = position; }
 
-        void IVertexGeometry.SetNormal(Vector3 normal) { this.NormalDelta = normal; }
+        void IVertexGeometry.SetNormal(in Vector3 normal) { this.NormalDelta = normal; }
 
-        void IVertexGeometry.SetTangent(Vector4 tangent) { this.TangentDelta = new Vector3(tangent.X, tangent.Y, tangent.Z); }
+        void IVertexGeometry.SetTangent(in Vector4 tangent) { this.TangentDelta = new Vector3(tangent.X, tangent.Y, tangent.Z); }
 
         public Vector3 GetPosition() { return this.PositionDelta; }
 
@@ -430,14 +430,14 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.TangentDelta, 0); return true; }
 
-        public void ApplyTransform(Matrix4x4 xform) { throw new NotSupportedException(); }
+        public void ApplyTransform(in Matrix4x4 xform) { throw new NotSupportedException(); }
 
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexGeometryDelta)baseValue, this);
         }
 
-        public void Add(VertexGeometryDelta delta)
+        public void Add(in VertexGeometryDelta delta)
         {
             this.PositionDelta += delta.PositionDelta;
             this.NormalDelta += delta.NormalDelta;

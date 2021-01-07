@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Numerics;
 
@@ -10,78 +9,6 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
-    public interface IPrimitiveReader<TMaterial>
-    {
-        /// <summary>
-        /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
-        /// </summary>
-        Type VertexType { get; }
-
-        /// <summary>
-        /// Gets the current <typeparamref name="TMaterial"/> instance used by this primitive.
-        /// </summary>
-        TMaterial Material { get; }
-
-        /// <summary>
-        /// Gets the number of vertices used by each primitive shape.
-        /// </summary>
-        int VerticesPerPrimitive { get; }
-
-        /// <summary>
-        /// Gets the list of <see cref="IVertexBuilder"/> vertices.
-        /// </summary>
-        IReadOnlyList<IVertexBuilder> Vertices { get; }
-
-        /// <summary>
-        /// Gets the list of <see cref="IPrimitiveMorphTargetReader"/>.
-        /// </summary>
-        IReadOnlyList<IPrimitiveMorphTargetReader> MorphTargets { get; }
-
-        /// <summary>
-        /// Gets the indices of all points, given that <see cref="VerticesPerPrimitive"/> is 1.
-        /// </summary>
-        IReadOnlyList<int> Points { get; }
-
-        /// <summary>
-        /// Gets the indices of all lines, given that <see cref="VerticesPerPrimitive"/> is 2.
-        /// </summary>
-        IReadOnlyList<(int A, int B)> Lines { get; }
-
-        /// <summary>
-        /// Gets the indices of all the surfaces as triangles, given that <see cref="VerticesPerPrimitive"/> is 3.
-        /// </summary>
-        IReadOnlyList<(int A, int B, int C)> Triangles { get; }
-
-        /// <summary>
-        /// Gets the indices of all the surfaces, given that <see cref="VerticesPerPrimitive"/> is 3.
-        /// </summary>
-        IReadOnlyList<(int A, int B, int C, int? D)> Surfaces { get; }
-
-        /// <summary>
-        /// Calculates the raw list of indices to use for this primitive.
-        /// </summary>
-        /// <returns>a list of indices.</returns>
-        IReadOnlyList<int> GetIndices();
-    }
-
-    public interface IPrimitiveBuilder
-    {
-        /// <summary>
-        /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
-        /// </summary>
-        Type VertexType { get; }
-
-        void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta);
-
-        int AddPoint(IVertexBuilder a);
-
-        (int A, int B) AddLine(IVertexBuilder a, IVertexBuilder b);
-
-        (int A, int B, int C) AddTriangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c);
-
-        (int A, int B, int C, int D) AddQuadrangle(IVertexBuilder a, IVertexBuilder b, IVertexBuilder c, IVertexBuilder d);
-    }
-
     /// <summary>
     /// Represents an utility class to help build mesh primitives by adding triangles
     /// </summary>
@@ -228,7 +155,7 @@ namespace SharpGLTF.Geometry
         /// <typeparamref name="TvS"/> fragments.
         /// </param>
         /// <returns>The index of the vertex.</returns>
-        protected int UseVertex(VertexBuilder<TvG, TvM, TvS> vertex)
+        protected int UseVertex(in VertexBuilder<TvG, TvM, TvS> vertex)
         {
             return _Vertices.Use(vertex);
         }
@@ -746,7 +673,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private (int A, int B, int C) _AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
+        private (int A, int B, int C) _AddTriangle(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b, in VertexBuilder<TvG, TvM, TvS> c)
         {
             // check for degenerated triangle
             if (a.Position == b.Position || a.Position == c.Position || b.Position == c.Position) return (-1, -1, -1);

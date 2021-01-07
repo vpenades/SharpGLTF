@@ -40,7 +40,7 @@ namespace SharpGLTF.IO
 
         #region API
 
-        public void AddTriangle(Material material, VERTEX a, VERTEX b, VERTEX c)
+        public void AddTriangle(Material material, in VERTEX a, in VERTEX b, in VERTEX c)
         {
             _Mesh.UsePrimitive(material).AddTriangle(a, b, c);
         }

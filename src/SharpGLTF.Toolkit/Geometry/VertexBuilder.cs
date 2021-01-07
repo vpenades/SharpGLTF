@@ -133,14 +133,14 @@ namespace SharpGLTF.Geometry
 
         #region constructors
 
-        public VertexBuilder(TvG g, TvM m, TvS s)
+        public VertexBuilder(in TvG g, in TvM m, in TvS s)
         {
             Geometry = g;
             Material = m;
             Skinning = s;
         }
 
-        public VertexBuilder(TvG g, TvM m, params (int, float)[] bindings)
+        public VertexBuilder(in TvG g, in TvM m, params (int, float)[] bindings)
         {
             Geometry = g;
             Material = m;
@@ -151,7 +151,7 @@ namespace SharpGLTF.Geometry
             Skinning.SetWeights(sparse);
         }
 
-        public VertexBuilder(TvG g, TvM m, Transforms.SparseWeight8 bindings)
+        public VertexBuilder(in TvG g, in TvM m, in Transforms.SparseWeight8 bindings)
         {
             Geometry = g;
             Material = m;
@@ -159,28 +159,28 @@ namespace SharpGLTF.Geometry
             Skinning.SetWeights(bindings);
         }
 
-        public VertexBuilder(TvG g, TvM m)
+        public VertexBuilder(in TvG g, in TvM m)
         {
             Geometry = g;
             Material = m;
             Skinning = default;
         }
 
-        public VertexBuilder(TvG g, TvS s)
+        public VertexBuilder(in TvG g, in TvS s)
         {
             Geometry = g;
             Material = default;
             Skinning = s;
         }
 
-        public VertexBuilder(TvG g)
+        public VertexBuilder(in TvG g)
         {
             Geometry = g;
             Material = default;
             Skinning = default;
         }
 
-        public VertexBuilder(TvG g, params (int Index, float Weight)[] bindings)
+        public VertexBuilder(in TvG g, params (int Index, float Weight)[] bindings)
         {
             Geometry = g;
             Material = default;
@@ -199,36 +199,36 @@ namespace SharpGLTF.Geometry
             Skinning.SetWeights(bindings);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvM Mat, TvS Skin) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>(in (TvG Geo, TvM Mat, TvS Skin) tuple)
         {
             return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat, tuple.Skin);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvM Mat) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>(in (TvG Geo, TvM Mat) tuple)
         {
             return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Mat);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>((TvG Geo, TvS Skin) tuple)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>(in (TvG Geo, TvS Skin) tuple)
         {
             return new VertexBuilder<TvG, TvM, TvS>(tuple.Geo, tuple.Skin);
         }
 
-        public static implicit operator VertexBuilder<TvG, TvM, TvS>(TvG g)
+        public static implicit operator VertexBuilder<TvG, TvM, TvS>(in TvG g)
         {
             return new VertexBuilder<TvG, TvM, TvS>(g);
         }
 
         #pragma warning disable CA1000 // Do not declare static members on generic types
 
-        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position)
+        public static VertexBuilder<TvG, TvM, TvS> Create(in Vector3 position)
         {
             var v = default(VertexBuilder<TvG, TvM, TvS>);
             v.Geometry.SetPosition(position);
             return v;
         }
 
-        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position, Vector3 normal)
+        public static VertexBuilder<TvG, TvM, TvS> Create(in Vector3 position, in Vector3 normal)
         {
             var v = default(VertexBuilder<TvG, TvM, TvS>);
             v.Geometry.SetPosition(position);
@@ -236,7 +236,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public static VertexBuilder<TvG, TvM, TvS> Create(Vector3 position, Vector3 normal, Vector4 tangent)
+        public static VertexBuilder<TvG, TvM, TvS> Create(in Vector3 position, in Vector3 normal, in Vector4 tangent)
         {
             var v = default(VertexBuilder<TvG, TvM, TvS>);
             v.Geometry.SetPosition(position);
@@ -270,6 +270,8 @@ namespace SharpGLTF.Geometry
         public TvM Material;
         public TvS Skinning;
 
+        public override int GetHashCode() { return Geometry.GetHashCode(); }
+
         #endregion
 
         #region properties
@@ -285,14 +287,14 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position)
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position)
         {
             var v = this;
             v.Geometry.SetPosition(position);
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position, Vector3 normal)
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal)
         {
             var v = this;
             v.Geometry.SetPosition(position);
@@ -300,7 +302,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(Vector3 position, Vector3 normal, Vector4 tangent)
+        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal, in Vector4 tangent)
         {
             var v = this;
             v.Geometry.SetPosition(position);
@@ -316,7 +318,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithMaterial(Vector4 color0, params Vector2[] uvs)
+        public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, params Vector2[] uvs)
         {
             var v = this;
             v.Material.SetColor(0, color0);
@@ -324,7 +326,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithMaterial(Vector4 color0, Vector4 color1, params Vector2[] uvs)
+        public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, Vector4 color1, params Vector2[] uvs)
         {
             var v = this;
             v.Material.SetColor(0, color0);
@@ -435,6 +437,8 @@ namespace SharpGLTF.Geometry
         public IVertexMaterial Material;
         public IVertexSkinning Skinning;
 
+        public override int GetHashCode() { return Geometry.GetHashCode(); }
+
         #endregion
 
         #region API
@@ -463,6 +467,5 @@ namespace SharpGLTF.Geometry
         }
 
         #endregion
-
     }
 }

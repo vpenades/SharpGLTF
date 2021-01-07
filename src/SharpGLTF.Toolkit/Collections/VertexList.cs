@@ -30,7 +30,7 @@ namespace SharpGLTF.Collections
 
         IEnumerator IEnumerable.GetEnumerator() { return _Vertices.GetEnumerator(); }
 
-        public int Use(T v)
+        public int Use(in T v)
         {
             if (_VertexCache.TryGetValue(new QueryKey(v), out int index))
             {
@@ -77,11 +77,12 @@ namespace SharpGLTF.Collections
 
         #endregion
 
-        #region types
+        #region nested types
 
         interface IVertexKey
         {
             T GetValue();
+            int HashCode { get; }
         }
 
         sealed class _KeyComparer : IEqualityComparer<IVertexKey>
@@ -100,25 +101,21 @@ namespace SharpGLTF.Collections
                 return object.Equals(xx, yy);
             }
 
-            public int GetHashCode(IVertexKey obj)
-            {
-                return obj
-                    .GetValue()
-                    .GetHashCode();
-            }
+            public int GetHashCode(IVertexKey obj) { return obj.HashCode; }
         }
 
-        [System.Diagnostics.DebuggerDisplay("{GetValue()} {GetHashCode()}")]
+        [System.Diagnostics.DebuggerDisplay("{GetValue()} {HashCode}")]
         private readonly struct QueryKey : IVertexKey
         {
-            public QueryKey(T value) { _Value = value; }
+            public QueryKey(in T value) { _Value = value; }
 
             private readonly T _Value;
 
+            public int HashCode => _Value.GetHashCode();
             public T GetValue() { return _Value; }
         }
 
-        [System.Diagnostics.DebuggerDisplay("{GetValue()} {GetHashCode()}")]
+        [System.Diagnostics.DebuggerDisplay("{GetValue()} {HashCode}")]
         private readonly struct StoredKey : IVertexKey
         {
             public StoredKey(IReadOnlyList<T> src, int idx)
@@ -130,6 +127,7 @@ namespace SharpGLTF.Collections
             private readonly IReadOnlyList<T> _Source;
             private readonly int _Index;
 
+            public int HashCode => _Source[_Index].GetHashCode();
             public T GetValue() { return _Source[_Index]; }
         }
 
