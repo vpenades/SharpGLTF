@@ -148,11 +148,16 @@ namespace SharpGLTF.Runtime
 
             _Color0 = srcPrim.GetVertexAccessor("COLOR_0")?.AsColorArray() as IReadOnlyList<XYZW>;
             _Color1 = srcPrim.GetVertexAccessor("COLOR_1")?.AsColorArray() as IReadOnlyList<XYZW>;
+            _ColorsCount = (_Color0 != null ? 1 : 0) + (_Color1 != null ? 1 : 0);
 
             _TexCoord0 = srcPrim.GetVertexAccessor("TEXCOORD_0")?.AsVector2Array() as IReadOnlyList<XY>;
             _TexCoord1 = srcPrim.GetVertexAccessor("TEXCOORD_1")?.AsVector2Array() as IReadOnlyList<XY>;
             _TexCoord2 = srcPrim.GetVertexAccessor("TEXCOORD_2")?.AsVector2Array() as IReadOnlyList<XY>;
             _TexCoord3 = srcPrim.GetVertexAccessor("TEXCOORD_3")?.AsVector2Array() as IReadOnlyList<XY>;
+            _TexCoordCount  = (_TexCoord0 != null ? 1 : 0)
+                            + (_TexCoord1 != null ? 1 : 0)
+                            + (_TexCoord2 != null ? 1 : 0)
+                            + (_TexCoord3 != null ? 1 : 0);
 
             _Joints0 = srcPrim.GetVertexAccessor("JOINTS_0")?.AsVector4Array() as IReadOnlyList<XYZW>;
             _Joints1 = srcPrim.GetVertexAccessor("JOINTS_1")?.AsVector4Array() as IReadOnlyList<XYZW>;
@@ -161,18 +166,37 @@ namespace SharpGLTF.Runtime
 
             if (_Joints0 == null || _Weights0 == null) { _Joints0 = _Joints1 = _Weights0 = _Weights1 = null; }
             if (_Joints1 == null || _Weights1 == null) { _Joints1 = _Weights1 = null; }
+            _JointsWeightsCount = (_Joints0 != null ? 4 : 0) + (_Joints1 != null ? 4 : 0);
 
-            if (_Weights0 != null)
+            // renormalize weights (As per latest glTF spec should not be needed, but...)
+
+            if (_Weights0 != null && _Weights1 == null)
             {
                 var wwww = _Weights0.ToArray(); // isolate memory to prevent overwriting source glTF.
 
-                for (int i = 0; i < _Weights0.Count; ++i)
+                for (int i = 0; i < wwww.Length; ++i)
                 {
-                    var r = XYZW.Dot(_Weights0[i], XYZW.One);
+                    var r = XYZW.Dot(wwww[i], XYZW.One);
                     wwww[i] /= r;
                 }
 
                 _Weights0 = wwww;
+            }
+
+            if (_Weights0 != null && _Weights1 != null)
+            {
+                var wwww0 = _Weights0.ToArray(); // isolate memory to prevent overwriting source glTF.
+                var wwww1 = _Weights1.ToArray(); // isolate memory to prevent overwriting source glTF.
+
+                for (int i = 0; i < wwww0.Length; ++i)
+                {
+                    var r = XYZW.Dot(wwww0[i], XYZW.One) + XYZW.Dot(wwww1[i], XYZW.One);
+                    wwww0[i] /= r;
+                    wwww1[i] /= r;
+                }
+
+                _Weights0 = wwww0;
+                _Weights1 = wwww1;
             }
         }
 
@@ -189,17 +213,21 @@ namespace SharpGLTF.Runtime
 
         private readonly IReadOnlyList<XYZW> _Color0;
         private readonly IReadOnlyList<XYZW> _Color1;
+        private readonly int _ColorsCount;
 
         private readonly IReadOnlyList<XY> _TexCoord0;
         private readonly IReadOnlyList<XY> _TexCoord1;
         private readonly IReadOnlyList<XY> _TexCoord2;
         private readonly IReadOnlyList<XY> _TexCoord3;
+        private readonly int _TexCoordCount;
 
         private readonly IReadOnlyList<XYZW> _Joints0;
         private readonly IReadOnlyList<XYZW> _Joints1;
 
         private readonly IReadOnlyList<XYZW> _Weights0;
         private readonly IReadOnlyList<XYZW> _Weights1;
+
+        private readonly int _JointsWeightsCount;
 
         private readonly Object _Extras;
 
@@ -209,14 +237,11 @@ namespace SharpGLTF.Runtime
 
         public int VertexCount => _Geometry.VertexCount;
 
-        public int ColorsCount => (_Color0 != null ? 1 : 0) + (_Color1 != null ? 1 : 0);
+        public int ColorsCount => _ColorsCount;
 
-        public int TexCoordsCount => (_TexCoord0 != null ? 1 : 0)
-            + (_TexCoord1 != null ? 1 : 0)
-            + (_TexCoord2 != null ? 1 : 0)
-            + (_TexCoord3 != null ? 1 : 0);
+        public int TexCoordsCount => _TexCoordCount;
 
-        public int JointsWeightsCount => (_Joints0 != null ? 4 : 0) + (_Joints1 != null ? 4 : 0);
+        public int JointsWeightsCount => _JointsWeightsCount;
 
         public int MorphTargetsCount => _MorphTargets.Count;
 
