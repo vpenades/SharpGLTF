@@ -39,14 +39,19 @@ namespace SharpGLTF.IO
 
         public static ReadContext CreateFromFile(string filePath)
         {
+            Guard.NotNull(filePath, nameof(filePath));
             Guard.FilePathMustExist(filePath, nameof(filePath));
+
             var dir = Path.GetDirectoryName(filePath);
             return CreateFromDirectory(dir);
         }
 
         public static ReadContext CreateFromDirectory(string directoryPath)
         {
-            directoryPath = System.IO.Path.GetFullPath(directoryPath);
+            Guard.NotNull(directoryPath, nameof(directoryPath));
+
+            if (string.IsNullOrEmpty(directoryPath)) directoryPath = Environment.CurrentDirectory;
+            else directoryPath = System.IO.Path.GetFullPath(directoryPath);
 
             string _uriSolver(string rawUri)
             {
