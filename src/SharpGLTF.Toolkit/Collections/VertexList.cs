@@ -12,11 +12,22 @@ namespace SharpGLTF.Collections
     class VertexList<T> : IReadOnlyList<T>
         where T : struct
     {
+        #region lifecycle
+
+        public VertexList()
+        {
+            _VertexComparer = new _KeyComparer(_Vertices);
+            _VertexCache = new Dictionary<int, int>(_VertexComparer);
+        }
+
+        #endregion
+
         #region data
 
-        private readonly List<T> _Vertices = new List<T>();
+        private List<T> _Vertices = new List<T>();
 
-        private readonly Dictionary<IVertexKey, int> _VertexCache = new Dictionary<IVertexKey, int>(_KeyComparer.Instance);
+        private _KeyComparer _VertexComparer;
+        private Dictionary<int, int> _VertexCache;
 
         #endregion
 
@@ -32,103 +43,84 @@ namespace SharpGLTF.Collections
 
         public int Use(in T v)
         {
-            if (_VertexCache.TryGetValue(new QueryKey(v), out int index))
+            var idx = IndexOf(v);
+
+            return idx >= 0 ? idx : _Add(v);
+        }
+
+        public int IndexOf(in T v)
+        {
+            _VertexComparer.QueryValue = v;
+
+            if (_VertexCache.TryGetValue(-1, out int idx))
             {
-                System.Diagnostics.Debug.Assert(Object.Equals(v, _Vertices[index]), "Vertex equality failed");
-                return index;
+                _VertexComparer.QueryValue = default;
+
+                System.Diagnostics.Debug.Assert(Object.Equals(v, _Vertices[idx]), "Vertex equality failed");
+
+                return idx;
             }
 
-            index = _Vertices.Count;
+            _VertexComparer.QueryValue = default;
+
+            return -1;
+        }
+
+        private int _Add(in T v)
+        {
+            int idx = _Vertices.Count;
 
             _Vertices.Add(v);
+            _VertexCache[idx] = idx;
 
-            var key = new StoredKey(_Vertices, index);
+            System.Diagnostics.Debug.Assert(_Vertices.Count == _VertexCache.Count);
 
-            _VertexCache[key] = index;
-
-            return index;
+            return idx;
         }
 
         public void TransformVertices(Func<T, T> transformFunc)
         {
+            // although our "apparent" dictionary keys and values remain the same
+            // we must reconstruct the VertexCache to regenerate the hashes.
             _VertexCache.Clear();
 
             for (int i = 0; i < _Vertices.Count; ++i)
             {
                 _Vertices[i] = transformFunc(_Vertices[i]);
-
-                var key = new StoredKey(_Vertices, i);
-
-                _VertexCache[key] = i;
+                _VertexCache[i] = i;
             }
         }
 
-        public void CopyTo(VertexList<T> dst)
-        {
-            for (int i = 0; i < this._Vertices.Count; ++i)
-            {
-                var v = this._Vertices[i];
+        public void CopyTo(VertexList<T> dst) { dst._Set(this); }
 
-                var idx = dst._Vertices.Count;
-                dst._Vertices.Add(v);
-                dst._VertexCache[new StoredKey(dst._Vertices, idx)] = idx;
-            }
+        private void _Set(VertexList<T> src)
+        {
+            _Vertices = new List<T>(src._Vertices);
+            _VertexComparer = new _KeyComparer(_Vertices);
+            _VertexCache = new Dictionary<int, int>(src._VertexCache, _VertexComparer);
         }
 
         #endregion
 
         #region nested types
 
-        interface IVertexKey
+        sealed class _KeyComparer : IEqualityComparer<int>
         {
-            T GetValue();
-            int HashCode { get; }
-        }
+            public _KeyComparer(IReadOnlyList<T> items) { _Items = items; }
 
-        sealed class _KeyComparer : IEqualityComparer<IVertexKey>
-        {
-            static _KeyComparer() { }
-            private _KeyComparer() { }
+            private readonly IReadOnlyList<T> _Items;
 
-            private static readonly _KeyComparer _Instance = new _KeyComparer();
-            public static _KeyComparer Instance => _Instance;
+            public T QueryValue { get; set; }
 
-            public bool Equals(IVertexKey x, IVertexKey y)
+            public bool Equals(int x, int y)
             {
-                var xx = x.GetValue();
-                var yy = y.GetValue();
+                var xx = x < 0 ? QueryValue : _Items[x];
+                var yy = y < 0 ? QueryValue : _Items[y];
 
                 return object.Equals(xx, yy);
             }
 
-            public int GetHashCode(IVertexKey obj) { return obj.HashCode; }
-        }
-
-        [System.Diagnostics.DebuggerDisplay("{GetValue()} {HashCode}")]
-        private readonly struct QueryKey : IVertexKey
-        {
-            public QueryKey(in T value) { _Value = value; }
-
-            private readonly T _Value;
-
-            public int HashCode => _Value.GetHashCode();
-            public T GetValue() { return _Value; }
-        }
-
-        [System.Diagnostics.DebuggerDisplay("{GetValue()} {HashCode}")]
-        private readonly struct StoredKey : IVertexKey
-        {
-            public StoredKey(IReadOnlyList<T> src, int idx)
-            {
-                _Source = src;
-                _Index = idx;
-            }
-
-            private readonly IReadOnlyList<T> _Source;
-            private readonly int _Index;
-
-            public int HashCode => _Source[_Index].GetHashCode();
-            public T GetValue() { return _Source[_Index]; }
+            public int GetHashCode(int idx) { return (idx < 0 ? QueryValue : _Items[idx]).GetHashCode(); }
         }
 
         #endregion

@@ -10,6 +10,23 @@ namespace SharpGLTF.Collections
     [Category("Core")]
     public class VertexListTests
     {
+        [Test]
+        public void TestFloatHashCode()
+        {
+            // it's important to ensure that the hash or positive and negative Zero is the same.
+
+            float positiveZero = 0f;
+            float negativeZero = -positiveZero;
+
+            var floats = new float[] { positiveZero, negativeZero };
+            var integers = System.Runtime.InteropServices.MemoryMarshal.Cast<float, uint>(floats);
+            Assert.AreNotEqual(integers[0], integers[1]);
+
+            var positiveHash = positiveZero.GetHashCode();
+            var negativeHash = negativeZero.GetHashCode();
+            Assert.AreEqual(positiveHash, negativeHash);
+        }
+
         [System.Diagnostics.DebuggerDisplay("{Value}")]
         struct _VertexExample
         {
@@ -41,7 +58,14 @@ namespace SharpGLTF.Collections
 
             list.Use(5);
             Assert.AreEqual(2, list.Count);
+
+            var list2 = new VertexList<_VertexExample>();
+            list.CopyTo(list2);
+            Assert.AreEqual(2, list2.Count);
+
         }
+
+        
 
     }
 }
