@@ -209,7 +209,6 @@ namespace SharpGLTF.Schema2
 
         internal void OnDeserializationCompleted()
         {
-            
         }
 
         internal void _ResolveSatelliteDependencies(IO.ReadContext context)

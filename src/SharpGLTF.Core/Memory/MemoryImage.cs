@@ -440,15 +440,15 @@ namespace SharpGLTF.Memory
         public readonly UInt64 Header0;
         public readonly UInt32 Header1;
 
-        public readonly UInt32 vkFormat;
-        public readonly UInt32 typeSize;
-        public readonly UInt32 pixelWidth;
-        public readonly UInt32 pixelHeight;
-        public readonly UInt32 pixelDepth;
-        public readonly UInt32 layerCount;
-        public readonly UInt32 faceCount;
-        public readonly UInt32 levelCount;
-        public readonly UInt32 supercompressionScheme;
+        public readonly UInt32 VkFormat;
+        public readonly UInt32 TypeSize;
+        public readonly UInt32 PixelWidth;
+        public readonly UInt32 PixelHeight;
+        public readonly UInt32 PixelDepth;
+        public readonly UInt32 LayerCount;
+        public readonly UInt32 FaceCount;
+        public readonly UInt32 LevelCount;
+        public readonly UInt32 SupercompressionScheme;
 
         public static bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
         {
@@ -477,13 +477,13 @@ namespace SharpGLTF.Memory
             Guard.IsTrue(header.IsValidHeader, paramName + ".Header");
 
             // pixelWidth and pixelHeight MUST be multiples of 4.
-            Guard.MustBePositiveAndMultipleOf((int)header.pixelWidth, 4, $"{paramName}.{nameof(pixelWidth)}");
-            Guard.MustBePositiveAndMultipleOf((int)header.pixelHeight, 4, $"{paramName}.{nameof(pixelHeight)}");
+            Guard.MustBePositiveAndMultipleOf((int)header.PixelWidth, 4, $"{paramName}.{nameof(PixelWidth)}");
+            Guard.MustBePositiveAndMultipleOf((int)header.PixelHeight, 4, $"{paramName}.{nameof(PixelHeight)}");
 
             // For 2D and cubemap textures, pixelDepth must be 0.
-            Guard.MustBeEqualTo((int)header.pixelDepth, 0, $"{paramName}.{nameof(pixelDepth)}");
+            Guard.MustBeEqualTo((int)header.PixelDepth, 0, $"{paramName}.{nameof(PixelDepth)}");
 
-            Guard.MustBeLessThan((int)header.supercompressionScheme, 3, $"{paramName}.{nameof(supercompressionScheme)}");
+            Guard.MustBeLessThan((int)header.SupercompressionScheme, 3, $"{paramName}.{nameof(SupercompressionScheme)}");
 
             // TODO: more checks required
         }
