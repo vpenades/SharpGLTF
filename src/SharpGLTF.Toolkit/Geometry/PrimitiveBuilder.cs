@@ -328,7 +328,7 @@ namespace SharpGLTF.Geometry
         {
             Guard.NotNull(vertexTransformFunc, nameof(vertexTransformFunc));
 
-            _Vertices.TransformVertices(vertexTransformFunc);
+            _Vertices.ApplyTransform(vertexTransformFunc);
 
             TvG geoFunc(TvG g) => vertexTransformFunc(new VertexBuilder<TvG, TvM, TvS>(g, default, default(TvS))).Geometry;
 
@@ -391,7 +391,7 @@ namespace SharpGLTF.Geometry
 
         #region helper types
 
-        private sealed class VertexListWrapper : VertexList<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
+        private sealed class VertexListWrapper : ValueListSet<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
         {
             #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
             IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];

@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 using NUnit.Framework;
+
+using XYZ = System.Numerics.Vector3;
 
 namespace SharpGLTF.Collections
 {
@@ -65,7 +68,41 @@ namespace SharpGLTF.Collections
 
         }
 
-        
+        [Test]
+        public void TestValueListSet()
+        {
+            var a = new XYZ(1.1f);
+            var b = new XYZ(1.2f);
+            var c = new XYZ(1.3f);
+            var d = new XYZ(1.4f);
+
+            var vlist = new ValueListSet<XYZ>();
+
+            var idx0 = vlist.Use(a); Assert.AreEqual(0, idx0);
+            var idx1 = vlist.Use(b); Assert.AreEqual(1, idx1);
+            var idx2 = vlist.Use(a); Assert.AreEqual(0, idx2);
+
+            Assert.AreEqual(a, vlist[idx0]);
+            Assert.AreEqual(b, vlist[idx1]);
+            Assert.AreEqual(a, vlist[idx2]);
+
+            CollectionAssert.AreEqual(new[] { a, b }, vlist.ToArray());
+
+            vlist.Use(c);
+            vlist.Use(d);
+            CollectionAssert.AreEqual(new[] { a, b, c, d }, vlist.ToArray());
+
+            var vlist2 = new ValueListSet<XYZ>();
+            vlist.CopyTo(vlist2);
+
+            Assert.AreEqual(vlist[0], vlist2[0]);
+            Assert.AreEqual(vlist[1], vlist2[1]);
+            Assert.AreEqual(vlist[2], vlist2[2]);
+            Assert.AreEqual(vlist[3], vlist2[3]);
+
+        }
+
+
 
     }
 }

@@ -78,7 +78,7 @@ namespace SharpGLTF.Collections
             return idx;
         }
 
-        public void TransformVertices(Func<T, T> transformFunc)
+        public void ApplyTransform(Func<T, T> transformFunc)
         {
             // although our "apparent" dictionary keys and values remain the same
             // we must reconstruct the VertexCache to regenerate the hashes.
