@@ -12,7 +12,7 @@ namespace SharpGLTF.Geometry
     /// to <see cref="Schema2.Mesh"/>.
     /// </summary>
     /// <typeparam name="TMaterial">A material key to split primitives by material.</typeparam>
-    class PackedMeshBuilder<TMaterial>
+    class PackedMeshBuilder<TMaterial> : BaseBuilder
     {
         #region lifecycle
 
@@ -65,18 +65,11 @@ namespace SharpGLTF.Geometry
         }
 
         private PackedMeshBuilder(string name, IO.JsonContent extras)
-        {
-            _MeshName = name;
-            _MeshExtras = extras;
-        }
+            : base(name, extras) { }
 
         #endregion
 
         #region data
-
-        private readonly string _MeshName;
-
-        private readonly IO.JsonContent _MeshExtras;
 
         private readonly List<PackedPrimitiveBuilder<TMaterial>> _Primitives = new List<PackedPrimitiveBuilder<TMaterial>>();
 
@@ -96,8 +89,8 @@ namespace SharpGLTF.Geometry
         {
             if (_Primitives.Count == 0) return null;
 
-            var dstMesh = root.CreateMesh(_MeshName);
-            dstMesh.Extras = _MeshExtras.DeepClone();
+            var dstMesh = root.CreateMesh();
+            this.TryCopyNameAndExtrasTo(dstMesh);
 
             foreach (var p in _Primitives)
             {

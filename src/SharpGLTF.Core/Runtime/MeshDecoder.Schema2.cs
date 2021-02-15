@@ -19,11 +19,12 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        public _MeshDecoder(Schema2.Mesh srcMesh)
+        public _MeshDecoder(Schema2.Mesh srcMesh, RuntimeOptions options)
         {
             Guard.NotNull(srcMesh, nameof(srcMesh));
 
             _Name = srcMesh.Name;
+            _Extras = RuntimeOptions.ConvertExtras(srcMesh, options);
 
             _LogicalIndex = srcMesh.LogicalIndex;
 
@@ -31,8 +32,6 @@ namespace SharpGLTF.Runtime
                 .Primitives
                 .Select(item => new _MeshPrimitiveDecoder<TMaterial>(item))
                 .ToArray();
-
-            _Extras = srcMesh.Extras;
         }
 
         #endregion
@@ -40,19 +39,19 @@ namespace SharpGLTF.Runtime
         #region data
 
         private readonly string _Name;
+        private readonly Object _Extras;
+
         private readonly int _LogicalIndex;
         private readonly _MeshPrimitiveDecoder<TMaterial>[] _Primitives;
-
-        private readonly Object _Extras;
 
         #endregion
 
         #region properties
 
         public string Name => _Name;
+        public Object Extras => _Extras;
         public int LogicalIndex => _LogicalIndex;
         public IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives => _Primitives;
-        public Object Extras => _Extras;
 
         #endregion
 

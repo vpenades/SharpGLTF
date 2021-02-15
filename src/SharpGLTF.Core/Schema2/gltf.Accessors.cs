@@ -12,14 +12,14 @@ namespace SharpGLTF.Schema2
     // https://github.com/KhronosGroup/glTF/issues/827#issuecomment-277537204
 
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._AccessorDebugProxy))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._AccessorDebugProxy))]
     public sealed partial class Accessor
     {
         #region debug
 
         internal string _GetDebuggerDisplay()
         {
-            return Debug.DebuggerDisplay.ToReportLong(this);
+            return Diagnostics.DebuggerDisplay.ToReportLong(this);
         }
 
         #endregion

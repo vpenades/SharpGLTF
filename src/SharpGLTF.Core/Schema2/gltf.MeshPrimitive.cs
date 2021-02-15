@@ -15,7 +15,7 @@ namespace SharpGLTF.Schema2
         {
             var txt = $"Primitive[{this.LogicalIndex}]";
 
-            return Debug.DebuggerDisplay.ToReport(this, txt);
+            return Diagnostics.DebuggerDisplay.ToReport(this, txt);
         }
 
         #endregion

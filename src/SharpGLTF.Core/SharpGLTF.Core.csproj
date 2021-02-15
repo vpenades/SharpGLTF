@@ -19,7 +19,7 @@
   <Import Project="..\Testing.props" />
   
   <ItemGroup>
-    <Compile Include="..\Shared\Guard.cs" Link="Debug\Guard.cs" />
+    <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
   </ItemGroup>  
   

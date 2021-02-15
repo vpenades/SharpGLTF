@@ -13,7 +13,7 @@ namespace SharpGLTF.Scenes
     /// Defines a node object within an armature.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public class NodeBuilder
+    public class NodeBuilder : BaseBuilder
     {
         #region debug
 
@@ -54,7 +54,11 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder() { }
 
-        public NodeBuilder(string name) { Name = name; }
+        public NodeBuilder(string name)
+            : base(name) { }
+
+        public NodeBuilder(string name, IO.JsonContent extras)
+            : base(name, extras) { }
 
         public Dictionary<NodeBuilder, NodeBuilder> DeepClone()
         {
@@ -69,15 +73,14 @@ namespace SharpGLTF.Scenes
         {
             var clone = new NodeBuilder();
 
+            clone.SetNameAndExtrasFrom(this);
+
             nodeMap[this] = clone;
 
-            clone.Name = this.Name;
             clone._Matrix = this._Matrix;
             clone._Scale = this._Scale?.Clone();
             clone._Rotation = this._Rotation?.Clone();
             clone._Translation = this._Translation?.Clone();
-
-            clone.Extras = this.Extras.DeepClone();
 
             foreach (var c in _Children)
             {
@@ -99,14 +102,6 @@ namespace SharpGLTF.Scenes
         private Animations.AnimatableProperty<Vector3> _Scale;
         private Animations.AnimatableProperty<Quaternion> _Rotation;
         private Animations.AnimatableProperty<Vector3> _Translation;
-
-        #endregion
-
-        #region properties
-
-        public String Name { get; set; }
-
-        public IO.JsonContent Extras { get; set; }
 
         #endregion
 
@@ -503,12 +498,6 @@ namespace SharpGLTF.Scenes
                 track.SetPoint(kf.Key, kf.Value);
             }
 
-            return this;
-        }
-
-        public NodeBuilder WithExtras(IO.JsonContent content)
-        {
-            Extras = content;
             return this;
         }
 

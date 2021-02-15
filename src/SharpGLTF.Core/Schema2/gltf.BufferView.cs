@@ -6,7 +6,7 @@ using BYTES = System.ArraySegment<byte>;
 
 namespace SharpGLTF.Schema2
 {
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._BufferViewDebugProxy))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._BufferViewDebugProxy))]
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public sealed partial class BufferView
     {
@@ -14,7 +14,7 @@ namespace SharpGLTF.Schema2
 
         internal string _GetDebuggerDisplay()
         {
-            return Debug.DebuggerDisplay.ToReport(this);
+            return Diagnostics.DebuggerDisplay.ToReport(this);
         }
 
         #endregion

@@ -21,11 +21,31 @@ namespace SharpGLTF.Runtime
         /// <param name="srcScene">The source <see cref="Schema2.Scene"/> to templateize.</param>
         /// <param name="isolateMemory">True if we want to copy data instead of sharing it.</param>
         /// <returns>A new <see cref="SceneTemplate"/> instance.</returns>
+        [Obsolete("Use Create(Schema2.Scene srcScene, RuntimeOptions options)")]
         public static SceneTemplate Create(Schema2.Scene srcScene, bool isolateMemory)
+        {
+            RuntimeOptions options = null;
+
+            if (isolateMemory)
+            {
+                options = new RuntimeOptions();
+                options.IsolateMemory = true;
+            }
+
+            return Create(srcScene, options);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="SceneTemplate"/> from a given <see cref="Schema2.Scene"/>.
+        /// </summary>
+        /// <param name="srcScene">The source <see cref="Schema2.Scene"/> to templateize.</param>
+        /// <param name="options">Custom processing options, or null.</param>
+        /// <returns>A new <see cref="SceneTemplate"/> instance.</returns>
+        public static SceneTemplate Create(Schema2.Scene srcScene, RuntimeOptions options = null)
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
-            var armature = ArmatureTemplate.Create(srcScene, isolateMemory);
+            var armature = ArmatureTemplate.Create(srcScene, options);
 
             // gather scene nodes.
 
@@ -58,12 +78,15 @@ namespace SharpGLTF.Runtime
                     (DrawableTemplate)new RigidDrawableTemplate(srcInstance, indexSolver);
             }
 
-            return new SceneTemplate(srcScene.Name, armature, drawables);
+            var extras = RuntimeOptions.ConvertExtras(srcScene, options);
+
+            return new SceneTemplate(srcScene.Name, extras, armature, drawables);
         }
 
-        private SceneTemplate(string name, ArmatureTemplate armature, DrawableTemplate[] drawables)
+        private SceneTemplate(string name, Object extras, ArmatureTemplate armature, DrawableTemplate[] drawables)
         {
             _Name = name;
+            _Extras = extras;
             _Armature = armature;
             _DrawableReferences = drawables;
         }
@@ -73,6 +96,7 @@ namespace SharpGLTF.Runtime
         #region data
 
         private readonly String _Name;
+        private readonly Object _Extras;
         private readonly ArmatureTemplate _Armature;
         private readonly DrawableTemplate[] _DrawableReferences;
 
@@ -81,6 +105,8 @@ namespace SharpGLTF.Runtime
         #region properties
 
         public String Name => _Name;
+
+        public Object Extras => _Extras;
 
         /// <summary>
         /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/>

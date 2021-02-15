@@ -192,6 +192,19 @@ namespace SharpGLTF
 
         #region linq
 
+        public static bool AreSameReference<T>(this (T x, T y) refs, out bool result)
+            where T : class
+        {
+            #pragma warning disable IDE0041 // Use 'is null' check
+            if (Object.ReferenceEquals(refs.x, refs.y)) { result = true; return true; }
+            if (Object.ReferenceEquals(refs.x, null)) { result = false; return true; }
+            if (Object.ReferenceEquals(refs.y, null)) { result = false; return true; }
+            #pragma warning restore IDE0041 // Use 'is null' check
+
+            result = false;
+            return false;
+        }
+
         internal static int GetContentHashCode<T>(this IEnumerable<T> collection, int count = int.MaxValue)
         {
             if (collection == null) return 0;

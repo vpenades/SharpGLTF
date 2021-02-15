@@ -18,7 +18,7 @@ namespace SharpGLTF
         {
             // create an instantiable scene.
             var sceneInstance = Runtime.SceneTemplate
-                .Create(srcScene, false)
+                .Create(srcScene)
                 .CreateInstance();
 
             // set the node animations for our scene instance-

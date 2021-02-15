@@ -14,7 +14,7 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, bool isolateMemory)
+        internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, RuntimeOptions options)
         {
             _LogicalSourceIndex = srcNode.LogicalIndex;
 
@@ -22,6 +22,7 @@ namespace SharpGLTF.Runtime
             _ChildIndices = childIndices;
 
             Name = srcNode.Name;
+            Extras = RuntimeOptions.ConvertExtras(srcNode, options);
 
             _LocalMatrix = srcNode.LocalMatrix;
             _LocalTransform = srcNode.LocalTransform;
@@ -32,6 +33,8 @@ namespace SharpGLTF.Runtime
 
             var mw = Transforms.SparseWeight8.Create(srcNode.MorphWeights);
             _Morphing = new AnimatableProperty<Transforms.SparseWeight8>(mw);
+
+            var isolateMemory = options?.IsolateMemory ?? false;
 
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
@@ -84,6 +87,8 @@ namespace SharpGLTF.Runtime
         #region properties
 
         public string Name { get; set; }
+
+        public Object Extras { get; set; }
 
         /// <summary>
         /// Gets the index of the source <see cref="Schema2.Node"/> in <see cref="Schema2.ModelRoot.LogicalNodes"/>

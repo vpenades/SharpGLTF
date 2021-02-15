@@ -5,11 +5,24 @@ using System.Text;
 
 namespace SharpGLTF.Scenes
 {
-    public abstract class CameraBuilder
+    public abstract class CameraBuilder : BaseBuilder
     {
         #region lifecycle
 
         public abstract CameraBuilder Clone();
+
+        protected CameraBuilder(float znear, float zfar)
+        {
+            this.ZNear = znear;
+            this.ZFar = zfar;
+        }
+
+        protected CameraBuilder(CameraBuilder other)
+            : base(other)
+        {
+            this.ZNear = other.ZNear;
+            this.ZFar = other.ZFar;
+        }
 
         #endregion
 
@@ -41,19 +54,17 @@ namespace SharpGLTF.Scenes
             #region lifecycle
 
             public Orthographic(float xmag, float ymag, float znear, float zfar)
+                : base(znear, zfar)
             {
                 this.XMag = xmag;
                 this.YMag = ymag;
-                this.ZNear = znear;
-                this.ZFar = zfar;
             }
 
             internal Orthographic(Schema2.CameraOrthographic ortho)
+                : base(ortho.ZFar, ortho.ZFar)
             {
                 this.XMag = ortho.XMag;
                 this.YMag = ortho.YMag;
-                this.ZNear = ortho.ZNear;
-                this.ZFar = ortho.ZFar;
             }
 
             public override CameraBuilder Clone()
@@ -61,12 +72,11 @@ namespace SharpGLTF.Scenes
                 return new Orthographic(this);
             }
 
-            internal Orthographic(Orthographic ortho)
+            private Orthographic(Orthographic ortho)
+                : base(ortho)
             {
                 this.XMag = ortho.XMag;
                 this.YMag = ortho.YMag;
-                this.ZNear = ortho.ZNear;
-                this.ZFar = ortho.ZFar;
             }
 
             #endregion
@@ -97,19 +107,17 @@ namespace SharpGLTF.Scenes
             #region lifecycle
 
             public Perspective(float? aspectRatio, float fovy, float znear, float zfar = float.PositiveInfinity)
+                : base(znear, zfar)
             {
                 this.AspectRatio = aspectRatio;
                 this.VerticalFOV = fovy;
-                this.ZNear = znear;
-                this.ZFar = zfar;
             }
 
             internal Perspective(Schema2.CameraPerspective persp)
+                : base(persp.ZNear, persp.ZFar)
             {
                 this.AspectRatio = persp.AspectRatio;
                 this.VerticalFOV = persp.VerticalFOV;
-                this.ZNear = persp.ZNear;
-                this.ZFar = persp.ZFar;
             }
 
             public override CameraBuilder Clone()
@@ -117,12 +125,11 @@ namespace SharpGLTF.Scenes
                 return new Perspective(this);
             }
 
-            internal Perspective(Perspective persp)
+            private Perspective(Perspective persp)
+                : base(persp)
             {
                 this.AspectRatio = persp.AspectRatio;
                 this.VerticalFOV = persp.VerticalFOV;
-                this.ZNear = persp.ZNear;
-                this.ZFar = persp.ZFar;
             }
 
             #endregion

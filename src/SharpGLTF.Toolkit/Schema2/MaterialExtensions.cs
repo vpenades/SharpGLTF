@@ -177,7 +177,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(root, nameof(root));
             Guard.NotNull(mb, nameof(mb));
 
-            var m = root.CreateMaterial(mb.Name);
+            var m = root.CreateMaterial();
 
             mb.CopyTo(m);
 
@@ -273,7 +273,8 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
 
-            dstMaterial.Name = srcMaterial.Name;
+            dstMaterial.SetNameAndExtrasFrom(srcMaterial);
+
             dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
@@ -307,9 +308,10 @@ namespace SharpGLTF.Schema2
 
             dstChannel.Parameter = srcChannel.Parameter;
 
-            if (srcChannel.Texture == null) { return; }
-
+            if (srcChannel.Texture == null) return;
             if (dstChannel.Texture == null) dstChannel.UseTexture();
+
+            dstChannel.Texture.SetNameAndExtrasFrom(srcChannel.Texture);
 
             dstChannel.Texture.CoordinateSet = srcChannel.TextureCoordinate;
 
@@ -328,8 +330,14 @@ namespace SharpGLTF.Schema2
                 dstChannel.Texture.WithTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.TextureCoordinateOverride);
             }
 
-            dstChannel.Texture.PrimaryImage = srcChannel.Texture.PrimaryImage?.Content ?? Memory.MemoryImage.Empty;
-            dstChannel.Texture.FallbackImage = srcChannel.Texture.FallbackImage?.Content ?? Memory.MemoryImage.Empty;
+            ImageBuilder _convert(Image src)
+            {
+                if (src == null) return null;
+                return ImageBuilder.From(src.Content, src.Name, src.Extras.DeepClone());
+            }
+
+            dstChannel.Texture.PrimaryImage = _convert(srcChannel.Texture.PrimaryImage);
+            dstChannel.Texture.FallbackImage = _convert(srcChannel.Texture.FallbackImage);
         }
 
         public static void CopyTo(this MaterialBuilder srcMaterial, Material dstMaterial)
@@ -338,6 +346,8 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
 
             srcMaterial.ValidateForSchema2();
+
+            srcMaterial.TryCopyNameAndExtrasTo(dstMaterial);
 
             dstMaterial.Alpha = srcMaterial.AlphaMode.ToSchema2();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
@@ -421,23 +431,31 @@ namespace SharpGLTF.Schema2
             Image primary = null;
             Image fallback = null;
 
-            if (srcTex.PrimaryImage.IsValid)
+            if (ImageBuilder.IsValid(srcTex.PrimaryImage))
             {
                 primary = dstChannel
-                .LogicalParent
-                .LogicalParent
-                .UseImageWithContent(srcTex.PrimaryImage);
+                    .LogicalParent
+                    .LogicalParent
+                    .UseImageWithContent(srcTex.PrimaryImage.Content);
+
+                srcTex.PrimaryImage.TryCopyNameAndExtrasTo(primary);
             }
 
-            if (srcTex.FallbackImage.IsValid)
+            if (primary == null) return;
+
+            if (ImageBuilder.IsValid(srcTex.FallbackImage))
             {
                 fallback = dstChannel
-                .LogicalParent
-                .LogicalParent
-                .UseImageWithContent(srcTex.FallbackImage);
+                    .LogicalParent
+                    .LogicalParent
+                    .UseImageWithContent(srcTex.FallbackImage.Content);
+
+                srcTex.FallbackImage.TryCopyNameAndExtrasTo(fallback);
             }
 
-            dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);
+            var dstTex = dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);
+
+            srcTex.TryCopyNameAndExtrasTo(dstTex);
 
             var srcXform = srcTex.Transform;
 

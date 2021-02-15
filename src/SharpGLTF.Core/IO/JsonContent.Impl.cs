@@ -174,6 +174,92 @@ namespace SharpGLTF.IO
 
             return true;
         }
+
+        public static bool AreEqualByContent(Object x, Object y, float precission)
+        {
+            #pragma warning disable IDE0041 // Use 'is null' check
+            if (Object.ReferenceEquals(x, y)) return true;
+            if (Object.ReferenceEquals(x, null)) return false;
+            if (Object.ReferenceEquals(y, null)) return false;
+            #pragma warning restore IDE0041 // Use 'is null' check
+
+            if (x is IConvertible xval && y is IConvertible yval)
+            {
+                return AreEqual(xval, yval, precission);
+            }
+
+            if (x is IReadOnlyList<object> xarr && y is IReadOnlyList<object> yarr)
+            {
+                if (xarr.Count != yarr.Count) return false;
+                int c = xarr.Count;
+
+                for (int i = 0; i < c; ++i)
+                {
+                    if (!AreEqualByContent(xarr[i], yarr[i], precission)) return false;
+                }
+
+                return true;
+            }
+
+            if (x is IReadOnlyDictionary<string, object> xdic && y is IReadOnlyDictionary<string, object> ydic)
+            {
+                if (xdic.Count != ydic.Count) return false;
+
+                foreach (var key in xdic.Keys)
+                {
+                    if (!xdic.TryGetValue(key, out Object xdval)) return false;
+                    if (!ydic.TryGetValue(key, out Object ydval)) return false;
+
+                    if (!AreEqualByContent(xdval, ydval, precission)) return false;
+                }
+
+                return true;
+            }
+
+            bool isValidType(Object z)
+            {
+                if (z is IConvertible) return true;
+                if (z is IReadOnlyList<Object>) return true;
+                if (z is IReadOnlyDictionary<string, object>) return true;
+                return false;
+            }
+
+            if (!isValidType(x)) throw new ArgumentException($"Invalid type: {x.GetType()}", nameof(x));
+            if (!isValidType(y)) throw new ArgumentException($"Invalid type: {y.GetType()}", nameof(y));
+
+            return false;
+        }
+
+        private static bool AreEqual(IConvertible x, IConvertible y, float precission)
+        {
+            var xc = x.GetTypeCode();
+            var yc = y.GetTypeCode();
+
+            if (xc == TypeCode.Decimal || yc == TypeCode.Decimal)
+            {
+                var xf = y.ToDecimal(CULTURE.InvariantCulture);
+                var yf = y.ToDecimal(CULTURE.InvariantCulture);
+                return Math.Abs((double)(xf - yf)) < precission;
+            }
+
+            if (xc == TypeCode.Double || yc == TypeCode.Double)
+            {
+                var xf = y.ToDouble(CULTURE.InvariantCulture);
+                var yf = y.ToDouble(CULTURE.InvariantCulture);
+                return Math.Abs(xf - yf) < precission;
+            }
+
+            if (xc == TypeCode.Single || yc == TypeCode.Single)
+            {
+                var xf = y.ToSingle(CULTURE.InvariantCulture);
+                var yf = y.ToSingle(CULTURE.InvariantCulture);
+                return Math.Abs(xf - yf) < precission;
+            }
+
+            if (xc == yc) return Object.Equals(x, y);
+
+            return false;
+        }
     }
 
     /// <summary>
@@ -185,8 +271,8 @@ namespace SharpGLTF.IO
 
         public static bool TryCreate(Object value, out _JsonArray obj)
         {
-            if (value is IConvertible _) { obj = default; return false; }
-            if (value is IDictionary _) { obj = default; return false; }
+            if (value is IConvertible) { obj = default; return false; }
+            if (value is IDictionary) { obj = default; return false; }
             if (value is IEnumerable collection) { obj = _From(collection); return true; }
 
             obj = default;
@@ -208,9 +294,19 @@ namespace SharpGLTF.IO
             }
         }
 
-        private static _JsonArray _From(IEnumerable collection) { return new _JsonArray(collection); }
+        private static _JsonArray _From(IEnumerable collection)
+        {
+            return new _JsonArray(TryClone(collection));
+        }
 
-        private _JsonArray(IEnumerable collection)
+        private _JsonArray(Array array)
+        {
+            _Array = array;
+        }
+
+        public object Clone() { return _From(this); }
+
+        private static Array TryClone(IEnumerable collection)
         {
             // 1st pass: determine element type and collection size
 
@@ -231,7 +327,11 @@ namespace SharpGLTF.IO
                     continue;
                 }
 
-                if (!elementType.IsAssignableFrom(item.GetType())) throw new ArgumentException($"{nameof(collection)}[{count}] is invalid type.", nameof(collection));
+                // subsequent types must match elementType.
+                if (!elementType.IsAssignableFrom(item.GetType()))
+                {
+                    throw new ArgumentException($"{nameof(collection)}[{count}] is invalid type.", nameof(collection));
+                }
             }
 
             if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))
@@ -241,24 +341,26 @@ namespace SharpGLTF.IO
 
             int contentType = 0;
             if (elementType == typeof(IConvertible)) contentType = 1;
-            if (contentType == 0 && elementType == typeof(IDictionary)) contentType = 3;
-            if (contentType == 0 && elementType.IsAssignableFrom(typeof(IEnumerable))) contentType = 2;
+            if (contentType == 0 && typeof(IDictionary).IsAssignableFrom(elementType)) contentType = 3;
+            if (contentType == 0 && typeof(IEnumerable).IsAssignableFrom(elementType)) contentType = 2;
+
+            Array container = null;
 
             switch (contentType)
             {
-                case 1: _Array = Array.CreateInstance(typeof(IConvertible), count); break;
-                case 2: _Array = Array.CreateInstance(typeof(_JsonArray), count); break;
-                case 3: _Array = Array.CreateInstance(typeof(_JsonObject), count); break;
+                case 1: container = Array.CreateInstance(typeof(IConvertible), count); break;
+                case 2: container = Array.CreateInstance(typeof(_JsonArray), count); break;
+                case 3: container = Array.CreateInstance(typeof(_JsonObject), count); break;
                 default: throw new NotImplementedException();
             }
 
             // 2nd pass: convert and assign items.
 
             int idx = 0;
-            foreach (var item in collection) _Array.SetValue(_JsonStaticUtils.Serialize(item), idx++);
-        }
+            foreach (var item in collection) container.SetValue(_JsonStaticUtils.Serialize(item), idx++);
 
-        public object Clone() { return _From(this); }
+            return container;
+        }
 
         #endregion
 

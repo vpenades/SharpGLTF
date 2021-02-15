@@ -10,8 +10,11 @@ using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
 
 namespace SharpGLTF.Materials
 {
+    /// <summary>
+    /// Represents the root object of a material instance structure.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    public class MaterialBuilder
+    public class MaterialBuilder : BaseBuilder
     {
         #region debug
 
@@ -67,23 +70,21 @@ namespace SharpGLTF.Materials
 
         #region lifecycle
 
-        public MaterialBuilder(string name = null)
-        {
-            Name = name;
-        }
-
         public static MaterialBuilder CreateDefault()
         {
             return new MaterialBuilder("Default");
         }
 
+        public MaterialBuilder(string name = null)
+            : base(name) { }
+
         public MaterialBuilder Clone() { return new MaterialBuilder(this); }
 
         public MaterialBuilder(MaterialBuilder other)
+            : base(other)
         {
             Guard.NotNull(other, nameof(other));
 
-            this.Name = other.Name;
             this.AlphaMode = other.AlphaMode;
             this.AlphaCutoff = other.AlphaCutoff;
             this.DoubleSided = other.DoubleSided;
@@ -114,11 +115,6 @@ namespace SharpGLTF.Materials
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private string _ShaderStyle = SHADERPBRMETALLICROUGHNESS;
 
-        /// <summary>
-        /// Gets or sets the name of this <see cref="MaterialBuilder"/> instance.
-        /// </summary>
-        public string Name { get; set; }
-
         public AlphaMode AlphaMode { get; set; } = AlphaMode.OPAQUE;
 
         public Single AlphaCutoff { get; set; } = 0.5f;
@@ -136,19 +132,10 @@ namespace SharpGLTF.Materials
 
         public static bool AreEqualByContent(MaterialBuilder x, MaterialBuilder y)
         {
-            #pragma warning disable IDE0041 // Use 'is null' check
-            if (Object.ReferenceEquals(x, y)) return true;
-            if (Object.ReferenceEquals(x, null)) return false;
-            if (Object.ReferenceEquals(y, null)) return false;
-            #pragma warning restore IDE0041 // Use 'is null' check
+            if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
 
-            // Although .Name is not strictly a material property,
-            // it identifies a specific material during Runtime that
-            // might be relevant and needs to be preserved.
-            // If an author needs materials to be merged, it's better
-            // to keep the Name as null, or to use a common name like "Default".
+            if (!BaseBuilder.AreEqualByContent(x, y)) return false;
 
-            if (x.Name != y.Name) return false;
             if (x.AlphaMode != y.AlphaMode) return false;
             if (x.AlphaCutoff != y.AlphaCutoff) return false;
             if (x.DoubleSided != y.DoubleSided) return false;
@@ -178,7 +165,7 @@ namespace SharpGLTF.Materials
         {
             if (x == null) return 0;
 
-            var h = x.Name == null ? 0 : x.Name.GetHashCode();
+            var h = BaseBuilder.GetContentHashCode(x);
 
             h ^= x.AlphaMode.GetHashCode();
             h ^= x.AlphaCutoff.GetHashCode();

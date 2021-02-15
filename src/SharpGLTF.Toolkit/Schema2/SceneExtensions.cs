@@ -214,7 +214,7 @@ namespace SharpGLTF.Schema2
             if (scene == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
             var instance = Runtime.SceneTemplate
-                .Create(scene, false)
+                .Create(scene)
                 .CreateInstance();
 
             if (animation == null)
@@ -250,7 +250,7 @@ namespace SharpGLTF.Schema2
             if (scene == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
             var instance = Runtime.SceneTemplate
-                .Create(scene, false)
+                .Create(scene)
                 .CreateInstance();
 
             if (animation == null)

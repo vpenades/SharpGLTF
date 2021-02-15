@@ -14,7 +14,7 @@ namespace SharpGLTF.Schema2
 
         internal string _DebuggerDisplay()
         {
-            return $"Image[{LogicalIndex}] {Name} = {Content.DisplayText}";
+            return $"Image[{LogicalIndex}] {Name} = {Content.ToDebuggerDisplay()}";
         }
 
         #endregion

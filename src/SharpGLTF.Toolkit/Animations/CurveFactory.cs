@@ -30,7 +30,7 @@ namespace SharpGLTF.Animations
         }
     }
 
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyVector3))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxyVector3))]
     sealed class Vector3CurveBuilder : CurveBuilder<Vector3>, ICurveSampler<Vector3>
     {
         #region lifecycle
@@ -85,7 +85,7 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxyQuaternion))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxyQuaternion))]
     sealed class QuaternionCurveBuilder : CurveBuilder<Quaternion>, ICurveSampler<Quaternion>
     {
         #region lifecycle
@@ -141,7 +141,7 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._CurveBuilderDebugProxySparse))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxySparse))]
     sealed class SparseCurveBuilder : CurveBuilder<SPARSE>, ICurveSampler<SPARSE>
     {
         #region lifecycle

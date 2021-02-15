@@ -43,10 +43,7 @@ namespace SharpGLTF.Schema2
         public IReadOnlyCollection<JsonSerializable> Extensions => _extensions;
 
         /// <summary>
-        /// Gets the extras of this instance, where the value can be
-        /// an <see cref="IConvertible"/>,
-        /// a <see cref="IReadOnlyList{Object}"/> or
-        /// a <see cref="IReadOnlyDictionary{String, Object}"/>.
+        /// Gets or sets the extras content of this instance.
         /// </summary>
         public IO.JsonContent Extras
         {

@@ -7,7 +7,7 @@ using SharpGLTF.Collections;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    [System.Diagnostics.DebuggerTypeProxy(typeof(Debug._MeshDebugProxy))]
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._MeshDebugProxy))]
     public sealed partial class Mesh
     {
         #region debug

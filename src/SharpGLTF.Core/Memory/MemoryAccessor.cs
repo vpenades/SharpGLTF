@@ -20,7 +20,7 @@ namespace SharpGLTF.Memory
 
         internal string _GetDebuggerDisplay()
         {
-            return Debug.DebuggerDisplay.ToReport(this);
+            return Diagnostics.DebuggerDisplay.ToReport(this);
         }
 
         #endregion

@@ -65,7 +65,7 @@ namespace SharpGLTF.Runtime
             var scene = model.DefaultScene;
             
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
-            var sceneTemplate = SceneTemplate.Create(scene, false);
+            var sceneTemplate = SceneTemplate.Create(scene);
             var sceneInstance = sceneTemplate.CreateInstance();
 
             var duration = sceneInstance.Armature.AnimationTracks[0].Duration;
@@ -108,7 +108,7 @@ namespace SharpGLTF.Runtime
 
             var (center, radius) = model.DefaultScene.EvaluateBoundingSphere(0.25f);           
             
-            var sceneTemplate = SceneTemplate.Create(model.DefaultScene, false);
+            var sceneTemplate = SceneTemplate.Create(model.DefaultScene);
             var sceneInstance = sceneTemplate.CreateInstance();
             sceneInstance.Armature.SetAnimationFrame(0, 0.1f);
 

@@ -14,28 +14,28 @@ namespace SharpGLTF.Geometry
     /// </summary>
     /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/> instance.</typeparam>
     /// <typeparam name="TvG">
-    /// The vertex fragment type with Position, Normal and Tangent.
-    /// Valid types are:
-    /// <see cref="VertexPosition"/>,
-    /// <see cref="VertexPositionNormal"/>,
-    /// <see cref="VertexPositionNormalTangent"/>.
+    /// The vertex fragment type with Position, Normal and Tangent.<br/>
+    /// Valid types are:<br/>
+    /// - <see cref="VertexPosition"/>,<br/>
+    /// - <see cref="VertexPositionNormal"/>,<br/>
+    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
     /// </typeparam>
     /// <typeparam name="TvM">
-    /// The vertex fragment type with Colors and Texture Coordinates.
-    /// Valid types are:
-    /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexColor1"/>,
-    /// <see cref="VertexTexture1"/>,
-    /// <see cref="VertexColor1Texture1"/>.
-    /// <see cref="VertexColor1Texture2"/>.
-    /// <see cref="VertexColor2Texture2"/>.
+    /// The vertex fragment type with Colors and Texture Coordinates.<br/>
+    /// Valid types are:<br/>
+    /// - <see cref="VertexEmpty"/>,<br/>
+    /// - <see cref="VertexColor1"/>,<br/>
+    /// - <see cref="VertexTexture1"/>,<br/>
+    /// - <see cref="VertexColor1Texture1"/>.<br/>
+    /// - <see cref="VertexColor1Texture2"/>.<br/>
+    /// - <see cref="VertexColor2Texture2"/>.<br/>
     /// </typeparam>
     /// <typeparam name="TvS">
-    /// The vertex fragment type with Skin Joint Weights.
-    /// Valid types are:
-    /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexJoints4"/>,
-    /// <see cref="VertexJoints8"/>.
+    /// The vertex fragment type with Skin Joint Weights.<br/>
+    /// Valid types are:<br/>
+    /// - <see cref="VertexEmpty"/>,<br/>
+    /// - <see cref="VertexJoints4"/>,<br/>
+    /// - <see cref="VertexJoints8"/>.<br/>
     /// </typeparam>
     public abstract class PrimitiveBuilder<TMaterial, TvG, TvM, TvS> : IPrimitiveBuilder, IPrimitiveReader<TMaterial>
         where TvG : struct, IVertexGeometry
@@ -163,6 +163,16 @@ namespace SharpGLTF.Geometry
         void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta)
         {
             _UseMorphTarget(morphTargetIndex).SetVertexDelta(vertexIndex, delta);
+        }
+
+        /// <summary>
+        /// Checks if a vertex is already in the vertex buffer.
+        /// </summary>
+        /// <param name="vertex">The vertex to query.</param>
+        /// <returns>True if the vertex is already in.</returns>
+        public bool ContainsVertex(in VertexBuilder<TvG, TvM, TvS> vertex)
+        {
+            return _Vertices.IndexOf(vertex) >= 0;
         }
 
         /// <summary>

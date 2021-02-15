@@ -108,6 +108,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             float weightsSum = 0;
 
+            // The threshold for weights sum is defined as 2e-7 * weightCount.
+            // Refer to https://github.com/KhronosGroup/glTF-Validator/issues/132#issuecomment-578118301
+            // and to https://github.com/KhronosGroup/glTF/pull/1749
+            float threshold = 0;
+
             for (int i = 0; i < vertex.MaxBindings; ++i)
             {
                 var (index, weight) = vertex.GetJointBinding(i);
@@ -117,11 +122,13 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (weight == 0) Guard.IsTrue(index == 0, "joints with weight zero must be set to zero");
 
                 weightsSum += weight;
+
+                if (weight > 0) threshold += 2e-7f;
             }
 
-            // TODO: check that joints are unique
+            Guard.MustBeLessThan(Math.Abs(weightsSum-1), threshold, $"Weights must sum 1, but found {weightsSum}");
 
-            Guard.MustBeBetweenOrEqualTo(weightsSum, 0.99f, 1.01f, "Weights SUM");
+            // TODO: check that joints are unique
 
             return vertex;
         }

@@ -133,7 +133,7 @@ namespace SharpGLTF.Schema2
             return _Material.LogicalParent.LogicalTextures[texInfo._LogicalTextureIndex];
         }
 
-        public void SetTexture(
+        public Texture SetTexture(
             int texCoord,
             Image primaryImg,
             Image fallbackImg = null,
@@ -142,7 +142,7 @@ namespace SharpGLTF.Schema2
             TextureMipMapFilter min = TextureMipMapFilter.DEFAULT,
             TextureInterpolationFilter mag = TextureInterpolationFilter.DEFAULT)
         {
-            if (primaryImg == null) return; // in theory, we should completely remove the TextureInfo
+            if (primaryImg == null) return null; // in theory, we should completely remove the TextureInfo
 
             Guard.NotNull(_Material, nameof(_Material));
 
@@ -150,6 +150,8 @@ namespace SharpGLTF.Schema2
             var texture = _Material.LogicalParent.UseTexture(primaryImg, fallbackImg, sampler);
 
             SetTexture(texCoord, texture);
+
+            return texture;
         }
 
         public void SetTexture(int texSet, Texture tex)
@@ -163,6 +165,16 @@ namespace SharpGLTF.Schema2
 
             texInfo.TextureCoordinate = texSet;
             texInfo._LogicalTextureIndex = tex.LogicalIndex;
+        }
+
+        private Texture TryGetTexture()
+        {
+            if (_TextureInfo == null) throw new InvalidOperationException();
+
+            var texInfo = _TextureInfo(false);
+            if (texInfo == null) return null;
+            if (texInfo._LogicalTextureIndex < 0) return null;
+            return _Material.LogicalParent.LogicalTextures[texInfo._LogicalTextureIndex];
         }
 
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation = 0, int? texCoordOverride = null)

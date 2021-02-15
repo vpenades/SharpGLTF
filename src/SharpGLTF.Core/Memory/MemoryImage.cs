@@ -10,9 +10,27 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Represents an image file stored as an in-memory byte array
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{DisplayText,nq}")]
+    [System.Diagnostics.DebuggerDisplay("{ToDebuggerDisplay(),nq}")]
     public readonly struct MemoryImage : IEquatable<MemoryImage>
     {
+        #region debug
+
+        public string ToDebuggerDisplay()
+        {
+            if (!string.IsNullOrWhiteSpace(_SourcePathHint)) return System.IO.Path.GetFileName(_SourcePathHint);
+
+            if (IsEmpty) return "Empty";
+            if (!_IsImage(_Image)) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsKtx2) return $"KTX2 {_Image.Count}ᴮʸᵗᵉˢ";
+            return "Undefined";
+        }
+
+        #endregion
+
         #region constants
 
         const string EMBEDDED_OCTET_STREAM = "data:application/octet-stream";
@@ -161,8 +179,14 @@ namespace SharpGLTF.Memory
         public ReadOnlyMemory<Byte> Content => _Image;
 
         /// <summary>
-        /// Gets the source path of this image, or null if the image cannot be tracked to a file path (as it is the case of embedded images)
+        /// Gets the source path of this image, or null.<br/>
+        /// ⚠️ DO NOT USE AS AN IMAGE ID ⚠️
         /// </summary>
+        /// <remarks>
+        /// Not all images are expected to have a source path.<br/>
+        /// Specifically images embedded in a GLB file or encoded with BASE64
+        /// will not have any source path at all.
+        /// </remarks>
         public string SourcePath => _SourcePathHint;
 
         /// <summary>
@@ -231,22 +255,6 @@ namespace SharpGLTF.Memory
                 if (IsWebp) return MIME_WEBP;
                 if (IsKtx2) return MIME_KTX2;
                 throw new NotImplementedException();
-            }
-        }
-
-        public string DisplayText
-        {
-            get {
-                if (!string.IsNullOrWhiteSpace(_SourcePathHint)) return System.IO.Path.GetFileName(_SourcePathHint);
-
-                if (IsEmpty) return "Empty";
-                if (!_IsImage(_Image)) return $"Unknown {_Image.Count}ᴮʸᵗᵉˢ";
-                if (IsJpg) return $"JPG {_Image.Count}ᴮʸᵗᵉˢ";
-                if (IsPng) return $"PNG {_Image.Count}ᴮʸᵗᵉˢ";
-                if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
-                if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
-                if (IsKtx2) return $"KTX2 {_Image.Count}ᴮʸᵗᵉˢ";
-                return "Undefined";
             }
         }
 

@@ -23,10 +23,7 @@ namespace SharpGLTF.Schema2
             set => _texCoord = value.AsNullable(_texCoordDefault, _texCoordMinimum, int.MaxValue);
         }
 
-        public TextureTransform Transform
-        {
-            get => this.GetExtension<TextureTransform>();
-        }
+        public TextureTransform Transform => this.GetExtension<TextureTransform>();
 
         #endregion
 

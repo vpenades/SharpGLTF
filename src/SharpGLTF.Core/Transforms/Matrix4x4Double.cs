@@ -12,7 +12,7 @@ namespace SharpGLTF.Transforms
     // stripped from https://github.com/dotnet/runtime/blob/master/src/libraries/System.Private.CoreLib/src/System/Numerics/Matrix4x4.cs
 
     [StructLayout(LayoutKind.Sequential)]
-    [DebuggerTypeProxy(typeof(Debug._Matrix4x4DoubleProxy))]
+    [DebuggerTypeProxy(typeof(Diagnostics._Matrix4x4DoubleProxy))]
     public struct Matrix4x4Double : IEquatable<Matrix4x4Double>
     {
         #region constants

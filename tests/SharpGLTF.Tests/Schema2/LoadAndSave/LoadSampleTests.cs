@@ -324,7 +324,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // pos_master
 
             var instance = Runtime.SceneTemplate
-                .Create(model.DefaultScene, false)
+                .Create(model.DefaultScene)
                 .CreateInstance();
 
             var pvrt = node.Mesh.Primitives[0].GetVertexColumns();

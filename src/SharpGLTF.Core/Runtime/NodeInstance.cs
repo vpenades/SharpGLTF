@@ -40,6 +40,8 @@ namespace SharpGLTF.Runtime
 
         public String Name => _Template.Name;
 
+        public Object Extras => _Template.Extras;
+
         public NodeInstance VisualParent => _Parent;
 
         public SparseWeight8 MorphWeights

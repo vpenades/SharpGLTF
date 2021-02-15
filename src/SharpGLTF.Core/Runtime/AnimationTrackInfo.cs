@@ -6,13 +6,15 @@ namespace SharpGLTF.Runtime
 {
     public class AnimationTrackInfo
     {
-        public AnimationTrackInfo(string name, float duration)
+        internal AnimationTrackInfo(string name, Object extras, float duration)
         {
             Name = name;
+            Extras = extras;
             Duration = duration;
         }
 
         public string Name { get; private set; }
+        public Object Extras { get; private set; }
         public float Duration { get; private set; }
     }
 }

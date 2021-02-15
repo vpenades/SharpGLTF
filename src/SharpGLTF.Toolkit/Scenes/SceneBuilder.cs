@@ -11,23 +11,19 @@ using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.Material
 
 namespace SharpGLTF.Scenes
 {
-    [System.Diagnostics.DebuggerDisplay("Scene {_Name}")]
-    public partial class SceneBuilder
+    [System.Diagnostics.DebuggerDisplay("Scene {Name}")]
+    public partial class SceneBuilder : BaseBuilder
     {
         #region lifecycle
 
-        public SceneBuilder() { }
-
-        public SceneBuilder(string name)
-        {
-            _Name = name;
-        }
+        public SceneBuilder(string name = null)
+            : base(name) { }
 
         public SceneBuilder DeepClone(bool cloneArmatures = true)
         {
             var clone = new SceneBuilder();
 
-            clone._Name = this._Name;
+            clone.SetNameAndExtrasFrom(this);
 
             var nodeMap = new Dictionary<NodeBuilder, NodeBuilder>();
 
@@ -64,22 +60,11 @@ namespace SharpGLTF.Scenes
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private String _Name;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal readonly List<InstanceBuilder> _Instances = new List<InstanceBuilder>();
 
         #endregion
 
         #region properties
-
-        public String Name
-        {
-            get => _Name;
-            set => _Name = value;
-        }
-
-        public IO.JsonContent Extras { get; set; }
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;
@@ -238,19 +223,6 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
-        [Obsolete("It does not belong here.")]
-        public void RenameAllNodes(string namePrefix)
-        {
-            var allNodes = Instances
-                .Select(item => item.Content.GetArmatureRoot())
-                .Where(item => item != null)
-                .SelectMany(item => NodeBuilder.Flatten(item))
-                .Distinct()
-                .ToList();
-
-            NodeBuilder.Rename(allNodes, namePrefix);
-        }
-
         /// <summary>
         /// Gets all the unique armatures used by this <see cref="SceneBuilder"/>.
         /// </summary>
@@ -263,13 +235,23 @@ namespace SharpGLTF.Scenes
                 .ToList();
         }
 
+        /// <summary>
+        /// Applies a tranform the this <see cref="SceneBuilder"/>.
+        /// </summary>
+        /// <param name="basisTransform">The transform to apply.</param>
+        /// <param name="basisNodeName">The name of the dummy root node.</param>
+        /// <remarks>
+        /// In some circunstances, it's not possible to apply the <paramref name="basisTransform"/> to
+        /// the nodes in the scene. In this case a dummy node is created, and these nodes are made
+        /// children of this dummy node.
+        /// </remarks>
         public void ApplyBasisTransform(Matrix4x4 basisTransform, string basisNodeName = "BasisTransform")
         {
             // gather all root nodes:
             var rootNodes = this.FindArmatures();
 
             // find all the nodes that cannot be modified
-            bool isSensible(NodeBuilder node)
+            bool isExtrinsic(NodeBuilder node)
             {
                 if (node.Scale != null) return true;
                 if (node.Rotation != null) return true;
@@ -278,22 +260,22 @@ namespace SharpGLTF.Scenes
                 return false;
             }
 
-            var sensibleNodes = rootNodes
-                .Where(item => isSensible(item))
+            var extrinsicNodes = rootNodes
+                .Where(item => isExtrinsic(item))
                 .ToList();
 
             // find all the nodes that we can change their transform matrix safely.
             var intrinsicNodes = rootNodes
-                .Except(sensibleNodes)
+                .Except(extrinsicNodes)
                 .ToList();
 
-            // apply the transform to the nodes that are safe to change.
+            // apply the transform to the nodes that can be safely changed.
             foreach (var n in intrinsicNodes)
             {
                 n.LocalMatrix *= basisTransform;
             }
 
-            if (sensibleNodes.Count == 0) return;
+            if (extrinsicNodes.Count == 0) return;
 
             // create a proxy node to be used as the root for all sensible nodes.
             var basisNode = new NodeBuilder();
@@ -301,12 +283,18 @@ namespace SharpGLTF.Scenes
             basisNode.LocalMatrix = basisTransform;
 
             // assign all the sensible nodes to the basis node.
-            foreach (var n in sensibleNodes)
+            foreach (var n in extrinsicNodes)
             {
                 basisNode.AddNode(n);
             }
         }
 
+        /// <summary>
+        /// Copies the instances from <paramref name="scene"/> to this <see cref="SceneBuilder"/>
+        /// </summary>
+        /// <param name="scene">The source scene.</param>
+        /// <param name="sceneTransform">A transform to apply to <paramref name="scene"/> before addition.</param>
+        /// <returns>The instances copied from <paramref name="scene"/>.</returns>
         public IReadOnlyList<InstanceBuilder> AddScene(SceneBuilder scene, Matrix4x4 sceneTransform)
         {
             Guard.NotNull(scene, nameof(scene));

@@ -23,9 +23,64 @@ namespace SharpGLTF.IO
         public double DoublePI { get; set; }
 
         public List<int> Array1 { get; set; }
+        public List<float> Array2 { get; set; }
+
+        public List<int[]> Array3 { get; set; }
+
+        public List<_TestStructure2> Array4 { get; set; }
 
         public _TestStructure2 Dict1 { get; set; }
         public _TestStructure3 Dict2 { get; set; }
+        
+        public static Dictionary<string,object> CreateCompatibleDictionary()
+        {
+            var dict = new Dictionary<string, Object>();
+            dict["author"] = "me";
+            dict["integer1"] = 17;
+
+            dict["bool1"] = true;
+
+            dict["single1"] = 15.3f;
+            dict["single2"] = 1.1f;
+            dict["single3"] = -1.1f;
+            // dict["singlePI"] = (float)Math.PI; // Fails on .Net Framework 471
+
+            dict["double1"] = 15.3;
+            dict["double2"] = 1.1;
+            dict["double3"] = -1.1;
+            dict["doublePI"] = Math.PI;
+
+            dict["array1"] = new int[] { 1, 2, 3 };
+            dict["array2"] = new float[] { 1.1f, 2.2f, 3.3f };
+
+            dict["array3"] = new object[]
+            {
+                new int[] { 1,2,3 },
+                new int[] { 4,5,6 }
+            };
+
+            dict["array4"] = new object[]
+            {
+                new Dictionary<string, int> { ["a0"] = 5, ["a1"] = 6 },
+                new Dictionary<string, int> { ["a0"] = 7, ["a1"] = 8 }
+            };
+
+            dict["dict1"] = new Dictionary<string, int> { ["a0"] = 2, ["a1"] = 3 };
+            dict["dict2"] = new Dictionary<string, Object>
+            {
+                ["a"] = 16,
+                ["b"] = "delta",
+                ["c"] = new List<int>() { 4, 6, 7 },
+                ["d"] = new Dictionary<string, int> { ["a0"] = 1, ["a1"] = 2 }
+            };
+
+            if (!JsonContentTests.IsJsonRoundtripReady)
+            {
+                dict["array2"] = new float[] { 1, 2, 3 };
+            }
+
+            return dict;
+        }
     }
 
     struct _TestStructure2
@@ -47,19 +102,30 @@ namespace SharpGLTF.IO
     [Category("Core.IO")]
     public class JsonContentTests
     {
-        // when serializing a JsonContent object, it's important to take into account floating point values roundtrips.
-        // it seems that prior NetCore3.1, System.Text.JSon was not roundtrip proven, so some values might have some
-        // error margin when they complete a roundtrip.
+        public static bool IsJsonRoundtripReady
+        {
+            get
+            {
+                // when serializing a JsonContent object, it's important to take into account floating point values roundtrips.
+                // it seems that prior NetCore3.1, System.Text.JSon was not roundtrip ready, so some values might have some
+                // error margin when they complete a roundtrip.
 
-        // On newer, NetCore System.Text.Json versions, it seems to use "G9" and "G17" text formatting are used.
+                // On newer, NetCore System.Text.Json versions, it seems to use "G9" and "G17" text formatting are used.
 
-        // https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/            
-        // https://github.com/dotnet/runtime/blob/76904319b41a1dd0823daaaaae6e56769ed19ed3/src/libraries/System.Text.Json/src/System/Text/Json/Writer/Utf8JsonWriter.WriteValues.Float.cs#L101
+                // https://devblogs.microsoft.com/dotnet/floating-point-parsing-and-formatting-improvements-in-net-core-3-0/            
+                // https://github.com/dotnet/runtime/blob/76904319b41a1dd0823daaaaae6e56769ed19ed3/src/libraries/System.Text.Json/src/System/Text/Json/Writer/Utf8JsonWriter.WriteValues.Float.cs#L101
 
-        // pull requests:
-        // https://github.com/dotnet/corefx/pull/40408
-        // https://github.com/dotnet/corefx/pull/38322
-        // https://github.com/dotnet/corefx/pull/32268
+                // pull requests:
+                // https://github.com/dotnet/corefx/pull/40408
+                // https://github.com/dotnet/corefx/pull/38322
+                // https://github.com/dotnet/corefx/pull/32268
+
+                var framework = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
+                return !framework.StartsWith(".NET Framework 4");
+            }
+        }
+
+        
 
         public static bool AreEqual(JsonContent a, JsonContent b)
         {
@@ -74,7 +140,11 @@ namespace SharpGLTF.IO
             var ajson = a.ToJson();
             var bjson = b.ToJson();
 
-            return ajson == bjson;
+            if (ajson != bjson) return false;
+
+            Assert.IsTrue(JsonContent.AreEqualByContent(a, b, 0.0001f));
+
+            return true;
         }
 
         [Test]
@@ -100,33 +170,7 @@ namespace SharpGLTF.IO
         [Test]
         public void CreateJsonContent()
         {
-            var dict = new Dictionary<string, Object>();
-            dict["author"] = "me";
-            dict["integer1"] = 17;
-
-            dict["bool1"] = true;
-
-            dict["single1"] = 15.3f;
-            dict["single2"] = 1.1f;
-            dict["single3"] = -1.1f;
-            // dict["singlePI"] = (float)Math.PI; // Fails on .Net Framework 471
-
-            dict["double1"] = 15.3;
-            dict["double2"] = 1.1;
-            dict["double3"] = -1.1;
-            dict["doublePI"] = Math.PI;
-
-            dict["array1"] = new int[] { 1, 2, 3 };
-            dict["dict1"] = new Dictionary<string, int> { ["a0"] = 2, ["a1"] = 3 };
-            dict["dict2"] = new Dictionary<string, Object>
-            {
-                ["a"] = 16,
-                ["b"] = "delta",
-                ["c"] = new List<int>() { 4, 6, 7 },
-                ["d"] = new Dictionary<string, int> { ["a0"] = 1, ["a1"] = 2 }
-            };            
-
-            JsonContent a = dict;
+            JsonContent a = _TestStructure.CreateCompatibleDictionary();
             
             // roundtrip to json
             var json = a.ToJson();
@@ -138,7 +182,7 @@ namespace SharpGLTF.IO
             var c = JsonContent.Serialize(x);
 
             Assert.IsTrue(AreEqual(a, b));
-            Assert.IsTrue(AreEqual(a, c));
+            Assert.IsTrue(AreEqual(a, c));            
 
             foreach (var dom in new[] { a, b, c})
             {

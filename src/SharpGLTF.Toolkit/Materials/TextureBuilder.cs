@@ -5,7 +5,6 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
 using TEXLERP = SharpGLTF.Schema2.TextureInterpolationFilter;
 using TEXMIPMAP = SharpGLTF.Schema2.TextureMipMapFilter;
 using TEXWRAP = SharpGLTF.Schema2.TextureWrapMode;
@@ -13,7 +12,7 @@ using TEXWRAP = SharpGLTF.Schema2.TextureWrapMode;
 namespace SharpGLTF.Materials
 {
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    public class TextureBuilder
+    public class TextureBuilder : BaseBuilder
     {
         #region Debug
 
@@ -28,8 +27,8 @@ namespace SharpGLTF.Materials
             if (WrapS != TEXWRAP.REPEAT) txt += $" {WrapS}↔";
             if (WrapT != TEXWRAP.REPEAT) txt += $" {WrapT}↕";
 
-            if (_PrimaryImageContent.IsValid) txt += $" {_PrimaryImageContent.DisplayText}";
-            if (_FallbackImageContent.IsValid) txt += $" => {_FallbackImageContent.DisplayText}";
+            if (_PrimaryImageContent != null) txt += $" {_PrimaryImageContent.Content.ToDebuggerDisplay()}";
+            if (_FallbackImageContent != null) txt += $" => {_FallbackImageContent.Content.ToDebuggerDisplay()}";
 
             return txt;
         }
@@ -53,10 +52,10 @@ namespace SharpGLTF.Materials
         private readonly ChannelBuilder _Parent;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private IMAGEFILE _PrimaryImageContent;
+        private ImageBuilder _PrimaryImageContent;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private IMAGEFILE _FallbackImageContent;
+        private ImageBuilder _FallbackImageContent;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private TextureTransformBuilder _Transform;
@@ -71,25 +70,23 @@ namespace SharpGLTF.Materials
 
         public TEXWRAP WrapT { get; set; } = TEXWRAP.REPEAT;
 
-        public static bool AreEqualByContent(TextureBuilder a, TextureBuilder b)
+        public static bool AreEqualByContent(TextureBuilder x, TextureBuilder y)
         {
-            #pragma warning disable IDE0041 // Use 'is null' check
-            if (Object.ReferenceEquals(a, b)) return true;
-            if (Object.ReferenceEquals(a, null)) return false;
-            if (Object.ReferenceEquals(b, null)) return false;
-            #pragma warning restore IDE0041 // Use 'is null' check
+            if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
 
-            if (a.CoordinateSet != b.CoordinateSet) return false;
+            if (!BaseBuilder.AreEqualByContent(x, y)) return false;
 
-            if (a.MinFilter != b.MinFilter) return false;
-            if (a.MagFilter != b.MagFilter) return false;
-            if (a.WrapS != b.WrapS) return false;
-            if (a.WrapT != b.WrapT) return false;
+            if (x.CoordinateSet != y.CoordinateSet) return false;
 
-            if (!IMAGEFILE.AreEqual(a._PrimaryImageContent, b._PrimaryImageContent)) return false;
-            if (!IMAGEFILE.AreEqual(a._FallbackImageContent, b._FallbackImageContent)) return false;
+            if (x.MinFilter != y.MinFilter) return false;
+            if (x.MagFilter != y.MagFilter) return false;
+            if (x.WrapS != y.WrapS) return false;
+            if (x.WrapT != y.WrapT) return false;
 
-            if (!TextureTransformBuilder.AreEqualByContent(a._Transform, b._Transform)) return false;
+            if (!ImageBuilder.AreEqualByContent(x._PrimaryImageContent, y._PrimaryImageContent)) return false;
+            if (!ImageBuilder.AreEqualByContent(x._FallbackImageContent, y._FallbackImageContent)) return false;
+
+            if (!TextureTransformBuilder.AreEqualByContent(x._Transform, y._Transform)) return false;
 
             return true;
         }
@@ -98,14 +95,16 @@ namespace SharpGLTF.Materials
         {
             if (x == null) return 0;
 
-            var h = x.CoordinateSet.GetHashCode();
+            var h = BaseBuilder.GetContentHashCode(x);
+
+            h ^= x.CoordinateSet.GetHashCode();
             h ^= x.MinFilter.GetHashCode();
             h ^= x.MagFilter.GetHashCode();
             h ^= x.WrapS.GetHashCode();
             h ^= x.WrapT.GetHashCode();
 
-            h ^= x._PrimaryImageContent.GetHashCode();
-            h ^= x._FallbackImageContent.GetHashCode();
+            h ^= ImageBuilder.GetContentHashCode(x._PrimaryImageContent);
+            h ^= ImageBuilder.GetContentHashCode(x._FallbackImageContent);
 
             return h;
         }
@@ -118,7 +117,7 @@ namespace SharpGLTF.Materials
         /// Gets or sets the default image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG, DDS, WEBP and KTX2
         /// </summary>
-        public IMAGEFILE PrimaryImage
+        public ImageBuilder PrimaryImage
         {
             get => _PrimaryImageContent;
             set => WithPrimaryImage(value);
@@ -128,7 +127,7 @@ namespace SharpGLTF.Materials
         /// Gets or sets the fallback image bytes to use by this <see cref="TextureBuilder"/>,
         /// Supported formats are: PNG, JPG.
         /// </summary>
-        public IMAGEFILE FallbackImage
+        public ImageBuilder FallbackImage
         {
             get => _FallbackImageContent;
             set => WithFallbackImage(value);
@@ -144,8 +143,10 @@ namespace SharpGLTF.Materials
 
         internal void CopyTo(TextureBuilder other)
         {
-            other._PrimaryImageContent = this._PrimaryImageContent;
-            other._FallbackImageContent = this._FallbackImageContent;
+            other.SetNameAndExtrasFrom(other);
+
+            other._PrimaryImageContent = this._PrimaryImageContent?.Clone();
+            other._FallbackImageContent = this._FallbackImageContent?.Clone();
 
             other.CoordinateSet = this.CoordinateSet;
 
@@ -160,11 +161,11 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder WithCoordinateSet(int cset) { CoordinateSet = cset; return this; }
 
-        public TextureBuilder WithPrimaryImage(IMAGEFILE image)
+        public TextureBuilder WithPrimaryImage(ImageBuilder image)
         {
-            if (!image.IsEmpty)
+            if (image != null)
             {
-                Guard.IsTrue(image.IsValid, nameof(image), "Must be JPG, PNG, DDS, WEBP or KTX2");
+                Guard.IsTrue(ImageBuilder.IsValid(image), nameof(image), "Must be JPG, PNG, DDS, WEBP or KTX2");
             }
             else
             {
@@ -175,11 +176,11 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public TextureBuilder WithFallbackImage(IMAGEFILE image)
+        public TextureBuilder WithFallbackImage(ImageBuilder image)
         {
-            if (!image.IsEmpty)
+            if (image != null)
             {
-                Guard.IsTrue(image.IsJpg || image.IsPng, nameof(image), "Must be JPG or PNG");
+                Guard.IsTrue(image.Content.IsJpg || image.Content.IsPng, nameof(image), "Must be JPG or PNG");
             }
             else
             {

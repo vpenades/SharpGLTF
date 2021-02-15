@@ -13,9 +13,9 @@ namespace SharpGLTF.Runtime
         where TMaterial : class
     {
         string Name { get; }
+        Object Extras { get; }
         int LogicalIndex { get; }
         IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives { get; }
-        Object Extras { get; }
     }
 
     public interface IMeshPrimitiveDecoder
@@ -96,21 +96,21 @@ namespace SharpGLTF.Runtime
     /// </summary>
     public static class MeshDecoder
     {
-        public static IMeshDecoder<Schema2.Material> Decode(this Schema2.Mesh mesh)
+        public static IMeshDecoder<Schema2.Material> Decode(this Schema2.Mesh mesh, RuntimeOptions options = null)
         {
             if (mesh == null) return null;
 
-            var meshDecoder = new _MeshDecoder<Schema2.Material>(mesh);
+            var meshDecoder = new _MeshDecoder<Schema2.Material>(mesh, options);
 
             meshDecoder.GenerateNormalsAndTangents();
 
             return meshDecoder;
         }
 
-        public static IMeshDecoder<Schema2.Material>[] Decode(this IReadOnlyList<Schema2.Mesh> meshes)
+        public static IMeshDecoder<Schema2.Material>[] Decode(this IReadOnlyList<Schema2.Mesh> meshes, RuntimeOptions options = null)
         {
             Guard.NotNull(meshes, nameof(meshes));
-            return meshes.Select(item => item.Decode()).ToArray();
+            return meshes.Select(item => item.Decode(options)).ToArray();
         }
 
         public static XYZ GetPosition(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
@@ -157,7 +157,7 @@ namespace SharpGLTF.Runtime
             Guard.NotNull(scene, nameof(scene));
 
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
-            var sceneTemplate = SceneTemplate.Create(scene, false);
+            var sceneTemplate = SceneTemplate.Create(scene);
             var sceneInstance = sceneTemplate.CreateInstance();
             var armatureInst = sceneInstance.Armature;
 
@@ -192,7 +192,7 @@ namespace SharpGLTF.Runtime
             Guard.NotNull(scene, nameof(scene));
 
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
-            var sceneTemplate = SceneTemplate.Create(scene, false);
+            var sceneTemplate = SceneTemplate.Create(scene);
             var sceneInstance = sceneTemplate.CreateInstance();
             var armatureInst = sceneInstance.Armature;
 

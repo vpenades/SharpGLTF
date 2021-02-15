@@ -12,14 +12,27 @@ namespace SharpGLTF.IO
     /// Represents an inmutable json object stored in memory.
     /// </summary>
     /// <remarks>
-    /// Valid values can be:
-    /// - <see cref="IConvertible"/> for literal values.
-    /// - <see cref="IReadOnlyList{Object}"/> for arrays.
-    /// - <see cref="IReadOnlyDictionary{String, Object}"/> for objects.
+    /// The data structure is stored in memory as a DOM, using standard objects and collections.<br/>
+    /// Use <see cref="Serialize(object, JSONOPTIONS)"/> and <see cref="Deserialize{T}(JSONOPTIONS)"/> to convert to your types.<br/>
+    /// Use <see cref="Parse(JsonDocument)"/> and <see cref="ToJson(JSONOPTIONS)"/> to convert from/to raw json text.<br/>
     /// </remarks>
     [System.ComponentModel.ImmutableObject(true)]
+    [System.Diagnostics.DebuggerDisplay("{ToDebuggerDisplay(),nq}")]
     public readonly struct JsonContent
     {
+        #region debug
+
+        private string ToDebuggerDisplay()
+        {
+            if (_Content == null) return null;
+
+            var options = new JSONOPTIONS();
+            options.WriteIndented = true;
+            return ToJson(options);
+        }
+
+        #endregion
+
         #region constructors
 
         public static implicit operator JsonContent(Boolean value) { return new JsonContent(value); }
@@ -59,25 +72,40 @@ namespace SharpGLTF.IO
 
         #region data
 
-        /// <summary>
-        /// The dynamic json structure, where it can be any of this:
-        /// - A <see cref="IConvertible"/> object.
-        /// - A non empty <see cref="IReadOnlyList{Object}"/> object.
-        /// - A non empty <see cref="IReadOnlyDictionary{String, Object}"/> object.
-        /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Object _Content;
 
-        // It is tempting to add Equality support, but it's problematic because these reasons:
-        // - It's not clear how to compare in-memory floating point values against deserialized string values.
-        // - Serialization roundtrip is not well supported in older NetFramework versions; this is specially
-        // apparent when using System.Text.JSon in NetCore and Net471, where NetCore is roundtrip safe, and
-        // NetFramework is not.
+        /// <summary>
+        /// Compares two <see cref="JsonContent"/> objects for equality.
+        /// </summary>
+        /// <param name="a">The first object to compare.</param>
+        /// <param name="b">The second object to compare.</param>
+        /// <param name="precission">The precission threshold when comparing floating point values.</param>
+        /// <returns>true if the objects are considered equal</returns>
+        /// <remarks>
+        /// - Comparing json structures is tricky because the values are typeless, so when we parse a json DOM
+        /// into memory we don't know which should be the right type to use for comparison.
+        /// - Also, System.Text.JSon is roundtrip safe when used in Net Core, but it is not when used in
+        /// Net Framework, so depending on the framework we use, floating point roundtrips will behave differently.
+        /// </remarks>
+        public static bool AreEqualByContent(JsonContent a, JsonContent b, float precission)
+        {
+            return _JsonStaticUtils.AreEqualByContent(a._Content, b._Content, precission);
+        }
 
         #endregion
 
         #region properties
 
+        /// <summary>
+        /// Gets the dynamic json structure.
+        /// </summary>
+        /// <remarks>
+        /// The possible value types can be:<br/>
+        /// - An <see cref="IConvertible"/> object.<br/>
+        /// - A non empty <see cref="IReadOnlyList{Object}"/> object.<br/>
+        /// - A non empty <see cref="IReadOnlyDictionary{String, Object}"/> object.
+        /// </remarks>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Collapsed)]
         public Object Content => _Content;
 
@@ -137,6 +165,11 @@ namespace SharpGLTF.IO
         public Object Deserialize(Type type, JSONOPTIONS options = null)
         {
             return _JsonStaticUtils.Deserialize(_Content, type, options);
+        }
+
+        public T Deserialize<T>(JSONOPTIONS options = null)
+        {
+            return (T)_JsonStaticUtils.Deserialize(_Content, typeof(T), options);
         }
 
         #endregion

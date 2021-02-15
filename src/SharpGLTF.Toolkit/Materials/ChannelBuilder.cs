@@ -50,10 +50,10 @@ namespace SharpGLTF.Materials
             }
 
             var tex = GetValidTexture();
-            if (tex != null)
+            if (tex?.PrimaryImage != null)
             {
                 if (hasParam) txt += " ×";
-                txt += $" {tex.PrimaryImage.DisplayText}";
+                txt += $" {tex.PrimaryImage.Content.ToDebuggerDisplay()}";
             }
 
             return txt;
@@ -91,19 +91,15 @@ namespace SharpGLTF.Materials
 
         public TextureBuilder Texture { get; private set; }
 
-        public static bool AreEqualByContent(ChannelBuilder a, ChannelBuilder b)
+        public static bool AreEqualByContent(ChannelBuilder x, ChannelBuilder y)
         {
-            #pragma warning disable IDE0041 // Use 'is null' check
-            if (Object.ReferenceEquals(a, b)) return true;
-            if (Object.ReferenceEquals(a, null)) return false;
-            if (Object.ReferenceEquals(b, null)) return false;
-            #pragma warning restore IDE0041 // Use 'is null' check
+            if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
 
-            if (a._Key != b._Key) return false;
+            if (x._Key != y._Key) return false;
 
-            if (a.Parameter != b.Parameter) return false;
+            if (x.Parameter != y.Parameter) return false;
 
-            if (!TextureBuilder.AreEqualByContent(a.Texture, b.Texture)) return false;
+            if (!TextureBuilder.AreEqualByContent(x.Texture, y.Texture)) return false;
 
             return true;
         }
@@ -140,7 +136,7 @@ namespace SharpGLTF.Materials
         public TextureBuilder GetValidTexture()
         {
             if (Texture == null) return null;
-            if (Texture.PrimaryImage.IsEmpty) return null;
+            if (Texture.PrimaryImage == null) return null;
             return Texture;
         }
 

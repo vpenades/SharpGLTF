@@ -73,7 +73,7 @@ namespace SharpGLTF.Scenes
             // TODO: here we could check that every dstMesh has been correctly created.
         }
 
-        private void AddArmatureResources(Func<string, Node> nodeFactory, IEnumerable<SceneBuilder> srcScenes)
+        private void AddArmatureResources(Func<Node> nodeFactory, IEnumerable<SceneBuilder> srcScenes)
         {
             // ALIGNMENT ISSUE:
             // the toolkit builder is designed in a way that every instance can reuse the same node many times, even from different scenes.
@@ -97,9 +97,12 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private void CreateArmature(Func<string, Node> nodeFactory, NodeBuilder srcNode)
+        private void CreateArmature(Func<Node> nodeFactory, NodeBuilder srcNode)
         {
-            var dstNode = nodeFactory(srcNode.Name);
+            var dstNode = nodeFactory();
+
+            srcNode.TryCopyNameAndExtrasTo(dstNode);
+
             _Nodes[srcNode] = dstNode;
 
             if (srcNode.HasAnimations)
@@ -116,9 +119,7 @@ namespace SharpGLTF.Scenes
                 dstNode.LocalMatrix = srcNode.LocalMatrix;
             }
 
-            dstNode.Extras = srcNode.Extras.DeepClone();
-
-            foreach (var c in srcNode.VisualChildren) CreateArmature(dstNode.CreateNode, c);
+            foreach (var c in srcNode.VisualChildren) CreateArmature(() => dstNode.CreateNode(), c);
         }
 
         public static void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
@@ -135,7 +136,7 @@ namespace SharpGLTF.Scenes
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
             _Nodes.Clear();
-            AddArmatureResources(dstScene.CreateNode, new[] { srcScene });
+            AddArmatureResources(() => dstScene.CreateNode(), new[] { srcScene });
 
             var schema2Instances = srcScene
                 .Instances
@@ -194,9 +195,7 @@ namespace SharpGLTF.Scenes
             foreach (var srcScene in srcScenes)
             {
                 var dstScene = dstModel.UseScene(dstModel.LogicalScenes.Count);
-
-                dstScene.Name = srcScene.Name;
-                dstScene.Extras = srcScene.Extras.DeepClone();
+                srcScene.TryCopyNameAndExtrasTo(dstScene);
 
                 context.AddScene(dstScene, srcScene);
             }
@@ -247,8 +246,7 @@ namespace SharpGLTF.Scenes
 
             var dstScene = new SceneBuilder();
 
-            dstScene.Name = srcScene.Name;
-            dstScene.Extras = srcScene.Extras.DeepClone();
+            dstScene.SetNameAndExtrasFrom(srcScene);
 
             // process mesh instances
             var srcMeshInstances = Node.Flatten(srcScene)
@@ -323,7 +321,11 @@ namespace SharpGLTF.Scenes
                 if (srcCam.Settings is CameraPerspective perspective) dstCam = new CameraBuilder.Perspective(perspective);
                 if (srcCam.Settings is CameraOrthographic orthographic) dstCam = new CameraBuilder.Orthographic(orthographic);
 
-                if (dstCam != null) dstScene.AddCamera(dstCam, dstNode);
+                if (dstCam != null)
+                {
+                    dstCam.SetNameAndExtrasFrom(srcCam);
+                    dstScene.AddCamera(dstCam, dstNode);
+                }
             }
         }
 
@@ -342,7 +344,11 @@ namespace SharpGLTF.Scenes
                 if (srcLight.LightType == PunctualLightType.Point) dstLight = new LightBuilder.Point(srcLight);
                 if (srcLight.LightType == PunctualLightType.Spot) dstLight = new LightBuilder.Spot(srcLight);
 
-                if (dstLight != null) dstScene.AddLight(dstLight, dstNode);
+                if (dstLight != null)
+                {
+                    dstLight.SetNameAndExtrasFrom(srcInstance);
+                    dstScene.AddLight(dstLight, dstNode);
+                }
             }
         }
 
@@ -351,8 +357,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(srcNode, nameof(srcNode));
             Guard.NotNull(dstNode, nameof(dstNode));
 
-            dstNode.Name = srcNode.Name;
-            dstNode.Extras = srcNode.Extras.DeepClone();
+            dstNode.SetNameAndExtrasFrom(srcNode);
 
             dstNode.LocalTransform = srcNode.LocalTransform;
 

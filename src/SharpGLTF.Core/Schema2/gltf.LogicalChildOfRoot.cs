@@ -13,6 +13,15 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
+        /// <summary>
+        /// Display text name, or null.<br/>⚠️ DO NOT USE AS AN OBJECT ID ⚠️
+        /// </summary>
+        /// <remarks>
+        /// glTF does not define any name ruling for object names.
+        /// This means that names can be null or non unique.
+        /// So don't use names for anything other than object name display.
+        /// Use lookup tables instead.
+        /// </remarks>
         public String Name
         {
             get => _name;

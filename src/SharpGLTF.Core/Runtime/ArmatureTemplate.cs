@@ -11,8 +11,8 @@ namespace SharpGLTF.Runtime
     /// /// <remarks>
     /// Only the nodes used by a given <see cref="Schema2.Scene"/> will be copied.
     /// Also, nodes will be reordered so children nodes always come after their parents (for fast evaluation),
-    /// so it's important to keek in mind that <see cref="NodeTemplate"/> indices will differ from those
-    /// in <see cref="Schema2.Scene"/>.
+    /// so it's important to keep in mind that <see cref="NodeTemplate"/> indices will differ from those
+    /// in <see cref="Schema2.Scene.VisualChildren"/>.
     /// </remarks>
     class ArmatureTemplate
     {
@@ -22,9 +22,9 @@ namespace SharpGLTF.Runtime
         /// Creates a new <see cref="ArmatureTemplate"/> based on the nodes of <see cref="Schema2.Scene"/>.
         /// </summary>
         /// <param name="srcScene">The source <see cref="Schema2.Scene"/> from where to take the nodes.</param>
-        /// <param name="isolateMemory">True if we want to copy the source data instead of share it.</param>
+        /// <param name="options">Custom processing options, or null.</param>
         /// <returns>A new <see cref="ArmatureTemplate"/> instance.</returns>
-        public static ArmatureTemplate Create(Schema2.Scene srcScene, bool isolateMemory)
+        internal static ArmatureTemplate Create(Schema2.Scene srcScene, RuntimeOptions options)
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
@@ -56,14 +56,14 @@ namespace SharpGLTF.Runtime
                     .Select(n => indexSolver(n))
                     .ToArray();
 
-                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, isolateMemory);
+                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, options);
             }
 
             // gather animation durations.
 
             var dstTracks = srcScene.LogicalParent
                 .LogicalAnimations
-                .Select(item => new AnimationTrackInfo(item.Name, item.Duration))
+                .Select(item => new AnimationTrackInfo(item.Name, RuntimeOptions.ConvertExtras(item, options), item.Duration))
                 .ToArray();
 
             return new ArmatureTemplate(dstNodes, dstTracks);
