@@ -4,6 +4,7 @@ using System.Text;
 
 namespace SharpGLTF.Runtime
 {
+    [System.Diagnostics.DebuggerDisplay("{Name} {Duration}s")]
     public class AnimationTrackInfo
     {
         internal AnimationTrackInfo(string name, Object extras, float duration)

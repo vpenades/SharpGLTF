@@ -62,16 +62,30 @@ namespace SharpGLTF.Runtime
             if (_Primitives.Length == 0) return;
 
             var geometries = _Primitives.Select(item => item._Geometry);
-            VertexNormalsFactory.CalculateSmoothNormals(geometries);
-            VertexTangentsFactory.CalculateTangents(geometries);
+
+            // we can only skip normals and tangents calculation if all the
+            // primitives have them. If we get a case in wich some primitives
+            // have normals and other not, we need to calculate the normals
+            // for all of them because there's vertex adyacencies shared
+            // between primitives.
+
+            var hasNormals = geometries.All(item => item.HasNormals);
+            var hasTangents = geometries.All(item => item.HasTangents);
+
+            if (!hasNormals) VertexNormalsFactory.CalculateSmoothNormals(geometries);
+            if (!hasTangents) VertexTangentsFactory.CalculateTangents(geometries);
 
             var morphTargetsCount = _Primitives.Min(item => item.MorphTargetsCount);
 
             for (int i = 0; i < morphTargetsCount; ++i)
             {
                 var targets = _Primitives.Select(item => item._MorphTargets[i]);
-                VertexNormalsFactory.CalculateSmoothNormals(targets);
-                VertexTangentsFactory.CalculateTangents(targets);
+
+                hasNormals = targets.All(item => item.HasNormals);
+                hasTangents = targets.All(item => item.HasTangents);
+
+                if (!hasNormals) VertexNormalsFactory.CalculateSmoothNormals(targets);
+                if (!hasTangents) VertexTangentsFactory.CalculateTangents(targets);
             }
         }
 
@@ -360,6 +374,9 @@ namespace SharpGLTF.Runtime
 
         public int VertexCount => _Positions?.Count ?? 0;
 
+        public bool HasNormals => _Normals != null;
+        public bool HasTangents => _Tangents != null;
+
         #endregion
 
         #region API
@@ -449,6 +466,9 @@ namespace SharpGLTF.Runtime
         #region properties
 
         public int VertexCount => _PositionsDeltas?.Count ?? 0;
+
+        public bool HasNormals => _NormalsDeltas != null;
+        public bool HasTangents => _TangentsDeltas != null;
 
         #endregion
 

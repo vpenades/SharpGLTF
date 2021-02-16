@@ -37,6 +37,9 @@ namespace SharpGLTF.Schema2
         BufferView
     }
 
+    /// <summary>
+    /// Write settings and base class of <see cref="IO.WriteContext"/>
+    /// </summary>
     public class WriteSettings
     {
         #region lifecycle

@@ -96,7 +96,10 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly NodeTemplate[] _NodeTemplates;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly AnimationTrackInfo[] _AnimationTracks;
 
         #endregion

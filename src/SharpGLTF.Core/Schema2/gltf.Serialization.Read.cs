@@ -13,15 +13,15 @@ namespace SharpGLTF.Schema2
     using MODEL = ModelRoot;
 
     /// <summary>
-    /// Callback used to intercept the loading of textures so they can be decoded by the client
-    /// engine and uploaded to the GPU if neccesary.
+    /// Callback used to intercept the loading of textures so they can be
+    /// decoded by the client engine and uploaded to the GPU if neccesary.
     /// </summary>
     /// <param name="image">The Image containing the texture</param>
     /// <returns>true if we want to keep the image memory data in Image. Otherwise the memory will be cleared.</returns>
     public delegate Boolean ImageDecodeCallback(Image image);
 
     /// <summary>
-    /// Settings to customize how <see cref="MODEL"/> files are read.
+    /// Read settings and base class of <see cref="IO.ReadContext"/>
     /// </summary>
     public class ReadSettings
     {

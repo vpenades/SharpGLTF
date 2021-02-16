@@ -17,6 +17,8 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region properties
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         internal IReadOnlyList<int> _VisualChildrenIndices => _nodes;
 
         public IEnumerable<Node> VisualChildren => _nodes.Select(idx => LogicalParent.LogicalNodes[idx]);
