@@ -205,7 +205,7 @@ namespace SharpGLTF.IO
         {
             // for some reason, System.IO.Path.GetFullPath() does not recogninze an empty string as the current directory.
 
-            var currDirContext0 = ReadContext.CreateFromDirectory(string.Empty);
+            var currDirContext0 = Schema2.ReadContext.CreateFromDirectory(string.Empty);
             Assert.NotNull(currDirContext0);            
         }
     }

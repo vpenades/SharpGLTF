@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 
 using BYTES = System.ArraySegment<byte>;
+using MODEL = SharpGLTF.Schema2.ModelRoot;
 using VALIDATIONMODE = SharpGLTF.Validation.ValidationMode;
 
 namespace SharpGLTF.Schema2
 {
-    using MODEL = ModelRoot;
-
     /// <summary>
     /// Determines how resources are written.
     /// </summary>
@@ -38,7 +34,7 @@ namespace SharpGLTF.Schema2
     }
 
     /// <summary>
-    /// Write settings and base class of <see cref="IO.WriteContext"/>
+    /// Write settings and base class of <see cref="WriteContext"/>
     /// </summary>
     public class WriteSettings
     {
@@ -72,7 +68,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets a callback hook that controls the image writing behavior.
         /// </summary>
-        public IO.ImageWriterCallback ImageWriteCallback { get; set; }
+        public ImageWriterCallback ImageWriteCallback { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to merge all the buffers in <see cref="MODEL.LogicalBuffers"/> into a single buffer.
@@ -137,11 +133,10 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
-            var context = IO.WriteContext
+            var context = WriteContext
                 .CreateFromFile(filePath)
-                .WithBinarySettings();
-
-            settings?.CopyTo(context);
+                .WithBinarySettings()
+                .WithSettingsFrom(settings);
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
@@ -160,10 +155,9 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
-            var context = IO.WriteContext
-                .CreateFromFile(filePath);
-
-            settings?.CopyTo(context);
+            var context = WriteContext
+                .CreateFromFile(filePath)
+                .WithSettingsFrom(settings);
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
@@ -188,13 +182,6 @@ namespace SharpGLTF.Schema2
                     return ss.ReadToEnd();
                 }
             }
-
-            /*
-            using (var ss = new StringWriter())
-            {
-                _WriteJSON(ss, fmt);
-                return ss.ToString();
-            }*/
         }
 
         /// <summary>
@@ -222,11 +209,13 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanWrite, nameof(stream));
 
-            var context = IO.WriteContext.CreateFromStream(stream);
+            var context = WriteContext
+                .CreateFromStream(stream)
+                .WithSettingsFrom(settings);
 
             if (settings != null)
             {
-                settings.CopyTo(context);
+                // override settings with required values for GLB writing.
                 context.MergeBuffers = true;
                 context.ImageWriting = ResourceWriteMode.Default;
             }
@@ -250,7 +239,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void _PrepareBuffersForSatelliteWriting(IO.WriteContext context, string baseName)
+        internal void _PrepareBuffersForSatelliteWriting(WriteContext context, string baseName)
         {
             // setup all buffers to be written as satellite files
             for (int i = 0; i < this._buffers.Count; ++i)
@@ -271,7 +260,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        internal void _PrepareImagesForWriting(IO.WriteContext context, string baseName, ResourceWriteMode rmode)
+        internal void _PrepareImagesForWriting(WriteContext context, string baseName, ResourceWriteMode rmode)
         {
             if (context.ImageWriting != ResourceWriteMode.Default) rmode = context.ImageWriting;
 

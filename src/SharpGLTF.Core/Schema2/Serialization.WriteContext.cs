@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 using SharpGLTF.Memory;
-using SharpGLTF.Schema2;
 
 using BYTES = System.ArraySegment<byte>;
-using SCHEMA2 = SharpGLTF.Schema2.ModelRoot;
+using MODEL = SharpGLTF.Schema2.ModelRoot;
 
-namespace SharpGLTF.IO
+namespace SharpGLTF.Schema2
 {
     /// <summary>
     /// Callback used for saving associated files of the current model.
@@ -113,10 +111,16 @@ namespace SharpGLTF.IO
             return this;
         }
 
+        public WriteContext WithSettingsFrom(WriteSettings settings)
+        {
+            settings?.CopyTo(this);
+            return this;
+        }
+
         /// <summary>
-        /// These settings are used exclusively by <see cref="SCHEMA2.DeepClone"/>.
+        /// These settings are used exclusively by <see cref="MODEL.DeepClone"/>.
         /// </summary>
-        /// <returns>A <see cref="WriteContext"/> instance to be used by <see cref="SCHEMA2.DeepClone()"/></returns>
+        /// <returns>A <see cref="WriteContext"/> instance to be used by <see cref="MODEL.DeepClone()"/></returns>
         internal WriteContext WithDeepCloneSettings()
         {
             _UpdateSupportedExtensions = false;
@@ -174,8 +178,8 @@ namespace SharpGLTF.IO
         /// Writes <paramref name="model"/> to this context.
         /// </summary>
         /// <param name="baseName">The base name to use for asset files, without extension.</param>
-        /// <param name="model">The <see cref="SCHEMA2"/> to write.</param>
-        public void WriteTextSchema2(string baseName, SCHEMA2 model)
+        /// <param name="model">The <see cref="MODEL"/> to write.</param>
+        public void WriteTextSchema2(string baseName, MODEL model)
         {
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
@@ -203,8 +207,8 @@ namespace SharpGLTF.IO
         /// Writes <paramref name="model"/> to this context.
         /// </summary>
         /// <param name="baseName">The base name to use for asset files, without extension.</param>
-        /// <param name="model">The <see cref="SCHEMA2"/> to write.</param>
-        public void WriteBinarySchema2(string baseName, SCHEMA2 model)
+        /// <param name="model">The <see cref="MODEL"/> to write.</param>
+        public void WriteBinarySchema2(string baseName, MODEL model)
         {
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
@@ -212,7 +216,7 @@ namespace SharpGLTF.IO
             model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, true);
             Guard.NotNull(model, nameof(model));
 
-            var ex = BinarySerialization.IsBinaryCompatible(model);
+            var ex = _BinarySerialization.IsBinaryCompatible(model);
             if (ex != null) throw ex;
 
             model._PrepareBuffersForInternalWriting();
@@ -225,7 +229,7 @@ namespace SharpGLTF.IO
             {
                 using (var w = new BinaryWriter(m))
                 {
-                    BinarySerialization.WriteBinaryModel(w, model);
+                    _BinarySerialization.WriteBinaryModel(w, model);
                 }
 
                 WriteAllBytesToEnd($"{baseName}.glb", m.ToArraySegment());
@@ -243,7 +247,7 @@ namespace SharpGLTF.IO
         /// but immediately after preprocessing and buffer setup, so the model can be correctly validated.
         /// </summary>
         /// <param name="model">The model to validate.</param>
-        private void _ValidateBeforeWriting(SCHEMA2 model)
+        private void _ValidateBeforeWriting(MODEL model)
         {
             if (_NoCloneWatchdog) return;
 
@@ -263,11 +267,11 @@ namespace SharpGLTF.IO
         /// <summary>
         /// Prepares the model for writing with the appropiate settings, creating a defensive copy if neccesary.
         /// </summary>
-        /// <param name="model">The source <see cref="SCHEMA2"/> instance.</param>
+        /// <param name="model">The source <see cref="MODEL"/> instance.</param>
         /// <param name="imagesAsBufferViews">true if images should be stored as buffer views.</param>
         /// <param name="mergeBuffers">true if it's required the model must have a single buffer.</param>
-        /// <returns>The source <see cref="SCHEMA2"/> instance, or a cloned and modified instance if current settings required it.</returns>
-        private SCHEMA2 _PreprocessSchema2(SCHEMA2 model, bool imagesAsBufferViews, bool mergeBuffers)
+        /// <returns>The source <see cref="MODEL"/> instance, or a cloned and modified instance if current settings required it.</returns>
+        private MODEL _PreprocessSchema2(MODEL model, bool imagesAsBufferViews, bool mergeBuffers)
         {
             Guard.NotNull(model, nameof(model));
 
@@ -282,7 +286,7 @@ namespace SharpGLTF.IO
             if (mergeBuffers | imagesAsBufferViews)
             {
                 // cloning check is done to prevent cloning from entering in an infinite loop where each clone attempt triggers another clone request.
-                if (_NoCloneWatchdog) throw new InvalidOperationException($"Current settings require creating a densive copy before model modification, but calling {nameof(SCHEMA2.DeepClone)} is not allowed with the current settings.");
+                if (_NoCloneWatchdog) throw new InvalidOperationException($"Current settings require creating a densive copy before model modification, but calling {nameof(MODEL.DeepClone)} is not allowed with the current settings.");
 
                 model = model.DeepClone();
             }

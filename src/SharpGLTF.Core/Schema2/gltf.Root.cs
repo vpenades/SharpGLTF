@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2
         {
             // prepare the in-memory temporary storage
             var dict = new Dictionary<string, ArraySegment<Byte>>();
-            var wcontext = IO.WriteContext
+            var wcontext = WriteContext
                 .CreateFromDictionary(dict)
                 .WithDeepCloneSettings();
 
@@ -67,7 +67,7 @@ namespace SharpGLTF.Schema2
 
             // restore the model from the temporary storage
 
-            var rcontext = IO.ReadContext.CreateFromDictionary(dict, wcontext._UpdateSupportedExtensions);
+            var rcontext = ReadContext.CreateFromDictionary(dict, wcontext._UpdateSupportedExtensions);
             rcontext.Validation = Validation.ValidationMode.Skip;
             var cloned = rcontext._ReadFromDictionary("deepclone.gltf");
 

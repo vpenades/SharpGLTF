@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
+using MODEL = SharpGLTF.Schema2.ModelRoot;
+
 namespace SharpGLTF.Schema2
 {
-    using ROOT = ModelRoot;
-
-    static class BinarySerialization
+    static class _BinarySerialization
     {
         #region constants
 
@@ -131,7 +131,7 @@ namespace SharpGLTF.Schema2
         /// <remarks>
         /// Due to the limitations of Binary Format, not all models can be saved as Binary.
         /// </remarks>
-        public static Exception IsBinaryCompatible(ROOT model)
+        public static Exception IsBinaryCompatible(MODEL model)
         {
             try
             {
@@ -149,11 +149,11 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Writes a <see cref="ROOT"/> instance into a <see cref="BinaryWriter"/>.
+        /// Writes a <see cref="MODEL"/> instance into a <see cref="BinaryWriter"/>.
         /// </summary>
         /// <param name="binaryWriter">The destination <see cref="BinaryWriter"/> stream.</param>
-        /// <param name="model">The source <see cref="ROOT"/> instance.</param>
-        public static void WriteBinaryModel(this BinaryWriter binaryWriter, ROOT model)
+        /// <param name="model">The source <see cref="MODEL"/> instance.</param>
+        public static void WriteBinaryModel(this BinaryWriter binaryWriter, MODEL model)
         {
             var ex = IsBinaryCompatible(model); if (ex != null) throw ex;
 

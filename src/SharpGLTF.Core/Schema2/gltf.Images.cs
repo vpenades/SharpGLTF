@@ -136,7 +136,7 @@ namespace SharpGLTF.Schema2
 
         #region binary read
 
-        internal void _ResolveUri(IO.ReadContext context)
+        internal void _ResolveUri(ReadContext context)
         {
             // No uri to decode.
             if (String.IsNullOrWhiteSpace(_uri)) return;
@@ -198,7 +198,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="writer">The satellite asset writer</param>
         /// <param name="satelliteUri">A local satellite URI</param>
-        internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
+        internal void _WriteToSatellite(WriteContext writer, string satelliteUri)
         {
             if (!_SatelliteContent.HasValue)
             {

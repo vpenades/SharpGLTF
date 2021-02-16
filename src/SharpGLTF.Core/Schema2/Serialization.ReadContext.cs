@@ -3,16 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-
-// using Newtonsoft.Json;
 using System.Text.Json;
-using SharpGLTF.Schema2;
 
 using BYTES = System.ArraySegment<byte>;
-using SCHEMA2 = SharpGLTF.Schema2.ModelRoot;
+using MODEL = SharpGLTF.Schema2.ModelRoot;
 using VALIDATIONMODE = SharpGLTF.Validation.ValidationMode;
 
-namespace SharpGLTF.IO
+namespace SharpGLTF.Schema2
 {
     /// <summary>
     /// Callback used for loading associated files of current model.
@@ -24,9 +21,9 @@ namespace SharpGLTF.IO
     public delegate String UriResolver(String relativeUri);
 
     /// <summary>
-    /// Context for reading a <see cref="SCHEMA2"/>.
+    /// Context for reading a <see cref="MODEL"/>.
     /// </summary>
-    public class ReadContext : Schema2.ReadSettings
+    public class ReadContext : ReadSettings
     {
         #region lifecycle
 
@@ -79,6 +76,12 @@ namespace SharpGLTF.IO
             _FileReader = reader;
             _UriResolver = uriResolver;
             _CheckSupportedExtensions = checkExtensions;
+        }
+
+        public ReadContext WithSettingsFrom(ReadSettings settings)
+        {
+            settings?.CopyTo(this);
+            return this;
         }
 
         internal ReadContext(ReadContext other)
@@ -146,7 +149,7 @@ namespace SharpGLTF.IO
         {
             using (var stream = File.OpenRead(filePath))
             {
-                bool isBinary = BinarySerialization._Identify(stream);
+                bool isBinary = _BinarySerialization._Identify(stream);
 
                 if (isBinary) return _ReadGLB(stream).Validation;
 
@@ -157,21 +160,21 @@ namespace SharpGLTF.IO
         }
 
         /// <summary>
-        /// Reads a <see cref="SCHEMA2"/> instance from a <see cref="Stream"/> containing a GLB or a GLTF file.
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLB or a GLTF file.
         /// </summary>
         /// <param name="stream">A <see cref="Stream"/> to read from.</param>
-        /// <returns>A <see cref="SCHEMA2"/> instance.</returns>
-        public SCHEMA2 ReadSchema2(Stream stream)
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public MODEL ReadSchema2(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
 
-            bool binaryFile = BinarySerialization._Identify(stream);
+            bool binaryFile = _BinarySerialization._Identify(stream);
 
             return binaryFile ? ReadBinarySchema2(stream) : ReadTextSchema2(stream);
         }
 
-        internal SCHEMA2 _ReadFromDictionary(string fileName)
+        internal MODEL _ReadFromDictionary(string fileName)
         {
             var json = this.ReadAllBytesToEnd(fileName);
 
@@ -183,11 +186,11 @@ namespace SharpGLTF.IO
         }
 
         /// <summary>
-        /// Reads a <see cref="SCHEMA2"/> instance from a <see cref="Stream"/> containing a GLTF file.
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLTF file.
         /// </summary>
         /// <param name="stream">A <see cref="Stream"/> to read from.</param>
-        /// <returns>A <see cref="SCHEMA2"/> instance.</returns>
-        public SCHEMA2 ReadTextSchema2(Stream stream)
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public MODEL ReadTextSchema2(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
@@ -202,11 +205,11 @@ namespace SharpGLTF.IO
         }
 
         /// <summary>
-        /// Reads a <see cref="SCHEMA2"/> instance from a <see cref="Stream"/> containing a GLB file.
+        /// Reads a <see cref="MODEL"/> instance from a <see cref="Stream"/> containing a GLB file.
         /// </summary>
         /// <param name="stream">A <see cref="Stream"/> to read from.</param>
-        /// <returns>A <see cref="SCHEMA2"/> instance.</returns>
-        public SCHEMA2 ReadBinarySchema2(Stream stream)
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public MODEL ReadBinarySchema2(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
@@ -222,7 +225,7 @@ namespace SharpGLTF.IO
 
         #region core
 
-        private (SCHEMA2 Model, Validation.ValidationResult Validation) _ReadGLB(Stream stream)
+        private (MODEL Model, Validation.ValidationResult Validation) _ReadGLB(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
 
@@ -230,7 +233,7 @@ namespace SharpGLTF.IO
 
             try
             {
-                chunks = BinarySerialization.ReadBinaryFile(stream);
+                chunks = _BinarySerialization.ReadBinaryFile(stream);
             }
             catch (System.IO.EndOfStreamException ex)
             {
@@ -247,22 +250,22 @@ namespace SharpGLTF.IO
 
             var context = this;
 
-            if (chunks.ContainsKey(BinarySerialization.CHUNKBIN))
+            if (chunks.ContainsKey(_BinarySerialization.CHUNKBIN))
             {
                 // clone self
-                var binChunk = chunks[BinarySerialization.CHUNKBIN];
+                var binChunk = chunks[_BinarySerialization.CHUNKBIN];
                 context = new ReadContext(context);
                 context._BinaryChunk = binChunk;
             }
 
-            var jsonChunk = chunks[BinarySerialization.CHUNKJSON];
+            var jsonChunk = chunks[_BinarySerialization.CHUNKJSON];
 
             return context._Read(jsonChunk);
         }
 
-        private (SCHEMA2 Model, Validation.ValidationResult Validation) _Read(ReadOnlyMemory<Byte> jsonUtf8Bytes)
+        private (MODEL Model, Validation.ValidationResult Validation) _Read(ReadOnlyMemory<Byte> jsonUtf8Bytes)
         {
-            var root = new SCHEMA2();
+            var root = new MODEL();
             var vcontext = new Validation.ValidationResult(root, this.Validation);
 
             #if !SUPRESSTRYCATCH
@@ -359,7 +362,7 @@ namespace SharpGLTF.IO
         public static bool IdentifyBinaryContainer(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
-            return BinarySerialization._Identify(stream);
+            return _BinarySerialization._Identify(stream);
         }
 
         public static String ReadJson(Stream stream)
@@ -370,9 +373,9 @@ namespace SharpGLTF.IO
 
             if (binaryFile)
             {
-                var chunks = BinarySerialization.ReadBinaryFile(stream);
+                var chunks = _BinarySerialization.ReadBinaryFile(stream);
 
-                return Encoding.UTF8.GetString(chunks[BinarySerialization.CHUNKJSON]);
+                return Encoding.UTF8.GetString(chunks[_BinarySerialization.CHUNKJSON]);
             }
 
             using (var streamReader = new StreamReader(stream))
@@ -389,9 +392,9 @@ namespace SharpGLTF.IO
 
             if (binaryFile)
             {
-                var chunks = BinarySerialization.ReadBinaryFile(stream);
+                var chunks = _BinarySerialization.ReadBinaryFile(stream);
 
-                return chunks[BinarySerialization.CHUNKJSON];
+                return chunks[_BinarySerialization.CHUNKJSON];
             }
 
             return stream.ReadBytesToEnd();

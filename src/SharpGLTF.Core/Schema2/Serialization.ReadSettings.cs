@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 using BYTES = System.ArraySegment<byte>;
-
+using MODEL = SharpGLTF.Schema2.ModelRoot;
 using VALIDATIONMODE = SharpGLTF.Validation.ValidationMode;
 
 namespace SharpGLTF.Schema2
 {
-    using MODEL = ModelRoot;
-
     /// <summary>
     /// Callback used to intercept the loading of textures so they can be
     /// decoded by the client engine and uploaded to the GPU if neccesary.
     /// </summary>
     /// <param name="image">The Image containing the texture</param>
-    /// <returns>true if we want to keep the image memory data in Image. Otherwise the memory will be cleared.</returns>
+    /// <returns>
+    /// True if we want to keep the image memory data inside <see cref="Image"/>.<br/>
+    /// Otherwise the memory will be cleared and <see cref="Image"/> will be empty.
+    /// </returns>
     public delegate Boolean ImageDecodeCallback(Image image);
 
     /// <summary>
-    /// Read settings and base class of <see cref="IO.ReadContext"/>
+    /// Read settings and base class of <see cref="ReadContext"/>
     /// </summary>
     public class ReadSettings
     {
@@ -79,7 +79,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
-            var context = IO.ReadContext.CreateFromFile(filePath);
+            var context = ReadContext.CreateFromFile(filePath);
 
             return context.Validate(filePath);
         }
@@ -98,9 +98,9 @@ namespace SharpGLTF.Schema2
         {
             Guard.FilePathMustExist(filePath, nameof(filePath));
 
-            var context = IO.ReadContext.CreateFromFile(filePath);
-
-            if (settings != null) settings.CopyTo(context);
+            var context = ReadContext
+                .CreateFromFile(filePath)
+                .WithSettingsFrom(settings);
 
             using (var s = File.OpenRead(filePath))
             {
@@ -135,10 +135,9 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
 
-            var context = IO.ReadContext
-                .Create(f => throw new NotSupportedException());
-
-            if (settings != null) settings.CopyTo(context);
+            var context = ReadContext
+                .Create(f => throw new NotSupportedException())
+                .WithSettingsFrom(settings);
 
             return context.ReadBinarySchema2(stream);
         }
@@ -161,7 +160,7 @@ namespace SharpGLTF.Schema2
 
             using (var s = File.OpenRead(filePath))
             {
-                json = IO.ReadContext.ReadJsonBytes(s);
+                json = ReadContext.ReadJsonBytes(s);
             }
 
             return ParseSatellitePaths(json);
@@ -211,7 +210,7 @@ namespace SharpGLTF.Schema2
         {
         }
 
-        internal void _ResolveSatelliteDependencies(IO.ReadContext context)
+        internal void _ResolveSatelliteDependencies(ReadContext context)
         {
             // resolve satellite buffers
 

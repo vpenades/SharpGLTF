@@ -88,7 +88,7 @@ namespace SharpGLTF.Materials
             // define the texture sharing hook; this is a pretty naive approach, but it's good
             // enough to demonstrate how it works.
 
-            string imageSharingHook(IO.WriteContext ctx, string uri, Memory.MemoryImage image)
+            string imageSharingHook(WriteContext ctx, string uri, Memory.MemoryImage image)
             {
                 Assert.IsTrue(new string[] { tex1, tex2 }.Contains(image.SourcePath) );
 

@@ -39,14 +39,14 @@ namespace SharpGLTF.Schema2
         const string EMBEDDEDOCTETSTREAM = "data:application/octet-stream";
         const string EMBEDDEDGLTFBUFFER = "data:application/gltf-buffer";
 
-        internal void _ResolveUri(IO.ReadContext context)
+        internal void _ResolveUri(ReadContext context)
         {
             _Content = _LoadBinaryBufferUnchecked(_uri, context);
 
             _uri = null; // When _Data is not empty, clear URI
         }
 
-        private static Byte[] _LoadBinaryBufferUnchecked(string uri, IO.ReadContext context)
+        private static Byte[] _LoadBinaryBufferUnchecked(string uri, ReadContext context)
         {
             var data = uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
             if (data != null) return data;
@@ -65,7 +65,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="writer">The satellite asset writer</param>
         /// <param name="satelliteUri">A local satellite URI</param>
-        internal void _WriteToSatellite(IO.WriteContext writer, string satelliteUri)
+        internal void _WriteToSatellite(WriteContext writer, string satelliteUri)
         {
             writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()));
 

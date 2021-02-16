@@ -7,8 +7,23 @@ using SharpGLTF.Schema2;
 
 namespace SharpGLTF.IO
 {
+    /// <summary>
+    /// Represents a context to read gltf files from a Zip archive.
+    /// </summary>
     public sealed class ZipReader : IDisposable
     {
+        #region static API
+
+        public static ModelRoot LoadGltf2(string zipPath, ReadSettings settings = null)
+        {
+            using (var zip = new ZipReader(zipPath))
+            {
+                return zip.LoadGltf2(settings);
+            }
+        }
+
+        #endregion
+
         #region lifecycle
 
         public ZipReader(string zipPath)
@@ -20,14 +35,6 @@ namespace SharpGLTF.IO
         {
             _Archive?.Dispose();
             _Archive = null;
-        }
-
-        public static ModelRoot LoadSchema2(string zipPath, ReadSettings settings = null)
-        {
-            using (var zip = new ZipReader(zipPath))
-            {
-                return zip.LoadSchema2(settings);
-            }
         }
 
         #endregion
@@ -54,17 +61,17 @@ namespace SharpGLTF.IO
                 .OrderBy(item => item.FullName);
         }
 
-        public ModelRoot LoadSchema2(ReadSettings settings = null)
+        public ModelRoot LoadGltf2(ReadSettings settings = null)
         {
             var gltfFile = ModelFiles.First();
-            return this._LoadSchema2(gltfFile, settings);
+            return this._LoadGltf2(gltfFile, settings);
         }
 
-        private ModelRoot _LoadSchema2(string gltfFile, ReadSettings settings = null)
+        private ModelRoot _LoadGltf2(string gltfFile, ReadSettings settings = null)
         {
-            var context = ReadContext.Create(_ReadAsset);
-
-            settings?.CopyTo(context);
+            var context = ReadContext
+                .Create(_ReadAsset)
+                .WithSettingsFrom(settings);
 
             using (var m = new System.IO.MemoryStream())
             {
@@ -107,6 +114,9 @@ namespace SharpGLTF.IO
         #endregion
     }
 
+    /// <summary>
+    /// Represents a context to write gltf files to a Zip archive.
+    /// </summary>
     public sealed class ZipWriter : IDisposable
     {
         #region lifecycle
@@ -135,6 +145,7 @@ namespace SharpGLTF.IO
         public void AddModel(string filePath, ModelRoot model, WriteSettings settings = null)
         {
             Guard.NotNullOrEmpty(filePath, nameof(filePath));
+            Guard.NotNull(model, nameof(model));
 
             var baseName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
