@@ -157,7 +157,7 @@ namespace SharpGLTF.IO
             var dict = new Dictionary<string, Object>();            
             dict["value"] = value;            
 
-            JsonContent a = dict;
+            JsonContent a = JsonContent.CreateFrom(dict);
 
             // roundtrip to json
             var json = a.ToJson();
@@ -170,7 +170,7 @@ namespace SharpGLTF.IO
         [Test]
         public void CreateJsonContent()
         {
-            JsonContent a = _TestStructure.CreateCompatibleDictionary();
+            JsonContent a = JsonContent.CreateFrom(_TestStructure.CreateCompatibleDictionary());
             
             // roundtrip to json
             var json = a.ToJson();

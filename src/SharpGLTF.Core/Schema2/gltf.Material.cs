@@ -27,7 +27,8 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="AlphaCutoff"/> value for <see cref="Alpha"/> = <see cref="AlphaMode.MASK"/>.
+        /// Gets or sets the <see cref="AlphaCutoff"/> value.<br/>
+        /// It needs to be used in combination with <see cref="Alpha"/> = <see cref="AlphaMode.MASK"/>.
         /// </summary>
         public Single AlphaCutoff
         {
@@ -36,7 +37,8 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="Material"/> will render as Double Sided.
+        /// Gets or sets a value indicating whether this <see cref="Material"/> will render as Double Sided.<br/>
+        /// Default value: False
         /// </summary>
         public Boolean DoubleSided
         {

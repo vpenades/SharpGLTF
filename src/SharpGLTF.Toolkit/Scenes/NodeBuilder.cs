@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-
-using SharpGLTF.Schema2;
 
 namespace SharpGLTF.Scenes
 {
@@ -115,6 +111,18 @@ namespace SharpGLTF.Scenes
         #endregion
 
         #region properties - transform
+
+        public IEnumerable<string> AnimationTracksNames
+        {
+            get
+            {
+                var tracks = Enumerable.Empty<string>();
+                if (_Scale != null) tracks.Concat(_Scale.Tracks.Keys);
+                if (_Rotation != null) tracks.Concat(_Rotation.Tracks.Keys);
+                if (_Translation != null) tracks.Concat(_Translation.Tracks.Keys);
+                return tracks.Distinct();
+            }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="NodeBuilder"/> has animations.

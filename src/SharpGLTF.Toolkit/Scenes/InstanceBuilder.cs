@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using SharpGLTF.Collections;
-
 using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Schema2.Scene>;
 
 namespace SharpGLTF.Scenes
 {
+    /// <summary>
+    /// Represents an element within <see cref="SceneBuilder.Instances"/>
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Content}")]
     public sealed class InstanceBuilder : SCHEMA2SCENE
     {
@@ -17,6 +18,18 @@ namespace SharpGLTF.Scenes
         internal InstanceBuilder(SceneBuilder parent)
         {
             _Parent = parent;
+        }
+
+        public InstanceBuilder WithName(string name)
+        {
+            if (this.Content != null) this.Content.Name = name;
+            return this;
+        }
+
+        public InstanceBuilder WithExtras(IO.JsonContent extras)
+        {
+            if (this.Content != null) this.Content.Extras = extras;
+            return this;
         }
 
         #endregion
@@ -34,17 +47,38 @@ namespace SharpGLTF.Scenes
         #region properties
 
         /// <summary>
-        /// Gets The name of this instance.
-        /// This name represents the name that will take the <see cref="Schema2.Node"/> containing this content.
+        /// Gets the display text name of this object, or null.
+        /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
         /// </summary>
+        /// <remarks>
+        /// glTF does not define any ruling for object names.<br/>
+        /// This means that names can be null or non unique.<br/>
+        /// So don't use names for anything other than object name display.<br/>
+        /// If you need to reference objects by some ID, use lookup tables instead.
+        /// </remarks>
         public string Name => _ContentTransformer?.Name;
 
+        /// <summary>
+        /// Gets the custom data of this object.
+        /// </summary>
+        public IO.JsonContent Extras => _ContentTransformer?.Extras ?? default;
+
+        /// <summary>
+        /// Gets or sets the content of this instance.<br/>
+        /// It can be one of those types:<br/>
+        /// - <see cref="FixedTransformer"/><br/>
+        /// - <see cref="RigidTransformer"/><br/>
+        /// - <see cref="SkinnedTransformer"/><br/>
+        /// </summary>
         public ContentTransformer Content
         {
             get => _ContentTransformer;
             set => _ContentTransformer = value;
         }
 
+        /// <summary>
+        /// Gets the materials used by <see cref="Content"/>.
+        /// </summary>
         public IEnumerable<Materials.MaterialBuilder> Materials
         {
             get

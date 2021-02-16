@@ -232,33 +232,7 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
-    /// <summary>
-    /// Represents an utility class to help build meshes by adding primitives associated with a given material.
-    /// </summary>
-    /// <typeparam name="TvG">
-    /// The vertex fragment type with Position, Normal and Tangent.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/>,<br/>
-    /// - <see cref="VertexPositionNormal"/>,<br/>
-    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
-    /// </typeparam>
-    /// <typeparam name="TvM">
-    /// The vertex fragment type with Colors and Texture Coordinates.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexColor1"/>,<br/>
-    /// - <see cref="VertexTexture1"/>,<br/>
-    /// - <see cref="VertexColor1Texture1"/>.<br/>
-    /// - <see cref="VertexColor1Texture2"/>.<br/>
-    /// - <see cref="VertexColor2Texture2"/>.<br/>
-    /// </typeparam>
-    /// <typeparam name="TvS">
-    /// The vertex fragment type with Skin Joint Weights.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexJoints4"/>,<br/>
-    /// - <see cref="VertexJoints8"/>.<br/>
-    /// </typeparam>
+    /// <inheritdoc/>
     public class MeshBuilder<TvG, TvM, TvS> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
@@ -268,26 +242,7 @@ namespace SharpGLTF.Geometry
             : base(name) { }
     }
 
-    /// <summary>
-    /// Represents an utility class to help build meshes by adding primitives associated with a given material.
-    /// </summary>
-    /// <typeparam name="TvG">
-    /// The vertex fragment type with Position, Normal and Tangent.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/>,<br/>
-    /// - <see cref="VertexPositionNormal"/>,<br/>
-    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
-    /// </typeparam>
-    /// <typeparam name="TvM">
-    /// The vertex fragment type with Colors and Texture Coordinates.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexColor1"/>,<br/>
-    /// - <see cref="VertexTexture1"/>,<br/>
-    /// - <see cref="VertexColor1Texture1"/>.<br/>
-    /// - <see cref="VertexColor1Texture2"/>.<br/>
-    /// - <see cref="VertexColor2Texture2"/>.<br/>
-    /// </typeparam>
+    /// <inheritdoc/>
     public class MeshBuilder<TvG, TvM> : MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty>
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
@@ -296,16 +251,7 @@ namespace SharpGLTF.Geometry
             : base(name) { }
     }
 
-    /// <summary>
-    /// Represents an utility class to help build meshes by adding primitives associated with a given material.
-    /// </summary>
-    /// <typeparam name="TvG">
-    /// The vertex fragment type with Position, Normal and Tangent.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/>,<br/>
-    /// - <see cref="VertexPositionNormal"/>,<br/>
-    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
-    /// </typeparam>
+    /// <inheritdoc/>
     public class MeshBuilder<TvG> : MeshBuilder<Materials.MaterialBuilder, TvG, VertexEmpty, VertexEmpty>
         where TvG : struct, IVertexGeometry
     {

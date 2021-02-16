@@ -27,13 +27,38 @@ namespace SharpGLTF.Scenes
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var material = MaterialBuilder.CreateDefault();
+            var material = MaterialBuilder.CreateDefault();            
 
-            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);
+            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);            
 
             var scene = new SceneBuilder();
 
-            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);                       
+
+            scene.AttachToCurrentTest("cube.glb");
+            scene.AttachToCurrentTest("cube.gltf");
+            scene.AttachToCurrentTest("cube.plotly");
+        }
+
+        [Test(Description = "Creates a simple cube.")]
+        public void CreateCubeSceneWithExtras()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var material = MaterialBuilder.CreateDefault();
+            material.Name = "hello name";
+            material.Extras = IO.JsonContent.Serialize(new KeyValuePair<string, int>("hello", 16));
+
+            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);
+            mesh.Name = "world name";
+            mesh.Extras = "world extras";
+
+            var scene = new SceneBuilder();
+
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity)
+                .WithName("Cube")
+                .WithExtras(17);
 
             scene.AttachToCurrentTest("cube.glb");
             scene.AttachToCurrentTest("cube.gltf");
@@ -403,7 +428,7 @@ namespace SharpGLTF.Scenes
 
             var mesh2 = VPOSNRM.CreateCompatibleMesh("shape2");
             mesh2.AddCube(pink, Matrix4x4.Identity);
-            var inst2 = scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(2,0,0));
+            var inst2 = scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(2, 0, 0));
 
             scene.AttachToCurrentTest("static.glb");
             scene.AttachToCurrentTest("static.gltf");

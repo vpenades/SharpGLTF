@@ -194,7 +194,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .ToMeshBuilder( m => m.ToMaterialBuilder() );            
 
             var editableScene = new Scenes.SceneBuilder();
-            editableScene.AddRigidMesh(mesh, System.Numerics.Matrix4x4.Identity);
+            editableScene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             model.AttachToCurrentTest("original.glb");
             editableScene.ToGltf2().AttachToCurrentTest("WithTangents.glb");

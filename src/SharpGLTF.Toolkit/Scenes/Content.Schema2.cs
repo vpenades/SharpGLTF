@@ -9,18 +9,6 @@ using SCHEMA2NODE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Sch
 
 namespace SharpGLTF.Scenes
 {
-    partial class MorphableMeshContent : SCHEMA2NODE
-    {
-        void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
-        {
-            if (!(_Target is SCHEMA2NODE schema2Target)) return;
-
-            schema2Target.Setup(dstNode, context);
-
-            // setup morphs here!
-        }
-    }
-
     partial class MeshContent : SCHEMA2NODE
     {
         void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)

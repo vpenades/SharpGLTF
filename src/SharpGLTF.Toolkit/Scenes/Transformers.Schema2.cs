@@ -19,6 +19,7 @@ namespace SharpGLTF.Scenes
             var dstNode = dstScene.CreateNode();
 
             dstNode.Name = _NodeName;
+            dstNode.Extras = _NodeExtras;
             dstNode.LocalMatrix = _WorldTransform;
 
             schema2Target.Setup(dstNode, context);
@@ -49,6 +50,7 @@ namespace SharpGLTF.Scenes
 
             var skinnedMeshNode = dstScene.CreateNode();
             skinnedMeshNode.Name = _NodeName;
+            skinnedMeshNode.Extras = _NodeExtras;
 
             if (_MeshPoseWorldMatrix.HasValue)
             {

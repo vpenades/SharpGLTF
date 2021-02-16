@@ -4,7 +4,8 @@ using System.Numerics;
 namespace SharpGLTF.Schema2
 {
     /// <summary>
-    /// Represents a material sub-channel, which usually contains a texture.
+    /// Represents a material sub-channel, which usually contains a texture.<br/>
+    /// Use <see cref="Material.Channels"/> and <see cref="Material.FindChannel(string)"/> to access it.
     /// </summary>
     /// <remarks>
     /// This structure is not part of the gltf schema,

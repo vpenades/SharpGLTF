@@ -14,7 +14,7 @@ namespace SharpGLTF.Geometry
     /// <remarks>
     /// One of the use cases of <see cref="VertexBufferColumns"/> is to bind the different attribute
     /// columns directly to the <see cref="Schema2.Accessor"/> source feed, which means that
-    /// if you modify the contents of a column that is binded directly to a model, you're
+    /// if you modify the contents of a column that is bound directly to a model, you're
     /// modifying the model's internal data.
     /// </remarks>
     public class VertexBufferColumns

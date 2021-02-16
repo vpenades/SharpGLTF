@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
 
@@ -12,6 +10,26 @@ namespace SharpGLTF.Scenes
         MESHBUILDER GetGeometryAsset();
     }
 
+    /// <summary>
+    /// Represents a dummy, empty content of <see cref="ContentTransformer.Content"/>.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Custom")]
+    partial class EmptyContent : ICloneable
+    {
+        #region lifecycle
+
+        public EmptyContent() { }
+
+        public Object Clone() { return new EmptyContent(this); }
+
+        private EmptyContent(EmptyContent other) { }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Represents a <see cref="MESHBUILDER"/> content of <see cref="ContentTransformer.Content"/>.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Mesh")]
     partial class MeshContent
         : IRenderableContent
@@ -60,25 +78,9 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
-    partial class MorphableMeshContent : IRenderableContent
-    {
-        #region data
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private IRenderableContent _Target;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly List<Animations.AnimatableProperty<float>> _MorphWeights = new List<Animations.AnimatableProperty<float>>();
-
-        #endregion
-
-        #region API
-
-        public MESHBUILDER GetGeometryAsset() => _Target?.GetGeometryAsset();
-
-        #endregion
-    }
-
+    /// <summary>
+    /// Represents a <see cref="CameraBuilder"/> content of <see cref="ContentTransformer.Content"/>.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Camera")]
     partial class CameraContent : ICloneable
     {
@@ -119,6 +121,9 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    /// <summary>
+    /// Represents a <see cref="LightBuilder"/> content of <see cref="ContentTransformer.Content"/>.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Light")]
     partial class LightContent : ICloneable
     {
@@ -155,20 +160,6 @@ namespace SharpGLTF.Scenes
             get => _Light;
             set => _Light = value;
         }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("Custom")]
-    partial class EmptyContent : ICloneable
-    {
-        #region lifecycle
-
-        public EmptyContent() { }
-
-        public Object Clone() { return new EmptyContent(this); }
-
-        private EmptyContent(EmptyContent other) {  }
 
         #endregion
     }

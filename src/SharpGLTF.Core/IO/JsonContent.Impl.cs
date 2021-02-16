@@ -260,6 +260,52 @@ namespace SharpGLTF.IO
 
             return false;
         }
+
+        /// <summary>
+        /// Calculates the hash of a json DOM structure, without taking values into account
+        /// </summary>
+        /// <param name="x">the input json DOM structure</param>
+        /// <returns>A hash code</returns>
+        /// <remarks>
+        /// Theory says that two objects that are considered equal must have the same hash.
+        /// This means that we cannot use the hashes of the values because two equivalent
+        /// values (int 5) and (float 5.0f)  might have different hashes.
+        /// </remarks>
+        public static int GetStructureHashCode(Object x)
+        {
+            if (x == null) return 0;
+
+            if (x is IConvertible xval) { return 1; }
+
+            if (x is IReadOnlyList<object> xarr)
+            {
+                int h = xarr.Count;
+
+                for (int i = 0; i < xarr.Count; ++i)
+                {
+                    h ^= GetStructureHashCode(xarr[i]);
+                    h *= 17;
+                }
+
+                return h;
+            }
+
+            if (x is IReadOnlyDictionary<string, object> xdic)
+            {
+                int h = xdic.Count;
+
+                foreach (var kvp in xdic.OrderBy(item => item.Key))
+                {
+                    h ^= kvp.Key.GetHashCode();
+                    h ^= GetStructureHashCode(kvp.Value);
+                    h *= 17;
+                }
+
+                return h;
+            }
+
+            throw new ArgumentException($"Invalid type: {x.GetType()}", nameof(x));
+        }
     }
 
     /// <summary>

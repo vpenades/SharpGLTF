@@ -11,6 +11,9 @@ using TEXWRAP = SharpGLTF.Schema2.TextureWrapMode;
 
 namespace SharpGLTF.Materials
 {
+    /// <summary>
+    /// Represents the texture used by a <see cref="ChannelBuilder"/>
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public class TextureBuilder : BaseBuilder
     {

@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SharpGLTF.Scenes
 {
+    /// <summary>
+    /// Represents a light object.
+    /// </summary>
     public abstract class LightBuilder : BaseBuilder
     {
         #region lifecycle
@@ -40,9 +43,10 @@ namespace SharpGLTF.Scenes
         public Vector3 Color { get; set; }
 
         /// <summary>
-        /// Gets or sets the Brightness of light in. The units that this is defined in depend on the type of light.
-        /// point and spot lights use luminous intensity in candela (lm/sr) while directional
-        /// lights use illuminance in lux (lm/m2)
+        /// Gets or sets the Brightness of light in.<br/>
+        /// The units that this is defined in depend on the type of light.<br/>
+        /// Point and spot lights use luminous intensity in candela (lm/sr)
+        /// while directional lights use illuminance in lux (lm/m2)
         /// </summary>
         public Single Intensity { get; set; }
 
@@ -50,6 +54,7 @@ namespace SharpGLTF.Scenes
 
         #region Nested types
 
+        /// <inheritdoc/>
         [System.Diagnostics.DebuggerDisplay("Directional")]
         public sealed class Directional : LightBuilder
         {
@@ -68,6 +73,7 @@ namespace SharpGLTF.Scenes
             #endregion
         }
 
+        /// <inheritdoc/>
         [System.Diagnostics.DebuggerDisplay("Point")]
         public sealed class Point : LightBuilder
         {
@@ -95,8 +101,9 @@ namespace SharpGLTF.Scenes
             #region data
 
             /// <summary>
-            /// Gets or sets a Hint defining a distance cutoff at which the light's intensity may be considered
-            /// to have reached zero. Supported only for point and spot lights. Must be > 0.
+            /// Gets or sets a Hint defining a distance cutoff at which the
+            /// light's intensity may be considered to have reached zero.<br/>
+            /// Supported only for point and spot lights. Must be > 0.<br/>
             /// When undefined, range is assumed to be infinite.
             /// </summary>
             public Single Range { get; set; }
@@ -104,6 +111,7 @@ namespace SharpGLTF.Scenes
             #endregion
         }
 
+        /// <inheritdoc/>
         [System.Diagnostics.DebuggerDisplay("Spot")]
         public sealed class Spot : LightBuilder
         {
@@ -135,20 +143,21 @@ namespace SharpGLTF.Scenes
             #region data
 
             /// <summary>
-            /// Gets or sets a Hint defining a distance cutoff at which the light's intensity may be considered
-            /// to have reached zero. Supported only for point and spot lights. Must be > 0.
+            /// Gets or sets a Hint defining a distance cutoff at which the
+            /// light's intensity may be considered to have reached zero.<br/>
+            /// Supported only for point and spot lights. Must be > 0.<br/>
             /// When undefined, range is assumed to be infinite.
             /// </summary>
             public Single Range { get; set; }
 
             /// <summary>
-            /// Gets or sets the Angle, in radians, from centre of spotlight where falloff begins.
+            /// Gets or sets the Angle, in radians, from centre of spotlight where falloff begins.<br/>
             /// Must be greater than or equal to 0 and less than outerConeAngle.
             /// </summary>
             public Single InnerConeAngle { get; set; }
 
             /// <summary>
-            /// Gets or sets Angle, in radians, from centre of spotlight where falloff ends.
+            /// Gets or sets Angle, in radians, from centre of spotlight where falloff ends.<br/>
             /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
             /// </summary>
             public Single OuterConeAngle { get; set; }

@@ -47,19 +47,11 @@ namespace SharpGLTF.IO
 
         public static implicit operator JsonContent(Double value) { return new JsonContent(value); }
 
-        public static implicit operator JsonContent(Object[] value) { return new JsonContent(value); }
-
-        public static implicit operator JsonContent(List<Object> value) { return new JsonContent(value); }
-
-        public static implicit operator JsonContent(Dictionary<String, Object> value) { return new JsonContent(value); }
-
         public static JsonContent CreateFrom(IConvertible value) { return new JsonContent(value); }
         public static JsonContent CreateFrom(IList value) { return new JsonContent(value); }
         public static JsonContent CreateFrom(IDictionary value) { return new JsonContent(value); }
 
         internal static JsonContent _Wrap(Object value) { return new JsonContent(value); }
-
-        public JsonContent DeepClone() { return new JsonContent(_Content);  }
 
         private JsonContent(Object value)
         {
@@ -68,12 +60,26 @@ namespace SharpGLTF.IO
                 _Content = null;
         }
 
+        public JsonContent DeepClone() { return new JsonContent(_Content); }
+
         #endregion
 
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Object _Content;
+
+        public override int GetHashCode()
+        {
+            // until I figure a correct way of handling this...
+            throw new NotSupportedException("Do not use");
+        }
+
+        public override bool Equals(object obj)
+        {
+            // until I figure a correct way of handling this...
+            throw new NotSupportedException($"Use {nameof(JsonContent.AreEqualByContent)} instead.");
+        }
 
         /// <summary>
         /// Compares two <see cref="JsonContent"/> objects for equality.

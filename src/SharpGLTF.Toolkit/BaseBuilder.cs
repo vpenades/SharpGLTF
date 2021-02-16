@@ -32,16 +32,20 @@ namespace SharpGLTF
         #region data
 
         /// <summary>
-        /// Display text name, or null.<br/>⚠️ DO NOT USE AS AN OBJECT ID ⚠️
+        /// Gets or sets the display text name, or null.
+        /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
         /// </summary>
         /// <remarks>
-        /// glTF does not define any name ruling for object names.
-        /// This means that names can be null or non unique.
-        /// So don't use names for anything other than object name display.
-        /// Use lookup tables instead.
+        /// glTF does not define any ruling for object names.<br/>
+        /// This means that names can be null or non unique.<br/>
+        /// So don't use <see cref="Name"/> for anything other than object name display.<br/>
+        /// If you need to reference objects by some ID, use lookup tables instead.
         /// </remarks>
         public string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the custom data of this object.
+        /// </summary>
         public IO.JsonContent Extras { get; set; }
 
         protected static int GetContentHashCode(BaseBuilder x)

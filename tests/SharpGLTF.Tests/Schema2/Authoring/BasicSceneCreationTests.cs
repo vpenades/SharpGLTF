@@ -46,7 +46,7 @@ namespace SharpGLTF.Schema2.Authoring
             };
             dict["dict2"] = new Dictionary<string, int> { ["2"] = 2, ["3"] = 3 };
 
-            JsonContent extras = dict;
+            var extras = JsonContent.CreateFrom(dict);
 
             root.Extras = extras;
 

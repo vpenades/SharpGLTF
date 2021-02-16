@@ -7,6 +7,9 @@ using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
 
 namespace SharpGLTF.Materials
 {
+    /// <summary>
+    /// Represents an image that can be used at <see cref="TextureBuilder.PrimaryImage"/> and <see cref="TextureBuilder.FallbackImage"/>.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
     public sealed class ImageBuilder : BaseBuilder
     {

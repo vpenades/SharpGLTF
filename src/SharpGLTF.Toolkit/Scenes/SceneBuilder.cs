@@ -11,6 +11,9 @@ using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.Material
 
 namespace SharpGLTF.Scenes
 {
+    /// <summary>
+    /// Represents the root scene for models, cameras and lights.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("Scene {Name}")]
     public partial class SceneBuilder : BaseBuilder
     {
@@ -66,26 +69,53 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
+        /// <summary>
+        /// Gets all the instances in this scene.
+        /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         public IReadOnlyList<InstanceBuilder> Instances => _Instances;
 
+        /// <summary>
+        /// Gets all the unique material references shared by all the meshes in this scene.
+        /// </summary>
         public IEnumerable<MaterialBuilder> Materials => _Instances.SelectMany(item => item.Materials).Distinct(MaterialBuilder.ReferenceComparer);
+
+        internal IEnumerable<string> AnimationTrackNames => _Instances
+            .SelectMany(item => item.Content.GetAnimationTracksNames())
+            .Distinct();
+
+        #endregion
+
+        #region Obsolete API
+
+        [Obsolete("Remove name param and use .WithName(name);")]
+        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix)
+        {
+            return AddRigidMesh(mesh, meshWorldMatrix).WithName(nodeName);
+        }
+
+        [Obsolete("Remove name param and use .WithName(name);")]
+        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
+        {
+            return AddSkinnedMesh(mesh, meshWorldMatrix, joints).WithName(nodeName);
+        }
+
+        [Obsolete("Remove name param and use .WithName(name);")]
+        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, string nodeName, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
+        {
+            return AddSkinnedMesh(mesh, joints).WithName(nodeName);
+        }
 
         #endregion
 
         #region API
-
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
         {
-            return AddRigidMesh(mesh, null, meshWorldMatrix);
-        }
-
-        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, String name, Matrix4x4 meshWorldMatrix)
-        {
             Guard.NotNull(mesh, nameof(mesh));
+            Guard.IsTrue(meshWorldMatrix.IsValid(true, false, false), nameof(meshWorldMatrix));
 
             var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(mesh, meshWorldMatrix, name);
+            instance.Content = new FixedTransformer(mesh, meshWorldMatrix);
 
             _Instances.Add(instance);
 
@@ -107,16 +137,12 @@ namespace SharpGLTF.Scenes
 
         public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
         {
-            return AddSkinnedMesh(mesh, null, meshWorldMatrix, joints);
-        }
-
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, String name, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
-        {
             Guard.NotNull(mesh, nameof(mesh));
+            Guard.IsTrue(meshWorldMatrix.IsValid(true, false, false), nameof(meshWorldMatrix));
             GuardAll.NotNull(joints, nameof(joints));
 
             var instance = new InstanceBuilder(this);
-            instance.Content = new SkinnedTransformer(mesh, meshWorldMatrix, joints, name);
+            instance.Content = new SkinnedTransformer(mesh, meshWorldMatrix, joints);
 
             _Instances.Add(instance);
 
@@ -125,16 +151,12 @@ namespace SharpGLTF.Scenes
 
         public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
-            return AddSkinnedMesh(mesh, null, joints);
-        }
-
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, String name, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
-        {
             Guard.NotNull(mesh, nameof(mesh));
             GuardAll.NotNull(joints.Select(item => item.Joint), nameof(joints));
+            GuardAll.AreTrue(joints.Select(item => item.InverseBindMatrix.IsValid(true, false, false)), nameof(joints), "Invalid matrix");
 
             var instance = new InstanceBuilder(this);
-            instance.Content = new SkinnedTransformer(mesh, joints, name);
+            instance.Content = new SkinnedTransformer(mesh, joints);
 
             _Instances.Add(instance);
 
@@ -155,47 +177,34 @@ namespace SharpGLTF.Scenes
 
         public InstanceBuilder AddCamera(CameraBuilder camera, Vector3 cameraPosition, Vector3 targetPosition)
         {
-            return AddCamera(camera, null, cameraPosition, targetPosition);
-        }
-
-        public InstanceBuilder AddCamera(CameraBuilder camera, String name, Vector3 cameraPosition, Vector3 targetPosition)
-        {
             Guard.NotNull(camera, nameof(camera));
             Guard.IsTrue(cameraPosition._IsFinite(), nameof(cameraPosition));
             Guard.IsTrue(targetPosition._IsFinite(), nameof(targetPosition));
 
             var xform = Matrix4x4.CreateWorld(cameraPosition, Vector3.Normalize(targetPosition - cameraPosition), Vector3.UnitY);
-            return AddCamera(camera, name, xform);
+            return AddCamera(camera, xform);
         }
 
         public InstanceBuilder AddCamera(CameraBuilder camera, Matrix4x4 cameraWorldMatrix)
         {
-            return AddCamera(camera, null, cameraWorldMatrix);
-        }
-
-        public InstanceBuilder AddCamera(CameraBuilder camera, String name, Matrix4x4 cameraWorldMatrix)
-        {
             Guard.NotNull(camera, nameof(camera));
+            Guard.IsTrue(cameraWorldMatrix.IsValid(true, false, false), nameof(cameraWorldMatrix));
 
             var content = new CameraContent(camera);
             var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(content, cameraWorldMatrix, name);
+            instance.Content = new FixedTransformer(content, cameraWorldMatrix);
             _Instances.Add(instance);
             return instance;
         }
 
         public InstanceBuilder AddLight(LightBuilder light, Matrix4x4 lightWorldMatrix)
         {
-            return AddLight(light, null, lightWorldMatrix);
-        }
-
-        public InstanceBuilder AddLight(LightBuilder light, String name, Matrix4x4 lightWorldMatrix)
-        {
             Guard.NotNull(light, nameof(light));
+            Guard.IsTrue(lightWorldMatrix.IsValid(true, false, false), nameof(lightWorldMatrix));
 
             var content = new LightContent(light);
             var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(content, lightWorldMatrix, name);
+            instance.Content = new FixedTransformer(content, lightWorldMatrix);
             _Instances.Add(instance);
             return instance;
         }
@@ -241,12 +250,15 @@ namespace SharpGLTF.Scenes
         /// <param name="basisTransform">The transform to apply.</param>
         /// <param name="basisNodeName">The name of the dummy root node.</param>
         /// <remarks>
-        /// In some circunstances, it's not possible to apply the <paramref name="basisTransform"/> to
-        /// the nodes in the scene. In this case a dummy node is created, and these nodes are made
-        /// children of this dummy node.
+        /// In some circunstances, it's not possible to apply the
+        /// <paramref name="basisTransform"/> to the nodes in the scene.<br/>
+        /// In these cases a dummy node is created, and these
+        /// nodes are made children of this dummy node.
         /// </remarks>
         public void ApplyBasisTransform(Matrix4x4 basisTransform, string basisNodeName = "BasisTransform")
         {
+            Guard.IsTrue(basisTransform.IsValid(true, false, false), nameof(basisTransform));
+
             // gather all root nodes:
             var rootNodes = this.FindArmatures();
 
@@ -298,6 +310,7 @@ namespace SharpGLTF.Scenes
         public IReadOnlyList<InstanceBuilder> AddScene(SceneBuilder scene, Matrix4x4 sceneTransform)
         {
             Guard.NotNull(scene, nameof(scene));
+            Guard.IsTrue(sceneTransform.IsValid(true, false, false), nameof(sceneTransform));
 
             scene = scene.DeepClone();
 

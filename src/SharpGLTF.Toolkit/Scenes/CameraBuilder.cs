@@ -5,6 +5,9 @@ using System.Text;
 
 namespace SharpGLTF.Scenes
 {
+    /// <summary>
+    /// Represents an camera object.
+    /// </summary>
     public abstract class CameraBuilder : BaseBuilder
     {
         #region lifecycle
@@ -40,7 +43,28 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public float ZFar { get; set; }
 
-        public abstract Matrix4x4 Matrix { get; }
+        /// <summary>
+        /// Gets a value indicating whether the camera parameters are correct.
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                try { GetMatrix(); return true; }
+                catch { return false; }
+            }
+        }
+
+        /// <summary>
+        /// Gets the projection matrix for the camera parameters.
+        /// </summary>
+        public Matrix4x4 Matrix => GetMatrix();
+
+        #endregion
+
+        #region API
+
+        protected abstract Matrix4x4 GetMatrix();
 
         #endregion
 
@@ -48,6 +72,7 @@ namespace SharpGLTF.Scenes
 
         #pragma warning disable CA1034 // Nested types should not be visible
 
+        /// <inheritdoc/>
         [System.Diagnostics.DebuggerDisplay("Orthographic ({XMag},{YMag})  {ZNear} < {ZFar}")]
         public sealed class Orthographic : CameraBuilder
         {
@@ -93,14 +118,19 @@ namespace SharpGLTF.Scenes
             /// </summary>
             public float YMag { get; set; }
 
-            /// <summary>
-            /// Gets the projection matrix for the current settings
-            /// </summary>
-            public override Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(XMag, YMag, ZNear, ZFar);
+            #endregion
+
+            #region API
+
+            protected override Matrix4x4 GetMatrix()
+            {
+                return Transforms.Projection.CreateOrthographicMatrix(XMag, YMag, ZNear, ZFar);
+            }
 
             #endregion
         }
 
+        /// <inheritdoc/>
         [System.Diagnostics.DebuggerDisplay("Perspective {AspectRatio} {VerticalFOV}   {ZNear} < {ZFar}")]
         public sealed partial class Perspective : CameraBuilder
         {
@@ -146,10 +176,13 @@ namespace SharpGLTF.Scenes
             /// </summary>
             public float VerticalFOV { get; set; }
 
-            /// <summary>
-            /// Gets the projection matrix for the current settings
-            /// </summary>
-            public override Matrix4x4 Matrix => Transforms.Projection.CreateOrthographicMatrix(AspectRatio ?? 1, VerticalFOV, ZNear, ZFar);
+            #endregion
+
+            #region API
+            protected override Matrix4x4 GetMatrix()
+            {
+                return Transforms.Projection.CreateOrthographicMatrix(AspectRatio ?? 1, VerticalFOV, ZNear, ZFar);
+            }
 
             #endregion
         }

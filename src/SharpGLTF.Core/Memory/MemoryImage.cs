@@ -26,6 +26,7 @@ namespace SharpGLTF.Memory
             if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
             if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
             if (IsKtx2) return $"KTX2 {_Image.Count}ᴮʸᵗᵉˢ";
+
             return "Undefined";
         }
 
@@ -179,13 +180,15 @@ namespace SharpGLTF.Memory
         public ReadOnlyMemory<Byte> Content => _Image;
 
         /// <summary>
-        /// Gets the source path of this image, or null.<br/>
-        /// ⚠️ DO NOT USE AS AN IMAGE ID ⚠️
+        /// Gets the source path of this image, or <b>null</b>.
+        /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
         /// </summary>
         /// <remarks>
         /// Not all images are expected to have a source path.<br/>
         /// Specifically images embedded in a GLB file or encoded with BASE64
-        /// will not have any source path at all.
+        /// will not have any source path at all.<br/>
+        /// So if your code depends on images having a path, it might crash
+        /// on gltf files with embedded images.
         /// </remarks>
         public string SourcePath => _SourcePathHint;
 
@@ -222,7 +225,14 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// Gets a value indicating whether this object represents a valid image.
         /// </summary>
-        public bool IsValid => _IsImage(_Image);
+        public bool IsValid
+        {
+            get
+            {
+                try { _Verify(this, string.Empty); return true; }
+                catch { return false; }
+            }
+        }
 
         /// <summary>
         /// Gets the most appropriate extension string for this image.
@@ -262,7 +272,7 @@ namespace SharpGLTF.Memory
 
         #region API
 
-        public static void Verify(MemoryImage image, string paramName)
+        internal static void _Verify(MemoryImage image, string paramName)
         {
             Guard.IsTrue(_IsImage(image._Image), paramName, $"{paramName} must be a valid image byte stream.");
 

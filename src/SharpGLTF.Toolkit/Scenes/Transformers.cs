@@ -4,11 +4,14 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.IO;
+
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
 
 namespace SharpGLTF.Scenes
 {
     /// <summary>
+    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a transform to the underlaying content object (usually a Mesh, a Camera or a light)
     /// </summary>
     public abstract class ContentTransformer
@@ -63,9 +66,27 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
-        public abstract String Name { get; }
+        /// <summary>
+        /// Gets or sets the display text name, or null.
+        /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
+        /// </summary>
+        /// <remarks>
+        /// glTF does not define any ruling for object names.<br/>
+        /// This means that names can be null or non unique.<br/>
+        /// So don't use <see cref="Name"/> for anything other than object name display.<br/>
+        /// If you need to reference objects by some ID, use lookup tables instead.
+        /// </remarks>
+        public abstract String Name { get; set; }
 
-        public Object Content => _Content;
+        /// <summary>
+        /// Gets or sets the custom data of this object.
+        /// </summary>
+        public abstract IO.JsonContent Extras { get; set; }
+
+        /// <summary>
+        /// Gets the content of this transformer.<br/>
+        /// </summary>
+        internal Object Content => _Content;
 
         public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
 
@@ -103,6 +124,14 @@ namespace SharpGLTF.Scenes
 
         public abstract Matrix4x4 GetPoseWorldMatrix();
 
+        internal IEnumerable<string> GetAnimationTracksNames()
+        {
+            var tracks = NodeBuilder.Flatten(this.GetArmatureRoot()).SelectMany(item => item.AnimationTracksNames);
+            if (_Morphings != null) tracks = tracks.Concat(_Morphings.Tracks.Keys);
+
+            return tracks.Distinct();
+        }
+
         #endregion
 
         #region nestedTypes
@@ -127,6 +156,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
+    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a fixed <see cref="Matrix4x4"/> transform to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Fixed Node[{_DebugName,nq}] = {Content}")]
@@ -134,11 +164,10 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal FixedTransformer(Object content, Matrix4x4 xform, string nodeName = null)
+        internal FixedTransformer(Object content, Matrix4x4 xform)
             : base(content)
         {
             _WorldTransform = xform;
-            _NodeName = nodeName;
         }
 
         protected FixedTransformer(FixedTransformer other)
@@ -147,6 +176,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(other, nameof(other));
 
             this._NodeName = other._NodeName;
+            this._NodeExtras = other._NodeExtras.DeepClone();
             this._WorldTransform = other._WorldTransform;
         }
 
@@ -163,13 +193,28 @@ namespace SharpGLTF.Scenes
         private String _NodeName;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private IO.JsonContent _NodeExtras;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Matrix4x4 _WorldTransform;
 
         #endregion
 
         #region properties
 
-        public override String Name => _NodeName;
+        /// <inheritdoc/>
+        public override String Name
+        {
+            get => _NodeName;
+            set => _NodeName = value;
+        }
+
+        /// <inheritdoc/>
+        public override JsonContent Extras
+        {
+            get => _NodeExtras;
+            set => _NodeExtras = value;
+        }
 
         public Matrix4x4 WorldMatrix
         {
@@ -190,6 +235,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
+    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transform of a single <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Rigid Node[{_DebugName,nq}] = {Content}")]
@@ -227,7 +273,19 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
-        public override String Name => _Node.Name;
+        /// <inheritdoc/>
+        public override String Name
+        {
+            get => _Node.Name;
+            set => _Node.Name = value;
+        }
+
+        /// <inheritdoc/>
+        public override JsonContent Extras
+        {
+            get => _Node.Extras;
+            set => _Node.Extras = value;
+        }
 
         public NodeBuilder Transform
         {
@@ -247,6 +305,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
+    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transforms of many <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Skinned Node[{_DebugName,nq}] = {Content}")]
@@ -254,17 +313,15 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints, string nodeName = null)
+        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
             : base(mesh)
         {
-            _NodeName = nodeName;
             SetJoints(meshWorldMatrix, joints);
         }
 
-        internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints, string nodeName = null)
+        internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
             : base(mesh)
         {
-            _NodeName = nodeName;
             SetJoints(joints);
         }
 
@@ -274,6 +331,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(other, nameof(other));
 
             this._NodeName = other._NodeName;
+            this._NodeExtras = other._NodeExtras.DeepClone();
             this._MeshPoseWorldMatrix = other._MeshPoseWorldMatrix;
 
             foreach (var (joint, inverseBindMatrix) in other._Joints)
@@ -296,6 +354,9 @@ namespace SharpGLTF.Scenes
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private String _NodeName;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private IO.JsonContent _NodeExtras;
+
         /// <summary>
         /// Defines the world matrix of the mesh at the time of binding.
         /// </summary>
@@ -310,7 +371,19 @@ namespace SharpGLTF.Scenes
 
         #region properties
 
-        public override String Name => _NodeName;
+        /// <inheritdoc/>
+        public override String Name
+        {
+            get => _NodeName;
+            set => _NodeName = value;
+        }
+
+        /// <inheritdoc/>
+        public override JsonContent Extras
+        {
+            get => _NodeExtras;
+            set => _NodeExtras = value;
+        }
 
         #endregion
 

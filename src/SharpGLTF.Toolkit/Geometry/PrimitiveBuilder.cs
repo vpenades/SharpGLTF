@@ -10,7 +10,7 @@ using SharpGLTF.Geometry.VertexTypes;
 namespace SharpGLTF.Geometry
 {
     /// <summary>
-    /// Represents an utility class to help build mesh primitives by adding triangles
+    /// Represents an utility class to help build mesh primitives by adding points, lines or triangles
     /// </summary>
     /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/> instance.</typeparam>
     /// <typeparam name="TvG">
@@ -416,6 +416,7 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
+    /// <inheritdoc/>
     [System.Diagnostics.DebuggerDisplay("Points[{Points.Count}] {_Material}")]
     sealed class PointsPrimitiveBuilder<TMaterial, TvG, TvM, TvS> : PrimitiveBuilder<TMaterial, TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
@@ -488,6 +489,7 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
+    /// <inheritdoc/>
     [System.Diagnostics.DebuggerDisplay("Lines[{Lines.Count}] {_Material}")]
     sealed class LinesPrimitiveBuilder<TMaterial, TvG, TvM, TvS> : PrimitiveBuilder<TMaterial, TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry
@@ -561,6 +563,7 @@ namespace SharpGLTF.Geometry
         #endregion
     }
 
+    /// <inheritdoc/>
     [System.Diagnostics.DebuggerDisplay("Triangles[{Triangles.Count}] {_Material}")]
     sealed class TrianglesPrimitiveBuilder<TMaterial, TvG, TvM, TvS> : PrimitiveBuilder<TMaterial, TvG, TvM, TvS>
         where TvG : struct, IVertexGeometry

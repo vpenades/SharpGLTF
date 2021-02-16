@@ -271,7 +271,7 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustDecompose = true, bool mustInvert = true)
         {
-            if (!matrix.IsValid(mustDecompose, mustInvert)) _DataThrow(pname, "Invalid Matrix");
+            if (!matrix.IsValid(mustInvert, mustDecompose)) _DataThrow(pname, "Invalid Matrix");
             return this;
         }
 

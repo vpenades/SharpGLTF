@@ -7,7 +7,7 @@ using System.Text;
 namespace SharpGLTF.Materials
 {
     /// <summary>
-    /// Represents a <see cref="MaterialBuilder"/> texture channel.
+    /// Represents a material channel at <see cref="MaterialBuilder"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public class ChannelBuilder
