@@ -39,28 +39,29 @@ namespace SharpGLTF.Geometry
     /// Represents an individual vertex object.
     /// </summary>
     /// <typeparam name="TvG">
-    /// The vertex fragment type with Position, Normal and Tangent.
-    /// Valid types are:
-    /// <see cref="VertexPosition"/>,
-    /// <see cref="VertexPositionNormal"/>,
-    /// <see cref="VertexPositionNormalTangent"/>.
+    /// The vertex fragment type with Position, Normal and Tangent.<br/>
+    /// Valid types are:<br/>
+    /// - <see cref="VertexPosition"/><br/>
+    /// - <see cref="VertexPositionNormal"/><br/>
+    /// - <see cref="VertexPositionNormalTangent"/>
     /// </typeparam>
     /// <typeparam name="TvM">
-    /// The vertex fragment type with Colors and Texture Coordinates.
-    /// Valid types are:
-    /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexColor1"/>,
-    /// <see cref="VertexTexture1"/>,
-    /// <see cref="VertexColor1Texture1"/>.
-    /// <see cref="VertexColor1Texture2"/>.
-    /// <see cref="VertexColor2Texture2"/>.
+    /// The vertex fragment type with Colors and Texture Coordinates.<br/>
+    /// Valid types are:<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexColor1"/><br/>
+    /// - <see cref="VertexTexture1"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor1Texture2"/><br/>
+    /// - <see cref="VertexColor2Texture1"/><br/>
+    /// - <see cref="VertexColor2Texture2"/>
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.
-    /// Valid types are:
-    /// <see cref="VertexEmpty"/>,
-    /// <see cref="VertexJoints4"/>,
-    /// <see cref="VertexJoints8"/>.
+    /// Valid types are:<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexJoints4"/><br/>
+    /// - <see cref="VertexJoints8"/>
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder
@@ -365,9 +366,9 @@ namespace SharpGLTF.Geometry
 
         public void Validate()
         {
-            Geometry.Validate();
-            Material.Validate();
-            Skinning.Validate();
+            VertexUtils.ValidateVertexGeometry(Geometry);
+            VertexUtils.ValidateVertexMaterial(Material);
+            VertexUtils.ValidateVertexSkinning(Skinning);
         }
 
         #pragma warning disable CA1000 // Do not declare static members on generic types

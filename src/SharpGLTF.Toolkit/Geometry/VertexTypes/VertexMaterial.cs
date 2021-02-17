@@ -7,21 +7,59 @@ using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    /// <summary>
+    /// Represents the interface that must be implemented by a material vertex fragment.<br/>
+    /// Implemented by:<br/>
+    /// - <see cref="VertexColor1"/><br/>
+    /// - <see cref="VertexColor2"/><br/>
+    /// - <see cref="VertexTexture1"/><br/>
+    /// - <see cref="VertexTexture2"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor1Texture2"/><br/>
+    /// - <see cref="VertexColor2Texture1"/><br/>
+    /// - <see cref="VertexColor2Texture2"/><br/>
+    /// </summary>
     public interface IVertexMaterial
     {
+        /// <summary>
+        /// Gets the number of color attributes available in this vertex
+        /// </summary>
         int MaxColors { get; }
 
+        /// <summary>
+        /// Gets the number of texture coordinate attributes available in this vertex
+        /// </summary>
         int MaxTextCoords { get; }
 
-        void Validate();
-
+        /// <summary>
+        /// Gets a color attribute.
+        /// </summary>
+        /// <param name="index">An index from 0 to <see cref="MaxColors"/>.</param>
+        /// <returns>A <see cref="Vector4"/> value in the range of 0 to 1</returns>
         Vector4 GetColor(int index);
+
+        /// <summary>
+        /// Gets a UV texture coordinate attribute.
+        /// </summary>
+        /// <param name="index">An index from 0 to <see cref="MaxTextCoords"/>.</param>
+        /// <returns>A <see cref="Vector2"/> UV texture coordinate.</returns>
         Vector2 GetTexCoord(int index);
 
+        /// <summary>
+        /// Sets a color attribute.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="setIndex">An index from 0 to <see cref="MaxColors"/>.</param>
+        /// <param name="color">A <see cref="Vector4"/> value in the range of 0 to 1</param>
         void SetColor(int setIndex, Vector4 color);
-        void SetTexCoord(int setIndex, Vector2 coord);
 
-        Object GetCustomAttribute(string attributeName);
+        /// <summary>
+        /// Sets a UV texture coordinate attribute.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="setIndex">An index from 0 to <see cref="MaxTextCoords"/>.</param>
+        /// <param name="coord">A <see cref="Vector2"/> UV texture coordinate.</param>
+        void SetTexCoord(int setIndex, Vector2 coord);
     }
 
     /// <summary>
@@ -62,8 +100,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color;
 
+        /// <inheritdoc/>
         public int MaxColors => 1;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 0;
 
         public override bool Equals(object obj) { return obj is VertexColor1 other && AreEqual(this, other); }
@@ -86,20 +126,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             throw new NotSupportedException();
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -147,8 +185,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color1;
 
+        /// <inheritdoc/>
         public int MaxColors => 2;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 0;
 
         public override bool Equals(object obj) { return obj is VertexColor2 other && AreEqual(this, other); }
@@ -175,8 +215,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             if (index == 0) return Color0;
@@ -184,9 +223,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             throw new ArgumentOutOfRangeException(nameof(index));
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index) { throw new NotSupportedException(); }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -229,8 +267,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_0")]
         public Vector2 TexCoord;
 
+        /// <inheritdoc/>
         public int MaxColors => 0;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 1;
 
         public override bool Equals(object obj) { return obj is VertexTexture1 other && AreEqual(this, other); }
@@ -252,20 +292,18 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return TexCoord;
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -313,8 +351,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_1")]
         public Vector2 TexCoord1;
 
+        /// <inheritdoc/>
         public int MaxColors => 0;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 2;
 
         public override bool Equals(object obj) { return obj is VertexTexture2 other && AreEqual(this, other); }
@@ -340,21 +380,19 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 1) this.TexCoord1 = coord;
         }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             throw new NotSupportedException();
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             if (index == 0) return TexCoord0;
             if (index == 1) return TexCoord1;
             throw new ArgumentOutOfRangeException(nameof(index));
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -402,8 +440,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_0")]
         public Vector2 TexCoord;
 
+        /// <inheritdoc/>
         public int MaxColors => 1;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 1;
 
         public override bool Equals(object obj) { return obj is VertexColor1Texture1 other && AreEqual(this, other); }
@@ -425,21 +465,19 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return TexCoord;
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }
@@ -492,8 +530,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_1")]
         public Vector2 TexCoord1;
 
+        /// <inheritdoc/>
         public int MaxColors => 1;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 2;
 
         public override bool Equals(object obj) { return obj is VertexColor1Texture2 other && AreEqual(this, other); }
@@ -519,14 +559,14 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 1) this.TexCoord1 = coord;
         }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             switch (index)
@@ -537,7 +577,110 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
+        #endregion
+    }
+
+    /// <summary>
+    /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexColor2Texture1 : IVertexMaterial, IEquatable<VertexColor2Texture1>
+    {
+        #region debug
+
+        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕:{TexCoord}";
+
+        #endregion
+
+        #region constructors
+
+        public VertexColor2Texture1(Vector4 color0, Vector4 color1, Vector2 tex)
+        {
+            Color0 = color0;
+            Color1 = color1;
+            TexCoord = tex;
+        }
+
+        public VertexColor2Texture1(IVertexMaterial src)
+        {
+            Guard.NotNull(src, nameof(src));
+
+            this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
+            this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
+            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
+        }
+
+        public static implicit operator VertexColor2Texture1((Vector4 Color0, Vector4 Color1, Vector2 Tex) tuple)
+        {
+            return new VertexColor2Texture1(tuple.Color0, tuple.Color1, tuple.Tex);
+        }
+
+        #endregion
+
+        #region data
+
+        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
+        public Vector4 Color0;
+
+        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
+        public Vector4 Color1;
+
+        [VertexAttribute("TEXCOORD_0")]
+        public Vector2 TexCoord;
+
+        /// <inheritdoc/>
+        public int MaxColors => 2;
+
+        /// <inheritdoc/>
+        public int MaxTextCoords => 1;
+
+        public override bool Equals(object obj) { return obj is VertexColor2Texture1 other && AreEqual(this, other); }
+        public bool Equals(VertexColor2Texture1 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return !AreEqual(a, b); }
+
+        public static bool AreEqual(in VertexColor2Texture1 a, in VertexColor2Texture1 b)
+        {
+            return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord == b.TexCoord;
+        }
+
+        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord.GetHashCode(); }
+
+        #endregion
+
+        #region API
+
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color)
+        {
+            if (setIndex == 0) this.Color0 = color;
+            if (setIndex == 1) this.Color1 = color;
+        }
+
+        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
+        {
+            if (setIndex == 0) this.TexCoord = coord;
+        }
+
+        /// <inheritdoc/>
+        public Vector4 GetColor(int index)
+        {
+            switch (index)
+            {
+                case 0: return this.Color0;
+                case 1: return this.Color1;
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
+
+        /// <inheritdoc/>
+        public Vector2 GetTexCoord(int index)
+        {
+            switch (index)
+            {
+                case 0: return this.TexCoord;
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
+        }
 
         #endregion
     }
@@ -595,8 +738,10 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TEXCOORD_1")]
         public Vector2 TexCoord1;
 
+        /// <inheritdoc/>
         public int MaxColors => 2;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 2;
 
         public override bool Equals(object obj) { return obj is VertexColor2Texture2 other && AreEqual(this, other); }
@@ -627,8 +772,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 1) this.TexCoord1 = coord;
         }
 
-        object IVertexMaterial.GetCustomAttribute(string attributeName) { return null; }
-
+        /// <inheritdoc/>
         public Vector4 GetColor(int index)
         {
             switch (index)
@@ -639,6 +783,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        /// <inheritdoc/>
         public Vector2 GetTexCoord(int index)
         {
             switch (index)
@@ -648,8 +793,6 @@ namespace SharpGLTF.Geometry.VertexTypes
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexMaterial(this); }
 
         #endregion
     }

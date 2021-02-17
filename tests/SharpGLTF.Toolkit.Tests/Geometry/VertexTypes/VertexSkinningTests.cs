@@ -5,8 +5,7 @@ using System.Text;
 using NUnit.Framework;
 
 namespace SharpGLTF.Geometry.VertexTypes
-{
-    [TestFixture]
+{    
     [Category("Toolkit")]
     public class VertexSkinningTests
     {

@@ -16,26 +16,27 @@ namespace SharpGLTF.Geometry
     /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/>,<br/>
-    /// - <see cref="VertexPositionNormal"/>,<br/>
-    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
+    /// - <see cref="VertexPosition"/><br/>
+    /// - <see cref="VertexPositionNormal"/><br/>
+    /// - <see cref="VertexPositionNormalTangent"/>
     /// </typeparam>
     /// <typeparam name="TvM">
     /// The vertex fragment type with Colors and Texture Coordinates.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexColor1"/>,<br/>
-    /// - <see cref="VertexTexture1"/>,<br/>
-    /// - <see cref="VertexColor1Texture1"/>.<br/>
-    /// - <see cref="VertexColor1Texture2"/>.<br/>
-    /// - <see cref="VertexColor2Texture2"/>.<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexColor1"/><br/>
+    /// - <see cref="VertexTexture1"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor1Texture2"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor2Texture2"/>
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexJoints4"/>,<br/>
-    /// - <see cref="VertexJoints8"/>.<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexJoints4"/><br/>
+    /// - <see cref="VertexJoints8"/>
     /// </typeparam>
     public class MeshBuilder<TMaterial, TvG, TvM, TvS> : BaseBuilder, IMeshBuilder<TMaterial>
         where TvG : struct, IVertexGeometry

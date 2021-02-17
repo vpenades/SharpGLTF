@@ -8,7 +8,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a set of vertex fragment preprocessors to be used with <see cref="VertexPreprocessor{TvG, TvM, TvS}"/>
     /// </summary>
-    static class FragmentPreprocessors
+    static partial class VertexUtils
     {
         /// <summary>
         /// validates a vertex geometry, throwing exceptions if found invalid
@@ -76,6 +76,8 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var t = vertex.GetTexCoord(i);
                 Guard.IsTrue(t._IsFinite(), $"TexCoord{i}", "Values are not finite.");
             }
+
+            if (vertex is IVertexCustom custom) custom.Validate();
 
             return vertex;
         }

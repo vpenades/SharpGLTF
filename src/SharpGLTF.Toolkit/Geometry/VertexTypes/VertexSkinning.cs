@@ -8,23 +8,66 @@ using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    /// <summary>
+    /// Represents the interface that must be implemented by a skiining vertex fragment.
+    /// Implemented by:<br/>
+    /// - <see cref="VertexJoints4"/><br/>
+    /// - <see cref="VertexJoints8"/><br/>
+    /// </summary>
     public interface IVertexSkinning
     {
+        /// <summary>
+        /// Gets the Number of valid joints supported.<br/>Typical values are 0, 4 or 8.
+        /// </summary>
         int MaxBindings { get; }
 
-        void Validate();
-
+        /// <summary>
+        /// Gets a joint-weight pair.
+        /// </summary>
+        /// <param name="index">An index from 0 to <see cref="MaxBindings"/>.</param>
+        /// <returns>The joint-weight pair.</returns>
         (int Index, float Weight) GetJointBinding(int index);
+
+        /// <summary>
+        /// Sets a joint-weight pair.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="index">An index from 0 to <see cref="MaxBindings"/>.</param>
+        /// <param name="joint">The joint index.</param>
+        /// <param name="weight">The weight of the joint.</param>
         void SetJointBinding(int index, int joint, float weight);
 
+        /// <summary>
+        /// Sets the packed joints-weights.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="weights">The packed joints-weights.</param>
         void SetWeights(in SparseWeight8 weights);
 
+        /// <summary>
+        /// Gets the packed joints-weights.
+        /// </summary>
+        /// <returns>The packed joints-weights.</returns>
         SparseWeight8 GetWeights();
 
+        /// <summary>
+        /// Gets the indices of the first 4 joints.
+        /// </summary>
         Vector4 JointsLow { get; }
+
+        /// <summary>
+        /// Gets the indices of the next 4 joints, if supported.
+        /// </summary>
         Vector4 JointsHigh { get; }
 
+        /// <summary>
+        /// Gets the weights of the first 4 joints.
+        /// </summary>
         Vector4 WeightsLow { get; }
+
+        /// <summary>
+        /// Gets the weights of the next 4 joints, if supported.
+        /// </summary>
         Vector4 WeightsHigh { get; }
     }
 
@@ -85,12 +128,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
-
+        /// <inheritdoc/>
         public SparseWeight8 GetWeights() { return new SparseWeight8(this.Joints, this.Weights); }
 
+        /// <inheritdoc/>
         public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints4(weights); }
 
+        /// <inheritdoc/>
         public (int, float) GetJointBinding(int index)
         {
             switch (index)
@@ -103,6 +147,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        /// <inheritdoc/>
         public void SetJointBinding(int index, int joint, float weight)
         {
             switch (index)
@@ -191,12 +236,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
-        public void Validate() { FragmentPreprocessors.ValidateVertexSkinning(this); }
-
+        /// <inheritdoc/>
         public SparseWeight8 GetWeights() { return new SparseWeight8(this.Joints0, this.Joints1, this.Weights0, this.Weights1); }
 
+        /// <inheritdoc/>
         public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints8(weights); }
 
+        /// <inheritdoc/>
         public (int Index, float Weight) GetJointBinding(int index)
         {
             switch (index)
@@ -213,6 +259,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
+        /// <inheritdoc/>
         public void SetJointBinding(int index, int joint, float weight)
         {
             switch (index)

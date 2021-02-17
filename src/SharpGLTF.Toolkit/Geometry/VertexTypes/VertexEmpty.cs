@@ -32,10 +32,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region properties
 
+        /// <inheritdoc/>
         public int MaxBindings => 0;
 
+        /// <inheritdoc/>
         public int MaxColors => 0;
 
+        /// <inheritdoc/>
         public int MaxTextCoords => 0;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -59,15 +62,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
+        /// <inheritdoc/>
         public SparseWeight8 GetWeights() { return default; }
 
+        /// <inheritdoc/>
         public void SetWeights(in SparseWeight8 weights) { throw new NotSupportedException(); }
 
         void IVertexSkinning.SetJointBinding(int index, int joint, float weight) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
         (int, float) IVertexSkinning.GetJointBinding(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
-
-        public object GetCustomAttribute(string attributeName) { return null; }
 
         #endregion
     }

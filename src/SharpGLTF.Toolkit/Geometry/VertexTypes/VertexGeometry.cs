@@ -6,22 +6,76 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    /// <summary>
+    /// Represents the interface that must be implemented by a geometry vertex fragment.<br/>
+    /// Implemented by:<br/>
+    /// - <see cref="VertexPosition"/><br/>
+    /// - <see cref="VertexPositionNormal"/><br/>
+    /// - <see cref="VertexPositionNormalTangent"/><br/>
+    /// - <see cref="VertexGeometryDelta"/><br/>
+    /// </summary>
     public interface IVertexGeometry
     {
-        void Validate();
-
+        /// <summary>
+        /// Gets the position of the vertex.
+        /// </summary>
+        /// <returns>A <see cref="Vector3"/> position.</returns>
         Vector3 GetPosition();
+
+        /// <summary>
+        /// Tries to get the normal of the vertex.
+        /// </summary>
+        /// <param name="normal">A <see cref="Vector3"/> normal.</param>
+        /// <returns>True if the normal exists.</returns>
         Boolean TryGetNormal(out Vector3 normal);
+
+        /// <summary>
+        /// Tries to get the tangent of the vertex.
+        /// </summary>
+        /// <param name="tangent">A <see cref="Vector4"/> tangent.</param>
+        /// <returns>True if the tangent exists.</returns>
         Boolean TryGetTangent(out Vector4 tangent);
 
+        /// <summary>
+        /// Sets the position of the vertex.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="position">A <see cref="Vector3"/> position.</param>
         void SetPosition(in Vector3 position);
+
+        /// <summary>
+        /// Sets the normal of the vertex.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="normal">A <see cref="Vector3"/> normal.</param>
         void SetNormal(in Vector3 normal);
+
+        /// <summary>
+        /// Sets the tangent of the vertex.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="tangent">A <see cref="Vector4"/> tangent.</param>
         void SetTangent(in Vector4 tangent);
 
+        /// <summary>
+        /// Applies a transform to the position, the normal and the tangent of this vertex.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="xform">a valid <see cref="Matrix4x4"/> transform.</param>
         void ApplyTransform(in Matrix4x4 xform);
 
+        /// <summary>
+        /// calculates the difference between this vertex and <paramref name="baseValue"/>
+        /// </summary>
+        /// <param name="baseValue">The other vertex.</param>
+        /// <returns>The <see cref="VertexGeometryDelta"/> value to subtract.</returns>
         VertexGeometryDelta Subtract(IVertexGeometry baseValue);
 
+        /// <summary>
+        /// Adds a vertex delta to this value.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="delta">The <see cref="VertexGeometryDelta"/> value to add.</param>
         void Add(in VertexGeometryDelta delta);
     }
 
@@ -87,28 +141,32 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
+        /// <inheritdoc/>
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPosition)baseValue, this);
         }
 
+        /// <inheritdoc/>
         public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
         }
 
+        /// <inheritdoc/>
         public Vector3 GetPosition() { return this.Position; }
 
+        /// <inheritdoc/>
         public bool TryGetNormal(out Vector3 normal) { normal = default; return false; }
 
+        /// <inheritdoc/>
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
+        /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }
@@ -183,30 +241,34 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
+        /// <inheritdoc/>
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormal)baseValue, this);
         }
 
+        /// <inheritdoc/>
         public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
             this.Normal += delta.NormalDelta;
         }
 
+        /// <inheritdoc/>
         public Vector3 GetPosition() { return this.Position; }
 
+        /// <inheritdoc/>
         public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
 
+        /// <inheritdoc/>
         public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
+        /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
             Normal = Vector3.Normalize(Vector3.TransformNormal(Normal, xform));
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }
@@ -280,11 +342,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(in Vector4 tangent) { this.Tangent = tangent; }
 
+        /// <inheritdoc/>
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormalTangent)baseValue, this);
         }
 
+        /// <inheritdoc/>
         public void Add(in VertexGeometryDelta delta)
         {
             this.Position += delta.PositionDelta;
@@ -292,12 +356,16 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Tangent += new Vector4(delta.TangentDelta, 0);
         }
 
+        /// <inheritdoc/>
         public Vector3 GetPosition() { return this.Position; }
 
+        /// <inheritdoc/>
         public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
 
+        /// <inheritdoc/>
         public bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
 
+        /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
@@ -307,8 +375,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             var txyz = Vector3.Normalize(Vector3.TransformNormal(new Vector3(Tangent.X, Tangent.Y, Tangent.Z), xform));
             Tangent = new Vector4(txyz, Tangent.W);
         }
-
-        public void Validate() { FragmentPreprocessors.ValidateVertexGeometry(this); }
 
         #endregion
     }
@@ -424,27 +490,31 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetTangent(in Vector4 tangent) { this.TangentDelta = new Vector3(tangent.X, tangent.Y, tangent.Z); }
 
+        /// <inheritdoc/>
         public Vector3 GetPosition() { return this.PositionDelta; }
 
+        /// <inheritdoc/>
         public bool TryGetNormal(out Vector3 normal) { normal = this.NormalDelta; return true; }
 
+        /// <inheritdoc/>
         public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.TangentDelta, 0); return true; }
 
+        /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform) { throw new NotSupportedException(); }
 
+        /// <inheritdoc/>
         public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexGeometryDelta)baseValue, this);
         }
 
+        /// <inheritdoc/>
         public void Add(in VertexGeometryDelta delta)
         {
             this.PositionDelta += delta.PositionDelta;
             this.NormalDelta += delta.NormalDelta;
             this.TangentDelta += delta.TangentDelta;
         }
-
-        public void Validate() { }
 
         #endregion
     }

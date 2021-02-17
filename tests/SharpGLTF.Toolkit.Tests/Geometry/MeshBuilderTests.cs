@@ -252,9 +252,9 @@ namespace SharpGLTF.Geometry
 
             prim.AddTriangle
                 (
-                (Vector3.UnitX, (Vector4.One, Vector2.Zero, 1)),
-                (Vector3.UnitY, (Vector4.One, Vector2.Zero, 2)),
-                (Vector3.UnitZ, (Vector4.One, Vector2.Zero, 3))
+                (Vector3.UnitX, (Vector4.One, Vector2.Zero, 0.1f)),
+                (Vector3.UnitY, (Vector4.One, Vector2.Zero, 0.2f)),
+                (Vector3.UnitZ, (Vector4.One, Vector2.Zero, 0.3f))
                 );
 
             var dstScene = new Schema2.ModelRoot();
@@ -263,7 +263,7 @@ namespace SharpGLTF.Geometry
 
             var batchId = dstMesh.Primitives[0].GetVertexAccessor(VertexColor1Texture1Custom1.CUSTOMATTRIBUTENAME).AsScalarArray();
 
-            CollectionAssert.AreEqual(new float[] { 1, 2, 3 }, batchId);
+            CollectionAssert.AreEqual(new float[] { 0.1f, 0.2f, 0.3f }, batchId);
         }
 
         [Test]

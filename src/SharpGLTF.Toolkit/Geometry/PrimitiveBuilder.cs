@@ -16,26 +16,27 @@ namespace SharpGLTF.Geometry
     /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/>,<br/>
-    /// - <see cref="VertexPositionNormal"/>,<br/>
-    /// - <see cref="VertexPositionNormalTangent"/>.<br/>
+    /// - <see cref="VertexPosition"/><br/>
+    /// - <see cref="VertexPositionNormal"/><br/>
+    /// - <see cref="VertexPositionNormalTangent"/><br/>
     /// </typeparam>
     /// <typeparam name="TvM">
     /// The vertex fragment type with Colors and Texture Coordinates.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexColor1"/>,<br/>
-    /// - <see cref="VertexTexture1"/>,<br/>
-    /// - <see cref="VertexColor1Texture1"/>.<br/>
-    /// - <see cref="VertexColor1Texture2"/>.<br/>
-    /// - <see cref="VertexColor2Texture2"/>.<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexColor1"/><br/>
+    /// - <see cref="VertexTexture1"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor1Texture2"/><br/>
+    /// - <see cref="VertexColor1Texture1"/><br/>
+    /// - <see cref="VertexColor2Texture2"/>
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/>,<br/>
-    /// - <see cref="VertexJoints4"/>,<br/>
-    /// - <see cref="VertexJoints8"/>.<br/>
+    /// - <see cref="VertexEmpty"/><br/>
+    /// - <see cref="VertexJoints4"/><br/>
+    /// - <see cref="VertexJoints8"/><br/>
     /// </typeparam>
     public abstract class PrimitiveBuilder<TMaterial, TvG, TvM, TvS> : IPrimitiveBuilder, IPrimitiveReader<TMaterial>
         where TvG : struct, IVertexGeometry
@@ -84,8 +85,14 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        /// <summary>
+        /// Gets the parent mesh that owns this primitive.
+        /// </summary>
         public MeshBuilder<TMaterial, TvG, TvM, TvS> Mesh => _Mesh;
 
+        /// <summary>
+        /// Gets the <see cref="TMaterial"/> used by this primitive.
+        /// </summary>
         public TMaterial Material => _Material;
 
         /// <summary>
@@ -96,20 +103,38 @@ namespace SharpGLTF.Geometry
         /// </summary>
         public abstract int VerticesPerPrimitive { get; }
 
+        /// <summary>
+        /// Gets the type of the vertex used by this primitive.
+        /// </summary>
         public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
+        /// <summary>
+        /// Gets the list of vertices used by this primitive.
+        /// </summary>
         public IReadOnlyList<VertexBuilder<TvG, TvM, TvS>> Vertices => _Vertices;
 
         IReadOnlyList<IVertexBuilder> IPrimitiveReader<TMaterial>.Vertices => _Vertices;
 
         IReadOnlyList<IPrimitiveMorphTargetReader> IPrimitiveReader<TMaterial>.MorphTargets => _MorphTargets;
 
+        /// <summary>
+        /// Gets the list in indices of the points contained in this primitive.
+        /// </summary>
         public virtual IReadOnlyList<int> Points => Array.Empty<int>();
 
+        /// <summary>
+        /// Gets the list in indices of the lines contained in this primitive.
+        /// </summary>
         public virtual IReadOnlyList<(int A, int B)> Lines => Array.Empty<(int, int)>();
 
+        /// <summary>
+        /// Gets the list in indices of triangles contained in this primitive.
+        /// </summary>
         public virtual IReadOnlyList<(int A, int B, int C)> Triangles => Array.Empty<(int, int, int)>();
 
+        /// <summary>
+        /// Gets the list in indices of the surfaces contained in this primitive.
+        /// </summary>
         public virtual IReadOnlyList<(int A, int B, int C, int? D)> Surfaces => Array.Empty<(int, int, int, int?)>();
 
         #endregion
@@ -179,7 +204,7 @@ namespace SharpGLTF.Geometry
         /// Adds a point.
         /// </summary>
         /// <param name="a">vertex for this point.</param>
-        /// <returns>The indices of the vertices.</returns>
+        /// <returns>The index of the vertex.</returns>
         public int AddPoint(IVertexBuilder a)
         {
             Guard.NotNull(a, nameof(a));
@@ -190,8 +215,8 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Adds a line.
         /// </summary>
-        /// <param name="a">First corner of the line.</param>
-        /// <param name="b">Second corner of the line.</param>
+        /// <param name="a">First end of the line.</param>
+        /// <param name="b">Last end of the line.</param>
         /// <returns>The indices of the vertices, or, in case the line is degenerated, (-1,-1).</returns>
         public (int A, int B) AddLine(IVertexBuilder a, IVertexBuilder b)
         {
@@ -444,14 +469,17 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        /// <inheritdoc/>
         public override int VerticesPerPrimitive => 1;
 
+        /// <inheritdoc/>
         public override IReadOnlyList<int> Points => new PointListWrapper<VertexBuilder<TvG, TvM, TvS>>(this.Vertices);
 
         #endregion
 
         #region API
 
+        /// <inheritdoc/>
         public override int AddPoint(VertexBuilder<TvG, TvM, TvS> a)
         {
             if (Mesh.VertexPreprocessor != null)
@@ -462,6 +490,7 @@ namespace SharpGLTF.Geometry
             return UseVertex(a);
         }
 
+        /// <inheritdoc/>
         public override IReadOnlyList<int> GetIndices() { return Array.Empty<int>(); }
 
         #endregion
@@ -524,14 +553,17 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        /// <inheritdoc/>
         public override int VerticesPerPrimitive => 2;
 
+        /// <inheritdoc/>
         public override IReadOnlyList<(int A, int B)> Lines => _Indices;
 
         #endregion
 
         #region API
 
+        /// <inheritdoc/>
         public override (int A, int B) AddLine(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b)
         {
             if (Mesh.VertexPreprocessor != null)
@@ -553,6 +585,7 @@ namespace SharpGLTF.Geometry
             return (aa, bb);
         }
 
+        /// <inheritdoc/>
         public override IReadOnlyList<int> GetIndices()
         {
             return _Indices
@@ -600,16 +633,20 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        /// <inheritdoc/>
         public override int VerticesPerPrimitive => 3;
 
+        /// <inheritdoc/>
         public override IReadOnlyList<(int A, int B, int C)> Triangles => new TriangleList(_TriIndices, _QuadIndices);
 
+        /// <inheritdoc/>
         public override IReadOnlyList<(int A, int B, int C, int? D)> Surfaces => new SurfaceList(_TriIndices, _QuadIndices);
 
         #endregion
 
         #region API
 
+        /// <inheritdoc/>
         public override (int A, int B, int C) AddTriangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c)
         {
             if (Mesh.VertexPreprocessor != null)
@@ -622,6 +659,7 @@ namespace SharpGLTF.Geometry
             return _AddTriangle(a, b, c);
         }
 
+        /// <inheritdoc/>
         public override (int A, int B, int C, int D) AddQuadrangle(VertexBuilder<TvG, TvM, TvS> a, VertexBuilder<TvG, TvM, TvS> b, VertexBuilder<TvG, TvM, TvS> c, VertexBuilder<TvG, TvM, TvS> d)
         {
             if (Mesh.VertexPreprocessor != null)
@@ -809,7 +847,7 @@ namespace SharpGLTF.Geometry
     /// Helper class used to calculate Normals and Tangents of missing meshes.
     /// </summary>
     /// <typeparam name="TMaterial">default material</typeparam>
-    class MeshPrimitiveNormalsAndTangents<TMaterial> : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+    sealed class MeshPrimitiveNormalsAndTangents<TMaterial> : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
     {
         #region constructor
 
