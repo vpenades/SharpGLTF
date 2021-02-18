@@ -489,7 +489,7 @@ namespace SharpGLTF.Schema2
             validate.IsAnyOf(nameof(Format), Format, (DimensionType.VEC4, EncodingType.UNSIGNED_BYTE, true), (DimensionType.VEC4, EncodingType.UNSIGNED_SHORT, true), DimensionType.VEC4);
         }
 
-        internal void ValidateMatrices(VALIDATIONCTX validate, bool mustDecompose = true, bool mustInvert = true)
+        internal void ValidateMatrices4x3(VALIDATIONCTX validate, bool mustInvert = true, bool mustDecompose = true)
         {
             validate = validate.GetContext(this);
 
@@ -501,7 +501,7 @@ namespace SharpGLTF.Schema2
 
             for (int i = 0; i < matrices.Count; ++i)
             {
-                validate.IsNullOrMatrix("Matrices", matrices[i], mustDecompose, mustInvert);
+                validate.IsNullOrMatrix4x3("Matrices", matrices[i], mustInvert, mustDecompose);
             }
         }
 

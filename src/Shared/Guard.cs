@@ -7,7 +7,9 @@ using System.Text;
 
 namespace SharpGLTF
 {
+    #if !SUPRESSTRYCATCH
     [DebuggerStepThrough]
+    #endif
     internal static class Guard
     {
         #region strings & paths

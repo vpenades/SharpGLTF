@@ -10,6 +10,8 @@ namespace SharpGLTF
 
         public static void SyncronizeGitRepository(string remoteUrl, string localDirectoryPath)
         {
+            Console.WriteLine($"Sync with {remoteUrl}...");
+
             if (!System.IO.Path.IsPathRooted(localDirectoryPath)) throw new ArgumentException(nameof(localDirectoryPath));
 
             lock (_DownloadMutex)

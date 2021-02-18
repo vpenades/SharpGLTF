@@ -32,8 +32,10 @@ namespace SharpGLTF.Runtime
 
             context.Reset();
 
+            var options = new Runtime.RuntimeOptions { IsolateMemory = true };
+
             var templates = srcModel.LogicalScenes
-                .Select(item => SceneTemplate.Create(item, true))
+                .Select(item => SceneTemplate.Create(item, options))
                 .ToArray();            
 
             var srcMeshes = templates

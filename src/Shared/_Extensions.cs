@@ -178,12 +178,48 @@ namespace SharpGLTF
             return dst;
         }
 
-        internal static bool IsValid(this in Matrix4x4 matrix, bool mustInvert = true, bool mustDecompose = true, bool mustPositiveDeterminant = false)
+        [Flags]
+        internal enum MatrixCheck
+        {
+            NonZero = 1,
+            Identity = 2,
+            IdentityColumn4 = 4,
+            Invertible = 8,
+            Decomposable = 16,
+            PositiveDeterminant = 32,
+
+            LocalTransform = Invertible | Decomposable | IdentityColumn4,
+
+            /// <remarks>
+            /// A world matrix can be built from a concatenation of local tranforms.<br/>
+            /// Which means it can be a squeezed matrix, and not decomposable.
+            /// </remarks>
+            WorldTransform = Invertible | IdentityColumn4,
+
+            /// <summary>
+            /// Since an inverse bind matrix is built from the inverse of a WorldMatrix,
+            /// the same rules apply.
+            /// </summary>
+            InverseBindMatrix = Invertible | IdentityColumn4
+        }
+
+        internal static bool IsValid(this in Matrix4x4 matrix, MatrixCheck check)
         {
             if (!matrix._IsFinite()) return false;
-            if (mustInvert && !Matrix4x4.Invert(matrix, out _)) return false;
-            if (mustDecompose && !Matrix4x4.Decompose(matrix, out _, out _, out _)) return false;
-            if (mustPositiveDeterminant && matrix.GetDeterminant() <= 0) return false;
+
+            if (check.HasFlag(MatrixCheck.NonZero) && matrix == default) return false;
+            if (check.HasFlag(MatrixCheck.Identity) && matrix != Matrix4x4.Identity) return false;
+            if (check.HasFlag(MatrixCheck.IdentityColumn4))
+            {
+                if (matrix.M14 != 0) return false;
+                if (matrix.M24 != 0) return false;
+                if (matrix.M34 != 0) return false;
+                if (matrix.M44 != 1) return false;
+            }
+
+            if (check.HasFlag(MatrixCheck.Invertible) && !Matrix4x4.Invert(matrix, out _)) return false;
+            if (check.HasFlag(MatrixCheck.Decomposable) && !Matrix4x4.Decompose(matrix, out _, out _, out _)) return false;
+            if (check.HasFlag(MatrixCheck.PositiveDeterminant) && matrix.GetDeterminant() <= 0) return false;
 
             return true;
         }

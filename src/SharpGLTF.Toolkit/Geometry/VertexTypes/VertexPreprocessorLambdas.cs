@@ -8,7 +8,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a set of vertex fragment preprocessors to be used with <see cref="VertexPreprocessor{TvG, TvM, TvS}"/>
     /// </summary>
-    static partial class VertexUtils
+    static class VertexPreprocessorLambdas
     {
         /// <summary>
         /// validates a vertex geometry, throwing exceptions if found invalid
@@ -128,7 +128,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (weight > 0) threshold += 2e-7f;
             }
 
-            Guard.MustBeLessThan(Math.Abs(weightsSum-1), threshold, $"Weights must sum 1, but found {weightsSum}");
+            Guard.MustBeLessThan(Math.Abs(weightsSum - 1), threshold, $"Weights must sum 1, but found {weightsSum}");
 
             // TODO: check that joints are unique
 
@@ -213,6 +213,9 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var t = vertex.GetTexCoord(i);
                 if (!t._IsFinite()) vertex.SetTexCoord(i, Vector2.Zero);
             }
+
+            // TODO:
+            // if (vertex is IVertexCustom custom) custom.Sanitize();
 
             return vertex;
         }

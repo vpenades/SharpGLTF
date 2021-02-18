@@ -181,7 +181,8 @@ namespace SharpGLTF.Animations
 
             var glTF = scene.ToGltf2();
 
-            var runtime = Runtime.SceneTemplate.Create(glTF.DefaultScene, true);
+            var options = new Runtime.RuntimeOptions { IsolateMemory = true };
+            var runtime = Runtime.SceneTemplate.Create(glTF.DefaultScene, options);
             var instance = runtime.CreateInstance();
 
             var instanceNode = instance.Armature.LogicalNodes.First(n => n.Name == "someNode");

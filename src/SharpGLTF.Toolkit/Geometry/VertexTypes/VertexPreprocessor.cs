@@ -76,20 +76,20 @@ namespace SharpGLTF.Geometry.VertexTypes
             _SkinningPreprocessor.Add(func);
         }
 
-        public void SetDebugPreprocessors()
+        public void SetValidationPreprocessors()
         {
             Clear();
-            Append(VertexUtils.ValidateVertexGeometry);
-            Append(VertexUtils.ValidateVertexMaterial);
-            Append(VertexUtils.ValidateVertexSkinning);
+            Append(VertexPreprocessorLambdas.ValidateVertexGeometry);
+            Append(VertexPreprocessorLambdas.ValidateVertexMaterial);
+            Append(VertexPreprocessorLambdas.ValidateVertexSkinning);
         }
 
         public void SetSanitizerPreprocessors()
         {
             Clear();
-            Append(VertexUtils.SanitizeVertexGeometry);
-            Append(VertexUtils.SanitizeVertexMaterial);
-            Append(VertexUtils.SanitizeVertexSkinning);
+            Append(VertexPreprocessorLambdas.SanitizeVertexGeometry);
+            Append(VertexPreprocessorLambdas.SanitizeVertexMaterial);
+            Append(VertexPreprocessorLambdas.SanitizeVertexSkinning);
         }
 
         public bool PreprocessVertex(ref VertexBuilder<TvG, TvM, TvS> vertex)

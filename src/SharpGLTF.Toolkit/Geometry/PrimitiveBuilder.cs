@@ -91,7 +91,7 @@ namespace SharpGLTF.Geometry
         public MeshBuilder<TMaterial, TvG, TvM, TvS> Mesh => _Mesh;
 
         /// <summary>
-        /// Gets the <see cref="TMaterial"/> used by this primitive.
+        /// Gets the <typeparamref name="TMaterial"/> used by this primitive.
         /// </summary>
         public TMaterial Material => _Material;
 

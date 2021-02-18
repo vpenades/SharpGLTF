@@ -26,7 +26,7 @@ namespace SharpGLTF.Geometry
             var mb = VERTEX2.CreateCompatibleMesh();
 
             // replaces default preprocessor with a debug preprocessor that throws exceptions at the slightest issue.
-            mb.VertexPreprocessor.SetDebugPreprocessors();
+            mb.VertexPreprocessor.SetValidationPreprocessors();
 
             int TriangleCounter() { return mb.Primitives.Sum(item => item.Triangles.Count()); }
 
@@ -136,7 +136,7 @@ namespace SharpGLTF.Geometry
                 );            
 
             var mesh = new MeshBuilder<VertexPosition>("mesh");
-            mesh.VertexPreprocessor.SetDebugPreprocessors();
+            mesh.VertexPreprocessor.SetValidationPreprocessors();
 
             var validIndices = mesh.UsePrimitive(material1)
                 .AddTriangle

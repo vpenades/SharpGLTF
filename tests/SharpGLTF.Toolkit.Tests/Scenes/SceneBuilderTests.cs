@@ -165,7 +165,7 @@ namespace SharpGLTF.Scenes
                 var mesh = VPOSNRM.CreateCompatibleMesh("shape");
 
                 #if DEBUG
-                mesh.VertexPreprocessor.SetDebugPreprocessors();
+                mesh.VertexPreprocessor.SetValidationPreprocessors();
                 #else
                 mesh.VertexPreprocessor.SetSanitizerPreprocessors();
                 #endif
@@ -248,7 +248,7 @@ namespace SharpGLTF.Scenes
             var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
 
             #if DEBUG
-            mesh.VertexPreprocessor.SetDebugPreprocessors();
+            mesh.VertexPreprocessor.SetValidationPreprocessors();
             #else
             mesh.VertexPreprocessor.SetSanitizerPreprocessors();
             #endif
@@ -335,7 +335,7 @@ namespace SharpGLTF.Scenes
             var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
 
             #if DEBUG
-            mesh.VertexPreprocessor.SetDebugPreprocessors();
+            mesh.VertexPreprocessor.SetValidationPreprocessors();
             #else
             mesh.VertexPreprocessor.SetSanitizerPreprocessors();
             #endif

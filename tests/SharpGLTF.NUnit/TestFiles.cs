@@ -42,7 +42,7 @@ namespace SharpGLTF
             _PollyModelsDir = System.IO.Path.Combine(_RootDir, "glTF-Blender-Exporter");
             _UniVRMModelsDir = System.IO.Path.Combine(_RootDir, "UniVRM");
 
-            _BabylonJsMeshesDir = System.IO.Path.Combine(_RootDir, "BabylonJS-MeshesLibrary");
+            _BabylonJsMeshesDir = System.IO.Path.Combine(_RootDir, "BabylonJS-Assets");
             _BabylonJsPlaygroundDir = System.IO.Path.Combine(_RootDir, "BabylonJS-PlaygroundScenes");
 
             _GeneratedModelsDir = System.IO.Path.Combine(_RootDir, "GeneratedReferenceModels", "v_0_6_1");
@@ -192,10 +192,11 @@ namespace SharpGLTF
 
             var skipAlways = new string[]
             {
-                "\\Tests\\AssetGenerator\\",
-                "\\Demos\\retargeting\\riggedMesh.glb",
-                "\\Demos\\retargeting\\riggedMesh-recycled.glb",
-                "\\Demos\\retargeting\\riggedMesh-source.glb"
+                "\\Elf\\Elf.gltf", // validator reports invalid inverse bind matrices.
+                "\\meshes\\Tests\\AssetGenerator", // already covered separately.
+                "\\meshes\\KHR_materials_volume_testing.glb", // draco compression-
+                "\\meshes\\Yeti\\MayaExport\\", // validator reports out of bounds accesor
+                "\\meshes\\Demos\\retargeting\\riggedMesh.glb", // validator reports errors
             };
 
             var invalid = new string[]
@@ -206,9 +207,11 @@ namespace SharpGLTF
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
-                .OrderBy(item => item)
+                .Where(item => !item.ToLower().Contains("gltf-draco"))
+                .Where(item => !item.ToLower().Contains("gltf-meshopt")) // not supported yet
                 .Where(item => skipAlways.All(f => !item.Contains(f)))
                 .Where(item => validOrInvalid == invalid.All(f => !item.EndsWith(f)))
+                .OrderBy(item => item)                
                 .ToList();
         }        
 

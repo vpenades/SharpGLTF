@@ -366,9 +366,9 @@ namespace SharpGLTF.Geometry
 
         public void Validate()
         {
-            VertexUtils.ValidateVertexGeometry(Geometry);
-            VertexUtils.ValidateVertexMaterial(Material);
-            VertexUtils.ValidateVertexSkinning(Skinning);
+            VertexPreprocessorLambdas.ValidateVertexGeometry(Geometry);
+            VertexPreprocessorLambdas.ValidateVertexMaterial(Material);
+            VertexPreprocessorLambdas.ValidateVertexSkinning(Skinning);
         }
 
         #pragma warning disable CA1000 // Do not declare static members on generic types

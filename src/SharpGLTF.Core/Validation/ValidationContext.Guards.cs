@@ -245,10 +245,16 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE IsNullOrMatrix(PARAMNAME pname, System.Numerics.Matrix4x4? matrix, bool mustDecompose = true, bool mustInvert = true)
+        public OUTTYPE IsNullOrMatrix(PARAMNAME pname, System.Numerics.Matrix4x4? matrix, bool mustInvert = true, bool mustDecompose = true)
         {
             if (!matrix.HasValue) return this;
-            return IsMatrix(pname, matrix.Value, mustDecompose, mustInvert);
+            return IsMatrix(pname, matrix.Value, mustInvert, mustDecompose);
+        }
+
+        public OUTTYPE IsNullOrMatrix4x3(PARAMNAME pname, System.Numerics.Matrix4x4? matrix, bool mustInvert = true, bool mustDecompose = true)
+        {
+            if (!matrix.HasValue) return this;
+            return IsMatrix4x3(pname, matrix.Value, mustInvert, mustDecompose);
         }
 
         public OUTTYPE IsPosition(PARAMNAME pname, in System.Numerics.Vector3 position)
@@ -269,9 +275,22 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustDecompose = true, bool mustInvert = true)
+        public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustInvert = true, bool mustDecompose = true)
         {
-            if (!matrix.IsValid(mustInvert, mustDecompose)) _DataThrow(pname, "Invalid Matrix");
+            var flags = _Extensions.MatrixCheck.NonZero;
+            if (mustInvert) flags |= _Extensions.MatrixCheck.Invertible;
+            if (mustDecompose) flags |= _Extensions.MatrixCheck.Decomposable;
+            if (!matrix.IsValid(flags)) _DataThrow(pname, "Invalid Matrix");
+            return this;
+        }
+
+        public OUTTYPE IsMatrix4x3(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustInvert = true, bool mustDecompose = true)
+        {
+            var flags = _Extensions.MatrixCheck.IdentityColumn4;
+            if (mustInvert) flags |= _Extensions.MatrixCheck.Invertible;
+            if (mustDecompose) flags |= _Extensions.MatrixCheck.Decomposable;
+
+            if (!matrix.IsValid(flags)) _DataThrow(pname, "Invalid Matrix");
             return this;
         }
 

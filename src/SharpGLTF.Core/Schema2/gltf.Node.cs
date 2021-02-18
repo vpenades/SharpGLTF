@@ -579,14 +579,14 @@ namespace SharpGLTF.Schema2
                 validate
                     .IsUndefined(nameof(_scale), _scale)
                     .IsUndefined(nameof(_rotation), _rotation)
-                    .IsUndefined(nameof(_translation), _translation);
+                    .IsUndefined(nameof(_translation), _translation)
+                    .IsNullOrMatrix4x3("Matrix", _matrix);
             }
 
             validate
                 .IsPosition("Scale", _scale.AsValue(Vector3.One))
                 .IsRotation("Rotation", _rotation.AsValue(Quaternion.Identity))
-                .IsPosition("Translation", _translation.AsValue(Vector3.Zero))
-                .IsNullOrMatrix("Rotation", _matrix, true, true);
+                .IsPosition("Translation", _translation.AsValue(Vector3.Zero));
         }
 
         private static void _ValidateMeshAndSkin(Validation.ValidationContext validate, Mesh mesh, Skin skin, List<Double> weights)
@@ -652,7 +652,7 @@ namespace SharpGLTF.Schema2
             // TODO: nameless nodes with decomposed transform
             // could be considered intrinsic.
 
-            Guard.IsTrue(basisTransform.IsValid(true, true), nameof(basisTransform));
+            Guard.IsTrue(basisTransform.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(basisTransform));
 
             // gather all root nodes:
             var rootNodes = this.LogicalNodes

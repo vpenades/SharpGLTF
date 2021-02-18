@@ -46,7 +46,9 @@ namespace SharpGLTF.Runtime
         {
             var model = Schema2.ModelRoot.Load(path);
 
-            var template = SceneTemplate.Create(model.DefaultScene, true);
+            var options = new Runtime.RuntimeOptions { IsolateMemory = true };
+
+            var template = SceneTemplate.Create(model.DefaultScene, options);
 
             return (template, new WeakReference<Schema2.ModelRoot>(model));
         }

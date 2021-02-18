@@ -112,7 +112,7 @@ namespace SharpGLTF.Scenes
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
         {
             Guard.NotNull(mesh, nameof(mesh));
-            Guard.IsTrue(meshWorldMatrix.IsValid(true, false, false), nameof(meshWorldMatrix));
+            Guard.IsTrue(meshWorldMatrix.IsValid(_Extensions.MatrixCheck.Decomposable | _Extensions.MatrixCheck.IdentityColumn4), nameof(meshWorldMatrix));
 
             var instance = new InstanceBuilder(this);
             instance.Content = new FixedTransformer(mesh, meshWorldMatrix);
@@ -138,7 +138,7 @@ namespace SharpGLTF.Scenes
         public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
         {
             Guard.NotNull(mesh, nameof(mesh));
-            Guard.IsTrue(meshWorldMatrix.IsValid(true, false, false), nameof(meshWorldMatrix));
+            Guard.IsTrue(meshWorldMatrix.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(meshWorldMatrix));
             GuardAll.NotNull(joints, nameof(joints));
 
             var instance = new InstanceBuilder(this);
@@ -153,7 +153,7 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(mesh, nameof(mesh));
             GuardAll.NotNull(joints.Select(item => item.Joint), nameof(joints));
-            GuardAll.AreTrue(joints.Select(item => item.InverseBindMatrix.IsValid(true, false, false)), nameof(joints), "Invalid matrix");
+            GuardAll.AreTrue(joints.Select(item => item.InverseBindMatrix.IsValid(_Extensions.MatrixCheck.InverseBindMatrix)), nameof(joints), "Invalid matrix");
 
             var instance = new InstanceBuilder(this);
             instance.Content = new SkinnedTransformer(mesh, joints);
@@ -185,26 +185,26 @@ namespace SharpGLTF.Scenes
             return AddCamera(camera, xform);
         }
 
-        public InstanceBuilder AddCamera(CameraBuilder camera, Matrix4x4 cameraWorldMatrix)
+        public InstanceBuilder AddCamera(CameraBuilder camera, Matrix4x4 cameraMatrix)
         {
             Guard.NotNull(camera, nameof(camera));
-            Guard.IsTrue(cameraWorldMatrix.IsValid(true, false, false), nameof(cameraWorldMatrix));
+            Guard.IsTrue(cameraMatrix.IsValid(_Extensions.MatrixCheck.LocalTransform), nameof(cameraMatrix));
 
             var content = new CameraContent(camera);
             var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(content, cameraWorldMatrix);
+            instance.Content = new FixedTransformer(content, cameraMatrix);
             _Instances.Add(instance);
             return instance;
         }
 
-        public InstanceBuilder AddLight(LightBuilder light, Matrix4x4 lightWorldMatrix)
+        public InstanceBuilder AddLight(LightBuilder light, Matrix4x4 lightMatrix)
         {
             Guard.NotNull(light, nameof(light));
-            Guard.IsTrue(lightWorldMatrix.IsValid(true, false, false), nameof(lightWorldMatrix));
+            Guard.IsTrue(lightMatrix.IsValid(_Extensions.MatrixCheck.LocalTransform), nameof(lightMatrix));
 
             var content = new LightContent(light);
             var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(content, lightWorldMatrix);
+            instance.Content = new FixedTransformer(content, lightMatrix);
             _Instances.Add(instance);
             return instance;
         }
@@ -257,7 +257,7 @@ namespace SharpGLTF.Scenes
         /// </remarks>
         public void ApplyBasisTransform(Matrix4x4 basisTransform, string basisNodeName = "BasisTransform")
         {
-            Guard.IsTrue(basisTransform.IsValid(true, false, false), nameof(basisTransform));
+            Guard.IsTrue(basisTransform.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(basisTransform));
 
             // gather all root nodes:
             var rootNodes = this.FindArmatures();
@@ -310,7 +310,7 @@ namespace SharpGLTF.Scenes
         public IReadOnlyList<InstanceBuilder> AddScene(SceneBuilder scene, Matrix4x4 sceneTransform)
         {
             Guard.NotNull(scene, nameof(scene));
-            Guard.IsTrue(sceneTransform.IsValid(true, false, false), nameof(sceneTransform));
+            Guard.IsTrue(sceneTransform.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(sceneTransform));
 
             scene = scene.DeepClone();
 
