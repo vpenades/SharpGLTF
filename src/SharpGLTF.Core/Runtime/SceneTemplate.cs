@@ -18,26 +18,6 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// Creates a new <see cref="SceneTemplate"/> from a given <see cref="Schema2.Scene"/>.
         /// </summary>
-        /// <param name="srcScene">The source <see cref="Schema2.Scene"/> to templateize.</param>
-        /// <param name="isolateMemory">True if we want to copy data instead of sharing it.</param>
-        /// <returns>A new <see cref="SceneTemplate"/> instance.</returns>
-        [Obsolete("Use Create(Schema2.Scene srcScene, RuntimeOptions options)")]
-        public static SceneTemplate Create(Schema2.Scene srcScene, bool isolateMemory)
-        {
-            RuntimeOptions options = null;
-
-            if (isolateMemory)
-            {
-                options = new RuntimeOptions();
-                options.IsolateMemory = true;
-            }
-
-            return Create(srcScene, options);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="SceneTemplate"/> from a given <see cref="Schema2.Scene"/>.
-        /// </summary>
         /// <param name="srcScene">The source <see cref="Schema2.Scene"/> to templatize.</param>
         /// <param name="options">Custom processing options, or null.</param>
         /// <returns>A new <see cref="SceneTemplate"/> instance.</returns>

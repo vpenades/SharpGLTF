@@ -46,16 +46,6 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets the in-memory representation of the image file.
         /// </summary>
-        [Obsolete("Use Content property instead.")]
-        public Memory.MemoryImage MemoryImage
-        {
-            get => Content;
-            set => Content = value;
-        }
-
-        /// <summary>
-        /// Gets or sets the in-memory representation of the image file.
-        /// </summary>
         public Memory.MemoryImage Content
         {
             get => GetSatelliteContent();

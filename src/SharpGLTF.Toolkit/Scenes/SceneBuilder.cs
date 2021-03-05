@@ -88,19 +88,19 @@ namespace SharpGLTF.Scenes
 
         #region Obsolete API
 
-        [Obsolete("Remove name param and use .WithName(name);")]
+        [Obsolete("Remove name parameter and use .WithName(name);", true)]
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix)
         {
             return AddRigidMesh(mesh, meshWorldMatrix).WithName(nodeName);
         }
 
-        [Obsolete("Remove name param and use .WithName(name);")]
+        [Obsolete("Remove name parameter and use .WithName(name);", true)]
         public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
         {
             return AddSkinnedMesh(mesh, meshWorldMatrix, joints).WithName(nodeName);
         }
 
-        [Obsolete("Remove name param and use .WithName(name);")]
+        [Obsolete("Remove name parameter and use .WithName(name);", true)]
         public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, string nodeName, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             return AddSkinnedMesh(mesh, joints).WithName(nodeName);

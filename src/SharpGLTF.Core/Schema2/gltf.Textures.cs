@@ -32,17 +32,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        [Obsolete("Use PrimaryImage")]
-        public Image Image
-        {
-            get => PrimaryImage;
-            set
-            {
-                if (value == null) ClearImages();
-                else SetImage(value);
-            }
-        }
-
         public Image PrimaryImage => _GetPrimaryImage();
 
         public Image FallbackImage => _GetFallbackImage();

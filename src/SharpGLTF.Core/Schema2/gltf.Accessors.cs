@@ -80,13 +80,6 @@ namespace SharpGLTF.Schema2
 
         public AttributeFormat Format => new AttributeFormat(_type, _componentType, this._normalized.AsValue(false));
 
-        /// <summary>
-        /// Gets the number of bytes required to encode a single item in <see cref="SourceBufferView"/>
-        /// Given the current <see cref="Dimensions"/> and <see cref="Encoding"/> states.
-        /// </summary>
-        [Obsolete("Use Format.ByteSize instead")]
-        public int ElementByteSize                 => Encoding.ByteLength() * Dimensions.DimCount();
-
         #endregion
 
         #region API

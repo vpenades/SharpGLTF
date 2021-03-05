@@ -221,68 +221,6 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
-
-        #region obsolete
-
-        [Obsolete("Use FindScaleChannel(node)?.GetScaleSampler()")]
-        public IAnimationSampler<Vector3> FindScaleSampler(Node node) => FindScaleChannel(node)?.GetScaleSampler();
-
-        [Obsolete("Use FindRotationChannel(node)?.GetRotationSampler()")]
-        public IAnimationSampler<Quaternion> FindRotationSampler(Node node) => FindRotationChannel(node)?.GetRotationSampler();
-
-        [Obsolete("Use FindTranslationChannel(node)?.GetTranslationSampler()")]
-        public IAnimationSampler<Vector3> FindTranslationSampler(Node node) => FindTranslationChannel(node)?.GetTranslationSampler();
-
-        [Obsolete("Use FindMorphChannel(node)?.GetMorphSampler()")]
-        public IAnimationSampler<Single[]> FindMorphSampler(Node node) => FindMorphChannel(node)?.GetMorphSampler();
-
-        [Obsolete("Use FindMorphChannel(node)?.GetSparseMorphSampler()")]
-        public IAnimationSampler<SparseWeight8> FindSparseMorphSampler(Node node) => FindMorphChannel(node)?.GetSparseMorphSampler();
-
-        [Obsolete("Use node.GetCurveSamplers(anim).GetLocalTransform(time)")]
-        public AffineTransform GetLocalTransform(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            return node.GetCurveSamplers(this).GetLocalTransform(time);
-        }
-
-        [Obsolete("Use node.GetCurveSamplers(anim).GetMorphingWeights(time)")]
-        public IReadOnlyList<float> GetMorphWeights(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-
-            var morphWeights = node.MorphWeights;
-            if (morphWeights == null || morphWeights.Count == 0) return morphWeights;
-
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            return FindMorphChannel(node)
-                ?.GetMorphSampler()
-                ?.CreateCurveSampler()
-                ?.GetPoint(time)
-                ?? default;
-        }
-
-        [Obsolete("Use node.GetCurveSamplers(anim).GetSparseMorphingWeights(time)")]
-        public SparseWeight8 GetSparseMorphWeights(Node node, Single time)
-        {
-            Guard.NotNull(node, nameof(node));
-
-            var morphWeights = node.MorphWeights;
-            if (morphWeights == null || morphWeights.Count == 0) return default;
-
-            Guard.MustShareLogicalParent(this, node, nameof(node));
-
-            return FindMorphChannel(node)
-                ?.GetSparseMorphSampler()
-                ?.CreateCurveSampler()
-                ?.GetPoint(time)
-                ?? default;
-        }
-
-        #endregion
     }
 
     public sealed partial class ModelRoot
