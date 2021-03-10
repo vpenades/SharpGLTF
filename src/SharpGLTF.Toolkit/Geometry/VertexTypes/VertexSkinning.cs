@@ -230,7 +230,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         Vector4 IVertexSkinning.WeightsLow => this.Weights0;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.WeightsHigh => this.Joints1;
+        Vector4 IVertexSkinning.WeightsHigh => this.Weights1;
 
         #endregion
 

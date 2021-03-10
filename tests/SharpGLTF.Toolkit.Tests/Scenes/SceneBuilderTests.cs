@@ -15,7 +15,8 @@ namespace SharpGLTF.Scenes
 {
     using VPOSNRM = VertexBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty>;
 
-    using SKINNEDVERTEX = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
+    using SKINNEDVERTEX4 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
+    using SKINNEDVERTEX8 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8>;
 
 
     [Category("Toolkit.Scenes")]
@@ -230,22 +231,22 @@ namespace SharpGLTF.Scenes
             const int jointIdx1 = 1; // index of joint node 1
             const int jointIdx2 = 2; // index of joint node 2
 
-            var v1 = new SKINNEDVERTEX(new Vector3(-10, 0, +10), (jointIdx0, 1));
-            var v2 = new SKINNEDVERTEX(new Vector3(+10, 0, +10), (jointIdx0, 1));
-            var v3 = new SKINNEDVERTEX(new Vector3(+10, 0, -10), (jointIdx0, 1));
-            var v4 = new SKINNEDVERTEX(new Vector3(-10, 0, -10), (jointIdx0, 1));
+            var v1 = new SKINNEDVERTEX4(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX4(new Vector3(+10, 0, +10), (jointIdx0, 1));
+            var v3 = new SKINNEDVERTEX4(new Vector3(+10, 0, -10), (jointIdx0, 1));
+            var v4 = new SKINNEDVERTEX4(new Vector3(-10, 0, -10), (jointIdx0, 1));
 
-            var v5 = new SKINNEDVERTEX(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v6 = new SKINNEDVERTEX(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v7 = new SKINNEDVERTEX(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v8 = new SKINNEDVERTEX(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v5 = new SKINNEDVERTEX4(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v6 = new SKINNEDVERTEX4(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v7 = new SKINNEDVERTEX4(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v8 = new SKINNEDVERTEX4(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
 
-            var v9  = new SKINNEDVERTEX(new Vector3(-5, 80, +5), (jointIdx2, 1));
-            var v10 = new SKINNEDVERTEX(new Vector3(+5, 80, +5), (jointIdx2, 1));
-            var v11 = new SKINNEDVERTEX(new Vector3(+5, 80, -5), (jointIdx2, 1));
-            var v12 = new SKINNEDVERTEX(new Vector3(-5, 80, -5), (jointIdx2, 1));
+            var v9  = new SKINNEDVERTEX4(new Vector3(-5, 80, +5), (jointIdx2, 1));
+            var v10 = new SKINNEDVERTEX4(new Vector3(+5, 80, +5), (jointIdx2, 1));
+            var v11 = new SKINNEDVERTEX4(new Vector3(+5, 80, -5), (jointIdx2, 1));
+            var v12 = new SKINNEDVERTEX4(new Vector3(-5, 80, -5), (jointIdx2, 1));
 
-            var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
+            var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
 
             #if DEBUG
             mesh.VertexPreprocessor.SetValidationPreprocessors();
@@ -317,22 +318,22 @@ namespace SharpGLTF.Scenes
             const int jointIdx1 = 1; // index of joint node 1
             const int jointIdx2 = 2; // index of joint node 2
 
-            var v1 = new SKINNEDVERTEX(new Vector3(-10, 0, +10), (jointIdx0, 1));
-            var v2 = new SKINNEDVERTEX(new Vector3(+10, 0, +10), (jointIdx0, 1));
-            var v3 = new SKINNEDVERTEX(new Vector3(+10, 0, -10), (jointIdx0, 1));
-            var v4 = new SKINNEDVERTEX(new Vector3(-10, 0, -10), (jointIdx0, 1));
+            var v1 = new SKINNEDVERTEX4(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX4(new Vector3(+10, 0, +10), (jointIdx0, 1));
+            var v3 = new SKINNEDVERTEX4(new Vector3(+10, 0, -10), (jointIdx0, 1));
+            var v4 = new SKINNEDVERTEX4(new Vector3(-10, 0, -10), (jointIdx0, 1));
 
-            var v5 = new SKINNEDVERTEX(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v6 = new SKINNEDVERTEX(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v7 = new SKINNEDVERTEX(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v8 = new SKINNEDVERTEX(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v5 = new SKINNEDVERTEX4(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v6 = new SKINNEDVERTEX4(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v7 = new SKINNEDVERTEX4(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v8 = new SKINNEDVERTEX4(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
 
-            var v9 = new SKINNEDVERTEX(new Vector3(-5, 80, +5), (jointIdx2, 1));
-            var v10 = new SKINNEDVERTEX(new Vector3(+5, 80, +5), (jointIdx2, 1));
-            var v11 = new SKINNEDVERTEX(new Vector3(+5, 80, -5), (jointIdx2, 1));
-            var v12 = new SKINNEDVERTEX(new Vector3(-5, 80, -5), (jointIdx2, 1));
+            var v9 = new SKINNEDVERTEX4(new Vector3(-5, 80, +5), (jointIdx2, 1));
+            var v10 = new SKINNEDVERTEX4(new Vector3(+5, 80, +5), (jointIdx2, 1));
+            var v11 = new SKINNEDVERTEX4(new Vector3(+5, 80, -5), (jointIdx2, 1));
+            var v12 = new SKINNEDVERTEX4(new Vector3(-5, 80, -5), (jointIdx2, 1));
 
-            var mesh = SKINNEDVERTEX.CreateCompatibleMesh("mesh1");
+            var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
 
             #if DEBUG
             mesh.VertexPreprocessor.SetValidationPreprocessors();
@@ -704,6 +705,55 @@ namespace SharpGLTF.Scenes
             scene.AddScene(polly, xform1);
 
             scene.AttachToCurrentTest("construction.glb");
+        }
+
+        [Test(Description = "Creates a scene using 8 weight skins")]
+        public void CreateSkinnedSceneWith8Weights()
+        {
+            // create plane mesh
+
+            (int, float)[] binds = new[]
+            {
+                (0, 0.125f),
+                (1, 0.125f),
+                (2, 0.125f),
+                (3, 0.125f),
+                (4, 0.125f),
+                (5, 0.125f),
+                (6, 0.125f),
+                (7, 0.125f),
+            };
+
+            var v0 = new SKINNEDVERTEX8(new Vector3(1, 0, 1), binds);
+            var v1 = new SKINNEDVERTEX8(new Vector3(-1, 0, 1), binds);
+            var v2 = new SKINNEDVERTEX8(new Vector3(-1, 0, -1), binds);
+            var v3 = new SKINNEDVERTEX8(new Vector3(1, 0, -1), binds);
+
+            var mesh = SKINNEDVERTEX8.CreateCompatibleMesh();
+            var prim = mesh.UsePrimitive(MaterialBuilder.CreateDefault());
+
+            prim.AddTriangle(v0, v1, v2);
+            prim.AddTriangle(v0, v2, v3);
+
+            // create armature
+
+            var root = new NodeBuilder();
+            var n0 = root.CreateNode();
+            var n1 = n0.CreateNode();
+            var n2 = n1.CreateNode();
+            var n3 = n2.CreateNode();
+            var n4 = n3.CreateNode();
+            var n5 = n4.CreateNode();
+            var n6 = n5.CreateNode();
+            var n7 = n6.CreateNode();
+
+            // create scene
+
+            var scene = new SceneBuilder();
+
+            scene.AddSkinnedMesh(mesh, Matrix4x4.Identity, n0, n1, n2, n3, n4, n5, n6, n7);
+
+            scene.AttachToCurrentTest("output.gltf");
         }
 
     }

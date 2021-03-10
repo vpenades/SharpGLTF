@@ -182,12 +182,17 @@ namespace SharpGLTF.Memory
                 return;
             }
 
+            // check for WEIGHTS_0 + WEIGHTS_1
+
             if (weights0 == null) throw new ArgumentNullException(nameof(weights0));
+
+            if (weights0.Attribute.Encoding != weights1.Attribute.Encoding) throw new ArgumentException("WEIGHTS_0 and WEIGHTS_1 format mismatch.", nameof(weights1.Attribute));
 
             var len = weights0.Attribute.ItemByteLength;
             Span<Byte> dst = stackalloc byte[len * 2];
 
-            var zip = weights0.GetItemsAsRawBytes().Zip(weights1.GetItemsAsRawBytes(), (a, b) => (a, b));
+            var zip = weights0.GetItemsAsRawBytes()
+                 .Zip(weights1.GetItemsAsRawBytes(), (a, b) => (a, b));
 
             foreach (var (a, b) in zip)
             {
@@ -203,11 +208,11 @@ namespace SharpGLTF.Memory
             }
         }
 
-        private static bool _CheckWeightSum(Span<byte> dst, ENCODING encoding)
+        private static bool _CheckWeightSum(ReadOnlySpan<byte> src, ENCODING encoding)
         {
             if (encoding == ENCODING.UNSIGNED_BYTE)
             {
-                var weights = dst;
+                var weights = src;
 
                 int r = 0;
                 for (int j = 0; j < weights.Length; ++j) r += weights[j];
@@ -216,7 +221,7 @@ namespace SharpGLTF.Memory
 
             if (encoding == ENCODING.UNSIGNED_SHORT)
             {
-                var weights = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, UInt16>(dst);
+                var weights = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, UInt16>(src);
 
                 int r = 0;
                 for (int j = 0; j < weights.Length; ++j) r += weights[j];
@@ -225,7 +230,7 @@ namespace SharpGLTF.Memory
 
             if (encoding == ENCODING.FLOAT)
             {
-                var weights = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Single>(dst);
+                var weights = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Single>(src);
 
                 float nonZero = 0;
                 float sum = 0;

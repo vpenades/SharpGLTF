@@ -381,7 +381,7 @@ namespace SharpGLTF.Schema2
             if (attributes.TryGetValue("TANGENT", out Accessor tangents)) tangents._ValidateTangents(validate);
 
             if (attributes.TryGetValue("JOINTS_0", out Accessor joints0)) joints0._ValidateJoints(validate, "JOINTS_0", skinsMaxJointCount);
-            if (attributes.TryGetValue("JOINTS_1", out Accessor joints1)) joints0._ValidateJoints(validate, "JOINTS_1", skinsMaxJointCount);
+            if (attributes.TryGetValue("JOINTS_1", out Accessor joints1)) joints1._ValidateJoints(validate, "JOINTS_1", skinsMaxJointCount);
 
             attributes.TryGetValue("WEIGHTS_0", out Accessor weights0);
             attributes.TryGetValue("WEIGHTS_1", out Accessor weights1);
