@@ -117,7 +117,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             for (int i = 0; i < vertex.MaxBindings; ++i)
             {
-                var (index, weight) = vertex.GetJointBinding(i);
+                var (index, weight) = vertex.GetBinding(i);
 
                 Guard.MustBeGreaterThanOrEqualTo(index, 0, $"Joint{i}");
                 Guard.IsTrue(weight._IsFinite(), $"Weight{i}", "Values are not finite.");
@@ -240,14 +240,14 @@ namespace SharpGLTF.Geometry.VertexTypes
             // Apparently the consensus is that weights are required to be normalized.
             // More here: https://github.com/KhronosGroup/glTF/issues/1213
 
-            var sparse = Transforms.SparseWeight8.OrderedByWeight(vertex.GetWeights());
+            var sparse = Transforms.SparseWeight8.OrderedByWeight(vertex.GetBindings());
 
             var sum = sparse.WeightSum;
+
             if (sum == 0) return default(TvS);
+            if (sum != 1) sparse = Transforms.SparseWeight8.Multiply(sparse, 1.0f / sum);
 
-            sparse = Transforms.SparseWeight8.Multiply(sparse, 1.0f / sum);
-
-            vertex.SetWeights(sparse);
+            vertex.SetBindings(sparse);
 
             return vertex;
         }

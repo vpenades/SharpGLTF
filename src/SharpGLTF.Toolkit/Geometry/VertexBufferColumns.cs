@@ -150,8 +150,8 @@ namespace SharpGLTF.Geometry
             {
                 if (this.Joints0 != null)
                 {
-                    if (this.Joints1 != null) skinning = new Transforms.SparseWeight8(Joints0[i], Joints1[i], Weights0[i], Weights1[i]);
-                    else skinning = new Transforms.SparseWeight8(Joints0[i], Weights0[i]);
+                    if (this.Joints1 != null) skinning = Transforms.SparseWeight8.Create(Joints0[i], Joints1[i], Weights0[i], Weights1[i]);
+                    else skinning = Transforms.SparseWeight8.Create(Joints0[i], Weights0[i]);
                 }
 
                 if (this.Positions != null)
@@ -292,13 +292,13 @@ namespace SharpGLTF.Geometry
             {
                 if (Joints1 != null && Weights1 != null)
                 {
-                    var sparse = new Transforms.SparseWeight8(Joints0[index], Joints1[index], Weights0[index], Weights1[index]);
-                    s.SetWeights(sparse);
+                    var sparse = Transforms.SparseWeight8.Create(Joints0[index], Joints1[index], Weights0[index], Weights1[index]);
+                    s.SetBindings(sparse);
                 }
                 else
                 {
-                    var sparse = new Transforms.SparseWeight8(Joints0[index], Weights0[index]);
-                    s.SetWeights(sparse);
+                    var sparse = Transforms.SparseWeight8.Create(Joints0[index], Weights0[index]);
+                    s.SetBindings(sparse);
                 }
             }
 

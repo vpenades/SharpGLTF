@@ -60,7 +60,7 @@ namespace SharpGLTF.Geometry
             var indices = meshes
                 .SelectMany(item => item.Primitives)
                 .SelectMany(item => item.Vertices)
-                .Select(item => item.GetSkinning().GetWeights().MaxIndex);
+                .Select(item => item.GetSkinning().GetBindings().MaxIndex);
 
             var maxIndex = indices.Any() ? indices.Max() : 0;
 

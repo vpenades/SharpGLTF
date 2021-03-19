@@ -332,8 +332,13 @@ namespace SharpGLTF.Runtime
         public Transforms.SparseWeight8 GetSkinWeights(int vertexIndex)
         {
             if (_Weights0 == null) return default;
-            if (_Weights1 == null) return new Transforms.SparseWeight8(_Joints0[vertexIndex], _Weights0[vertexIndex]);
-            return new Transforms.SparseWeight8(_Joints0[vertexIndex], _Joints1[vertexIndex], _Weights0[vertexIndex], _Weights1[vertexIndex]);
+
+            var idx0123 = _Joints0[vertexIndex];
+            var idx4567 = _Joints1 == null ? XYZW.Zero : _Joints1[vertexIndex];
+            var wgt0123 = _Weights0[vertexIndex];
+            var wgt4567 = _Weights1 == null ? XYZW.Zero : _Weights1[vertexIndex];
+
+            return Transforms.SparseWeight8.CreateUnchecked(idx0123, idx4567, wgt0123, wgt4567);
         }
 
         #endregion

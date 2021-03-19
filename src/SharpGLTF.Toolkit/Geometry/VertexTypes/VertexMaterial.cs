@@ -8,17 +8,23 @@ using ENCODING = SharpGLTF.Schema2.EncodingType;
 namespace SharpGLTF.Geometry.VertexTypes
 {
     /// <summary>
-    /// Represents the interface that must be implemented by a material vertex fragment.<br/>
-    /// Implemented by:<br/>
-    /// - <see cref="VertexColor1"/><br/>
-    /// - <see cref="VertexColor2"/><br/>
-    /// - <see cref="VertexTexture1"/><br/>
-    /// - <see cref="VertexTexture2"/><br/>
-    /// - <see cref="VertexColor1Texture1"/><br/>
-    /// - <see cref="VertexColor1Texture2"/><br/>
-    /// - <see cref="VertexColor2Texture1"/><br/>
-    /// - <see cref="VertexColor2Texture2"/><br/>
+    /// Represents the interface that must be implemented by a material vertex fragment.
     /// </summary>
+    /// <remarks>
+    /// Implemented by:
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexColor1"/></item>
+    /// <item><see cref="VertexColor2"/></item>
+    /// <item><see cref="VertexTexture1"/></item>
+    /// <item><see cref="VertexTexture2"/></item>
+    /// <item><see cref="VertexColor1Texture1"/></item>
+    /// <item><see cref="VertexColor1Texture2"/></item>
+    /// <item><see cref="VertexColor2Texture1"/></item>
+    /// <item><see cref="VertexColor2Texture2"/></item>
+    /// <item>And also by other custom vertex material fragment types.</item>
+    /// </list>
+    /// </remarks>
     public interface IVertexMaterial
     {
         /// <summary>
@@ -70,7 +76,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂:{Color}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -150,7 +156,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -237,7 +243,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐔𝐕:{TexCoord}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -316,7 +322,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -405,7 +411,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂:{Color} 𝐔𝐕:{TexCoord}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -490,7 +496,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂:{Color} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -588,7 +594,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕:{TexCoord}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -693,7 +699,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐂₀:{Color0} 𝐂₁:{Color1} 𝐔𝐕₀:{TexCoord0} 𝐔𝐕₁:{TexCoord1}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 

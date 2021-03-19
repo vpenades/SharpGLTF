@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
-using SharpGLTF.Memory;
-using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
-using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
@@ -168,12 +163,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             where TvS : struct, IVertexSkinning
         {
             if (src is TvS srcTyped) return srcTyped;
-
-            var sparse = src.MaxBindings > 0 ? src.GetWeights() : default;
+            var srcWeights = src.MaxBindings > 0 ? src.GetBindings() : default;
 
             var dst = default(TvS);
-
-            if (dst.MaxBindings > 0) dst.SetWeights(sparse);
+            if (dst.MaxBindings > 0) dst.SetBindings(srcWeights);
 
             return dst;
         }

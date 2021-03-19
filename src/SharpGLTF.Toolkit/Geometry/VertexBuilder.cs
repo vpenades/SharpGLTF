@@ -40,31 +40,40 @@ namespace SharpGLTF.Geometry
     /// </summary>
     /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/><br/>
-    /// - <see cref="VertexPositionNormal"/><br/>
-    /// - <see cref="VertexPositionNormalTangent"/>
+    /// <br/>Valid types are:
+    /// <list type="table">
+    /// <item><see cref="VertexPosition"/></item>
+    /// <item><see cref="VertexPositionNormal"/></item>
+    /// <item><see cref="VertexPositionNormalTangent"/></item>
+    /// </list>
     /// </typeparam>
     /// <typeparam name="TvM">
-    /// The vertex fragment type with Colors and Texture Coordinates.<br/>
-    /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/><br/>
-    /// - <see cref="VertexColor1"/><br/>
-    /// - <see cref="VertexTexture1"/><br/>
-    /// - <see cref="VertexColor1Texture1"/><br/>
-    /// - <see cref="VertexColor1Texture2"/><br/>
-    /// - <see cref="VertexColor2Texture1"/><br/>
-    /// - <see cref="VertexColor2Texture2"/>
+    /// The vertex fragment type with Colors, Texture Coordinates, and custom attributes.<br/>
+    /// <br/>Valid types are:
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexColor1"/></item>
+    /// <item><see cref="VertexColor2"/></item>
+    /// <item><see cref="VertexTexture1"/></item>
+    /// <item><see cref="VertexTexture2"/></item>
+    /// <item><see cref="VertexColor1Texture1"/></item>
+    /// <item><see cref="VertexColor2Texture1"/></item>
+    /// <item><see cref="VertexColor2Texture1"/></item>
+    /// <item><see cref="VertexColor2Texture2"/></item>
+    /// <item>Custom vertex material fragment types.</item>
+    /// </list>
     /// </typeparam>
     /// <typeparam name="TvS">
-    /// The vertex fragment type with Skin Joint Weights.
-    /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/><br/>
-    /// - <see cref="VertexJoints4"/><br/>
-    /// - <see cref="VertexJoints8"/>
+    /// The vertex fragment type with Skin Joint Weights.<br/>
+    /// <br/>Valid types are:
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexJoints4"/></item>
+    /// <item><see cref="VertexJoints8"/></item>
+    /// </list>
     /// </typeparam>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder
+    public partial struct VertexBuilder<TvG, TvM, TvS> : IVertexBuilder, IEquatable<VertexBuilder<TvG, TvM, TvS>>
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -123,8 +132,8 @@ namespace SharpGLTF.Geometry
 
             for (int i = 0; i < Skinning.MaxBindings; ++i)
             {
-                var jw = Skinning.GetJointBinding(i);
-                if (!jw.Weight._IsFinite() || jw.Weight < 0 || jw.Index < 0) sb.Append($" ❌𝐉𝐖{i} {jw.Index}:{jw.Weight}");
+                var (jidx, jwgt) = Skinning.GetBinding(i);
+                if (!jwgt._IsFinite() || jwgt < 0 || jidx < 0) sb.Append($" ❌𝐉𝐖{i} {jidx}:{jwgt}");
             }
 
             return sb.ToString();
@@ -141,7 +150,7 @@ namespace SharpGLTF.Geometry
             Skinning = s;
         }
 
-        public VertexBuilder(in TvG g, in TvM m, params (int, float)[] bindings)
+        public VertexBuilder(in TvG g, in TvM m, params (int JointIndex, float Weight)[] bindings)
         {
             Geometry = g;
             Material = m;
@@ -149,7 +158,7 @@ namespace SharpGLTF.Geometry
             var sparse = Transforms.SparseWeight8.Create(bindings);
 
             Skinning = default;
-            Skinning.SetWeights(sparse);
+            Skinning.SetBindings(sparse);
         }
 
         public VertexBuilder(in TvG g, in TvM m, in Transforms.SparseWeight8 bindings)
@@ -157,7 +166,7 @@ namespace SharpGLTF.Geometry
             Geometry = g;
             Material = m;
             Skinning = default;
-            Skinning.SetWeights(bindings);
+            Skinning.SetBindings(bindings);
         }
 
         public VertexBuilder(in TvG g, in TvM m)
@@ -181,7 +190,7 @@ namespace SharpGLTF.Geometry
             Skinning = default;
         }
 
-        public VertexBuilder(in TvG g, params (int Index, float Weight)[] bindings)
+        public VertexBuilder(in TvG g, params (int JointIndex, float Weight)[] bindings)
         {
             Geometry = g;
             Material = default;
@@ -189,7 +198,7 @@ namespace SharpGLTF.Geometry
             var sparse = Transforms.SparseWeight8.Create(bindings);
 
             Skinning = default;
-            Skinning.SetWeights(sparse);
+            Skinning.SetBindings(sparse);
         }
 
         public VertexBuilder(TvG g, Transforms.SparseWeight8 bindings)
@@ -197,7 +206,7 @@ namespace SharpGLTF.Geometry
             Geometry = g;
             Material = default;
             Skinning = default;
-            Skinning.SetWeights(bindings);
+            Skinning.SetBindings(bindings);
         }
 
         public static implicit operator VertexBuilder<TvG, TvM, TvS>(in (TvG Geo, TvM Mat, TvS Skin) tuple)
@@ -271,6 +280,14 @@ namespace SharpGLTF.Geometry
         public TvM Material;
         public TvS Skinning;
 
+        public override bool Equals(object obj) { return obj is VertexBuilder<TvG, TvM, TvS> other && AreEqual(this, other); }
+        public bool Equals(VertexBuilder<TvG, TvM, TvS> other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b)
+        {
+            return a.Position.Equals(b.Position) && a.Material.Equals(b.Material) && a.Skinning.Equals(b.Skinning);
+        }
         public override int GetHashCode() { return Geometry.GetHashCode(); }
 
         #endregion
@@ -287,6 +304,62 @@ namespace SharpGLTF.Geometry
         #endregion
 
         #region API
+
+        public void Validate()
+        {
+            VertexPreprocessorLambdas.ValidateVertexGeometry(Geometry);
+            VertexPreprocessorLambdas.ValidateVertexMaterial(Material);
+            VertexPreprocessorLambdas.ValidateVertexSkinning(Skinning);
+        }
+
+        #pragma warning disable CA1000 // Do not declare static members on generic types
+
+        public static MeshBuilder<TMaterial, TvG, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
+        {
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(name);
+        }
+
+        public static MeshBuilder<TvG, TvM, TvS> CreateCompatibleMesh(string name = null)
+        {
+            return new MeshBuilder<TvG, TvM, TvS>(name);
+        }
+
+        #pragma warning restore CA1000 // Do not declare static members on generic types
+
+        IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
+
+        IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
+
+        IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
+
+        void IVertexBuilder.SetGeometry(IVertexGeometry geometry)
+        {
+            Guard.NotNull(geometry, nameof(geometry));
+            this.Geometry = geometry.ConvertToGeometry<TvG>();
+        }
+
+        void IVertexBuilder.SetMaterial(IVertexMaterial material)
+        {
+            Guard.NotNull(material, nameof(material));
+            this.Material = material.ConvertToMaterial<TvM>();
+        }
+
+        void IVertexBuilder.SetSkinning(IVertexSkinning skinning)
+        {
+            Guard.NotNull(skinning, nameof(skinning));
+            this.Skinning = skinning.ConvertToSkinning<TvS>();
+        }
+
+        #endregion
+
+        #region With* fluent API
+
+        public VertexBuilder<TvG, TvM, TvS> TransformedBy(in Matrix4x4 transform)
+        {
+            var clone = this;
+            clone.Geometry.ApplyTransform(transform);
+            return clone;
+        }
 
         public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position)
         {
@@ -336,77 +409,33 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
+        public VertexBuilder<TvG, TvM, TvS> WithSkinning(in Transforms.SparseWeight8 sparse)
+        {
+            var v = this;
+            v.Skinning.SetBindings(sparse);
+            return v;
+        }
+
         public VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int Index, float Weight)[] bindings)
         {
             var v = this;
 
-            int i = 0;
+            var sparse = Transforms.SparseWeight8.Create(bindings);
 
-            while (i < bindings.Length)
-            {
-                v.Skinning.SetJointBinding(i, bindings[i].Index, bindings[i].Weight);
-                ++i;
-            }
-
-            while (i < bindings.Length)
-            {
-                v.Skinning.SetJointBinding(i, 0, 0);
-                ++i;
-            }
+            v.Skinning.SetBindings(sparse);
 
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> TransformedBy(in Matrix4x4 transform)
+        public VertexBuilder<TvG, TvM, TvS> WithSkinning(IEnumerable<(int Index, float Weight)> bindings)
         {
-            var clone = this;
-            clone.Geometry.ApplyTransform(transform);
-            return clone;
-        }
+            var v = this;
 
-        public void Validate()
-        {
-            VertexPreprocessorLambdas.ValidateVertexGeometry(Geometry);
-            VertexPreprocessorLambdas.ValidateVertexMaterial(Material);
-            VertexPreprocessorLambdas.ValidateVertexSkinning(Skinning);
-        }
+            var sparse = Transforms.SparseWeight8.Create(bindings);
 
-        #pragma warning disable CA1000 // Do not declare static members on generic types
+            v.Skinning.SetBindings(sparse);
 
-        public static MeshBuilder<TMaterial, TvG, TvM, TvS> CreateCompatibleMesh<TMaterial>(string name = null)
-        {
-            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(name);
-        }
-
-        public static MeshBuilder<TvG, TvM, TvS> CreateCompatibleMesh(string name = null)
-        {
-            return new MeshBuilder<TvG, TvM, TvS>(name);
-        }
-
-        #pragma warning restore CA1000 // Do not declare static members on generic types
-
-        IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
-
-        IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
-
-        IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
-
-        void IVertexBuilder.SetGeometry(IVertexGeometry geometry)
-        {
-            Guard.NotNull(geometry, nameof(geometry));
-            this.Geometry = geometry.ConvertToGeometry<TvG>();
-        }
-
-        void IVertexBuilder.SetMaterial(IVertexMaterial material)
-        {
-            Guard.NotNull(material, nameof(material));
-            this.Material = material.ConvertToMaterial<TvM>();
-        }
-
-        void IVertexBuilder.SetSkinning(IVertexSkinning skinning)
-        {
-            Guard.NotNull(skinning, nameof(skinning));
-            this.Skinning = skinning.ConvertToSkinning<TvS>();
+            return v;
         }
 
         #endregion

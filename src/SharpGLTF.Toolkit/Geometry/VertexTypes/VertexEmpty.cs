@@ -63,14 +63,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
         /// <inheritdoc/>
-        public SparseWeight8 GetWeights() { return default; }
+        public SparseWeight8 GetBindings() { return default; }
 
         /// <inheritdoc/>
-        public void SetWeights(in SparseWeight8 weights) { throw new NotSupportedException(); }
+        public void SetBindings(in SparseWeight8 weights) { throw new NotSupportedException(); }
 
-        void IVertexSkinning.SetJointBinding(int index, int joint, float weight) { throw new ArgumentOutOfRangeException(nameof(index)); }
+        /// <inheritdoc/>
+        public void SetBindings(params (int Index, float Weight)[] bindings) { throw new NotSupportedException(); }
 
-        (int, float) IVertexSkinning.GetJointBinding(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
+        /// <inheritdoc/>
+        (int Index, float Weight) IVertexSkinning.GetBinding(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
         #endregion
     }

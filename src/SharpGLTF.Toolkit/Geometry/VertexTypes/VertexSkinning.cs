@@ -9,11 +9,16 @@ using ENCODING = SharpGLTF.Schema2.EncodingType;
 namespace SharpGLTF.Geometry.VertexTypes
 {
     /// <summary>
-    /// Represents the interface that must be implemented by a skiining vertex fragment.
-    /// Implemented by:<br/>
-    /// - <see cref="VertexJoints4"/><br/>
-    /// - <see cref="VertexJoints8"/><br/>
+    /// Represents the interface that must be implemented by a skinning vertex fragment.
     /// </summary>
+    /// <remarks>
+    /// Implemented by:
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexJoints4"/></item>
+    /// <item><see cref="VertexJoints8"/></item>
+    /// </list>
+    /// </remarks>
     public interface IVertexSkinning
     {
         /// <summary>
@@ -24,31 +29,29 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <summary>
         /// Gets a joint-weight pair.
         /// </summary>
-        /// <param name="index">An index from 0 to <see cref="MaxBindings"/>.</param>
+        /// <param name="index">An index from 0 to <see cref="MaxBindings"/> exclusive.</param>
         /// <returns>The joint-weight pair.</returns>
-        (int Index, float Weight) GetJointBinding(int index);
-
-        /// <summary>
-        /// Sets a joint-weight pair.
-        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
-        /// </summary>
-        /// <param name="index">An index from 0 to <see cref="MaxBindings"/>.</param>
-        /// <param name="joint">The joint index.</param>
-        /// <param name="weight">The weight of the joint.</param>
-        void SetJointBinding(int index, int joint, float weight);
+        (int Index, float Weight) GetBinding(int index);
 
         /// <summary>
         /// Sets the packed joints-weights.
         /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
         /// </summary>
-        /// <param name="weights">The packed joints-weights.</param>
-        void SetWeights(in SparseWeight8 weights);
+        /// <param name="bindings">The packed joints-weights.</param>
+        void SetBindings(in SparseWeight8 bindings);
+
+        /// <summary>
+        /// Sets the packed joints-weights.
+        /// <para><b>⚠️ USE ONLY ON UNBOXED VALUES ⚠️</b></para>
+        /// </summary>
+        /// <param name="bindings">the list of joint indices and weights.</param>
+        void SetBindings(params (int Index, float Weight)[] bindings);
 
         /// <summary>
         /// Gets the packed joints-weights.
         /// </summary>
         /// <returns>The packed joints-weights.</returns>
-        SparseWeight8 GetWeights();
+        SparseWeight8 GetBindings();
 
         /// <summary>
         /// Gets the indices of the first 4 joints.
@@ -74,8 +77,15 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 4 weights.
     /// </summary>
-    public struct VertexJoints4 : IVertexSkinning
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexJoints4 : IVertexSkinning, IEquatable<VertexJoints4>
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+
+        #endregion
+
         #region constructors
 
         public VertexJoints4(int jointIndex)
@@ -84,30 +94,64 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights = Vector4.UnitX;
         }
 
-        public VertexJoints4(params (int, float)[] bindings)
+        public VertexJoints4(params (int JointIndex, float Weight)[] bindings)
             : this( SparseWeight8.Create(bindings) ) { }
 
         public VertexJoints4(in SparseWeight8 weights)
         {
-            var w4 = SparseWeight8.OrderedByWeight(weights);
+            var ordered = SparseWeight8.OrderedByWeight(weights);
 
-            Joints = new Vector4(w4.Index0, w4.Index1, w4.Index2, w4.Index3);
-            Weights = new Vector4(w4.Weight0, w4.Weight1, w4.Weight2, w4.Weight3);
+            Joints = new Vector4(ordered.Index0, ordered.Index1, ordered.Index2, ordered.Index3);
+            Weights = new Vector4(ordered.Weight0, ordered.Weight1, ordered.Weight2, ordered.Weight3);
 
             // renormalize
             var w = Vector4.Dot(Weights, Vector4.One);
             if (w != 0 && w != 1) Weights /= w;
+
+            // we must be sure that pairs are sorted by weight
+            System.Diagnostics.Debug.Assert(Weights.X >= Weights.Y);
+            System.Diagnostics.Debug.Assert(Weights.Y >= Weights.Z);
+            System.Diagnostics.Debug.Assert(Weights.Z >= Weights.W);
         }
 
         #endregion
 
         #region data
 
+        /// <summary>
+        /// Stores the indices of the 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints;
 
+        /// <summary>
+        /// Stores the weights of the 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights;
+
+        public override bool Equals(object obj) { return obj is VertexJoints4 other && AreEqual(this, other); }
+        public bool Equals(VertexJoints4 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexJoints4 a, in VertexJoints4 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexJoints4 a, in VertexJoints4 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexJoints4 a, in VertexJoints4 b)
+        {
+            // technically we should compare index-weights pairs,
+            // but it's expensive, and these values are expected
+            // to be already sorted by weight, unless filled manually.
+
+            return a.Joints == b.Joints && a.Weights == b.Weights;
+        }
+
+        public override int GetHashCode() { return Joints.GetHashCode(); }
 
         public int MaxBindings => 4;
 
@@ -129,13 +173,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public SparseWeight8 GetWeights() { return new SparseWeight8(this.Joints, this.Weights); }
+        public SparseWeight8 GetBindings() { return SparseWeight8.Create(this.Joints, this.Weights); }
 
         /// <inheritdoc/>
-        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints4(weights); }
+        public void SetBindings(in SparseWeight8 bindings) { this = new VertexJoints4(bindings); }
 
         /// <inheritdoc/>
-        public (int, float) GetJointBinding(int index)
+        public void SetBindings(params (int Index, float Weight)[] bindings) { this = new VertexJoints4(bindings); }
+
+        /// <inheritdoc/>
+        public (int Index, float Weight) GetBinding(int index)
         {
             switch (index)
             {
@@ -147,33 +194,21 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        /// <inheritdoc/>
-        public void SetJointBinding(int index, int joint, float weight)
-        {
-            switch (index)
-            {
-                case 0: { this.Joints.X = joint; this.Weights.X = weight; return; }
-                case 1: { this.Joints.Y = joint; this.Weights.Y = weight; return; }
-                case 2: { this.Joints.Z = joint; this.Weights.Z = weight; return; }
-                case 3: { this.Joints.W = joint; this.Weights.W = weight; return; }
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        public void InPlaceSort()
-        {
-            var sparse = new SparseWeight8(this.Joints, this.Weights);
-            this = new VertexJoints4(sparse);
-        }
-
         #endregion
     }
 
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 8 weights.
     /// </summary>
-    public struct VertexJoints8 : IVertexSkinning
+    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
+    public struct VertexJoints8 : IVertexSkinning, IEquatable<VertexJoints8>
     {
+        #region debug
+
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+
+        #endregion
+
         #region constructors
 
         public VertexJoints8(int jointIndex)
@@ -184,38 +219,91 @@ namespace SharpGLTF.Geometry.VertexTypes
             Weights1 = Vector4.Zero;
         }
 
-        public VertexJoints8(params (int, float)[] bindings)
+        public VertexJoints8(params (int JointIndex, float Weight)[] bindings)
             : this(SparseWeight8.Create(bindings)) { }
 
         public VertexJoints8(in SparseWeight8 weights)
         {
-            var w8 = SparseWeight8.OrderedByWeight(weights);
+            var ordered = SparseWeight8.OrderedByWeight(weights);
 
-            Joints0 = new Vector4(w8.Index0, w8.Index1, w8.Index2, w8.Index3);
-            Joints1 = new Vector4(w8.Index4, w8.Index5, w8.Index6, w8.Index7);
-            Weights0 = new Vector4(w8.Weight0, w8.Weight1, w8.Weight2, w8.Weight3);
-            Weights1 = new Vector4(w8.Weight4, w8.Weight5, w8.Weight6, w8.Weight7);
+            Joints0 = new Vector4(ordered.Index0, ordered.Index1, ordered.Index2, ordered.Index3);
+            Joints1 = new Vector4(ordered.Index4, ordered.Index5, ordered.Index6, ordered.Index7);
+            Weights0 = new Vector4(ordered.Weight0, ordered.Weight1, ordered.Weight2, ordered.Weight3);
+            Weights1 = new Vector4(ordered.Weight4, ordered.Weight5, ordered.Weight6, ordered.Weight7);
 
             // renormalize
             var w = Vector4.Dot(Weights0, Vector4.One) + Vector4.Dot(Weights1, Vector4.One);
             if (w != 0 && w != 1) { Weights0 /= w; Weights1 /= w; }
+
+            // we must be sure that pairs are sorted by weight
+            System.Diagnostics.Debug.Assert(Weights0.X >= Weights0.Y);
+            System.Diagnostics.Debug.Assert(Weights0.Y >= Weights0.Z);
+            System.Diagnostics.Debug.Assert(Weights0.Z >= Weights0.W);
+            System.Diagnostics.Debug.Assert(Weights0.W >= Weights1.X);
+            System.Diagnostics.Debug.Assert(Weights1.X >= Weights1.Y);
+            System.Diagnostics.Debug.Assert(Weights1.Y >= Weights1.Z);
+            System.Diagnostics.Debug.Assert(Weights1.Z >= Weights1.W);
         }
 
         #endregion
 
         #region data
 
+        /// <summary>
+        /// Stores the indices of the first 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints0;
 
+        /// <summary>
+        /// Stores the indices of the next 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("JOINTS_1", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints1;
 
+        /// <summary>
+        /// Stores the weights of the first 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights0;
 
+        /// <summary>
+        /// Stores the weights of the next 4 joints.
+        /// </summary>
+        /// <remarks>
+        /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
+        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// </remarks>
         [VertexAttribute("WEIGHTS_1")]
         public Vector4 Weights1;
+
+        public override bool Equals(object obj) { return obj is VertexJoints8 other && AreEqual(this, other); }
+        public bool Equals(VertexJoints8 other) { return AreEqual(this, other); }
+        public static bool operator ==(in VertexJoints8 a, in VertexJoints8 b) { return AreEqual(a, b); }
+        public static bool operator !=(in VertexJoints8 a, in VertexJoints8 b) { return !AreEqual(a, b); }
+        public static bool AreEqual(in VertexJoints8 a, in VertexJoints8 b)
+        {
+            // technically we should compare index-weights pairs,
+            // but it's expensive, and these values are expected
+            // to be already sorted by weight, unless filled manually.
+
+            return a.Joints0 == b.Joints0 && a.Joints1 == b.Joints1
+                && a.Weights0 == b.Weights0 && a.Weights1 == b.Weights1;
+        }
+
+        public override int GetHashCode() { return Joints0.GetHashCode(); }
 
         public int MaxBindings => 8;
 
@@ -237,13 +325,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public SparseWeight8 GetWeights() { return new SparseWeight8(this.Joints0, this.Joints1, this.Weights0, this.Weights1); }
+        public SparseWeight8 GetBindings() { return SparseWeight8.CreateUnchecked(this.Joints0, this.Joints1, this.Weights0, this.Weights1); }
 
         /// <inheritdoc/>
-        public void SetWeights(in SparseWeight8 weights) { this = new VertexJoints8(weights); }
+        public void SetBindings(in SparseWeight8 weights) { this = new VertexJoints8(weights); }
 
         /// <inheritdoc/>
-        public (int Index, float Weight) GetJointBinding(int index)
+        public void SetBindings(params (int Index, float Weight)[] bindings) { this = new VertexJoints8(bindings); }
+
+        /// <inheritdoc/>
+        public (int Index, float Weight) GetBinding(int index)
         {
             switch (index)
             {
@@ -255,23 +346,6 @@ namespace SharpGLTF.Geometry.VertexTypes
                 case 5: return ((int)this.Joints1.Y, this.Weights1.Y);
                 case 6: return ((int)this.Joints1.Z, this.Weights1.Z);
                 case 7: return ((int)this.Joints1.W, this.Weights1.W);
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetJointBinding(int index, int joint, float weight)
-        {
-            switch (index)
-            {
-                case 0: { this.Joints0.X = joint; this.Weights0.X = weight; return; }
-                case 1: { this.Joints0.Y = joint; this.Weights0.Y = weight; return; }
-                case 2: { this.Joints0.Z = joint; this.Weights0.Z = weight; return; }
-                case 3: { this.Joints0.W = joint; this.Weights0.W = weight; return; }
-                case 4: { this.Joints1.X = joint; this.Weights1.X = weight; return; }
-                case 5: { this.Joints1.Y = joint; this.Weights1.Y = weight; return; }
-                case 6: { this.Joints1.Z = joint; this.Weights1.Z = weight; return; }
-                case 7: { this.Joints1.W = joint; this.Weights1.W = weight; return; }
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }

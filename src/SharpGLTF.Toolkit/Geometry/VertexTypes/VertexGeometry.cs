@@ -7,13 +7,17 @@ using System.Text;
 namespace SharpGLTF.Geometry.VertexTypes
 {
     /// <summary>
-    /// Represents the interface that must be implemented by a geometry vertex fragment.<br/>
-    /// Implemented by:<br/>
-    /// - <see cref="VertexPosition"/><br/>
-    /// - <see cref="VertexPositionNormal"/><br/>
-    /// - <see cref="VertexPositionNormalTangent"/><br/>
-    /// - <see cref="VertexGeometryDelta"/><br/>
+    /// Represents the interface that must be implemented by a geometry vertex fragment.
     /// </summary>
+    /// <remarks>
+    /// Implemented by:
+    /// <list type="table">
+    /// <item><see cref="VertexPosition"/></item>
+    /// <item><see cref="VertexPositionNormal"/></item>
+    /// <item><see cref="VertexPositionNormalTangent"/></item>
+    /// <item><see cref="VertexGeometryDelta"/></item>
+    /// </list>
+    /// </remarks>
     public interface IVertexGeometry
     {
         /// <summary>
@@ -87,7 +91,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐏:{Position}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -179,7 +183,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -281,7 +285,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"𝐏:{Position} 𝚴:{Normal} 𝚻:{Tangent}";
+        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
