@@ -203,7 +203,7 @@ namespace SharpGLTF
                 return (new Vector3(xmin, ymin,zmin), new Vector3(xmax, ymax, zmax));
             }
 
-            private Plotly.Box<Plotly.Types.ITracesProperty> GetTrace()
+            private TRACES GetTrace()
             {
                 var x = Plotly.Scatter3d.x(_Points.Select(item => (float)item.X));
                 var y = Plotly.Scatter3d.y(_Points.Select(item => (float)item.Y));
