@@ -16,27 +16,33 @@ namespace SharpGLTF.Geometry
     /// <typeparam name="TvG">
     /// The vertex fragment type with Position, Normal and Tangent.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexPosition"/><br/>
-    /// - <see cref="VertexPositionNormal"/><br/>
-    /// - <see cref="VertexPositionNormalTangent"/>
+    /// <list type="table">
+    /// <item><see cref="VertexPosition"/></item>
+    /// <item><see cref="VertexPositionNormal"/></item>
+    /// <item><see cref="VertexPositionNormalTangent"/></item>
+    /// </list>
     /// </typeparam>
     /// <typeparam name="TvM">
     /// The vertex fragment type with Colors and Texture Coordinates.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/><br/>
-    /// - <see cref="VertexColor1"/><br/>
-    /// - <see cref="VertexTexture1"/><br/>
-    /// - <see cref="VertexColor1Texture1"/><br/>
-    /// - <see cref="VertexColor1Texture2"/><br/>
-    /// - <see cref="VertexColor1Texture1"/><br/>
-    /// - <see cref="VertexColor2Texture2"/>
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexColor1"/></item>
+    /// <item><see cref="VertexTexture1"/></item>
+    /// <item><see cref="VertexColor1Texture1"/></item>
+    /// <item><see cref="VertexColor1Texture2"/></item>
+    /// <item><see cref="VertexColor1Texture1"/></item>
+    /// <item><see cref="VertexColor2Texture2"/></item>
+    /// </list>
     /// </typeparam>
     /// <typeparam name="TvS">
     /// The vertex fragment type with Skin Joint Weights.<br/>
     /// Valid types are:<br/>
-    /// - <see cref="VertexEmpty"/><br/>
-    /// - <see cref="VertexJoints4"/><br/>
-    /// - <see cref="VertexJoints8"/>
+    /// <list type="table">
+    /// <item><see cref="VertexEmpty"/></item>
+    /// <item><see cref="VertexJoints4"/></item>
+    /// <item><see cref="VertexJoints8"/></item>
+    /// </list>
     /// </typeparam>
     public class MeshBuilder<TMaterial, TvG, TvM, TvS> : BaseBuilder, IMeshBuilder<TMaterial>
         where TvG : struct, IVertexGeometry
@@ -107,12 +113,16 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
+        /// <inheritdoc/>
+        public bool IsEmpty => Primitives.Sum(item => item.Vertices.Count) == 0;
+
         public VertexPreprocessor<TvG, TvM, TvS> VertexPreprocessor
         {
             get => _VertexPreprocessor;
             set => _VertexPreprocessor = value;
         }
 
+        /// <inheritdoc/>
         public IEnumerable<TMaterial> Materials => _Primitives.Keys.Select(item => item.Material).Distinct();
 
         public IReadOnlyCollection<PrimitiveBuilder<TMaterial, TvG, TvM, TvS>> Primitives => _Primitives.Values;
@@ -149,6 +159,19 @@ namespace SharpGLTF.Geometry
             return primitive;
         }
 
+        /// <summary>
+        /// Creates, or uses an existing primitive using <paramref name="material"/>.
+        /// </summary>
+        /// <param name="material">The material used by the primitive.</param>
+        /// <param name="primitiveVertexCount">
+        /// Defines the primitive type.<br/>
+        /// <list type="number">
+        /// <item>Points</item>
+        /// <item>Lines</item>
+        /// <item>Triangles (Default)</item>
+        /// </list>
+        /// </param>
+        /// <returns>An instance of <see cref="IPrimitiveBuilder"/>.</returns>
         public PrimitiveBuilder<TMaterial, TvG, TvM, TvS> UsePrimitive(TMaterial material, int primitiveVertexCount = 3)
         {
             Guard.NotNull(material, nameof(material));
@@ -165,39 +188,30 @@ namespace SharpGLTF.Geometry
             return _UsePrimitive((material, primitiveVertexCount));
         }
 
-        public void AddMesh(MeshBuilder<TMaterial, TvG, TvM, TvS> mesh, Func<TMaterial, TMaterial> materialTransform, Converter<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
-        {
-            if (mesh == null) return;
-
-            if (materialTransform == null) materialTransform = m => m;
-            if (vertexTransform == null) vertexTransform = v => v;
-
-            AddMesh<TMaterial>(mesh, materialTransform, v => vertexTransform(VertexBuilder<TvG, TvM, TvS>.CreateFrom(v)));
-        }
-
         public void AddMesh(IMeshBuilder<TMaterial> mesh, Matrix4x4 vertexTransform)
         {
             if (mesh == null) return;
 
             if (vertexTransform == Matrix4x4.Identity)
             {
-                AddMesh<TMaterial>(mesh, m => m, null);
+                AddMesh<TMaterial>(mesh, null, null);
                 return;
             }
 
-            AddMesh<TMaterial>(mesh, m => m, v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v).TransformedBy(vertexTransform));
+            AddMesh<TMaterial>(mesh, null, v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v).TransformedBy(vertexTransform));
         }
 
-        public void AddMesh(IMeshBuilder<TMaterial> mesh, Func<TMaterial, TMaterial> materialTransform, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        public void AddMesh(IMeshBuilder<TMaterial> mesh, Func<TMaterial, TMaterial> materialTransform = null, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform = null)
         {
             if (mesh == null) return;
 
             if (materialTransform == null) materialTransform = m => m;
+            if (vertexTransform == null) vertexTransform = v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
 
             AddMesh<TMaterial>(mesh, materialTransform, vertexTransform);
         }
 
-        public void AddMesh<TSourceMaterial>(IMeshBuilder<TSourceMaterial> mesh, Func<TSourceMaterial, TMaterial> materialTransform, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
+        public void AddMesh<TSourceMaterial>(IMeshBuilder<TSourceMaterial> mesh, Func<TSourceMaterial, TMaterial> materialTransform, Converter<IVertexBuilder, VertexBuilder<TvG, TvM, TvS>> vertexTransform = null)
         {
             if (mesh == null) return;
 
@@ -220,6 +234,8 @@ namespace SharpGLTF.Geometry
         public void TransformVertices(Func<VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>> vertexTransform)
         {
             foreach (var p in Primitives) p.TransformVertices(vertexTransform);
+
+            // TODO: remove collapsed primitives.
         }
 
         public void Validate()

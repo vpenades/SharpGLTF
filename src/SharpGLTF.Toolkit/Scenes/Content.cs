@@ -49,7 +49,7 @@ namespace SharpGLTF.Scenes
 
         private MeshContent(MeshContent other)
         {
-            this._Mesh = other._Mesh?.Clone(m => new Materials.MaterialBuilder(m));
+            this._Mesh = other._Mesh?.Clone(m => m.Clone());
         }
 
         #endregion

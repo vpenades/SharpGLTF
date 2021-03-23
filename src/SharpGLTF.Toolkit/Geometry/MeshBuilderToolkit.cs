@@ -8,16 +8,60 @@ using SharpGLTF.Geometry.VertexTypes;
 
 namespace SharpGLTF.Geometry
 {
+    /// <summary>
+    /// Represents an utility class to help build meshes by adding primitives associated with a given material.
+    /// </summary>
+    /// <typeparam name="TMaterial">The material type used by this <see cref="PrimitiveBuilder{TMaterial, TvP, TvM, TvS}"/> instance.</typeparam>
     public interface IMeshBuilder<TMaterial>
     {
+        /// <summary>
+        /// Gets or sets the display text name, or null.
+        /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
+        /// </summary>
+        /// <remarks>
+        /// glTF does not define any rule for object names.<br/>
+        /// This means that names can be null or non unique.<br/>
+        /// So don't use <see cref="Name"/> for anything other than object name display.<br/>
+        /// If you need to reference objects by some ID, use lookup tables instead.
+        /// </remarks>
         string Name { get; set; }
 
+        /// <summary>
+        /// Gets or sets the custom data of this object.
+        /// </summary>
         IO.JsonContent Extras { get; set; }
 
+        /// <summary>
+        /// Gets a value indicating whether this mesh does not contain any geometry.
+        /// </summary>
+        Boolean IsEmpty { get; }
+
+        /// <summary>
+        /// Gets a collection of materials used by this mesh.
+        /// </summary>
+        /// <remarks>
+        /// The materials are taken directly from the <see cref="Primitives"/>.
+        /// </remarks>
         IEnumerable<TMaterial> Materials { get; }
 
+        /// <summary>
+        /// Gets a collection of primitives used by this mesh.
+        /// </summary>
         IReadOnlyCollection<IPrimitiveReader<TMaterial>> Primitives { get; }
 
+        /// <summary>
+        /// Creates, or uses an existing primitive using <paramref name="material"/>.
+        /// </summary>
+        /// <param name="material">The material used by the primitive.</param>
+        /// <param name="primitiveVertexCount">
+        /// Defines the primitive type.<br/>
+        /// <list type="number">
+        /// <item>Points</item>
+        /// <item>Lines</item>
+        /// <item>Triangles (Default)</item>
+        /// </list>
+        /// </param>
+        /// <returns>An instance of <see cref="IPrimitiveBuilder"/>.</returns>
         IPrimitiveBuilder UsePrimitive(TMaterial material, int primitiveVertexCount = 3);
 
         IMorphTargetBuilder UseMorphTarget(int index);

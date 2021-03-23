@@ -51,7 +51,7 @@ namespace SharpGLTF.Scenes
         /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
         /// </summary>
         /// <remarks>
-        /// glTF does not define any ruling for object names.<br/>
+        /// glTF does not define any rule for object names.<br/>
         /// This means that names can be null or non unique.<br/>
         /// So don't use names for anything other than object name display.<br/>
         /// If you need to reference objects by some ID, use lookup tables instead.
