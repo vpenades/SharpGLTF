@@ -106,7 +106,7 @@ namespace SharpGLTF.Schema2
 	
 	}
 
-	partial class KHR_lights_punctualglTFextension : ExtraProperties
+	partial class _ModelPunctualLights : ExtraProperties
 	{
 	
 		private const int _lightsMinItems = 1;

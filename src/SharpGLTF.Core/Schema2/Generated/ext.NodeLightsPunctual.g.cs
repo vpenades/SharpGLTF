@@ -27,7 +27,7 @@ namespace SharpGLTF.Schema2
 {
 	using Collections;
 
-	partial class KHR_lights_punctualnodeextension : ExtraProperties
+	partial class _NodePunctualLight : ExtraProperties
 	{
 	
 		private Int32 _light;

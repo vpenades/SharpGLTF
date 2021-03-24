@@ -1,37 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Linq;
-
-using SharpGLTF.Collections;
+using System.Numerics;
+using System.Text;
 
 namespace SharpGLTF.Schema2
 {
-    partial class KHR_lights_punctualglTFextension
-    {
-        internal KHR_lights_punctualglTFextension(ModelRoot root)
-        {
-            _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
-        }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_lights);
-        }
-
-        public IReadOnlyList<PunctualLight> Lights => _lights;
-
-        public PunctualLight CreateLight(string name, PunctualLightType ltype)
-        {
-            var light = new PunctualLight(ltype);
-            light.Name = name;
-
-            _lights.Add(light);
-
-            return light;
-        }
-    }
-
     /// <summary>
     /// Defines all the types of <see cref="PunctualLight"/> types.
     /// </summary>
@@ -231,104 +205,6 @@ namespace SharpGLTF.Schema2
                 .IsLess(nameof(InnerConeAngle), InnerConeAngle, OuterConeAngle);
 
             base.OnValidateContent(validate);
-        }
-    }
-
-    partial class KHR_lights_punctualnodeextension
-    {
-        #pragma warning disable CA1801 // Review unused parameters
-        internal KHR_lights_punctualnodeextension(Node node) { }
-        #pragma warning restore CA1801 // Review unused parameters
-
-        public int LightIndex
-        {
-            get => _light;
-            set => _light = value;
-        }
-    }
-
-    partial class Node
-    {
-        /// <summary>
-        /// Gets or sets the <see cref="Schema2.PunctualLight"/> of this <see cref="Node"/>.
-        /// </summary>
-        /// <remarks>
-        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual"/> extension.
-        /// </remarks>
-        public PunctualLight PunctualLight
-        {
-            get
-            {
-                var ext = this.GetExtension<KHR_lights_punctualnodeextension>();
-                if (ext == null) return null;
-
-                return this.LogicalParent.LogicalPunctualLights[ext.LightIndex];
-            }
-            set
-            {
-                if (value == null) { this.RemoveExtensions<KHR_lights_punctualnodeextension>(); return; }
-
-                Guard.MustShareLogicalParent(this, value, nameof(value));
-
-                this.UsingExtension(typeof(KHR_lights_punctualnodeextension));
-
-                var ext = new KHR_lights_punctualnodeextension(this);
-                ext.LightIndex = value.LogicalIndex;
-
-                this.SetExtension(ext);
-            }
-        }
-    }
-
-    partial class ModelRoot
-    {
-        /// <summary>
-        /// Gets A collection of <see cref="PunctualLight"/> instances.
-        /// </summary>
-        /// <remarks>
-        /// This is part of <see href="https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual">KHR_lights_punctual</see> extension.
-        /// </remarks>
-        public IReadOnlyList<PunctualLight> LogicalPunctualLights
-        {
-            get
-            {
-                var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
-                if (ext == null) return Array.Empty<PunctualLight>();
-
-                return ext.Lights;
-            }
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="PunctualLight"/> instance and
-        /// adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
-        /// </summary>
-        /// <param name="lightType">A value of <see cref="PunctualLightType"/> describing the type of light to create.</param>
-        /// <returns>A <see cref="PunctualLight"/> instance.</returns>
-        public PunctualLight CreatePunctualLight(PunctualLightType lightType)
-        {
-            return CreatePunctualLight(null, lightType);
-        }
-
-        /// <summary>
-        /// Creates a new <see cref="PunctualLight"/> instance.
-        /// and adds it to <see cref="ModelRoot.LogicalPunctualLights"/>.
-        /// </summary>
-        /// <param name="name">The name of the instance.</param>
-        /// <param name="lightType">A value of <see cref="PunctualLightType"/> describing the type of light to create.</param>
-        /// <returns>A <see cref="PunctualLight"/> instance.</returns>
-        public PunctualLight CreatePunctualLight(string name, PunctualLightType lightType)
-        {
-            var ext = this.GetExtension<KHR_lights_punctualglTFextension>();
-            if (ext == null)
-            {
-                this.UsingExtension(typeof(ModelRoot), typeof(KHR_lights_punctualglTFextension));
-
-                ext = new KHR_lights_punctualglTFextension(this);
-                this.SetExtension(ext);
-            }
-
-            return ext.CreateLight(name, lightType);
         }
     }
 }
