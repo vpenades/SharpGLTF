@@ -712,6 +712,391 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix3x2}"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Vector"/> namespace doesn't support a 2x2 matrix, so the array is<br/>
+    /// decoded as a Matrix2x2 matrix internally, but exposed as a <see cref="Matrix3x2"/>.
+    /// </remarks>
+    [System.Diagnostics.DebuggerDisplay("Matrix2x2[{Count}]")]
+    public readonly struct Matrix2x2Array : IList<Matrix3x2>, IReadOnlyList<Matrix3x2>
+    {
+        #region constructors
+
+        public Matrix2x2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix2x2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        {
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 4, encoding, normalized);
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly FloatingAccessor _Accessor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Matrix3x2[] _DebugItems => this.ToArray();
+
+        #endregion
+
+        #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _Accessor.Count;
+
+        bool ICollection<Matrix3x2>.IsReadOnly => false;
+
+        public Matrix3x2 this[int index]
+        {
+            get
+            {
+                return new Matrix3x2
+                    (
+                    _Accessor[index, 0], _Accessor[index, 1],
+                    _Accessor[index, 2], _Accessor[index, 3],
+                    0, 0
+                    );
+            }
+
+            set
+            {
+                _Accessor[index, 0] = value.M11;
+                _Accessor[index, 1] = value.M12;
+                _Accessor[index, 2] = value.M21;
+                _Accessor[index, 3] = value.M22;
+            }
+        }
+
+        public IEnumerator<Matrix3x2> GetEnumerator() { return new EncodedArrayEnumerator<Matrix3x2>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix3x2>(this); }
+
+        public bool Contains(Matrix3x2 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Matrix3x2 item) { return this._FirstIndexOf(item); }
+
+        public void CopyTo(Matrix3x2[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
+
+        public void Fill(IEnumerable<Matrix3x2> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
+
+        void IList<Matrix3x2>.Insert(int index, Matrix3x2 item) { throw new NotSupportedException(); }
+
+        void IList<Matrix3x2>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix3x2>.Add(Matrix3x2 item) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix3x2>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Matrix3x2>.Remove(Matrix3x2 item) { throw new NotSupportedException(); }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix3x2}"/>.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Matrix3x2[{Count}]")]
+    public readonly struct Matrix3x2Array : IList<Matrix3x2>, IReadOnlyList<Matrix3x2>
+    {
+        #region constructors
+
+        public Matrix3x2Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix3x2Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        {
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 6, encoding, normalized);
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly FloatingAccessor _Accessor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Matrix3x2[] _DebugItems => this.ToArray();
+
+        #endregion
+
+        #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _Accessor.Count;
+
+        bool ICollection<Matrix3x2>.IsReadOnly => false;
+
+        public Matrix3x2 this[int index]
+        {
+            get
+            {
+                return new Matrix3x2
+                    (
+                    _Accessor[index, 0], _Accessor[index, 1],
+                    _Accessor[index, 2], _Accessor[index, 3],
+                    _Accessor[index, 4], _Accessor[index, 5]
+                    );
+            }
+
+            set
+            {
+                _Accessor[index, 0] = value.M11;
+                _Accessor[index, 1] = value.M12;
+                _Accessor[index, 2] = value.M21;
+                _Accessor[index, 3] = value.M22;
+                _Accessor[index, 4] = value.M31;
+                _Accessor[index, 5] = value.M32;
+            }
+        }
+
+        public IEnumerator<Matrix3x2> GetEnumerator() { return new EncodedArrayEnumerator<Matrix3x2>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix3x2>(this); }
+
+        public bool Contains(Matrix3x2 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Matrix3x2 item) { return this._FirstIndexOf(item); }
+
+        public void CopyTo(Matrix3x2[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
+
+        public void Fill(IEnumerable<Matrix3x2> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
+
+        void IList<Matrix3x2>.Insert(int index, Matrix3x2 item) { throw new NotSupportedException(); }
+
+        void IList<Matrix3x2>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix3x2>.Add(Matrix3x2 item) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix3x2>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Matrix3x2>.Remove(Matrix3x2 item) { throw new NotSupportedException(); }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Vector"/> namespace doesn't support a 3x3 matrix, so the array is<br/>
+    /// decoded as a Matrix3x3 matrix internally, but exposed as a <see cref="Matrix4x4"/>.
+    /// </remarks>
+    [System.Diagnostics.DebuggerDisplay("Matrix3x3[{Count}]")]
+    public readonly struct Matrix3x3Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
+    {
+        #region constructors
+
+        public Matrix3x3Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix3x3Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        {
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 9, encoding, normalized);
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly FloatingAccessor _Accessor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Matrix4x4[] _DebugItems => this.ToArray();
+
+        #endregion
+
+        #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _Accessor.Count;
+
+        bool ICollection<Matrix4x4>.IsReadOnly => false;
+
+        public Matrix4x4 this[int index]
+        {
+            get
+            {
+                return new Matrix4x4
+                    (
+                    _Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], 0,
+                    _Accessor[index, 3], _Accessor[index, 4], _Accessor[index, 5], 0,
+                    _Accessor[index, 6], _Accessor[index, 7], _Accessor[index, 8], 0,
+                    0, 0, 0, 1
+                    );
+            }
+
+            set
+            {
+                _Accessor[index, 0] = value.M11;
+                _Accessor[index, 1] = value.M12;
+                _Accessor[index, 2] = value.M13;
+                _Accessor[index, 3] = value.M21;
+                _Accessor[index, 4] = value.M22;
+                _Accessor[index, 5] = value.M23;
+                _Accessor[index, 6] = value.M31;
+                _Accessor[index, 7] = value.M32;
+                _Accessor[index, 8] = value.M33;
+            }
+        }
+
+        public IEnumerator<Matrix4x4> GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
+
+        public bool Contains(Matrix4x4 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Matrix4x4 item) { return this._FirstIndexOf(item); }
+
+        public void CopyTo(Matrix4x4[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
+
+        public void Fill(IEnumerable<Matrix4x4> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
+
+        void IList<Matrix4x4>.Insert(int index, Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void IList<Matrix4x4>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Add(Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Matrix4x4>.Remove(Matrix4x4 item) { throw new NotSupportedException(); }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Vector"/> namespace doesn't support a 4x3 matrix, so the array is<br/>
+    /// decoded as a Matrix4x3 matrix internally, but exposed as a <see cref="Matrix4x4"/>.
+    /// </remarks>
+    [System.Diagnostics.DebuggerDisplay("Matrix4x3[{Count}]")]
+    public readonly struct Matrix4x3Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
+    {
+        #region constructors
+
+        public Matrix4x3Array(BYTES source, int byteStride = 0, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
+            : this(source, 0, int.MaxValue, byteStride, encoding, normalized) { }
+
+        public Matrix4x3Array(BYTES source, int byteOffset, int itemsCount, int byteStride, ENCODING encoding, Boolean normalized)
+        {
+            _Accessor = new FloatingAccessor(source, byteOffset, itemsCount, byteStride, 12, encoding, normalized);
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly FloatingAccessor _Accessor;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private Matrix4x4[] _DebugItems => this.ToArray();
+
+        #endregion
+
+        #region API
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int Count => _Accessor.Count;
+
+        bool ICollection<Matrix4x4>.IsReadOnly => false;
+
+        public Matrix4x4 this[int index]
+        {
+            get
+            {
+                return new Matrix4x4
+                    (
+                    _Accessor[index, 0], _Accessor[index, 1], _Accessor[index, 2], 0,
+                    _Accessor[index, 3], _Accessor[index, 4], _Accessor[index, 5], 0,
+                    _Accessor[index, 6], _Accessor[index, 7], _Accessor[index, 8], 0,
+                    _Accessor[index, 9], _Accessor[index, 10], _Accessor[index, 11], 1
+                    );
+            }
+
+            set
+            {
+                _Accessor[index, 0] = value.M11;
+                _Accessor[index, 1] = value.M12;
+                _Accessor[index, 2] = value.M13;
+                _Accessor[index, 3] = value.M21;
+                _Accessor[index, 4] = value.M22;
+                _Accessor[index, 5] = value.M23;
+                _Accessor[index, 6] = value.M31;
+                _Accessor[index, 7] = value.M32;
+                _Accessor[index, 8] = value.M33;
+                _Accessor[index, 9] = value.M41;
+                _Accessor[index, 10] = value.M42;
+                _Accessor[index, 11] = value.M43;
+            }
+        }
+
+        public IEnumerator<Matrix4x4> GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
+
+        IEnumerator IEnumerable.GetEnumerator() { return new EncodedArrayEnumerator<Matrix4x4>(this); }
+
+        public bool Contains(Matrix4x4 item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Matrix4x4 item) { return this._FirstIndexOf(item); }
+
+        public void CopyTo(Matrix4x4[] array, int arrayIndex)
+        {
+            Guard.NotNull(array, nameof(array));
+            this._CopyTo(array, arrayIndex);
+        }
+
+        public void Fill(IEnumerable<Matrix4x4> values, int dstStart = 0)
+        {
+            Guard.NotNull(values, nameof(values));
+            values._CopyTo(this, dstStart);
+        }
+
+        void IList<Matrix4x4>.Insert(int index, Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void IList<Matrix4x4>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Add(Matrix4x4 item) { throw new NotSupportedException(); }
+
+        void ICollection<Matrix4x4>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Matrix4x4>.Remove(Matrix4x4 item) { throw new NotSupportedException(); }
+
+        #endregion
+    }
+
+    /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Matrix4x4[{Count}]")]
