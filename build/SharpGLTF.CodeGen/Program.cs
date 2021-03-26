@@ -37,11 +37,14 @@ namespace SharpGLTF
             // lights
             _ProcessKhronosLightsPunctualExtension();
 
+            // gpu mesh instancing
+            _ProcessMeshGpuInstancingExtension();
+
             // textures
             _ProcessKhronosTextureTransformExtension();
             _ProcessMicrosoftTextureDDSExtension();
             _ProcessTextureWebpExtension();
-            _ProcessTextureKtx2Extension();
+            _ProcessTextureKtx2Extension();            
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
@@ -106,7 +109,7 @@ namespace SharpGLTF
         {
             // Model extension
 
-            var ctx = LoadSchemaContext(Constants.KhronosModelXMPSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.XMP_Model);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -132,7 +135,7 @@ namespace SharpGLTF
 
             // Node extension
 
-            ctx = LoadSchemaContext(Constants.KhronosNodeXMPSchemaFile);
+            ctx = LoadSchemaContext(Constants.KhronosExtensions.XMP_Node);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -141,7 +144,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosSpecularGlossinessExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosPbrSpecGlossSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.PbrSpecularGlossiness);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
@@ -163,7 +166,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosUnlitExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosUnlitSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.Unlit);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -172,7 +175,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosClearCoatExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosPbrClearCoatSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.PbrClearCoat);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
@@ -183,7 +186,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosTransmissionExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosPbrTransmissionSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.PbrTransmission);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
@@ -194,7 +197,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosSheenExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosPbrSheenSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.PbrSheen);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
@@ -219,7 +222,7 @@ namespace SharpGLTF
         {
             // Model
 
-            var ctx = LoadSchemaContext(Constants.KhronosModelLightsPunctualSchemaFile);            
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.LightsPunctual_Model);            
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -233,7 +236,7 @@ namespace SharpGLTF
 
             // Node
 
-            ctx = LoadSchemaContext(Constants.KhronosNodeLightsPunctualSchemaFile);
+            ctx = LoadSchemaContext(Constants.KhronosExtensions.LightsPunctual_Node);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -242,7 +245,7 @@ namespace SharpGLTF
 
         private static void _ProcessKhronosTextureTransformExtension()
         {
-            var ctx = LoadSchemaContext(Constants.KhronosTextureTransformSchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.TextureTransform);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
 
@@ -263,7 +266,7 @@ namespace SharpGLTF
 
         private static void _ProcessMicrosoftTextureDDSExtension()
         {
-            var ctx = LoadSchemaContext(Constants.MicrosoftTextureDDSSchemaFile);
+            var ctx = LoadSchemaContext(Constants.VendorExtensions.TextureDDS);
             ctx.IgnoredByCodeEmitter("glTF Property");
 
             ProcessSchema("ext.MSFT.TextureDDS.g", ctx);
@@ -271,7 +274,7 @@ namespace SharpGLTF
 
         private static void _ProcessTextureWebpExtension()
         {
-            var ctx = LoadSchemaContext(Constants.TextureWebpSchemaFile);
+            var ctx = LoadSchemaContext(Constants.VendorExtensions.TextureWebp);
             ctx.IgnoredByCodeEmitter("glTF Property");
 
             ProcessSchema("ext.TextureWEBP.g", ctx);
@@ -279,10 +282,19 @@ namespace SharpGLTF
 
         private static void _ProcessTextureKtx2Extension()
         {
-            var ctx = LoadSchemaContext(Constants.TextureKtx2SchemaFile);
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.Ktx2);
             ctx.IgnoredByCodeEmitter("glTF Property");
 
             ProcessSchema("ext.TextureKTX2.g", ctx);
+        }
+
+        private static void _ProcessMeshGpuInstancingExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.VendorExtensions.MeshGpuInstancing);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            
+            ProcessSchema("ext.MeshGpuInstancing.g", ctx);
         }
 
         #endregion
@@ -344,12 +356,16 @@ namespace SharpGLTF
 
             newEmitter.SetRuntimeName("light", "PunctualLight");
             newEmitter.SetRuntimeName("light/spot", "PunctualLightSpot");
+            newEmitter.SetRuntimeName("KHR_lights_punctual glTF extension", "_ModelPunctualLights");
+            newEmitter.SetRuntimeName("KHR_lights_punctual node extension", "_NodePunctualLight");
 
             newEmitter.SetRuntimeName("KHR_texture_transform textureInfo extension", "TextureTransform");
 
             newEmitter.SetRuntimeName("MSFT_texture_dds extension", "TextureDDS");
             newEmitter.SetRuntimeName("EXT_texture_webp glTF extension", "TextureWEBP");
             newEmitter.SetRuntimeName("KHR_texture_basisu glTF extension", "TextureKTX2");
+
+            newEmitter.SetRuntimeName("EXT_mesh_gpu_instancing glTF extension", "MeshGpuInstancing");
 
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();
