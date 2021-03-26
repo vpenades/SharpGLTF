@@ -263,6 +263,8 @@ namespace SharpGLTF.SchemaReflection
 
         public FieldInfo SetDataType(Type type, bool isNullable)
         {
+            if (type == typeof(string)) { _FieldType = DeclaringClass.Owner.UseString(); return this; }
+
             _FieldType = DeclaringClass.Owner.UseBlittable(type.GetTypeInfo(), isNullable);
             return this;
         }

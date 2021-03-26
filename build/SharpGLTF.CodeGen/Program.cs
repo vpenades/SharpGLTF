@@ -92,11 +92,21 @@ namespace SharpGLTF
                 .SetDefaultValue("Vector4.One")
                 .SetItemsRange(0);
 
-            var tex1 = ctx1.FindEnum("LINEAR-NEAREST");
-            tex1.SetValue("DEFAULT",0);
+            ctx1.FindEnum("LINEAR-NEAREST")
+                .SetValue("DEFAULT",0);
 
-            var tex2 = ctx1.FindEnum("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST");
-            tex2.SetValue("DEFAULT", 0);
+            ctx1.FindEnum("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST")
+                .SetValue("DEFAULT", 0);
+
+            // Accessor.type is declared as AnyOfEnum, but also as a STRING,
+            // which can be used by extensions to store non standard values like MAT4x3
+            ctx1.FindClass("Accessor")
+                .GetField("type").SetDataType(typeof(string), true);
+
+            // Since DimensionType can have additional values other than the ones defined by the schema
+            // we need a "special" value to define it
+            ctx1.FindEnum("MAT2-MAT3-MAT4-SCALAR-VEC2-VEC3-VEC4")
+                .SetValue("CUSTOM", 0);
 
             ProcessSchema("gltf.g", ctx1);
         }

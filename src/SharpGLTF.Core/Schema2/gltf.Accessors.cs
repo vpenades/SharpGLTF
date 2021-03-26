@@ -41,48 +41,53 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the <see cref="BufferView"/> buffer that contains the items as an encoded byte array.
         /// </summary>
-        public BufferView SourceBufferView      => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
+        public BufferView SourceBufferView => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
 
         /// <summary>
         /// Gets the number of items.
         /// </summary>
-        public int Count                        => this._count;
+        public int Count => this._count;
 
         /// <summary>
         /// Gets the starting byte offset within <see cref="SourceBufferView"/>.
         /// </summary>
-        public int ByteOffset                   => this._byteOffset.AsValue(0);
+        public int ByteOffset => this._byteOffset.AsValue(0);
 
         /// <summary>
         /// Gets the number of bytes, starting at <see cref="ByteOffset"/> use by this <see cref="Accessor"/>
         /// </summary>
-        public int ByteLength                   => SourceBufferView.GetAccessorByteLength(Format, Count);
+        public int ByteLength => SourceBufferView.GetAccessorByteLength(Format, Count);
 
         /// <summary>
         /// Gets the <see cref="DimensionType"/> of an item.
         /// </summary>
-        public DimensionType Dimensions           => this._type;
+        public DimensionType Dimensions => _GetDimensions();
 
         /// <summary>
         /// Gets the <see cref="EncodingType"/> of an item.
         /// </summary>
-        public EncodingType Encoding           => this._componentType;
+        public EncodingType Encoding => this._componentType;
 
         /// <summary>
         /// Gets a value indicating whether the items values are normalized.
         /// </summary>
-        public Boolean Normalized               => this._normalized.AsValue(false);
+        public Boolean Normalized => this._normalized.AsValue(false);
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="Accessor"/> has a sparse structure.
         /// </summary>
-        public Boolean IsSparse                 => this._sparse != null;
+        public Boolean IsSparse => this._sparse != null;
 
-        public AttributeFormat Format => new AttributeFormat(_type, _componentType, this._normalized.AsValue(false));
+        public AttributeFormat Format => new AttributeFormat(this.Dimensions, _componentType, this._normalized.AsValue(false));
 
         #endregion
 
         #region API
+
+        private DimensionType _GetDimensions()
+        {
+            return Enum.TryParse<DimensionType>(this._type, out var r) ? r : DimensionType.CUSTOM;
+        }
 
         internal MemoryAccessor _GetMemoryAccessor(string name = null)
         {
@@ -165,11 +170,21 @@ namespace SharpGLTF.Schema2
             this._byteOffset = bufferByteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
             this._count = itemCount;
 
-            this._type = dimensions;
+            this._type = Enum.GetName(typeof(DimensionType), dimensions);
             this._componentType = encoding;
             this._normalized = normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
+        }
+
+        public Matrix2x2Array AsMatrix2x2Array()
+        {
+            return _GetMemoryAccessor().AsMatrix2x2Array();
+        }
+
+        public Matrix3x3Array AsMatrix3x3Array()
+        {
+            return _GetMemoryAccessor().AsMatrix3x3Array();
         }
 
         public Matrix4x4Array AsMatrix4x4Array()

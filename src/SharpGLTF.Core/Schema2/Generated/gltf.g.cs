@@ -64,6 +64,7 @@ namespace SharpGLTF.Schema2
 		MAT2,
 		MAT3,
 		MAT4,
+		CUSTOM,
 	}
 
 
@@ -331,7 +332,7 @@ namespace SharpGLTF.Schema2
 		
 		private AccessorSparse _sparse;
 		
-		private DimensionType _type;
+		private String _type;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -345,7 +346,7 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "min", _min, _minMinItems);
 			SerializeProperty(writer, "normalized", _normalized, _normalizedDefault);
 			SerializePropertyObject(writer, "sparse", _sparse);
-			SerializePropertyEnumSymbol<DimensionType>(writer, "type", _type);
+			SerializeProperty(writer, "type", _type);
 		}
 	
 		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
@@ -360,7 +361,7 @@ namespace SharpGLTF.Schema2
 				case "min": DeserializePropertyList<Double>(ref reader, _min); break;
 				case "normalized": _normalized = DeserializePropertyValue<Boolean?>(ref reader); break;
 				case "sparse": _sparse = DeserializePropertyValue<AccessorSparse>(ref reader); break;
-				case "type": _type = DeserializePropertyValue<DimensionType>(ref reader); break;
+				case "type": _type = DeserializePropertyValue<String>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

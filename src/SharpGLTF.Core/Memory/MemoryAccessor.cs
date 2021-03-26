@@ -462,6 +462,20 @@ namespace SharpGLTF.Memory
             return new QuaternionArray(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Encoding, _Slicer.Normalized);
         }
 
+        public Matrix2x2Array AsMatrix2x2Array()
+        {
+            Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
+            Guard.IsTrue(_Slicer.Dimensions == DIMENSIONS.MAT2, nameof(_Slicer));
+            return new Matrix2x2Array(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Encoding, _Slicer.Normalized);
+        }
+
+        public Matrix3x3Array AsMatrix3x3Array()
+        {
+            Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
+            Guard.IsTrue(_Slicer.Dimensions == DIMENSIONS.MAT3, nameof(_Slicer));
+            return new Matrix3x3Array(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Encoding, _Slicer.Normalized);
+        }
+
         public Matrix4x4Array AsMatrix4x4Array()
         {
             Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
