@@ -286,8 +286,9 @@ namespace SharpGLTF.Geometry
         public static bool operator !=(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b)
         {
-            return a.Position.Equals(b.Position) && a.Material.Equals(b.Material) && a.Skinning.Equals(b.Skinning);
+            return a.Geometry.Equals(b.Geometry) && a.Material.Equals(b.Material) && a.Skinning.Equals(b.Skinning);
         }
+
         public override int GetHashCode() { return Geometry.GetHashCode(); }
 
         #endregion
