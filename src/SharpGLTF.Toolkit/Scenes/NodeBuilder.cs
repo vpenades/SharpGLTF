@@ -300,7 +300,7 @@ namespace SharpGLTF.Scenes
 
         private void _DecomposeMatrix(Matrix4x4 matrix)
         {
-            var affine = new Transforms.AffineTransform(matrix);
+            var affine = Transforms.AffineTransform.CreateDecomposed(matrix);
 
             UseScale().Value = affine.Scale;
             UseRotation().Value = affine.Rotation;

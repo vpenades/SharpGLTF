@@ -25,9 +25,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(node, nameof(node));
 
-            var xform = node.LocalTransform;
-            xform.Translation = translation;
-            node.LocalTransform = xform;
+            node.LocalTransform = node.LocalTransform.WithTranslation(translation);
 
             return node;
         }
@@ -36,9 +34,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(node, nameof(node));
 
-            var xform = node.LocalTransform;
-            xform.Rotation = rotation;
-            node.LocalTransform = xform;
+            node.LocalTransform = node.LocalTransform.WithRotation(rotation);
 
             return node;
         }
@@ -47,9 +43,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(node, nameof(node));
 
-            var xform = node.LocalTransform;
-            xform.Scale = scale;
-            node.LocalTransform = xform;
+            node.LocalTransform = node.LocalTransform.WithScale(scale);
 
             return node;
         }

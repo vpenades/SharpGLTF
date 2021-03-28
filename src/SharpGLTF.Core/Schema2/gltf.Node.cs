@@ -195,13 +195,14 @@ namespace SharpGLTF.Schema2
             set
             {
                 Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
-
                 Guard.IsTrue(value.IsValid, nameof(value));
 
+                var decomposed = value.GetDecomposed();
+
                 _matrix = null;
-                _scale = value.Scale.AsNullable(Vector3.One);
-                _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
-                _translation = value.Translation.AsNullable(Vector3.Zero);
+                _scale = decomposed.Scale.AsNullable(Vector3.One);
+                _rotation = decomposed.Rotation.Sanitized().AsNullable(Quaternion.Identity);
+                _translation = decomposed.Translation.AsNullable(Vector3.Zero);
             }
         }
 
@@ -813,17 +814,13 @@ namespace SharpGLTF.Schema2
 
         public Transforms.AffineTransform GetLocalTransform(Single time)
         {
-            var xform = TargetNode.LocalTransform;
+            var xform = TargetNode.LocalTransform.GetDecomposed();
 
-            var sfunc = Scale?.CreateCurveSampler();
-            var rfunc = Rotation?.CreateCurveSampler();
-            var tfunc = Translation?.CreateCurveSampler();
+            var s = Scale?.CreateCurveSampler()?.GetPoint(time) ?? xform.Scale;
+            var r = Rotation?.CreateCurveSampler()?.GetPoint(time) ?? xform.Rotation;
+            var t = Translation?.CreateCurveSampler()?.GetPoint(time) ?? xform.Translation;
 
-            if (sfunc != null) xform.Scale = sfunc.GetPoint(time);
-            if (rfunc != null) xform.Rotation = rfunc.GetPoint(time);
-            if (tfunc != null) xform.Translation = tfunc.GetPoint(time);
-
-            return xform;
+            return new Transforms.AffineTransform(s, r, t);
         }
 
         public IReadOnlyList<float> GetMorphingWeights(Single time)
