@@ -44,11 +44,13 @@ namespace SharpGLTF
             _ProcessKhronosTextureTransformExtension();
             _ProcessMicrosoftTextureDDSExtension();
             _ProcessTextureWebpExtension();
-            _ProcessTextureKtx2Extension();            
+            _ProcessTextureKtx2Extension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
             // _ProcessMicrosoftLODExtension();
+
+            _ProcessAgiArticulationsExtension();
         }
 
         #endregion
@@ -307,6 +309,21 @@ namespace SharpGLTF
             ProcessSchema("ext.MeshGpuInstancing.g", ctx);
         }
 
+        private static void _ProcessAgiArticulationsExtension()
+        {
+            var ctx1 = LoadSchemaContext(Constants.VendorExtensions.RootAgiArticulations);
+            ctx1.IgnoredByCodeEmitter("glTF Property");
+            ctx1.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.RootAgiArticulations.g", ctx1);
+
+            var ctx2 = LoadSchemaContext(Constants.VendorExtensions.NodeAgiArticulations);
+            ctx2.IgnoredByCodeEmitter("glTF Property");
+            ctx2.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.NodeAgiArticulations.g", ctx2);
+        }
+
         #endregion
 
         #region code generation
@@ -376,6 +393,8 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_texture_basisu glTF extension", "TextureKTX2");
 
             newEmitter.SetRuntimeName("EXT_mesh_gpu_instancing glTF extension", "MeshGpuInstancing");
+
+            newEmitter.SetRuntimeName("uniformScale-xRotate-xScale-xTranslate-yRotate-yScale-yTranslate-zRotate-zScale-zTranslate", "ArticulationTransformType");
 
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();
