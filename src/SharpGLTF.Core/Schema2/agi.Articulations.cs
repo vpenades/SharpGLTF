@@ -18,6 +18,8 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class AGI_articulationsglTFNodeextension
     {
+        public AGI_articulationsglTFNodeextension(Node node) { }
+
         public String ArticulationName
         {
             get => _articulationName;
