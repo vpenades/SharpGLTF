@@ -18,7 +18,16 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class AGI_articulationsglTFNodeextension
     {
-        public String ArticulationName => _articulationName;
-        public Boolean? IsAttachPoint => _isAttachPoint;
+        public String ArticulationName
+        {
+            get => _articulationName;
+            set => _articulationName = value;
+        }
+
+        public Boolean? IsAttachPoint
+        {
+            get => _isAttachPoint;
+            set => _isAttachPoint = value;
+        }
     }
 }
