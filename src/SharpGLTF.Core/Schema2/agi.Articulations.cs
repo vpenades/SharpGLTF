@@ -12,13 +12,13 @@ namespace SharpGLTF.Schema2
     {
     }
 
-    public sealed partial class AGI_articulationsglTFextension
+    public sealed partial class RootAgiArticulations
     {
     }
 
-    public sealed partial class AGI_articulationsglTFNodeextension
+    public sealed partial class NodeAgiArticulations
     {
-        public AGI_articulationsglTFNodeextension(Node node) { }
+        public NodeAgiArticulations(Node node) { }
 
         public String ArticulationName
         {

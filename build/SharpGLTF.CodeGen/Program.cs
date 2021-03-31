@@ -394,6 +394,8 @@ namespace SharpGLTF
 
             newEmitter.SetRuntimeName("EXT_mesh_gpu_instancing glTF extension", "MeshGpuInstancing");
 
+            newEmitter.SetRuntimeName("AGI_articulations glTF extension", "RootAgiArticulations");
+            newEmitter.SetRuntimeName("AGI_articulations glTF Node extension", "NodeAgiArticulations");
             newEmitter.SetRuntimeName("uniformScale-xRotate-xScale-xTranslate-yRotate-yScale-yTranslate-zRotate-zScale-zTranslate", "ArticulationTransformType");
 
             var classes = ctx.Classes.ToArray();

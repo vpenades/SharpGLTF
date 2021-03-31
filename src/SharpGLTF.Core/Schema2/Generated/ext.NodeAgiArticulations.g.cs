@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF Extension for an individual node in a glTF model, to associate it with the model's root AGI_articulations object.
 	/// </summary>
-	partial class AGI_articulationsglTFNodeextension : ExtraProperties
+	partial class NodeAgiArticulations : ExtraProperties
 	{
 	
 		private String _articulationName;

@@ -127,7 +127,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF Extension that defines metadata for applying external analysis or effects to a model.
 	/// </summary>
-	partial class AGI_articulationsglTFextension : ExtraProperties
+	partial class RootAgiArticulations : ExtraProperties
 	{
 	
 		private const int _articulationsMinItems = 1;
