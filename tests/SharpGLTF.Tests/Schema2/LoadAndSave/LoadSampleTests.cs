@@ -58,7 +58,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // check extensions used
             if (unsupportedExtensions.All(uex => !model.ExtensionsUsed.Contains(uex)))
             {
-                var detectedExtensions = model.RetrieveUsedExtensions().ToArray();
+                var detectedExtensions = model.GatherUsedExtensions().ToArray();
                 CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
             }
 

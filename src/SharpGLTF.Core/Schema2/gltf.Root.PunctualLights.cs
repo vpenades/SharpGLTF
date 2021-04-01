@@ -45,9 +45,7 @@ namespace SharpGLTF.Schema2
             get
             {
                 var ext = this.GetExtension<_ModelPunctualLights>();
-                if (ext == null) return Array.Empty<PunctualLight>();
-
-                return ext.Lights;
+                return ext == null ? Array.Empty<PunctualLight>() : ext.Lights;
             }
         }
 
@@ -71,16 +69,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="PunctualLight"/> instance.</returns>
         public PunctualLight CreatePunctualLight(string name, PunctualLightType lightType)
         {
-            var ext = this.GetExtension<_ModelPunctualLights>();
-            if (ext == null)
-            {
-                this.UsingExtension(typeof(ModelRoot), typeof(_ModelPunctualLights));
-
-                ext = new _ModelPunctualLights(this);
-                this.SetExtension(ext);
-            }
-
-            return ext.CreateLight(name, lightType);
+            return UseExtension<_ModelPunctualLights>().CreateLight(name, lightType);
         }
     }
 }
