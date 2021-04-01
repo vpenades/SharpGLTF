@@ -18,7 +18,7 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class NodeAgiArticulations
     {
-        public NodeAgiArticulations(Node node) { }
+        internal NodeAgiArticulations(Node node) { }
 
         public String ArticulationName
         {
