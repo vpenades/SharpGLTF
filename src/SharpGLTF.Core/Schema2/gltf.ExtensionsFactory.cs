@@ -7,7 +7,7 @@ using SharpGLTF.IO;
 
 namespace SharpGLTF.Schema2
 {
-    static class ExtensionsFactory
+    public static class ExtensionsFactory
     {
         // extensions design inconsistencies:
         // https://github.com/KhronosGroup/glTF/issues/1491
@@ -71,7 +71,7 @@ namespace SharpGLTF.Schema2
             var instance = Activator.CreateInstance
                 (
                 extType,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
                 null,
                 new Object[] { parent },
                 null
