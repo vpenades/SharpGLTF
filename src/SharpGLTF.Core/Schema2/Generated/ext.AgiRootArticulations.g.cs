@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The type of motion applied by this articulation stage.
 	/// </summary>
-	public enum ArticulationTransformType
+	public enum AgiArticulationTransformType
 	{
 		xTranslate,
 		yTranslate,
@@ -48,7 +48,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// One stage of a model articulation definition.
 	/// </summary>
-	partial class ArticulationStage : ExtraProperties
+	partial class AgiArticulationStage : ExtraProperties
 	{
 	
 		private Double _initialValue;
@@ -59,7 +59,7 @@ namespace SharpGLTF.Schema2
 		
 		private String _name;
 		
-		private ArticulationTransformType _type;
+		private AgiArticulationTransformType _type;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "maximumValue", _maximumValue);
 			SerializeProperty(writer, "minimumValue", _minimumValue);
 			SerializeProperty(writer, "name", _name);
-			SerializePropertyEnumSymbol<ArticulationTransformType>(writer, "type", _type);
+			SerializePropertyEnumSymbol<AgiArticulationTransformType>(writer, "type", _type);
 		}
 	
 		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
@@ -80,7 +80,7 @@ namespace SharpGLTF.Schema2
 				case "maximumValue": _maximumValue = DeserializePropertyValue<Double>(ref reader); break;
 				case "minimumValue": _minimumValue = DeserializePropertyValue<Double>(ref reader); break;
 				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "type": _type = DeserializePropertyValue<ArticulationTransformType>(ref reader); break;
+				case "type": _type = DeserializePropertyValue<AgiArticulationTransformType>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -90,24 +90,22 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A model articulation definition.
 	/// </summary>
-	partial class Articulation : ExtraProperties
+	partial class AgiArticulation : ExtraProperties
 	{
 	
 		private String _name;
 		
-		private const int _pointingVectorMinItems = 3;
-		private const int _pointingVectorMaxItems = 3;
-		private List<Double> _pointingVector;
+		private Vector3? _pointingVector;
 		
 		private const int _stagesMinItems = 1;
-		private List<ArticulationStage> _stages;
+		private ChildrenCollection<AgiArticulationStage,AgiArticulation> _stages;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "name", _name);
-			SerializeProperty(writer, "pointingVector", _pointingVector, _pointingVectorMinItems);
+			SerializeProperty(writer, "pointingVector", _pointingVector);
 			SerializeProperty(writer, "stages", _stages, _stagesMinItems);
 		}
 	
@@ -116,8 +114,8 @@ namespace SharpGLTF.Schema2
 			switch (jsonPropertyName)
 			{
 				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "pointingVector": DeserializePropertyList<Double>(ref reader, _pointingVector); break;
-				case "stages": DeserializePropertyList<ArticulationStage>(ref reader, _stages); break;
+				case "pointingVector": _pointingVector = DeserializePropertyValue<Vector3?>(ref reader); break;
+				case "stages": DeserializePropertyList<AgiArticulationStage>(ref reader, _stages); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -127,11 +125,11 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF Extension that defines metadata for applying external analysis or effects to a model.
 	/// </summary>
-	partial class RootAgiArticulations : ExtraProperties
+	partial class AgiRootArticulations : ExtraProperties
 	{
 	
 		private const int _articulationsMinItems = 1;
-		private List<Articulation> _articulations;
+		private ChildrenCollection<AgiArticulation,AgiRootArticulations> _articulations;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -144,7 +142,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "articulations": DeserializePropertyList<Articulation>(ref reader, _articulations); break;
+				case "articulations": DeserializePropertyList<AgiArticulation>(ref reader, _articulations); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

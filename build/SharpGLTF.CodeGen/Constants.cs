@@ -69,8 +69,10 @@ namespace SharpGLTF
             public static string TextureWebp => _Path("EXT_texture_webp", "glTF.EXT_texture_webp.schema.json");
             public static string MeshGpuInstancing => _Path("EXT_mesh_gpu_instancing", "glTF.EXT_mesh_gpu_instancing.schema.json");
 
-            public static string RootAgiArticulations => _Path("AGI_articulations", "glTF.AGI_articulations.schema.json");
-            public static string NodeAgiArticulations => _Path("AGI_articulations", "node.AGI_articulations.schema.json");
+            public static string AgiRootArticulations => _Path("AGI_articulations", "glTF.AGI_articulations.schema.json");
+            public static string AgiNodeArticulations => _Path("AGI_articulations", "node.AGI_articulations.schema.json");
+            public static string AgiRootStkMetadata => _Path("AGI_stk_metadata", "glTF.AGI_stk_metadata.schema.json");
+            public static string AgiNodeStkMetadata => _Path("AGI_stk_metadata", "node.AGI_stk_metadata.schema.json");
         }
 
         #endregion
