@@ -27,7 +27,7 @@ namespace SharpGLTF.Schema2
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
-            this.SetExtension(new MaterialUnlit(this));
+            this.UseExtension<MaterialUnlit>();
         }
 
         /// <summary>
@@ -45,9 +45,9 @@ namespace SharpGLTF.Schema2
 
             foreach (var extn in extensionNames)
             {
-                if (extn == "ClearCoat") this.SetExtension(new MaterialClearCoat(this));
-                if (extn == "Transmission") this.SetExtension(new MaterialTransmission(this));
-                if (extn == "Sheen") this.SetExtension(new MaterialSheen(this));
+                if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
+                if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
+                if (extn == "Sheen") this.UseExtension<MaterialSheen>();
             }
         }
 
@@ -67,7 +67,7 @@ namespace SharpGLTF.Schema2
             }
 
             ClearExtensions();
-            this.SetExtension(new MaterialPBRSpecularGlossiness(this));
+            this.UseExtension<MaterialPBRSpecularGlossiness>();
         }
 
         #endregion

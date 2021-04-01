@@ -7,7 +7,14 @@ using SharpGLTF.IO;
 
 namespace SharpGLTF.Schema2
 {
-    static class ExtensionsFactory
+    /// <summary>
+    /// Global extensions manager.
+    /// </summary>
+    /// <remarks>
+    /// Extensions must be registered at the beginning of the application<br/>
+    /// Before using the APIs.
+    /// </remarks>
+    public static class ExtensionsFactory
     {
         // extensions design inconsistencies:
         // https://github.com/KhronosGroup/glTF/issues/1491
@@ -48,14 +55,33 @@ namespace SharpGLTF.Schema2
 
         public static IEnumerable<string> SupportedExtensions => _Extensions
             .Select(item => item.Name)
-            .Concat(new[] { "KHR_mesh_quantization" });
+            .Concat(new[] { "KHR_mesh_quantization" }); // special case because it's a "typeless" extension.
 
+        /// <summary>
+        /// Registers a new extensions to be used globally.
+        /// </summary>
+        /// <typeparam name="TParent">The parent type to which this extension is attached.</typeparam>
+        /// <typeparam name="TExtension">The extension type.</typeparam>
+        /// <param name="persistentName">The extension name.</param>
+        /// <remarks>
+        /// The <paramref name="persistentName"/> is the value used for serialization<br/>
+        /// and it must meet <see href="https://github.com/KhronosGroup/glTF/blob/master/extensions/Prefixes.md">extension naming constraints</see>.
+        /// </remarks>
         public static void RegisterExtension<TParent, TExtension>(string persistentName)
             where TParent : JsonSerializable
             where TExtension : JsonSerializable
         {
+            Guard.NotNullOrEmpty(persistentName, nameof(persistentName));
+            Guard.MustBeNull(Identify(typeof(TParent), typeof(TExtension)), $"{nameof(TExtension)} already registered for {nameof(TParent)}");
+
+            // TODO: check that persistentName has a valid extension name.
+
             _Extensions.Add( (persistentName, typeof(TParent), typeof(TExtension)) );
         }
+
+        #endregion
+
+        #region internals
 
         /// <summary>
         /// Creates an extension object based on the parent object and the extension code.
@@ -84,11 +110,14 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Given a parentType and an extensionType, it identifies the extension code.
+        /// Given a parentType and an extensionType, it identifies the extension code name.
         /// </summary>
         /// <param name="parentType">The type of the parent object.</param>
         /// <param name="extensionType">The type of the extension object.</param>
         /// <returns>An extension identifier code, like "KHR_texture_transform".</returns>
+        /// <remarks>
+        /// Extensions must be registered in advanced using <see cref="RegisterExtension{TParent, TExtension}(string)"/>.
+        /// </remarks>
         internal static string Identify(Type parentType, Type extensionType)
         {
             foreach (var (name, baseType, extType) in _Extensions)
@@ -114,7 +143,7 @@ namespace SharpGLTF.Schema2
 
         internal void UpdateExtensionsSupport()
         {
-            var used = RetrieveUsedExtensions();
+            var used = GatherUsedExtensions();
 
             // update the used list
             this._extensionsUsed.Clear();
@@ -123,20 +152,7 @@ namespace SharpGLTF.Schema2
             _SetExtensionUsage("KHR_mesh_quantization", this._extensionsUsed.Contains("KHR_mesh_quantization"), true);
         }
 
-        private void _SetExtensionUsage(string extension, bool used, bool required)
-        {
-            if (!used)
-            {
-                this._extensionsUsed.Remove(extension);
-                this._extensionsRequired.Remove(extension);
-                return;
-            }
-
-            if (!this._extensionsUsed.Contains(extension)) this._extensionsUsed.Add(extension);
-            if (required && !this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
-        }
-
-        internal IEnumerable<string> RetrieveUsedExtensions()
+        internal IEnumerable<string> GatherUsedExtensions()
         {
             // retrieve ALL the property based objects of the whole model.
             var allObjects = new[] { this }
@@ -170,14 +186,17 @@ namespace SharpGLTF.Schema2
             return used;
         }
 
-        internal void UsingExtension(Type parentType, Type extensionType)
+        private void _SetExtensionUsage(string extension, bool used, bool required)
         {
-            var id = ExtensionsFactory.Identify(parentType, extensionType);
-            if (string.IsNullOrWhiteSpace(id)) return;
+            if (!used)
+            {
+                this._extensionsUsed.Remove(extension);
+                this._extensionsRequired.Remove(extension);
+                return;
+            }
 
-            if (this._extensionsUsed.Contains(id)) return;
-
-            this._extensionsUsed.Add(id);
+            if (!this._extensionsUsed.Contains(extension)) this._extensionsUsed.Add(extension);
+            if (required && !this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
         }
 
         internal void _ValidateExtensions(Validation.ValidationContext validate)
@@ -187,7 +206,7 @@ namespace SharpGLTF.Schema2
                 validate._LinkThrow("Extensions", iex);
             }
 
-            foreach (var ext in RetrieveUsedExtensions())
+            foreach (var ext in GatherUsedExtensions())
             {
                 if (!this._extensionsUsed.Contains(ext)) validate._LinkThrow("Extensions", ext);
             }

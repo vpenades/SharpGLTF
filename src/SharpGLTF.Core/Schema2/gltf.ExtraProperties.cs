@@ -61,6 +61,23 @@ namespace SharpGLTF.Schema2
             return _extensions.OfType<T>().FirstOrDefault();
         }
 
+        public T UseExtension<T>()
+            where T : JsonSerializable
+        {
+            var value = GetExtension<T>();
+            if (value != null) return value;
+
+            var name = ExtensionsFactory.Identify(this.GetType(), typeof(T));
+            Guard.NotNull(name, nameof(T));
+
+            value = ExtensionsFactory.Create(this, name) as T;
+            Guard.NotNull(value, nameof(T));
+
+            _extensions.Add(value);
+
+            return value;
+        }
+
         public void SetExtension<T>(T value)
             where T : JsonSerializable
         {
@@ -89,6 +106,10 @@ namespace SharpGLTF.Schema2
         /// Gets a collection of <see cref="ExtraProperties"/> instances stored by this object.
         /// </summary>
         /// <returns>A collection of <see cref="ExtraProperties"/> instances.</returns>
+        /// <remarks>
+        /// This is used to traverse the whole glTF document tree and gather all the objects<br/>
+        /// So we can identify which extensions are used anywhere in the document.
+        /// </remarks>
         protected virtual IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return _extensions.OfType<ExtraProperties>();

@@ -62,14 +62,6 @@ namespace SharpGLTF.Schema2
             return _GetPrimaryImage() == img ? null : img;
         }
 
-        public void ClearImages()
-        {
-            _source = null;
-            this.RemoveExtensions<TextureDDS>();
-            this.RemoveExtensions<TextureWEBP>();
-            this.RemoveExtensions<TextureKTX2>();
-        }
-
         public void SetImage(Image primaryImage)
         {
             Guard.NotNull(primaryImage, nameof(primaryImage));
@@ -96,8 +88,6 @@ namespace SharpGLTF.Schema2
             Guard.IsTrue(primaryImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP or KTX2");
             Guard.IsTrue(fallbackImage.Content.IsJpg || fallbackImage.Content.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
 
-            ClearImages();
-
             if (primaryImage.Content.IsDds) { _UseDDSTexture().Image = primaryImage; }
             if (primaryImage.Content.IsWebp) { _UseWEBPTexture().Image = primaryImage; }
             if (primaryImage.Content.IsKtx2) { _UseKTX2Texture().Image = primaryImage; }
@@ -105,28 +95,33 @@ namespace SharpGLTF.Schema2
             _source = fallbackImage.LogicalIndex;
         }
 
+        public void ClearImages()
+        {
+            _source = null;
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureKTX2>();
+        }
+
         private TextureDDS _UseDDSTexture()
         {
-            var primary = this.GetExtension<TextureDDS>();
-            if (primary == null) { primary = new TextureDDS(this); this.SetExtension(primary); }
-
-            return primary;
+            this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureKTX2>();
+            return this.UseExtension<TextureDDS>();
         }
 
         private TextureWEBP _UseWEBPTexture()
         {
-            var primary = this.GetExtension<TextureWEBP>();
-            if (primary == null) { primary = new TextureWEBP(this); this.SetExtension(primary); }
-
-            return primary;
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureKTX2>();
+            return this.UseExtension<TextureWEBP>();
         }
 
         private TextureKTX2 _UseKTX2Texture()
         {
-            var primary = this.GetExtension<TextureKTX2>();
-            if (primary == null) { primary = new TextureKTX2(this); this.SetExtension(primary); }
-
-            return primary;
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureWEBP>();
+            return this.UseExtension<TextureKTX2>();
         }
 
         internal bool _IsEqualentTo(Image primary, Image fallback, TextureSampler sampler)

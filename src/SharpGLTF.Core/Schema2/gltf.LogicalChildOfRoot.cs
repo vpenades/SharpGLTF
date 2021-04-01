@@ -62,11 +62,6 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        internal void UsingExtension(Type extensionType)
-        {
-            LogicalParent.UsingExtension(this.GetType(), extensionType);
-        }
-
         /// <summary>
         /// Renames all the unnamed and duplicate name items in the collection so all the items have a unique valid name.
         /// </summary>
