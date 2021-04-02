@@ -38,6 +38,11 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds");
             RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp");
             RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu");
+
+            RegisterExtension<ModelRoot, AgiRootArticulations>("AGI_articulations");
+            RegisterExtension<ModelRoot, AgiRootStkMetadata>("AGI_stk_metadata");
+            RegisterExtension<Node, AgiNodeArticulations>("AGI_articulations");
+            RegisterExtension<Node, AgiNodeStkMetadata>("AGI_stk_metadata");
         }
 
         #endregion

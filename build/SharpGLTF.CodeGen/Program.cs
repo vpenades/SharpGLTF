@@ -44,11 +44,14 @@ namespace SharpGLTF
             _ProcessKhronosTextureTransformExtension();
             _ProcessMicrosoftTextureDDSExtension();
             _ProcessTextureWebpExtension();
-            _ProcessTextureKtx2Extension();            
+            _ProcessTextureKtx2Extension();
 
             // these extansions are not fully supported and temporarily removed:
             // _ProcessDracoExtension();
             // _ProcessMicrosoftLODExtension();
+
+            _ProcessAgiArticulationsExtension();
+            _ProcessAgiStkMetadataExtension();
         }
 
         #endregion
@@ -307,6 +310,41 @@ namespace SharpGLTF
             ProcessSchema("ext.MeshGpuInstancing.g", ctx);
         }
 
+        private static void _ProcessAgiArticulationsExtension()
+        {
+            var ctx1 = LoadSchemaContext(Constants.VendorExtensions.AgiRootArticulations);
+            ctx1.IgnoredByCodeEmitter("glTF Property");
+            ctx1.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ctx1.FindClass("Articulation")
+                .GetField("pointingVector")
+                .SetDataType(typeof(System.Numerics.Vector3), true)
+                .SetItemsRange(0);
+
+            ProcessSchema("ext.AgiRootArticulations.g", ctx1);
+
+            var ctx2 = LoadSchemaContext(Constants.VendorExtensions.AgiNodeArticulations);
+            ctx2.IgnoredByCodeEmitter("glTF Property");
+            ctx2.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.AgiNodeArticulations.g", ctx2);
+        }
+
+        private static void _ProcessAgiStkMetadataExtension()
+        {
+            var ctx1 = LoadSchemaContext(Constants.VendorExtensions.AgiRootStkMetadata);
+            ctx1.IgnoredByCodeEmitter("glTF Property");
+            ctx1.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.AgiRootStkMetadata.g", ctx1);
+
+            var ctx2 = LoadSchemaContext(Constants.VendorExtensions.AgiNodeStkMetadata);
+            ctx2.IgnoredByCodeEmitter("glTF Property");
+            ctx2.IgnoredByCodeEmitter("glTF Child of Root Property");
+
+            ProcessSchema("ext.AgiNodeStkMetadata.g", ctx2);
+        }
+
         #endregion
 
         #region code generation
@@ -377,6 +415,15 @@ namespace SharpGLTF
 
             newEmitter.SetRuntimeName("EXT_mesh_gpu_instancing glTF extension", "MeshGpuInstancing");
 
+            newEmitter.SetRuntimeName("AGI_articulations glTF extension", "AgiRootArticulations");
+            newEmitter.SetRuntimeName("AGI_articulations glTF Node extension", "AgiNodeArticulations");
+            newEmitter.SetRuntimeName("Articulation", "AgiArticulation");
+            newEmitter.SetRuntimeName("Articulation Stage", "AgiArticulationStage");
+            newEmitter.SetRuntimeName("uniformScale-xRotate-xScale-xTranslate-yRotate-yScale-yTranslate-zRotate-zScale-zTranslate", "AgiArticulationTransformType");
+            newEmitter.SetRuntimeName("AGI_stk_metadata glTF extension", "AgiRootStkMetadata");
+            newEmitter.SetRuntimeName("AGI_stk_metadata glTF Node extension", "AgiNodeStkMetadata");
+            newEmitter.SetRuntimeName("Solar Panel Group", "AgiStkSolarPanelGroup");
+
             var classes = ctx.Classes.ToArray();
             var fields = classes.SelectMany(item => item.Fields).ToArray();
 
@@ -392,7 +439,25 @@ namespace SharpGLTF
                 newEmitter.SetCollectionContainer(animationClass.UseField("channels"), "ChildrenCollection<TItem,Animation>");
                 newEmitter.SetCollectionContainer(animationClass.UseField("samplers"), "ChildrenCollection<TItem,Animation>");
             }
-            
+
+            var agiArticulationRootClass = ctx.FindClass("AGI_articulations glTF extension");
+            if (agiArticulationRootClass != null)
+            {
+                newEmitter.SetCollectionContainer(agiArticulationRootClass.UseField("articulations"), "ChildrenCollection<TItem,AgiRootArticulations>");
+            }
+
+            var agiArticulationClass = ctx.FindClass("Articulation");
+            if (agiArticulationClass != null)
+            {
+                newEmitter.SetCollectionContainer(agiArticulationClass.UseField("stages"), "ChildrenCollection<TItem,AgiArticulation>");
+            }
+
+            var agiStkMetadataRootClass = ctx.FindClass("AGI_stk_metadata glTF extension");
+            if (agiStkMetadataRootClass != null)
+            {
+                newEmitter.SetCollectionContainer(agiStkMetadataRootClass.UseField("solarPanelGroups"), "ChildrenCollection<TItem,AgiRootStkMetadata>");
+            }
+
             foreach (var f in fields)
             {
                 if (f.FieldType is ArrayType atype)
