@@ -133,11 +133,19 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class AgiArticulationStage : IChildOf<AgiArticulation>
     {
+        internal AgiArticulationStage()
+        {
+            _type = _TransformTypeDefault;
+        }
+
         internal AgiArticulationStage(string name, AgiArticulationTransformType transformType)
         {
             _name = name;
             _type = transformType;
         }
+
+        // The default transform type is not one of the rotation types, so is always safe to add.
+        private const AgiArticulationTransformType _TransformTypeDefault = AgiArticulationTransformType.xTranslate;
 
         public void SetValues(Double minValue, Double initial, Double maxValue)
         {
