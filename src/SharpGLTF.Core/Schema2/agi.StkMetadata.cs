@@ -34,16 +34,18 @@ namespace SharpGLTF.Schema2
     {
         internal AgiNodeStkMetadata(Node node) { }
 
+        private const Boolean _NoObscurationDefault = false;
+
         public String SolarPanelGroupName
         {
             get => _solarPanelGroupName;
             set => _solarPanelGroupName = value;
         }
 
-        public Boolean? NoObscuration
+        public Boolean NoObscuration
         {
-            get => _noObscuration;
-            set => _noObscuration = value;
+            get => _noObscuration.AsValue(_NoObscurationDefault);
+            set => _noObscuration = value.AsNullable(_NoObscurationDefault);
         }
     }
 

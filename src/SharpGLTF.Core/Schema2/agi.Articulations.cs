@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Numerics;
 using System.Linq;
 using SharpGLTF.Collections;
@@ -35,21 +36,31 @@ namespace SharpGLTF.Schema2
     {
         internal AgiNodeArticulations(Node node) { }
 
+        private const Boolean _IsAttachPointDefault = false;
+
         public String ArticulationName
         {
             get => _articulationName;
             set => _articulationName = value;
         }
 
-        public Boolean? IsAttachPoint
+        public Boolean IsAttachPoint
         {
-            get => _isAttachPoint;
-            set => _isAttachPoint = value;
+            get => _isAttachPoint.AsValue(_IsAttachPointDefault);
+            set => _isAttachPoint = value.AsNullable(_IsAttachPointDefault);
         }
     }
 
     public sealed partial class AgiArticulation : IChildOf<AgiRootArticulations>
     {
+        public static readonly ReadOnlyCollection<AgiArticulationTransformType> AgiRotationTypes =
+            new ReadOnlyCollection<AgiArticulationTransformType>(new List<AgiArticulationTransformType>
+            {
+                AgiArticulationTransformType.xRotate,
+                AgiArticulationTransformType.yRotate,
+                AgiArticulationTransformType.zRotate
+            });
+
         internal AgiArticulation()
         {
             _stages = new ChildrenCollection<AgiArticulationStage, AgiArticulation>(this);
@@ -62,10 +73,18 @@ namespace SharpGLTF.Schema2
 
         public IReadOnlyList<AgiArticulationStage> Stages => _stages;
 
-        public AgiArticulationStage CreateArticulationStage(string name)
+        public AgiArticulationStage CreateArticulationStage(string name, AgiArticulationTransformType transformType)
         {
-            var stage = new AgiArticulationStage();
-            stage.Name = name;
+            var stage = new AgiArticulationStage(name, transformType);
+
+            if (_pointingVector.HasValue && AgiRotationTypes.Contains(transformType))
+            {
+                // If one rotation stage exists, we may add a second rotation stage, but that's the limit
+                // for pointing to be enabled. Additional non-rotation stages are always allowed.
+                var numRotationStages = _stages.Where(s => AgiRotationTypes.Contains(s.TransformType)).Count();
+                Guard.IsTrue(numRotationStages <= 1, "transformType",
+                    "Cannot add more than 2 rotation stages when a PointingVector is in use.");
+            }
 
             _stages.Add(stage);
 
@@ -81,7 +100,24 @@ namespace SharpGLTF.Schema2
         public Vector3? PointingVector
         {
             get => _pointingVector;
-            set => _pointingVector = value;
+            set
+            {
+                if (!value.HasValue)
+                {
+                    // Pointing is turned off.
+                    _pointingVector = null;
+                }
+                else
+                {
+                    Guard.IsTrue(value.Value.IsNormalized(), "PointingVector", "PointingVector must be a unit-length vector.");
+
+                    var numRotationStages = _stages.Where(s => AgiRotationTypes.Contains(s.TransformType)).Count();
+                    Guard.IsTrue(numRotationStages == 1 || numRotationStages == 2, "PointingVector",
+                        "PointingVector requires exactly 1 or exactly 2 rotation stages.");
+
+                    _pointingVector = value;
+                }
+            }
         }
 
         public int LogicalIndex { get; private set; } = -1;
@@ -97,6 +133,23 @@ namespace SharpGLTF.Schema2
 
     public sealed partial class AgiArticulationStage : IChildOf<AgiArticulation>
     {
+        internal AgiArticulationStage(string name, AgiArticulationTransformType transformType)
+        {
+            _name = name;
+            _type = transformType;
+        }
+
+        public void SetValues(Double minValue, Double initial, Double maxValue)
+        {
+            // Use "IsTrue" (not "MustBeLessThanOrEqual") so the message can mention 2 different parameters by name.
+            Guard.IsTrue(minValue <= initial, "minValue", "Minimm value must be less than or equal to initial value.");
+            Guard.IsTrue(initial <= maxValue, "initial", "Initial value must be less than or equal to maximum value.");
+
+            _minimumValue = minValue;
+            _initialValue = initial;
+            _maximumValue = maxValue;
+        }
+
         public int LogicalIndex { get; private set; } = -1;
 
         public AgiArticulation LogicalParent { get; private set; }
@@ -107,34 +160,14 @@ namespace SharpGLTF.Schema2
             LogicalIndex = index;
         }
 
-        public String Name
-        {
-            get => _name;
-            set => _name = value;
-        }
+        public String Name => _name;
 
-        public AgiArticulationTransformType TransformType
-        {
-            get => _type;
-            set => _type = value;
-        }
+        public AgiArticulationTransformType TransformType => _type;
 
-        public Double MinimumValue
-        {
-            get => _minimumValue;
-            set => _minimumValue = value;
-        }
+        public Double MinimumValue => _minimumValue;
 
-        public Double InitialValue
-        {
-            get => _initialValue;
-            set => _initialValue = value;
-        }
+        public Double InitialValue => _initialValue;
 
-        public Double MaximumValue
-        {
-            get => _maximumValue;
-            set => _maximumValue = value;
-        }
+        public Double MaximumValue => _maximumValue;
     }
 }
