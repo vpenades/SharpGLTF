@@ -47,6 +47,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Toolkit.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Plotly", "examples\SharpGLTF.Plotly\SharpGLTF.Plotly.csproj", "{A63C2A2D-950F-4C76-9299-2B2D325A8653}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.ThirdParty.Tests", "tests\SharpGLTF.ThirdParty.Tests\SharpGLTF.ThirdParty.Tests.csproj", "{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,10 @@ Global
 		{A63C2A2D-950F-4C76-9299-2B2D325A8653}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A63C2A2D-950F-4C76-9299-2B2D325A8653}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A63C2A2D-950F-4C76-9299-2B2D325A8653}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -118,6 +124,7 @@ Global
 		{56FE769E-6B09-462B-9947-A9B64161CD80} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 		{7FEFC259-51D6-4409-8724-8DE0EA8D5CD9} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 		{A63C2A2D-950F-4C76-9299-2B2D325A8653} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
+		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7BBAD9-834C-4981-AC96-0AA5226FC43F}
