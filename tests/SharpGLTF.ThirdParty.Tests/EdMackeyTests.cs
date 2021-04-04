@@ -41,6 +41,8 @@ namespace SharpGLTF.ThirdParty
             prim.AddTriangle(v0, v1, v3);
             prim.AddTriangle(v3, v1, v2);
 
+            Assert.AreEqual(8, prim.Vertices.Count);
+
             // create a scene
 
             var scene = new Scenes.SceneBuilder();
