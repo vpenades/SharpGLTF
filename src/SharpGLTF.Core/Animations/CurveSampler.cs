@@ -176,7 +176,14 @@ namespace SharpGLTF.Animations
                 prev = item;
             }
 
-            if (left == null && right == null) return (default(T), default(T), 0);
+            if (left == null && right == null)
+            {
+                // if both left and right are null is becase the sequence is empty,
+                // or the offset went past the last item.
+                if (prev.HasValue) return (prev.Value.Value, prev.Value.Value, 0);
+                return (default(T), default(T), 0);
+            }
+
             if (left == null) return (right.Value.Value, right.Value.Value, 0);
             if (right == null) return (left.Value.Value, left.Value.Value, 0);
 
@@ -230,7 +237,14 @@ namespace SharpGLTF.Animations
                 prev = item;
             }
 
-            if (left == null && right == null) return (0, 0, 0);
+            if (left == null && right == null)
+            {
+                // if both left and right are null is becase the sequence is empty,
+                // or the offset went past the last item.
+                if (prev.HasValue) return (prev.Value, prev.Value, 0);
+                return (0, 0, 0);
+            }
+
             if (left == null) return (right.Value, right.Value, 0);
             if (right == null) return (left.Value, left.Value, 0);
 
