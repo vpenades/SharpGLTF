@@ -41,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.DownloadTestFiles
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.NUnit", "tests\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj", "{7A5EAF7E-D6A6-4861-9488-F98E4AA00A3A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Core.Tests", "tests\SharpGLTF.Tests\SharpGLTF.Core.Tests.csproj", "{56FE769E-6B09-462B-9947-A9B64161CD80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Core.Tests", "tests\SharpGLTF.Core.Tests\SharpGLTF.Core.Tests.csproj", "{56FE769E-6B09-462B-9947-A9B64161CD80}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Toolkit.Tests", "tests\SharpGLTF.Toolkit.Tests\SharpGLTF.Toolkit.Tests.csproj", "{7FEFC259-51D6-4409-8724-8DE0EA8D5CD9}"
 EndProject
