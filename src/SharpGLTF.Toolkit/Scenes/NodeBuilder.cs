@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using MATRIX = System.Numerics.Matrix4x4;
+using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
+
 namespace SharpGLTF.Scenes
 {
     /// <summary>
@@ -19,22 +22,10 @@ namespace SharpGLTF.Scenes
 
             if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" {this.Name}";
 
-            if (_Matrix.HasValue)
-            {
-                if (_Matrix.Value != Matrix4x4.Identity)
-                {
-                    var xform = this.LocalTransform;
-                    if (xform.Scale != Vector3.One) txt += $" 𝐒:{xform.Scale}";
-                    if (xform.Rotation != Quaternion.Identity) txt += $" 𝐑:{xform.Rotation}";
-                    if (xform.Translation != Vector3.Zero) txt += $" 𝚻:{xform.Translation}";
-                }
-            }
-            else
-            {
-                if (_Scale != null) txt += $" 𝐒:{_Scale.Value}";
-                if (_Rotation != null) txt += $" 𝐑:{_Rotation.Value}";
-                if (_Translation != null) txt += $" 𝚻:{_Translation.Value}";
-            }
+            var xform = this.LocalTransform.GetDecomposed();
+            if (xform.Scale != Vector3.One) txt += $" 𝐒:{xform.Scale}";
+            if (xform.Rotation != Quaternion.Identity) txt += $" 𝐑:{xform.Rotation}";
+            if (xform.Translation != Vector3.Zero) txt += $" 𝚻:{xform.Translation}";
 
             if (this.VisualChildren.Any())
             {
@@ -94,7 +85,7 @@ namespace SharpGLTF.Scenes
 
         private readonly List<NodeBuilder> _Children = new List<NodeBuilder>();
 
-        private Matrix4x4? _Matrix;
+        private MATRIX? _Matrix;
         private Animations.AnimatableProperty<Vector3> _Scale;
         private Animations.AnimatableProperty<Quaternion> _Rotation;
         private Animations.AnimatableProperty<Vector3> _Translation;
@@ -129,29 +120,84 @@ namespace SharpGLTF.Scenes
         /// </summary>
         public bool HasAnimations => (_Scale?.IsAnimated ?? false) || (_Rotation?.IsAnimated ?? false) || (_Translation?.IsAnimated ?? false);
 
+        /// <summary>
+        /// Gets the current Scale transform, or null.
+        /// </summary>
         public Animations.AnimatableProperty<Vector3> Scale => _Scale;
 
+        /// <summary>
+        /// Gets the current rotation transform, or null.
+        /// </summary>
         public Animations.AnimatableProperty<Quaternion> Rotation => _Rotation;
 
+        /// <summary>
+        /// Gets the current translation transform, or null.
+        /// </summary>
         public Animations.AnimatableProperty<Vector3> Translation => _Translation;
 
         /// <summary>
-        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.
+        /// Gets or sets the local transform <see cref="MATRIX"/> of this <see cref="NodeBuilder"/>.
         /// </summary>
-        public Matrix4x4 LocalMatrix
+        /// <remarks>
+        /// When setting the value, If there's no animations currently attached to this node,<br/>
+        /// the transform is stored as a matrix. Otherwise, it's decomposed to a SRT chain.
+        /// </remarks>
+        public MATRIX LocalMatrix
         {
-            get => Transforms.Matrix4x4Factory.CreateFrom(_Matrix, Scale?.Value, Rotation?.Value, Translation?.Value);
+            get => LocalTransform.Matrix;
+            set => LocalTransform = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="NodeBuilder"/>.
+        /// </summary>
+        public TRANSFORM LocalTransform
+        {
+            get => TRANSFORM.CreateFromAny(_Matrix, _Scale?.Value, _Rotation?.Value, _Translation?.Value);
             set
             {
-                if (HasAnimations) { _DecomposeMatrix(value); return; }
+                Guard.IsTrue(value.IsValid, nameof(value));
 
-                _Matrix = value != Matrix4x4.Identity ? value : (Matrix4x4?)null;
-                _Scale = null;
-                _Rotation = null;
-                _Translation = null;
+                // we cannot set a matrix while holding animation tracks because it would destroy them.
+                if (HasAnimations) value = value.GetDecomposed();
+
+                if (value.IsSRT)
+                {
+                    _Matrix = null;
+                    if (_Scale != null || value.Scale != Vector3.One) UseScale().Value = value.Scale;
+                    if (_Rotation != null || value.Rotation != Quaternion.Identity) UseRotation().Value = value.Rotation;
+                    if (_Translation != null || value.Translation != Vector3.Zero) UseTranslation().Value = value.Translation;
+                }
+                else
+                {
+                    _Matrix = value.Matrix;
+                    _Scale = null;
+                    _Rotation = null;
+                    _Translation = null;
+                }
             }
         }
 
+        /// <summary>
+        /// Gets or sets the world transform <see cref="MATRIX"/> of this <see cref="NodeBuilder"/>.
+        /// </summary>
+        public MATRIX WorldMatrix
+        {
+            get
+            {
+                var p = this.Parent;
+                return p == null ? LocalMatrix : Transforms.Matrix4x4Factory.LocalToWorld(p.WorldMatrix, LocalMatrix);
+            }
+            set
+            {
+                var p = this.Parent;
+                LocalMatrix = p == null ? value : Transforms.Matrix4x4Factory.WorldToLocal(p.WorldMatrix, value);
+            }
+        }
+
+        /// <summary>
+        /// Equivalent to <see cref="LocalMatrix"/> but calculated at double precission.
+        /// </summary>
         internal Transforms.Matrix4x4Double LocalMatrixPrecise
         {
             get
@@ -171,43 +217,9 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        #pragma warning disable CA1721 // Property names should not match get methods
-
         /// <summary>
-        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="NodeBuilder"/>.
+        /// Equivalent to <see cref="WorldMatrix"/> but calculated at double precission.
         /// </summary>
-        public Transforms.AffineTransform LocalTransform
-        {
-            get => Transforms.AffineTransform.CreateFromAny(_Matrix, _Scale?.Value, _Rotation?.Value, Translation?.Value);
-            set
-            {
-                Guard.IsTrue(value.IsValid, nameof(value));
-
-                _Matrix = null;
-
-                if (value.Scale != Vector3.One) UseScale().Value = value.Scale;
-                if (value.Rotation != Quaternion.Identity) UseRotation().Value = value.Rotation;
-                if (value.Translation != Vector3.Zero) UseTranslation().Value = value.Translation;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="NodeBuilder"/>.
-        /// </summary>
-        public Matrix4x4 WorldMatrix
-        {
-            get
-            {
-                var vs = this.Parent;
-                return vs == null ? LocalMatrix : Transforms.Matrix4x4Factory.LocalToWorld(vs.WorldMatrix, LocalMatrix);
-            }
-            set
-            {
-                var vs = this.Parent;
-                LocalMatrix = vs == null ? value : Transforms.Matrix4x4Factory.WorldToLocal(vs.WorldMatrix, value);
-            }
-        }
-
         internal Transforms.Matrix4x4Double WorldMatrixPrecise
         {
             get
@@ -216,8 +228,6 @@ namespace SharpGLTF.Scenes
                 return vs == null ? LocalMatrixPrecise : LocalMatrixPrecise * vs.WorldMatrixPrecise;
             }
         }
-
-        #pragma warning restore CA1721 // Property names should not match get methods
 
         #endregion
 
@@ -287,29 +297,24 @@ namespace SharpGLTF.Scenes
 
         #region API - transform
 
-        private void _DecomposeMatrix()
+        private void _UseDecomposedTransform()
         {
-            if (!_Matrix.HasValue) return;
+            var xform = this.LocalTransform;
+            if (xform.IsSRT) return;
 
-            var m = _Matrix.Value;
+            // try to convert from matrix representation to decomposed representation.
+
+            xform = xform.GetDecomposed();
+
             _Matrix = null;
-
-            // we do the decomposition AFTER setting _Matrix to null to prevent an infinite recursive loop. Fixes #37
-            if (m != Matrix4x4.Identity) _DecomposeMatrix(m);
-        }
-
-        private void _DecomposeMatrix(Matrix4x4 matrix)
-        {
-            var affine = Transforms.AffineTransform.CreateDecomposed(matrix);
-
-            UseScale().Value = affine.Scale;
-            UseRotation().Value = affine.Rotation;
-            UseTranslation().Value = affine.Translation;
+            UseScale().Value = xform.Scale;
+            UseRotation().Value = xform.Rotation;
+            UseTranslation().Value = xform.Translation;
         }
 
         public Animations.AnimatableProperty<Vector3> UseScale()
         {
-            _DecomposeMatrix();
+            _UseDecomposedTransform();
 
             if (_Scale == null)
             {
@@ -327,7 +332,7 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<Quaternion> UseRotation()
         {
-            _DecomposeMatrix();
+            _UseDecomposedTransform();
 
             if (_Rotation == null)
             {
@@ -345,7 +350,7 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<Vector3> UseTranslation()
         {
-            _DecomposeMatrix();
+            _UseDecomposedTransform();
 
             if (_Translation == null)
             {
@@ -367,7 +372,7 @@ namespace SharpGLTF.Scenes
 
         public void SetRotationTrack(string track, Animations.ICurveSampler<Quaternion> curve) { UseRotation().SetTrack(track, curve); }
 
-        public Transforms.AffineTransform GetLocalTransform(string animationTrack, float time)
+        public TRANSFORM GetLocalTransform(string animationTrack, float time)
         {
             if (animationTrack == null) return this.LocalTransform;
 
@@ -375,10 +380,10 @@ namespace SharpGLTF.Scenes
             var rotation = Rotation?.GetValueAt(animationTrack, time);
             var translation = Translation?.GetValueAt(animationTrack, time);
 
-            return new Transforms.AffineTransform(scale, rotation, translation);
+            return new TRANSFORM(scale, rotation, translation);
         }
 
-        public Matrix4x4 GetWorldMatrix(string animationTrack, float time)
+        public MATRIX GetWorldMatrix(string animationTrack, float time)
         {
             if (animationTrack == null) return this.WorldMatrix;
 
@@ -387,11 +392,11 @@ namespace SharpGLTF.Scenes
             return vs == null ? lm : Transforms.Matrix4x4Factory.LocalToWorld(vs.GetWorldMatrix(animationTrack, time), lm);
         }
 
-        public Matrix4x4 GetInverseBindMatrix(Matrix4x4? meshWorldMatrix = null)
+        public MATRIX GetInverseBindMatrix(MATRIX? meshWorldMatrix = null)
         {
-            Transforms.Matrix4x4Double mwx = meshWorldMatrix ?? Matrix4x4.Identity;
+            Transforms.Matrix4x4Double mwx = meshWorldMatrix ?? MATRIX.Identity;
 
-            return (Matrix4x4)Transforms.SkinnedTransform.CalculateInverseBinding(mwx, this.WorldMatrixPrecise);
+            return (MATRIX)Transforms.SkinnedTransform.CalculateInverseBinding(mwx, this.WorldMatrixPrecise);
         }
 
         #endregion

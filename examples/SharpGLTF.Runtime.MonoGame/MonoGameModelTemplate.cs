@@ -117,17 +117,17 @@ namespace SharpGLTF.Runtime
 
         private BoundingSphere CalculateBounds(SceneTemplate scene)
         {
-            var instance = scene.CreateInstance();            
+            var instances = scene.CreateInstance();            
 
             var bounds = default(BoundingSphere);
 
-            foreach (var d in instance.DrawableInstances)
+            foreach (var inst in instances)
             {
-                var b = _Meshes[d.Template.LogicalMeshIndex].BoundingSphere;
+                var b = _Meshes[inst.Template.LogicalMeshIndex].BoundingSphere;
 
-                if (d.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
+                if (inst.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
 
-                if (d.Transform is Transforms.SkinnedTransform skinXform)
+                if (inst.Transform is Transforms.SkinnedTransform skinXform)
                 {
                     // this is a bit agressive and probably over-reaching, but with skins you never know the actual bounds
                     // unless you calculate the bounds frame by frame.

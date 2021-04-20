@@ -25,11 +25,31 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
+        #region settings
+        public int GpuMeshInstancingMinCount { get; set; }
+
+        #endregion
+
         #region API
 
         public Mesh GetMesh(MESHBUILDER key) { return key == null ? null : _Meshes.TryGetValue(key, out Mesh val) ? val : null; }
 
         public Node GetNode(NodeBuilder key) { return key == null ? null : _Nodes.TryGetValue(key, out Node val) ? val : null; }
+
+        public static bool HasContent(Node node, bool checkTransform = true)
+        {
+            if (checkTransform && node.LocalMatrix != Matrix4x4.Identity) return true;
+
+            if (node.VisualChildren.Any()) return true;
+
+            if (node.Mesh != null) return true;
+            if (node.Skin != null) return true;
+            if (node.Camera != null) return true;
+            if (node.PunctualLight != null) return true;
+            if (node.GetGpuInstancing() != null) return true;
+
+            return false;
+        }
 
         public void AddGeometryResources(ModelRoot root, IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
         {
@@ -38,7 +58,7 @@ namespace SharpGLTF.Scenes
             var srcMeshes = srcScenes
                 .SelectMany(item => item.Instances)
                 .Select(item => item.Content?.GetGeometryAsset())
-                .Where(item => item != null)
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
                 .Distinct()
                 .ToArray();
 
@@ -73,7 +93,7 @@ namespace SharpGLTF.Scenes
             // TODO: here we could check that every dstMesh has been correctly created.
         }
 
-        private void AddArmatureResources(Func<Node> nodeFactory, IEnumerable<SceneBuilder> srcScenes)
+        private void AddArmatureResources(IEnumerable<SceneBuilder> srcScenes, Func<Node> nodeFactory)
         {
             // ALIGNMENT ISSUE:
             // the toolkit builder is designed in a way that every instance can reuse the same node many times, even from different scenes.
@@ -93,11 +113,11 @@ namespace SharpGLTF.Scenes
 
             foreach (var armature in armatures)
             {
-                CreateArmature(nodeFactory, armature);
+                CreateArmature(armature, nodeFactory);
             }
         }
 
-        private void CreateArmature(Func<Node> nodeFactory, NodeBuilder srcNode)
+        private void CreateArmature(NodeBuilder srcNode, Func<Node> nodeFactory)
         {
             var dstNode = nodeFactory();
 
@@ -107,7 +127,7 @@ namespace SharpGLTF.Scenes
 
             if (srcNode.HasAnimations)
             {
-                dstNode.LocalTransform = srcNode.LocalTransform;
+                dstNode.LocalTransform = srcNode.LocalTransform.GetDecomposed();
 
                 // Copies all the animations to the target node.
                 if (srcNode.Scale != null) foreach (var t in srcNode.Scale.Tracks) dstNode.WithScaleAnimation(t.Key, t.Value);
@@ -116,14 +136,17 @@ namespace SharpGLTF.Scenes
             }
             else
             {
-                dstNode.LocalMatrix = srcNode.LocalMatrix;
+                dstNode.LocalTransform = srcNode.LocalTransform;
             }
 
-            foreach (var c in srcNode.VisualChildren) CreateArmature(() => dstNode.CreateNode(), c);
+            foreach (var c in srcNode.VisualChildren) CreateArmature(c, () => dstNode.CreateNode());
         }
 
         public static void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<Transforms.SparseWeight8> animation)
         {
+            Guard.NotNull(dstNode, nameof(dstNode));
+            Guard.NotNull(dstNode.Mesh, nameof(dstNode.Mesh), "call after IOperator.ApplyTo");
+
             if (animation == null) return;
 
             var dstMesh = dstNode.Mesh;
@@ -136,25 +159,54 @@ namespace SharpGLTF.Scenes
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
             _Nodes.Clear();
-            AddArmatureResources(() => dstScene.CreateNode(), new[] { srcScene });
+            AddArmatureResources(new[] { srcScene }, () => dstScene.CreateNode());
 
-            var schema2Instances = srcScene
+            // gather single operators (RigidTransformer and SkinnedTransformer)
+
+            var srcSingleOperators = srcScene
                 .Instances
+                .Select(item => item.Content)
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item.GetGeometryAsset()))
                 .OfType<IOperator<Scene>>();
 
-            foreach (var inst in schema2Instances)
+            // gather multi operators (Fixed Transformer)
+
+            var srcChildren = srcScene
+                .Instances
+                .Select(item => item.Content)
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item.GetGeometryAsset()))
+                .OfType<FixedTransformer>();
+
+            var srcMultiOperators = _MeshInstancing.CreateFrom(srcChildren, this.GpuMeshInstancingMinCount);
+
+            // apply operators
+
+            var srcOperators = srcSingleOperators.Concat(srcMultiOperators);
+
+            foreach (var op in srcOperators)
             {
-                inst.Setup(dstScene, this);
+                op.ApplyTo(dstScene, this);
             }
+
+            #if DEBUG
+            srcScene._VerifyConversion(dstScene);
+            #endif
         }
 
         #endregion
 
-        #region types
+        #region nested types
 
+        /// <summary>
+        /// Represents an object that can operate on a target object.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The target type.
+        /// This is usually <see cref="Scene"/> or <see cref="Node"/>.
+        /// </typeparam>
         public interface IOperator<T>
         {
-            void Setup(T dst, Schema2SceneBuilder context);
+            void ApplyTo(T target, Schema2SceneBuilder context);
         }
 
         #endregion
@@ -165,17 +217,46 @@ namespace SharpGLTF.Scenes
         public static SceneBuilderSchema2Settings Default => new SceneBuilderSchema2Settings
         {
             UseStridedBuffers = true,
-            CompactVertexWeights = false
+            CompactVertexWeights = false,
+            GpuMeshInstancingMinCount = int.MaxValue
+        };
+
+        public static SceneBuilderSchema2Settings WithGpuInstancing => new SceneBuilderSchema2Settings
+        {
+            UseStridedBuffers = true,
+            CompactVertexWeights = false,
+            GpuMeshInstancingMinCount = 3
         };
 
         public bool UseStridedBuffers;
 
         public bool CompactVertexWeights;
+
+        public int GpuMeshInstancingMinCount;
     }
 
     public partial class SceneBuilder : IConvertibleToGltf2
     {
         #region from SceneBuilder to Schema2
+
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
+        public ModelRoot ToGltf2()
+        {
+            return ToGltf2(new[] { this }, SceneBuilderSchema2Settings.Default);
+        }
+
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <param name="settings">Conversion settings.</param>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
+        public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
+        {
+            return ToGltf2(new[] { this }, settings);
+        }
 
         /// <summary>
         /// Converts a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
@@ -188,6 +269,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(srcScenes, nameof(srcScenes));
 
             var context = new Schema2SceneBuilder();
+            context.GpuMeshInstancingMinCount = settings.GpuMeshInstancingMinCount;
 
             var dstModel = ModelRoot.CreateModel();
             context.AddGeometryResources(dstModel, srcScenes, settings);
@@ -205,30 +287,11 @@ namespace SharpGLTF.Scenes
             return dstModel;
         }
 
-        /// <summary>
-        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
-        /// </summary>
-        /// <param name="settings">Conversion settings.</param>
-        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
-        {
-            return ToGltf2(new[] { this }, settings);
-        }
-
-        /// <summary>
-        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
-        /// </summary>
-        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToGltf2()
-        {
-            return ToGltf2(new[] { this }, SceneBuilderSchema2Settings.Default);
-        }
-
         #endregion
 
         #region from Schema2 to SceneBuilder
 
-        internal static SceneBuilder CreateFrom(Scene srcScene)
+        public static SceneBuilder CreateFrom(Scene srcScene)
         {
             if (srcScene == null) return null;
 
@@ -268,6 +331,10 @@ namespace SharpGLTF.Scenes
 
             _AddLightInstances(dstScene, dstNodes, srcCameraInstances);
 
+            #if DEBUG
+            dstScene._VerifyConversion(srcScene);
+            #endif
+
             return dstScene;
         }
 
@@ -285,9 +352,25 @@ namespace SharpGLTF.Scenes
                 if (srcInstance.Skin == null)
                 {
                     var dstNode = dstNodes[srcInstance];
-                    var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode);
 
-                    _CopyMorphingAnimation(dstInst, srcInstance);
+                    var gpuInstancing = srcInstance.GetGpuInstancing();
+
+                    if (gpuInstancing != null)
+                    {
+                        foreach (var xinst in gpuInstancing.LocalTransforms)
+                        {
+                            var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode, xinst);
+
+                            // if we add morphing the the mesh, all meshes would morph simultaneously??
+                            _CopyMorphingAnimation(dstInst, srcInstance);
+                        }
+                    }
+                    else
+                    {
+                        var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode);
+
+                        _CopyMorphingAnimation(dstInst, srcInstance);
+                    }
                 }
                 else
                 {
@@ -399,6 +482,48 @@ namespace SharpGLTF.Scenes
                 var curves = srcNode.GetCurveSamplers(anim);
 
                 if (curves.MorphingSparse != null) dstInst.Content.UseMorphing(name).SetCurve(curves.MorphingSparse);
+            }
+        }
+
+        #endregion
+
+        #region utilities
+
+        internal void _VerifyConversion(Scene gltfScene)
+        {
+            // renderable instances
+
+            var renderableInstCount = this.Instances
+                .Select(item => item.Content.GetGeometryAsset())
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
+                .Count();
+
+            // check if we have created the same amount of instances defined in the SceneBuilder.
+
+            var renderableGltfCount = Node.Flatten(gltfScene)
+                .Where(item => item.Mesh != null)
+                .Sum(item => item.GetGpuInstancing()?.Count ?? 1);
+
+            if (renderableInstCount != renderableGltfCount)
+            {
+                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableGltfCount}");
+            }
+
+            // create a viewer to compare against
+
+            var gltfViewOptions = new Runtime.RuntimeOptions();
+            gltfViewOptions.IsolateMemory = false;
+            gltfViewOptions.GpuMeshInstancing = Runtime.MeshInstancing.Enabled;
+
+            var gltfView = Runtime.SceneTemplate
+                .Create(gltfScene, gltfViewOptions)
+                .CreateInstance();
+
+            var renderableViewCount = gltfView.Sum(item => item.InstanceCount);
+
+            if (renderableInstCount != renderableViewCount)
+            {
+                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableViewCount}");
             }
         }
 

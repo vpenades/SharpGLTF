@@ -20,7 +20,7 @@ namespace SharpGLTF.Scenes
 
 
     [Category("Toolkit.Scenes")]
-    public class SceneBuilderTests
+    public partial class SceneBuilderTests
     {
         [Test(Description ="Creates a simple cube.")]
         public void CreateCubeScene()
@@ -140,8 +140,9 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("NonConvexQuads.gltf");
         }
         
-        [Test(Description = "Creates a scene with multiple cubes and spheres.")]
-        public void CreateSceneWithRandomShapes()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void CreateSceneWithRandomShapes(bool useGpuInstancing)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -149,43 +150,76 @@ namespace SharpGLTF.Scenes
             var rnd = new Random(177);
 
             // create materials
+
             var materials = Enumerable
                 .Range(0, 10)
-                .Select(idx => new Materials.MaterialBuilder()
+                .Select(idx => new MaterialBuilder()
                 .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(), 1)))
                 .ToList();
-            
+
+            // create meshes
+
+            var sphereMeshes = Enumerable
+                .Range(0, 10)
+                .Select(idx => materials[idx])
+                .Select(mat =>
+                {
+                    var mesh = VPOSNRM.CreateCompatibleMesh("shape");
+                    #if DEBUG
+                    mesh.VertexPreprocessor.SetValidationPreprocessors();
+                    #else
+                    mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+                    #endif
+                    mesh.AddSphere(mat, 0.5f, Matrix4x4.Identity);
+                    mesh.Validate();
+                    return mesh;
+                });
+
+            var cubeMeshes = Enumerable
+                .Range(0, 10)
+                .Select(idx => materials[idx])
+                .Select(mat =>
+                {
+                    var mesh = VPOSNRM.CreateCompatibleMesh("shape");
+                    #if DEBUG
+                    mesh.VertexPreprocessor.SetValidationPreprocessors();
+                    #else
+                    mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+                    #endif
+                    mesh.AddCube(mat, Matrix4x4.Identity);
+                    mesh.Validate();
+                    return mesh;
+                });
+
+            var meshes = sphereMeshes.Concat(cubeMeshes).ToArray();
+
             // create scene            
 
             var scene = new SceneBuilder();
 
             for (int i = 0; i < 100; ++i)
-            {
-                // create mesh
-                var mat = materials[rnd.Next(0, 10)];
-                var mesh = VPOSNRM.CreateCompatibleMesh("shape");
-
-                #if DEBUG
-                mesh.VertexPreprocessor.SetValidationPreprocessors();
-                #else
-                mesh.VertexPreprocessor.SetSanitizerPreprocessors();
-                #endif
-
-                if ((i & 1) == 0) mesh.AddCube(mat, Matrix4x4.Identity);
-                else mesh.AddSphere(mat, 0.5f, Matrix4x4.Identity);
-
-                mesh.Validate();
+            {                
+                var mesh = meshes[rnd.Next(0, 20)];
 
                 // create random transform
-                var r = rnd.NextVector3() * 5;
-                var xform = Matrix4x4.CreateFromYawPitchRoll(r.X, r.Y, r.Z) * Matrix4x4.CreateTranslation(rnd.NextVector3() * 25);
+                var r = rnd.NextQuaternion();                
+                var t = rnd.NextVector3() * 25;
 
-                scene.AddRigidMesh(mesh, xform);                
+                scene.AddRigidMesh(mesh, (r, t));
             }
+
+            // collapse to glTF
+
+            
+            var gltf = scene.ToGltf2(useGpuInstancing ? SceneBuilderSchema2Settings.WithGpuInstancing : SceneBuilderSchema2Settings.Default);
+
+            var bounds = Runtime.MeshDecoder.EvaluateBoundingBox(gltf.DefaultScene);
+
+            // Assert.AreEqual(defaultBounds,instancedBounds);
 
             // save the model as GLB
 
-            scene.AttachToCurrentTest("shapes.glb");
+            gltf.AttachToCurrentTest("shapes.glb");
             scene.AttachToCurrentTest("shapes.plotly");
         }
 

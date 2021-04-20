@@ -25,6 +25,31 @@ namespace SharpGLTF.Geometry
 
         #endregion
 
+        #region lifecycle
+
+        public VertexBufferColumns() { }
+
+        public VertexBufferColumns(VertexBufferColumns other)
+        {
+            this.Positions = other.Positions;
+            this.Normals = other.Normals;
+            this.Tangents = other.Tangents;
+            this.Colors0 = other.Colors0;
+            this.Colors1 = other.Colors1;
+            this.TexCoords0 = other.TexCoords0;
+            this.TexCoords1 = other.TexCoords1;
+            this.TexCoords2 = other.TexCoords2;
+            this.TexCoords3 = other.TexCoords3;
+            this.Joints0 = other.Joints0;
+            this.Joints1 = other.Joints1;
+            this.Weights0 = other.Weights0;
+            this.Weights1 = other.Weights1;
+
+            this._MorphTargets = other._MorphTargets;
+        }
+
+        #endregion
+
         #region Data Columns
 
         #pragma warning disable CA2227 // Collection properties should be read only
@@ -38,6 +63,8 @@ namespace SharpGLTF.Geometry
 
         public IList<Vector2> TexCoords0 { get; set; }
         public IList<Vector2> TexCoords1 { get; set; }
+        public IList<Vector2> TexCoords2 { get; set; }
+        public IList<Vector2> TexCoords3 { get; set; }
 
         public IList<Vector4> Joints0 { get; set; }
         public IList<Vector4> Joints1 { get; set; }
@@ -49,7 +76,11 @@ namespace SharpGLTF.Geometry
 
         private List<VertexBufferColumns> _MorphTargets;
 
-        public IReadOnlyList<VertexBufferColumns> MorphTargets => _MorphTargets == null ? (IReadOnlyList<VertexBufferColumns>)Array.Empty<VertexBufferColumns>() : _MorphTargets;
+        #endregion
+
+        #region properties
+
+        public IReadOnlyList<VertexBufferColumns> MorphTargets => _MorphTargets != null ? _MorphTargets : (IReadOnlyList<VertexBufferColumns>)Array.Empty<VertexBufferColumns>();
 
         #endregion
 
@@ -82,6 +113,8 @@ namespace SharpGLTF.Geometry
 
             this.TexCoords0 = _IsolateColumn(this.TexCoords0);
             this.TexCoords1 = _IsolateColumn(this.TexCoords1);
+            this.TexCoords2 = _IsolateColumn(this.TexCoords2);
+            this.TexCoords3 = _IsolateColumn(this.TexCoords3);
 
             this.Joints0 = _IsolateColumn(this.Joints0);
             this.Joints1 = _IsolateColumn(this.Joints1);
@@ -94,6 +127,13 @@ namespace SharpGLTF.Geometry
             foreach (var mt in _MorphTargets) mt.IsolateColumns();
         }
 
+        public VertexBufferColumns WithTransform(Transforms.IGeometryTransform transform)
+        {
+            var clone = new VertexBufferColumns(this);
+            clone._ApplyTransform(transform);
+            return clone;
+        }
+
         /// <summary>
         /// Applies a transform to the columns of this <see cref="VertexBufferColumns"/>
         /// </summary>
@@ -103,7 +143,7 @@ namespace SharpGLTF.Geometry
         /// Once it's applied, skinning and morphing columns are removed, since they're baked
         /// into the position, normal and tangent columns.
         /// </remarks>
-        public void ApplyTransform(Transforms.IGeometryTransform transform)
+        private void _ApplyTransform(Transforms.IGeometryTransform transform)
         {
             Guard.NotNull(this.Positions, nameof(this.Positions), "Missing Positions column");
             if (this.Normals != null) Guard.IsTrue(this.Positions.Count == this.Normals.Count, nameof(this.Normals), ERR_COLUMNLEN);
@@ -112,12 +152,14 @@ namespace SharpGLTF.Geometry
             if (this.Colors1 != null) Guard.IsTrue(this.Positions.Count == this.Colors1.Count, nameof(this.Colors1), ERR_COLUMNLEN);
             if (this.TexCoords0 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords0.Count, nameof(this.TexCoords0), ERR_COLUMNLEN);
             if (this.TexCoords1 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords1.Count, nameof(this.TexCoords1), ERR_COLUMNLEN);
+            if (this.TexCoords2 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords2.Count, nameof(this.TexCoords2), ERR_COLUMNLEN);
+            if (this.TexCoords3 != null) Guard.IsTrue(this.Positions.Count == this.TexCoords3.Count, nameof(this.TexCoords3), ERR_COLUMNLEN);
             if (this.Joints0 != null) Guard.IsTrue(this.Positions.Count == this.Joints0.Count, nameof(this.Joints0), ERR_COLUMNLEN);
             if (this.Joints1 != null) Guard.IsTrue(this.Positions.Count == this.Joints1.Count, nameof(this.Joints1), ERR_COLUMNLEN);
             if (this.Weights0 != null) Guard.IsTrue(this.Positions.Count == this.Weights0.Count, nameof(this.Weights0), ERR_COLUMNLEN);
             if (this.Weights1 != null) Guard.IsTrue(this.Positions.Count == this.Weights1.Count, nameof(this.Weights1), ERR_COLUMNLEN);
 
-            // since the attributes we want to overwrite might be binded directly to the model's buffer
+            // since the attributes we want to overwrite might be bound directly to the model's buffer
             // data, and we don't want to modify the source data, we isolate the columns to be overwritten.
 
             this.Positions = _IsolateColumn(this.Positions);
@@ -132,7 +174,7 @@ namespace SharpGLTF.Geometry
             Vector3[] morphPositions = null;
             Vector3[] morphNormals = null;
             Vector3[] morphTangents = null;
-            Vector4[] morphColors0 = null;
+            Vector4[] morphColors0 = null; // we clone it because it can be affected by morph targets
 
             if (_MorphTargets != null)
             {
@@ -179,9 +221,7 @@ namespace SharpGLTF.Geometry
                 }
             }
 
-            // we've just applied the transform,
-            // so we clear animation columns since
-            // they're irrelevant now.
+            // we've just applied the transform, so we make this a rigid geometry.
 
             _MorphTargets = null;
 
@@ -242,11 +282,13 @@ namespace SharpGLTF.Geometry
 
             int numCols = 0;
             if (Colors0 != null) numCols = 1;
-            if (Colors0 != null && Colors1 != null) numCols = 2;
+            if (numCols == 1 && Colors1 != null) numCols = 2;
 
             int numTexs = 0;
             if (TexCoords0 != null) numTexs = 1;
-            if (TexCoords0 != null && TexCoords1 != null) numTexs = 2;
+            if (numTexs == 1 && TexCoords1 != null) numTexs = 2;
+            if (numTexs == 2 && TexCoords2 != null) numTexs = 3;
+            if (numTexs == 3 && TexCoords3 != null) numTexs = 4;
 
             int numJoints = 0;
             if (Joints0 != null) numJoints = 4;
@@ -277,6 +319,8 @@ namespace SharpGLTF.Geometry
 
             if (m.MaxTextCoords > 0) m.SetTexCoord(0, TexCoords0 == null ? Vector2.Zero : TexCoords0[index]);
             if (m.MaxTextCoords > 1) m.SetTexCoord(1, TexCoords1 == null ? Vector2.Zero : TexCoords1[index]);
+            if (m.MaxTextCoords > 2) m.SetTexCoord(2, TexCoords2 == null ? Vector2.Zero : TexCoords2[index]);
+            if (m.MaxTextCoords > 3) m.SetTexCoord(3, TexCoords3 == null ? Vector2.Zero : TexCoords3[index]);
 
             return m;
         }

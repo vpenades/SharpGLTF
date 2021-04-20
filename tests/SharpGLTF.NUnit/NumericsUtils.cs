@@ -32,6 +32,12 @@ namespace SharpGLTF
             return new Vector4(rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle(), rnd.NextSingle());
         }
 
+        public static Quaternion NextQuaternion(this Random rnd)
+        {
+            var r = rnd.NextVector3() * (float)Math.PI*2;
+            return Quaternion.CreateFromYawPitchRoll(r.X, r.Y, r.Z);
+        }
+
         public static float GetAngle(this (Quaternion a, Quaternion b) pair)
         {
             var w = Quaternion.Concatenate(pair.b, Quaternion.Inverse(pair.a)).W;

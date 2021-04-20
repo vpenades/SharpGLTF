@@ -76,6 +76,9 @@ namespace SharpGLTF
             }
             else if (fileName.ToLower().EndsWith(".obj"))
             {
+                // skip exporting to obj if gpu instancing is there
+                if (Node.Flatten(model.DefaultScene).Any(n => n.GetGpuInstancing() != null)) return fileName;                
+
                 fileName = fileName.Replace(" ", "_");
                 model.SaveAsWavefront(fileName);
             }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+
 using SharpGLTF.Memory;
-using SharpGLTF.Validation;
 
 using VALIDATIONCTX = SharpGLTF.Validation.ValidationContext;
 
@@ -31,6 +31,15 @@ namespace SharpGLTF.Schema2
             _min = new List<double>();
             _max = new List<double>();
         }
+
+        #endregion
+
+        #region data
+
+        /// <summary>
+        /// This must be null, or always in sync with <see cref="_type"/>
+        /// </summary>
+        private DimensionType? _CachedType;
 
         #endregion
 
@@ -86,7 +95,19 @@ namespace SharpGLTF.Schema2
 
         private DimensionType _GetDimensions()
         {
-            return Enum.TryParse<DimensionType>(this._type, out var r) ? r : DimensionType.CUSTOM;
+            if (_CachedType.HasValue)
+            {
+                #if DEBUG
+                var parsedType = Enum.TryParse<DimensionType>(this._type, out var rr) ? rr : DimensionType.CUSTOM;
+                System.Diagnostics.Debug.Assert(_CachedType.Value == parsedType);
+                #endif
+
+                return _CachedType.Value;
+            }
+
+            _CachedType = Enum.TryParse<DimensionType>(this._type, out var r) ? r : DimensionType.CUSTOM;
+
+            return _CachedType.Value;
         }
 
         internal MemoryAccessor _GetMemoryAccessor(string name = null)
@@ -170,24 +191,37 @@ namespace SharpGLTF.Schema2
             this._byteOffset = bufferByteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
             this._count = itemCount;
 
+            this._CachedType = dimensions;
             this._type = Enum.GetName(typeof(DimensionType), dimensions);
+
             this._componentType = encoding;
             this._normalized = normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
         }
 
-        public Matrix2x2Array AsMatrix2x2Array()
+        public IList<Matrix3x2> AsMatrix2x2Array()
         {
             return _GetMemoryAccessor().AsMatrix2x2Array();
         }
 
-        public Matrix3x3Array AsMatrix3x3Array()
+        public IList<Matrix4x4> AsMatrix3x3Array()
         {
             return _GetMemoryAccessor().AsMatrix3x3Array();
         }
 
-        public Matrix4x4Array AsMatrix4x4Array()
+        public IList<Matrix4x4> AsMatrix4x3Array()
+        {
+            const int dimsize = 4 * 3;
+
+            var view = SourceBufferView;
+            var stride = Math.Max(dimsize * this.Encoding.ByteLength(), view.ByteStride);
+            var content = view.Content.Slice(this.ByteOffset, Count * stride);
+
+            return new Matrix4x3Array(content, stride, this.Encoding, this.Normalized);
+        }
+
+        public IList<Matrix4x4> AsMatrix4x4Array()
         {
             return _GetMemoryAccessor().AsMatrix4x4Array();
         }
@@ -357,6 +391,10 @@ namespace SharpGLTF.Schema2
         protected override void OnValidateContent(VALIDATIONCTX validate)
         {
             base.OnValidateContent(validate);
+
+            // if Accessor.Type uses a custom dimension,
+            // we cannot check the rest of the accessor.
+            if (this.Dimensions == DimensionType.CUSTOM) return;
 
             BufferView.VerifyAccess(validate, this.SourceBufferView, this.ByteOffset, this.Format, this.Count);
 

@@ -123,7 +123,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like<see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints;
@@ -133,7 +133,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights;
@@ -254,7 +254,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints0;
@@ -264,7 +264,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("JOINTS_1", ENCODING.UNSIGNED_SHORT, false)]
         public Vector4 Joints1;
@@ -274,7 +274,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights0;
@@ -284,7 +284,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </summary>
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
-        /// Consider using the constructor, <see cref="SetBindings(in SparseWeight8)"/> or <see cref="SetBindings((int Index, float Weight)[])"/> instead of setting this value directly.
+        /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
         /// </remarks>
         [VertexAttribute("WEIGHTS_1")]
         public Vector4 Weights1;

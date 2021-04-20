@@ -25,6 +25,8 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
+            if (options == null) options = new RuntimeOptions();
+
             var armature = ArmatureTemplate.Create(srcScene, options);
 
             // gather scene nodes.
@@ -45,22 +47,43 @@ namespace SharpGLTF.Runtime
                 .Where(item => item.Mesh != null)
                 .ToList();
 
-            var drawables = new DrawableTemplate[instances.Count];
+            var drawables = new List<DrawableTemplate>();
 
-            for (int i = 0; i < drawables.Length; ++i)
+            for (int i = 0; i < instances.Count; ++i)
             {
                 var srcInstance = instances[i];
 
-                drawables[i] = srcInstance.Skin != null
-                    ?
-                    new SkinnedDrawableTemplate(srcInstance, indexSolver)
-                    :
-                    (DrawableTemplate)new RigidDrawableTemplate(srcInstance, indexSolver);
+                if (srcInstance.Skin != null)
+                {
+                    drawables.Add(new SkinnedDrawableTemplate(srcInstance, indexSolver));
+                    continue;
+                }
+
+                if (srcInstance.GetGpuInstancing() == null)
+                {
+                    drawables.Add(new RigidDrawableTemplate(srcInstance, indexSolver));
+                    continue;
+                }
+
+                switch (options.GpuMeshInstancing)
+                {
+                    case MeshInstancing.Discard: break;
+
+                    case MeshInstancing.Enabled:
+                        drawables.Add(new InstancedDrawableTemplate(srcInstance, indexSolver));
+                        break;
+
+                    case MeshInstancing.SingleMesh:
+                        drawables.Add(new RigidDrawableTemplate(srcInstance, indexSolver));
+                        break;
+
+                    default: throw new NotImplementedException();
+                }
             }
 
             var extras = RuntimeOptions.ConvertExtras(srcScene, options);
 
-            return new SceneTemplate(srcScene.Name, extras, armature, drawables);
+            return new SceneTemplate(srcScene.Name, extras, armature, drawables.ToArray());
         }
 
         private SceneTemplate(string name, Object extras, ArmatureTemplate armature, DrawableTemplate[] drawables)

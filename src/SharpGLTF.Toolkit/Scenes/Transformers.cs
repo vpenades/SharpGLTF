@@ -7,6 +7,7 @@ using System.Text;
 using SharpGLTF.IO;
 
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
+using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
 
 namespace SharpGLTF.Scenes
 {
@@ -90,6 +91,11 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
 
+        /// <summary>
+        /// Gets a value indicating whether <see cref="Content"/> implements <see cref="IRenderableContent"/>
+        /// </summary>
+        public bool HasRenderableContent => _Content is IRenderableContent;
+
         #endregion
 
         #region API
@@ -164,25 +170,33 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal FixedTransformer(Object content, Matrix4x4 xform)
+        internal FixedTransformer(Object content, Transforms.AffineTransform transform)
             : base(content)
         {
-            _WorldTransform = xform;
+            _ChildTransform = transform;
         }
 
-        protected FixedTransformer(FixedTransformer other)
+        internal FixedTransformer(Object content, NodeBuilder parentNode, Transforms.AffineTransform childTransform)
+            : base(content)
+        {
+            _ParentNode = parentNode;
+            _ChildTransform = childTransform;
+        }
+
+        protected FixedTransformer(FixedTransformer other, DeepCloneContext args)
             : base(other)
         {
             Guard.NotNull(other, nameof(other));
 
+            this._ParentNode = args.GetNode(other._ParentNode);
             this._NodeName = other._NodeName;
             this._NodeExtras = other._NodeExtras.DeepClone();
-            this._WorldTransform = other._WorldTransform;
+            this._ChildTransform = other._ChildTransform;
         }
 
         public override ContentTransformer DeepClone(DeepCloneContext args)
         {
-            return new FixedTransformer(this);
+            return new FixedTransformer(this, args);
         }
 
         #endregion
@@ -196,7 +210,10 @@ namespace SharpGLTF.Scenes
         private IO.JsonContent _NodeExtras;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private Matrix4x4 _WorldTransform;
+        private NodeBuilder _ParentNode;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private Transforms.AffineTransform _ChildTransform;
 
         #endregion
 
@@ -216,19 +233,20 @@ namespace SharpGLTF.Scenes
             set => _NodeExtras = value;
         }
 
-        public Matrix4x4 WorldMatrix
-        {
-            get => _WorldTransform;
-            set => _WorldTransform = value;
-        }
+        public NodeBuilder ParentNode => _ParentNode;
+
+        public Transforms.AffineTransform ChildTransform => _ChildTransform;
 
         #endregion
 
         #region API
 
-        public override NodeBuilder GetArmatureRoot() { return null; }
+        public override NodeBuilder GetArmatureRoot() { return _ParentNode?.Root; }
 
-        public override Matrix4x4 GetPoseWorldMatrix() => WorldMatrix;
+        public override Matrix4x4 GetPoseWorldMatrix()
+        {
+            return _ParentNode == null ? _ChildTransform.Matrix : _ChildTransform.Matrix * _ParentNode.WorldMatrix;
+        }
 
         #endregion
 
@@ -313,10 +331,10 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal SkinnedTransformer(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
+        internal SkinnedTransformer(MESHBUILDER mesh, TRANSFORM meshWorldTransform, NodeBuilder[] joints)
             : base(mesh)
         {
-            SetJoints(meshWorldMatrix, joints);
+            SetJoints(meshWorldTransform, joints);
         }
 
         internal SkinnedTransformer(MESHBUILDER mesh, (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
@@ -332,7 +350,7 @@ namespace SharpGLTF.Scenes
 
             this._NodeName = other._NodeName;
             this._NodeExtras = other._NodeExtras.DeepClone();
-            this._MeshPoseWorldMatrix = other._MeshPoseWorldMatrix;
+            this._MeshPoseWorldTransform = other._MeshPoseWorldTransform;
 
             foreach (var (joint, inverseBindMatrix) in other._Joints)
             {
@@ -361,7 +379,7 @@ namespace SharpGLTF.Scenes
         /// Defines the world matrix of the mesh at the time of binding.
         /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private Matrix4x4? _MeshPoseWorldMatrix;
+        private TRANSFORM? _MeshPoseWorldTransform;
 
         // condition: all NodeBuilder objects must have the same root.
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -389,12 +407,12 @@ namespace SharpGLTF.Scenes
 
         #region API
 
-        private void SetJoints(Matrix4x4 meshWorldMatrix, NodeBuilder[] joints)
+        private void SetJoints(TRANSFORM meshWorldTransform, NodeBuilder[] joints)
         {
             Guard.NotNull(joints, nameof(joints));
             Guard.IsTrue(NodeBuilder.IsValidArmature(joints), nameof(joints));
 
-            _MeshPoseWorldMatrix = meshWorldMatrix;
+            _MeshPoseWorldTransform = meshWorldTransform;
             _Joints.Clear();
             _Joints.AddRange(joints.Select(item => (item, (Matrix4x4?)null)));
         }
@@ -404,7 +422,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(joints, nameof(joints));
             Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Joint)), nameof(joints));
 
-            _MeshPoseWorldMatrix = null;
+            _MeshPoseWorldTransform = null;
             _Joints.Clear();
             _Joints.AddRange(joints.Select(item => (item.Joint, (Matrix4x4?)item.InverseBindMatrix)));
         }
@@ -413,10 +431,12 @@ namespace SharpGLTF.Scenes
         {
             var jb = new (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[_Joints.Count];
 
+            var meshPoseWorld = _MeshPoseWorldTransform?.Matrix ?? Matrix4x4.Identity;
+
             for (int i = 0; i < jb.Length; ++i)
             {
                 var j = _Joints[i].Joint;
-                var m = _Joints[i].InverseBindMatrix ?? Transforms.SkinnedTransform.CalculateInverseBinding(_MeshPoseWorldMatrix ?? Matrix4x4.Identity, j.WorldMatrix);
+                var m = _Joints[i].InverseBindMatrix ?? Transforms.SkinnedTransform.CalculateInverseBinding(meshPoseWorld, j.WorldMatrix);
 
                 jb[i] = (j, m);
             }
@@ -445,7 +465,7 @@ namespace SharpGLTF.Scenes
                 );
         }
 
-        public override Matrix4x4 GetPoseWorldMatrix() => _MeshPoseWorldMatrix ?? Matrix4x4.Identity;
+        public override Matrix4x4 GetPoseWorldMatrix() => _MeshPoseWorldTransform?.Matrix ?? Matrix4x4.Identity;
 
         #endregion
     }

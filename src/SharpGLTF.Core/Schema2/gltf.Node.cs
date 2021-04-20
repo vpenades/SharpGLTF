@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
+
 namespace SharpGLTF.Schema2
 {
     /// <summary>
@@ -25,34 +27,33 @@ namespace SharpGLTF.Schema2
         {
             var txt = $"Node[{LogicalIndex}ᴵᵈˣ]";
 
-            if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" {this.Name}";
-
-            if (_matrix.HasValue)
-            {
-                if (_matrix.Value != Matrix4x4.Identity)
-                {
-                    var xform = this.LocalTransform;
-                    if (xform.Scale != Vector3.One) txt += $" 𝐒:{xform.Scale}";
-                    if (xform.Rotation != Quaternion.Identity) txt += $" 𝐑:{xform.Rotation}";
-                    if (xform.Translation != Vector3.Zero) txt += $" 𝚻:{xform.Translation}";
-                }
-            }
-            else
-            {
-                if (_scale.HasValue) txt += $" 𝐒:{_scale.Value}";
-                if (_rotation.HasValue) txt += $" 𝐑:{_rotation.Value}";
-                if (_translation.HasValue) txt += $" 𝚻:{_translation.Value}";
-            }
+            if (!string.IsNullOrWhiteSpace(this.Name)) txt += $" \"{this.Name}\" ";
 
             if (this.Mesh != null)
             {
-                if (this.Skin != null) txt += $" ⇨ Skin[{this.Skin.LogicalIndex}ᴵᵈˣ]";
-                txt += $" ⇨ Mesh[{this.Mesh.LogicalIndex}ᴵᵈˣ]";
+                if (this.Skin != null) txt += $" / Skin[{this.Skin.LogicalIndex}ᴵᵈˣ]";
+                txt += $" / Mesh[{this.Mesh.LogicalIndex}ᴵᵈˣ]";
+
+                var instances = this.GetGpuInstancing();
+                if (instances != null) txt += $" x {instances.Count} instances.";
             }
 
             if (this.VisualChildren.Any())
             {
-                txt += $" | Children[{this.VisualChildren.Count()}]";
+                if (this.VisualChildren.Count() < 16)
+                {
+                    var indices = string.Join(", ", this.VisualChildren.Select(item => item.LogicalIndex));
+                    txt += $" / Children[{indices}]";
+                }
+                else
+                {
+                    txt += $" / Children x {this.VisualChildren.Count()}";
+                }
+            }
+
+            if (!this.LocalTransform.IsIdentity)
+            {
+                txt += " At " + this.LocalTransform.ToDebuggerDisplayString();
             }
 
             return txt;
@@ -189,53 +190,51 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
         /// </summary>
-        public Transforms.AffineTransform LocalTransform
+        public TRANSFORM LocalTransform
         {
-            get => Transforms.AffineTransform.CreateFromAny(_matrix, _scale, _rotation, _translation);
+            get => TRANSFORM.CreateFromAny(_matrix, _scale, _rotation, _translation);
             set
             {
                 Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
                 Guard.IsTrue(value.IsValid, nameof(value));
 
-                var decomposed = value.GetDecomposed();
+                if (value.IsMatrix && this.IsTransformAnimated)
+                {
+                    value = value.GetDecomposed(); // animated nodes require a decomposed transform.
+                }
 
-                _matrix = null;
-                _scale = decomposed.Scale.AsNullable(Vector3.One);
-                _rotation = decomposed.Rotation.Sanitized().AsNullable(Quaternion.Identity);
-                _translation = decomposed.Translation.AsNullable(Vector3.Zero);
+                if (value.IsMatrix)
+                {
+                    _matrix = value.Matrix.AsNullable(Matrix4x4.Identity);
+                    _scale = null;
+                    _rotation = null;
+                    _translation = null;
+                }
+                else if (value.IsSRT)
+                {
+                    _matrix = null;
+                    _scale = value.Scale.AsNullable(Vector3.One);
+                    _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
+                    _translation = value.Translation.AsNullable(Vector3.Zero);
+                }
+                else
+                {
+                    throw new ArgumentException("Undefined", nameof(value));
+                }
             }
         }
-
-        #pragma warning restore CA1721 // Property names should not match get methods
 
         /// <summary>
         /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
         /// </summary>
         public Matrix4x4 LocalMatrix
         {
-            get => Transforms.Matrix4x4Factory.CreateFrom(_matrix, _scale, _rotation, _translation);
-            set
-            {
-                if (value == Matrix4x4.Identity)
-                {
-                    _matrix = null;
-                }
-                else
-                {
-                    Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
-                    _matrix = value;
-                }
-
-                _scale = null;
-                _rotation = null;
-                _translation = null;
-            }
+            get => LocalTransform.Matrix;
+            set => LocalTransform = value;
         }
 
-        #pragma warning disable CA1721 // Property names should not match get methods
-
         /// <summary>
-        /// Gets or sets the world transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// Gets or sets the world <see cref="Matrix4x4"/> of this <see cref="Node"/>.
         /// </summary>
         public Matrix4x4 WorldMatrix
         {
@@ -251,6 +250,16 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets the local <see cref="Transforms.Matrix4x4Double"/> of this <see cref="Node"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method is equivalent to <see cref="WorldMatrix"/>, but since the world matrix<br/>
+        /// is calculated by concatenating all the local matrices in the hierarchy, there's chances<br/>
+        /// to have some precission loss on large transform chains.
+        /// </para>
+        /// </remarks>
         internal Transforms.Matrix4x4Double LocalMatrixPrecise
         {
             get
@@ -270,6 +279,19 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets the world <see cref="Transforms.Matrix4x4Double"/> of this <see cref="Node"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This method is equivalent to <see cref="WorldMatrix"/>, but since the world matrix<br/>
+        /// is calculated by concatenating all the local matrices in the hierarchy, there's chances<br/>
+        /// to have some precission loss on large transform chains.
+        /// </para>
+        /// <para>
+        /// Precission is specially relevant when calculating the Inverse Bind Matrix.
+        /// </para>
+        /// </remarks>
         internal Transforms.Matrix4x4Double WorldMatrixPrecise
         {
             get
@@ -326,7 +348,7 @@ namespace SharpGLTF.Schema2
 
         #region API - Transforms
 
-        public Transforms.AffineTransform GetLocalTransform(Animation animation, float time)
+        public TRANSFORM GetLocalTransform(Animation animation, float time)
         {
             if (animation == null) return this.LocalTransform;
 
@@ -812,7 +834,7 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public Transforms.AffineTransform GetLocalTransform(Single time)
+        public TRANSFORM GetLocalTransform(Single time)
         {
             var xform = TargetNode.LocalTransform.GetDecomposed();
 
@@ -820,7 +842,7 @@ namespace SharpGLTF.Schema2
             var r = Rotation?.CreateCurveSampler()?.GetPoint(time) ?? xform.Rotation;
             var t = Translation?.CreateCurveSampler()?.GetPoint(time) ?? xform.Translation;
 
-            return new Transforms.AffineTransform(s, r, t);
+            return new TRANSFORM(s, r, t);
         }
 
         public IReadOnlyList<float> GetMorphingWeights(Single time)

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
+using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
+
 namespace SharpGLTF.Runtime
 {
     public interface IDrawableTemplate
@@ -30,8 +32,10 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly String _NodeName;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _LogicalMeshIndex;
 
         #endregion
@@ -59,7 +63,7 @@ namespace SharpGLTF.Runtime
     /// <summary>
     /// Defines a reference to a drawable rigid mesh
     /// </summary>
-    sealed class RigidDrawableTemplate : DrawableTemplate
+    class RigidDrawableTemplate : DrawableTemplate
     {
         #region lifecycle
 
@@ -73,6 +77,7 @@ namespace SharpGLTF.Runtime
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _NodeIndex;
 
         #endregion
@@ -88,6 +93,51 @@ namespace SharpGLTF.Runtime
             var statxform = (Transforms.RigidTransform)rigidTransform;
             statxform.Update(node.ModelMatrix);
             statxform.Update(node.MorphWeights, false);
+        }
+
+        #endregion
+    }
+
+    class InstancedDrawableTemplate : RigidDrawableTemplate
+    {
+        #region lifecycle
+
+        internal InstancedDrawableTemplate(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
+            : base(node, indexFunc)
+        {
+            var instancing = node.GetGpuInstancing();
+
+            _Instances = new TRANSFORM[instancing.Count];
+
+            for (int i = 0; i < _Instances.Length; ++i)
+            {
+                _Instances[i] = instancing.GetLocalTransform(i);
+            }
+        }
+
+        #endregion
+
+        #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly TRANSFORM[] _Instances;
+
+        #endregion
+
+        #region properties
+
+        public IReadOnlyList<TRANSFORM> Instances => _Instances;
+
+        #endregion
+
+        #region API
+
+        public override Transforms.IGeometryTransform CreateGeometryTransform() { return new Transforms.InstancingTransform(_Instances); }
+
+        public override void UpdateGeometryTransform(Transforms.IGeometryTransform rigidTransform, ArmatureInstance armature)
+        {
+            base.UpdateGeometryTransform(rigidTransform, armature);
+            (rigidTransform as Transforms.InstancingTransform).UpdateInstances();
         }
 
         #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace SharpGLTF.Runtime
     /// <summary>
     /// Represents a specific and independent state of a <see cref="SceneTemplate"/>.
     /// </summary>
-    public sealed class SceneInstance
+    public sealed class SceneInstance : IReadOnlyList<DrawableInstance>
     {
         #region lifecycle
 
@@ -40,9 +41,13 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// Represents the skeleton that's going to be used by each drawing command to draw the model matrices.
         /// </summary>
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly ArmatureInstance _Armature;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly DrawableTemplate[] _DrawableReferences;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IGeometryTransform[] _DrawableTransforms;
 
         #endregion
@@ -51,24 +56,11 @@ namespace SharpGLTF.Runtime
 
         public ArmatureInstance Armature => _Armature;
 
-        /// <summary>
-        /// Gets the number of drawable instances.
-        /// </summary>
-        public int DrawableInstancesCount => _DrawableTransforms.Length;
+        /// <inheritdoc/>
+        public int Count => _DrawableTransforms.Length;
 
-        /// <summary>
-        /// Gets the current sequence of drawing commands.
-        /// </summary>
-        public IEnumerable<DrawableInstance> DrawableInstances
-        {
-            get
-            {
-                for (int i = 0; i < _DrawableReferences.Length; ++i)
-                {
-                    yield return GetDrawableInstance(i);
-                }
-            }
-        }
+        /// <inheritdoc/>
+        public DrawableInstance this[int index] => GetDrawableInstance(index);
 
         #endregion
 
@@ -89,6 +81,34 @@ namespace SharpGLTF.Runtime
             dref.UpdateGeometryTransform(_DrawableTransforms[index], _Armature);
 
             return new DrawableInstance(dref, _DrawableTransforms[index]);
+        }
+
+        public IEnumerator<DrawableInstance> GetEnumerator()
+        {
+            for (int i = 0; i < Count; ++i) { yield return this[i]; }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            for (int i = 0; i < Count; ++i) { yield return this[i]; }
+        }
+
+        #endregion
+
+        #region obsolete
+
+        [Obsolete("Use .Count", true)]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public int DrawableInstancesCount => Count;
+
+        [Obsolete("use <this>", true)]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public IEnumerable<DrawableInstance> DrawableInstances
+        {
+            get
+            {
+                for (int i = 0; i < Count; ++i) { yield return this[i]; }
+            }
         }
 
         #endregion

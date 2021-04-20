@@ -86,41 +86,7 @@ namespace SharpGLTF.Scenes
 
         #endregion
 
-        #region Obsolete API
-
-        [Obsolete("Remove name parameter and use .WithName(name);", true)]
-        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix)
-        {
-            return AddRigidMesh(mesh, meshWorldMatrix).WithName(nodeName);
-        }
-
-        [Obsolete("Remove name parameter and use .WithName(name);", true)]
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, String nodeName, Matrix4x4 meshWorldMatrix, params NodeBuilder[] joints)
-        {
-            return AddSkinnedMesh(mesh, meshWorldMatrix, joints).WithName(nodeName);
-        }
-
-        [Obsolete("Remove name parameter and use .WithName(name);", true)]
-        public InstanceBuilder AddSkinnedMesh(MESHBUILDER mesh, string nodeName, params (NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
-        {
-            return AddSkinnedMesh(mesh, joints).WithName(nodeName);
-        }
-
-        #endregion
-
         #region API
-        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Matrix4x4 meshWorldMatrix)
-        {
-            Guard.NotNull(mesh, nameof(mesh));
-            Guard.IsTrue(meshWorldMatrix.IsValid(_Extensions.MatrixCheck.Decomposable | _Extensions.MatrixCheck.IdentityColumn4), nameof(meshWorldMatrix));
-
-            var instance = new InstanceBuilder(this);
-            instance.Content = new FixedTransformer(mesh, meshWorldMatrix);
-
-            _Instances.Add(instance);
-
-            return instance;
-        }
 
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, NodeBuilder node)
         {
@@ -129,6 +95,33 @@ namespace SharpGLTF.Scenes
 
             var instance = new InstanceBuilder(this);
             instance.Content = new RigidTransformer(mesh, node);
+
+            _Instances.Add(instance);
+
+            return instance;
+        }
+
+        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Transforms.AffineTransform meshWorldTransform)
+        {
+            Guard.NotNull(mesh, nameof(mesh));
+
+            var instance = new InstanceBuilder(this);
+            instance.Content = new FixedTransformer(mesh, meshWorldTransform);
+
+            _Instances.Add(instance);
+
+            return instance;
+        }
+
+        public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, NodeBuilder node, Transforms.AffineTransform instanceTransform)
+        {
+            Guard.NotNull(mesh, nameof(mesh));
+            Guard.NotNull(node, nameof(node));
+
+            if (instanceTransform.IsIdentity) return AddRigidMesh(mesh, node);
+
+            var instance = new InstanceBuilder(this);
+            instance.Content = new FixedTransformer(mesh, node, instanceTransform);
 
             _Instances.Add(instance);
 

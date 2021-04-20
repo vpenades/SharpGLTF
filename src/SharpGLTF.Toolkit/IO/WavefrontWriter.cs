@@ -221,7 +221,11 @@ namespace SharpGLTF.IO
 
         public void AddModel(ModelRoot model, Animation animation, float time)
         {
-            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, animation, time))
+            var options = new Runtime.RuntimeOptions();
+            options.IsolateMemory = false;
+            options.GpuMeshInstancing = Runtime.MeshInstancing.SingleMesh;
+
+            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, options, animation, time))
             {
                 var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);

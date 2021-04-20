@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using SCHEMA2SCENE = SharpGLTF.Scenes.Schema2SceneBuilder.IOperator<SharpGLTF.Schema2.Scene>;
-
 namespace SharpGLTF.Scenes
 {
     /// <summary>
     /// Represents an element within <see cref="SceneBuilder.Instances"/>
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{Content}")]
-    public sealed class InstanceBuilder : SCHEMA2SCENE
+    public sealed class InstanceBuilder
     {
         #region lifecycle
 
@@ -114,11 +112,6 @@ namespace SharpGLTF.Scenes
             clone._ContentTransformer = this._ContentTransformer?.DeepClone(args);
 
             return clone;
-        }
-
-        void SCHEMA2SCENE.Setup(Schema2.Scene dstScene, Schema2SceneBuilder context)
-        {
-            if (_ContentTransformer is SCHEMA2SCENE schema2scb) schema2scb.Setup(dstScene, context);
         }
 
         #endregion

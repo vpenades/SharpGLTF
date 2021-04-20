@@ -29,8 +29,7 @@ namespace SharpGLTF
             var meshes = srcScene.LogicalParent.LogicalMeshes;
 
             // get the drawable instances.
-            var instances = sceneInstance
-                .DrawableInstances
+            var instances = sceneInstance                
                 .Where(item => item.Transform.Visible);
 
             // prepare the PlotlyScene.

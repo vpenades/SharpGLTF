@@ -90,7 +90,7 @@ namespace SharpGLTF.Runtime
                 }
             }
 
-            var worldTriangles = sceneInstance.DrawableInstances.SelectMany(item => evaluateTriangles(item));            
+            var worldTriangles = sceneInstance.SelectMany(item => evaluateTriangles(item));            
 
             var scenePlot = new PlotlyScene();
             scenePlot.AppendTriangles(worldTriangles, c=>c);

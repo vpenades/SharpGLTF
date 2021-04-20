@@ -118,33 +118,49 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             foreach (var f in TestFiles.GetBabylonJSModelsPaths())
             {
-                TestContext.Progress.WriteLine(f);
-
                 _LoadModel(f, true);
             }
-        }
+        }        
 
-        [Test]
-        public void LoadInvalidModelsFromBabylonJs()
+        [TestCase("TeapotsGalore.gltf")]
+        [TestCase("GrassFieldInstanced.glb")]
+        [TestCase("InstanceTest.glb")]
+        public void LoadModelsWithGpuMeshInstancingExtension(string fileFilter)
         {
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetBabylonJSModelsPaths(false))
-            {
-                TestContext.Progress.WriteLine(f);
+            var f = TestFiles.GetMeshIntancingModelPaths().FirstOrDefault(item => item.Contains(fileFilter));
+                        
+            var model = _LoadModel(f, false);
 
-                try
-                {
-                    var model = ModelRoot.Load(f, Validation.ValidationMode.Strict);
-                    
-                    Assert.Fail($"{f} Should throw");
-                }
-                catch(Exception ex)
-                {
-                    TestContext.WriteLine(ex.Message);
-                }
-            }
+            var ff = System.IO.Path.GetFileNameWithoutExtension(f);
+
+            model.AttachToCurrentTest($"{ff}.loaded.glb");
+
+            // perform roundtrip
+
+            var roundtripDefault = model.DefaultScene
+                .ToSceneBuilder()                                       // glTF to SceneBuilder
+                .ToGltf2(Scenes.SceneBuilderSchema2Settings.Default);   // SceneBuilder to glTF
+
+            var roundtripInstanced = model.DefaultScene
+                .ToSceneBuilder()                                               // glTF to SceneBuilder
+                .ToGltf2(Scenes.SceneBuilderSchema2Settings.WithGpuInstancing); // SceneBuilder to glTF
+
+            // compare bounding spheres
+
+            var modelBounds = Runtime.MeshDecoder.EvaluateBoundingBox(model.DefaultScene);
+            var rtripDefBounds = Runtime.MeshDecoder.EvaluateBoundingBox(roundtripDefault.DefaultScene);
+            var rtripGpuBounds = Runtime.MeshDecoder.EvaluateBoundingBox(roundtripInstanced.DefaultScene);
+
+            Assert.AreEqual(modelBounds, rtripDefBounds);
+            Assert.AreEqual(modelBounds, rtripGpuBounds);
+
+            // save results
+
+            roundtripDefault.AttachToCurrentTest($"{ff}.roundtrip.default.glb");
+            roundtripInstanced.AttachToCurrentTest($"{ff}.roundtrip.instancing.glb");            
         }
 
         [TestCase("SpecGlossVsMetalRough.gltf")]
@@ -251,7 +267,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
 
             var triangles = model.DefaultScene
-                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, 0)
+                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, null, 0)
                 .ToArray();
 
             model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".obj"));
@@ -355,7 +371,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 TestContext.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
 
                 var triangles = model.DefaultScene
-                    .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(anim, t)
+                    .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, anim, t)
                     .ToList();
 
                 var vertices = triangles

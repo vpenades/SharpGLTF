@@ -200,15 +200,16 @@ namespace SharpGLTF.Schema2
         /// Yields a collection of triangles representing the geometry in world space.
         /// </summary>
         /// /// <param name="scene">A <see cref="Scene"/> instance.</param>
+        /// <param name="options">Evaluation options.</param>
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, IVertexBuilder C, Material Material)> EvaluateTriangles(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(IVertexBuilder A, IVertexBuilder B, IVertexBuilder C, Material Material)> EvaluateTriangles(this Scene scene, Runtime.RuntimeOptions options = null, Animation animation = null, float time = 0)
         {
             if (scene == null) return Enumerable.Empty<(IVertexBuilder, IVertexBuilder, IVertexBuilder, Material)>();
 
             var instance = Runtime.SceneTemplate
-                .Create(scene)
+                .Create(scene, options)
                 .CreateInstance();
 
             if (animation == null)
@@ -223,7 +224,6 @@ namespace SharpGLTF.Schema2
             var meshes = scene.LogicalParent.LogicalMeshes;
 
             return instance
-                .DrawableInstances
                 .Where(item => item.Transform.Visible)
                 .SelectMany(item => meshes[item.Template.LogicalMeshIndex].EvaluateTriangles(item.Transform));
         }
@@ -234,17 +234,18 @@ namespace SharpGLTF.Schema2
         /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
         /// <typeparam name="TvM">The vertex fragment type with Colors and Texture Coordinates.</typeparam>
         /// <param name="scene">A <see cref="Scene"/> instance.</param>
+        /// <param name="options">Evaluation options.</param>
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty> A, VertexBuilder<TvG, TvM, VertexEmpty> B, VertexBuilder<TvG, TvM, VertexEmpty> C, Material Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Animation animation = null, float time = 0)
+        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty> A, VertexBuilder<TvG, TvM, VertexEmpty> B, VertexBuilder<TvG, TvM, VertexEmpty> C, Material Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Runtime.RuntimeOptions options = null, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
             if (scene == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
 
             var instance = Runtime.SceneTemplate
-                .Create(scene)
+                .Create(scene, options)
                 .CreateInstance();
 
             if (animation == null)
@@ -259,7 +260,6 @@ namespace SharpGLTF.Schema2
             var meshes = scene.LogicalParent.LogicalMeshes;
 
             return instance
-                .DrawableInstances
                 .Where(item => item.Transform.Visible)
                 .SelectMany(item => meshes[item.Template.LogicalMeshIndex].EvaluateTriangles<TvG, TvM, VertexEmpty>(item.Transform));
         }

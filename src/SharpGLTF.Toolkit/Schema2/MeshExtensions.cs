@@ -321,6 +321,109 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
+        public static unsafe MeshGpuInstancing WithInstanceAccessor<T>(this MeshGpuInstancing instancing, string attribute, IReadOnlyList<T> values)
+            where T : unmanaged
+        {
+            Guard.NotNull(instancing, nameof(instancing));
+            Guard.NotNull(values, nameof(values));
+
+            var root = instancing.LogicalParent.LogicalParent;
+            var view = root.CreateBufferView(values);
+
+            var accessor = root.CreateAccessor();
+
+            if (typeof(T) == typeof(int))
+            {
+                accessor.SetIndexData(view, 0, values.Count, IndexEncodingType.UNSIGNED_INT);
+            }
+            else
+            {
+                var dt = DimensionType.CUSTOM;
+                if (typeof(T) == typeof(Single)) dt = DimensionType.SCALAR;
+                if (typeof(T) == typeof(Vector2)) dt = DimensionType.VEC2;
+                if (typeof(T) == typeof(Vector3)) dt = DimensionType.VEC3;
+                if (typeof(T) == typeof(Vector4)) dt = DimensionType.VEC4;
+                if (typeof(T) == typeof(Quaternion)) dt = DimensionType.VEC4;
+                if (typeof(T) == typeof(Matrix4x4)) dt = DimensionType.MAT4;
+
+                if (dt == DimensionType.CUSTOM) throw new ArgumentException(typeof(T).Name);
+
+                accessor.SetVertexData(view, 0, values.Count, dt, EncodingType.FLOAT, false);
+            }
+
+            instancing.SetAccessor(attribute, accessor);
+
+            return instancing;
+        }
+
+        public static MeshGpuInstancing WithInstanceAccessors(this MeshGpuInstancing instancing, IReadOnlyList<Transforms.AffineTransform> transforms)
+        {
+            Guard.NotNull(instancing, nameof(instancing));
+            Guard.NotNull(transforms, nameof(transforms));
+
+            var xfrms = transforms.Select(item => item.GetDecomposed());
+            var hasS = xfrms.Any(item => item.Scale != Vector3.One);
+            var hasR = xfrms.Any(item => item.Rotation != Quaternion.Identity);
+            var hasT = xfrms.Any(item => item.Translation != Vector3.Zero);
+
+            if (hasS) instancing.WithInstanceAccessor("SCALE", xfrms.Select(item => item.Scale).ToList());
+            if (hasR) instancing.WithInstanceAccessor("ROTATION", xfrms.Select(item => item.Rotation).ToList());
+            if (hasT) instancing.WithInstanceAccessor("TRANSLATION", xfrms.Select(item => item.Translation).ToList());
+
+            return instancing;
+        }
+
+        public static MeshGpuInstancing WithInstanceCustomAccessors(this MeshGpuInstancing instancing, IReadOnlyList<IO.JsonContent> extras)
+        {
+            Guard.NotNull(instancing, nameof(instancing));
+
+            // gather attribute keys
+            var keys = extras
+                .Select(item => item.Content)
+                .OfType<IReadOnlyDictionary<string, Object>>()
+                .SelectMany(item => item.Keys)
+                .Distinct()
+                .Where(item => item.StartsWith("_"));
+
+            foreach (var key in keys)
+            {
+                Object valueGetter(IO.JsonContent extra)
+                {
+                    if (!(extra.Content is IReadOnlyDictionary<string, Object> dict)) return null;
+                    return dict.TryGetValue(key, out var val) ? val : null;
+                }
+
+                var values = extras.Select(valueGetter).ToList();
+
+                instancing.WithInstanceCustomAccessor(key, values);
+            }
+
+            return instancing;
+        }
+
+        public static MeshGpuInstancing WithInstanceCustomAccessor(this MeshGpuInstancing instancing, string attribute, IReadOnlyList<Object> values)
+        {
+            Guard.NotNullOrEmpty(attribute, nameof(attribute));
+
+            attribute = attribute.ToUpper();
+            var expectedType = values.Where(item => item != null).FirstOrDefault()?.GetType();
+            if (expectedType == null) return instancing;
+
+            if (expectedType == typeof(int))
+            {
+                var xValues = values.Select(item => item is int val ? val : 0).ToList();
+                return instancing.WithInstanceAccessor(attribute, xValues);
+            }
+
+            if (expectedType == typeof(Single))
+            {
+                var xValues = values.Select(item => item is float val ? val : 0).ToList();
+                return instancing.WithInstanceAccessor(attribute, xValues);
+            }
+
+            throw new ArgumentException(expectedType.Name);
+        }
+
         #endregion
 
         #region material
@@ -352,14 +455,19 @@ namespace SharpGLTF.Schema2
             var points = prim.GetPointIndices();
             if (!points.Any()) yield break;
 
-            var vertices = prim.GetVertexColumns(xform);
+            var vertices = prim.GetVertexColumns();
             var vtype = vertices.GetCompatibleVertexType();
 
-            foreach (var t in points)
+            foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
-                var a = vertices.GetVertex(vtype, t);
+                var xvertices = xinst != null ? vertices.WithTransform(xinst) : vertices;
 
-                yield return (a, prim.Material);
+                foreach (var t in points)
+                {
+                    var a = xvertices.GetVertex(vtype, t);
+
+                    yield return (a, prim.Material);
+                }
             }
         }
 
@@ -378,15 +486,20 @@ namespace SharpGLTF.Schema2
             var lines = prim.GetLineIndices();
             if (!lines.Any()) yield break;
 
-            var vertices = prim.GetVertexColumns(xform);
+            var vertices = prim.GetVertexColumns();
             var vtype = vertices.GetCompatibleVertexType();
 
-            foreach (var (la, lb) in lines)
+            foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
-                var va = vertices.GetVertex(vtype, la);
-                var vb = vertices.GetVertex(vtype, lb);
+                var xvertices = xinst != null ? vertices.WithTransform(xinst) : vertices;
 
-                yield return (va, vb, prim.Material);
+                foreach (var (la, lb) in lines)
+                {
+                    var va = xvertices.GetVertex(vtype, la);
+                    var vb = xvertices.GetVertex(vtype, lb);
+
+                    yield return (va, vb, prim.Material);
+                }
             }
         }
 
@@ -402,19 +515,23 @@ namespace SharpGLTF.Schema2
             if (prim == null) yield break;
             if (xform != null && !xform.Visible) yield break;
 
+            var vertices = prim.GetVertexColumns();
             var triangles = prim.GetTriangleIndices();
             if (!triangles.Any()) yield break;
 
-            var vertices = prim.GetVertexColumns(xform);
-            var vtype = vertices.GetCompatibleVertexType();
-
-            foreach (var (ta, tb, tc) in triangles)
+            foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
-                var va = vertices.GetVertex(vtype, ta);
-                var vb = vertices.GetVertex(vtype, tb);
-                var vc = vertices.GetVertex(vtype, tc);
+                var xvertices = xinst != null ? vertices.WithTransform(xinst) : vertices;
+                var vtype = vertices.GetCompatibleVertexType();
 
-                yield return (va, vb, vc, prim.Material);
+                foreach (var (ta, tb, tc) in triangles)
+                {
+                    var va = xvertices.GetVertex(vtype, ta);
+                    var vb = xvertices.GetVertex(vtype, tb);
+                    var vc = xvertices.GetVertex(vtype, tc);
+
+                    yield return (va, vb, vc, prim.Material);
+                }
             }
         }
 
@@ -426,10 +543,30 @@ namespace SharpGLTF.Schema2
             if (xform != null && !xform.Visible) mesh = null;
             if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
 
+            var primitives = _GatherMeshGeometry<TvG>(mesh);
+
+            return Transforms.InstancingTransform.Evaluate(xform)
+                .SelectMany
+                (
+                    xinst => primitives.SelectMany
+                    (
+                        prim =>
+                        {
+                            var xvertices = xinst != null ? prim.Vertices.WithTransform(xinst) : prim.Vertices;
+                            return _EvaluateTriangles<TvG, TvM, TvS>(prim.Material, xvertices, prim.Triangles);
+                        }
+
+                    )
+                );
+        }
+
+        private static IReadOnlyList<(Material Material, VertexBufferColumns Vertices, IEnumerable<(int, int, int)> Triangles)> _GatherMeshGeometry<TvG>(Mesh mesh)
+            where TvG : struct, IVertexGeometry
+        {
             var primitives = mesh.Primitives
-                .Where(prim => prim.GetTriangleIndices().Any())
-                .Select(prim => (prim.Material, prim.GetVertexColumns(xform), (IEnumerable<(int, int, int)>)prim.GetTriangleIndices().ToList()))
-                .ToList();
+                            .Where(prim => prim.GetTriangleIndices().Any())
+                            .Select(prim => (prim.Material, prim.GetVertexColumns(), (IEnumerable<(int, int, int)>)prim.GetTriangleIndices().ToList()))
+                            .ToList();
 
             bool needsNormals = default(TvG).TryGetNormal(out Vector3 nrm);
             bool needsTangents = default(TvG).TryGetTangent(out Vector4 tgt);
@@ -454,7 +591,7 @@ namespace SharpGLTF.Schema2
                 if (prims.Any()) VertexBufferColumns.CalculateTangents(prims);
             }
 
-            return primitives.SelectMany(prim => _EvaluateTriangles<TvG, TvM, TvS>(prim.Material, prim.Item2, prim.Item3));
+            return primitives;
         }
 
         private static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> _EvaluateTriangles<TvG, TvM, TvS>(Material material, VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
@@ -476,7 +613,7 @@ namespace SharpGLTF.Schema2
 
         #region mesh conversion
 
-        public static VertexBufferColumns GetVertexColumns(this MeshPrimitive primitive, MESHXFORM xform = null)
+        public static VertexBufferColumns GetVertexColumns(this MeshPrimitive primitive)
         {
             Guard.NotNull(primitive, nameof(primitive));
 
@@ -489,8 +626,6 @@ namespace SharpGLTF.Schema2
                 var morphTarget = primitive.GetMorphTargetAccessors(i);
                 _Initialize(morphTarget, columns.AddMorphTarget());
             }
-
-            if (xform != null) columns.ApplyTransform(xform);
 
             return columns;
         }
@@ -506,6 +641,8 @@ namespace SharpGLTF.Schema2
 
             if (vertexAccessors.ContainsKey("TEXCOORD_0")) dstColumns.TexCoords0 = vertexAccessors["TEXCOORD_0"].AsVector2Array();
             if (vertexAccessors.ContainsKey("TEXCOORD_1")) dstColumns.TexCoords1 = vertexAccessors["TEXCOORD_1"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_2")) dstColumns.TexCoords2 = vertexAccessors["TEXCOORD_2"].AsVector2Array();
+            if (vertexAccessors.ContainsKey("TEXCOORD_3")) dstColumns.TexCoords3 = vertexAccessors["TEXCOORD_3"].AsVector2Array();
 
             if (vertexAccessors.ContainsKey("JOINTS_0")) dstColumns.Joints0 = vertexAccessors["JOINTS_0"].AsVector4Array();
             if (vertexAccessors.ContainsKey("JOINTS_1")) dstColumns.Joints1 = vertexAccessors["JOINTS_1"].AsVector4Array();
@@ -553,10 +690,11 @@ namespace SharpGLTF.Schema2
         /// <typeparam name="TvM">A subtype of <see cref="IVertexMaterial"/></typeparam>
         /// <param name="srcScene">The source <see cref="Scene"/> to evaluate.</param>
         /// <param name="materialFunc">A function to convert <see cref="Material"/> into <typeparamref name="TMaterial"/>.</param>
+        /// <param name="options">Evaluation options.</param>
         /// <param name="animation">The source <see cref="Animation"/> to evaluate.</param>
         /// <param name="time">A time point, in seconds, within <paramref name="animation"/>.</param>
         /// <returns>A new <see cref="MeshBuilder{TMaterial, TvG, TvM, TvS}"/> containing the evaluated geometry.</returns>
-        public static MeshBuilder<TMaterial, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TMaterial, TvG, TvM>(this Scene srcScene, Converter<Material, TMaterial> materialFunc, Animation animation, float time)
+        public static MeshBuilder<TMaterial, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TMaterial, TvG, TvM>(this Scene srcScene, Converter<Material, TMaterial> materialFunc, Runtime.RuntimeOptions options, Animation animation, float time)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -568,7 +706,7 @@ namespace SharpGLTF.Schema2
 
             Guard.NotNull(materialFunc, nameof(materialFunc));
 
-            foreach (var tri in srcScene.EvaluateTriangles<VertexPositionNormal, VertexColor1Texture1>(animation, time))
+            foreach (var tri in srcScene.EvaluateTriangles<VertexPositionNormal, VertexColor1Texture1>(options, animation, time))
             {
                 var material = materialFunc(tri.Item4);
 
@@ -578,7 +716,7 @@ namespace SharpGLTF.Schema2
             return mesh;
         }
 
-        public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TvG, TvM>(this Scene srcScene, Animation animation, float time)
+        public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, VertexEmpty> ToStaticMeshBuilder<TvG, TvM>(this Scene srcScene, Runtime.RuntimeOptions options, Animation animation, float time)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
@@ -598,7 +736,7 @@ namespace SharpGLTF.Schema2
                 return materials[srcMaterial] = dstMaterial;
             }
 
-            return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(convertMaterial, animation, time);
+            return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(convertMaterial, options, animation, time);
         }
 
         public static IMeshBuilder<Materials.MaterialBuilder> ToMeshBuilder(this Mesh srcMesh)

@@ -11,7 +11,7 @@ namespace SharpGLTF.Scenes
 {
     partial class MeshContent : SCHEMA2NODE
     {
-        void SCHEMA2NODE.Setup(Node dstNode, Schema2SceneBuilder context)
+        void SCHEMA2NODE.ApplyTo(Node dstNode, Schema2SceneBuilder context)
         {
             // we try to assign our mesh to the target node.
             // but if the target node already has a mesh, we need to create
@@ -24,7 +24,7 @@ namespace SharpGLTF.Scenes
 
     partial class CameraContent : SCHEMA2NODE
     {
-        public void Setup(Node dstNode, Schema2SceneBuilder context)
+        public void ApplyTo(Node dstNode, Schema2SceneBuilder context)
         {
             if (_Camera is CameraBuilder.Orthographic ortho)
             {
@@ -42,7 +42,7 @@ namespace SharpGLTF.Scenes
 
     partial class LightContent : SCHEMA2NODE
     {
-        public void Setup(Node dstNode, Schema2SceneBuilder context)
+        public void ApplyTo(Node dstNode, Schema2SceneBuilder context)
         {
             if (_Light is LightBuilder.Directional directional)
             {

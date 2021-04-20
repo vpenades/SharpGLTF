@@ -167,6 +167,7 @@ namespace SharpGLTF.Geometry
 
         public static bool IsEmpty<TMaterial>(this IPrimitiveReader<TMaterial> primitive)
         {
+            if (primitive == null) return true;
             if (primitive.Points.Count > 0) return false;
             if (primitive.Lines.Count > 0) return false;
             if (primitive.Triangles.Count > 0) return false;
@@ -175,6 +176,8 @@ namespace SharpGLTF.Geometry
 
         public static bool IsEmpty<TMaterial>(this IMeshBuilder<TMaterial> mesh)
         {
+            if (mesh == null) return true;
+            if (mesh.Primitives.Count == 0) return true;
             return mesh.Primitives.All(prim => prim.IsEmpty());
         }
 

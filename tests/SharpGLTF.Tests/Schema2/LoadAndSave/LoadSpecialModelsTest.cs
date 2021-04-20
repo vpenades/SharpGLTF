@@ -57,7 +57,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.NotNull(model);
 
             var triangles = model.DefaultScene
-                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexTexture1>(model.LogicalAnimations[0], 0.5f)
+                .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexTexture1>(null, model.LogicalAnimations[0], 0.5f)
                 .ToList();
 
             // Save as GLB, and also evaluate all triangles and save as Wavefront OBJ            

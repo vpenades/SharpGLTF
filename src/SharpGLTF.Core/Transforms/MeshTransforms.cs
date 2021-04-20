@@ -62,6 +62,14 @@ namespace SharpGLTF.Transforms
         V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets);
     }
 
+    public interface IGeometryInstancing
+    {
+        /// <summary>
+        /// Gets the list of instances produced by this transform.
+        /// </summary>
+        IReadOnlyList<RigidTransform> WorldTransforms { get; }
+    }
+
     public abstract class MorphTransform
     {
         #region constructor
@@ -85,6 +93,7 @@ namespace SharpGLTF.Transforms
         /// - Index of value <see cref="COMPLEMENT_INDEX"/> points to the Mesh master positions.
         /// - All other indices point to Mesh MorphTarget[index] positions.
         /// </summary>
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private SparseWeight8 _Weights;
 
         public const int COMPLEMENT_INDEX = 65536;
@@ -93,6 +102,7 @@ namespace SharpGLTF.Transforms
         /// True if morph targets represent absolute values.
         /// False if morph targets represent values relative to master value.
         /// </summary>
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private bool _AbsoluteMorphTargets;
 
         #endregion
@@ -215,8 +225,13 @@ namespace SharpGLTF.Transforms
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private TRANSFORM _WorldMatrix;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Boolean _Visible;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private Boolean _FlipFaces;
 
         #endregion
@@ -299,6 +314,7 @@ namespace SharpGLTF.Transforms
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private TRANSFORM[] _SkinTransforms;
 
         #endregion
@@ -417,6 +433,90 @@ namespace SharpGLTF.Transforms
             if (meshWorldTransform == Matrix4x4Double.Identity) return invJoint;
 
             return meshWorldTransform * invJoint;
+        }
+
+        #endregion
+    }
+
+    public class InstancingTransform : RigidTransform, IGeometryInstancing
+    {
+        #region lifecycle
+
+        public InstancingTransform(AffineTransform[] instances)
+        {
+            _LocalMatrices = new TRANSFORM[instances.Length];
+
+            for (int i = 0; i < _LocalMatrices.Length; ++i)
+            {
+                _LocalMatrices[i] = instances[i].Matrix;
+            }
+
+            _WorldTransforms = new Lazy<RigidTransform[]>(_CreateTransforms);
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly Matrix4x4[] _LocalMatrices;
+
+        private Lazy<RigidTransform[]> _WorldTransforms;
+
+        #endregion
+
+        #region properties
+
+        /// <summary>
+        /// Gets the local matrices for every instanced mesh
+        /// </summary>
+        public IReadOnlyList<TRANSFORM> LocalMatrices => _LocalMatrices;
+
+        /// <summary>
+        /// Gets the local transforms for every instanced mesh
+        /// </summary>
+        public IReadOnlyList<RigidTransform> WorldTransforms => UpdateInstances();
+
+        #endregion
+
+        #region API
+
+        private RigidTransform[] _CreateTransforms()
+        {
+            var xforms = new RigidTransform[_LocalMatrices.Length];
+
+            for (int i = 0; i < xforms.Length; ++i)
+            {
+                xforms[i] = new RigidTransform();
+            }
+
+            return xforms;
+        }
+
+        public RigidTransform[] UpdateInstances()
+        {
+            var xforms = _WorldTransforms.Value;
+
+            for (int i = 0; i < xforms.Length; ++i)
+            {
+                var xform = AffineTransform
+                    .Multiply(_LocalMatrices[i], this.WorldMatrix)
+                    .Matrix;
+
+                xforms[i].Update(xform);
+            }
+
+            return xforms;
+        }
+
+        public static IEnumerable<IGeometryTransform> Evaluate(IGeometryTransform xform)
+        {
+            if (xform is IGeometryInstancing instanced)
+            {
+                foreach (var xinst in instanced.WorldTransforms) yield return xinst;
+                yield break;
+            }
+
+            yield return xform;
         }
 
         #endregion

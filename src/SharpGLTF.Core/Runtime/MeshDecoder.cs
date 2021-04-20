@@ -313,7 +313,6 @@ namespace SharpGLTF.Runtime
             }
 
             return instance
-                .DrawableInstances
                 .Where(item => item.Transform.Visible)
                 .SelectMany(item => meshes[item.Template.LogicalMeshIndex].GetWorldVertices(item.Transform));
         }
@@ -324,11 +323,14 @@ namespace SharpGLTF.Runtime
             Guard.NotNull(mesh, nameof(mesh));
             Guard.NotNull(xform, nameof(xform));
 
-            foreach (var primitive in mesh.Primitives)
+            foreach (var childXform in Transforms.InstancingTransform.Evaluate(xform))
             {
-                for (int i = 0; i < primitive.VertexCount; ++i)
+                foreach (var primitive in mesh.Primitives)
                 {
-                    yield return primitive.GetPosition(i, xform);
+                    for (int i = 0; i < primitive.VertexCount; ++i)
+                    {
+                        yield return primitive.GetPosition(i, childXform);
+                    }
                 }
             }
         }

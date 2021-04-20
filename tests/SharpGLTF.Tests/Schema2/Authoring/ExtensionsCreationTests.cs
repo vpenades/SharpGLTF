@@ -49,7 +49,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+            var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
 
             // first, create a default material
             var material = new Materials.MaterialBuilder("material1")
@@ -91,7 +91,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+            var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
 
             // first, create a default material
             var material = new Materials.MaterialBuilder("material")
@@ -131,7 +131,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+            var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
             
             var material = new Materials.MaterialBuilder("material")
                 .WithMetallicRoughnessShader()
@@ -168,7 +168,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var basePath = System.IO.Path.Combine(TestFiles.RootDirectory, "glTF-Sample-Models", "2.0", "SpecGlossVsMetalRough", "glTF");
+            var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
 
             var material = new Materials.MaterialBuilder("material")
                 .WithMetallicRoughnessShader()

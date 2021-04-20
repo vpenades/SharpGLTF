@@ -93,9 +93,9 @@ namespace SharpGLTF.Runtime
     }
 
     [System.Diagnostics.DebuggerDisplay("{_GetDebugString(),nq}")]
-    sealed class _MeshPrimitiveDecoder<TMaterial>
-        : _MeshPrimitiveDecoder
-        , IMeshPrimitiveDecoder<TMaterial>
+    sealed class _MeshPrimitiveDecoder<TMaterial> :
+        _MeshPrimitiveDecoder,
+        IMeshPrimitiveDecoder<TMaterial>
         where TMaterial : class
     {
         #region lifecycle
@@ -345,9 +345,9 @@ namespace SharpGLTF.Runtime
     }
 
     [System.Diagnostics.DebuggerDisplay("Vertices: {VertexCount}")]
-    sealed class _MeshGeometryDecoder
-        : VertexNormalsFactory.IMeshPrimitive
-        , VertexTangentsFactory.IMeshPrimitive
+    sealed class _MeshGeometryDecoder :
+        VertexNormalsFactory.IMeshPrimitive,
+        VertexTangentsFactory.IMeshPrimitive
     {
         #region  lifecycle
 
@@ -423,9 +423,9 @@ namespace SharpGLTF.Runtime
     }
 
     [System.Diagnostics.DebuggerDisplay("Vertices: {VertexCount}")]
-    sealed class _MorphTargetDecoder
-        : VertexNormalsFactory.IMeshPrimitive
-        , VertexTangentsFactory.IMeshPrimitive
+    sealed class _MorphTargetDecoder :
+        VertexNormalsFactory.IMeshPrimitive,
+        VertexTangentsFactory.IMeshPrimitive
     {
         #region  lifecycle
 

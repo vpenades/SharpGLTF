@@ -181,6 +181,7 @@ namespace SharpGLTF
         [Flags]
         internal enum MatrixCheck
         {
+            Finite = 0,
             NonZero = 1,
             Identity = 2,
             IdentityColumn4 = 4,

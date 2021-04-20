@@ -31,9 +31,10 @@ namespace SharpGLTF.Scenes
     /// Represents a <see cref="MESHBUILDER"/> content of <see cref="ContentTransformer.Content"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Mesh")]
-    partial class MeshContent
-        : IRenderableContent
-        , ICloneable
+    partial class MeshContent :
+        IRenderableContent,
+        ICloneable,
+        IEquatable<IRenderableContent>
     {
         #region lifecycle
 
@@ -58,6 +59,16 @@ namespace SharpGLTF.Scenes
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private MESHBUILDER _Mesh;
+
+        public override int GetHashCode() { return _Mesh.GetHashCode(); }
+
+        public override bool Equals(object obj) { return obj is IRenderableContent other && this.Equals(other); }
+
+        public bool Equals(IRenderableContent other)
+        {
+            if (other is MeshContent otherMesh) return this._Mesh == otherMesh._Mesh;
+            throw new ArgumentException("Type mismatch", nameof(other));
+        }
 
         #endregion
 
