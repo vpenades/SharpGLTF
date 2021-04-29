@@ -357,14 +357,14 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 if (t < anim.Duration)
                 {
-                    var mw = curves.Morphing
+                    var mw = curves.GetMorphingSampler<float[]>()
                         .CreateCurveSampler()
                         .GetPoint(t);            
                     
                     TestContext.WriteLine($"    Morph Weights: {mw[0]} {mw[1]}");
                 }
 
-                var msw = curves.MorphingSparse
+                var msw = curves.GetMorphingSampler<Transforms.SparseWeight8>()
                     .CreateCurveSampler()
                     .GetPoint(t);
 

@@ -61,7 +61,7 @@ namespace SharpGLTF.Scenes
         private Object _Content;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private Animations.AnimatableProperty<Transforms.SparseWeight8> _Morphings;
+        private Animations.AnimatableProperty<ArraySegment<float>> _Morphings;
 
         #endregion
 
@@ -89,7 +89,7 @@ namespace SharpGLTF.Scenes
         /// </summary>
         internal Object Content => _Content;
 
-        public Animations.AnimatableProperty<Transforms.SparseWeight8> Morphings => _Morphings;
+        public Animations.AnimatableProperty<ArraySegment<float>> Morphings => _Morphings;
 
         /// <summary>
         /// Gets a value indicating whether <see cref="Content"/> implements <see cref="IRenderableContent"/>
@@ -112,20 +112,24 @@ namespace SharpGLTF.Scenes
         /// <returns>A <see cref="NodeBuilder"/> instance, or NULL.</returns>
         public abstract NodeBuilder GetArmatureRoot();
 
-        public Animations.AnimatableProperty<Transforms.SparseWeight8> UseMorphing()
+        public Animations.AnimatableProperty<ArraySegment<float>> UseMorphing()
         {
             if (_Morphings == null)
             {
-                _Morphings = new Animations.AnimatableProperty<Transforms.SparseWeight8>();
+                _Morphings = new Animations.AnimatableProperty<ArraySegment<float>>();
                 _Morphings.Value = default;
             }
 
             return _Morphings;
         }
 
-        public Animations.CurveBuilder<Transforms.SparseWeight8> UseMorphing(string animationTrack)
+        public Animations.CurveBuilder<ArraySegment<float>> UseMorphing(string animationTrack)
         {
-            return UseMorphing().UseTrackBuilder(animationTrack);
+            var m = UseMorphing();
+
+            if (m.Value.Count == 0) throw new InvalidOperationException("A default sequence of weights must be set before setting animated weights. Use UseMorphing().SetValue(...)");
+
+            return m.UseTrackBuilder(animationTrack);
         }
 
         public abstract Matrix4x4 GetPoseWorldMatrix();

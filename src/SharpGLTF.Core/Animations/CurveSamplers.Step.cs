@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SharpGLTF.Animations
 {
-    readonly struct LinearSampler<T> :
+    readonly struct StepSampler<T> :
         ICurveSampler<T>,
         IConvertibleCurve<T>
     {
         #region lifecycle
 
-        public LinearSampler(IEnumerable<(float, T)> sequence, ISamplerTraits<T> traits)
+        public StepSampler(IEnumerable<(float, T)> sequence, ISamplerTraits<T> traits)
         {
             _Sequence = sequence;
             _Traits = traits;
@@ -25,7 +26,8 @@ namespace SharpGLTF.Animations
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly IEnumerable<(float Key, T Value)> _Sequence;
-        public int MaxDegree => 1;
+
+        public int MaxDegree => 0;
 
         #endregion
 
@@ -33,20 +35,19 @@ namespace SharpGLTF.Animations
 
         public T GetPoint(float offset)
         {
-            var (valA, valB, amount) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
-
-            return _Traits.InterpolateLinear(valA, valB, amount);
+            var (valA, _, _) = CurveSampler.FindRangeContainingOffset(_Sequence, offset);
+            return _Traits.Clone(valA);
         }
 
         public IReadOnlyDictionary<float, T> ToStepCurve()
         {
-            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
+            var traits = _Traits;
+            return _Sequence.ToDictionary(pair => pair.Key, pair => traits.Clone(pair.Value));
         }
 
         public IReadOnlyDictionary<float, T> ToLinearCurve()
         {
-            var traits = _Traits;
-            return _Sequence.ToDictionary(pair => pair.Key, pair => traits.Clone(pair.Value));
+            throw new NotSupportedException(CurveSampler.CurveError(MaxDegree));
         }
 
         public IReadOnlyDictionary<float, (T TangentIn, T Value, T TangentOut)> ToSplineCurve()
@@ -57,7 +58,7 @@ namespace SharpGLTF.Animations
         public ICurveSampler<T> ToFastSampler()
         {
             var traits = _Traits;
-            return FastCurveSampler<T>.CreateFrom(_Sequence, chunk => new LinearSampler<T>(chunk, traits)) ?? this;
+            return FastCurveSampler<T>.CreateFrom(_Sequence, chunk => new StepSampler<T>(chunk, traits)) ?? this;
         }
 
         #endregion

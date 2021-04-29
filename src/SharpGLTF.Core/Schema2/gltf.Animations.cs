@@ -9,6 +9,8 @@ using SharpGLTF.Transforms;
 using SharpGLTF.Animations;
 using SharpGLTF.Validation;
 
+using WEIGHTS = System.Collections.Generic.IReadOnlyList<float>;
+
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Animation[{LogicalIndex}] {Name}")]
@@ -112,7 +114,7 @@ namespace SharpGLTF.Schema2
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetKeys(keyframes);
+            sampler.SetCubicKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.scale)
                 .SetSampler(sampler);
@@ -140,7 +142,7 @@ namespace SharpGLTF.Schema2
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetKeys(keyframes);
+            sampler.SetCubicKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.rotation)
                 .SetSampler(sampler);
@@ -168,9 +170,39 @@ namespace SharpGLTF.Schema2
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetKeys(keyframes);
+            sampler.SetCubicKeys(keyframes);
 
             this._UseChannel(node, PropertyPath.translation)
+                .SetSampler(sampler);
+        }
+
+        public void CreateMorphChannel<TWeights>(Node node, IReadOnlyDictionary<Single, TWeights> keyframes, int morphCount, bool linear = true)
+            where TWeights : WEIGHTS
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            sampler.SetKeys(keyframes, morphCount);
+
+            this._UseChannel(node, PropertyPath.weights)
+                .SetSampler(sampler);
+        }
+
+        public void CreateMorphChannel<TWeights>(Node node, IReadOnlyDictionary<Single, (TWeights TangentIn, TWeights Value, TWeights TangentOut)> keyframes, int morphCount)
+            where TWeights : WEIGHTS
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
+
+            sampler.SetCubicKeys(keyframes, morphCount);
+
+            this._UseChannel(node, PropertyPath.weights)
                 .SetSampler(sampler);
         }
 
@@ -196,7 +228,7 @@ namespace SharpGLTF.Schema2
 
             var sampler = this._CreateSampler(AnimationInterpolationMode.CUBICSPLINE);
 
-            sampler.SetKeys(keyframes, morphCount);
+            sampler.SetCubicKeys(keyframes, morphCount);
 
             this._UseChannel(node, PropertyPath.weights)
                 .SetSampler(sampler);

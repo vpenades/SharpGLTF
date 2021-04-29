@@ -475,12 +475,12 @@ namespace SharpGLTF.Scenes
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(2), (Vector3.UnitY, Vector3.Zero));
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(3), (Vector3.UnitY, Vector3.Zero));
 
-            inst2.Content.UseMorphing().Value = Transforms.SparseWeight8.Create(1);
+            inst2.Content.UseMorphing().SetValue(1);
             
             var curve = inst2.Content.UseMorphing().UseTrackBuilder("Default");
-            curve.SetPoint(0, Transforms.SparseWeight8.Create(0));
-            curve.SetPoint(1, Transforms.SparseWeight8.Create(1));
-            curve.SetPoint(2, Transforms.SparseWeight8.Create(0));
+            curve.SetPoint(0, true, 0);
+            curve.SetPoint(1, true, 1);
+            curve.SetPoint(2, true, 0);
 
             var gltf = scene.ToGltf2();
 
@@ -788,6 +788,115 @@ namespace SharpGLTF.Scenes
             scene.AddSkinnedMesh(mesh, Matrix4x4.Identity, n0, n1, n2, n3, n4, n5, n6, n7);
 
             scene.AttachToCurrentTest("output.gltf");
+        }
+
+
+
+        [Test]
+        public void CreateMorphScene()
+        {
+            // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
+
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var meshMorphs = CreateMeshWith16MorphTargets();
+
+            var scene = new SceneBuilder();
+            var node = new NodeBuilder();
+
+            // var inst = scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
+            // inst.Content.UseMorphing().SetValue(1);
+
+            var inst = scene.AddRigidMesh(meshMorphs, node);
+            inst.Content.UseMorphing().SetValue(1.5f, 1.25f, 1, 1, 1, 1, 0.5f, 0.25f, 0.5f, 1, 1, 0, 0.25f, 0.5f, 0.75f, 1.5f);
+
+            scene.AttachToCurrentTest("morph.glb");
+            scene.AttachToCurrentTest("morph.gltf");
+            scene.ToGltf2().DefaultScene.ToSceneBuilder().AttachToCurrentTest("morph-roundtrip.glb");
+
+            var morphAnim = inst.Content.UseMorphing("Default");
+
+            var wwww = new float[16];
+
+            for(int i=0; i < 16; ++i)
+            {
+                Array.Clear(wwww, 0, wwww.Length);
+                wwww[i] = 1;
+                morphAnim.SetPoint(i, true, wwww);
+            }
+
+            var rnd = new Random(154);
+
+            for (int i = 16; i < 24; ++i)
+            {
+                Array.Clear(wwww, 0, wwww.Length);
+                for(int j=0; j < wwww.Length; ++j) wwww[j] = (float)rnd.NextDouble();
+                morphAnim.SetPoint(i, true, wwww);
+            }
+
+            scene.AttachToCurrentTest("morph-anim.glb");
+            scene.AttachToCurrentTest("morph-anim.gltf");
+            scene.ToGltf2().DefaultScene.ToSceneBuilder().AttachToCurrentTest("morph-anim-roundtrip.glb");
+        }        
+
+        static MeshBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty> CreateMeshWith16MorphTargets()
+        {
+            // create two materials
+
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1));
+
+            var blue = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannel.BaseColor, new Vector4(0, 0, 1, 1));
+
+            var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
+            var prim1 = mesh1.UsePrimitive(pink);
+            var prim2 = mesh1.UsePrimitive(blue);
+
+            // create a mesh made of a strip of triangle pairs (quads), with 256 segments
+
+            for (int i = 0; i < 256; ++i)
+            {
+                var a = new VertexPositionNormal(i + 0, 0, +10, 0, 1, 0);
+                var b = new VertexPositionNormal(i + 1, 0, +10, 0, 1, 0);
+                var c = new VertexPositionNormal(i + 1, 0, -10, 0, 1, 0);
+                var d = new VertexPositionNormal(i + 0, 0, -10, 0, 1, 0);
+
+                prim1.AddQuadrangle(a, b, c, d);
+                prim2.AddQuadrangle(d, c, b, a);
+            }
+
+            // create a 16 morph targets
+
+            for (int i = 0; i < 16; ++i)
+            {
+                var morphTarget = mesh1.UseMorphTarget(i);
+
+                var idx = i * 16 + 8;
+
+                const float waveWidth = 5;
+
+                foreach (var baseVertex in morphTarget.Vertices)
+                {
+                    var morphedVertex = baseVertex;
+
+                    var distance = Math.Abs(baseVertex.Position.X - idx);
+                    if (distance > waveWidth) continue;
+
+                    distance *= (float)Math.PI / (waveWidth * 2);
+                    distance = 30 * (float)Math.Cos(distance);
+
+                    morphedVertex.Position += new Vector3(0, distance, 0);
+
+                    // this method sets a new modified vertex associated to the base vertex.
+                    // notice that this method works with absolute values, deltas are calculated internally.
+                    // alternatively, you can also set deltas with SetVertexDelta method.
+                    morphTarget.SetVertex(baseVertex, morphedVertex);
+                }                
+            }
+
+            return mesh1;
         }
 
     }

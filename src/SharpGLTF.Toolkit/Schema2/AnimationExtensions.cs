@@ -78,6 +78,36 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        public static Node WithMorphingAnimation<T>(this Node node, string animationName, Animations.ICurveSampler<T> sampler)
+            where T : IReadOnlyList<float>
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNull(node.MorphWeights, nameof(node.MorphWeights), "Set node.MorphWeights before setting morphing animation");
+            Guard.MustBeGreaterThanOrEqualTo(node.MorphWeights.Count, 0, nameof(node.MorphWeights));
+
+            if (sampler is Animations.IConvertibleCurve<float[]> arrayCurve)
+            {
+                var animation = node.LogicalParent.UseAnimation(animationName);
+
+                var degree = arrayCurve.MaxDegree;
+                if (degree == 0) animation.CreateMorphChannel(node, arrayCurve.ToStepCurve(), node.MorphWeights.Count, false);
+                if (degree == 1) animation.CreateMorphChannel(node, arrayCurve.ToLinearCurve(), node.MorphWeights.Count, true);
+                if (degree == 3) animation.CreateMorphChannel(node, arrayCurve.ToSplineCurve(), node.MorphWeights.Count);
+            }
+
+            if (sampler is Animations.IConvertibleCurve<ArraySegment<float>> segmentCurve)
+            {
+                var animation = node.LogicalParent.UseAnimation(animationName);
+
+                var degree = segmentCurve.MaxDegree;
+                if (degree == 0) animation.CreateMorphChannel(node, segmentCurve.ToStepCurve(), node.MorphWeights.Count, false);
+                if (degree == 1) animation.CreateMorphChannel(node, segmentCurve.ToLinearCurve(), node.MorphWeights.Count, true);
+                if (degree == 3) animation.CreateMorphChannel(node, segmentCurve.ToSplineCurve(), node.MorphWeights.Count);
+            }
+
+            return node;
+        }
+
         public static Node WithRotationAnimation(this Node node, string animationName, Animations.ICurveSampler<Quaternion> sampler)
         {
             Guard.NotNull(node, nameof(node));

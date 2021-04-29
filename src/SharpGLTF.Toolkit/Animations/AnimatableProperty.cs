@@ -137,5 +137,24 @@ namespace SharpGLTF.Animations
         }
 
         #endregion
+
+        #region extended API
+
+        public void SetValue(params float[] elements) { this.Value = _Convert(elements); }
+
+        private static T _Convert(float[] elements)
+        {
+            if (typeof(T) == typeof(Vector3)) return (T)(Object)new Vector3(elements[0], elements[1], elements[2]);
+            if (typeof(T) == typeof(Vector4)) return (T)(Object)new Vector4(elements[0], elements[1], elements[2], elements[3]);
+            if (typeof(T) == typeof(Quaternion)) return (T)(Object)new Quaternion(elements[0], elements[1], elements[2], elements[3]);
+
+            if (typeof(T) == typeof(Single[])) return (T)(Object)new ArraySegment<Single>(elements).ToArray();
+            if (typeof(T) == typeof(ArraySegment<Single>)) return (T)(Object)new ArraySegment<Single>(elements);
+            if (typeof(T) == typeof(Transforms.SparseWeight8)) return (T)(Object)Transforms.SparseWeight8.Create(elements);
+
+            throw new NotSupportedException();
+        }
+
+        #endregion
     }
 }

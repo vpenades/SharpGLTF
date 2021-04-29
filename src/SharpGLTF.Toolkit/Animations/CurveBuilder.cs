@@ -10,10 +10,9 @@ namespace SharpGLTF.Animations
     /// Represents an editable curve of <typeparamref name="T"/> elements.
     /// </summary>
     /// <typeparam name="T">An element of the curve.</typeparam>
-    public abstract class CurveBuilder<T>
-        : ICurveSampler<T>,
+    public abstract class CurveBuilder<T> :
+        ICurveSampler<T>,
         IConvertibleCurve<T>
-        where T : struct
     {
         #region lifecycle
 
@@ -42,6 +41,7 @@ namespace SharpGLTF.Animations
 
         #region properties
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         internal IReadOnlyDictionary<float, _CurveNode<T>> _DebugKeys => _Keys;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
@@ -53,12 +53,16 @@ namespace SharpGLTF.Animations
 
         #region abstract API
 
+        protected abstract bool AreEqual(T left, T right);
+
+        protected abstract T CloneValue(T value);
+
         /// <summary>
         /// Creates a <typeparamref name="T"/> instance from an <see cref="Single"/>[] array.
         /// </summary>
         /// <param name="values">An array of floats.</param>
         /// <returns>A <typeparamref name="T"/> instance.</returns>
-        protected abstract T CreateValue(params float[] values);
+        protected abstract T CreateValue(IReadOnlyList<float> values);
 
         /// <summary>
         /// Samples the curve at a given <paramref name="offset"/>
@@ -77,8 +81,15 @@ namespace SharpGLTF.Animations
 
         public void RemoveKey(float offset) { _Keys.Remove(offset); }
 
+        public void SetPoint(float offset, bool isLinear, params float[] elements)
+        {
+            SetPoint(offset, CreateValue(elements), isLinear);
+        }
+
         public void SetPoint(float offset, T value, bool isLinear = true)
         {
+            value = CloneValue(value);
+
             if (_Keys.TryGetValue(offset, out _CurveNode<T> existing))
             {
                 existing.Point = value;
@@ -100,21 +111,35 @@ namespace SharpGLTF.Animations
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
 
+            tangent = CloneValue(tangent);
+
             offset -= float.Epsilon;
 
             var (keyA, keyB, _) = CurveSampler.FindRangeContainingOffset(_Keys.Keys, offset);
 
-            var a = _Keys[keyA];
-            var b = _Keys[keyB];
+            if (keyA == keyB)
+            {
+                var a = _Keys[keyA];
 
-            if (a.Degree == 1) a.OutgoingTangent = GetTangent(a.Point, b.Point);
+                a.Degree = 3;
+                a.IncomingTangent = tangent;
 
-            a.Degree = 3;
+                _Keys[keyA] = a;
+            }
+            else
+            {
+                var a = _Keys[keyA];
+                var b = _Keys[keyB];
 
-            b.IncomingTangent = tangent;
+                if (a.Degree == 1) a.OutgoingTangent = GetTangent(a.Point, b.Point);
 
-            _Keys[keyA] = a;
-            _Keys[keyB] = b;
+                a.Degree = 3;
+
+                b.IncomingTangent = tangent;
+
+                _Keys[keyA] = a;
+                _Keys[keyB] = b;
+            }
         }
 
         /// <summary>
@@ -126,22 +151,36 @@ namespace SharpGLTF.Animations
         {
             Guard.IsTrue(_Keys.ContainsKey(offset), nameof(offset));
 
+            tangent = CloneValue(tangent);
+
             var (keyA, keyB, _) = CurveSampler.FindRangeContainingOffset(_Keys.Keys, offset);
 
-            var a = _Keys[keyA];
-            var b = _Keys[keyB];
-
-            if (keyA != keyB)
+            if (keyA == keyB)
             {
-                if (a.Degree == 1) b.IncomingTangent = GetTangent(a.Point, b.Point);
-                _Keys[keyB] = b;
+                var a = _Keys[keyA];
+
+                a.Degree = 3;
+                a.OutgoingTangent = tangent;
+
+                _Keys[keyA] = a;
             }
+            else
+            {
+                var a = _Keys[keyA];
+                var b = _Keys[keyB];
 
-            a.Degree = 3;
+                if (keyA != keyB)
+                {
+                    if (a.Degree == 1) b.IncomingTangent = GetTangent(a.Point, b.Point);
+                    _Keys[keyB] = b;
+                }
 
-            a.OutgoingTangent = tangent;
+                a.Degree = 3;
 
-            _Keys[keyA] = a;
+                a.OutgoingTangent = tangent;
+
+                _Keys[keyA] = a;
+            }
         }
 
         private protected (_CurveNode<T> A, _CurveNode<T> B, float Amount) FindSample(float offset)
@@ -159,8 +198,18 @@ namespace SharpGLTF.Animations
             {
                 if (convertible.MaxDegree == 0)
                 {
-                    var linear = convertible.ToStepCurve();
-                    foreach (var p in linear) this.SetPoint(p.Key, p.Value, false);
+                    var step = convertible.ToStepCurve();
+                    foreach (var p in step) this.SetPoint(p.Key, p.Value, false);
+
+                    #if DEBUG
+                    foreach (var p in step)
+                    {
+                        var dstKey = _Keys[p.Key];
+                        System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
+                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
+                    }
+                    #endif
+
                     return;
                 }
 
@@ -168,6 +217,16 @@ namespace SharpGLTF.Animations
                 {
                     var linear = convertible.ToLinearCurve();
                     foreach (var p in linear) this.SetPoint(p.Key, p.Value);
+
+                    #if DEBUG
+                    foreach (var p in linear)
+                    {
+                        var dstKey = _Keys[p.Key];
+                        System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
+                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
+                    }
+                    #endif
+
                     return;
                 }
 
@@ -180,6 +239,17 @@ namespace SharpGLTF.Animations
                         this.SetIncomingTangent(ppp.Key, ppp.Value.TangentIn);
                         this.SetOutgoingTangent(ppp.Key, ppp.Value.TangentOut);
                     }
+
+                    #if DEBUG
+                    foreach (var ppp in spline)
+                    {
+                        var dstKey = _Keys[ppp.Key];
+                        System.Diagnostics.Debug.Assert(dstKey.Degree == 3);
+                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, ppp.Value.Value));
+                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.IncomingTangent, ppp.Value.TangentIn));
+                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.OutgoingTangent, ppp.Value.TangentOut));
+                    }
+                    #endif
 
                     return;
                 }
@@ -202,6 +272,15 @@ namespace SharpGLTF.Animations
                             this.SetPoint(key, value, isLinear);
                         }
 
+                        #if DEBUG
+                        foreach (var (key, value) in curve.GetLinearKeys())
+                        {
+                            var dstKey = _Keys[key];
+                            System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
+                            System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, value));
+                        }
+                        #endif
+
                         break;
                     }
 
@@ -213,6 +292,17 @@ namespace SharpGLTF.Animations
                             this.SetIncomingTangent(key, value.TangentIn);
                             this.SetOutgoingTangent(key, value.TangentOut);
                         }
+
+                        #if DEBUG
+                        foreach (var (key, value) in curve.GetCubicKeys())
+                        {
+                            var dstKey = _Keys[key];
+                            System.Diagnostics.Debug.Assert(dstKey.Degree == 3);
+                            System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, value.Value));
+                            System.Diagnostics.Debug.Assert(AreEqual(dstKey.IncomingTangent, value.TangentIn));
+                            System.Diagnostics.Debug.Assert(AreEqual(dstKey.OutgoingTangent, value.TangentOut));
+                        }
+                        #endif
 
                         break;
                     }
@@ -265,12 +355,21 @@ namespace SharpGLTF.Animations
         IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToStepCurve()
         {
             if (MaxDegree != 0) throw new NotSupportedException();
+            if (_Keys.Count == 0) return new Dictionary<float, T>();
 
-            return _Keys.ToDictionary(item => item.Key, item => item.Value.Point);
+            return _Keys.ToDictionary(item => item.Key, item => CloneValue(item.Value.Point));
         }
 
         IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToLinearCurve()
         {
+            if (MaxDegree != 1) throw new NotSupportedException();
+            if (_Keys.Count == 0) return new Dictionary<float, T>();
+
+            if (_Keys.All(item => item.Value.Degree == 1))
+            {
+                return _Keys.ToDictionary(item => item.Key, item => CloneValue(item.Value.Point));
+            }
+
             var d = new Dictionary<float, T>();
 
             if (_Keys.Count == 0) return d;
@@ -324,6 +423,17 @@ namespace SharpGLTF.Animations
 
         IReadOnlyDictionary<float, (T TangentIn, T Value, T TangentOut)> IConvertibleCurve<T>.ToSplineCurve()
         {
+            if (_Keys.Count == 0) return new Dictionary<float, (T TangentIn, T Value, T TangentOut)>();
+
+            if (_Keys.All(item => item.Value.Degree == 3))
+            {
+                return _Keys.ToDictionary
+                    (
+                    item => item.Key,
+                    item => (item.Value.IncomingTangent, item.Value.Point, item.Value.OutgoingTangent)
+                    );
+            }
+
             var d = new Dictionary<float, (T, T, T)>();
 
             var orderedKeys = _Keys.Keys.ToList();
@@ -374,29 +484,64 @@ namespace SharpGLTF.Animations
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("{IncomingTangent} -> {Point}[{Degree}] -> {OutgoingTangent}")]
+    [System.Diagnostics.DebuggerDisplay("{ToDebuggerDisplayString(),nq}")]
     struct _CurveNode<T>
-        where T : struct
     {
+        #region diagnostics
+
+        private string ToDebuggerDisplayString()
+        {
+            switch (Degree)
+            {
+                case 0: return $"{_ToString(Point)}";
+                case 1: return $"{_ToString(Point)}";
+                case 3: return $"{_ToString(IncomingTangent)} -> ({_ToString(Point)}) -> {_ToString(OutgoingTangent)}";
+            }
+
+            return "Unsupported";
+        }
+
+        private static string _ToString(T value)
+        {
+            if (value is ArraySegment<float> segm)
+            {
+                if (segm.Count < 20) return string.Join(" ", segm.ToArray());
+                return Transforms.SparseWeight8.Create(segm.ToArray()).ToString();
+            }
+
+            if (value is Transforms.SparseWeight8 sparse) return sparse.ToString();
+
+            return value.ToString();
+        }
+
+        #endregion
+
+        #region constructors
         public _CurveNode(T value, bool isLinear)
         {
+            Degree = isLinear ? 1 : 0;
             IncomingTangent = default;
             Point = value;
             OutgoingTangent = default;
-            Degree = isLinear ? 1 : 0;
         }
 
         public _CurveNode(T incoming, T value, T outgoing)
         {
+            Degree = 3;
             IncomingTangent = incoming;
             Point = value;
             OutgoingTangent = outgoing;
-            Degree = 3;
         }
 
+        #endregion
+
+        #region data
+
+        public int Degree;
         public T IncomingTangent;
         public T Point;
         public T OutgoingTangent;
-        public int Degree;
+
+        #endregion
     }
 }

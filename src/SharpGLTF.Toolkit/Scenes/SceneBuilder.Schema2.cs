@@ -156,6 +156,20 @@ namespace SharpGLTF.Scenes
             foreach (var t in animation.Tracks) dstNode.WithMorphingAnimation(t.Key, t.Value);
         }
 
+        public static void SetMorphAnimation(Node dstNode, Animations.AnimatableProperty<ArraySegment<float>> animation)
+        {
+            Guard.NotNull(dstNode, nameof(dstNode));
+            Guard.NotNull(dstNode.Mesh, nameof(dstNode.Mesh), "call after IOperator.ApplyTo");
+
+            if (animation == null) return;
+
+            var dstMesh = dstNode.Mesh;
+
+            dstMesh.SetMorphWeights(animation.Value);
+
+            foreach (var t in animation.Tracks) dstNode.WithMorphingAnimation(t.Key, t.Value);
+        }
+
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
             _Nodes.Clear();
@@ -474,6 +488,17 @@ namespace SharpGLTF.Scenes
 
         private static void _CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
         {
+            bool hasDefaultMorphing = false;
+
+            var defMorphWeights = srcNode.GetMorphWeights();
+            if (defMorphWeights != null && defMorphWeights.Count > 0)
+            {
+                dstInst.Content.UseMorphing().SetValue(defMorphWeights.ToArray());
+                hasDefaultMorphing = true;
+            }
+
+            if (!hasDefaultMorphing) return;
+
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
                 var name = anim.Name;
@@ -481,13 +506,63 @@ namespace SharpGLTF.Scenes
 
                 var curves = srcNode.GetCurveSamplers(anim);
 
-                if (curves.MorphingSparse != null) dstInst.Content.UseMorphing(name).SetCurve(curves.MorphingSparse);
+                var srcMorphing = curves.GetMorphingSampler<ArraySegment<float>>();
+                if (srcMorphing != null)
+                {
+                    var dstMorphing = dstInst.Content.UseMorphing(name);
+                    dstMorphing.SetCurve(srcMorphing);
+
+                    _VerifyCurveConversion(srcMorphing, dstMorphing, (a, b) => a.AsSpan().SequenceEqual(b));
+                }
             }
         }
 
         #endregion
 
         #region utilities
+
+        internal static void _VerifyCurveConversion<T>(IAnimationSampler<T> a, Animations.IConvertibleCurve<T> b, Func<T, T, bool> equalityComparer)
+        {
+            if (a.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE)
+            {
+                if (b.MaxDegree != 3) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToSplineCurve();
+
+                foreach (var (ak, av) in a.GetCubicKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+
+                    if (!equalityComparer(av.TangentIn, bv.TangentIn)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av.Value, bv.Value)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av.TangentOut, bv.TangentOut)) throw new ArgumentException(nameof(b));
+                }
+            }
+            else if (a.InterpolationMode == AnimationInterpolationMode.LINEAR)
+            {
+                if (b.MaxDegree != 1) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToLinearCurve();
+
+                foreach (var (ak, av) in a.GetLinearKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                }
+            }
+            if (a.InterpolationMode == AnimationInterpolationMode.STEP)
+            {
+                if (b.MaxDegree != 0) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToStepCurve();
+
+                foreach (var (ak, av) in a.GetLinearKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                }
+            }
+        }
 
         internal void _VerifyConversion(Scene gltfScene)
         {

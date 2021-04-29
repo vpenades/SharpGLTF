@@ -9,8 +9,16 @@ using SharpGLTF.Collections;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 
+using ROLIST = System.Collections.Generic.IReadOnlyList<float>;
+using SPARSE8 = SharpGLTF.Transforms.SparseWeight8;
+using SEGMENT = System.ArraySegment<float>;
+
 namespace SharpGLTF.Schema2
 {
+    /// <summary>
+    /// Represents an interface to a curve made of time-value points.
+    /// </summary>
+    /// <typeparam name="T">The curve point value type.</typeparam>
     public interface IAnimationSampler<T>
     {
         /// <summary>
@@ -47,11 +55,21 @@ namespace SharpGLTF.Schema2
         ICurveSampler<T> CreateCurveSampler(bool isolateMemory = false);
     }
 
+    /// <remarks>
+    /// This class can be casted to these interfaces:
+    /// <list type="table">
+    /// <item><see cref="IAnimationSampler{T}"/> with T: <see cref="Vector3"/> for Scale and Translation keys.</item>
+    /// <item><see cref="IAnimationSampler{T}"/> with T: <see cref="Quaternion"/> for Rotation keys.</item>
+    /// <item><see cref="IAnimationSampler{T}"/> with T: <see cref="SPARSE8"/> for Morph targets (limited to 8 weights).</item>
+    /// <item><see cref="IAnimationSampler{T}"/> with T: <see cref="Single"/>[] for Morph targets (unlimited weights).</item>
+    /// </list>
+    /// </remarks>
     sealed partial class AnimationSampler :
         IChildOf<Animation>,
         IAnimationSampler<Vector3>,
         IAnimationSampler<Quaternion>,
-        IAnimationSampler<SparseWeight8>,
+        IAnimationSampler<SPARSE8>,
+        IAnimationSampler<SEGMENT>,
         IAnimationSampler<Single[]>
     {
         #region lifecycle
@@ -83,6 +101,7 @@ namespace SharpGLTF.Schema2
             LogicalIndex = index;
         }
 
+        /// <inheritdoc/>
         public AnimationInterpolationMode InterpolationMode
         {
             get => _interpolation.AsValue(_interpolationDefault);
@@ -166,28 +185,45 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(IReadOnlyList<SparseWeight8> output, int expandedCount)
+        private Accessor _CreateOutputAccessor(IReadOnlyList<SPARSE8> output, int itemsStride)
+        {
+            return _CreateOutputAccessor(output.Count, itemsStride, (y, x) => output[y][x]);
+        }
+
+        private Accessor _CreateOutputAccessor<T>(IReadOnlyList<T> output, int itemsStride)
+            where T : ROLIST
+        {
+            System.Diagnostics.Debug.Assert(output.All(item => item.Count == itemsStride));
+
+            float eval(int y, int x)
+            {
+                var row = output[y];
+                return x < row.Count ? row[x] : 0;
+            }
+
+            return _CreateOutputAccessor(output.Count, itemsStride, eval);
+        }
+
+        private Accessor _CreateOutputAccessor(int itemCount, int itemsStride, Func<int, int, float> output)
         {
             Guard.NotNull(output, nameof(output));
-            Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
-            Guard.MustBeGreaterThan(expandedCount, 0, nameof(expandedCount));
+            Guard.MustBeGreaterThan(itemCount, 0, nameof(itemCount));
+            Guard.MustBeGreaterThan(itemsStride, 0, nameof(itemsStride));
 
             var root = LogicalParent.LogicalParent;
 
-            var buffer = root.CreateBufferView(output.Count * 4 * expandedCount);
+            var buffer = root.CreateBufferView(itemCount * 4 * itemsStride);
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count * expandedCount, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, itemCount * itemsStride, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
             var dst = accessor.AsScalarArray();
 
-            for (int i = 0; i < output.Count; ++i)
+            for (int y = 0; y < itemCount; ++y)
             {
-                var src = output[i];
-
-                for (int j = 0; j < expandedCount; ++j)
+                for (int x = 0; x < itemsStride; ++x)
                 {
-                    dst[(i * expandedCount) + j] = src[j];
+                    dst[(y * itemsStride) + x] = output(y, x);
                 }
             }
 
@@ -256,16 +292,27 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(values).LogicalIndex;
         }
 
-        internal void SetKeys(IReadOnlyDictionary<Single, SparseWeight8> keyframes, int expandedCount)
+        internal void SetKeys<TWeights>(IReadOnlyDictionary<Single, TWeights> keyframes, int itemsStride)
+            where TWeights : ROLIST
+        {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+            GuardAll.MustBeEqualTo(keyframes.Values.Select(item => item.Count), itemsStride, nameof(keyframes));
+
+            var (keys, values) = _Split(keyframes);
+            _input = this._CreateInputAccessor(keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, itemsStride).LogicalIndex;
+        }
+
+        internal void SetKeys(IReadOnlyDictionary<Single, SPARSE8> keyframes, int itemsStride)
         {
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
             var (keys, values) = _Split(keyframes);
             _input = this._CreateInputAccessor(keys).LogicalIndex;
-            _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, itemsStride).LogicalIndex;
         }
 
-        internal void SetKeys(IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
+        internal void SetCubicKeys(IReadOnlyDictionary<Single, (Vector3 TangentIn, Vector3 Value, Vector3 TangentOut)> keyframes)
         {
             Guard.NotNull(keyframes, nameof(keyframes));
             Guard.MustBeGreaterThan(keyframes.Count, 0, nameof(keyframes.Count));
@@ -283,7 +330,7 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(values).LogicalIndex;
         }
 
-        internal void SetKeys(IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
+        internal void SetCubicKeys(IReadOnlyDictionary<Single, (Quaternion TangentIn, Quaternion Value, Quaternion TangentOut)> keyframes)
         {
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
@@ -300,7 +347,24 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(values).LogicalIndex;
         }
 
-        internal void SetKeys(IReadOnlyDictionary<Single, (SparseWeight8 TangentIn, SparseWeight8 Value, SparseWeight8 TangentOut)> keyframes, int expandedCount)
+        internal void SetCubicKeys<TWeights>(IReadOnlyDictionary<Single, (TWeights TangentIn, TWeights Value, TWeights TangentOut)> keyframes, int expandedCount)
+            where TWeights : ROLIST
+        {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+            Guard.MustBeGreaterThan(expandedCount, 0, nameof(expandedCount));
+
+            // splits the dictionary into separated input/output collections, also, the output will be flattened to plain Vector3 values.
+            var (keys, values) = _Split(keyframes);
+            System.Diagnostics.Debug.Assert(keys.Length * 3 == values.Length, "keys and values must have 1 to 3 ratio");
+
+            // fix for first incoming tangent and last outgoing tangent
+            // this might not be true for a looped animation, where first and last might be the same
+
+            _input = this._CreateInputAccessor(keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
+        }
+
+        internal void SetCubicKeys(IReadOnlyDictionary<Single, (SPARSE8 TangentIn, SPARSE8 Value, SPARSE8 TangentOut)> keyframes, int expandedCount)
         {
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
             Guard.MustBeGreaterThan(expandedCount, 0, nameof(expandedCount));
@@ -318,6 +382,7 @@ namespace SharpGLTF.Schema2
             _output = this._CreateOutputAccessor(values, expandedCount).LogicalIndex;
         }
 
+        /// <inheritdoc/>
         IEnumerable<(Single, Vector3)> IAnimationSampler<Vector3>.GetLinearKeys()
         {
             Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -328,6 +393,7 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
+        /// <inheritdoc/>
         IEnumerable<(Single, Quaternion)> IAnimationSampler<Quaternion>.GetLinearKeys()
         {
             Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -338,7 +404,8 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
-        IEnumerable<(Single, SparseWeight8)> IAnimationSampler<SparseWeight8>.GetLinearKeys()
+        /// <inheritdoc/>
+        IEnumerable<(Single, SPARSE8)> IAnimationSampler<SPARSE8>.GetLinearKeys()
         {
             Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
 
@@ -350,6 +417,20 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, SparseWeight8.Create(val)));
         }
 
+        /// <inheritdoc/>
+        IEnumerable<(Single, SEGMENT)> IAnimationSampler<SEGMENT>.GetLinearKeys()
+        {
+            Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / this.Input.Count;
+
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsMultiArray(dimensions);
+
+            return keys.Zip(frames, (key, val) => (key, new ArraySegment<float>(val)));
+        }
+
+        /// <inheritdoc/>
         IEnumerable<(Single, Single[])> IAnimationSampler<Single[]>.GetLinearKeys()
         {
             Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -362,6 +443,7 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
+        /// <inheritdoc/>
         IEnumerable<(Single, (Vector3, Vector3, Vector3))> IAnimationSampler<Vector3>.GetCubicKeys()
         {
             Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -372,6 +454,7 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
+        /// <inheritdoc/>
         IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> IAnimationSampler<Quaternion>.GetCubicKeys()
         {
             Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -382,6 +465,7 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
+        /// <inheritdoc/>
         IEnumerable<(Single, (Single[], Single[], Single[]))> IAnimationSampler<Single[]>.GetCubicKeys()
         {
             Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -394,7 +478,7 @@ namespace SharpGLTF.Schema2
             return keys.Zip(frames, (key, val) => (key, val));
         }
 
-        IEnumerable<(Single, (SparseWeight8, SparseWeight8, SparseWeight8))> IAnimationSampler<SparseWeight8>.GetCubicKeys()
+        IEnumerable<(Single, (SEGMENT, SEGMENT, SEGMENT))> IAnimationSampler<SEGMENT>.GetCubicKeys()
         {
             Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
 
@@ -403,7 +487,95 @@ namespace SharpGLTF.Schema2
             var keys = this.Input.AsScalarArray();
             var frames = _GroupByTangentValueTangent(this.Output.AsMultiArray(dimensions));
 
-            return keys.Zip(frames, (key, val) => (key, SparseWeight8.AsTuple(val.TangentIn, val.Value, val.TangentOut)) );
+            return keys.Zip(frames, (key, val) => (key, (new SEGMENT(val.TangentIn), new SEGMENT(val.Value), new SEGMENT(val.TangentOut))));
+        }
+
+        /// <inheritdoc/>
+        IEnumerable<(Single, (SPARSE8, SPARSE8, SPARSE8))> IAnimationSampler<SPARSE8>.GetCubicKeys()
+        {
+            Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
+
+            var dimensions = this.Output.Count / (this.Input.Count * 3);
+
+            var keys = this.Input.AsScalarArray();
+            var frames = _GroupByTangentValueTangent(this.Output.AsMultiArray(dimensions));
+
+            return keys.Zip(frames, (key, val) => (key, SPARSE8.AsTuple(val.TangentIn, val.Value, val.TangentOut)) );
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<Vector3> IAnimationSampler<Vector3>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<Vector3>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<Quaternion> IAnimationSampler<Quaternion>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<Quaternion>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<SPARSE8> IAnimationSampler<SPARSE8>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<SPARSE8>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<Single[]> IAnimationSampler<Single[]>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<Single[]>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<SEGMENT> IAnimationSampler<SEGMENT>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<SEGMENT>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
+                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
+                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
         }
 
         private static IEnumerable<(T TangentIn, T Value, T TangentOut)> _GroupByTangentValueTangent<T>(IEnumerable<T> collection)
@@ -424,66 +596,11 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        ICurveSampler<Vector3> IAnimationSampler<Vector3>.CreateCurveSampler(bool isolateMemory)
-        {
-            var xsampler = this as IAnimationSampler<Vector3>;
-
-            switch (this.InterpolationMode)
-            {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
-            }
-
-            throw new NotImplementedException();
-        }
-
-        ICurveSampler<Quaternion> IAnimationSampler<Quaternion>.CreateCurveSampler(bool isolateMemory)
-        {
-            var xsampler = this as IAnimationSampler<Quaternion>;
-
-            switch (this.InterpolationMode)
-            {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
-            }
-
-            throw new NotImplementedException();
-        }
-
-        ICurveSampler<SparseWeight8> IAnimationSampler<SparseWeight8>.CreateCurveSampler(bool isolateMemory)
-        {
-            var xsampler = this as IAnimationSampler<SparseWeight8>;
-
-            switch (this.InterpolationMode)
-            {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
-            }
-
-            throw new NotImplementedException();
-        }
-
-        ICurveSampler<Single[]> IAnimationSampler<Single[]>.CreateCurveSampler(bool isolateMemory)
-        {
-            var xsampler = this as IAnimationSampler<Single[]>;
-
-            switch (this.InterpolationMode)
-            {
-                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(false, isolateMemory);
-                case AnimationInterpolationMode.LINEAR: return xsampler.GetLinearKeys().CreateSampler(true, isolateMemory);
-                case AnimationInterpolationMode.CUBICSPLINE: return xsampler.GetCubicKeys().CreateSampler(isolateMemory);
-            }
-
-            throw new NotImplementedException();
-        }
-
         #endregion
 
         #region validation
 
+        /// <inheritdoc/>
         protected override void OnValidateReferences(ValidationContext validate)
         {
             base.OnValidateReferences(validate);
@@ -493,6 +610,7 @@ namespace SharpGLTF.Schema2
                 .IsNullOrIndex("Output", _output, this.LogicalParent.LogicalParent.LogicalAccessors);
         }
 
+        /// <inheritdoc/>
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);

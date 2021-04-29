@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using ROLIST = System.Collections.Generic.IReadOnlyList<float>;
+using SEGMENT = System.ArraySegment<float>;
+using SPARSE = SharpGLTF.Transforms.SparseWeight8;
+
 namespace SharpGLTF.Animations
 {
     /// <summary>
@@ -310,7 +314,21 @@ namespace SharpGLTF.Animations
 
         #region interpolation utils
 
-        public static Single[] InterpolateLinear(Single[] start, Single[] end, Single amount)
+        public static Single[] Subtract(ROLIST left, ROLIST right)
+        {
+            Guard.MustBeEqualTo(right.Count, left.Count, nameof(right));
+
+            var dst = new Single[left.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                dst[i] = left[i] - right[i];
+            }
+
+            return dst;
+        }
+
+        public static Single[] InterpolateLinear(ROLIST start, ROLIST end, Single amount)
         {
             Guard.NotNull(start, nameof(start));
             Guard.NotNull(end, nameof(end));
@@ -318,7 +336,7 @@ namespace SharpGLTF.Animations
             var startW = 1 - amount;
             var endW = amount;
 
-            var result = new float[start.Length];
+            var result = new float[start.Count];
 
             for (int i = 0; i < result.Length; ++i)
             {
@@ -342,7 +360,7 @@ namespace SharpGLTF.Animations
             return Quaternion.Normalize((start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent));
         }
 
-        public static Single[] InterpolateCubic(Single[] start, Single[] outgoingTangent, Single[] end, Single[] incomingTangent, Single amount)
+        public static Single[] InterpolateCubic(ROLIST start, ROLIST outgoingTangent, ROLIST end, ROLIST incomingTangent, Single amount)
         {
             Guard.NotNull(start, nameof(start));
             Guard.NotNull(outgoingTangent, nameof(outgoingTangent));
@@ -351,7 +369,7 @@ namespace SharpGLTF.Animations
 
             var hermite = CreateHermitePointWeights(amount);
 
-            var result = new float[start.Length];
+            var result = new float[start.Count];
 
             for (int i = 0; i < result.Length; ++i)
             {
@@ -365,99 +383,136 @@ namespace SharpGLTF.Animations
 
         #region sampler creation
 
+        private static bool _HasZero<T>(this IEnumerable<T> collection) { return collection == null || !collection.Any(); }
+        private static bool _HasOne<T>(this IEnumerable<T> collection) { return !collection.Skip(1).Any(); }
+
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector3>.Create(collection);
 
-            var single = SingleValueSampler<Vector3>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new Vector3LinearSampler(collection, isLinear);
-
-            return optimize ? sampler.ToFastSampler() : sampler;
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Vector3>(collection, SamplerTraits.Vector3);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Vector3>(collection, SamplerTraits.Vector3);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
         }
 
         public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, Quaternion)> collection, bool isLinear = true, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Quaternion>.Create(collection);
 
-            var single = SingleValueSampler<Quaternion>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new QuaternionLinearSampler(collection, isLinear);
-
-            return optimize ? sampler.ToFastSampler() : sampler;
-        }
-
-        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, Transforms.SparseWeight8)> collection, bool isLinear = true, bool optimize = false)
-        {
-            if (collection == null) return null;
-
-            var single = SingleValueSampler<Transforms.SparseWeight8>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new SparseLinearSampler(collection, isLinear);
-
-            return optimize ? sampler.ToFastSampler() : sampler;
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Quaternion>(collection, SamplerTraits.Quaternion);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Quaternion>(collection, SamplerTraits.Quaternion);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
         }
 
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, Single[])> collection, bool isLinear = true, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Single[]>.Create(collection);
 
-            var single = SingleValueSampler<Single[]>.CreateForSingle(collection);
-            if (single != null) return single;
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Single[]>(collection, SamplerTraits.Array);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Single[]>(collection, SamplerTraits.Array);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+        }
 
-            var sampler = new ArrayLinearSampler(collection, isLinear);
+        public static ICurveSampler<SEGMENT> CreateSampler(this IEnumerable<(Single, SEGMENT)> collection, bool isLinear = true, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<SEGMENT>.Create(collection);
 
-            return optimize ? sampler.ToFastSampler() : sampler;
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<SEGMENT>(collection, SamplerTraits.Segment);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<SEGMENT>(collection, SamplerTraits.Segment);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+        }
+
+        public static ICurveSampler<SPARSE> CreateSampler(this IEnumerable<(Single, SPARSE)> collection, bool isLinear = true, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<SPARSE>.Create(collection);
+
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<SPARSE>(collection, SamplerTraits.Sparse);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<SPARSE>(collection, SamplerTraits.Sparse);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
         }
 
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector3>.Create(collection);
 
-            var single = SingleValueSampler<Vector3>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new Vector3CubicSampler(collection);
-
+            var sampler = new CubicSampler<Vector3>(collection, SamplerTraits.Vector3);
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         public static ICurveSampler<Quaternion> CreateSampler(this IEnumerable<(Single, (Quaternion, Quaternion, Quaternion))> collection, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Quaternion>.Create(collection);
 
-            var single = SingleValueSampler<Quaternion>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new QuaternionCubicSampler(collection);
-
-            return optimize ? sampler.ToFastSampler() : sampler;
-        }
-
-        public static ICurveSampler<Transforms.SparseWeight8> CreateSampler(this IEnumerable<(Single, (Transforms.SparseWeight8, Transforms.SparseWeight8, Transforms.SparseWeight8))> collection, bool optimize = false)
-        {
-            if (collection == null) return null;
-
-            var single = SingleValueSampler<Transforms.SparseWeight8>.CreateForSingle(collection);
-            if (single != null) return single;
-
-            var sampler = new SparseCubicSampler(collection);
-
+            var sampler = new CubicSampler<Quaternion>(collection, SamplerTraits.Quaternion);
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 
         public static ICurveSampler<Single[]> CreateSampler(this IEnumerable<(Single, (Single[], Single[], Single[]))> collection, bool optimize = false)
         {
-            if (collection == null) return null;
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Single[]>.Create(collection);
 
-            var single = SingleValueSampler<Single[]>.CreateForSingle(collection);
-            if (single != null) return single;
+            var sampler = new CubicSampler<Single[]>(collection, SamplerTraits.Array);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
 
-            var sampler = new ArrayCubicSampler(collection);
+        public static ICurveSampler<SEGMENT> CreateSampler(this IEnumerable<(Single, (SEGMENT, SEGMENT, SEGMENT))> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<SEGMENT>.Create(collection);
 
+            var sampler = new CubicSampler<SEGMENT>(collection, SamplerTraits.Segment);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
+
+        public static ICurveSampler<SPARSE> CreateSampler(this IEnumerable<(Single, (SPARSE, SPARSE, SPARSE))> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<SPARSE>.Create(collection);
+
+            var sampler = new CubicSampler<SPARSE>(collection, SamplerTraits.Sparse);
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 

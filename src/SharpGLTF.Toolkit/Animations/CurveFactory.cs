@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SEGMENT = System.ArraySegment<float>;
 using SPARSE = SharpGLTF.Transforms.SparseWeight8;
 
 namespace SharpGLTF.Animations
@@ -15,8 +17,9 @@ namespace SharpGLTF.Animations
             if (typeof(T) == typeof(Vector3)) return new Vector3CurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(SPARSE)) return new SparseCurveBuilder() as CurveBuilder<T>;
+            if (typeof(T) == typeof(SEGMENT)) return new SegmentCurveBuilder() as CurveBuilder<T>;
 
-            throw new InvalidOperationException($"{nameof(T)} not supported.");
+            throw new InvalidOperationException($"{typeof(T).Name} not supported.");
         }
 
         public static CurveBuilder<T> CreateCurveBuilder<T>(ICurveSampler<T> curve)
@@ -25,8 +28,9 @@ namespace SharpGLTF.Animations
             if (curve is Vector3CurveBuilder v3cb) return v3cb.Clone() as CurveBuilder<T>;
             if (curve is QuaternionCurveBuilder q4cb) return q4cb.Clone() as CurveBuilder<T>;
             if (curve is SparseCurveBuilder sscb) return sscb.Clone() as CurveBuilder<T>;
+            if (curve is SegmentCurveBuilder xscb) return xscb.Clone() as CurveBuilder<T>;
 
-            throw new InvalidOperationException($"{nameof(T)} not supported.");
+            throw new InvalidOperationException($"{typeof(T).Name} not supported.");
         }
     }
 
@@ -45,10 +49,12 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        protected override Vector3 CreateValue(params float[] values)
+        protected override bool AreEqual(Vector3 left, Vector3 right) { return left == right; }
+        protected override Vector3 CloneValue(Vector3 value) { return value; }
+        protected override Vector3 CreateValue(IReadOnlyList<float> values)
         {
             Guard.NotNull(values, nameof(values));
-            Guard.IsTrue(values.Length == 3, nameof(values));
+            Guard.IsTrue(values.Count == 3, nameof(values));
             return new Vector3(values[0], values[1], values[2]);
         }
 
@@ -101,10 +107,12 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        protected override Quaternion CreateValue(params float[] values)
+        protected override bool AreEqual(Quaternion left, Quaternion right) { return left == right; }
+        protected override Quaternion CloneValue(Quaternion value) { return value; }
+        protected override Quaternion CreateValue(IReadOnlyList<float> values)
         {
             Guard.NotNull(values, nameof(values));
-            Guard.IsTrue(values.Length == 4, nameof(values));
+            Guard.IsTrue(values.Count == 4, nameof(values));
             return new Quaternion(values[0], values[1], values[2], values[3]);
         }
 
@@ -159,10 +167,9 @@ namespace SharpGLTF.Animations
 
         #region API
 
-        protected override SPARSE CreateValue(params Single[] values)
-        {
-            return SPARSE.Create(values);
-        }
+        protected override bool AreEqual(SPARSE left, SPARSE right) { return left.Equals(right); }
+        protected override SPARSE CloneValue(SPARSE value) { return value; }
+        protected override SPARSE CreateValue(IReadOnlyList<float> values) { return SPARSE.Create(values); }
 
         protected override SPARSE GetTangent(SPARSE fromValue, SPARSE toValue)
         {
@@ -189,6 +196,70 @@ namespace SharpGLTF.Animations
                             sample.Amount
                             );
 
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        #endregion
+    }
+
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxySparse))]
+    sealed class SegmentCurveBuilder : CurveBuilder<SEGMENT>, ICurveSampler<SEGMENT>
+    {
+        #region lifecycle
+
+        public SegmentCurveBuilder() { }
+
+        private SegmentCurveBuilder(SegmentCurveBuilder other)
+            : base(other)
+        {
+        }
+
+        public override CurveBuilder<SEGMENT> Clone() { return new SegmentCurveBuilder(this); }
+
+        #endregion
+
+        #region API
+
+        protected override bool AreEqual(SEGMENT left, SEGMENT right) { return left.AsSpan().SequenceEqual(right); }
+        protected override SEGMENT CloneValue(SEGMENT value)
+        {
+            Guard.IsTrue(value.Count > 0, nameof(value));
+            return new SEGMENT(value.ToArray());
+        }
+
+        protected override SEGMENT CreateValue(IReadOnlyList<float> values)
+        {
+            Guard.NotNull(values, nameof(values));
+            Guard.IsTrue(values.Count > 0, nameof(values));
+            return new SEGMENT(values.ToArray());
+        }
+
+        protected override SEGMENT GetTangent(SEGMENT fromValue, SEGMENT toValue)
+        {
+            return new SEGMENT(CurveSampler.Subtract(toValue, fromValue));
+        }
+
+        public override SEGMENT GetPoint(Single offset)
+        {
+            var sample = FindSample(offset);
+
+            switch (sample.A.Degree)
+            {
+                case 0:
+                    return sample.A.Point;
+
+                case 1:
+                    return new SEGMENT(CurveSampler.InterpolateLinear(sample.A.Point, sample.B.Point, sample.Amount));
+
+                case 3:
+                    return new SEGMENT(CurveSampler.InterpolateCubic
+                            (
+                            sample.A.Point, sample.A.OutgoingTangent,
+                            sample.B.Point, sample.B.IncomingTangent,
+                            sample.Amount
+                            ));
                 default:
                     throw new NotSupportedException();
             }

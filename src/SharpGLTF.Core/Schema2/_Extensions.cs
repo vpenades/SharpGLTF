@@ -19,9 +19,30 @@ namespace SharpGLTF.Schema2
 
             if (list.Count > 0)
             {
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    list[i] = 0;
+                }
+
                 foreach (var (index, weight) in weights.GetIndexedWeights())
                 {
                     list[index] = weight;
+                }
+            }
+        }
+
+        public static void SetMorphWeights(this IList<Double> list, IReadOnlyList<float> weights)
+        {
+            if (weights == null) { list.Clear(); return; }
+
+            while (list.Count > weights.Count) list.RemoveAt(list.Count - 1);
+            while (list.Count < weights.Count) list.Add(0);
+
+            if (list.Count > 0)
+            {
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    list[i] = weights[i];
                 }
             }
         }

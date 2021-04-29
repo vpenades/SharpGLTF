@@ -759,23 +759,19 @@ namespace SharpGLTF.Schema2
             TargetNode = node;
             Animation = animation;
 
-            Scale = null;
-            Rotation = null;
-            Translation = null;
-            Morphing = null;
-            MorphingSparse = null;
+            _ScaleSampler = null;
+            _RotationSampler = null;
+            _TranslationSampler = null;
+            _MorphSampler = null;
 
             foreach (var c in animation.FindChannels(node))
             {
                 switch (c.TargetNodePath)
                 {
-                    case PropertyPath.scale: Scale = c.GetScaleSampler(); break;
-                    case PropertyPath.rotation: Rotation = c.GetRotationSampler(); break;
-                    case PropertyPath.translation: Translation = c.GetTranslationSampler(); break;
-                    case PropertyPath.weights:
-                        Morphing = c.GetMorphSampler();
-                        MorphingSparse = c.GetSparseMorphSampler();
-                        break;
+                    case PropertyPath.scale: _ScaleSampler = c._GetSampler(); break;
+                    case PropertyPath.rotation: _RotationSampler = c._GetSampler(); break;
+                    case PropertyPath.translation: _TranslationSampler = c._GetSampler(); break;
+                    case PropertyPath.weights: _MorphSampler = c._GetSampler(); break;
                 }
             }
 
@@ -791,6 +787,11 @@ namespace SharpGLTF.Schema2
         public readonly Node TargetNode;
         public readonly Animation Animation;
 
+        private readonly AnimationSampler _ScaleSampler;
+        private readonly AnimationSampler _RotationSampler;
+        private readonly AnimationSampler _TranslationSampler;
+        private readonly AnimationSampler _MorphSampler;
+
         #endregion
 
         #region  properties
@@ -798,41 +799,60 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// True if any of <see cref="Scale"/>, <see cref="Rotation"/> or <see cref="Translation"/> is defined.
         /// </summary>
-        public bool HasTransformCurves => Scale != null || Rotation != null || Translation != null;
+        public bool HasTransformCurves => _ScaleSampler != null || _RotationSampler != null || _TranslationSampler != null;
 
         /// <summary>
         /// True if there's a morphing curve.
         /// </summary>
-        public bool HasMorphingCurves => Morphing != null || MorphingSparse != null;
+        public bool HasMorphingCurves => _MorphSampler != null;
 
         /// <summary>
         /// Gets the Scale sampler, or null if there's no curve defined.
         /// </summary>
-        public readonly IAnimationSampler<Vector3> Scale;
+        public IAnimationSampler<Vector3> Scale => _ScaleSampler;
 
         /// <summary>
         /// Gets the Rotation sampler, or null if there's no curve defined.
         /// </summary>
-        public readonly IAnimationSampler<Quaternion> Rotation;
+        public IAnimationSampler<Quaternion> Rotation => _RotationSampler;
 
         /// <summary>
         /// Gets the Translation sampler, or null if there's no curve defined.
         /// </summary>
-        public readonly IAnimationSampler<Vector3> Translation;
+        public IAnimationSampler<Vector3> Translation => _TranslationSampler;
 
         /// <summary>
         /// Gets the raw Morphing sampler, or null if there's no curve defined.
         /// </summary>
-        public readonly IAnimationSampler<Single[]> Morphing;
+        [Obsolete("Use GetMorphingSampler<T>()", true)]
+        public IAnimationSampler<Single[]> Morphing => GetMorphingSampler<Single[]>();
 
         /// <summary>
         /// Gets the SparseWeight8 Morphing sampler, or null if there's no curve defined.
         /// </summary>
-        public readonly IAnimationSampler<Transforms.SparseWeight8> MorphingSparse;
+        [Obsolete("Use GetMorphingSampler<T>()", true)]
+        public IAnimationSampler<Transforms.SparseWeight8> MorphingSparse => GetMorphingSampler<Transforms.SparseWeight8>();
 
         #endregion
 
         #region API
+
+        /// <summary>
+        /// Gets the morphing sampler, or null if there's no curve defined.
+        /// </summary>
+        /// <typeparam name="TWeights">
+        /// It must be one of these:<br/>
+        /// <list type="table">
+        /// <item><see cref="float"/>[]</item>
+        /// <item><see cref="Transforms.SparseWeight8"/></item>
+        /// <item><see cref="ArraySegment{T}"/> of <see cref="float"/></item>
+        /// </list>
+        /// </typeparam>
+        /// <returns>A valid sampler, or null.</returns>
+        public IAnimationSampler<TWeights> GetMorphingSampler<TWeights>()
+        {
+            return _MorphSampler as IAnimationSampler<TWeights>;
+        }
 
         public TRANSFORM GetLocalTransform(Single time)
         {
@@ -845,9 +865,9 @@ namespace SharpGLTF.Schema2
             return new TRANSFORM(s, r, t);
         }
 
-        public IReadOnlyList<float> GetMorphingWeights(Single time)
+        public IReadOnlyList<float> GetMorphingWeights<TWeight>(Single time)
         {
-            return Morphing
+            return GetMorphingSampler<float[]>()
                 ?.CreateCurveSampler()
                 ?.GetPoint(time)
                 ?? TargetNode.MorphWeights;
@@ -855,7 +875,7 @@ namespace SharpGLTF.Schema2
 
         public Transforms.SparseWeight8 GetSparseMorphingWeights(Single time)
         {
-            return MorphingSparse
+            return GetMorphingSampler<Transforms.SparseWeight8>()
                 ?.CreateCurveSampler()
                 ?.GetPoint(time)
                 ?? Transforms.SparseWeight8.Create(TargetNode.MorphWeights);

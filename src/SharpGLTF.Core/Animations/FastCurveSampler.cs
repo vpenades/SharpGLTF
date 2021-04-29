@@ -40,6 +40,7 @@ namespace SharpGLTF.Animations
             _Samplers = samplers.ToArray();
         }
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly ICurveSampler<T>[] _Samplers;
 
         public T GetPoint(float offset)

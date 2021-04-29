@@ -47,7 +47,7 @@ namespace SharpGLTF.Runtime
                 _Scale.SetCurve(index, curves.Scale?.CreateCurveSampler(isolateMemory));
                 _Rotation.SetCurve(index, curves.Rotation?.CreateCurveSampler(isolateMemory));
                 _Translation.SetCurve(index, curves.Translation?.CreateCurveSampler(isolateMemory));
-                _Morphing.SetCurve(index, curves.MorphingSparse?.CreateCurveSampler(isolateMemory));
+                _Morphing.SetCurve(index, curves.GetMorphingSampler<Transforms.SparseWeight8>()?.CreateCurveSampler(isolateMemory));
             }
 
             _UseAnimatedTransforms = _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;

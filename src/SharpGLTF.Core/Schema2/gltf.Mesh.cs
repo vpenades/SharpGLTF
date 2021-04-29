@@ -56,6 +56,11 @@ namespace SharpGLTF.Schema2
             return _weights.Select(item => (float)item).ToList();
         }
 
+        public void SetMorphWeights(IReadOnlyList<float> weights)
+        {
+            _weights.SetMorphWeights(weights);
+        }
+
         public void SetMorphWeights(Transforms.SparseWeight8 weights)
         {
             int count = _primitives.Max(item => item.MorphTargetsCount);

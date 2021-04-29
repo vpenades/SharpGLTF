@@ -87,18 +87,18 @@ namespace SharpGLTF
                 .Select(idx => (0.1f * (float)idx, new Vector3(idx, idx, idx)))
                 .ToArray();
 
-            var defaultSampler = new Animations.Vector3LinearSampler(curve, true);
-            var fastSampler = defaultSampler.ToFastSampler();
+            var slowSampler = Animations.CurveSampler.CreateSampler(curve, true, false);
+            var fastSampler = Animations.CurveSampler.CreateSampler(curve, true, true);
 
-            foreach(var k in curve)
+            foreach (var k in curve)
             {
-                Assert.AreEqual(k.Item2, defaultSampler.GetPoint(k.Item1));
+                Assert.AreEqual(k.Item2, slowSampler.GetPoint(k.Item1));
                 Assert.AreEqual(k.Item2, fastSampler.GetPoint(k.Item1));
             }
 
             for(float t=0; t < 100; t+=0.232f)
             {
-                var dv = defaultSampler.GetPoint(t);
+                var dv = slowSampler.GetPoint(t);
                 var fv = fastSampler.GetPoint(t);
 
                 Assert.AreEqual(dv, fv);
