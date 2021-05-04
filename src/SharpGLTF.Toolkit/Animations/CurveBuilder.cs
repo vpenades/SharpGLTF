@@ -362,7 +362,6 @@ namespace SharpGLTF.Animations
 
         IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToLinearCurve()
         {
-            if (MaxDegree != 1) throw new NotSupportedException();
             if (_Keys.Count == 0) return new Dictionary<float, T>();
 
             if (_Keys.All(item => item.Value.Degree == 1))

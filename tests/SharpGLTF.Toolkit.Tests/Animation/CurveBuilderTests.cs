@@ -57,7 +57,7 @@ namespace SharpGLTF.Animations
                 .Select(kvp => new Vector2(kvp.Value.X, kvp.Value.Y))
                 .ToPointSeries()
                 .WithLineType(Plotting.LineType.Continuous)
-                .AttachToCurrentTest("plot.png");
+                .AttachToCurrentTest("plot.html");
         }
 
         [Test]
@@ -106,7 +106,7 @@ namespace SharpGLTF.Animations
                 .Select(kvp => new Vector2(kvp.Key, kvp.Value.W))
                 .ToPointSeries()
                 .WithLineType(Plotting.LineType.Continuous)
-                .AttachToCurrentTest("plot.png");
+                .AttachToCurrentTest("plot.html");
         }
 
         [Test]
@@ -160,7 +160,7 @@ namespace SharpGLTF.Animations
                 .Select(kvp => new Vector2(kvp.Value[0], kvp.Value[1]))
                 .ToPointSeries()
                 .WithLineType(Plotting.LineType.Continuous)
-                .AttachToCurrentTest("plot.png");
+                .AttachToCurrentTest("plot.html");
         }
     }
 
