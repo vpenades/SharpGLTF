@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Encodings.Web;
 
 using NUnit.Framework;
 
@@ -195,6 +196,57 @@ namespace SharpGLTF.IO
 
         }
 
+    }
+
+    [Category("Core.IO")]
+    public class JsonSerializationTests
+    {
+        const string UNESCAPED = "你好";
+        const string ESCAPED = "\u4f60\u597d";
+
+        [Test]
+        public void TestJsonExtendedCharacters()
+        {
+            TestContext.CurrentContext.AttachShowDirLink();
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            // create a test model
+
+            var model = Schema2.ModelRoot.CreateModel();
+
+            model.Asset.Copyright = UNESCAPED;
+            model.UseScene(UNESCAPED);
+            model.Asset.Extras = JsonContent.CreateFrom(new string[] { UNESCAPED, ESCAPED, UNESCAPED });
+            model.CreateImage().Content = Memory.MemoryImage.DefaultPngImage;
+
+            // create write settings
+
+            var joptions = new System.Text.Json.JsonWriterOptions
+            {
+                Indented = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
+
+            var wsettings = new Schema2.WriteSettings();
+            wsettings.JsonOptions = joptions;
+
+            // model save-load roundtrip
+
+            var roundtripPath = model.AttachToCurrentTest("extended 你好 characters.gltf", wsettings);
+            var roundtripJson = System.IO.File.ReadAllText(roundtripPath);
+            var roundtripModel = Schema2.ModelRoot.Load(roundtripPath);
+
+            // checks
+
+            TestContext.WriteLine(roundtripJson);
+
+            Assert.IsTrue(roundtripJson.Contains("你好"));
+            
+            // https://github.com/KhronosGroup/glTF/issues/1978#issuecomment-831744624
+            Assert.IsTrue(roundtripJson.Contains("extended%20%E4%BD%A0%E5%A5%BD%20characters.png"));
+
+            Assert.IsTrue(roundtripModel.LogicalImages[0].Content.IsPng);
+        }
     }
 
     [Category("Core.IO")]

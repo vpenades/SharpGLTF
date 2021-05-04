@@ -195,7 +195,7 @@ namespace SharpGLTF.Schema2
 
             using (var m = new MemoryStream())
             {
-                model._WriteJSON(m, this.JsonIndented);
+                model._WriteJSON(m, this.JsonOptions);
 
                 WriteAllBytesToEnd($"{baseName}.gltf", m.ToArraySegment());
             }

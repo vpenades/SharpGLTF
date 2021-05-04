@@ -58,6 +58,12 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
+        #region data
+
+        private System.Text.Json.JsonWriterOptions _JsonOptions = default;
+
+        #endregion
+
         #region properties
 
         /// <summary>
@@ -78,7 +84,20 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets a value indicating whether the JSON formatting will include indentation.
         /// </summary>
-        public Boolean JsonIndented { get; set; }
+        public Boolean JsonIndented
+        {
+            get => _JsonOptions.Indented;
+            set => _JsonOptions.Indented = value;
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating the Json options to be used for writing.
+        /// </summary>
+        public System.Text.Json.JsonWriterOptions JsonOptions
+        {
+            get => _JsonOptions;
+            set => _JsonOptions = value;
+        }
 
         /// <summary>
         /// Gets or sets a value indicating the level of validation applied when loading a file.
@@ -96,7 +115,7 @@ namespace SharpGLTF.Schema2
             other.ImageWriting = this.ImageWriting;
             other.ImageWriteCallback = this.ImageWriteCallback;
             other.MergeBuffers = this.MergeBuffers;
-            other.JsonIndented = this.JsonIndented;
+            other._JsonOptions = this._JsonOptions;
             other.Validation = this.Validation;
         }
 
@@ -171,9 +190,19 @@ namespace SharpGLTF.Schema2
         /// <returns>A JSON content.</returns>
         public string GetJSON(bool indented)
         {
+            var options = new System.Text.Json.JsonWriterOptions
+            {
+                Indented = indented
+            };
+
+            return GetJSON(options);
+        }
+
+        public string GetJSON(System.Text.Json.JsonWriterOptions options)
+        {
             using (var mm = new System.IO.MemoryStream())
             {
-                _WriteJSON(mm, indented);
+                _WriteJSON(mm, options);
 
                 mm.Position = 0;
 
@@ -227,12 +256,8 @@ namespace SharpGLTF.Schema2
 
         #region core
 
-        internal void _WriteJSON(System.IO.Stream sw, bool indented)
+        internal void _WriteJSON(System.IO.Stream sw, System.Text.Json.JsonWriterOptions options)
         {
-            System.Text.Json.JsonWriterOptions options = default;
-
-            options.Indented = indented;
-
             using (var writer = new System.Text.Json.Utf8JsonWriter(sw, options))
             {
                 this.Serialize(writer);
