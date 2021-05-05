@@ -368,6 +368,8 @@ namespace SharpGLTF.Schema2
 
         public int BufferIndex => _BufferIndex;
 
+        public int BufferSize => _Data.Count;
+
         #endregion
 
         #region API

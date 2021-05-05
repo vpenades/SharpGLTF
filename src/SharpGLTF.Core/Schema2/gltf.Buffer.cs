@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpGLTF.Schema2
@@ -187,32 +188,99 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Merges all the <see cref="ModelRoot.LogicalBuffers"/> instances into a single big one.
+        /// Merges all the <see cref="LogicalBuffers"/> instances into a single big one.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// When merging the buffers, it also adjusts the BufferView offsets so the data they point to remains the same.
-        /// If images are required to be included in the binary, call <see cref="ModelRoot.MergeImages"/> before calling <see cref="MergeBuffers"/>
-        /// This action cannot be reversed.
+        /// </para>
+        /// <para>
+        /// If images are required to be included in the binary, call <see cref="MergeImages"/>
+        /// before calling <see cref="MergeBuffers()"/>.
+        /// </para>
         /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// .Net arrays have an upper limit of 2Gb, so this is the biggest a buffer can normally grow,
+        /// so attempting to merge buffers that sum more than 2Gb will throw this exception.
+        /// </exception>
         public void MergeBuffers()
         {
             // retrieve all buffers and merge them into a single, big buffer
 
             var views = _bufferViews
                 .OrderByDescending(item => item.Content.Count)
-                .ToArray();
+                .ToList();
 
-            if (views.Length <= 1) return; // nothing to do.
+            if (views.Count <= 1) return; // nothing to do.
+
+            // check final size
+
+            long totalLen = views.Sum(item => (long)item.Content.Count.WordPadded());
+            if (totalLen >= (long)int.MaxValue) throw new InvalidOperationException("Can't merge a buffer larger than 2Gb");
+
+            // begin merge
 
             var sbbuilder = new _StaticBufferBuilder(0);
 
             foreach (var bv in views) bv._IsolateBufferMemory(sbbuilder);
+
+            // build final buffer
 
             this._buffers.Clear();
 
             var b = new Buffer(sbbuilder.ToArray());
 
             this._buffers.Add(b);
+        }
+
+        /// <summary>
+        /// Merges all the <see cref="LogicalBuffers"/> instances into buffers of <paramref name="maxSize"/> size.
+        /// </summary>
+        /// <param name="maxSize">
+        /// The maximum size of each buffer.
+        /// Notice that if a single BufferView is larger than <paramref name="maxSize"/>, that buffer will be also larger.
+        /// </param>
+        public void MergeBuffers(int maxSize)
+        {
+            // retrieve all buffers and merge them into a single, big buffer
+
+            var views = _bufferViews
+                .OrderByDescending(item => item.Content.Count)
+                .ToList();
+
+            if (views.Count <= 1) return; // nothing to do.
+
+            // begin merge
+
+            var buffers = new List<_StaticBufferBuilder>();
+            buffers.Add(new _StaticBufferBuilder(0));
+
+            foreach (var bv in views)
+            {
+                var last = buffers.Last();
+
+                var alreadyFull = last.BufferSize >= maxSize;
+                var notEmpty = last.BufferSize > 0;
+                var bvTooBig = bv.Content.Count >= maxSize;
+
+                if (alreadyFull || (notEmpty && bvTooBig))
+                {
+                    last = new _StaticBufferBuilder(buffers.Count);
+                    buffers.Add(last);
+                }
+
+                bv._IsolateBufferMemory(last);
+            }
+
+            // build final buffers
+
+            this._buffers.Clear();
+
+            foreach (var buffer in buffers)
+            {
+                var b = new Buffer(buffer.ToArray());
+                this._buffers.Add(b);
+            }
         }
 
         /// <summary>

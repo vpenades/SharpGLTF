@@ -184,7 +184,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
 
-            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, this.MergeBuffers);
+            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, this.MergeBuffers, this.BuffersMaxSize);
             Guard.NotNull(model, nameof(model));
 
             model._PrepareBuffersForSatelliteWriting(this, baseName);
@@ -213,7 +213,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
 
-            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, true);
+            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, true, int.MaxValue);
             Guard.NotNull(model, nameof(model));
 
             var ex = _BinarySerialization.IsBinaryCompatible(model);
@@ -270,8 +270,9 @@ namespace SharpGLTF.Schema2
         /// <param name="model">The source <see cref="MODEL"/> instance.</param>
         /// <param name="imagesAsBufferViews">true if images should be stored as buffer views.</param>
         /// <param name="mergeBuffers">true if it's required the model must have a single buffer.</param>
+        /// <param name="buffersMaxSize">When merging buffers, the max buffer size</param>
         /// <returns>The source <see cref="MODEL"/> instance, or a cloned and modified instance if current settings required it.</returns>
-        private MODEL _PreprocessSchema2(MODEL model, bool imagesAsBufferViews, bool mergeBuffers)
+        private MODEL _PreprocessSchema2(MODEL model, bool imagesAsBufferViews, bool mergeBuffers, int buffersMaxSize)
         {
             Guard.NotNull(model, nameof(model));
 
@@ -292,7 +293,11 @@ namespace SharpGLTF.Schema2
             }
 
             if (imagesAsBufferViews) model.MergeImages();
-            if (mergeBuffers) model.MergeBuffers();
+            if (mergeBuffers)
+            {
+                if (buffersMaxSize == int.MaxValue) model.MergeBuffers();
+                else model.MergeBuffers(buffersMaxSize);
+            }
 
             if (this._UpdateSupportedExtensions) model.UpdateExtensionsSupport();
 

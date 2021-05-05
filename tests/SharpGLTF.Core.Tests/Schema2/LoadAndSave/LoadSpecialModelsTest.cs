@@ -105,6 +105,12 @@ namespace SharpGLTF.Schema2.LoadAndSave
             clonedModel.ApplyBasisTransform(basisTransform);
 
             clonedModel.AttachToCurrentTest("polly_out_transformed.glb");
+
+            var wsettings = new WriteSettings();
+            wsettings.ImageWriting = ResourceWriteMode.BufferView;
+            wsettings.MergeBuffers = true;
+            wsettings.BuffersMaxSize = 1024 * 1024 * 10;
+            clonedModel.AttachToCurrentTest("polly_out_merged_10mb.gltf", wsettings);
         }
 
         [Test]

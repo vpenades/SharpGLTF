@@ -82,6 +82,18 @@ namespace SharpGLTF.Schema2
         public Boolean MergeBuffers { get; set; } = true;
 
         /// <summary>
+        /// Gets or sets the size used to split all the resources into individual buffers.
+        /// </summary>
+        /// <remarks>
+        /// It only has an effect when these conditions are met:
+        /// <list type="table">
+        /// <item><see cref="MergeBuffers"/> must be true.</item>
+        /// <item>Output format must be glTF, not GLB</item>
+        /// </list>
+        /// </remarks>
+        public int BuffersMaxSize { get; set; } = int.MaxValue;
+
+        /// <summary>
         /// Gets or sets a value indicating whether the JSON formatting will include indentation.
         /// </summary>
         public Boolean JsonIndented
@@ -115,6 +127,7 @@ namespace SharpGLTF.Schema2
             other.ImageWriting = this.ImageWriting;
             other.ImageWriteCallback = this.ImageWriteCallback;
             other.MergeBuffers = this.MergeBuffers;
+            other.BuffersMaxSize = this.BuffersMaxSize;
             other._JsonOptions = this._JsonOptions;
             other.Validation = this.Validation;
         }
