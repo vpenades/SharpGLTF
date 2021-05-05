@@ -561,21 +561,28 @@ namespace SharpGLTF.Transforms
 
         public static AffineTransform Blend(ReadOnlySpan<AffineTransform> transforms, ReadOnlySpan<float> weights)
         {
+            if (transforms.Length == 0) return Identity;
+            if (transforms.Length == 1) return transforms[0];
+
             var sss = Vector3.Zero;
             var rrr = default(Quaternion);
             var ttt = Vector3.Zero;
 
+            float tweight = 0;
+
             for (int i = 0; i < transforms.Length; ++i)
             {
-                Guard.IsFalse(transforms[i]._Representation == DATA_UNDEFINED, nameof(transforms));
+                Guard.IsTrue(transforms[i].IsValid, nameof(transforms));
+                Guard.IsTrue(transforms[i].TryDecompose(out var s, out var r, out var t), $"Can't decompose [{i}]");
 
                 var w = weights[i];
 
-                transforms[i].TryDecompose(out var s, out var r, out var t);
-
                 sss += s * w;
-                rrr += r * w;
                 ttt += t * w;
+
+                tweight += w;
+                if (i == 0) rrr = r;
+                else rrr = Quaternion.Slerp(r, rrr, w / tweight);
             }
 
             rrr = Quaternion.Normalize(rrr);
