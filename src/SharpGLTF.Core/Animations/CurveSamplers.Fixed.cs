@@ -27,6 +27,11 @@ namespace SharpGLTF.Animations
             return new FixedSampler<T>(sequence.First().Value.Item2);
         }
 
+        public IConvertibleCurve<T> Clone()
+        {
+            return new FixedSampler<T>(_Value);
+        }
+
         private FixedSampler(T value)
         {
             _Value = value;
@@ -60,6 +65,8 @@ namespace SharpGLTF.Animations
         {
             return new Dictionary<float, (T TangentIn, T Value, T TangentOut)> { [0] = (default, _Value, default) };
         }
+
+        
 
         #endregion
     }

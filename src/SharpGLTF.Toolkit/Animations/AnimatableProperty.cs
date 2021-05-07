@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace SharpGLTF.Animations
 {
@@ -110,8 +109,17 @@ namespace SharpGLTF.Animations
                 return;
             }
 
+            Guard.IsFalse(curve is CurveBuilder<T>, "Use UseTrackBuilder() instead");
+
+            // clone curve
+
+            var convertible = curve as IConvertibleCurve<T>;
+            curve = convertible.Clone() as ICurveSampler<T>;
+
+            // validate
+
             curve.GetPoint(0); // make a single evaluation to ensure it's an evaluable curve.
-            Guard.IsTrue(curve is IConvertibleCurve<T>, nameof(curve), $"Provided {nameof(ICurveSampler<T>)} {nameof(curve)} must implement {nameof(IConvertibleCurve<T>)} interface.");
+            Guard.NotNull(curve, $"Provided {nameof(ICurveSampler<T>)} {nameof(curve)} must implement {nameof(IConvertibleCurve<T>)} interface.");
 
             // insert track
             if (_Tracks == null) _Tracks = new Dictionary<string, ICurveSampler<T>>();
@@ -123,17 +131,22 @@ namespace SharpGLTF.Animations
         {
             Guard.NotNullOrEmpty(track, nameof(track));
 
-            if (_Tracks == null || !_Tracks.TryGetValue(track, out ICurveSampler<T> sampler))
+            if (_Tracks == null) _Tracks = new Dictionary<string, ICurveSampler<T>>();
+
+            if (!_Tracks.TryGetValue(track, out ICurveSampler<T> sampler))
             {
                 sampler = CurveFactory.CreateCurveBuilder<T>();
-                SetTrack(track, sampler);
+                _Tracks[track] = sampler;
             }
 
             if (sampler is CurveBuilder<T> builder) return builder;
 
-            throw new NotImplementedException($"Underlaying curve must be of type CurveBuilder<{nameof(T)}>");
+            // convert to builder
 
-            // TODO: CurveFactory.CreateCurveBuilder(sampler);
+            builder = CurveFactory.CreateCurveBuilder(sampler);
+            _Tracks[track] = builder;
+
+            return builder;
         }
 
         #endregion

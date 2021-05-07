@@ -33,6 +33,12 @@ namespace SharpGLTF.Animations
         int MaxDegree { get; }
 
         /// <summary>
+        /// Creates a clone of this curve.
+        /// </summary>
+        /// <returns>A new curve.</returns>
+        IConvertibleCurve<T> Clone();
+
+        /// <summary>
         /// Gets a STEP interpolated curve. Use only when <see cref="MaxDegree"/> is 0.
         /// </summary>
         /// <returns>A Time-Value dictionary</returns>

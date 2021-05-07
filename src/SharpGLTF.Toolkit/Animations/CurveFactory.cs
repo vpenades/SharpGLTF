@@ -30,6 +30,34 @@ namespace SharpGLTF.Animations
             if (curve is SparseCurveBuilder sscb) return sscb.Clone() as CurveBuilder<T>;
             if (curve is SegmentCurveBuilder xscb) return xscb.Clone() as CurveBuilder<T>;
 
+            if (typeof(T) == typeof(Vector3))
+            {
+                var cb = new Vector3CurveBuilder();
+                cb.SetCurve(curve as ICurveSampler<Vector3>);
+                return cb as CurveBuilder<T>;
+            }
+
+            if (typeof(T) == typeof(Quaternion))
+            {
+                var cb = new QuaternionCurveBuilder();
+                cb.SetCurve(curve as ICurveSampler<Quaternion>);
+                return cb as CurveBuilder<T>;
+            }
+
+            if (typeof(T) == typeof(SEGMENT))
+            {
+                var cb = new SegmentCurveBuilder();
+                cb.SetCurve(curve as ICurveSampler<SEGMENT>);
+                return cb as CurveBuilder<T>;
+            }
+
+            if (typeof(T) == typeof(SPARSE))
+            {
+                var cb = new SparseCurveBuilder();
+                cb.SetCurve(curve as ICurveSampler<SPARSE>);
+                return cb as CurveBuilder<T>;
+            }
+
             throw new InvalidOperationException($"{typeof(T).Name} not supported.");
         }
     }

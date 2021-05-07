@@ -147,6 +147,8 @@ namespace SharpGLTF.Geometry
 
             var pivot = new NodeBuilder("RootNode").WithLocalTranslation("track1", keyframes);
 
+            Assert.AreEqual(4, pivot.UseTranslation("track1").Keys.Count);
+
             // create scene
 
             var scene = new SceneBuilder();

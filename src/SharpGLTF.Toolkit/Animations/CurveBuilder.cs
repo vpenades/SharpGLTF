@@ -13,6 +13,7 @@ namespace SharpGLTF.Animations
     public abstract class CurveBuilder<T> :
         ICurveSampler<T>,
         IConvertibleCurve<T>
+        where T : struct
     {
         #region lifecycle
 
@@ -24,8 +25,13 @@ namespace SharpGLTF.Animations
 
             foreach (var kvp in other._Keys)
             {
-                this._Keys[kvp.Key] = kvp.Value;
+                this._Keys[kvp.Key] = kvp.Value.Clone(CloneValue);
             }
+        }
+
+        IConvertibleCurve<T> IConvertibleCurve<T>.Clone()
+        {
+            return this.Clone();
         }
 
         public abstract CurveBuilder<T> Clone();
@@ -196,66 +202,73 @@ namespace SharpGLTF.Animations
         {
             if (curve is IConvertibleCurve<T> convertible)
             {
-                if (convertible.MaxDegree == 0)
+                SetCurve(convertible);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public void SetCurve(IConvertibleCurve<T> convertible)
+        {
+            if (convertible.MaxDegree == 0)
+            {
+                var step = convertible.ToStepCurve();
+                foreach (var p in step) this.SetPoint(p.Key, p.Value, false);
+
+                #if DEBUG
+                foreach (var p in step)
                 {
-                    var step = convertible.ToStepCurve();
-                    foreach (var p in step) this.SetPoint(p.Key, p.Value, false);
-
-                    #if DEBUG
-                    foreach (var p in step)
-                    {
-                        var dstKey = _Keys[p.Key];
-                        System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
-                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
-                    }
-                    #endif
-
-                    return;
+                    var dstKey = _Keys[p.Key];
+                    System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
+                    System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
                 }
+                #endif
 
-                if (convertible.MaxDegree == 1)
-                {
-                    var linear = convertible.ToLinearCurve();
-                    foreach (var p in linear) this.SetPoint(p.Key, p.Value);
-
-                    #if DEBUG
-                    foreach (var p in linear)
-                    {
-                        var dstKey = _Keys[p.Key];
-                        System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
-                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
-                    }
-                    #endif
-
-                    return;
-                }
-
-                if (convertible.MaxDegree == 3)
-                {
-                    var spline = convertible.ToSplineCurve();
-                    foreach (var ppp in spline)
-                    {
-                        this.SetPoint(ppp.Key, ppp.Value.Value);
-                        this.SetIncomingTangent(ppp.Key, ppp.Value.TangentIn);
-                        this.SetOutgoingTangent(ppp.Key, ppp.Value.TangentOut);
-                    }
-
-                    #if DEBUG
-                    foreach (var ppp in spline)
-                    {
-                        var dstKey = _Keys[ppp.Key];
-                        System.Diagnostics.Debug.Assert(dstKey.Degree == 3);
-                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, ppp.Value.Value));
-                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.IncomingTangent, ppp.Value.TangentIn));
-                        System.Diagnostics.Debug.Assert(AreEqual(dstKey.OutgoingTangent, ppp.Value.TangentOut));
-                    }
-                    #endif
-
-                    return;
-                }
+                return;
             }
 
-            throw new NotImplementedException();
+            if (convertible.MaxDegree == 1)
+            {
+                var linear = convertible.ToLinearCurve();
+                foreach (var p in linear) this.SetPoint(p.Key, p.Value);
+
+                #if DEBUG
+                foreach (var p in linear)
+                {
+                    var dstKey = _Keys[p.Key];
+                    System.Diagnostics.Debug.Assert(dstKey.Degree <= 1);
+                    System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, p.Value));
+                }
+                #endif
+
+                return;
+            }
+
+            if (convertible.MaxDegree == 3)
+            {
+                var spline = convertible.ToSplineCurve();
+                foreach (var ppp in spline)
+                {
+                    this.SetPoint(ppp.Key, ppp.Value.Value);
+                    this.SetIncomingTangent(ppp.Key, ppp.Value.TangentIn);
+                    this.SetOutgoingTangent(ppp.Key, ppp.Value.TangentOut);
+                }
+
+                #if DEBUG
+                foreach (var ppp in spline)
+                {
+                    var dstKey = _Keys[ppp.Key];
+                    System.Diagnostics.Debug.Assert(dstKey.Degree == 3);
+                    System.Diagnostics.Debug.Assert(AreEqual(dstKey.Point, ppp.Value.Value));
+                    System.Diagnostics.Debug.Assert(AreEqual(dstKey.IncomingTangent, ppp.Value.TangentIn));
+                    System.Diagnostics.Debug.Assert(AreEqual(dstKey.OutgoingTangent, ppp.Value.TangentOut));
+                }
+                #endif
+
+                return;
+            }
         }
 
         public void SetCurve(Schema2.IAnimationSampler<T> curve)
@@ -530,6 +543,17 @@ namespace SharpGLTF.Animations
             IncomingTangent = incoming;
             Point = value;
             OutgoingTangent = outgoing;
+        }
+
+        public _CurveNode<T> Clone(Func<T, T> cloneValue)
+        {
+            return new _CurveNode<T>
+            {
+                Degree = this.Degree,
+                IncomingTangent = cloneValue(this.IncomingTangent),
+                Point = cloneValue(this.Point),
+                OutgoingTangent = cloneValue(this.OutgoingTangent)
+            };
         }
 
         #endregion

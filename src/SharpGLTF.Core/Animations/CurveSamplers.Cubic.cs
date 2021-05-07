@@ -10,6 +10,21 @@ namespace SharpGLTF.Animations
     {
         #region lifecycle
 
+        public IConvertibleCurve<T> Clone()
+        {
+            var traits = _Traits;
+            var clonedSequence = _Sequence.Select
+                (
+                pair =>
+                    (
+                    pair.Key,
+                    (traits.Clone(pair.Item2.TangentIn), traits.Clone(pair.Item2.Value), traits.Clone(pair.Item2.TangentOut))
+                    )
+                ).ToArray();
+
+            return new CubicSampler<T>(clonedSequence, traits);
+        }
+
         public CubicSampler(IEnumerable<(float, (T, T, T))> sequence, ISamplerTraits<T> traits)
         {
             _Sequence = sequence;

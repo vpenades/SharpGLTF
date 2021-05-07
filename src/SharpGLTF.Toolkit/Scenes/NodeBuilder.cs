@@ -366,11 +366,20 @@ namespace SharpGLTF.Scenes
             return UseTranslation().UseTrackBuilder(animationTrack);
         }
 
-        public void SetScaleTrack(string track, Animations.ICurveSampler<Vector3> curve) { UseScale().SetTrack(track, curve); }
+        public void SetScaleTrack(string track, Animations.ICurveSampler<Vector3> curve)
+        {
+            UseScale().SetTrack(track, curve);
+        }
 
-        public void SetTranslationTrack(string track, Animations.ICurveSampler<Vector3> curve) { UseTranslation().SetTrack(track, curve); }
+        public void SetTranslationTrack(string track, Animations.ICurveSampler<Vector3> curve)
+        {
+            UseTranslation().SetTrack(track, curve);
+        }
 
-        public void SetRotationTrack(string track, Animations.ICurveSampler<Quaternion> curve) { UseRotation().SetTrack(track, curve); }
+        public void SetRotationTrack(string track, Animations.ICurveSampler<Quaternion> curve)
+        {
+            UseRotation().SetTrack(track, curve);
+        }
 
         public TRANSFORM GetLocalTransform(string animationTrack, float time)
         {
@@ -425,12 +434,12 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(keyframes, nameof(keyframes));
 
-            var track = this.UseTranslation(animTrack);
+            var items = keyframes
+                .OrderBy(item => item.Key)
+                .Select(item => (item.Key, item.Value));
+                // no need to collapse, since SetTrack already clones the curve.
 
-            foreach (var kf in keyframes)
-            {
-                track.SetPoint(kf.Key, kf.Value);
-            }
+            this.UseTranslation().SetTrack(animTrack, Animations.CurveSampler.CreateSampler(items));
 
             return this;
         }
@@ -439,12 +448,12 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(keyframes, nameof(keyframes));
 
-            var track = this.UseRotation(animTrack);
+            var items = keyframes
+                .OrderBy(item => item.Key)
+                .Select(item => (item.Key, item.Value));
+            // no need to collapse, since SetTrack already clones the curve.
 
-            foreach (var kf in keyframes)
-            {
-                track.SetPoint(kf.Key, kf.Value);
-            }
+            this.UseRotation().SetTrack(animTrack, Animations.CurveSampler.CreateSampler(items));
 
             return this;
         }
@@ -453,12 +462,12 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(keyframes, nameof(keyframes));
 
-            var track = this.UseScale(animTrack);
+            var items = keyframes
+                .OrderBy(item => item.Key)
+                .Select(item => (item.Key, item.Value));
+            // no need to collapse, since SetTrack already clones the curve.
 
-            foreach (var kf in keyframes)
-            {
-                track.SetPoint(kf.Key, kf.Value);
-            }
+            this.UseScale().SetTrack(animTrack, Animations.CurveSampler.CreateSampler(items));
 
             return this;
         }
