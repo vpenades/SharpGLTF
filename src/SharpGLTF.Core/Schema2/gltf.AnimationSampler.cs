@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 
 using SharpGLTF.Animations;
 using SharpGLTF.Collections;
@@ -10,8 +10,8 @@ using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 
 using ROLIST = System.Collections.Generic.IReadOnlyList<float>;
-using SPARSE8 = SharpGLTF.Transforms.SparseWeight8;
 using SEGMENT = System.ArraySegment<float>;
+using SPARSE8 = SharpGLTF.Transforms.SparseWeight8;
 
 namespace SharpGLTF.Schema2
 {

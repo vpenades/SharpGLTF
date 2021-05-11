@@ -27,6 +27,7 @@ namespace SharpGLTF.Animations
                 return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
             }
         }
+
         sealed class _Quaternion : ISamplerTraits<Quaternion>
         {
             public Quaternion Clone(Quaternion value) { return value; }
@@ -36,6 +37,7 @@ namespace SharpGLTF.Animations
                 return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
             }
         }
+
         sealed class _Array : ISamplerTraits<Single[]>
         {
             public Single[] Clone(Single[] value) { return (Single[])value.Clone(); }
@@ -43,11 +45,13 @@ namespace SharpGLTF.Animations
             {
                 return CurveSampler.InterpolateLinear(left, right, amount);
             }
+
             public float[] InterpolateCubic(float[] start, float[] outgoingTangent, float[] end, float[] incomingTangent, float amount)
             {
                 return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
             }
         }
+
         sealed class _Segment : ISamplerTraits<SEGMENT>
         {
             public SEGMENT Clone(SEGMENT value) { return new SEGMENT(value.ToArray()); }
@@ -55,11 +59,13 @@ namespace SharpGLTF.Animations
             {
                 return new SEGMENT(CurveSampler.InterpolateLinear(left, right, amount));
             }
+
             public SEGMENT InterpolateCubic(SEGMENT start, SEGMENT outgoingTangent, SEGMENT end, SEGMENT incomingTangent, Single amount)
             {
                 return new SEGMENT(CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount));
             }
         }
+
         sealed class _Sparse : ISamplerTraits<SPARSE>
         {
             public SPARSE Clone(SPARSE value) { return value; }
@@ -67,6 +73,7 @@ namespace SharpGLTF.Animations
             {
                 return SPARSE.InterpolateLinear(left, right, amount);
             }
+
             public SPARSE InterpolateCubic(SPARSE start, SPARSE outgoingTangent, SPARSE end, SPARSE incomingTangent, Single amount)
             {
                 return SPARSE.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);

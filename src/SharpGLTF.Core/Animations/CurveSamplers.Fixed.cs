@@ -66,8 +66,6 @@ namespace SharpGLTF.Animations
             return new Dictionary<float, (T TangentIn, T Value, T TangentOut)> { [0] = (default, _Value, default) };
         }
 
-        
-
         #endregion
     }
 }

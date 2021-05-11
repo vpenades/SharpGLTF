@@ -550,6 +550,7 @@ namespace SharpGLTF.Scenes
                     if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
                 }
             }
+
             if (a.InterpolationMode == AnimationInterpolationMode.STEP)
             {
                 if (b.MaxDegree != 0) throw new ArgumentException(nameof(b.MaxDegree));
