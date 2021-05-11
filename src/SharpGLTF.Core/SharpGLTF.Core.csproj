@@ -23,9 +23,8 @@
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
   </ItemGroup>  
   
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <!-- TODO: Only target 5.0.0 when we add Net5 -->
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+  <ItemGroup>    
+    <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
   <ItemGroup>
