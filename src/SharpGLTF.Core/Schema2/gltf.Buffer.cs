@@ -261,7 +261,7 @@ namespace SharpGLTF.Schema2
 
                 var alreadyFull = last.BufferSize >= maxSize;
                 var notEmpty = last.BufferSize > 0;
-                var bvTooBig = bv.Content.Count >= maxSize;
+                var bvTooBig = (long)bv.Content.Count + last.BufferSize >= maxSize;
 
                 if (alreadyFull || (notEmpty && bvTooBig))
                 {
