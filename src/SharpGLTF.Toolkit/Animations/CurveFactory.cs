@@ -9,6 +9,14 @@ using SPARSE = SharpGLTF.Transforms.SparseWeight8;
 
 namespace SharpGLTF.Animations
 {
+    /// <summary>
+    /// This class is meant to be used internally.
+    /// </summary>
+    /// <remarks>
+    /// Functions of this class are being used by:
+    /// <see cref="AnimatableProperty{T}.UseTrackBuilder(string)"/>
+    /// which is the public API.
+    /// </remarks>
     static class CurveFactory
     {
         public static CurveBuilder<T> CreateCurveBuilder<T>()
