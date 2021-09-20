@@ -1,22 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Include="..\..\tools\linux64\gltf_validator" Link="gltf_validator">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="..\..\tools\win64\gltf_validator.exe" Link="gltf_validator.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup>    
+    <PackageReference Include="GltfValidator" Version="2.0.0-dev.3.5.202109201056" />    
     <PackageReference Include="nunit" Version="3.13.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>

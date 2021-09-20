@@ -98,15 +98,16 @@ namespace SharpGLTF
 
             if (validationPath != null)
             {
-                var report = gltf_validator.ValidateFile(fileName);
+                var report = GltfValidator.ValidationReport.Validate(fileName);                
+
                 if (report == null) return fileName;
 
-                if (report.HasErrors || report.HasWarnings)
+                if (report.Severity == GltfValidator.Severity.Error || report.Severity == GltfValidator.Severity.Warning)
                 {
                     TestContext.WriteLine(report.ToString());
                 }
 
-                Assert.IsFalse(report.HasErrors);
+                Assert.AreNotEqual(GltfValidator.Severity.Error, report.Severity);
             }
 
             return fileName;

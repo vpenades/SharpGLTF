@@ -40,17 +40,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 var gltfJson = filePath.EndsWith(".gltf") ? System.IO.File.ReadAllText(filePath) : string.Empty;
 
-                var report = gltf_validator.ValidateFile(filePath);                
+                var report = GltfValidator.ValidationReport.Validate(filePath);                
 
                 if (report == null) continue; // ??
 
-                if (report.Warnings.Any(item => item.Contains("Cannot validate an extension"))) continue;
+                if (report.HasUnsupportedExtensions) continue;
 
                 try
                 {
                     var model = ModelRoot.Load(filePath);
 
-                    if (report.HasErrors)
+                    if (report.Severity == GltfValidator.Severity.Error)
                     {
                         TestContext.Error.WriteLine($"{filePath.ToShortDisplayPath()} 👎😦 Should not load!");
                         passed = false;
@@ -62,7 +62,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 }
                 catch (Exception ex)
                 {
-                    if (!report.HasErrors)
+                    if (report.Severity != GltfValidator.Severity.Error)
                     {
                         TestContext.Error.WriteLine($"{filePath.ToShortDisplayPath()} 👎😦 Should load!");
                         TestContext.Error.WriteLine($"   ERROR: {ex.Message}");

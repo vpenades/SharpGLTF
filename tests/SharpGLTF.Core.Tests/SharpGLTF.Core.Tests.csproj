@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1;net471;net5.0</TargetFrameworks>
+    <TargetFrameworks>net471;netcoreapp3.1;net5.0-windows</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>latest</LangVersion>
@@ -20,13 +20,13 @@
     <!--
     <PackageReference Include="Mono.ApiTools.NuGetDiff" Version="1.3.1" />    
     <PackageReference Include="Mono.ApiTools" Version="5.14.0.2" />
-    -->
+    -->    
     
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-  </ItemGroup>  
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />    
+  </ItemGroup>    
 
 </Project>
