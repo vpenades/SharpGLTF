@@ -4,6 +4,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Validation;
+
 namespace SharpGLTF.Schema2
 {
     public partial class Material
@@ -12,6 +14,7 @@ namespace SharpGLTF.Schema2
 
         internal void ClearExtensions()
         {
+            this.RemoveExtensions<MaterialIOR>();
             this.RemoveExtensions<MaterialUnlit>();
             this.RemoveExtensions<MaterialSheen>();
             this.RemoveExtensions<MaterialClearCoat>();
@@ -232,6 +235,24 @@ namespace SharpGLTF.Schema2
                 value => this.Parameter = value
                 );
         }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_baseColorFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.X, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Y, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Z, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.W, 0, 1, nameof(_baseColorFactor));
+            }
+
+            if (_metallicFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_metallicFactor.Value, _metallicFactorMinimum, _metallicFactorMaximum, nameof(_metallicFactor));
+            }
+        }
     }
 
     internal sealed partial class MaterialPBRSpecularGlossiness
@@ -295,6 +316,23 @@ namespace SharpGLTF.Schema2
                 () => this.Parameter,
                 value => this.Parameter = value
                 );
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_specularFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value.X, 0, 1, nameof(_specularFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value.Y, 0, 1, nameof(_specularFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value.Z, 0, 1, nameof(_specularFactor));
+            }
+
+            if (_glossinessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_glossinessFactor.Value, _glossinessFactorMinimum, _glossinessFactorMaximum, nameof(_glossinessFactor));
+            }
         }
     }
 
@@ -363,6 +401,21 @@ namespace SharpGLTF.Schema2
                 value => _GetClearCoatNormalTexture(true).Scale = value
                 );
         }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_clearcoatFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_clearcoatFactor.Value, _clearcoatFactorMinimum, _clearcoatFactorMaximum, nameof(_clearcoatFactor));
+            }
+
+            if (_clearcoatRoughnessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_clearcoatRoughnessFactor.Value, _clearcoatRoughnessFactorMinimum, _clearcoatRoughnessFactorMaximum, nameof(_clearcoatRoughnessFactor));
+            }
+        }
     }
 
     internal sealed partial class MaterialTransmission
@@ -392,6 +445,16 @@ namespace SharpGLTF.Schema2
         {
             if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
             return _transmissionTexture;
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_transmissionFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_transmissionFactor.Value, _transmissionFactorMinimum, _transmissionFactorMaximum, nameof(_transmissionFactor));
+            }
         }
     }
 
@@ -438,5 +501,46 @@ namespace SharpGLTF.Schema2
             if (create && _sheenRoughnessTexture == null) _sheenRoughnessTexture = new TextureInfo();
             return _sheenRoughnessTexture;
         }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_sheenColorFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_sheenColorFactor.Value.X, 0, 1, nameof(_sheenColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_sheenColorFactor.Value.Y, 0, 1, nameof(_sheenColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_sheenColorFactor.Value.Z, 0, 1, nameof(_sheenColorFactor));
+            }
+
+            if (_sheenRoughnessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_sheenRoughnessFactor.Value, _sheenRoughnessFactorMinimum, _sheenRoughnessFactorMaximum, nameof(_sheenRoughnessFactor));
+            }
+        }
+    }
+
+    internal sealed partial class MaterialIOR
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialIOR(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        public static float DefaultIndexOfRefraction => (float)_iorDefault;
+
+        public float IndexOfRefraction
+        {
+            get => (float)(this._ior ?? _iorDefault);
+            set => this._ior = ((double)value).AsNullable(_iorDefault);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_ior == 0) return; // a value of 0 is allowed by the spec as a special value
+            if (_ior < 1) throw new ArgumentOutOfRangeException(nameof(IndexOfRefraction));
+        }
     }
 }
+

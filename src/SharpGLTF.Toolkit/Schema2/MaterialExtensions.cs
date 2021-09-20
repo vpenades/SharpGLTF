@@ -278,6 +278,7 @@ namespace SharpGLTF.Schema2
             dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
+            dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
 
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
         }
@@ -352,6 +353,7 @@ namespace SharpGLTF.Schema2
             dstMaterial.Alpha = srcMaterial.AlphaMode.ToSchema2();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
+            dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
 
             var hasClearCoat = srcMaterial.GetChannel("ClearCoat") != null
                 || srcMaterial.GetChannel("ClearCoatRoughness") != null

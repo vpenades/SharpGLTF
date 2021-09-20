@@ -49,6 +49,7 @@ namespace SharpGLTF
             public static string PbrClearCoat => _Path("KHR_materials_clearcoat", "glTF.KHR_materials_clearcoat.schema.json");
             public static string PbrTransmission => _Path("KHR_materials_transmission", "glTF.KHR_materials_transmission.schema.json");
             public static string PbrSheen => _Path("KHR_materials_sheen", "glTF.KHR_materials_sheen.schema.json");
+            public static string MaterialIor => _Path("KHR_materials_ior", "glTF.KHR_materials_ior.schema.json");
             public static string Unlit => _Path("KHR_materials_unlit", "glTF.KHR_materials_unlit.schema.json");
             public static string LightsPunctual_Model => _Path("KHR_lights_punctual", "glTF.KHR_lights_punctual.schema.json");
             public static string LightsPunctual_Node => _Path("KHR_lights_punctual", "node.KHR_lights_punctual.schema.json");

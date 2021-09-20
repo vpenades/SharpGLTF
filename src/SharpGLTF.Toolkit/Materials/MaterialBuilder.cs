@@ -89,6 +89,7 @@ namespace SharpGLTF.Materials
             this.AlphaCutoff = other.AlphaCutoff;
             this.DoubleSided = other.DoubleSided;
             this.ShaderStyle = other.ShaderStyle;
+            this.IndexOfRefraction = other.IndexOfRefraction;
 
             this._CompatibilityFallbackMaterial = other._CompatibilityFallbackMaterial == null
                 ? null
@@ -130,6 +131,8 @@ namespace SharpGLTF.Materials
             set => _SetShader(value);
         }
 
+        public float IndexOfRefraction { get; set; } = 1.5f;
+
         public static bool AreEqualByContent(MaterialBuilder x, MaterialBuilder y)
         {
             if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
@@ -139,6 +142,7 @@ namespace SharpGLTF.Materials
             if (x.AlphaMode != y.AlphaMode) return false;
             if (x.AlphaCutoff != y.AlphaCutoff) return false;
             if (x.DoubleSided != y.DoubleSided) return false;
+            if (x.IndexOfRefraction != y.IndexOfRefraction) return false;
             if (x._ShaderStyle != y._ShaderStyle) return false;
 
             if (!AreEqualByContent(x._CompatibilityFallbackMaterial, y._CompatibilityFallbackMaterial)) return false;
@@ -170,6 +174,7 @@ namespace SharpGLTF.Materials
             h ^= x.AlphaMode.GetHashCode();
             h ^= x.AlphaCutoff.GetHashCode();
             h ^= x.DoubleSided.GetHashCode();
+            h ^= x.IndexOfRefraction.GetHashCode();
             h ^= x.ShaderStyle.GetHashCode();
 
             h ^= x._Channels
@@ -299,6 +304,7 @@ namespace SharpGLTF.Materials
                     Guard.IsTrue(this.AlphaMode == this.CompatibilityFallback.AlphaMode, nameof(AlphaMode));
                     Guard.MustBeEqualTo(this.AlphaCutoff, this.CompatibilityFallback.AlphaCutoff, nameof(AlphaCutoff));
                     Guard.MustBeEqualTo(this.DoubleSided, this.CompatibilityFallback.DoubleSided, nameof(DoubleSided));
+                    Guard.MustBeEqualTo(this.IndexOfRefraction, this.CompatibilityFallback.IndexOfRefraction, nameof(IndexOfRefraction));
 
                     foreach (var chKey in new[] { KnownChannel.Normal, KnownChannel.Occlusion, KnownChannel.Emissive })
                     {

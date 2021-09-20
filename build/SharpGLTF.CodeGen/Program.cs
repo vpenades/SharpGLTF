@@ -29,6 +29,7 @@ namespace SharpGLTF
 
             // material extensions            
             _ProcessKhronosUnlitExtension();
+            _ProcessKhronosIorExtension();
             _ProcessKhronosSheenExtension();
             _ProcessKhronosClearCoatExtension();
             _ProcessKhronosTransmissionExtension();
@@ -231,6 +232,17 @@ namespace SharpGLTF
             ProcessSchema("ext.Sheen.g", ctx);
         }
 
+        private static void _ProcessKhronosIorExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.MaterialIor);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            // ctx.IgnoredByCodeEmitter("Texture Info");
+            // ctx.IgnoredByCodeEmitter("Material Normal Texture Info");
+
+            ProcessSchema("ext.Ior.g", ctx);
+        }
+
         private static void _ProcessKhronosLightsPunctualExtension()
         {
             // Model
@@ -396,6 +408,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("KHR_materials_clearcoat glTF extension", "MaterialClearCoat");
             newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
             newEmitter.SetRuntimeName("KHR_materials_sheen glTF extension", "MaterialSheen");
+            newEmitter.SetRuntimeName("KHR_materials_ior glTF extension", "MaterialIOR");
 
             newEmitter.SetRuntimeName("KHR_xmp glTF extension", "XMPPacketsCollection");
             newEmitter.SetRuntimeName("KHR_xmp node extension", "XMPPacketReference");

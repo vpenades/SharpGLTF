@@ -56,6 +56,25 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public IEnumerable<MaterialChannel> Channels => _GetChannels();
 
+        /// <summary>
+        /// Gets or sets the index of refraction.
+        /// </summary>
+        /// <remarks>
+        /// The index of refraction (IOR) is a measured physical number usually in the range between 1 and 2
+        /// that determines how much the path of light is bent, or refracted, when entering a material.
+        /// It also influences the ratio between reflected and transmitted light, calculated from the Fresnel equations.
+        /// </remarks>
+        public float IndexOfRefraction
+        {
+            get => this.GetExtension<MaterialIOR>()?.IndexOfRefraction ?? MaterialIOR.DefaultIndexOfRefraction;
+            set
+            {
+                if (this.GetExtension<MaterialUnlit>() != null) return;
+                if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) return;
+                this.UseExtension<MaterialIOR>().IndexOfRefraction = value;
+            }
+        }
+
         #endregion
 
         #region API
