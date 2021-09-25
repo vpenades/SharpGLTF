@@ -450,18 +450,32 @@ namespace SharpGLTF.CodeGen
                 yield return Invariant($"private {tconst} {defval} = {vconst};");
             }
 
-            if (f.MinimumValue != null)
+            if (f.ExclusiveMinimumValue != null)
             {
                 var tconst = _GetConstantRuntimeName(f.FieldType);
-                var vconst = _GetConstantRuntimeValue(f.FieldType, f.MinimumValue);
+                var vconst = _GetConstantRuntimeValue(f.FieldType, f.ExclusiveMinimumValue);
+                yield return Invariant($"private {tconst} {fname}ExclusiveMinimum = {vconst};");
+            }
+
+            if (f.InclusiveMinimumValue != null)
+            {
+                var tconst = _GetConstantRuntimeName(f.FieldType);
+                var vconst = _GetConstantRuntimeValue(f.FieldType, f.InclusiveMinimumValue);
                 yield return Invariant($"private {tconst} {fname}Minimum = {vconst};");
             }
 
-            if (f.MaximumValue != null)
+            if (f.InclusiveMaximumValue != null)
             {
                 var tconst = _GetConstantRuntimeName(f.FieldType);
-                var vconst = _GetConstantRuntimeValue(f.FieldType, f.MaximumValue);
+                var vconst = _GetConstantRuntimeValue(f.FieldType, f.InclusiveMaximumValue);
                 yield return Invariant($"private {tconst} {fname}Maximum = {vconst};");
+            }
+
+            if (f.ExclusiveMaximumValue != null)
+            {
+                var tconst = _GetConstantRuntimeName(f.FieldType);
+                var vconst = _GetConstantRuntimeValue(f.FieldType, f.ExclusiveMaximumValue);
+                yield return Invariant($"private {tconst} {fname}ExclusiveMaximum = {vconst};");
             }
 
             if (f.MinItems > 0)

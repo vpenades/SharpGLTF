@@ -32,11 +32,11 @@ namespace SharpGLTF.Schema2
 	
 		private const Double _innerConeAngleDefault = 0;
 		private const Double _innerConeAngleMinimum = 0;
-		private const Double _innerConeAngleMaximum = 1.5707963267948966;
+		private const Double _innerConeAngleExclusiveMaximum = 1.5707963267948966;
 		private Double? _innerConeAngle = _innerConeAngleDefault;
 		
 		private const Double _outerConeAngleDefault = 0.7853981633974483;
-		private const Double _outerConeAngleMinimum = 0;
+		private const Double _outerConeAngleExclusiveMinimum = 0;
 		private const Double _outerConeAngleMaximum = 1.5707963267948966;
 		private Double? _outerConeAngle = _outerConeAngleDefault;
 		
@@ -73,7 +73,7 @@ namespace SharpGLTF.Schema2
 		private const Double _intensityMinimum = 0;
 		private Double? _intensity = _intensityDefault;
 		
-		private const Double _rangeMinimum = 0;
+		private const Double _rangeExclusiveMinimum = 0;
 		private Double? _range;
 		
 		private PunctualLightSpot _spot;

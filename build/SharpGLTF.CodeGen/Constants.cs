@@ -22,7 +22,7 @@ namespace SharpGLTF
         /// <summary>
         /// Directory of the main schema within the download repo directory
         /// </summary>
-        public static string MainSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "specification", "2.0", "schema");
+        public static string MainSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "specification", "2.0", "schema", "2020-12");
 
         /// <summary>
         /// schema source code file path

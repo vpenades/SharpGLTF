@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// The datatype of components in the attribute.
+	/// The datatype of the accessor's components.
 	/// </summary>
 	public enum EncodingType
 	{
@@ -53,7 +53,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// Specifies if the attribute is a scalar, vector, or matrix.
+	/// Specifies if the accessor's elements are scalars, vectors, or matrices.
 	/// </summary>
 	public enum DimensionType
 	{
@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// The name of the node's TRS property to modify, or the "weights" of the Morph Targets it instantiates. For the "translation" property, the values that are provided by the sampler are the translation along the x, y, and z axes. For the "rotation" property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the "scale" property, the values are the scaling factors along the x, y, and z axes.
+	/// The name of the node's TRS property to modify, or the <see cref="weights"/> of the Morph Targets it instantiates. For the <see cref="translation"/> property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the <see cref="rotation"/> property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the <see cref="scale"/> property, the values are the scaling factors along the X, Y, and Z axes.
 	/// </summary>
 	public enum PropertyPath
 	{
@@ -92,7 +92,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// The target that the GPU buffer should be bound to.
+	/// The hint representing the intended GPU buffer type to use with this buffer view.
 	/// </summary>
 	public enum BufferMode
 	{
@@ -123,7 +123,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// The type of primitives to render.
+	/// The topology type of primitives to render.
 	/// </summary>
 	public enum PrimitiveType
 	{
@@ -164,7 +164,7 @@ namespace SharpGLTF.Schema2
 
 
 	/// <summary>
-	/// t wrapping mode.
+	/// T (V) wrapping mode.
 	/// </summary>
 	public enum TextureWrapMode
 	{
@@ -198,7 +198,7 @@ namespace SharpGLTF.Schema2
 	}
 
 	/// <summary>
-	/// Indices of those attributes that deviate from their initialization value.
+	/// An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `accessor.sparse.count`. Indices **MUST** strictly increase.
 	/// </summary>
 	partial class AccessorSparseIndices : ExtraProperties
 	{
@@ -234,7 +234,7 @@ namespace SharpGLTF.Schema2
 	}
 
 	/// <summary>
-	/// Array of size `accessor.sparse.count` times number of components storing the displaced accessor attributes pointed by `accessor.sparse.indices`.
+	/// An object pointing to a buffer view containing the deviating accessor values. The number of elements is equal to `accessor.sparse.count` times number of components. The elements have the same component type as the base accessor. The elements are tightly packed. Data **MUST** be aligned following the same rules as the base accessor.
 	/// </summary>
 	partial class AccessorSparseValues : ExtraProperties
 	{
@@ -266,7 +266,7 @@ namespace SharpGLTF.Schema2
 	}
 
 	/// <summary>
-	/// Sparse storage of attributes that deviate from their initialization value.
+	/// Sparse storage of accessor values that deviate from their initialization value.
 	/// </summary>
 	partial class AccessorSparse : ExtraProperties
 	{
@@ -301,9 +301,7 @@ namespace SharpGLTF.Schema2
 	}
 
 	/// <summary>
-	/// A typed view into a bufferView.
-	/// A bufferView contains raw binary data.
-	/// An accessor provides a typed view into a bufferView or a subset of a bufferView similar to how WebGL's `vertexAttribPointer()` defines an attribute in a buffer.
+	/// A typed view into a buffer view that contains raw binary data.
 	/// </summary>
 	partial class Accessor : LogicalChildOfRoot
 	{
@@ -621,7 +619,7 @@ namespace SharpGLTF.Schema2
 		
 		private Double _ymag;
 		
-		private const Double _zfarMinimum = 0;
+		private const Double _zfarExclusiveMinimum = 0;
 		private Double _zfar;
 		
 		private const Double _znearMinimum = 0;
@@ -657,16 +655,16 @@ namespace SharpGLTF.Schema2
 	partial class CameraPerspective : ExtraProperties
 	{
 	
-		private const Double _aspectRatioMinimum = 0;
+		private const Double _aspectRatioExclusiveMinimum = 0;
 		private Double? _aspectRatio;
 		
-		private const Double _yfovMinimum = 0;
+		private const Double _yfovExclusiveMinimum = 0;
 		private Double _yfov;
 		
-		private const Double _zfarMinimum = 0;
+		private const Double _zfarExclusiveMinimum = 0;
 		private Double? _zfar;
 		
-		private const Double _znearMinimum = 0;
+		private const Double _znearExclusiveMinimum = 0;
 		private Double _znear;
 		
 	
@@ -695,7 +693,7 @@ namespace SharpGLTF.Schema2
 
 	/// <summary>
 	/// A camera's projection.
-	/// A node can reference a camera to apply a transform to place the camera in the scene.
+	/// A node **MAY** reference a camera to apply a transform to place the camera in the scene.
 	/// </summary>
 	partial class Camera : LogicalChildOfRoot
 	{
@@ -964,8 +962,7 @@ namespace SharpGLTF.Schema2
 
 	/// <summary>
 	/// A set of primitives to be rendered.
-	/// A node can contain one mesh.
-	/// A node's transform places the mesh in the scene.
+	/// Its global transform is defined by a node that references it.
 	/// </summary>
 	partial class Mesh : LogicalChildOfRoot
 	{
@@ -998,8 +995,8 @@ namespace SharpGLTF.Schema2
 
 	/// <summary>
 	/// A node in the node hierarchy.
-	/// When the node contains `skin`, all `mesh.primitives` must contain `JOINTS_0` and `WEIGHTS_0` attributes.
-	/// A node can have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), only TRS properties may be present; `matrix` will not be present.
+	/// When the node contains `skin`, all `mesh.primitives` **MUST** contain `JOINTS_0` and `WEIGHTS_0` attributes.
+	/// A node **MAY** have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), `matrix` **MUST NOT** be present.
 	/// </summary>
 	partial class Node : LogicalChildOfRoot
 	{
@@ -1296,7 +1293,7 @@ namespace SharpGLTF.Schema2
 	}
 
 	/// <summary>
-	/// Image data used to create a texture. Image can be referenced by URI or `bufferView` index. `mimeType` is required in the latter case.
+	/// Image data used to create a texture. Image **MAY** be referenced by an URI (or IRI) or a buffer view index.
 	/// </summary>
 	partial class Image : LogicalChildOfRoot
 	{

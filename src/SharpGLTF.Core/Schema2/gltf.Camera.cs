@@ -172,7 +172,7 @@ namespace SharpGLTF.Schema2
         public static void VerifyParameters(float xmag, float ymag, float znear, float zfar)
         {
             Guard.MustBeGreaterThanOrEqualTo(znear, (float)_znearMinimum, nameof(znear));
-            Guard.MustBeGreaterThanOrEqualTo(zfar, (float)_zfarMinimum, nameof(zfar));
+            Guard.MustBeGreaterThan(zfar, (float)_zfarExclusiveMinimum, nameof(zfar));
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
             Guard.MustBeLessThan(zfar, float.PositiveInfinity, nameof(zfar));
 
@@ -254,12 +254,12 @@ namespace SharpGLTF.Schema2
 
         public static void VerifyParameters(float? aspectRatio, float yfov, float znear, float zfar = float.PositiveInfinity)
         {
-            Guard.MustBeGreaterThanOrEqualTo(aspectRatio.AsValue(1), (float)_aspectRatioMinimum, nameof(aspectRatio));
-            Guard.MustBeGreaterThan(yfov, (float)_yfovMinimum, nameof(yfov));
+            Guard.MustBeGreaterThan(aspectRatio.AsValue(1), (float)_aspectRatioExclusiveMinimum, nameof(aspectRatio));
+            Guard.MustBeGreaterThan(yfov, (float)_yfovExclusiveMinimum, nameof(yfov));
             // Guard.MustBeLessThan(yfov, (float)Math.PI, nameof(yfov));
 
-            Guard.MustBeGreaterThanOrEqualTo(znear, (float)_znearMinimum, nameof(znear));
-            Guard.MustBeGreaterThanOrEqualTo(zfar, (float)_zfarMinimum, nameof(zfar));
+            Guard.MustBeGreaterThan(znear, (float)_znearExclusiveMinimum, nameof(znear));
+            Guard.MustBeGreaterThan(zfar, (float)_zfarExclusiveMinimum, nameof(zfar));
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
         }
 

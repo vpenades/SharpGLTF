@@ -40,6 +40,9 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }
 
+    /// <summary>
+    /// Represents a <see cref="String"/> type.
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class StringType : SchemaType
     {
@@ -72,6 +75,12 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }
 
+    /// <summary>
+    /// Represents a "by value" type <see cref="Boolean"/>, <see cref="Int32"/>, <see cref="Single"/>, etc
+    /// </summary>
+    /// <remarks>
+    /// This type can optionally be set as nullable.
+    /// </remarks>
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class BlittableType : SchemaType
     {
@@ -229,9 +238,13 @@ namespace SharpGLTF.SchemaReflection
         private readonly String _PersistentName;
         private SchemaType _FieldType;
 
+        private Object _ExclusiveMinimumValue;
+        private Object _InclusiveMinimumValue;
+
         private Object _DefaultValue;
-        private Object _MinimumValue;
-        private Object _MaximumValue;
+
+        private Object _InclusiveMaximumValue;
+        private Object _ExclusiveMaximumValue;
 
         private int _MinItems;
         private int _MaxItems;
@@ -247,10 +260,12 @@ namespace SharpGLTF.SchemaReflection
         public String PersistentName => _PersistentName;
 
         public SchemaType FieldType { get => _FieldType; set => _FieldType = value; }
-
+        
+        public Object ExclusiveMinimumValue { get => _ExclusiveMinimumValue; set => _ExclusiveMinimumValue = value; }
+        public Object InclusiveMinimumValue { get => _InclusiveMinimumValue; set => _InclusiveMinimumValue = value; }
         public Object DefaultValue { get => _DefaultValue; set => _DefaultValue = value; }
-        public Object MinimumValue { get => _MinimumValue; set => _MinimumValue = value; }
-        public Object MaximumValue { get => _MaximumValue; set => _MaximumValue = value; }
+        public Object InclusiveMaximumValue { get => _InclusiveMaximumValue; set => _InclusiveMaximumValue = value; }
+        public Object ExclusiveMaximumValue { get => _ExclusiveMaximumValue; set => _ExclusiveMaximumValue = value; }
 
         public int MinItems { get => _MinItems; set => _MinItems = value; }
         public int MaxItems { get => _MaxItems; set => _MaxItems = value; }
@@ -273,7 +288,7 @@ namespace SharpGLTF.SchemaReflection
 
         public FieldInfo SetDefaultValue(string defval) { _DefaultValue = defval; return this; }
 
-        public FieldInfo SetLimits(Decimal? min, Decimal? max) { _MinimumValue = min; _MaximumValue = max; return this; }
+        public FieldInfo SetLimits(Decimal? min, Decimal? max) { _InclusiveMinimumValue = min; _InclusiveMaximumValue = max; return this; }
 
         public FieldInfo SetItemsRange(int min, int max = int.MaxValue) { _MinItems = min; _MaxItems = max; return this; }
 

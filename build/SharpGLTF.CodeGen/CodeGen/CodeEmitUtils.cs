@@ -55,6 +55,8 @@ namespace SharpGLTF.CodeGen
         {
             if (string.IsNullOrWhiteSpace(description)) yield break;
 
+            description = _ReplaceDescriptionKeywords(description);
+
             var lines = description
                 .Split("  ")
                 .Select(item => item.Trim())
@@ -63,6 +65,28 @@ namespace SharpGLTF.CodeGen
             yield return "/// <summary>".Indent(indent);
             foreach(var l in lines) yield return $"/// {l}";
             yield return "/// </summary>".Indent(indent);
+        }
+
+        private static string _ReplaceDescriptionKeywords(string description)
+        {
+            while(true)
+            {
+                var indices = _FindDescriptionKeyword(description);
+                if (indices.start < 0) return description;
+
+                var block = description.Substring(indices.start , indices.len);
+                var name = block.Substring(2, block.Length - 4);
+
+                description = description.Replace(block, $"<see cref=\"{name}\"/>");
+            }
+        }
+
+        private static (int start,int len) _FindDescriptionKeyword(string description)
+        {
+            int start = description.IndexOf("`\"");
+            var end = description.IndexOf("\"`");
+            if (start < 0 || end < 0 || start >= end) return (-1, -1);
+            return (start, end - start + 2);
         }
     }
 }

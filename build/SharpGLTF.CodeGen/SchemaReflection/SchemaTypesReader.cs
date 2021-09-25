@@ -81,10 +81,28 @@ namespace SharpGLTF.SchemaReflection
 
                     foreach (var v in property.AnyOf)
                     {
-                        var val = v.Enumeration.FirstOrDefault();
                         var key = v.Description;
+                        var val = v.Enumeration?.FirstOrDefault();
+                        var ext = v.ExtensionData?.FirstOrDefault() ?? default;                        
 
-                        if (val is String) { key = (string)val; val = (Int64)0; }                        
+                        if (val is String txt)
+                        {
+                            System.Diagnostics.Debug.Assert(v.Type == NJsonSchema.JsonObjectType.None);
+
+                            key = txt; val = (Int64)0;
+                        }
+
+                        if (v.Type == NJsonSchema.JsonObjectType.None && ext.Key == "const")
+                        {
+                            key = (string)ext.Value; val = (Int64)0;
+                        }
+
+                        if (v.Type == NJsonSchema.JsonObjectType.Integer && ext.Key == "const")
+                        {
+                            val = (Int64)ext.Value;
+                        }
+
+                        System.Diagnostics.Debug.Assert(key != null || dict.Count > 0);
 
                         if (string.IsNullOrWhiteSpace(key)) continue;
 
@@ -153,9 +171,11 @@ namespace SharpGLTF.SchemaReflection
 
                     field.FieldType = ctx._UseType(p, required.Contains(p.Name));
 
-                    field.MinimumValue = p.Minimum;
-                    field.MaximumValue = p.Maximum;
+                    field.ExclusiveMinimumValue = p.ExclusiveMinimum ?? (p.IsExclusiveMinimum ? p.Minimum : null);
+                    field.InclusiveMinimumValue = p.IsExclusiveMinimum ? null : p.Minimum;
                     field.DefaultValue = p.Default;
+                    field.InclusiveMaximumValue = p.IsExclusiveMaximum ? null : p.Maximum;
+                    field.ExclusiveMaximumValue = p.ExclusiveMaximum ?? (p.IsExclusiveMaximum ? p.Maximum : null);
 
                     field.MinItems = p.MinItems;
                     field.MaxItems = p.MaxItems;
