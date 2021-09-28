@@ -380,6 +380,8 @@ namespace SharpGLTF.IO
                 }
             }
 
+            if (count == 0) { return Array.Empty<Object>(); }
+
             if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))
             {
                 elementType = typeof(IDictionary);
@@ -491,6 +493,7 @@ namespace SharpGLTF.IO
         {
             foreach (DictionaryEntry entry in dict)
             {
+                if (entry.Value == null) continue;
                 yield return new JSONPROPERTY(_GetKey(entry.Key), _GetValue(entry.Value));
             }
         }
@@ -499,6 +502,7 @@ namespace SharpGLTF.IO
         {
             foreach (var entry in dict)
             {
+                if (entry.Value == null) continue;
                 yield return new JSONPROPERTY(_GetKey(entry.Key), _GetValue(entry.Value));
             }
         }

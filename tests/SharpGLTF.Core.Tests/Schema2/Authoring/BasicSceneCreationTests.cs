@@ -34,9 +34,11 @@ namespace SharpGLTF.Schema2.Authoring
             var dict = new Dictionary<string, object>();
 
             dict["author"] = "me";
+            dict["string_null"] = (string)null;
 
             dict["value1"] = 17;
             dict["array1"] = new List<int> { 1, 2, 3 };
+            dict["array_empty"] = new List<int>();
             dict["dict1"] = new Dictionary<string, object>
             {
                 ["A"] = 16,
