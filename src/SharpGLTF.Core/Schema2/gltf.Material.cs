@@ -71,6 +71,15 @@ namespace SharpGLTF.Schema2
             {
                 if (this.GetExtension<MaterialUnlit>() != null) return;
                 if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) return;
+
+                // setting the IOR to its default value essentially
+                // makes the extension unneccesary
+                if (value == MaterialIOR.DefaultIndexOfRefraction)
+                {
+                    this.RemoveExtensions<MaterialIOR>();
+                    return;
+                }
+
                 this.UseExtension<MaterialIOR>().IndexOfRefraction = value;
             }
         }
