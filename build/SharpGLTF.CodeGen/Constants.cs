@@ -22,7 +22,7 @@ namespace SharpGLTF
         /// <summary>
         /// Directory of the main schema within the download repo directory
         /// </summary>
-        public static string MainSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "specification", "2.0", "schema", "2020-12");
+        public static string MainSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "specification", "2.0", "schema");
 
         /// <summary>
         /// schema source code file path
@@ -49,6 +49,7 @@ namespace SharpGLTF
             public static string PbrClearCoat => _Path("KHR_materials_clearcoat", "glTF.KHR_materials_clearcoat.schema.json");
             public static string PbrTransmission => _Path("KHR_materials_transmission", "glTF.KHR_materials_transmission.schema.json");
             public static string PbrSheen => _Path("KHR_materials_sheen", "glTF.KHR_materials_sheen.schema.json");
+            public static string PbrSpecular => _Path("KHR_materials_specular", "glTF.KHR_materials_specular.schema.json");
             public static string MaterialIor => _Path("KHR_materials_ior", "glTF.KHR_materials_ior.schema.json");
             public static string Unlit => _Path("KHR_materials_unlit", "glTF.KHR_materials_unlit.schema.json");
             public static string LightsPunctual_Model => _Path("KHR_lights_punctual", "glTF.KHR_lights_punctual.schema.json");

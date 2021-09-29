@@ -10,7 +10,7 @@ namespace SharpGLTF.Materials
     /// Represents a material channel at <see cref="MaterialBuilder"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public class ChannelBuilder
+    public partial class ChannelBuilder
     {
         #region debug
 
@@ -32,6 +32,7 @@ namespace SharpGLTF.Materials
                     case KnownChannel.Normal:
                     case KnownChannel.ClearCoatNormal:
                     case KnownChannel.Occlusion:
+                    case KnownChannel.SpecularFactor:
                         txt += $" {Parameter.X}"; break;
 
                     case KnownChannel.Emissive:
@@ -39,6 +40,7 @@ namespace SharpGLTF.Materials
 
                     case KnownChannel.Diffuse:
                     case KnownChannel.BaseColor:
+                    case KnownChannel.SpecularColor:
                         txt += $" ({rgba})"; break;
 
                     case KnownChannel.MetallicRoughness:
@@ -160,36 +162,6 @@ namespace SharpGLTF.Materials
         public void SetDefaultParameter()
         {
             this.Parameter = _GetDefaultParameter(_Key);
-        }
-
-        private static Vector4 _GetDefaultParameter(KnownChannel key)
-        {
-            switch (key)
-            {
-                case KnownChannel.Emissive: return Vector4.Zero;
-
-                case KnownChannel.Normal:
-                case KnownChannel.ClearCoatNormal:
-                case KnownChannel.Occlusion:
-                    return  Vector4.UnitX;
-
-                case KnownChannel.BaseColor:
-                case KnownChannel.Diffuse:
-                    return Vector4.One;
-
-                case KnownChannel.MetallicRoughness: return new Vector4(1, 1, 0, 0);
-                case KnownChannel.SpecularGlossiness: return Vector4.One;
-
-                case KnownChannel.ClearCoat: return Vector4.Zero;
-                case KnownChannel.ClearCoatRoughness: return Vector4.Zero;
-
-                case KnownChannel.Transmission: return Vector4.Zero;
-
-                case KnownChannel.SheenColor: return Vector4.Zero;
-                case KnownChannel.SheenRoughness: return Vector4.Zero;
-
-                default: throw new NotImplementedException();
-            }
         }
 
         public TextureBuilder UseTexture()

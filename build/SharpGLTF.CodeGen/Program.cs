@@ -31,7 +31,8 @@ namespace SharpGLTF
             _ProcessKhronosUnlitExtension();
             _ProcessKhronosIorExtension();
             _ProcessKhronosSheenExtension();
-            _ProcessKhronosClearCoatExtension();
+            _ProcessKhronosSpecularExtension();
+            _ProcessKhronosClearCoatExtension();            
             _ProcessKhronosTransmissionExtension();
             _ProcessKhronosSpecularGlossinessExtension();
 
@@ -196,6 +197,23 @@ namespace SharpGLTF
             ctx.IgnoredByCodeEmitter("Material Normal Texture Info");            
 
             ProcessSchema("ext.ClearCoat.g", ctx);
+        }
+
+        private static void _ProcessKhronosSpecularExtension()
+        {
+            var ctx = LoadSchemaContext(Constants.KhronosExtensions.PbrSpecular);
+            ctx.IgnoredByCodeEmitter("glTF Property");
+            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            ctx.IgnoredByCodeEmitter("Texture Info");
+            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");
+
+            ctx.FindClass("KHR_materials_specular glTF extension")
+                .GetField("specularColorFactor")
+                .SetDataType(typeof(System.Numerics.Vector3), true)
+                .SetDefaultValue("Vector3.One")
+                .SetItemsRange(0);
+
+            ProcessSchema("ext.pbrSpecular.g", ctx);
         }
 
         private static void _ProcessKhronosTransmissionExtension()
@@ -404,7 +422,8 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("LINEAR-LINEAR_MIPMAP_LINEAR-LINEAR_MIPMAP_NEAREST-NEAREST-NEAREST_MIPMAP_LINEAR-NEAREST_MIPMAP_NEAREST", "TextureMipMapFilter");
 
             newEmitter.SetRuntimeName("KHR_materials_pbrSpecularGlossiness glTF extension", "MaterialPBRSpecularGlossiness");
-            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");            
+            newEmitter.SetRuntimeName("KHR_materials_unlit glTF extension", "MaterialUnlit");
+            newEmitter.SetRuntimeName("KHR_materials_specular glTF extension", "MaterialSpecular");
             newEmitter.SetRuntimeName("KHR_materials_clearcoat glTF extension", "MaterialClearCoat");
             newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
             newEmitter.SetRuntimeName("KHR_materials_sheen glTF extension", "MaterialSheen");

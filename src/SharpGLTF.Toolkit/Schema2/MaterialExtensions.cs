@@ -266,6 +266,7 @@ namespace SharpGLTF.Schema2
             srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
             srcMaterial.CopyChannelsTo(dstMaterial, "Transmission");
             srcMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
+            srcMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
         }
 
         private static void _CopyDefaultTo(Material srcMaterial, MaterialBuilder dstMaterial)
@@ -355,14 +356,20 @@ namespace SharpGLTF.Schema2
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
             dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
 
-            var hasClearCoat = srcMaterial.GetChannel("ClearCoat") != null
+            var hasClearCoat
+                = srcMaterial.GetChannel("ClearCoat") != null
                 || srcMaterial.GetChannel("ClearCoatRoughness") != null
                 || srcMaterial.GetChannel("ClearCoatNormal") != null;
 
             var hasTransmission = srcMaterial.GetChannel("Transmission") != null;
 
-            var hasSheen = srcMaterial.GetChannel("SheenColor") != null
+            var hasSheen
+                = srcMaterial.GetChannel("SheenColor") != null
                 || srcMaterial.GetChannel("SheenRoughness") != null;
+
+            var hasSpecular
+                = srcMaterial.GetChannel("SpecularColor") != null
+                || srcMaterial.GetChannel("SpecularFactor") != null;
 
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
 
@@ -381,7 +388,8 @@ namespace SharpGLTF.Schema2
                     (
                     hasClearCoat ? "ClearCoat" : null,
                     hasTransmission ? "Transmission" : null,
-                    hasSheen ? "Sheen" : null);
+                    hasSheen ? "Sheen" : null,
+                    hasSpecular ? "Specular" : null);
 
                 defMaterial = srcMaterial;
             }
@@ -400,6 +408,7 @@ namespace SharpGLTF.Schema2
                 defMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
                 defMaterial.CopyChannelsTo(dstMaterial, "Transmission");
                 defMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
+                defMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
             }
         }
 

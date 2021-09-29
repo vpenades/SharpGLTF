@@ -18,6 +18,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialUnlit>();
             this.RemoveExtensions<MaterialSheen>();
             this.RemoveExtensions<MaterialClearCoat>();
+            this.RemoveExtensions<MaterialSpecular>();
             this.RemoveExtensions<MaterialTransmission>();
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
         }
@@ -48,9 +49,10 @@ namespace SharpGLTF.Schema2
 
             foreach (var extn in extensionNames)
             {
+                if (extn == "Sheen") this.UseExtension<MaterialSheen>();
+                if (extn == "Specular") this.UseExtension<MaterialSpecular>();
                 if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
-                if (extn == "Sheen") this.UseExtension<MaterialSheen>();
             }
         }
 
@@ -110,6 +112,13 @@ namespace SharpGLTF.Schema2
             if (sheen != null)
             {
                 var channels = sheen.GetChannels(this);
+                foreach (var c in channels) yield return c;
+            }
+
+            var specular = this.GetExtension<MaterialSpecular>();
+            if (specular != null)
+            {
+                var channels = specular.GetChannels(this);
                 foreach (var c in channels) yield return c;
             }
 
@@ -542,5 +551,82 @@ namespace SharpGLTF.Schema2
             if (_ior < 1) throw new ArgumentOutOfRangeException(nameof(IndexOfRefraction));
         }
     }
-}
 
+    internal sealed partial class MaterialSpecular
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialSpecular(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_specularColorTexture, _specularTexture);
+        }
+
+        private TextureInfo _GetSpecularColorTexture(bool create)
+        {
+            if (create && _specularColorTexture == null) _specularColorTexture = new TextureInfo();
+            return _specularColorTexture;
+        }
+
+        private TextureInfo _GetSpecularFactorTexture(bool create)
+        {
+            if (create && _specularTexture == null) _specularTexture = new TextureInfo();
+            return _specularTexture;
+        }
+
+        public Vector3 SpecularColor
+        {
+            get => _specularColorFactor.AsValue(_specularColorFactorDefault);
+            set => _specularColorFactor = value.AsNullable(_specularColorFactorDefault);
+        }
+
+        public static float SpecularFactorDefault => (float)_specularFactorDefault;
+
+        public float SpecularFactor
+        {
+            get => (float)_specularFactor.AsValue(_specularFactorDefault);
+            set => _specularFactor = ((double)value).AsNullable(_specularFactorDefault, _specularFactorMinimum, _specularFactorMaximum);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            yield return new MaterialChannel
+                (
+                material,
+                "SpecularColor",
+                _GetSpecularColorTexture,
+                _specularColorFactorDefault,
+                () => this.SpecularColor,
+                value => this.SpecularColor = value
+                );
+
+            yield return new MaterialChannel
+                (
+                material,
+                "SpecularFactor",
+                _GetSpecularFactorTexture,
+                SpecularFactorDefault,
+                () => this.SpecularFactor,
+                value => this.SpecularFactor = value
+                );
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_specularColorFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.X, 0, float.MaxValue, nameof(_specularColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Y, 0, float.MaxValue, nameof(_specularColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Z, 0, float.MaxValue, nameof(_specularColorFactor));
+            }
+
+            if (_specularFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value, _specularFactorMinimum, _specularFactorMaximum, nameof(_specularFactor));
+            }
+        }
+    }
+}

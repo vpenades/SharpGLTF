@@ -38,6 +38,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 // System.Diagnostics.Debug.Assert(!filePath.EndsWith("Buffer_Interleaved_03.gltf"));
 
+                if (filePath.EndsWith("Compatibility_05.gltf")) continue; // contains a REQUIRED Material_QuantumRendering
+
                 var gltfJson = filePath.EndsWith(".gltf") ? System.IO.File.ReadAllText(filePath) : string.Empty;
 
                 var report = GltfValidator.ValidationReport.Validate(filePath);                
