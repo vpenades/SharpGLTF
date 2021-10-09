@@ -60,9 +60,14 @@ namespace SharpGLTF.Schema2
         /// Gets or sets the index of refraction.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// The index of refraction (IOR) is a measured physical number usually in the range between 1 and 2
         /// that determines how much the path of light is bent, or refracted, when entering a material.
         /// It also influences the ratio between reflected and transmitted light, calculated from the Fresnel equations.
+        /// </para>
+        /// <para>
+        /// This property backs KHR_Materials_IOR extension.
+        /// </para>
         /// </remarks>
         public float IndexOfRefraction
         {
