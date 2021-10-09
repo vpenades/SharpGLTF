@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>glTF2Sharp</RootNamespace>
+    <RootNamespace>SharpGLTF</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
