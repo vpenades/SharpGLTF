@@ -116,9 +116,9 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the index of texture's TEXCOORD_[index] attribute used for texture coordinate mapping.
         /// </summary>
-        public int TextureCoordinate => _TextureInfo(false)?.TextureCoordinate ?? 0;
+        public int TextureCoordinate => _TextureInfo?.Invoke(false)?.TextureCoordinate ?? 0;
 
-        public TextureTransform TextureTransform => _TextureInfo(false)?.Transform;
+        public TextureTransform TextureTransform => _TextureInfo?.Invoke(false)?.Transform;
 
         public TextureSampler TextureSampler => Texture?.Sampler;
 
@@ -147,6 +147,8 @@ namespace SharpGLTF.Schema2
 
             Guard.NotNull(_Material, nameof(_Material));
 
+            if (_TextureInfo == null) throw new InvalidOperationException();
+
             var sampler = _Material.LogicalParent.UseTextureSampler(ws, wt, min, mag);
             var texture = _Material.LogicalParent.UseTexture(primaryImg, fallbackImg, sampler);
 
@@ -170,9 +172,7 @@ namespace SharpGLTF.Schema2
 
         private Texture TryGetTexture()
         {
-            if (_TextureInfo == null) throw new InvalidOperationException();
-
-            var texInfo = _TextureInfo(false);
+            var texInfo = _TextureInfo?.Invoke(false);
             if (texInfo == null) return null;
             if (texInfo._LogicalTextureIndex < 0) return null;
             return _Material.LogicalParent.LogicalTextures[texInfo._LogicalTextureIndex];

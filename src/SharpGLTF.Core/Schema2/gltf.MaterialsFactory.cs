@@ -629,4 +629,99 @@ namespace SharpGLTF.Schema2
             }
         }
     }
+
+    internal sealed partial class MaterialVolume
+    {
+#pragma warning disable CA1801 // Review unused parameters
+        internal MaterialVolume(Material material) { }
+#pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_thicknessTexture);
+        }
+
+        private TextureInfo _GetThicknessTexture(bool create)
+        {
+            if (create && _thicknessTexture == null) _thicknessTexture = new TextureInfo();
+            return _thicknessTexture;
+        }
+
+        public float ThicknessFactor
+        {
+            get => (float)_thicknessFactor.AsValue(_thicknessFactorDefault);
+            set => _thicknessFactor = ((double)value).AsNullable(_thicknessFactorDefault);
+        }
+
+        public Vector3 AttenuationColor
+        {
+            get => _attenuationColor.AsValue(_attenuationColorDefault);
+            set => _attenuationColor = value.AsNullable(_attenuationColorDefault);
+        }
+
+        public float AttenuationDistance
+        {
+            get => (float)_attenuationDistance;
+            set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException();
+        }
+
+        private static Vector4 _AttenuationDefault => new Vector4(_attenuationColorDefault, float.MaxValue);
+
+        private Vector4 _Attenuation
+        {
+            get
+            {
+                return new Vector4
+                    (
+                    _attenuationColor.AsValue(_attenuationColorDefault),
+                    (float)_attenuationDistance.AsValue(float.MaxValue)
+                    );
+            }
+            set
+            {
+                _attenuationColor = new Vector3(value.X, value.Y, value.Z).AsNullable(_attenuationColorDefault);
+                _attenuationDistance = ((double)value.W).AsNullable(float.MaxValue, _attenuationDistanceExclusiveMinimum, float.PositiveInfinity);
+            }
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            yield return new MaterialChannel
+                (
+                material,
+                "VolumeThickness",
+                _GetThicknessTexture,
+                (float)_thicknessFactorDefault,
+                () => ThicknessFactor,
+                value => ThicknessFactor = value
+                );
+
+            yield return new MaterialChannel
+                (
+                material,
+                "VolumeAttenuation",
+                null,
+                _AttenuationDefault,
+                () => _Attenuation,
+                value => _Attenuation = value
+                );
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_attenuationColor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.X, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Y, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Z, 0, float.MaxValue, nameof(_attenuationColor));
+            }
+
+            if (_thicknessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_thicknessFactor.Value, _thicknessFactorMinimum, float.MaxValue, nameof(_thicknessFactor));
+            }
+        }
+    }
 }
