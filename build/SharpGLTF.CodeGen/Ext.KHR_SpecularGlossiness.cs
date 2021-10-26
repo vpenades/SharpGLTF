@@ -8,7 +8,7 @@ namespace SharpGLTF
 {
     class SpecularGlossinessExtension : SchemaProcessor
     {
-        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_pbrSpecularGlossiness", "glTF.KHR_materials_pbrSpecularGlossiness.schema.json");
+        private static string SchemaUri => Constants.ArchivedExtensionPath("KHR_materials_pbrSpecularGlossiness", "glTF.KHR_materials_pbrSpecularGlossiness.schema.json");
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
             var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);

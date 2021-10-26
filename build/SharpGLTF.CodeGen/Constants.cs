@@ -32,14 +32,20 @@ namespace SharpGLTF
         #endregion
 
         #region extension paths        
+        private static string ArchivedSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Archived");
         private static string KhronosSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Khronos");
         private static string VendorSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Vendor");
+
+        internal static string ArchivedExtensionPath(string ext, string json)
+        {
+            return System.IO.Path.Combine(ArchivedSchemaDir, ext, "schema", json);
+        }
 
         internal static string KhronosExtensionPath(string ext, string json)
         {
             return System.IO.Path.Combine(KhronosSchemaDir, ext, "schema", json);
-        }        
-
+        }
+        
         internal static string VendorExtensionPath(string ext, string json)
         {
             return System.IO.Path.Combine(VendorSchemaDir, ext, "schema", json);
