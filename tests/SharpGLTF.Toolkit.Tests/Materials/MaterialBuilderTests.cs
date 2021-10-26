@@ -122,6 +122,25 @@ namespace SharpGLTF.Materials
         }
 
         [Test]
+        public void CreateVolume()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var srcMaterial = new MaterialBuilder()
+                .WithAlpha(AlphaMode.MASK, 0.6f)
+                .WithMetallicRoughnessShader()
+                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                    .WithMetallicRoughness(tex1, 0.2f, 0.4f)
+
+                .WithVolumeAttenuation(Vector3.One * 0.3f, 0.6f)
+                .WithVolumeThickness(tex1, 0.4f);
+
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
+        }
+
+        [Test]
         public void CreateSpecularGlossiness()
         {
             var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");

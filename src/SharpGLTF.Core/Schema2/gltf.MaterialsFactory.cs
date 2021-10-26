@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -20,6 +19,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialClearCoat>();
             this.RemoveExtensions<MaterialSpecular>();
             this.RemoveExtensions<MaterialTransmission>();
+            this.RemoveExtensions<MaterialVolume>();
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
         }
 
@@ -53,6 +53,7 @@ namespace SharpGLTF.Schema2
                 if (extn == "Specular") this.UseExtension<MaterialSpecular>();
                 if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
+                if (extn == "Volume") this.UseExtension<MaterialVolume>();
             }
         }
 
@@ -81,79 +82,45 @@ namespace SharpGLTF.Schema2
 
         private IEnumerable<MaterialChannel> _GetChannels()
         {
-            if (_pbrMetallicRoughness != null)
-            {
-                var channels = _pbrMetallicRoughness.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            var channels = _pbrMetallicRoughness?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
-            var pbrSpecGloss = this.GetExtension<MaterialPBRSpecularGlossiness>();
-            if (pbrSpecGloss != null)
-            {
-                var channels = pbrSpecGloss.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            channels = this.GetExtension<MaterialPBRSpecularGlossiness>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
-            var clearCoat = this.GetExtension<MaterialClearCoat>();
-            if (clearCoat != null)
-            {
-                var channels = clearCoat.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            channels = this.GetExtension<MaterialClearCoat>()?.GetChannels(this);
+            if (channels != null) {foreach (var c in channels) yield return c; }
 
-            var transmission = this.GetExtension<MaterialTransmission>();
-            if (transmission != null)
-            {
-                var channels = transmission.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            channels = this.GetExtension<MaterialTransmission>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
-            var sheen = this.GetExtension<MaterialSheen>();
-            if (sheen != null)
-            {
-                var channels = sheen.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            channels = this.GetExtension<MaterialSheen>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
-            var specular = this.GetExtension<MaterialSpecular>();
-            if (specular != null)
-            {
-                var channels = specular.GetChannels(this);
-                foreach (var c in channels) yield return c;
-            }
+            channels = this.GetExtension<MaterialSpecular>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
-            yield return new MaterialChannel
-                (
-                this, "Normal",
-                _GetNormalTexture,
+            channels = this.GetExtension<MaterialVolume>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
+
+            var normalParam = new MaterialParameter(MaterialParameter.Key.NormalScale,
                 MaterialNormalTextureInfo.ScaleDefault,
                 () => _GetNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
-                value => _GetNormalTexture(true).Scale = value
-                );
+                value => _GetNormalTexture(true).Scale = value);
 
-            yield return new MaterialChannel
-                (
-                this, "Occlusion",
-                _GetOcclusionTexture,
+            var occlusionParam = new MaterialParameter(MaterialParameter.Key.OcclusionStrength,
                 MaterialOcclusionTextureInfo.StrengthDefault,
                 () => _GetOcclusionTexture(false)?.Strength ?? MaterialOcclusionTextureInfo.StrengthDefault,
-                value => _GetOcclusionTexture(true).Strength = value
-                );
+                value => _GetOcclusionTexture(true).Strength = value);
 
-            yield return new MaterialChannel
-                (
-                this, "Emissive",
-                _GetEmissiveTexture,
-                Vector4.Zero,
-                () => this._EmissiveColor,
-                value => this._EmissiveColor = value
-                );
-        }
+            var emissiveParam = new MaterialParameter(MaterialParameter.Key.RGB,
+                _emissiveFactorDefault,
+                () => this._emissiveFactor.AsValue(_emissiveFactorDefault),
+                value => this._emissiveFactor = value.AsNullable(_emissiveFactorDefault, Vector3.Zero, Vector3.One));
 
-        private Vector4 _EmissiveColor
-        {
-            get => new Vector4(_emissiveFactor.AsValue(_emissiveFactorDefault), 1);
-            set => _emissiveFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_emissiveFactorDefault, Vector3.Zero, Vector3.One);
+            yield return new MaterialChannel(this, "Normal", _GetNormalTexture, normalParam);
+            yield return new MaterialChannel(this, "Occlusion", _GetOcclusionTexture, occlusionParam);
+            yield return new MaterialChannel(this, "Emissive", _GetEmissiveTexture, emissiveParam);
         }
 
         private MaterialNormalTextureInfo _GetNormalTexture(bool create)
@@ -184,6 +151,24 @@ namespace SharpGLTF.Schema2
             return base.GetLogicalChildren().ConcatElements(_baseColorTexture, _metallicRoughnessTexture);
         }
 
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_baseColorFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.X, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Y, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Z, 0, 1, nameof(_baseColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.W, 0, 1, nameof(_baseColorFactor));
+            }
+
+            if (_metallicFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_metallicFactor.Value, _metallicFactorMinimum, _metallicFactorMaximum, nameof(_metallicFactor));
+            }
+        }
+
         private TextureInfo _GetBaseTexture(bool create)
         {
             if (create && _baseColorTexture == null) _baseColorTexture = new TextureInfo();
@@ -202,65 +187,26 @@ namespace SharpGLTF.Schema2
             set => _baseColorFactor = value.AsNullable(_baseColorFactorDefault);
         }
 
-        public static Vector4 ParameterDefault => new Vector4((float)_metallicFactorDefault, (float)_roughnessFactorDefault, 0, 0);
-
-        public Vector4 Parameter
+        public float MetallicFactor
         {
-            get
-            {
-                return new Vector4
-                    (
-                    (float)_metallicFactor.AsValue( _metallicFactorDefault),
-                    (float)_roughnessFactor.AsValue(_roughnessFactorDefault),
-                    0,
-                    0
-                    );
-            }
-            set
-            {
-                _metallicFactor  = ((double)value.X).AsNullable( _metallicFactorDefault,  _metallicFactorMinimum,  _metallicFactorMaximum);
-                _roughnessFactor = ((double)value.Y).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum);
-            }
+            get => (float)_metallicFactor.AsValue(_metallicFactorDefault);
+            set => _metallicFactor = ((double)value).AsNullable(_metallicFactorDefault, _metallicFactorMinimum, _metallicFactorMaximum);
+        }
+
+        public float RoughnessFactor
+        {
+            get => (float)_roughnessFactor.AsValue(_roughnessFactorDefault);
+            set => _roughnessFactor = ((double)value).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum);
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannel
-                (
-                material, "BaseColor",
-                _GetBaseTexture,
-                _baseColorFactorDefault,
-                () => this.Color,
-                value => this.Color = value
-                );
+            var colorParam = new MaterialParameter(MaterialParameter.Key.RGBA, _baseColorFactorDefault, () => Color, v => Color = v);
+            var metallicParam = new MaterialParameter(MaterialParameter.Key.MetallicFactor, (float)_metallicFactorDefault, () => MetallicFactor, v => MetallicFactor = v);
+            var roughnessParam = new MaterialParameter(MaterialParameter.Key.RoughnessFactor, (float)_roughnessFactorDefault, () => RoughnessFactor, v => RoughnessFactor = v);
 
-            yield return new MaterialChannel
-                (
-                material,
-                "MetallicRoughness",
-                _GetMetallicTexture,
-                ParameterDefault,
-                () => this.Parameter,
-                value => this.Parameter = value
-                );
-        }
-
-        protected override void OnValidateContent(ValidationContext validate)
-        {
-            base.OnValidateContent(validate);
-
-            if (_baseColorFactor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.X, 0, 1, nameof(_baseColorFactor));
-                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Y, 0, 1, nameof(_baseColorFactor));
-                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.Z, 0, 1, nameof(_baseColorFactor));
-                Guard.MustBeBetweenOrEqualTo(_baseColorFactor.Value.W, 0, 1, nameof(_baseColorFactor));
-            }
-
-            if (_metallicFactor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_metallicFactor.Value, _metallicFactorMinimum, _metallicFactorMaximum, nameof(_metallicFactor));
-            }
+            yield return new MaterialChannel(material, "BaseColor", _GetBaseTexture, colorParam);
+            yield return new MaterialChannel(material, "MetallicRoughness", _GetMetallicTexture, metallicParam, roughnessParam);
         }
     }
 
@@ -273,58 +219,6 @@ namespace SharpGLTF.Schema2
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().ConcatElements(_diffuseTexture, _specularGlossinessTexture);
-        }
-
-        private TextureInfo _GetDiffuseTexture(bool create)
-        {
-            if (create && _diffuseTexture == null) _diffuseTexture = new TextureInfo();
-            return _diffuseTexture;
-        }
-
-        private TextureInfo _GetGlossinessTexture(bool create)
-        {
-            if (create && _specularGlossinessTexture == null) _specularGlossinessTexture = new TextureInfo();
-            return _specularGlossinessTexture;
-        }
-
-        public static Vector4 ParameterDefault => new Vector4(_specularFactorDefault, (float)_glossinessFactorDefault);
-
-        public Vector4 Parameter
-        {
-            get
-            {
-                return new Vector4
-                    (
-                    _specularFactor.AsValue(_specularFactorDefault),
-                    (float)_glossinessFactor.AsValue(_glossinessFactorDefault)
-                    );
-            }
-            set
-            {
-                _specularFactor = new Vector3(value.X, value.Y, value.Z).AsNullable(_specularFactorDefault);
-                _glossinessFactor = ((double)value.W).AsNullable(_glossinessFactorDefault, _glossinessFactorMinimum, _glossinessFactorMaximum);
-            }
-        }
-
-        public IEnumerable<MaterialChannel> GetChannels(Material material)
-        {
-            yield return new MaterialChannel
-                (
-                material, "Diffuse",
-                _GetDiffuseTexture,
-                _diffuseFactorDefault,
-                () => _diffuseFactor.AsValue(_diffuseFactorDefault),
-                value => _diffuseFactor = value.AsNullable(_diffuseFactorDefault)
-                );
-
-            yield return new MaterialChannel
-                (
-                material, "SpecularGlossiness",
-                _GetGlossinessTexture,
-                ParameterDefault,
-                () => this.Parameter,
-                value => this.Parameter = value
-                );
         }
 
         protected override void OnValidateContent(ValidationContext validate)
@@ -342,6 +236,46 @@ namespace SharpGLTF.Schema2
             {
                 Guard.MustBeBetweenOrEqualTo(_glossinessFactor.Value, _glossinessFactorMinimum, _glossinessFactorMaximum, nameof(_glossinessFactor));
             }
+        }
+
+        private TextureInfo _GetDiffuseTexture(bool create)
+        {
+            if (create && _diffuseTexture == null) _diffuseTexture = new TextureInfo();
+            return _diffuseTexture;
+        }
+
+        private TextureInfo _GetGlossinessTexture(bool create)
+        {
+            if (create && _specularGlossinessTexture == null) _specularGlossinessTexture = new TextureInfo();
+            return _specularGlossinessTexture;
+        }
+
+        public Vector4 DiffuseFactor
+        {
+            get => _diffuseFactor.AsValue(_diffuseFactorDefault);
+            set => _diffuseFactor = _diffuseFactor = value.AsNullable(_diffuseFactorDefault);
+        }
+
+        public Vector3 SpecularFactor
+        {
+            get => _specularFactor.AsValue(_specularFactorDefault);
+            set => _specularFactor = value.AsNullable(_specularFactorDefault);
+        }
+
+        public float GlossinessFactor
+        {
+            get => (float)_glossinessFactor.AsValue(_glossinessFactorDefault);
+            set => _glossinessFactor = ((double)value).AsNullable(_glossinessFactorDefault, _glossinessFactorMinimum, _glossinessFactorMaximum);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var diffuseParam = new MaterialParameter(MaterialParameter.Key.RGBA, _diffuseFactorDefault, () => DiffuseFactor, v => DiffuseFactor = v);
+            var specularParam = new MaterialParameter(MaterialParameter.Key.SpecularFactor, _specularFactorDefault, () => SpecularFactor, v => SpecularFactor = v);
+            var glossinessParam = new MaterialParameter(MaterialParameter.Key.GlossinessFactor, (float)_glossinessFactorDefault, () => GlossinessFactor, v => GlossinessFactor = v);
+
+            yield return new MaterialChannel(material, "Diffuse", _GetDiffuseTexture, diffuseParam);
+            yield return new MaterialChannel(material, "SpecularGlossiness", _GetGlossinessTexture, specularParam, glossinessParam);
         }
     }
 
@@ -363,6 +297,21 @@ namespace SharpGLTF.Schema2
             return base.GetLogicalChildren().ConcatElements(_clearcoatTexture, _clearcoatRoughnessTexture, _clearcoatNormalTexture);
         }
 
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_clearcoatFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_clearcoatFactor.Value, _clearcoatFactorMinimum, _clearcoatFactorMaximum, nameof(_clearcoatFactor));
+            }
+
+            if (_clearcoatRoughnessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_clearcoatRoughnessFactor.Value, _clearcoatRoughnessFactorMinimum, _clearcoatRoughnessFactorMaximum, nameof(_clearcoatRoughnessFactor));
+            }
+        }
+
         private TextureInfo _GetClearCoatTexture(bool create)
         {
             if (create && _clearcoatTexture == null) _clearcoatTexture = new TextureInfo();
@@ -381,49 +330,30 @@ namespace SharpGLTF.Schema2
             return _clearcoatNormalTexture;
         }
 
-        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        public float ClearCoatFactor
         {
-            yield return new MaterialChannel
-                (
-                material, "ClearCoat",
-                _GetClearCoatTexture,
-                (float)_clearcoatFactorDefault,
-                () => (float)this._clearcoatFactor.AsValue(_clearcoatFactorDefault),
-                value => this._clearcoatFactor = value.AsNullable((float)_clearcoatFactorDefault)
-                );
-
-            yield return new MaterialChannel
-                (
-                material, "ClearCoatRoughness",
-                _GetClearCoatRoughnessTexture,
-                (float)_clearcoatRoughnessFactorDefault,
-                () => (float)this._clearcoatRoughnessFactor.AsValue(_clearcoatRoughnessFactorDefault),
-                value => this._clearcoatRoughnessFactor = value.AsNullable((float)_clearcoatRoughnessFactorDefault)
-                );
-
-            yield return new MaterialChannel
-                (
-                material, "ClearCoatNormal",
-                _GetClearCoatNormalTexture,
-                MaterialNormalTextureInfo.ScaleDefault,
-                () => _GetClearCoatNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
-                value => _GetClearCoatNormalTexture(true).Scale = value
-                );
+            get => (float)this._clearcoatFactor.AsValue(_clearcoatFactorDefault);
+            set => this._clearcoatFactor = value.AsNullable((float)_clearcoatFactorDefault);
         }
 
-        protected override void OnValidateContent(ValidationContext validate)
+        public float RoughnessFactor
         {
-            base.OnValidateContent(validate);
+            get => (float)this._clearcoatRoughnessFactor.AsValue(_clearcoatRoughnessFactorDefault);
+            set => this._clearcoatRoughnessFactor = value.AsNullable((float)_clearcoatRoughnessFactorDefault);
+        }
 
-            if (_clearcoatFactor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_clearcoatFactor.Value, _clearcoatFactorMinimum, _clearcoatFactorMaximum, nameof(_clearcoatFactor));
-            }
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var clearCoatParam = new MaterialParameter(MaterialParameter.Key.ClearCoatFactor, (float)_clearcoatFactorDefault, () => ClearCoatFactor, v => ClearCoatFactor = v);
+            var roughnessParam = new MaterialParameter(MaterialParameter.Key.RoughnessFactor, (float)_clearcoatRoughnessFactorDefault, () => RoughnessFactor, v => RoughnessFactor = v);
+            var normScaleParam = new MaterialParameter(MaterialParameter.Key.NormalScale,
+                MaterialNormalTextureInfo.ScaleDefault,
+                () => _GetClearCoatNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
+                v => _GetClearCoatNormalTexture(true).Scale = v);
 
-            if (_clearcoatRoughnessFactor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_clearcoatRoughnessFactor.Value, _clearcoatRoughnessFactorMinimum, _clearcoatRoughnessFactorMaximum, nameof(_clearcoatRoughnessFactor));
-            }
+            yield return new MaterialChannel(material, "ClearCoat", _GetClearCoatTexture, clearCoatParam);
+            yield return new MaterialChannel(material, "ClearCoatRoughness", _GetClearCoatRoughnessTexture, roughnessParam);
+            yield return new MaterialChannel(material, "ClearCoatNormal", _GetClearCoatNormalTexture, normScaleParam);
         }
     }
 
@@ -438,24 +368,6 @@ namespace SharpGLTF.Schema2
             return base.GetLogicalChildren().ConcatElements(_transmissionTexture);
         }
 
-        public IEnumerable<MaterialChannel> GetChannels(Material material)
-        {
-            yield return new MaterialChannel
-                (
-                material, "Transmission",
-                _GetTransmissionTexture,
-                (float)_transmissionFactorDefault,
-                () => (float)this._transmissionFactor.AsValue(_transmissionFactorDefault),
-                value => this._transmissionFactor = value.AsNullable((float)_transmissionFactorDefault)
-                );
-        }
-
-        private TextureInfo _GetTransmissionTexture(bool create)
-        {
-            if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
-            return _transmissionTexture;
-        }
-
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -464,6 +376,25 @@ namespace SharpGLTF.Schema2
             {
                 Guard.MustBeBetweenOrEqualTo(_transmissionFactor.Value, _transmissionFactorMinimum, _transmissionFactorMaximum, nameof(_transmissionFactor));
             }
+        }
+
+        public float TransmissionFactor
+        {
+            get => (float)this._transmissionFactor.AsValue(_transmissionFactorDefault);
+            set => this._transmissionFactor = value.AsNullable((float)_transmissionFactorDefault);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var transmissionParam = new MaterialParameter(MaterialParameter.Key.TransmissionFactor, (float)_transmissionFactorDefault, () => TransmissionFactor, v => TransmissionFactor = v);
+
+            yield return new MaterialChannel(material, "Transmission", _GetTransmissionTexture, transmissionParam);
+        }
+
+        private TextureInfo _GetTransmissionTexture(bool create)
+        {
+            if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
+            return _transmissionTexture;
         }
     }
 
@@ -477,40 +408,6 @@ namespace SharpGLTF.Schema2
         {
             return base.GetLogicalChildren().ConcatElements(_sheenColorTexture, _sheenRoughnessTexture);
         }
-
-        public IEnumerable<MaterialChannel> GetChannels(Material material)
-        {
-            yield return new MaterialChannel
-                (
-                material, "SheenColor",
-                _GetSheenColorTexture,
-                _sheenColorFactorDefault,
-                () => _sheenColorFactor.AsValue(_sheenColorFactorDefault),
-                value => this._sheenColorFactor = value.AsNullable(_sheenColorFactorDefault)
-                );
-
-            yield return new MaterialChannel
-                (
-                material, "SheenRoughness",
-                _GetSheenRoughnessTexture,
-                _sheenRoughnessFactorDefault,
-                () => _sheenRoughnessFactor.AsValue(_sheenRoughnessFactorDefault),
-                value => this._sheenRoughnessFactor = value.AsNullable(_sheenRoughnessFactorDefault)
-                );
-        }
-
-        private TextureInfo _GetSheenColorTexture(bool create)
-        {
-            if (create && _sheenColorTexture == null) _sheenColorTexture = new TextureInfo();
-            return _sheenColorTexture;
-        }
-
-        private TextureInfo _GetSheenRoughnessTexture(bool create)
-        {
-            if (create && _sheenRoughnessTexture == null) _sheenRoughnessTexture = new TextureInfo();
-            return _sheenRoughnessTexture;
-        }
-
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -527,6 +424,39 @@ namespace SharpGLTF.Schema2
                 Guard.MustBeBetweenOrEqualTo(_sheenRoughnessFactor.Value, _sheenRoughnessFactorMinimum, _sheenRoughnessFactorMaximum, nameof(_sheenRoughnessFactor));
             }
         }
+
+        public Vector3 ColorFactor
+        {
+            get => _sheenColorFactor.AsValue(_sheenColorFactorDefault);
+            set => this._sheenColorFactor = value.AsNullable(_sheenColorFactorDefault);
+        }
+
+        public float RoughnessFactor
+        {
+            get => _sheenRoughnessFactor.AsValue(_sheenRoughnessFactorDefault);
+            set => this._sheenRoughnessFactor = value.AsNullable(_sheenRoughnessFactorDefault);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var colorParam = new MaterialParameter(MaterialParameter.Key.RGB, _sheenColorFactorDefault, () => ColorFactor, v => ColorFactor = v);
+            var roughnessParam = new MaterialParameter(MaterialParameter.Key.RoughnessFactor, _sheenRoughnessFactorDefault, () => RoughnessFactor, v => RoughnessFactor = v);
+
+            yield return new MaterialChannel(material, "SheenColor", _GetSheenColorTexture, colorParam);
+            yield return new MaterialChannel(material, "SheenRoughness", _GetSheenRoughnessTexture, roughnessParam);
+        }
+
+        private TextureInfo _GetSheenColorTexture(bool create)
+        {
+            if (create && _sheenColorTexture == null) _sheenColorTexture = new TextureInfo();
+            return _sheenColorTexture;
+        }
+
+        private TextureInfo _GetSheenRoughnessTexture(bool create)
+        {
+            if (create && _sheenRoughnessTexture == null) _sheenRoughnessTexture = new TextureInfo();
+            return _sheenRoughnessTexture;
+        }
     }
 
     internal sealed partial class MaterialIOR
@@ -535,20 +465,20 @@ namespace SharpGLTF.Schema2
         internal MaterialIOR(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
 
-        public static float DefaultIndexOfRefraction => (float)_iorDefault;
-
-        public float IndexOfRefraction
-        {
-            get => (float)(this._ior ?? _iorDefault);
-            set => this._ior = ((double)value).AsNullable(_iorDefault);
-        }
-
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
 
             if (_ior == 0) return; // a value of 0 is allowed by the spec as a special value
             if (_ior < 1) throw new ArgumentOutOfRangeException(nameof(IndexOfRefraction));
+        }
+
+        public static float DefaultIndexOfRefraction => (float)_iorDefault;
+
+        public float IndexOfRefraction
+        {
+            get => (float)(this._ior ?? _iorDefault);
+            set => this._ior = ((double)value).AsNullable(_iorDefault);
         }
     }
 
@@ -561,6 +491,23 @@ namespace SharpGLTF.Schema2
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().ConcatElements(_specularColorTexture, _specularTexture);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_specularColorFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.X, 0, float.MaxValue, nameof(_specularColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Y, 0, float.MaxValue, nameof(_specularColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Z, 0, float.MaxValue, nameof(_specularColorFactor));
+            }
+
+            if (_specularFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value, _specularFactorMinimum, _specularFactorMaximum, nameof(_specularFactor));
+            }
         }
 
         private TextureInfo _GetSpecularColorTexture(bool create)
@@ -581,8 +528,6 @@ namespace SharpGLTF.Schema2
             set => _specularColorFactor = value.AsNullable(_specularColorFactorDefault);
         }
 
-        public static float SpecularFactorDefault => (float)_specularFactorDefault;
-
         public float SpecularFactor
         {
             get => (float)_specularFactor.AsValue(_specularFactorDefault);
@@ -591,54 +536,40 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannel
-                (
-                material,
-                "SpecularColor",
-                _GetSpecularColorTexture,
-                _specularColorFactorDefault,
-                () => this.SpecularColor,
-                value => this.SpecularColor = value
-                );
+            var colorParam = new MaterialParameter(MaterialParameter.Key.RGB, _specularColorFactorDefault, () => SpecularColor, v => SpecularColor = v);
+            var factorParam = new MaterialParameter(MaterialParameter.Key.SpecularFactor, (float)_specularFactorDefault, () => SpecularFactor, v => SpecularFactor = v);
 
-            yield return new MaterialChannel
-                (
-                material,
-                "SpecularFactor",
-                _GetSpecularFactorTexture,
-                SpecularFactorDefault,
-                () => this.SpecularFactor,
-                value => this.SpecularFactor = value
-                );
+            yield return new MaterialChannel(material, "SpecularColor", _GetSpecularColorTexture, colorParam);
+            yield return new MaterialChannel(material, "SpecularFactor", _GetSpecularFactorTexture, factorParam);
+        }
+    }
+
+    internal sealed partial class MaterialVolume
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialVolume(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_thicknessTexture);
         }
 
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
 
-            if (_specularColorFactor.HasValue)
+            if (_attenuationColor.HasValue)
             {
-                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.X, 0, float.MaxValue, nameof(_specularColorFactor));
-                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Y, 0, float.MaxValue, nameof(_specularColorFactor));
-                Guard.MustBeBetweenOrEqualTo(_specularColorFactor.Value.Z, 0, float.MaxValue, nameof(_specularColorFactor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.X, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Y, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Z, 0, float.MaxValue, nameof(_attenuationColor));
             }
 
-            if (_specularFactor.HasValue)
+            if (_thicknessFactor.HasValue)
             {
-                Guard.MustBeBetweenOrEqualTo(_specularFactor.Value, _specularFactorMinimum, _specularFactorMaximum, nameof(_specularFactor));
+                Guard.MustBeBetweenOrEqualTo(_thicknessFactor.Value, _thicknessFactorMinimum, float.MaxValue, nameof(_thicknessFactor));
             }
-        }
-    }
-
-    internal sealed partial class MaterialVolume
-    {
-#pragma warning disable CA1801 // Review unused parameters
-        internal MaterialVolume(Material material) { }
-#pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_thicknessTexture);
         }
 
         private TextureInfo _GetThicknessTexture(bool create)
@@ -661,67 +592,18 @@ namespace SharpGLTF.Schema2
 
         public float AttenuationDistance
         {
-            get => (float)_attenuationDistance;
+            get => (float)_attenuationDistance.AsValue((double)0);
             set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException();
-        }
-
-        private static Vector4 _AttenuationDefault => new Vector4(_attenuationColorDefault, float.MaxValue);
-
-        private Vector4 _Attenuation
-        {
-            get
-            {
-                return new Vector4
-                    (
-                    _attenuationColor.AsValue(_attenuationColorDefault),
-                    (float)_attenuationDistance.AsValue(float.MaxValue)
-                    );
-            }
-            set
-            {
-                _attenuationColor = new Vector3(value.X, value.Y, value.Z).AsNullable(_attenuationColorDefault);
-                _attenuationDistance = ((double)value.W).AsNullable(float.MaxValue, _attenuationDistanceExclusiveMinimum, float.PositiveInfinity);
-            }
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            yield return new MaterialChannel
-                (
-                material,
-                "VolumeThickness",
-                _GetThicknessTexture,
-                (float)_thicknessFactorDefault,
-                () => ThicknessFactor,
-                value => ThicknessFactor = value
-                );
+            var thicknessParam = new MaterialParameter(MaterialParameter.Key.ThicknessFactor, (float)_thicknessFactorDefault, () => ThicknessFactor, v => ThicknessFactor = v);
+            var attColorParam = new MaterialParameter(MaterialParameter.Key.RGB, _attenuationColorDefault, () => AttenuationColor, v => AttenuationColor = v);
+            var attDistParam = new MaterialParameter(MaterialParameter.Key.AttenuationDistance, 0, () => AttenuationDistance, v => AttenuationDistance = v);
 
-            yield return new MaterialChannel
-                (
-                material,
-                "VolumeAttenuation",
-                null,
-                _AttenuationDefault,
-                () => _Attenuation,
-                value => _Attenuation = value
-                );
-        }
-
-        protected override void OnValidateContent(ValidationContext validate)
-        {
-            base.OnValidateContent(validate);
-
-            if (_attenuationColor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.X, 0, float.MaxValue, nameof(_attenuationColor));
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Y, 0, float.MaxValue, nameof(_attenuationColor));
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Z, 0, float.MaxValue, nameof(_attenuationColor));
-            }
-
-            if (_thicknessFactor.HasValue)
-            {
-                Guard.MustBeBetweenOrEqualTo(_thicknessFactor.Value, _thicknessFactorMinimum, float.MaxValue, nameof(_thicknessFactor));
-            }
+            yield return new MaterialChannel(material, "VolumeThickness", _GetThicknessTexture, thicknessParam);
+            yield return new MaterialChannel(material, "VolumeAttenuation", onCreate => null, attColorParam, attDistParam);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace SharpGLTF.Materials
     /// Represents the root object of a material instance structure.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    public class MaterialBuilder : BaseBuilder
+    public partial class MaterialBuilder : BaseBuilder
     {
         #region debug
 
@@ -39,32 +39,6 @@ namespace SharpGLTF.Materials
         public const string SHADERUNLIT = "Unlit";
         public const string SHADERPBRMETALLICROUGHNESS = "PBRMetallicRoughness";
         public const string SHADERPBRSPECULARGLOSSINESS = "PBRSpecularGlossiness";
-
-        private static readonly KnownChannel[] _UnlitChannels = new[] { KnownChannel.BaseColor };
-
-        private static readonly KnownChannel[] _MetRouChannels = new[]
-        {
-            KnownChannel.BaseColor,
-            KnownChannel.MetallicRoughness,
-            KnownChannel.Normal,
-            KnownChannel.Occlusion,
-            KnownChannel.Emissive,
-            KnownChannel.ClearCoat,
-            KnownChannel.ClearCoatNormal,
-            KnownChannel.ClearCoatRoughness,
-            KnownChannel.Transmission,
-            KnownChannel.SheenColor,
-            KnownChannel.SheenRoughness,
-        };
-
-        private static readonly KnownChannel[] _SpeGloChannels = new[]
-        {
-            KnownChannel.Diffuse,
-            KnownChannel.SpecularGlossiness,
-            KnownChannel.Normal,
-            KnownChannel.Occlusion,
-            KnownChannel.Emissive,
-        };
 
         #endregion
 
@@ -228,17 +202,6 @@ namespace SharpGLTF.Materials
             }
         }
 
-        private IReadOnlyList<KnownChannel> _GetValidChannels()
-        {
-            switch (ShaderStyle)
-            {
-                case SHADERUNLIT: return _UnlitChannels;
-                case SHADERPBRMETALLICROUGHNESS: return _MetRouChannels;
-                case SHADERPBRSPECULARGLOSSINESS: return _SpeGloChannels;
-                default: throw new NotImplementedException();
-            }
-        }
-
         public ChannelBuilder GetChannel(KnownChannel channelKey)
         {
             return _Channels.FirstOrDefault(item => item.Key == channelKey);
@@ -338,19 +301,19 @@ namespace SharpGLTF.Materials
         public MaterialBuilder WithShader(string shader) { _SetShader(shader); return this; }
 
         /// <summary>
-        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERUNLIT"/>.
+        /// Sets <see cref="ShaderStyle"/> to use <see cref="SHADERUNLIT"/>.
         /// </summary>
         /// <returns>This <see cref="MaterialBuilder"/>.</returns>
         public MaterialBuilder WithUnlitShader() { _SetShader(SHADERUNLIT); return this; }
 
         /// <summary>
-        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERPBRMETALLICROUGHNESS"/>.
+        /// Sets <see cref="ShaderStyle"/> to use <see cref="SHADERPBRMETALLICROUGHNESS"/>.
         /// </summary>
         /// <returns>This <see cref="MaterialBuilder"/>.</returns>
         public MaterialBuilder WithMetallicRoughnessShader() { _SetShader(SHADERPBRMETALLICROUGHNESS); return this; }
 
         /// <summary>
-        /// Sets <see cref="MaterialBuilder.ShaderStyle"/> to use <see cref="SHADERPBRSPECULARGLOSSINESS"/>.
+        /// Sets <see cref="ShaderStyle"/> to use <see cref="SHADERPBRSPECULARGLOSSINESS"/>.
         /// </summary>
         /// <returns>This <see cref="MaterialBuilder"/>.</returns>
         public MaterialBuilder WithSpecularGlossinessShader() { _SetShader(SHADERPBRSPECULARGLOSSINESS); return this; }
@@ -370,6 +333,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        [Obsolete("Use WithChannelParam(KnownChannel channelKey, KnownProperty propertyName, Object parameter)")]
         public MaterialBuilder WithChannelParam(KnownChannel channelKey, Vector4 parameter)
         {
             this.UseChannel(channelKey).Parameter = parameter;
@@ -377,9 +341,16 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        [Obsolete("Use WithChannelParam(KnownChannel channelKey, KnownProperty propertyName, Object parameter)")]
         public MaterialBuilder WithChannelParam(string channelKey, Vector4 parameter)
         {
             this.UseChannel(channelKey).Parameter = parameter;
+            return this;
+        }
+
+        public MaterialBuilder WithChannelParam(KnownChannel channelKey, KnownProperty propertyName, Object parameter)
+        {
+            this.UseChannel(channelKey).Parameters[propertyName] = MaterialValue.CreateFrom(parameter);
             return this;
         }
 
@@ -440,18 +411,21 @@ namespace SharpGLTF.Materials
         public MaterialBuilder WithNormal(IMAGEFILE imageFile, float scale = 1)
         {
             WithChannelImage(KnownChannel.Normal, imageFile);
-            WithChannelParam(KnownChannel.Normal, new Vector4(scale, 0, 0, 0));
+            WithChannelParam(KnownChannel.Normal, KnownProperty.NormalScale, scale);
             return this;
         }
 
         public MaterialBuilder WithOcclusion(IMAGEFILE imageFile, float strength = 1)
         {
             WithChannelImage(KnownChannel.Occlusion, imageFile);
-            WithChannelParam(KnownChannel.Occlusion, new Vector4(strength, 0, 0, 0));
+            WithChannelParam(KnownChannel.Occlusion, KnownProperty.OcclusionStrength, strength);
             return this;
         }
 
-        public MaterialBuilder WithEmissive(Vector3 rgb) { return WithChannelParam(KnownChannel.Emissive, new Vector4(rgb, 1)); }
+        public MaterialBuilder WithEmissive(Vector3 rgb)
+        {
+            return WithChannelParam(KnownChannel.Emissive, KnownProperty.RGB, rgb);
+        }
 
         public MaterialBuilder WithEmissive(IMAGEFILE imageFile, Vector3? rgb = null)
         {
@@ -460,7 +434,10 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithBaseColor(Vector4 rgba) { return WithChannelParam(KnownChannel.BaseColor, rgba); }
+        public MaterialBuilder WithBaseColor(Vector4 rgba)
+        {
+            return WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, rgba);
+        }
 
         public MaterialBuilder WithBaseColor(IMAGEFILE imageFile, Vector4? rgba = null)
         {
@@ -474,11 +451,8 @@ namespace SharpGLTF.Materials
             if (!metallic.HasValue && !roughness.HasValue) return this;
 
             var channel = UseChannel(KnownChannel.MetallicRoughness);
-            var val = channel.Parameter;
-            if (metallic.HasValue) val.X = metallic.Value;
-            if (roughness.HasValue) val.Y = roughness.Value;
-            channel.Parameter = val;
-
+            if (metallic.HasValue) channel.Parameters[KnownProperty.MetallicFactor] = metallic.Value;
+            if (roughness.HasValue) channel.Parameters[KnownProperty.RoughnessFactor] = roughness.Value;
             return this;
         }
 
@@ -489,7 +463,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithDiffuse(Vector4 rgba) { return WithChannelParam(KnownChannel.Diffuse, rgba); }
+        public MaterialBuilder WithDiffuse(Vector4 rgba) { return WithChannelParam(KnownChannel.Diffuse, KnownProperty.RGBA, rgba); }
 
         public MaterialBuilder WithDiffuse(IMAGEFILE imageFile, Vector4? rgba = null)
         {
@@ -504,17 +478,8 @@ namespace SharpGLTF.Materials
 
             var channel = UseChannel(KnownChannel.SpecularGlossiness);
 
-            var val = channel.Parameter;
-            if (specular.HasValue)
-            {
-                val.X = specular.Value.X;
-                val.Y = specular.Value.Y;
-                val.Z = specular.Value.Z;
-            }
-
-            if (glossiness.HasValue) val.W = glossiness.Value;
-
-            channel.Parameter = val;
+            if (specular.HasValue) channel.Parameters[KnownProperty.SpecularFactor] = specular.Value;
+            if (glossiness.HasValue) channel.Parameters[KnownProperty.GlossinessFactor] = glossiness.Value;
 
             return this;
         }
@@ -550,6 +515,33 @@ namespace SharpGLTF.Materials
         {
             WithChannelImage(KnownChannel.Transmission, imageFile);
             WithChannelParam(KnownChannel.Transmission, new Vector4(intensity, 0, 0, 0));
+            return this;
+        }
+
+        public MaterialBuilder WithSpecularColor(IMAGEFILE imageFile, Vector3? rgb = null)
+        {
+            WithChannelImage(KnownChannel.SpecularColor, imageFile);
+            if (rgb.HasValue) WithChannelParam(KnownChannel.SpecularColor, new Vector4(rgb.Value, 0));
+            return this;
+        }
+
+        public MaterialBuilder WithSpecularFactor(IMAGEFILE imageFile, float factor)
+        {
+            WithChannelImage(KnownChannel.SpecularFactor, imageFile);
+            WithChannelParam(KnownChannel.SpecularFactor, new Vector4(factor, 0, 0, 0));
+            return this;
+        }
+
+        public MaterialBuilder WithVolumeThickness(IMAGEFILE imageFile, float factor)
+        {
+            WithChannelImage(KnownChannel.VolumeThickness, imageFile);
+            WithChannelParam(KnownChannel.VolumeThickness, new Vector4(factor, 0, 0, 0));
+            return this;
+        }
+
+        public MaterialBuilder WithVolumeAttenuation(Vector3 color, float distance)
+        {
+            WithChannelParam(KnownChannel.VolumeAttenuation, new Vector4(color, distance));
             return this;
         }
 

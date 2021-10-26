@@ -102,7 +102,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
                 .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"))
                 .WithChannelImage(Materials.KnownChannel.ClearCoat, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
-                .WithChannelParam(Materials.KnownChannel.ClearCoat, new Vector4(0.5f, 0, 0, 0))
+                .WithChannelParam(Materials.KnownChannel.ClearCoat, Materials.KnownProperty.ClearCoatFactor, 0.5f)
                 .WithChannelImage(Materials.KnownChannel.ClearCoatRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"))
                 .WithChannelImage(Materials.KnownChannel.ClearCoatNormal, System.IO.Path.Combine(basePath, "WaterBottle_normal.png"));
 
@@ -141,7 +141,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
                 .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"))
                 .WithChannelImage(Materials.KnownChannel.Transmission, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
-                .WithChannelParam(Materials.KnownChannel.Transmission, new Vector4(0.75f,0,0,0) );                
+                .WithChannelParam(Materials.KnownChannel.Transmission, Materials.KnownProperty.TransmissionFactor, 0.75f);                
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
             mesh.UsePrimitive(material).AddQuadrangle
@@ -178,9 +178,9 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "WaterBottle_baseColor.png"))
                 .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"))
                 .WithChannelImage(Materials.KnownChannel.SheenColor, System.IO.Path.Combine(basePath, "WaterBottle_emissive.png"))
-                .WithChannelParam(Materials.KnownChannel.SheenColor, new Vector4(1,1,1,0))
+                .WithChannelParam(Materials.KnownChannel.SheenColor, Materials.KnownProperty.RGB, Vector3.One)
                 .WithChannelImage(Materials.KnownChannel.SheenRoughness, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
-                .WithChannelParam(Materials.KnownChannel.SheenRoughness, new Vector4(0.5f, 0, 0, 0));
+                .WithChannelParam(Materials.KnownChannel.SheenRoughness, Materials.KnownProperty.RoughnessFactor, 0.5f);
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
             mesh.UsePrimitive(material).AddQuadrangle

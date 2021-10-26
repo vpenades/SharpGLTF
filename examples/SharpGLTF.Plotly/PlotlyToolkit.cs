@@ -85,10 +85,16 @@ namespace SharpGLTF
 
         private static int GetMaterialColor(MaterialBuilder material)
         {
-            var color = (material.GetChannel(KnownChannel.BaseColor) ?? material.GetChannel(KnownChannel.Diffuse))?.Parameter ?? Vector4.One * 0.8f;
+            var color = Vector4.One;
 
+            var baseColor = material.GetChannel(KnownChannel.BaseColor);
+            if (baseColor != null) color = (Vector4)baseColor.Parameters[KnownProperty.RGBA];
+
+            var diffuseColor = material.GetChannel(KnownChannel.Diffuse);
+            if (diffuseColor != null) color = (Vector4)diffuseColor.Parameters[KnownProperty.RGBA];
+
+            color *= 0.8f;
             color *= 255;
-
             var ccc = color.X * 65536 + color.Y * 256 + color.Z;
 
             return (int)ccc;

@@ -262,11 +262,12 @@ namespace SharpGLTF.Schema2
         private static void _CopyMetallicRoughnessTo(Material srcMaterial, MaterialBuilder dstMaterial)
         {
             dstMaterial.WithMetallicRoughnessShader();
-            srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
-            srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
-            srcMaterial.CopyChannelsTo(dstMaterial, "Transmission");
-            srcMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
-            srcMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
+
+            var channels = MaterialBuilder._MetRouChannels
+                .Select(item => item.ToString())
+                .ToArray();
+
+            srcMaterial.CopyChannelsTo(dstMaterial, channels);
         }
 
         private static void _CopyDefaultTo(Material srcMaterial, MaterialBuilder dstMaterial)
@@ -308,7 +309,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));
 
-            dstChannel.Parameter = srcChannel.Parameter;
+            foreach (var srcProp in srcChannel.Parameters)
+            {
+                dstChannel.Parameters[srcProp.Name] = MaterialValue.CreateFrom(srcProp.Value);
+            }
 
             if (srcChannel.Texture == null) return;
             if (dstChannel.Texture == null) dstChannel.UseTexture();
@@ -371,6 +375,10 @@ namespace SharpGLTF.Schema2
                 = srcMaterial.GetChannel("SpecularColor") != null
                 || srcMaterial.GetChannel("SpecularFactor") != null;
 
+            var hasVolume
+                = srcMaterial.GetChannel("VolumeThickness") != null
+                || srcMaterial.GetChannel("VolumeAttenuation") != null;
+
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
 
             MaterialBuilder defMaterial = null;
@@ -389,7 +397,8 @@ namespace SharpGLTF.Schema2
                     hasClearCoat ? "ClearCoat" : null,
                     hasTransmission ? "Transmission" : null,
                     hasSheen ? "Sheen" : null,
-                    hasSpecular ? "Specular" : null);
+                    hasSpecular ? "Specular" : null,
+                    hasVolume ? "Volume" : null);
 
                 defMaterial = srcMaterial;
             }
@@ -409,6 +418,7 @@ namespace SharpGLTF.Schema2
                 defMaterial.CopyChannelsTo(dstMaterial, "Transmission");
                 defMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
                 defMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
+                defMaterial.CopyChannelsTo(dstMaterial, "VolumeThickness", "VolumeAttenuation");
             }
         }
 
@@ -434,7 +444,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(srcChannel, nameof(srcChannel));
             Guard.NotNull(dstChannel, nameof(dstChannel));
 
-            dstChannel.Parameter = srcChannel.Parameter;
+            foreach (var dstProp in dstChannel.Parameters)
+            {
+                dstProp.Value = srcChannel.Parameters[dstProp.Name].ToTypeless();
+            }
 
             var srcTex = srcChannel.GetValidTexture();
             if (srcTex == null) return;

@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+
+using PARAMETER = System.Object;
 
 namespace SharpGLTF.Schema2
 {
@@ -17,40 +21,7 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Single defval, Func<Single> cgetter, Action<Single> csetter)
-            : this(m, key, texInfo)
-        {
-            Guard.NotNull(cgetter, nameof(cgetter));
-            Guard.NotNull(csetter, nameof(csetter));
-
-            _ParameterDefVal = new Vector4(defval, 0, 0, 0);
-            _ParameterGetter = () => new Vector4(cgetter(), 0, 0, 0);
-            _ParameterSetter = value => csetter(value.X);
-        }
-
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Vector3 defval, Func<Vector3> cgetter, Action<Vector3> csetter)
-            : this(m, key, texInfo)
-        {
-            Guard.NotNull(cgetter, nameof(cgetter));
-            Guard.NotNull(csetter, nameof(csetter));
-
-            _ParameterDefVal = new Vector4(defval, 0);
-            _ParameterGetter = () => new Vector4(cgetter(), 0);
-            _ParameterSetter = value => csetter(new Vector3(value.X, value.Y, value.Z));
-        }
-
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, Vector4 defval, Func<Vector4> cgetter, Action<Vector4> csetter)
-            : this(m, key, texInfo)
-        {
-            Guard.NotNull(cgetter, nameof(cgetter));
-            Guard.NotNull(csetter, nameof(csetter));
-
-            _ParameterDefVal = defval;
-            _ParameterGetter = cgetter;
-            _ParameterSetter = csetter;
-        }
-
-        private MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo)
+        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, params MaterialParameter[] parameters)
         {
             Guard.NotNull(m, nameof(m));
             Guard.NotNullOrEmpty(key, nameof(key));
@@ -61,24 +32,24 @@ namespace SharpGLTF.Schema2
             _Material = m;
 
             _TextureInfo = texInfo;
-
-            _ParameterDefVal = Vector4.Zero;
-            _ParameterGetter = null;
-            _ParameterSetter = null;
+            _Parameters = parameters;
         }
 
         #endregion
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly String _Key;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Material _Material;
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Func<Boolean, TextureInfo> _TextureInfo;
 
-        private readonly Vector4 _ParameterDefVal;
-        private readonly Func<Vector4> _ParameterGetter;
-        private readonly Action<Vector4> _ParameterSetter;
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+        private readonly IReadOnlyList<MaterialParameter> _Parameters;
 
         public override int GetHashCode()
         {
@@ -102,11 +73,15 @@ namespace SharpGLTF.Schema2
         /// The meaning of the <see cref="Vector4.X"/>, <see cref="Vector4.Y"/>. <see cref="Vector4.Z"/> and <see cref="Vector4.W"/>
         /// depend on the type of channel.
         /// </summary>
+        [Obsolete("Use Parameters[]")]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector4 Parameter
         {
-            get => _ParameterGetter();
-            set => _ParameterSetter(value);
+            get => MaterialParameter.Combine(_Parameters);
+            set => MaterialParameter.Apply(_Parameters, value);
         }
+
+        public IReadOnlyList<MaterialParameter> Parameters => _Parameters;
 
         /// <summary>
         /// Gets the <see cref="Texture"/> instance used by this Material, or null.
@@ -189,12 +164,139 @@ namespace SharpGLTF.Schema2
 
         private bool _CheckHasDefaultContent()
         {
-            if (this.Parameter != _ParameterDefVal) return false;
             if (this.Texture != null) return false;
-
-            // there's no point in keep checking because if there's no texture, all other elements are irrelevant.
-
+            if (!this._Parameters.All(item => item.IsDefault)) return false;
             return true;
+        }
+
+        #endregion
+    }
+
+    [System.Diagnostics.DebuggerDisplay("[{Name}, {Value}]")]
+    public readonly struct MaterialParameter
+    {
+        #region constants
+
+        internal enum Key
+        {
+            RGB,
+            RGBA,
+
+            NormalScale,
+            OcclusionStrength,
+
+            MetallicFactor,
+            RoughnessFactor,
+            SpecularFactor,
+            GlossinessFactor,
+            ClearCoatFactor,
+            ThicknessFactor,
+            TransmissionFactor,
+            AttenuationDistance,
+        }
+
+        #endregion
+
+        #region constructors
+
+        internal MaterialParameter(Key key, double defval, Func<double?> getter, Action<double?> setter, double min = double.MinValue, double max = double.MaxValue)
+        {
+            _Key = key;
+            _ValueDefault = defval;
+            _ValueGetter = () => (PARAMETER)(float)getter().AsValue(defval);
+            _ValueSetter = value => { double v = (float)value; setter(v.AsNullable(defval, min, max)); };
+        }
+
+        internal MaterialParameter(Key key, float defval, Func<float> getter, Action<float> setter)
+        {
+            _Key = key;
+            _ValueDefault = defval;
+            _ValueGetter = () => (PARAMETER)getter();
+            _ValueSetter = value => setter((float)value);
+        }
+
+        internal MaterialParameter(Key key, Vector2 defval, Func<Vector2> getter, Action<Vector2> setter)
+        {
+            _Key = key;
+            _ValueDefault = defval;
+            _ValueGetter = () => (PARAMETER)getter();
+            _ValueSetter = value => setter((Vector2)value);
+        }
+
+        internal MaterialParameter(Key key, Vector3 defval, Func<Vector3> getter, Action<Vector3> setter)
+        {
+            _Key = key;
+            _ValueDefault = defval;
+            _ValueGetter = () => (PARAMETER)getter();
+            _ValueSetter = value => setter((Vector3)value);
+        }
+
+        internal MaterialParameter(Key key, Vector4 defval, Func<Vector4> getter, Action<Vector4> setter)
+        {
+            _Key = key;
+            _ValueDefault = defval;
+            _ValueGetter = () => (PARAMETER)getter();
+            _ValueSetter = value => setter((Vector4)value);
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly Key _Key;
+        private readonly Object _ValueDefault;
+        private readonly Func<PARAMETER> _ValueGetter;
+        private readonly Action<PARAMETER> _ValueSetter;
+
+        #endregion
+
+        #region properties
+
+        public string Name => _Key.ToString();
+
+        public bool IsDefault => Object.Equals(Value, _ValueDefault);
+
+        public PARAMETER Value
+        {
+            get => _ValueGetter();
+            set => _ValueSetter(value);
+        }
+
+        #endregion
+
+        #region helpers
+        internal static Vector4 Combine(IReadOnlyList<MaterialParameter> parameters)
+        {
+            Span<float> tmp = stackalloc float[4];
+            int idx = 0;
+
+            foreach (var p in parameters)
+            {
+                if (p.Value is Single v1) { tmp[idx++] = v1; }
+                if (p.Value is Vector2 v2) { tmp[idx++] = v2.X; tmp[idx++] = v2.Y; }
+                if (p.Value is Vector3 v3) { tmp[idx++] = v3.X; tmp[idx++] = v3.Y; tmp[idx++] = v3.Z; }
+                if (p.Value is Vector4 v4) { tmp[idx++] = v4.X; tmp[idx++] = v4.Y; tmp[idx++] = v4.Z; tmp[idx++] = v4.W; }
+            }
+
+            return new Vector4(tmp[0], tmp[1], tmp[2], tmp[3]);
+        }
+        internal static void Apply(IReadOnlyList<MaterialParameter> parameters, Vector4 value)
+        {
+            Span<float> tmp = stackalloc float[4];
+            tmp[0] = value.X;
+            tmp[1] = value.Y;
+            tmp[2] = value.Z;
+            tmp[3] = value.W;
+
+            int idx = 0;
+
+            foreach (var p in parameters)
+            {
+                if (p.Value is Single) { p.Value = tmp[idx++]; }
+                if (p.Value is Vector2) { p.Value = new Vector2(tmp[idx + 0], tmp[idx + 1]); idx += 2; }
+                if (p.Value is Vector3) { p.Value = new Vector3(tmp[idx + 0], tmp[idx + 1], tmp[idx + 2]); idx += 3; }
+                if (p.Value is Vector4) { p.Value = new Vector4(tmp[idx + 0], tmp[idx + 1], tmp[idx + 2], tmp[idx + 3]); idx += 4; }
+            }
         }
 
         #endregion

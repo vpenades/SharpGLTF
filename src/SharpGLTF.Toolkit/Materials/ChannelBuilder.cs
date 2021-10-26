@@ -18,46 +18,10 @@ namespace SharpGLTF.Materials
         {
             var txt = Key.ToString();
 
-            var hasParam = false;
-
-            if (Parameter != _GetDefaultParameter(_Key))
-            {
-                hasParam = true;
-
-                var rgb = $"𝐑 {Parameter.X} 𝐆 {Parameter.Y} 𝐁 {Parameter.Z}";
-                var rgba = $"{rgb} 𝐀 {Parameter.W}";
-
-                switch (Key)
-                {
-                    case KnownChannel.Normal:
-                    case KnownChannel.ClearCoatNormal:
-                    case KnownChannel.Occlusion:
-                    case KnownChannel.SpecularFactor:
-                        txt += $" {Parameter.X}"; break;
-
-                    case KnownChannel.Emissive:
-                        txt += $" ({rgb})"; break;
-
-                    case KnownChannel.Diffuse:
-                    case KnownChannel.BaseColor:
-                    case KnownChannel.SpecularColor:
-                        txt += $" ({rgba})"; break;
-
-                    case KnownChannel.MetallicRoughness:
-                        txt += $" 𝐌 {Parameter.X} 𝐑 {Parameter.Y}"; break;
-
-                    case KnownChannel.SpecularGlossiness:
-                        txt += $" 𝐒 ({rgb}) 𝐆 {Parameter.Y}"; break;
-
-                    default:
-                        txt += $" {Parameter}"; break;
-                }
-            }
-
             var tex = GetValidTexture();
             if (tex?.PrimaryImage != null)
             {
-                if (hasParam) txt += " ×";
+                // if (hasParam) txt += " ×";
                 txt += $" {tex.PrimaryImage.Content.ToDebuggerDisplay()}";
             }
 
@@ -75,7 +39,7 @@ namespace SharpGLTF.Materials
             _Parent = parent;
             _Key = key;
 
-            SetDefaultParameter();
+            _Parameters = MaterialValue.CreateDefaultProperties(key);
         }
 
         #endregion
@@ -88,11 +52,8 @@ namespace SharpGLTF.Materials
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly KnownChannel _Key;
 
-        /// <summary>
-        /// Gets or sets the <see cref="ChannelBuilder"/> paramenter.
-        /// Its meaning depends on <see cref="Key"/>.
-        /// </summary>
-        public Vector4 Parameter { get; set; }
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly MaterialValue.Collection _Parameters;
 
         public TextureBuilder Texture { get; private set; }
 
@@ -102,7 +63,7 @@ namespace SharpGLTF.Materials
 
             if (x._Key != y._Key) return false;
 
-            if (x.Parameter != y.Parameter) return false;
+            if (!MaterialValue.Collection.AreEqual(x._Parameters, y._Parameters)) return false;
 
             if (!TextureBuilder.AreEqualByContent(x.Texture, y.Texture)) return false;
 
@@ -115,7 +76,7 @@ namespace SharpGLTF.Materials
 
             var h = x._Key.GetHashCode();
 
-            h ^= x.Parameter.GetHashCode();
+            h ^= x._Parameters.GetHashCode();
 
             h ^= TextureBuilder.GetContentHashCode(x.Texture);
 
@@ -131,13 +92,34 @@ namespace SharpGLTF.Materials
         /// </summary>
         public KnownChannel Key => _Key;
 
+        /// <summary>
+        /// Gets or sets the <see cref="ChannelBuilder"/> parameter.
+        /// </summary>
+        /// <remarks>
+        /// Its meaning differs depending on the value of <see cref="Key"/>.
+        /// </remarks>
+        [Obsolete("Use .Parameters[KnownProperty] or .Parameters.CombinedVector")]
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public Vector4 Parameter
+        {
+            get => _Parameters.CombinedVector;
+            set => _Parameters.CombinedVector = value;
+        }
+
+        /// <summary>
+        /// Gets the collection of parameters of this channel
+        /// </summary>
+        public MaterialValue.Collection Parameters => _Parameters;
+
+        /// <summary>
+        /// Gets an equality comparer that deep compares the internal fields and collections.
+        /// </summary>
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public static IEqualityComparer<ChannelBuilder> ContentComparer => _ContentComparer.Default;
 
         #endregion
 
         #region API
-
         public TextureBuilder GetValidTexture()
         {
             if (Texture == null) return null;
@@ -145,9 +127,17 @@ namespace SharpGLTF.Materials
             return Texture;
         }
 
+        public TextureBuilder UseTexture()
+        {
+            if (Texture == null) Texture = new TextureBuilder(this);
+            return Texture;
+        }
+
+        public void RemoveTexture() { Texture = null; }
+
         internal void CopyTo(ChannelBuilder other)
         {
-            other.Parameter = this.Parameter;
+            this._Parameters.CopyTo(other._Parameters);
 
             if (this.Texture == null)
             {
@@ -158,19 +148,6 @@ namespace SharpGLTF.Materials
                 this.Texture.CopyTo(other.UseTexture());
             }
         }
-
-        public void SetDefaultParameter()
-        {
-            this.Parameter = _GetDefaultParameter(_Key);
-        }
-
-        public TextureBuilder UseTexture()
-        {
-            if (Texture == null) Texture = new TextureBuilder(this);
-            return Texture;
-        }
-
-        public void RemoveTexture() { Texture = null; }
 
         #endregion
 
