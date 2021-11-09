@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
 
-  <!-- https://devblogs.microsoft.com/dotnet/producing-packages-with-source-link/ -->
+  <!-- https://github.com/dotnet/sourcelink/#using-sourcelink -->
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
 
