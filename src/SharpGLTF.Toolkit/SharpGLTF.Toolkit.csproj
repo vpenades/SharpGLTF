@@ -11,7 +11,8 @@
   <Import Project="..\PackageInfo.props" />
   <Import Project="..\Version.props" />
   <Import Project="..\Analyzers.props" />
-  <Import Project="..\Testing.props" />  
+  <Import Project="..\Testing.props" />
+  <Import Project="..\SourceLink.props" />
 
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
