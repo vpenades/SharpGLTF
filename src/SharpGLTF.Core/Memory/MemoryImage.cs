@@ -55,7 +55,7 @@ namespace SharpGLTF.Memory
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
         internal static readonly string[] _EmbeddedHeaders = 
-        { EMBEDDED_OCTET_STREAM
+            { EMBEDDED_OCTET_STREAM
             , EMBEDDED_GLTF_BUFFER
             , EMBEDDED_JPEG_BUFFER
             , EMBEDDED_PNG_BUFFER
