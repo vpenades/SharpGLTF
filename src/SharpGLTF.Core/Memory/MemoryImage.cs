@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using BYTES = System.ArraySegment<System.Byte>;
 
 namespace SharpGLTF.Memory
@@ -55,7 +54,7 @@ namespace SharpGLTF.Memory
 
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
-        internal static readonly string[] _EmbeddedHeaders =
+        internal static readonly string[] _EmbeddedHeaders = 
             { EMBEDDED_OCTET_STREAM
             , EMBEDDED_GLTF_BUFFER
             , EMBEDDED_JPEG_BUFFER
@@ -430,8 +429,9 @@ namespace SharpGLTF.Memory
 
         private static bool _IsKtx2Image(IReadOnlyList<Byte> data)
         {
-            if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) return false;
-            return header.IsValidHeader;
+            try { if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) return false;
+                return header.IsValidHeader; }
+            catch { return false; }
         }
 
         private static bool _IsImage(IReadOnlyList<Byte> data)
