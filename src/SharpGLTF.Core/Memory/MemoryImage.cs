@@ -54,15 +54,14 @@ namespace SharpGLTF.Memory
 
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
-        internal static readonly string[] _EmbeddedHeaders =
-            {
-                EMBEDDED_OCTET_STREAM,
-                EMBEDDED_GLTF_BUFFER,
-                EMBEDDED_JPEG_BUFFER,
-                EMBEDDED_PNG_BUFFER,
-                EMBEDDED_DDS_BUFFER,
-                EMBEDDED_WEBP_BUFFER,
-                EMBEDDED_KTX2_BUFFER
+        internal static readonly string[] _EmbeddedHeaders = 
+        { EMBEDDED_OCTET_STREAM
+            , EMBEDDED_GLTF_BUFFER
+            , EMBEDDED_JPEG_BUFFER
+            , EMBEDDED_PNG_BUFFER
+            , EMBEDDED_DDS_BUFFER
+            , EMBEDDED_WEBP_BUFFER
+            , EMBEDDED_KTX2_BUFFER
             };
 
         public static MemoryImage Empty => default;
@@ -334,8 +333,7 @@ namespace SharpGLTF.Memory
                 mimeContent += ";base64,";
             }
 
-            return mimeContent +
-                   Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
+            return mimeContent + Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
         }
 
         /// <summary>
@@ -473,7 +471,6 @@ namespace SharpGLTF.Memory
         public static bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
         {
             if (data.Count < 12) { header = default; return false; }
-
             header = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Ktx2Header>(data.ToArray())[0];
             return true;
         }
