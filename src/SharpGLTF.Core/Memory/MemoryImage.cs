@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
 using BYTES = System.ArraySegment<System.Byte>;
 
 namespace SharpGLTF.Memory
@@ -51,19 +50,16 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// Represents a 4x4 white PNG image.
         /// </summary>
-        private const string DEFAULT_PNG_IMAGE = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAHXpUWHRUaXRsZQAACJlzSU1LLM0pCUmtKCktSgUAKVIFt/VCuZ8AAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAANElEQVQoz2O8cuUKAwxoa2vD2VevXsUqzsRAIqC9Bsb///8TdDey+CD0Awsx7h6NB5prAADPsx0VAB8VRQAAAABJRU5ErkJggg==";
+        private const string DEFAULT_PNG_IMAGE =
+            "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAHXpUWHRUaXRsZQAACJlzSU1LLM0pCUmtKCktSgUAKVIFt/VCuZ8AAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAANElEQVQoz2O8cuUKAwxoa2vD2VevXsUqzsRAIqC9Bsb///8TdDey+CD0Awsx7h6NB5prAADPsx0VAB8VRQAAAABJRU5ErkJggg==";
 
         internal static Byte[] DefaultPngImage => Convert.FromBase64String(DEFAULT_PNG_IMAGE);
 
         internal static readonly string[] _EmbeddedHeaders =
-            { EMBEDDED_OCTET_STREAM
-            , EMBEDDED_GLTF_BUFFER
-            , EMBEDDED_JPEG_BUFFER
-            , EMBEDDED_PNG_BUFFER
-            , EMBEDDED_DDS_BUFFER
-            , EMBEDDED_WEBP_BUFFER
-            , EMBEDDED_KTX2_BUFFER
-            };
+        {
+            EMBEDDED_OCTET_STREAM, EMBEDDED_GLTF_BUFFER, EMBEDDED_JPEG_BUFFER, EMBEDDED_PNG_BUFFER, EMBEDDED_DDS_BUFFER,
+            EMBEDDED_WEBP_BUFFER, EMBEDDED_KTX2_BUFFER
+        };
 
         public static MemoryImage Empty => default;
 
@@ -73,11 +69,20 @@ namespace SharpGLTF.Memory
 
         #region constructor
 
-        public static implicit operator MemoryImage(BYTES image) { return new MemoryImage(image); }
+        public static implicit operator MemoryImage(BYTES image)
+        {
+            return new MemoryImage(image);
+        }
 
-        public static implicit operator MemoryImage(Byte[] image) { return new MemoryImage(image); }
+        public static implicit operator MemoryImage(Byte[] image)
+        {
+            return new MemoryImage(image);
+        }
 
-        public static implicit operator MemoryImage(string filePath) { return new MemoryImage(filePath); }
+        public static implicit operator MemoryImage(string filePath)
+        {
+            return new MemoryImage(filePath);
+        }
 
         public MemoryImage(BYTES image)
         {
@@ -160,13 +165,25 @@ namespace SharpGLTF.Memory
             return a._Image.AsSpan().SequenceEqual(b._Image);
         }
 
-        public override bool Equals(object obj) { return obj is MemoryImage other && AreEqual(this, other); }
+        public override bool Equals(object obj)
+        {
+            return obj is MemoryImage other && AreEqual(this, other);
+        }
 
-        public bool Equals(MemoryImage other) { return AreEqual(this, other); }
+        public bool Equals(MemoryImage other)
+        {
+            return AreEqual(this, other);
+        }
 
-        public static bool operator ==(MemoryImage left, MemoryImage right) { return AreEqual(left, right); }
+        public static bool operator ==(MemoryImage left, MemoryImage right)
+        {
+            return AreEqual(left, right);
+        }
 
-        public static bool operator !=(MemoryImage left, MemoryImage right) { return !AreEqual(left, right); }
+        public static bool operator !=(MemoryImage left, MemoryImage right)
+        {
+            return !AreEqual(left, right);
+        }
 
         #endregion
 
@@ -229,8 +246,15 @@ namespace SharpGLTF.Memory
         {
             get
             {
-                try { _Verify(this, string.Empty); return true; }
-                catch { return false; }
+                try
+                {
+                    _Verify(this, string.Empty);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
             }
         }
 
@@ -296,7 +320,8 @@ namespace SharpGLTF.Memory
         public void SaveToFile(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
-            Guard.IsTrue(filePath.EndsWith("." + this.FileExtension, StringComparison.OrdinalIgnoreCase), nameof(filePath), $"{nameof(filePath)} must use extension '.{this.FileExtension}'");
+            Guard.IsTrue(filePath.EndsWith("." + this.FileExtension, StringComparison.OrdinalIgnoreCase),
+                nameof(filePath), $"{nameof(filePath)} must use extension '.{this.FileExtension}'");
 
             using (var dst = System.IO.File.Create(filePath))
             {
@@ -311,7 +336,10 @@ namespace SharpGLTF.Memory
         /// Gets the internal buffer.
         /// </summary>
         /// <returns>An array buffer.</returns>
-        internal BYTES _GetBuffer() { return _Image; }
+        internal BYTES _GetBuffer()
+        {
+            return _Image;
+        }
 
         /// <summary>
         /// Returns this image file, enconded as a Mime64 string.
@@ -334,7 +362,8 @@ namespace SharpGLTF.Memory
                 mimeContent += ";base64,";
             }
 
-            return mimeContent + Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
+            return mimeContent +
+                   Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
         }
 
         /// <summary>
@@ -345,16 +374,25 @@ namespace SharpGLTF.Memory
         /// <returns>true if decoding succeeded.</returns>
         internal static bool TryParseMime64(string mime64content, out Byte[] data)
         {
-            if (mime64content == null) { data = null; return false; }
+            if (mime64content == null)
+            {
+                data = null;
+                return false;
+            }
 
             data = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
             if (data == null) return false;
 
-            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data)) throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data))
+                throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data))
+                throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data))
+                throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data))
+                throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data))
+                throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
 
             return true;
         }
@@ -430,8 +468,16 @@ namespace SharpGLTF.Memory
 
         private static bool _IsKtx2Image(IReadOnlyList<Byte> data)
         {
-            if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) return false;
-            return header.IsValidHeader;
+            try
+            {
+                if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) 
+                    return false;
+                return header.IsValidHeader;
+            }
+            catch (IndexOutOfRangeException)
+            {
+                return false;
+            }
         }
 
         private static bool _IsImage(IReadOnlyList<Byte> data)
@@ -470,7 +516,12 @@ namespace SharpGLTF.Memory
 
         public static bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
         {
-            if (data.Count < 12) { header = default; return false; }
+            if (data.Count < 12)
+            {
+                header = default;
+                return false;
+            }
+
             header = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Ktx2Header>(data.ToArray())[0];
             return true;
         }
@@ -501,7 +552,8 @@ namespace SharpGLTF.Memory
             // For 2D and cubemap textures, pixelDepth must be 0.
             Guard.MustBeEqualTo((int)header.PixelDepth, 0, $"{paramName}.{nameof(PixelDepth)}");
 
-            Guard.MustBeLessThan((int)header.SupercompressionScheme, 3, $"{paramName}.{nameof(SupercompressionScheme)}");
+            Guard.MustBeLessThan((int)header.SupercompressionScheme, 3,
+                $"{paramName}.{nameof(SupercompressionScheme)}");
 
             // TODO: more checks required
         }
