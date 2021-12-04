@@ -26,9 +26,18 @@ namespace SharpGLTF.IO
 
         #region lifecycle
 
-        public ZipReader(string zipPath)
+        public ZipReader(string zipPath, Encoding encoding = null)
         {
-            _Archive = System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Read);
+            _Archive = encoding == null
+                ? System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Read)
+                : System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Read, encoding);
+        }
+
+        public ZipReader(System.IO.Stream zipStream, bool leaveOpen = false, Encoding encoding = null)
+        {
+            _Archive = encoding == null
+                ? new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Read, leaveOpen)
+                : new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Read, leaveOpen, encoding);
         }
 
         public void Dispose()
@@ -121,9 +130,18 @@ namespace SharpGLTF.IO
     {
         #region lifecycle
 
-        public ZipWriter(string zipPath)
+        public ZipWriter(string zipPath, Encoding encoding = null)
         {
-            _Archive = System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create);
+            _Archive = encoding == null
+                ? System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create)
+                : System.IO.Compression.ZipFile.Open(zipPath, System.IO.Compression.ZipArchiveMode.Create, encoding);
+        }
+
+        public ZipWriter(System.IO.Stream zipStream, bool leaveOpen = false, Encoding encoding = null)
+        {
+            _Archive = encoding == null
+                ? new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen)
+                : new System.IO.Compression.ZipArchive(zipStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen, encoding);
         }
 
         public void Dispose()
