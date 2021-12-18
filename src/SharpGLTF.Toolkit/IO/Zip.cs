@@ -42,8 +42,7 @@ namespace SharpGLTF.IO
 
         public void Dispose()
         {
-            _Archive?.Dispose();
-            _Archive = null;
+            System.Threading.Interlocked.Exchange(ref _Archive, null)?.Dispose();
         }
 
         #endregion
@@ -146,8 +145,7 @@ namespace SharpGLTF.IO
 
         public void Dispose()
         {
-            _Archive?.Dispose();
-            _Archive = null;
+            System.Threading.Interlocked.Exchange(ref _Archive, null)?.Dispose();
         }
 
         #endregion

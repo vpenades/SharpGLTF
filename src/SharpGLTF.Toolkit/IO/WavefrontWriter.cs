@@ -20,20 +20,17 @@ namespace SharpGLTF.IO
     #pragma warning restore SA1135 // Using directives should be qualified
 
     /// <summary>
-    /// Tiny wavefront object writer
+    /// Tiny <see href="https://www.fileformat.info/format/wavefrontobj/egff.htm">wavefront object</see> writer
     /// </summary>
-    /// <see href="https://www.fileformat.info/format/wavefrontobj/egff.htm"/>
+    /// <remarks>
+    /// Wavefront obj export is not intended to be a fully featured wavefront / converter exporter, but
+    /// to serve as support and reference for glTF development. Consider this feature as an "easter egg".
+    /// </remarks>
     class WavefrontWriter
     {
         #region data
 
-        public struct Material
-        {
-            public Vector3 DiffuseColor;
-            public Vector3 SpecularColor;
-            public Memory.MemoryImage DiffuseTexture;
-        }
-
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY>();
 
         #endregion
@@ -45,6 +42,15 @@ namespace SharpGLTF.IO
             _Mesh.UsePrimitive(material).AddTriangle(a, b, c);
         }
 
+        /// <summary>
+        /// Writes this model to two files:<br/>
+        /// - filePath.OBJ<br/>
+        /// - filePath.MTL<br/>
+        /// </summary>
+        /// <param name="filePath">the base file path.</param>
+        /// <remarks>
+        /// The extension of <paramref name="filePath"/> is discarded and replaced by .OBJ and .MTL when required.
+        /// </remarks>
         public void WriteFiles(string filePath)
         {
             Guard.NotNullOrEmpty(filePath, nameof(filePath));
@@ -60,6 +66,16 @@ namespace SharpGLTF.IO
             }
         }
 
+        /// <summary>
+        /// Serializes this model to a dictionary with 2 entries:<br/>
+        /// - ("baseName.OBJ", Byte[])<br/>
+        /// - ("baseName.MTL", Byte[])<br/>
+        /// </summary>
+        /// <param name="baseName">the file name.</param>
+        /// <returns>A dictionary with two entries.</returns>
+        /// <remarks>
+        /// The extension of <paramref name="baseName"/> is discarded and replaced by .OBJ and .MTL when required.
+        /// </remarks>
         public IReadOnlyDictionary<String, BYTES> GetFiles(string baseName)
         {
             Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
@@ -248,6 +264,18 @@ namespace SharpGLTF.IO
             dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.Content ?? default;
 
             return dstMaterial;
+        }
+
+        #endregion
+
+        #region nested types
+
+        [System.Diagnostics.DebuggerDisplay("{DiffuseColor} {DiffuseTexture.ToDebuggerDisplay()}")]
+        public struct Material
+        {
+            public Vector3 DiffuseColor;
+            public Vector3 SpecularColor;
+            public Memory.MemoryImage DiffuseTexture;
         }
 
         #endregion
