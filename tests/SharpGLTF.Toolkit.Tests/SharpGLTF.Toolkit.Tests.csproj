@@ -22,7 +22,7 @@
     <PackageReference Include="Mono.ApiTools" Version="5.14.0.2" />
     -->
 
-    <PackageReference Include="NUnit3TestAdapter" Version="4.2.0-beta.3">
+    <PackageReference Include="NUnit3TestAdapter" Version="4.2.0-beta.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
