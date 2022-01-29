@@ -2,12 +2,8 @@
 <Project>
 
   <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>SharpGLTF.Core.Tests</_Parameter1>
-    </AssemblyAttribute>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>SharpGLTF.Toolkit.Tests</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="SharpGLTF.Core.Tests"/>
+    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests"/>
   </ItemGroup>  
 	
 </Project>
