@@ -12,7 +12,7 @@ using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
 namespace SharpGLTF.Scenes
 {
     /// <summary>
-    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
+    /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a transform to the underlaying content object (usually a Mesh, a Camera or a light)
     /// </summary>
     public abstract class ContentTransformer
@@ -41,14 +41,9 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(other, nameof(other));
 
-            if (other._Content is ICloneable cloneable)
-            {
-                this._Content = cloneable.Clone();
-            }
-            else
-            {
-                this._Content = other._Content;
-            }
+            this._Content = other._Content is ICloneable cloneable
+                ? cloneable.Clone()
+                : other._Content;
 
             this._Morphings = other._Morphings?.Clone();
         }
@@ -166,7 +161,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
-    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
+    /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a fixed <see cref="Matrix4x4"/> transform to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Fixed Node[{_DebugName,nq}] = {Content}")]
@@ -217,7 +212,7 @@ namespace SharpGLTF.Scenes
         private NodeBuilder _ParentNode;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private Transforms.AffineTransform _ChildTransform;
+        private TRANSFORM _ChildTransform;
 
         #endregion
 
@@ -239,7 +234,7 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder ParentNode => _ParentNode;
 
-        public Transforms.AffineTransform ChildTransform => _ChildTransform;
+        public TRANSFORM ChildTransform => _ChildTransform;
 
         #endregion
 
@@ -249,7 +244,9 @@ namespace SharpGLTF.Scenes
 
         public override Matrix4x4 GetPoseWorldMatrix()
         {
-            return _ParentNode == null ? _ChildTransform.Matrix : _ChildTransform.Matrix * _ParentNode.WorldMatrix;
+            return _ParentNode == null
+                ? _ChildTransform.Matrix
+                : _ChildTransform.Matrix * _ParentNode.WorldMatrix;
         }
 
         #endregion
@@ -257,7 +254,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
-    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
+    /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transform of a single <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Rigid Node[{_DebugName,nq}] = {Content}")]
@@ -327,7 +324,7 @@ namespace SharpGLTF.Scenes
     }
 
     /// <summary>
-    /// Represents the content of <see cref="InstanceBuilder.Content"/>.<br/>
+    /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transforms of many <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Skinned Node[{_DebugName,nq}] = {Content}")]

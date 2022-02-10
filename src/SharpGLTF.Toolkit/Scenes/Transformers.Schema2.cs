@@ -18,7 +18,7 @@ namespace SharpGLTF.Scenes
         #region debug
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private string _DebugName => string.IsNullOrWhiteSpace(_ParentNode.Name) ? "*" : _ParentNode.Name;
+        private string _DebugName => _ParentNode?.Name ?? "*";
 
         #endregion
 
@@ -130,7 +130,10 @@ namespace SharpGLTF.Scenes
                     if (srcChild.Content is SCHEMA2NODE srcOperator)
                     {
                         var dstNode = dst.CreateNode();
+                        dstNode.Name = srcChild.Name;
+                        dstNode.Extras = srcChild.Extras.DeepClone();
                         dstNode.LocalTransform = srcChild.ChildTransform;
+
                         srcOperator.ApplyTo(dstNode, context);
 
                         System.Diagnostics.Debug.Assert(dstNode.WorldMatrix == srcChild.GetPoseWorldMatrix(), "Transform mismatch!");

@@ -46,7 +46,11 @@ namespace SharpGLTF
 
         internal static bool _IsFinite(this float value)
         {
+            #if NETSTANDARD2_1_OR_GREATER
+            return float.IsFinite(value);
+            #else
             return !(float.IsNaN(value) || float.IsInfinity(value));
+            #endif
         }
 
         internal static bool _IsFinite(this Vector2 v)

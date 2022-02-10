@@ -413,7 +413,7 @@ namespace SharpGLTF.IO
                 // System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
             }
 
-            if (list.Count == 0) throw new JsonException("Empty array found.");
+            if (list.Count == 0) throw new JSONEXCEPTION("Empty array found.");
 
             System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndArray);
         }
@@ -445,7 +445,7 @@ namespace SharpGLTF.IO
                 }
             }
 
-            if (dict.Count == 0) throw new JsonException("Empty dictionary found.");
+            if (dict.Count == 0) throw new JSONEXCEPTION("Empty dictionary found.");
         }
 
         private static bool _TryCastValue(ref Utf8JsonReader reader, Type vtype, out Object value)
@@ -505,7 +505,7 @@ namespace SharpGLTF.IO
             {
                 var l = new List<float>(4);
                 DeserializePropertyList<float>(ref reader, l);
-                value = new System.Numerics.Quaternion(l[0], l[1], l[2], l[3]);
+                value = new Quaternion(l[0], l[1], l[2], l[3]);
                 return true;
             }
 
