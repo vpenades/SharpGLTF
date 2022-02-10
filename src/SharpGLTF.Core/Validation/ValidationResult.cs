@@ -46,6 +46,31 @@ namespace SharpGLTF.Validation
 
         public ValidationContext GetContext() { return new ValidationContext(this); }
 
+        public void SetSchemaError(System.IO.EndOfStreamException ex)
+        {
+            SetError(new SchemaException(null, ex.Message));
+        }
+
+        public void SetSchemaError(Schema2.ModelRoot model, string error)
+        {
+            SetError(new SchemaException(model, error));
+        }
+
+        public void SetSchemaError(Schema2.ModelRoot model, System.Text.Json.JsonException ex)
+        {
+            SetError(new SchemaException(model, ex));
+        }
+
+        public void SetModelError(System.FormatException ex)
+        {
+            SetError(new ModelException(null, ex));
+        }
+
+        public void SetModelError(Schema2.ModelRoot model, System.ArgumentException ex)
+        {
+            SetError(new ModelException(model, ex));
+        }
+
         public void SetError(ModelException ex)
         {
             if (_InstantThrow) throw ex;

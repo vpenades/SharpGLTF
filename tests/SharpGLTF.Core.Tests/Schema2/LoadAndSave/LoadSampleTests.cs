@@ -171,6 +171,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase(@"glTF-Quantized\AnimatedMorphCube.gltf")]
         [TestCase(@"glTF-Quantized\Duck.gltf")]
         [TestCase(@"glTF-Quantized\Lantern.gltf")]
+        [TestCase(@"MosquitoInAmber.glb")]
         public void LoadModelsWithExtensions(string filePath)
         {
             TestContext.CurrentContext.AttachShowDirLink();

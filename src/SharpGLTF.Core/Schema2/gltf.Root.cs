@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
 
             var rcontext = ReadContext.CreateFromDictionary(dict, wcontext._UpdateSupportedExtensions);
             rcontext.Validation = Validation.ValidationMode.Skip;
-            var cloned = rcontext._ReadFromDictionary("deepclone.gltf");
+            var cloned = rcontext.ReadSchema2("deepclone.gltf");
 
             // Restore MemoryImage source URIs (they're not cloned as part of the serialization)
             foreach (var srcImg in this.LogicalImages)

@@ -32,17 +32,6 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static bool IsBinaryHeader(Byte a, Byte b, Byte c, Byte d)
-        {
-            uint magic = 0;
-            magic |= (uint)a;
-            magic |= (uint)b << 8;
-            magic |= (uint)c << 16;
-            magic |= (uint)d << 24;
-
-            return magic == GLTFHEADER;
-        }
-
         internal static bool _Identify(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
@@ -58,6 +47,23 @@ namespace SharpGLTF.Schema2
             stream.Position = currPos; // restart read position
 
             return IsBinaryHeader((Byte)a, (Byte)b, (Byte)c, (Byte)d);
+        }
+
+        internal static bool IsBinaryHeader(ReadOnlySpan<Byte> span)
+        {
+            if (span.Length < 4) return false;
+            return IsBinaryHeader(span[0], span[1], span[2], span[3]);
+        }
+
+        public static bool IsBinaryHeader(Byte a, Byte b, Byte c, Byte d)
+        {
+            uint magic = 0;
+            magic |= (uint)a;
+            magic |= (uint)b << 8;
+            magic |= (uint)c << 16;
+            magic |= (uint)d << 24;
+
+            return magic == GLTFHEADER;
         }
 
         public static IReadOnlyDictionary<UInt32, Byte[]> ReadBinaryFile(Stream stream)
@@ -157,7 +163,7 @@ namespace SharpGLTF.Schema2
         {
             var ex = IsBinaryCompatible(model); if (ex != null) throw ex;
 
-            var jsonText = model.GetJSON(false);
+            var jsonText = model._GetJSON(false);
             var jsonChunk = Encoding.UTF8.GetBytes(jsonText);
             var jsonPadding = jsonChunk.Length & 3; if (jsonPadding != 0) jsonPadding = 4 - jsonPadding;
 

@@ -116,6 +116,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public VALIDATIONMODE Validation { get; set; } = VALIDATIONMODE.Strict;
 
+        /// <summary>
+        /// Gets or sets the callback used to postprocess the json text before parsing it.
+        /// </summary>
+        public JsonFilterCallback JsonPostprocessor { get; set; }
+
         #endregion
 
         #region API
@@ -130,6 +135,7 @@ namespace SharpGLTF.Schema2
             other.BuffersMaxSize = this.BuffersMaxSize;
             other._JsonOptions = this._JsonOptions;
             other.Validation = this.Validation;
+            other.JsonPostprocessor = this.JsonPostprocessor;
         }
 
         #endregion
@@ -196,26 +202,37 @@ namespace SharpGLTF.Schema2
             context.WriteTextSchema2(name, this);
         }
 
+        [Obsolete("Use GetJsonPreview", true)]
+        public string GetJSON(bool indented) { return GetJsonPreview(); }
+
+        /// <summary>
+        /// Gets the JSON document of this <see cref="MODEL"/>.
+        /// </summary>
+        /// <returns>A JSON content.</returns>
+        /// <remarks>
+        /// ⚠ Beware: this method serializes the current model into a json, without taking care of the binary buffers,
+        /// so the produced json might not be usable!
+        /// </remarks>
+        public string GetJsonPreview()
+        {
+            return _GetJSON(true);
+        }
+
         /// <summary>
         /// Gets the JSON document of this <see cref="MODEL"/>.
         /// </summary>
         /// <param name="indented">The formatting of the JSON document.</param>
         /// <returns>A JSON content.</returns>
-        public string GetJSON(bool indented)
+        internal string _GetJSON(bool indented)
         {
             var options = new System.Text.Json.JsonWriterOptions
             {
                 Indented = indented
             };
 
-            return GetJSON(options);
-        }
-
-        public string GetJSON(System.Text.Json.JsonWriterOptions options)
-        {
             using (var mm = new System.IO.MemoryStream())
             {
-                _WriteJSON(mm, options);
+                _WriteJSON(mm, options, null);
 
                 mm.Position = 0;
 
@@ -269,11 +286,39 @@ namespace SharpGLTF.Schema2
 
         #region core
 
-        internal void _WriteJSON(System.IO.Stream sw, System.Text.Json.JsonWriterOptions options)
+        internal void _WriteJSON(System.IO.Stream sw, System.Text.Json.JsonWriterOptions options, JsonFilterCallback filter)
         {
-            using (var writer = new System.Text.Json.Utf8JsonWriter(sw, options))
+            if (filter == null)
             {
-                this.Serialize(writer);
+                using (var writer = new System.Text.Json.Utf8JsonWriter(sw, options))
+                {
+                    this.Serialize(writer);
+                }
+
+                return;
+            }
+
+            string text = null;
+
+            using (var mm = new System.IO.MemoryStream())
+            {
+                _WriteJSON(mm, options, null);
+
+                mm.Position = 0;
+
+                using (var ss = new System.IO.StreamReader(mm))
+                {
+                    text = ss.ReadToEnd();
+                }
+            }
+
+            text = filter.Invoke(text);
+
+            var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+
+            using (var mm = new System.IO.MemoryStream(bytes, false))
+            {
+                mm.CopyTo(sw);
             }
         }
 

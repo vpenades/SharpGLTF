@@ -51,14 +51,13 @@ namespace SharpGLTF.Schema2.Authoring
             var extras = JsonContent.CreateFrom(dict);
 
             root.Extras = extras;
-
-            var json = root.GetJSON(true);
+            
             var bytes = root.WriteGLB();
             var rootBis = ModelRoot.ParseGLB(bytes);
 
             var a = root.Extras;
             var b = rootBis.Extras;
-            json = rootBis.Extras.ToJson();
+            var json = rootBis.Extras.ToJson();
             var c = IO.JsonContent.Parse(json);
 
             Assert.IsTrue(JsonContentTests.AreEqual(a,b));

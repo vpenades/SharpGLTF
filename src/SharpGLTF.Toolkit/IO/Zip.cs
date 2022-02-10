@@ -14,11 +14,11 @@ namespace SharpGLTF.IO
     {
         #region static API
 
-        public static ModelRoot LoadGltf2(string zipPath, ReadSettings settings = null)
+        public static ModelRoot LoadModelFromZip(string zipPath, ReadSettings settings = null)
         {
             using (var zip = new ZipReader(zipPath))
             {
-                return zip.LoadGltf2(settings);
+                return zip.LoadModel(settings);
             }
         }
 
@@ -69,29 +69,19 @@ namespace SharpGLTF.IO
                 .OrderBy(item => item.FullName);
         }
 
-        public ModelRoot LoadGltf2(ReadSettings settings = null)
+        public ModelRoot LoadModel(ReadSettings settings = null)
         {
             var gltfFile = ModelFiles.First();
-            return this._LoadGltf2(gltfFile, settings);
+            return this.LoadModel(gltfFile, settings);
         }
 
-        private ModelRoot _LoadGltf2(string gltfFile, ReadSettings settings = null)
+        public ModelRoot LoadModel(string gltfFile, ReadSettings settings = null)
         {
             var context = ReadContext
                 .Create(_ReadAsset)
                 .WithSettingsFrom(settings);
 
-            using (var m = new System.IO.MemoryStream())
-            {
-                using (var s = _Archive.GetEntry(gltfFile).Open())
-                {
-                    s.CopyTo(m);
-                }
-
-                m.Position = 0;
-
-                return context.ReadSchema2(m);
-            }
+            return context.ReadSchema2(gltfFile);
         }
 
         private ArraySegment<Byte> _ReadAsset(string rawUri)

@@ -95,8 +95,15 @@ namespace SharpGLTF.Schema2
 
         #region data
 
-        private FileReaderCallback _FileReader;
+        /// <summary>
+        /// Unescapes glTF asset URIs so they can be consumed by <see cref="_FileReader"/>
+        /// </summary>
         private UriResolver _UriResolver;
+
+        /// <summary>
+        /// Retrieves file blobs from the current context.
+        /// </summary>
+        private FileReaderCallback _FileReader;
 
         /// <summary>
         /// When loading a GLB, this represents the internal binary data chunk.
@@ -119,43 +126,63 @@ namespace SharpGLTF.Schema2
             return true;
         }
 
-        public BYTES ReadAllBytesToEnd(string fileName)
-        {
-            if (_BinaryChunk != null)
-            {
-                if (string.IsNullOrEmpty(fileName)) return new BYTES(_BinaryChunk);
-            }
-
-            return _FileReader(fileName);
-        }
-
         /// <summary>
         /// Opens a file relative to this <see cref="ReadContext"/>.
         /// </summary>
-        /// <param name="fileName">A relative file Name path.</param>
+        /// <param name="resourceName">A relative file Name path.</param>
         /// <returns>A <see cref="Stream"/>.</returns>
-        public Stream OpenFile(string fileName)
+        public Stream OpenFile(string resourceName)
         {
-            var content = _FileReader(fileName);
+            var content = ReadAllBytesToEnd(resourceName);
 
             return new MemoryStream(content.Array, content.Offset, content.Count);
+        }
+
+        public BYTES ReadAllBytesToEnd(string resourceName)
+        {
+            if (_BinaryChunk != null)
+            {
+                if (string.IsNullOrEmpty(resourceName)) return new BYTES(_BinaryChunk);
+            }
+
+            return _FileReader(resourceName);
         }
 
         #endregion
 
         #region API
 
-        public Validation.ValidationResult Validate(string filePath)
+        public Validation.ValidationResult Validate(string resourceName)
         {
-            using (var stream = File.OpenRead(filePath))
+            Guard.FilePathMustBeValid(resourceName, nameof(resourceName));
+
+            var root = this.ReadAllBytesToEnd(resourceName);
+
+            if (!_BinarySerialization.IsBinaryHeader(root))
             {
-                bool isBinary = _BinarySerialization._Identify(stream);
+                return _Read(root).Validation;
+            }
 
-                if (isBinary) return _ReadGLB(stream).Validation;
+            using (var stream = new MemoryStream(root.Array, root.Offset, root.Count, false))
+            {
+                return _ReadGLB(stream).Validation;
+            }
+        }
 
-                var json = stream.ReadBytesToEnd();
+        /// <summary>
+        /// Reads a <see cref="MODEL"/> instance from the current context containing a GLB or a GLTF file.
+        /// </summary>
+        /// <param name="resourceName">The name of the resource within the context.</param>
+        /// <returns>A <see cref="MODEL"/> instance.</returns>
+        public MODEL ReadSchema2(string resourceName)
+        {
+            Guard.FilePathMustBeValid(resourceName, nameof(resourceName));
 
-                return _Read(json).Validation;
+            var root = this.ReadAllBytesToEnd(resourceName);
+
+            using (var stream = new MemoryStream(root.Array, root.Offset, root.Count, false))
+            {
+                return ReadSchema2(stream);
             }
         }
 
@@ -171,18 +198,9 @@ namespace SharpGLTF.Schema2
 
             bool binaryFile = _BinarySerialization._Identify(stream);
 
-            return binaryFile ? ReadBinarySchema2(stream) : ReadTextSchema2(stream);
-        }
-
-        internal MODEL _ReadFromDictionary(string fileName)
-        {
-            var json = this.ReadAllBytesToEnd(fileName);
-
-            var mv = this._Read(json);
-
-            if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
-
-            return mv.Model;
+            return binaryFile
+                ? ReadBinarySchema2(stream)
+                : ReadTextSchema2(stream);
         }
 
         /// <summary>
@@ -197,11 +215,7 @@ namespace SharpGLTF.Schema2
 
             var json = stream.ReadBytesToEnd();
 
-            var mv = this._Read(json);
-
-            if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
-
-            return mv.Model;
+            return _FilterErrors(this._Read(json));
         }
 
         /// <summary>
@@ -214,9 +228,17 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
 
-            var mv = this._ReadGLB(stream);
+            return _FilterErrors(this._ReadGLB(stream));
+        }
 
-            if (mv.Validation.HasErrors) throw mv.Validation.Errors.FirstOrDefault();
+        private static MODEL _FilterErrors((MODEL Model, Validation.ValidationResult Validation) mv)
+        {
+            if (mv.Validation.HasErrors)
+            {
+                var ex = mv.Validation.Errors.FirstOrDefault();
+                SharpGLTF.Validation.ModelException._Decorate(ex);
+                throw ex;
+            }
 
             return mv.Model;
         }
@@ -238,7 +260,7 @@ namespace SharpGLTF.Schema2
             catch (System.IO.EndOfStreamException ex)
             {
                 var vr = new Validation.ValidationResult(null, this.Validation);
-                vr.SetError(new Validation.SchemaException(null, ex.Message));
+                vr.SetSchemaError(ex);
                 return (null, vr);
             }
             catch (Validation.SchemaException ex)
@@ -272,13 +294,15 @@ namespace SharpGLTF.Schema2
             try {
             #endif
 
-            if (jsonUtf8Bytes.IsEmpty) throw new System.Text.Json.JsonException("JSon is empty.");
+            if (jsonUtf8Bytes.IsEmpty) throw new JsonException("JSon is empty.");
+
+            jsonUtf8Bytes = _Preprocess(jsonUtf8Bytes);
 
             var reader = new Utf8JsonReader(jsonUtf8Bytes.Span);
 
             if (!reader.Read())
             {
-                vcontext.SetError(new Validation.SchemaException(root, "Json is empty"));
+                vcontext.SetSchemaError(root, "Json is empty");
                 return (null, vcontext);
             }
 
@@ -324,17 +348,17 @@ namespace SharpGLTF.Schema2
             }
             catch (JsonException rex)
             {
-                vcontext.SetError(new Validation.SchemaException(root, rex));
+                vcontext.SetSchemaError(root, rex);
                 return (null, vcontext);
             }
             catch (System.FormatException fex)
             {
-                vcontext.SetError(new Validation.ModelException(null, fex));
+                vcontext.SetModelError(fex);
                 return (null, vcontext);
             }
             catch (ArgumentException aex)
             {
-                vcontext.SetError(new Validation.ModelException(root, aex));
+                vcontext.SetModelError(root, aex);
                 return (null, vcontext);
             }
             catch (Validation.ModelException mex)
@@ -345,6 +369,21 @@ namespace SharpGLTF.Schema2
             #endif
 
             return (root, vcontext);
+        }
+
+        private ReadOnlyMemory<Byte> _Preprocess(ReadOnlyMemory<Byte> jsonUtf8Bytes)
+        {
+            if (this.JsonPreprocessor == null) return jsonUtf8Bytes;
+
+            #if NETSTANDARD2_0
+            var text = Encoding.UTF8.GetString(jsonUtf8Bytes.ToArray());
+            #else
+            var text = Encoding.UTF8.GetString(jsonUtf8Bytes.Span);
+            #endif
+
+            text = this.JsonPreprocessor.Invoke(text);
+
+            return new ReadOnlyMemory<Byte>(Encoding.UTF8.GetBytes(text));
         }
 
         #endregion

@@ -21,6 +21,13 @@ namespace SharpGLTF.Schema2
     public delegate Boolean ImageDecodeCallback(Image image);
 
     /// <summary>
+    /// Callback used to preprocess and postprocess json before reading and after writing.
+    /// </summary>
+    /// <param name="json">The source json text.</param>
+    /// <returns>The processed json text.</returns>
+    public delegate string JsonFilterCallback(string json);
+
+    /// <summary>
     /// Read settings and base class of <see cref="ReadContext"/>
     /// </summary>
     public class ReadSettings
@@ -57,6 +64,11 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public ImageDecodeCallback ImageDecoder { get; set; }
 
+        /// <summary>
+        /// Gets or sets the callback used to preprocess the json text before parsing it.
+        /// </summary>
+        public JsonFilterCallback JsonPreprocessor { get; set; }
+
         #endregion
 
         #region API
@@ -66,6 +78,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(other, nameof(other));
             other.Validation = this.Validation;
             other.ImageDecoder = this.ImageDecoder;
+            other.JsonPreprocessor = this.JsonPreprocessor;
         }
 
         #endregion
@@ -94,18 +107,21 @@ namespace SharpGLTF.Schema2
         /// <param name="filePath">A valid file path.</param>
         /// <param name="settings">Optional settings.</param>
         /// <returns>A <see cref="MODEL"/> instance.</returns>
+        /// <remarks>
+        /// <paramref name="settings"/> can be either a plain <see cref="ReadSettings"/> instance,
+        /// or a <see cref="ReadContext"/>, in which case, the context will be used to read the
+        /// files from it.
+        /// </remarks>
         public static MODEL Load(string filePath, ReadSettings settings = null)
         {
-            Guard.FilePathMustExist(filePath, nameof(filePath));
-
-            var context = ReadContext
-                .CreateFromFile(filePath)
-                .WithSettingsFrom(settings);
-
-            using (var s = File.OpenRead(filePath))
+            if (!(settings is ReadContext context))
             {
-                return context.ReadSchema2(s);
+                context = ReadContext
+                    .CreateFromFile(filePath)
+                    .WithSettingsFrom(settings);
             }
+
+            return context.ReadSchema2(filePath);
         }
 
         /// <summary>
@@ -116,6 +132,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="MODEL"/> instance.</returns>
         public static MODEL ParseGLB(BYTES glb, ReadSettings settings = null)
         {
+            System.Diagnostics.Debug.Assert(!(settings is ReadContext), "Use Load method.");
+
             Guard.NotNull(glb, nameof(glb));
 
             using (var m = new MemoryStream(glb.Array, glb.Offset, glb.Count, false))
@@ -132,6 +150,8 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="MODEL"/> instance.</returns>
         public static MODEL ReadGLB(Stream stream, ReadSettings settings = null)
         {
+            System.Diagnostics.Debug.Assert(!(settings is ReadContext), "Use Load method.");
+
             Guard.NotNull(stream, nameof(stream));
             Guard.IsTrue(stream.CanRead, nameof(stream));
 

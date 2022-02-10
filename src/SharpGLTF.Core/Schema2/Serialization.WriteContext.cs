@@ -175,10 +175,16 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Writes <paramref name="model"/> to this context.
+        /// Writes <paramref name="model"/> to this context using the glTF json container.
         /// </summary>
         /// <param name="baseName">The base name to use for asset files, without extension.</param>
         /// <param name="model">The <see cref="MODEL"/> to write.</param>
+        /// <remarks>
+        /// If the model has associated resources like binary assets and textures,<br/>
+        /// these additional resources will be also written as associated files using the pattern:<br/>
+        /// <br/>
+        /// "<paramref name="baseName"/>.{Number}.bin|png|jpg|dds"
+        /// </remarks>
         public void WriteTextSchema2(string baseName, MODEL model)
         {
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
@@ -195,7 +201,7 @@ namespace SharpGLTF.Schema2
 
             using (var m = new MemoryStream())
             {
-                model._WriteJSON(m, this.JsonOptions);
+                model._WriteJSON(m, this.JsonOptions, this.JsonPostprocessor);
 
                 WriteAllBytesToEnd($"{baseName}.gltf", m.ToArraySegment());
             }
@@ -204,7 +210,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Writes <paramref name="model"/> to this context.
+        /// Writes <paramref name="model"/> to this context using the GLB binary container.
         /// </summary>
         /// <param name="baseName">The base name to use for asset files, without extension.</param>
         /// <param name="model">The <see cref="MODEL"/> to write.</param>
