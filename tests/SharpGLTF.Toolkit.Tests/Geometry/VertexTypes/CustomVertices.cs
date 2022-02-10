@@ -65,6 +65,26 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region API
 
+        /// <inheritdoc/>
+        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        {
+            return this.Subtract((VertexColor1Texture1Custom1)baseValue);
+        }
+
+        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
+        public VertexMaterialDelta Subtract(in VertexColor1Texture1Custom1 baseValue)
+        {
+            return new VertexMaterialDelta(this.Color - baseValue.Color, Vector4.Zero,
+                this.TexCoord - baseValue.TexCoord, Vector2.Zero);
+        }
+
+        /// <inheritdoc/>
+        public void Add(in VertexMaterialDelta delta)
+        {
+            this.Color += delta.Color0Delta;
+            this.TexCoord += delta.TexCoord0Delta;
+        }
+
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
@@ -163,6 +183,23 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region API
+
+        /// <inheritdoc/>
+        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        {
+            return this.Subtract((VertexColor1Texture1Custom1)baseValue);
+        }
+
+        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
+        public VertexMaterialDelta Subtract(in VertexColor1Texture1Custom1 baseValue)
+        {
+            return new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero);
+        }
+
+        /// <inheritdoc/>
+        public void Add(in VertexMaterialDelta delta)
+        {
+        }
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
 

@@ -58,6 +58,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetTexCoord(int index, Vector2 coord) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
+        VertexMaterialDelta IVertexMaterial.Subtract(IVertexMaterial baseValue) { throw new NotSupportedException(); }
+
+        void IVertexMaterial.Add(in VertexMaterialDelta delta) { throw new NotImplementedException(); }
+
         Vector4 IVertexMaterial.GetColor(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
         Vector2 IVertexMaterial.GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }

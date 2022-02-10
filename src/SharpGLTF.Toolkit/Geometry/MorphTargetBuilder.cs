@@ -21,7 +21,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="vertexIndex">The index of the vertex.</param>
         /// <returns>If the given index has a morphed vertex, it will return it, else ir will return the base vertex.</returns>
-        IVertexGeometry GetVertex(int vertexIndex);
+        IVertexBuilder GetVertex(int vertexIndex);
 
         /// <summary>
         /// Gets the <see cref="VertexGeometryDelta"/> of a given vertex for a given morph target.
@@ -36,30 +36,31 @@ namespace SharpGLTF.Geometry
     /// <see cref="PrimitiveBuilder{TMaterial, TvG, TvM, TvS}._UseMorphTarget(int)"/>
     /// </summary>
     /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
-    sealed class PrimitiveMorphTargetBuilder<TvG> : IPrimitiveMorphTargetReader
+    class PrimitiveMorphTargetBuilder<TvG, TvM> : IPrimitiveMorphTargetReader
         where TvG : struct, IVertexGeometry
+        where TvM : struct, IVertexMaterial
     {
         #region lifecycle
 
-        internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc)
+        internal PrimitiveMorphTargetBuilder(Func<int, VertexBuilder<TvG, TvM, VertexEmpty>> baseVertexFunc)
         {
             this._BaseVertexFunc = baseVertexFunc;
-            this._MorphVertices = new Dictionary<int, TvG>();
+            this._MorphVertices = new Dictionary<int, VertexBuilder<TvG, TvM, VertexEmpty>>();
         }
 
-        internal PrimitiveMorphTargetBuilder(Func<int, TvG> baseVertexFunc, PrimitiveMorphTargetBuilder<TvG> other)
+        internal PrimitiveMorphTargetBuilder(Func<int, VertexBuilder<TvG, TvM, VertexEmpty>> baseVertexFunc, PrimitiveMorphTargetBuilder<TvG, TvM> other)
         {
             this._BaseVertexFunc = baseVertexFunc;
-            this._MorphVertices = new Dictionary<int, TvG>(other._MorphVertices);
+            this._MorphVertices = new Dictionary<int, VertexBuilder<TvG, TvM, VertexEmpty>>(other._MorphVertices);
         }
 
         #endregion
 
         #region data
 
-        private readonly Func<int, TvG> _BaseVertexFunc;
+        private readonly Func<int, VertexBuilder<TvG, TvM, VertexEmpty>> _BaseVertexFunc;
 
-        private readonly Dictionary<int, TvG> _MorphVertices;
+        private readonly Dictionary<int, VertexBuilder<TvG, TvM, VertexEmpty>> _MorphVertices;
 
         #endregion
 
@@ -72,9 +73,9 @@ namespace SharpGLTF.Geometry
 
         public VertexGeometryDelta GetVertexDelta(int vertexIndex)
         {
-            if (_MorphVertices.TryGetValue(vertexIndex, out TvG value))
+            if (_MorphVertices.TryGetValue(vertexIndex, out VertexBuilder<TvG, TvM, VertexEmpty> value))
             {
-                return value.Subtract(_BaseVertexFunc(vertexIndex));
+                return value.Geometry.Subtract(_BaseVertexFunc(vertexIndex).Geometry);
             }
 
             return default;
@@ -89,35 +90,36 @@ namespace SharpGLTF.Geometry
             }
 
             var vertex = _BaseVertexFunc(vertexIndex);
-            vertex.Add(value);
+
+            vertex.Geometry.Add(value);
 
             _SetVertex(vertexIndex, vertex);
         }
 
-        IVertexGeometry IPrimitiveMorphTargetReader.GetVertex(int vertexIndex)
+        IVertexBuilder IPrimitiveMorphTargetReader.GetVertex(int vertexIndex)
         {
-            return _MorphVertices.TryGetValue(vertexIndex, out TvG value) ? value : _BaseVertexFunc(vertexIndex);
+            return _MorphVertices.TryGetValue(vertexIndex, out VertexBuilder<TvG, TvM, VertexEmpty> value) ? value : _BaseVertexFunc(vertexIndex);
         }
 
-        public TvG GetVertex(int vertexIndex)
+        public VertexBuilder<TvG, TvM, VertexEmpty> GetVertex(int vertexIndex)
         {
-            return _MorphVertices.TryGetValue(vertexIndex, out TvG value) ? value : _BaseVertexFunc(vertexIndex);
+            return _MorphVertices.TryGetValue(vertexIndex, out VertexBuilder<TvG, TvM, VertexEmpty> value) ? value : _BaseVertexFunc(vertexIndex);
         }
 
-        public void SetVertex(int vertexIndex, TvG value)
+        public void SetVertex(int vertexIndex, VertexBuilder<TvG, TvM, VertexEmpty> vertex)
         {
-            if (object.Equals(value, _BaseVertexFunc(vertexIndex)))
+            if (object.Equals(vertex, _BaseVertexFunc(vertexIndex)))
             {
                 _RemoveVertex(vertexIndex);
                 return;
             }
 
-            _SetVertex(vertexIndex, value);
+            _SetVertex(vertexIndex, vertex);
         }
 
-        private void _SetVertex(int vertexIndex, TvG value)
+        private void _SetVertex(int vertexIndex, VertexBuilder<TvG, TvM, VertexEmpty> vertex)
         {
-            _MorphVertices[vertexIndex] = value;
+            _MorphVertices[vertexIndex] = vertex;
         }
 
         private void _RemoveVertex(int vertexIndex)
@@ -129,7 +131,7 @@ namespace SharpGLTF.Geometry
 
         #region internals
 
-        internal void TransformVertices(Func<TvG, TvG> vertexFunc)
+        internal void TransformVertices(Func<VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>> vertexFunc)
         {
             foreach (var vidx in _MorphVertices.Keys)
             {
@@ -141,7 +143,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        internal void SetMorphTargets(IPrimitiveMorphTargetReader other, IReadOnlyDictionary<int, int> vertexMap, Func<IVertexGeometry, TvG> vertexFunc)
+        internal void SetMorphTargets(IPrimitiveMorphTargetReader other, IReadOnlyDictionary<int, int> vertexMap, Func<IVertexGeometry, VertexBuilder<TvG, TvM, VertexEmpty>> vertexFunc)
         {
             Guard.NotNull(vertexFunc, nameof(vertexFunc));
 
@@ -149,7 +151,7 @@ namespace SharpGLTF.Geometry
 
             foreach (var srcVidx in indices)
             {
-                var g = vertexFunc(other.GetVertex(srcVidx));
+                var g = vertexFunc(other.GetVertex(srcVidx).GetGeometry());
 
                 var dstVidx = srcVidx;
 
@@ -181,6 +183,14 @@ namespace SharpGLTF.Geometry
         /// <param name="meshVertex">The base mesh vertex to morph.</param>
         /// <param name="morphVertex">The morphed vertex.</param>
         void SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex);
+
+        /// <summary>
+        /// Sets an absolute morph target.
+        /// </summary>
+        /// <param name="meshVertex">The base mesh vertex to morph.</param>
+        /// <param name="morphVertex">The morphed vertex.</param>
+        /// <param name="morphMaterial">The morphed vertex material.</param>
+        void SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex, IVertexMaterial morphMaterial);
 
         /// <summary>
         /// Sets a relative morph target
@@ -281,7 +291,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void SetVertex(TvG meshVertex, TvG morphVertex)
+        public void SetVertex(TvG meshVertex, VertexBuilder<TvG, TvM, VertexEmpty> morphVertex)
         {
             if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
             {
@@ -322,7 +332,14 @@ namespace SharpGLTF.Geometry
 
         void IMorphTargetBuilder.SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex)
         {
-            SetVertex(meshVertex.ConvertToGeometry<TvG>(), morphVertex.ConvertToGeometry<TvG>());
+            SetVertex(meshVertex.ConvertToGeometry<TvG>(), 
+                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), default(VertexEmpty).ConvertToMaterial<TvM>()));
+        }
+
+        void IMorphTargetBuilder.SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex, IVertexMaterial morphMaterial)
+        {
+            SetVertex(meshVertex.ConvertToGeometry<TvG>(),
+                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), morphMaterial.ConvertToMaterial<TvM>()));
         }
 
         void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta delta)
