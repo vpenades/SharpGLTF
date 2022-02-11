@@ -152,8 +152,6 @@ namespace SharpGLTF.Schema2
         /// <param name="settings">Optional settings.</param>
         public void Save(string filePath, WriteSettings settings = null)
         {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
-
             bool isGltfExtension = filePath
                 .ToLower(System.Globalization.CultureInfo.InvariantCulture)
                 .EndsWith(".gltf", StringComparison.OrdinalIgnoreCase);
@@ -169,12 +167,14 @@ namespace SharpGLTF.Schema2
         /// <param name="settings">Optional settings.</param>
         public void SaveGLB(string filePath, WriteSettings settings = null)
         {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
+            if (!(settings is WriteContext context))
+            {
+                context = WriteContext
+                    .CreateFromFile(filePath)
+                    .WithSettingsFrom(settings);
+            }
 
-            var context = WriteContext
-                .CreateFromFile(filePath)
-                .WithBinarySettings()
-                .WithSettingsFrom(settings);
+            context.WithBinarySettings();
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
@@ -191,11 +191,12 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void SaveGLTF(string filePath, WriteSettings settings = null)
         {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
-
-            var context = WriteContext
-                .CreateFromFile(filePath)
-                .WithSettingsFrom(settings);
+            if (!(settings is WriteContext context))
+            {
+                context = WriteContext
+                    .CreateFromFile(filePath)
+                    .WithSettingsFrom(settings);
+            }
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 

@@ -205,5 +205,31 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest("original.glb");
             editableScene.ToGltf2().AttachToCurrentTest("WithTangents.glb");
         }
+
+
+        [Test]
+        public void LoadAndSaveToMemory()
+        {
+            var path = TestFiles.GetSampleModelsPaths().FirstOrDefault(item => item.EndsWith("Avocado.glb"));
+
+            var model = ModelRoot.Load(path);
+            // model.LogicalImages[0].TransferToSatelliteFile(); // TODO
+
+            // we will use this dictionary as our in-memory model container.
+            var dictionary = new Dictionary<string, ArraySegment<Byte>>();
+
+            // write to dictionary
+            var wcontext = WriteContext.CreateFromDictionary(dictionary);
+            model.Save("avocado.gltf", wcontext);
+            Assert.IsTrue(dictionary.ContainsKey("avocado.gltf"));
+            Assert.IsTrue(dictionary.ContainsKey("avocado.bin"));
+
+            // read back from dictionary
+            var rcontext = ReadContext.CreateFromDictionary(dictionary);
+            var model2 = ModelRoot.Load("avocado.gltf", rcontext);
+            
+            // TODO: verify
+            
+        }
     }
 }
