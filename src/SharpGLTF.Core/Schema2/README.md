@@ -4,7 +4,7 @@ This namespace contains the collection of classes, structures and enumerations t
 represent the bulk of the API to access directly to glTF v2 documents.
 
 Part of the code has been generated directly from the glTF v2 schema using
-[SharpGLTF.CodeGen tool](../../build/SharpGLTF.CodeGen).
+[SharpGLTF.CodeGen tool](../../../build/SharpGLTF.CodeGen).
 
 Not all the objects of glTF v2 are exposed directly in the public API, some remain private and
 can be accessed indirectly with helper classes, for example, materials use this approach.
