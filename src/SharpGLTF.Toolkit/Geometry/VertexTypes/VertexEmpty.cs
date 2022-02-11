@@ -60,7 +60,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         VertexMaterialDelta IVertexMaterial.Subtract(IVertexMaterial baseValue) { throw new NotSupportedException(); }
 
-        void IVertexMaterial.Add(in VertexMaterialDelta delta) { throw new NotImplementedException(); }
+        void IVertexMaterial.Add(in VertexMaterialDelta delta) { throw new NotSupportedException(); }
 
         Vector4 IVertexMaterial.GetColor(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 

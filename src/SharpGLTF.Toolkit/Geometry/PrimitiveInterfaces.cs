@@ -74,7 +74,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         Type VertexType { get; }
 
-        void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta);
+        void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta);
 
         int AddPoint(IVertexBuilder a);
 

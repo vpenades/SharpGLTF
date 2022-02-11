@@ -978,7 +978,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"ΔC0:{Color0Delta} ΔC1:{Color1Delta} ΔUV0:{TexCoord0Delta}  ΔUV1:{TexCoord1Delta}";
+        private string _GetDebuggerDisplay() => $"ΔC₀:{Color0Delta} ΔC₁:{Color1Delta} ΔUV₀:{TexCoord0Delta}  ΔUV₁:{TexCoord1Delta}";
 
         #endregion
 
@@ -1029,7 +1029,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
         }
 
-        internal VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta)
+        public VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta)
         {
             MaxColors = 2;
             MaxTextCoords = 2;
@@ -1040,7 +1040,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             TexCoord1Delta = texCoord1Delta;
         }
 
-        internal VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
+        public VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
         {
             MaxColors = 1;
             MaxTextCoords = 0;
@@ -1147,6 +1147,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
+
+        public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero);
 
         [VertexAttribute("COLOR_0DELTA", ENCODING.UNSIGNED_BYTE, true)]
         public Vector4 Color0Delta;

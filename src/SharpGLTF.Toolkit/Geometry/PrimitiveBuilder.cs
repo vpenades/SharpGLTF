@@ -186,9 +186,9 @@ namespace SharpGLTF.Geometry
             return _Vertices.Use(vertex);
         }
 
-        void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta delta)
+        void IPrimitiveBuilder.SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
         {
-            _UseMorphTarget(morphTargetIndex).SetVertexDelta(vertexIndex, delta);
+            _UseMorphTarget(morphTargetIndex).SetVertexDelta(vertexIndex, geometryDelta, materialDelta);
         }
 
         /// <summary>

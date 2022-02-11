@@ -93,6 +93,11 @@ namespace SharpGLTF.Geometry
             bool hasNormals = _VertexAccessors.Any(item => item.Attribute.Name == "NORMAL");
             bool hasTangents = _VertexAccessors.Any(item => item.Attribute.Name == "TANGENT");
 
+            bool hasColors0 = _VertexAccessors.Any(item => item.Attribute.Name == "COLOR_0");
+            bool hasColors1 = _VertexAccessors.Any(item => item.Attribute.Name == "COLOR_1");
+            bool hasTextCoords0 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_0");
+            bool hasTextCoords1 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_1");
+
             if (!hasPositions) throw new InvalidOperationException("Set vertices before morph targets.");
 
             for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
@@ -100,25 +105,45 @@ namespace SharpGLTF.Geometry
                 var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
 
                 var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", vertexEncodings);
+                //TODO: Should POSITIONDELTA be removed if all delta is 0s?
 
                 var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (nAccessor != null && nAccessor.Data.All(b => b == 0))
+                    nAccessor = null;
 
                 var tAccessor = !hasTangents ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TANGENTDELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (tAccessor != null && tAccessor.Data.All(b => b == 0))
+                    tAccessor = null;
 
-                AddMorphTarget(pAccessor, nAccessor, tAccessor);
+                var c0Accessor = !hasColors0 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_0DELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (c0Accessor != null && c0Accessor.Data.All(b => b == 0))
+                    c0Accessor = null;
+
+                var c1Accessor = !hasColors1 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_1DELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (c1Accessor != null && c1Accessor.Data.All(b => b == 0))
+                    c1Accessor = null;
+
+                var uv0Accessor = !hasTextCoords0 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TEXCOORD_0DELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (uv0Accessor != null && uv0Accessor.Data.All(b => b == 0))
+                    uv0Accessor = null;
+
+                var uv1Accessor = !hasTextCoords1 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TEXCOORD_1DELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (uv1Accessor != null && uv1Accessor.Data.All(b => b == 0))
+                    uv1Accessor = null;
+
+                AddMorphTarget(pAccessor, nAccessor, tAccessor, c0Accessor, c1Accessor, uv0Accessor, uv1Accessor);
             }
         }
 
         private void AddMorphTarget(params Memory.MemoryAccessor[] morphTarget)
         {
-            morphTarget = morphTarget.Where(item => item != null).ToArray();
-
-            foreach (var accessor in morphTarget)
-            {
-                if (accessor.Attribute.Dimensions != DimensionType.VEC3) throw new InvalidOperationException();
-            }
-
-            morphTarget = morphTarget
+            morphTarget = morphTarget.Where(item => item != null)
                 .Select(item => _RemoveDelta(item))
                 .ToArray();
 

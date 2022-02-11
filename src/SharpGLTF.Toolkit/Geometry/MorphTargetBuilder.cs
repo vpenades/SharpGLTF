@@ -28,7 +28,7 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="vertexIndex">The index of the vertex.</param>
         /// <returns>A Vertex delta (Morphed vertex minus base vertex).</returns>
-        VertexGeometryDelta GetVertexDelta(int vertexIndex);
+        VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty> GetVertexDelta(int vertexIndex);
     }
 
     /// <summary>
@@ -71,19 +71,22 @@ namespace SharpGLTF.Geometry
             return _MorphVertices.Keys;
         }
 
-        public VertexGeometryDelta GetVertexDelta(int vertexIndex)
+        public VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty> GetVertexDelta(int vertexIndex)
         {
             if (_MorphVertices.TryGetValue(vertexIndex, out VertexBuilder<TvG, TvM, VertexEmpty> value))
             {
-                return value.Geometry.Subtract(_BaseVertexFunc(vertexIndex).Geometry);
+                var vertex = _BaseVertexFunc(vertexIndex);
+                return new VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty>(
+                    value.Geometry.Subtract(vertex.Geometry),
+                    value.Material.Subtract(vertex.Material));
             }
 
             return default;
         }
 
-        public void SetVertexDelta(int vertexIndex, VertexGeometryDelta value)
+        public void SetVertexDelta(int vertexIndex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
         {
-            if (object.Equals(value, default(VertexGeometryDelta)))
+            if (object.Equals(geometryDelta, default(VertexGeometryDelta)))
             {
                 _RemoveVertex(vertexIndex);
                 return;
@@ -91,7 +94,9 @@ namespace SharpGLTF.Geometry
 
             var vertex = _BaseVertexFunc(vertexIndex);
 
-            vertex.Geometry.Add(value);
+            vertex.Geometry.Add(geometryDelta);
+            if (typeof(TvM) != typeof(VertexEmpty))
+                vertex.Material.Add(materialDelta);
 
             _SetVertex(vertexIndex, vertex);
         }
@@ -196,15 +201,31 @@ namespace SharpGLTF.Geometry
         /// Sets a relative morph target
         /// </summary>
         /// <param name="meshVertex">The base mesh vertex to morph.</param>
-        /// <param name="delta">The offset from <paramref name="meshVertex"/> to morph.</param>
-        void SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta delta);
+        /// <param name="geometryDelta">The offset from <paramref name="meshVertex"/> to morph.</param>
+        void SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta geometryDelta);
+
+        /// <summary>
+        /// Sets a relative morph target
+        /// </summary>
+        /// <param name="meshVertex">The base mesh vertex to morph.</param>
+        /// <param name="geometryDelta">The offset from <paramref name="meshVertex"/> to morph.</param>
+        /// <param name="materialDelta">The offset from <paramref name="meshVertex"/> material to morph.</param>
+        void SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta);
 
         /// <summary>
         /// Sets a relative morph target to all base mesh vertices matching <paramref name="meshPosition"/>.
         /// </summary>
         /// <param name="meshPosition">The base vertex position.</param>
-        /// <param name="delta">The offset to apply to each matching vertex found.</param>
-        void SetVertexDelta(Vector3 meshPosition, VertexGeometryDelta delta);
+        /// <param name="geometryDelta">The offset to apply to each matching vertex found.</param>
+        void SetVertexDelta(Vector3 meshPosition, VertexGeometryDelta geometryDelta);
+
+        /// <summary>
+        /// Sets a relative morph target to all base mesh vertices matching <paramref name="meshPosition"/>.
+        /// </summary>
+        /// <param name="meshPosition">The base vertex position.</param>
+        /// <param name="geometryDelta">The offset to apply to each matching vertex found.</param>
+        /// <param name="materialDelta">The offset to apply to each matching vertex material found.</param>
+        void SetVertexDelta(Vector3 meshPosition, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta);
     }
 
     /// <summary>
@@ -283,14 +304,47 @@ namespace SharpGLTF.Geometry
             return _Positions.TryGetValue(position, out List<TvG> geos) ? (IReadOnlyList<TvG>)geos : Array.Empty<TvG>();
         }
 
-        public void SetVertexDelta(Vector3 key, VertexGeometryDelta delta)
+        public void SetVertexDelta(Vector3 key, VertexGeometryDelta geometryDelta)
         {
             if (_Positions.TryGetValue(key, out List<TvG> geos))
             {
-                foreach (var g in geos) SetVertexDelta(g, delta);
+                foreach (var g in geos) SetVertexDelta(g, geometryDelta, VertexMaterialDelta.Zero);
             }
         }
 
+        public void SetVertexDelta(Vector3 key, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
+        {
+            if (_Positions.TryGetValue(key, out List<TvG> geos))
+            {
+                foreach (var g in geos) SetVertexDelta(g, geometryDelta, materialDelta);
+            }
+        }
+
+        public void SetVertexDelta(TvG meshVertex, VertexGeometryDelta geometryDelta)
+        {
+            if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+            {
+                foreach (var entry in val)
+                {
+                    entry.Item1
+                        ._UseMorphTarget(_MorphTargetIndex)
+                        .SetVertexDelta(entry.Item2, geometryDelta, VertexMaterialDelta.Zero);
+                }
+            }
+        }
+
+        public void SetVertexDelta(TvG meshVertex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
+        {
+            if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
+            {
+                foreach (var entry in val)
+                {
+                    entry.Item1
+                        ._UseMorphTarget(_MorphTargetIndex)
+                        .SetVertexDelta(entry.Item2, geometryDelta, materialDelta);
+                }
+            }
+        }
         public void SetVertex(TvG meshVertex, VertexBuilder<TvG, TvM, VertexEmpty> morphVertex)
         {
             if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
@@ -304,15 +358,16 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        public void SetVertexDelta(TvG meshVertex, VertexGeometryDelta delta)
+        public void SetVertex(TvG meshVertex, TvG morphVertex)
         {
             if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
             {
                 foreach (var entry in val)
                 {
+                    var vertexMaterial = entry.Item1.Vertices[entry.Item2].Material;
                     entry.Item1
                         ._UseMorphTarget(_MorphTargetIndex)
-                        .SetVertexDelta(entry.Item2, delta);
+                        .SetVertex(entry.Item2, new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex, vertexMaterial));
                 }
             }
         }
@@ -342,9 +397,14 @@ namespace SharpGLTF.Geometry
                 new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), morphMaterial.ConvertToMaterial<TvM>()));
         }
 
-        void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta delta)
+        void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta geometryDelta)
         {
-            SetVertexDelta(meshVertex.ConvertToGeometry<TvG>(), delta);
+            SetVertexDelta(meshVertex.ConvertToGeometry<TvG>(), geometryDelta, VertexMaterialDelta.Zero);
+        }
+
+        void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
+        {
+            SetVertexDelta(meshVertex.ConvertToGeometry<TvG>(), geometryDelta, materialDelta);
         }
 
         #endregion
