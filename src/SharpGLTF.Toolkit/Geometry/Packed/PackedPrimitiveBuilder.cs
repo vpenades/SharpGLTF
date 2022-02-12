@@ -98,14 +98,14 @@ namespace SharpGLTF.Geometry
             bool hasTextCoords0 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_0");
             bool hasTextCoords1 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_1");
 
-            if (!hasPositions) throw new InvalidOperationException("Set vertices before morph targets.");
-
             for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
             {
                 var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
 
-                var pAccessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", vertexEncodings);
-                //TODO: Should POSITIONDELTA be removed if all delta is 0s?
+                var pAccessor = !hasPositions ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", vertexEncodings);
+                // if delta is all 0s, then do not use the accessor
+                if (pAccessor != null && pAccessor.Data.All(b => b == 0))
+                    pAccessor = null;
 
                 var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", vertexEncodings);
                 // if delta is all 0s, then do not use the accessor
