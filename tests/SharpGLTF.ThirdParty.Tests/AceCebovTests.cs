@@ -1,22 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
+using System.Text;
+using System.Threading.Tasks;
+using NUnit.Framework;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
-using SharpGLTF.Schema2;
 using VB = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition,
     SharpGLTF.Geometry.VertexTypes.VertexColor1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 
-namespace Animations
+namespace SharpGLTF.ThirdParty
 {
-    internal class Program
+    internal class AceCebovTests
     {
-        static void Main(string[] args)
+        [Test]
+        public void TestMorphTargets()
         {
-            // create two materials
-
-            var material1 = new MaterialBuilder()
+            // create material
+            var material = new MaterialBuilder()
                 .WithDoubleSide(true)
                 .WithMetallicRoughnessShader();
 
@@ -24,7 +28,7 @@ namespace Animations
 
             var triangle = new MeshBuilder<VertexPosition, VertexColor1>("mesh");
 
-            var prim = triangle.UsePrimitive(material1);
+            var prim = triangle.UsePrimitive(material);
             var redColor = new Vector4(1f, 0f, 0f, 1f);
             prim.AddTriangle(new VB(new VertexPosition(-10, 0, 0), redColor),
                 new VB(new VertexPosition(10, 0, 0), redColor),
@@ -52,6 +56,8 @@ namespace Animations
                     greenColor));
             }
 
+            Assert.AreEqual(3, morphTargetBuilder.Vertices.Count);
+
             // save the model in different formats
             var model = scene.ToGltf2();
 
@@ -66,7 +72,6 @@ namespace Animations
                 }, 1);
 
             // save the model in different formats
-            model.SaveAsWavefront("mesh.obj");
             model.SaveGLB("mesh.glb");
             model.SaveGLTF("mesh.gltf");
         }
