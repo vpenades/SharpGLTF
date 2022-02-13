@@ -345,6 +345,7 @@ namespace SharpGLTF.Geometry
                 }
             }
         }
+
         public void SetVertex(TvG meshVertex, VertexBuilder<TvG, TvM, VertexEmpty> morphVertex)
         {
             if (_Vertices.TryGetValue(meshVertex, out List<(PrimitiveBuilder<TMaterial, TvG, TvM, TvS>, int)> val))
