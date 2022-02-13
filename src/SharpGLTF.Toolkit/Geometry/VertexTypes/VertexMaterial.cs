@@ -148,12 +148,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexMaterialDelta((VertexColor1)baseValue, this);
         }
 
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor1 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
-        }
-
         /// <inheritdoc/>
         public void Add(in VertexMaterialDelta delta)
         {
@@ -251,12 +245,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexMaterialDelta((VertexColor2)baseValue, this);
         }
 
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor2 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
-        }
-
         /// <inheritdoc/>
         public void Add(in VertexMaterialDelta delta)
         {
@@ -349,12 +337,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexTexture1)baseValue, this);
-        }
-
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexTexture1 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
         }
 
         /// <inheritdoc/>
@@ -451,12 +433,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexTexture2)baseValue, this);
-        }
-
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexTexture2 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
         }
 
         /// <inheritdoc/>
@@ -561,12 +537,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexMaterialDelta((VertexColor1Texture1)baseValue, this);
         }
 
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor1Texture1 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
-        }
-
         /// <inheritdoc/>
         public void Add(in VertexMaterialDelta delta)
         {
@@ -667,12 +637,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor1Texture2)baseValue, this);
-        }
-
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor1Texture2 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
         }
 
         /// <inheritdoc/>
@@ -786,12 +750,6 @@ namespace SharpGLTF.Geometry.VertexTypes
         public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor2Texture1)baseValue, this);
-        }
-
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor2Texture1 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
         }
 
         /// <inheritdoc/>
@@ -918,12 +876,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             return new VertexMaterialDelta((VertexColor2Texture2)baseValue, this);
         }
 
-        /// <inheritdoc cref="Subtract(IVertexMaterial)"/>
-        public VertexMaterialDelta Subtract(in VertexColor2Texture2 baseValue)
-        {
-            return new VertexMaterialDelta(in baseValue, this);
-        }
-
         /// <inheritdoc/>
         public void Add(in VertexMaterialDelta delta)
         {
@@ -1040,7 +992,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             TexCoord1Delta = texCoord1Delta;
         }
 
-        public VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
+        internal VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
         {
             MaxColors = 1;
             MaxTextCoords = 0;
