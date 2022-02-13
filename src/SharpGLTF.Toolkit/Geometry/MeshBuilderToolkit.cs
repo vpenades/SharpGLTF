@@ -73,15 +73,13 @@ namespace SharpGLTF.Geometry
 
     static class MeshBuilderToolkit
     {
-        public static VertexBuilder<VertexGeometryDelta, VertexEmpty, VertexEmpty>[] GetMorphTargetVertices(this IPrimitiveMorphTargetReader morphTarget, int vertexCount)
+        public static VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty>[] GetMorphTargetVertices(this IPrimitiveMorphTargetReader morphTarget, int vertexCount)
         {
-            var c = new VertexBuilder<VertexGeometryDelta, VertexEmpty, VertexEmpty>[vertexCount];
+            var c = new VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty>[vertexCount];
 
             for (int i = 0; i < vertexCount; ++i)
             {
-                var delta = morphTarget.GetVertexDelta(i);
-
-                c[i] = new VertexBuilder<VertexGeometryDelta, VertexEmpty, VertexEmpty>(delta);
+                c[i] = morphTarget.GetVertexDelta(i);
             }
 
             return c;

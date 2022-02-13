@@ -873,7 +873,8 @@ namespace SharpGLTF.Schema2
 
                     var v = srcTarget.GetVertex(dstPrim.VertexType, kvp.Key);
 
-                    dstPrim.SetVertexDelta(tidx, kvp.Value, new VertexGeometryDelta(v.GetGeometry()) );
+                    dstPrim.SetVertexDelta(tidx, kvp.Value,
+                        new VertexGeometryDelta(v.GetGeometry()), new VertexMaterialDelta(v.GetMaterial()));
                 }
             }
         }

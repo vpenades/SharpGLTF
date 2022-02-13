@@ -178,10 +178,16 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (attributeName == "COLOR_2") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.One : m.GetColor(2); };
             if (attributeName == "COLOR_3") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.One : m.GetColor(3); };
 
+            if (attributeName == "COLOR_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.Zero : m.GetColor(0); };
+            if (attributeName == "COLOR_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.Zero : m.GetColor(1); };
+
             if (attributeName == "TEXCOORD_0") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
             if (attributeName == "TEXCOORD_1") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
             if (attributeName == "TEXCOORD_2") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
             if (attributeName == "TEXCOORD_3") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
+
+            if (attributeName == "TEXCOORD_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
+            if (attributeName == "TEXCOORD_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
 
             if (attributeName == "JOINTS_0") return v => v.GetSkinning().JointsLow;
             if (attributeName == "JOINTS_1") return v => v.GetSkinning().JointsHigh;
