@@ -104,7 +104,11 @@ namespace SharpGLTF.Schema2
 
         public WriteContext WithBinarySettings()
         {
-            ImageWriting = ResourceWriteMode.BufferView;
+            // Binary settings should allow BufferView and SatelliteFile ImageWriting modes:
+
+            if (ImageWriting == ResourceWriteMode.Default) ImageWriting = ResourceWriteMode.BufferView;
+            if (ImageWriting == ResourceWriteMode.Embedded) ImageWriting = ResourceWriteMode.BufferView;
+
             MergeBuffers = true;
             JsonIndented = false;
 
