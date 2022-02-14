@@ -231,5 +231,51 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // TODO: verify
             
         }
+
+        [Test]
+        public void LoadInvalidModelWithJsonFix()
+        {
+            // try to load an invalid gltf with an empty array
+
+            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\Invalid_EmptyArray.gltf");
+
+            Assert.Throws<Validation.SchemaException>(() => ModelRoot.Load(path));
+
+            // try to load an invalid gltf with an empty array, using a hook to fix the json before running the parser.
+
+            var rsettings = new ReadSettings();
+            rsettings.JsonPreprocessor = _RemoveEmptyArrayJsonProcessor;
+
+            var model = ModelRoot.Load(path, rsettings);
+            Assert.NotNull(model);
+
+            // save the model, using a hook to modify the json before writing it to the file.
+
+            var wsettings = new WriteSettings();
+            wsettings.JsonPostprocessor = json =>
+            {
+                json = json.Replace("glTF 2.0 Validator test suite", "postprocessed json"); return json;
+            };
+
+            path = model.AttachToCurrentTest("modified.gltf", wsettings);
+
+            model = ModelRoot.Load(path);
+
+            Assert.AreEqual(model.Asset.Generator, "postprocessed json");
+        }
+
+
+        private string _RemoveEmptyArrayJsonProcessor(string json)
+        {
+            var obj = Newtonsoft.Json.Linq.JObject.Parse(json);
+
+            var children = obj.Children().ToArray();
+
+            children[1].Remove(); // remove the empty "meshes" array.
+
+            json = obj.ToString();            
+
+            return json;
+        }
     }
 }

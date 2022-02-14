@@ -1,0 +1,9 @@
+{
+    "asset": {
+        "version": "2.0",
+        "minVersion": "2.0",
+        "generator": "glTF 2.0 Validator test suite",
+        "copyright": "Khronos Group Inc."
+    },
+    "meshes": []
+}
