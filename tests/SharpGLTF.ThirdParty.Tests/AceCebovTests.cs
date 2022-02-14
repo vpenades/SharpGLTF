@@ -35,7 +35,7 @@ namespace SharpGLTF.ThirdParty
                 new VB(new VertexPosition(0, 10, 0), redColor));
 
             // create a scene
-            var scene = new SharpGLTF.Scenes.SceneBuilder();
+            var scene = new Scenes.SceneBuilder();
 
             scene.AddRigidMesh(triangle, Matrix4x4.Identity);
 
@@ -72,8 +72,19 @@ namespace SharpGLTF.ThirdParty
                 }, 1);
 
             // save the model in different formats
-            model.SaveGLB("mesh.glb");
-            model.SaveGLTF("mesh.gltf");
+            // model.AttachToCurrentTest("ColorAndTextureMorphing.glb");
+            // model.AttachToCurrentTest("ColorAndTextureMorphing.gltf");
+
+            // bypassing AttachToCurrentTest until glTFValidator is fixed.
+
+            var outPath = TestContext.CurrentContext.GetAttachmentPath("ColorAndTextureMorphing.glb", true);
+            model.Save(outPath);
+            TestContext.AddTestAttachment(outPath);
+
+            outPath = TestContext.CurrentContext.GetAttachmentPath("ColorAndTextureMorphing.gltf", true);
+            model.Save(outPath);
+            TestContext.AddTestAttachment(outPath);
+
         }
     }
 }
