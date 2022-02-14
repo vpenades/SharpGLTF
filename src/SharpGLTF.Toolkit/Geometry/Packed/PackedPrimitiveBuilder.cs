@@ -87,6 +87,25 @@ namespace SharpGLTF.Geometry
             _IndexAccessors = iAccessor;
         }
 
+        public static bool _HasColorMorphTargets(IPrimitiveReader<TMaterial> srcPrim)
+        {
+            var vertexEncodings = new PackedEncoding();
+            vertexEncodings.ColorEncoding = EncodingType.FLOAT;
+
+            for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
+            {
+                var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
+
+                var c0Accessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_0DELTA", vertexEncodings);
+                if (c0Accessor != null && c0Accessor.Data.Any(b => b != 0)) return true;
+
+                var c1Accessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_1DELTA", vertexEncodings);
+                if (c1Accessor != null && c1Accessor.Data.Any(b => b != 0)) return true;
+            }
+
+            return false;
+        }
+
         public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncodings)
         {
             bool hasPositions = _VertexAccessors.Any(item => item.Attribute.Name == "POSITION");

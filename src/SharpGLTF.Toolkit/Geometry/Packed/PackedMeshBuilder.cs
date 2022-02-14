@@ -48,10 +48,24 @@ namespace SharpGLTF.Geometry
                 {
                     if (srcPrim.Vertices.Count == 0) continue;
 
-                    var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
+                    vertexEncodings.ColorEncoding = null;
 
                     bool useStrided = settings.UseStridedBuffers;
-                    if (srcPrim.MorphTargets.Count > 0) useStrided = false; // if the primitive has morphing, it is better not to use strided vertex buffers.
+
+                    if (srcPrim.MorphTargets.Count > 0)
+                    {
+                        // if the primitive has morphing, it is better not to use strided vertex buffers.
+                        useStrided = false;
+
+                        // if the primitive has color morphing, we need to ensure the vertex
+                        // color attribute encoding is FLOAT to allow negative delta values.
+                        if (PackedPrimitiveBuilder<TMaterial>._HasColorMorphTargets(srcPrim))
+                        {
+                            vertexEncodings.ColorEncoding = EncodingType.FLOAT;
+                        }
+                    }
+
+                    var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
                     if (useStrided) dstPrim.SetStridedVertices(srcPrim, vertexEncodings);
                     else dstPrim.SetStreamedVertices(srcPrim, vertexEncodings);

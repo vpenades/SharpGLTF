@@ -9,6 +9,7 @@ namespace SharpGLTF.Geometry
 {
     class PackedEncoding
     {
+        public ENCODING? ColorEncoding;
         public ENCODING? JointsEncoding;
         public ENCODING? WeightsEncoding;
 

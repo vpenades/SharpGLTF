@@ -114,7 +114,20 @@ namespace SharpGLTF.Geometry.VertexTypes
             foreach (var finfo in tvm.GetFields())
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue) attributes.Add(attribute.Value);
+                if (attribute.HasValue)
+                {
+                    var a = attribute.Value;
+                    if (a.Name.StartsWith("COLOR_", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (vertexEncoding.ColorEncoding.HasValue)
+                        {
+                            a.Encoding = vertexEncoding.ColorEncoding.Value;
+                            a.Normalized = a.Encoding != ENCODING.FLOAT;
+                        }
+                    }
+
+                    attributes.Add(a);
+                }
             }
 
             foreach (var finfo in tvs.GetFields())

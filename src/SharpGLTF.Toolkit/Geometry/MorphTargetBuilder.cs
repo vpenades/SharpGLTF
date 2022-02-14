@@ -36,6 +36,7 @@ namespace SharpGLTF.Geometry
     /// <see cref="PrimitiveBuilder{TMaterial, TvG, TvM, TvS}._UseMorphTarget(int)"/>
     /// </summary>
     /// <typeparam name="TvG">The vertex fragment type with Position, Normal and Tangent.</typeparam>
+    /// <typeparam name="TvM">The vertex fragment type with Color0, Color1, TexCoord0, TexCoord1.</typeparam>
     class PrimitiveMorphTargetBuilder<TvG, TvM> : IPrimitiveMorphTargetReader
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
@@ -388,14 +389,18 @@ namespace SharpGLTF.Geometry
 
         void IMorphTargetBuilder.SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex)
         {
-            SetVertex(meshVertex.ConvertToGeometry<TvG>(), 
-                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), default(VertexEmpty).ConvertToMaterial<TvM>()));
+            SetVertex(
+                meshVertex.ConvertToGeometry<TvG>(),
+                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), default(VertexEmpty).ConvertToMaterial<TvM>())
+                );
         }
 
         void IMorphTargetBuilder.SetVertex(IVertexGeometry meshVertex, IVertexGeometry morphVertex, IVertexMaterial morphMaterial)
         {
-            SetVertex(meshVertex.ConvertToGeometry<TvG>(),
-                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), morphMaterial.ConvertToMaterial<TvM>()));
+            SetVertex(
+                meshVertex.ConvertToGeometry<TvG>(),
+                new VertexBuilder<TvG, TvM, VertexEmpty>(morphVertex.ConvertToGeometry<TvG>(), morphMaterial.ConvertToMaterial<TvM>())
+                );
         }
 
         void IMorphTargetBuilder.SetVertexDelta(IVertexGeometry meshVertex, VertexGeometryDelta geometryDelta)

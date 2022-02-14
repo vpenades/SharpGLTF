@@ -5,13 +5,21 @@ using System.Numerics;
 using System.Text;
 
 using TRANSFORM = System.Numerics.Matrix4x4;
+using V2 = System.Numerics.Vector2;
 using V3 = System.Numerics.Vector3;
 using V4 = System.Numerics.Vector4;
 
 namespace SharpGLTF.Transforms
 {
+    public interface IMaterialTransform
+    {
+        V2 MorphTexCoord(V2 texCoord, IReadOnlyList<V2> morphTargets);
+
+        V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets);
+    }
+
     /// <summary>
-    /// Interface for a mesh transform object
+    /// Interface for a vertex transform object
     /// </summary>
     public interface IGeometryTransform
     {
@@ -58,8 +66,6 @@ namespace SharpGLTF.Transforms
         /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
         /// <returns>A tangent in world space.</returns>
         V4 TransformTangent(V4 tangent, IReadOnlyList<V3> tangentDeltas, in SparseWeight8 skinWeights);
-
-        V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets);
     }
 
     public interface IGeometryInstancing
@@ -70,7 +76,7 @@ namespace SharpGLTF.Transforms
         IReadOnlyList<RigidTransform> WorldTransforms { get; }
     }
 
-    public abstract class MorphTransform
+    public abstract class MorphTransform : IMaterialTransform
     {
         #region constructor
 
@@ -123,7 +129,7 @@ namespace SharpGLTF.Transforms
 
         #region API
 
-        public void Update(SparseWeight8 morphWeights, bool useAbsoluteMorphTargets = false)
+        public void Update(in SparseWeight8 morphWeights, bool useAbsoluteMorphTargets = false)
         {
             _AbsoluteMorphTargets = useAbsoluteMorphTargets;
 
@@ -134,6 +140,34 @@ namespace SharpGLTF.Transforms
             }
 
             _Weights = morphWeights.GetNormalizedWithComplement(COMPLEMENT_INDEX);
+        }
+
+        protected V2 MorphVectors(V2 value, IReadOnlyList<V2> morphTargets)
+        {
+            if (morphTargets == null || morphTargets.Count == 0) return value;
+
+            if (_Weights.Index0 == COMPLEMENT_INDEX && _Weights.Weight0 == 1) return value;
+
+            var p = V2.Zero;
+
+            if (_AbsoluteMorphTargets)
+            {
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
+                {
+                    var val = index == COMPLEMENT_INDEX ? value : morphTargets[index];
+                    p += val * weight;
+                }
+            }
+            else
+            {
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
+                {
+                    var val = index == COMPLEMENT_INDEX ? value : value + morphTargets[index];
+                    p += val * weight;
+                }
+            }
+
+            return p;
         }
 
         protected V3 MorphVectors(V3 value, IReadOnlyList<V3> morphTargets)
@@ -174,18 +208,18 @@ namespace SharpGLTF.Transforms
 
             if (_AbsoluteMorphTargets)
             {
-                foreach (var pair in _Weights.GetNonZeroWeights())
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Index == COMPLEMENT_INDEX ? value : morphTargets[pair.Index];
-                    p += val * pair.Weight;
+                    var val = index == COMPLEMENT_INDEX ? value : morphTargets[index];
+                    p += val * weight;
                 }
             }
             else
             {
-                foreach (var pair in _Weights.GetNonZeroWeights())
+                foreach (var (index, weight) in _Weights.GetNonZeroWeights())
                 {
-                    var val = pair.Index == COMPLEMENT_INDEX ? value : value + morphTargets[pair.Index];
-                    p += val * pair.Weight;
+                    var val = index == COMPLEMENT_INDEX ? value : value + morphTargets[index];
+                    p += val * weight;
                 }
             }
 
@@ -195,6 +229,11 @@ namespace SharpGLTF.Transforms
         public V4 MorphColors(V4 color, IReadOnlyList<V4> morphTargets)
         {
             return MorphVectors(color, morphTargets);
+        }
+
+        public V2 MorphTexCoord(V2 texCoord, IReadOnlyList<V2> morphTargets)
+        {
+            return MorphVectors(texCoord, morphTargets);
         }
 
         #endregion

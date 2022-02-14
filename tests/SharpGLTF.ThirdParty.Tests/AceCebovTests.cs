@@ -5,9 +5,11 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+
 using VB = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition,
     SharpGLTF.Geometry.VertexTypes.VertexColor1,
     SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
@@ -71,6 +73,18 @@ namespace SharpGLTF.ThirdParty
                     { 1f, new[] { 1f } }
                 }, 1);
 
+            // evaluate triangles at animation 0.5, and get the color of the first pixel of the first triangle
+
+            var triangles = Schema2.Toolkit
+                .EvaluateTriangles(model.DefaultScene, null, model.LogicalAnimations[0], 0.5f)
+                .ToArray();
+
+            var morphedColor = triangles[0].A.GetMaterial().GetColor(0);
+            Assert.AreEqual(0.5f, morphedColor.X);
+            Assert.AreEqual(0.5f, morphedColor.Y);
+            Assert.AreEqual(0, morphedColor.Z);
+            Assert.AreEqual(1, morphedColor.W);
+
             // save the model in different formats
             // model.AttachToCurrentTest("ColorAndTextureMorphing.glb");
             // model.AttachToCurrentTest("ColorAndTextureMorphing.gltf");
@@ -84,7 +98,6 @@ namespace SharpGLTF.ThirdParty
             outPath = TestContext.CurrentContext.GetAttachmentPath("ColorAndTextureMorphing.gltf", true);
             model.Save(outPath);
             TestContext.AddTestAttachment(outPath);
-
         }
     }
 }

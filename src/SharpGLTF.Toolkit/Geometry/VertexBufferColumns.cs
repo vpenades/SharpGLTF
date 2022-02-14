@@ -162,19 +162,27 @@ namespace SharpGLTF.Geometry
             // since the attributes we want to overwrite might be bound directly to the model's buffer
             // data, and we don't want to modify the source data, we isolate the columns to be overwritten.
 
-            this.Positions = _IsolateColumn(this.Positions);
+            this.Positions = _IsolateColumn(this.Positions); // Position, normal and tangent can be modified by morphing and skinning
             this.Normals = _IsolateColumn(this.Normals);
             this.Tangents = _IsolateColumn(this.Tangents);
-            this.Colors0 = _IsolateColumn(this.Colors0);
+            this.Colors0 = _IsolateColumn(this.Colors0);     // colors0,1 and texCoords0,1 can be modified by morphing
+            this.Colors1 = _IsolateColumn(this.Colors1);
+            this.TexCoords0 = _IsolateColumn(this.TexCoords0);
+            this.TexCoords1 = _IsolateColumn(this.TexCoords1);
 
             // prepare animation data, if available
 
             var skinning = default(Transforms.SparseWeight8);
 
+            Transforms.IMaterialTransform morphMaterial = transform as Transforms.IMaterialTransform;
+
             Vector3[] morphPositions = null;
             Vector3[] morphNormals = null;
             Vector3[] morphTangents = null;
-            Vector4[] morphColors0 = null; // we clone it because it can be affected by morph targets
+            Vector4[] morphColors0 = null;
+            Vector4[] morphColors1 = null;
+            Vector2[] morphTexcrd0 = null;
+            Vector2[] morphTexcrd1 = null;
 
             if (_MorphTargets != null)
             {
@@ -182,6 +190,9 @@ namespace SharpGLTF.Geometry
                 if (_MorphTargets.All(item => item.Normals != null)) morphNormals = new Vector3[this.MorphTargets.Count];
                 if (_MorphTargets.All(item => item.Tangents != null)) morphTangents = new Vector3[this.MorphTargets.Count];
                 if (_MorphTargets.All(item => item.Colors0 != null)) morphColors0 = new Vector4[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.Colors1 != null)) morphColors1 = new Vector4[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.TexCoords0 != null)) morphTexcrd0 = new Vector2[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.TexCoords1 != null)) morphTexcrd1 = new Vector2[this.MorphTargets.Count];
             }
 
             // loop over every vertex
@@ -214,10 +225,31 @@ namespace SharpGLTF.Geometry
                     Tangents[i] = transform.TransformTangent(Tangents[i], morphTangents, skinning);
                 }
 
-                if (this.Colors0 != null)
+                if (morphMaterial != null)
                 {
-                    _FillMorphData(morphColors0, vc => vc.Colors0[i]);
-                    Colors0[i] = transform.MorphColors(Colors0[i], morphColors0);
+                    if (this.Colors0 != null)
+                    {
+                        _FillMorphData(morphColors0, vc => vc.Colors0[i]);
+                        Colors0[i] = morphMaterial.MorphColors(Colors0[i], morphColors0);
+                    }
+
+                    if (this.Colors1 != null)
+                    {
+                        _FillMorphData(morphColors1, vc => vc.Colors1[i]);
+                        Colors1[i] = morphMaterial.MorphColors(Colors1[i], morphColors1);
+                    }
+
+                    if (this.TexCoords0 != null)
+                    {
+                        _FillMorphData(morphTexcrd0, vc => vc.TexCoords0[i]);
+                        TexCoords0[i] = morphMaterial.MorphTexCoord(TexCoords0[i], morphTexcrd0);
+                    }
+
+                    if (this.TexCoords1 != null)
+                    {
+                        _FillMorphData(morphTexcrd1, vc => vc.TexCoords1[i]);
+                        TexCoords1[i] = morphMaterial.MorphTexCoord(TexCoords1[i], morphTexcrd1);
+                    }
                 }
             }
 
@@ -229,6 +261,16 @@ namespace SharpGLTF.Geometry
             Joints1 = null;
             Weights0 = null;
             Weights1 = null;
+        }
+
+        private void _FillMorphData(Vector2[] array, Converter<VertexBufferColumns, Vector2> selector)
+        {
+            if (array == null) return;
+
+            for (int i = 0; i < this._MorphTargets.Count; ++i)
+            {
+                array[i] = selector(this._MorphTargets[i]);
+            }
         }
 
         private void _FillMorphData(Vector3[] array, Converter<VertexBufferColumns, Vector3> selector)
