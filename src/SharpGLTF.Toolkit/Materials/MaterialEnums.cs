@@ -142,7 +142,7 @@ namespace SharpGLTF.Materials
                     yield return new _Property(KnownProperty.GlossinessFactor, 1f);
                     break;
 
-                case KnownChannel.BaseColor: yield return new _Property(KnownProperty.RGBA, Vector4.One);break;
+                case KnownChannel.BaseColor: yield return new _Property(KnownProperty.RGBA, Vector4.One); break;
                 case KnownChannel.MetallicRoughness:
                     yield return new _Property(KnownProperty.MetallicFactor, 1f);
                     yield return new _Property(KnownProperty.RoughnessFactor, 1f);

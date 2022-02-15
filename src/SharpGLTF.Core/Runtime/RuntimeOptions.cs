@@ -17,6 +17,10 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// True if we want to copy buffers data instead of sharing it.
         /// </summary>
+        /// <remarks>
+        /// If we want to create a runtime representation of the model, so the garbage collector will release the source model,
+        /// we have to set this to true, so we will not use any reference to the source model.
+        /// </remarks>
         public bool IsolateMemory { get; set; }
 
         /// <summary>
@@ -37,9 +41,13 @@ namespace SharpGLTF.Runtime
         {
             if (source.Extras.Content == null) return null;
 
-            var callback = options?.ExtrasConverterCallback;
+            if (options == null) return source.Extras;
 
-            return callback != null ? callback(source) : source.Extras.DeepClone();
+            var callback = options.ExtrasConverterCallback;
+
+            return callback != null
+                ? callback(source)
+                : (options.IsolateMemory ? source.Extras.DeepClone() : source.Extras);
         }
     }
 }

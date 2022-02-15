@@ -154,7 +154,7 @@ namespace SharpGLTF.Scenes
             var materials = Enumerable
                 .Range(0, 10)
                 .Select(idx => new MaterialBuilder()
-                .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(), 1)))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(rnd.NextVector3(), 1)))
                 .ToList();
 
             // create meshes
@@ -252,11 +252,11 @@ namespace SharpGLTF.Scenes
             // create two materials
 
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithChannelParam(KnownChannel.BaseColor,KnownProperty.RGBA, new Vector4(1, 0, 1, 1))
                 .WithDoubleSide(true);
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1))
                 .WithDoubleSide(true);
 
             // create the mesh            
@@ -339,11 +339,11 @@ namespace SharpGLTF.Scenes
             // create two materials
 
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1))
                 .WithDoubleSide(true);
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1))
                 .WithDoubleSide(true);
 
             // create the mesh            
@@ -450,10 +450,10 @@ namespace SharpGLTF.Scenes
             // create two materials
 
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));
 
             var scene = new SceneBuilder();
 
@@ -668,8 +668,8 @@ namespace SharpGLTF.Scenes
             // create materials
             var materials = Enumerable
                 .Range(0, 10)
-                .Select(idx => new Materials.MaterialBuilder($"material{idx}")
-                .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(), 1)))
+                .Select(idx => new MaterialBuilder($"material{idx}")
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(rnd.NextVector3(), 1)))
                 .ToList();
 
             // create meshes            
@@ -845,10 +845,10 @@ namespace SharpGLTF.Scenes
             // create two materials
 
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
 
             var blue = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(0, 0, 1, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(0, 0, 1, 1));
 
             var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
             var prim1 = mesh1.UsePrimitive(pink);

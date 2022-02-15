@@ -29,7 +29,7 @@ namespace SharpGLTF.Geometry
 
             // create a material
             var material1 = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, Vector4.One);
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, Vector4.One);
             
             // create model
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
@@ -62,10 +62,10 @@ namespace SharpGLTF.Geometry
 
             // create materials
             var material1 = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));
 
             var material2 = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1));            
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));            
 
             // create several meshes
             var meshBuilder1 = new MeshBuilder<VPOSNRM>("mesh1");
@@ -126,7 +126,7 @@ namespace SharpGLTF.Geometry
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             // create a material
-            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannel.BaseColor, Vector4.One);
+            var material1 = new MaterialBuilder("material1").WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, Vector4.One);
 
             // create a mesh
             var meshBuilder = new MeshBuilder<VPOSNRM>("mesh1");
@@ -175,11 +175,11 @@ namespace SharpGLTF.Geometry
 
             // create two materials
             var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 0, 1, 1))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1))
                 .WithDoubleSide(true);
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, new Vector4(1, 1, 0, 1))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1))
                 .WithDoubleSide(true);
 
             // create the mesh
@@ -357,7 +357,7 @@ namespace SharpGLTF.Geometry
             var materials = Enumerable
                 .Range(0, 10)
                 .Select(idx => MaterialBuilder.CreateDefault()
-                .WithChannelParam("BaseColor", new Vector4(rnd.NextVector3(),1)))
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(rnd.NextVector3(),1)))
                 .ToList();
 
             // create a mesh

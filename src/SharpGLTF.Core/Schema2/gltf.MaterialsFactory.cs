@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2
             if (channels != null) { foreach (var c in channels) yield return c; }
 
             channels = this.GetExtension<MaterialClearCoat>()?.GetChannels(this);
-            if (channels != null) {foreach (var c in channels) yield return c; }
+            if (channels != null) { foreach (var c in channels) yield return c; }
 
             channels = this.GetExtension<MaterialTransmission>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
@@ -103,17 +103,20 @@ namespace SharpGLTF.Schema2
             channels = this.GetExtension<MaterialVolume>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
 
-            var normalParam = new MaterialParameter(MaterialParameter.Key.NormalScale,
+            var normalParam = new MaterialParameter(
+                MaterialParameter.Key.NormalScale,
                 MaterialNormalTextureInfo.ScaleDefault,
                 () => _GetNormalTexture(false)?.Scale ?? MaterialNormalTextureInfo.ScaleDefault,
                 value => _GetNormalTexture(true).Scale = value);
 
-            var occlusionParam = new MaterialParameter(MaterialParameter.Key.OcclusionStrength,
+            var occlusionParam = new MaterialParameter(
+                MaterialParameter.Key.OcclusionStrength,
                 MaterialOcclusionTextureInfo.StrengthDefault,
                 () => _GetOcclusionTexture(false)?.Strength ?? MaterialOcclusionTextureInfo.StrengthDefault,
                 value => _GetOcclusionTexture(true).Strength = value);
 
-            var emissiveParam = new MaterialParameter(MaterialParameter.Key.RGB,
+            var emissiveParam = new MaterialParameter(
+                MaterialParameter.Key.RGB,
                 _emissiveFactorDefault,
                 () => this._emissiveFactor.AsValue(_emissiveFactorDefault),
                 value => this._emissiveFactor = value.AsNullable(_emissiveFactorDefault, Vector3.Zero, Vector3.One));
@@ -408,6 +411,7 @@ namespace SharpGLTF.Schema2
         {
             return base.GetLogicalChildren().ConcatElements(_sheenColorTexture, _sheenRoughnessTexture);
         }
+
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -592,7 +596,7 @@ namespace SharpGLTF.Schema2
 
         public float AttenuationDistance
         {
-            get => (float)_attenuationDistance.AsValue((double)0);
+            get => (float)_attenuationDistance.AsValue(0);
             set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException();
         }
 

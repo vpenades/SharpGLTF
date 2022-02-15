@@ -543,6 +543,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Color += delta.Color0Delta;
             this.TexCoord += delta.TexCoord0Delta;
         }
+
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }

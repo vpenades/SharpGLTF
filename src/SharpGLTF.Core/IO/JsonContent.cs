@@ -134,7 +134,7 @@ namespace SharpGLTF.IO
                 options = new JSONOPTIONS
                 {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    IgnoreNullValues = true,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
                     WriteIndented = true
                 };
             }

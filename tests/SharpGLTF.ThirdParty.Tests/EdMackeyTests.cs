@@ -20,7 +20,7 @@ namespace SharpGLTF.ThirdParty
             var material1 = new MaterialBuilder()
                 .WithDoubleSide(true)
                 .WithMetallicRoughnessShader()
-                .WithChannelParam("BaseColor", new Vector4(1, 0, 0, 1));
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 0, 1));
 
             var mesh = new MeshBuilder<VERTEX>("mesh");
 

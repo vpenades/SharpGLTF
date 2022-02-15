@@ -163,6 +163,9 @@ namespace SharpGLTF.Memory
             }
         }
 
+        /// <summary>
+        /// returns true if this type can be used as a joint index.
+        /// </summary>
         public Boolean IsValidIndexer
         {
             get

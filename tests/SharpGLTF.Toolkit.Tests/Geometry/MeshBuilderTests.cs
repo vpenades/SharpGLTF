@@ -113,11 +113,11 @@ namespace SharpGLTF.Geometry
 
             var material1 = new Materials.MaterialBuilder()
                 .WithMetallicRoughnessShader()
-                .WithChannelParam("BaseColor", Vector4.One * 0.5f);
+                .WithChannelParam(Materials.KnownChannel.BaseColor, Materials.KnownProperty.RGBA, Vector4.One * 0.5f);
 
             var material2 = new Materials.MaterialBuilder()
                 .WithMetallicRoughnessShader()
-                .WithChannelParam("BaseColor", Vector4.One * 0.7f);
+                .WithChannelParam(Materials.KnownChannel.BaseColor, Materials.KnownProperty.RGBA, Vector4.One * 0.7f);
 
             // create a mesh with degenerated triangles
 
@@ -214,9 +214,9 @@ namespace SharpGLTF.Geometry
 
             // since Materials.MaterialBuilder is not immutable we can change the contents,
             // so now, material1, material2 and material3 no longer represent the same material
-            material1.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.2f);
-            material2.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.4f);
-            material3.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Vector4.One * 0.6f);
+            material1.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Materials.KnownProperty.RGBA, Vector4.One * 0.2f);
+            material2.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Materials.KnownProperty.RGBA, Vector4.One * 0.4f);
+            material3.WithMetallicRoughnessShader().WithChannelParam(Materials.KnownChannel.BaseColor, Materials.KnownProperty.RGBA, Vector4.One * 0.6f);
 
             gltfModel = scene.ToGltf2();            
             Assert.AreEqual(3, gltfModel.LogicalMaterials.Count);

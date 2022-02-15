@@ -280,6 +280,7 @@ namespace SharpGLTF.Schema2
 
             return new Vector4(tmp[0], tmp[1], tmp[2], tmp[3]);
         }
+
         internal static void Apply(IReadOnlyList<MaterialParameter> parameters, Vector4 value)
         {
             Span<float> tmp = stackalloc float[4];
