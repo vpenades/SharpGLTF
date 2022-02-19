@@ -78,6 +78,29 @@ namespace SharpGLTF.Memory
 
         public static implicit operator MemoryImage(string filePath) { return new MemoryImage(filePath); }
 
+        /// <summary>
+        /// Tries to parse a Mime64 string to <see cref="MemoryImage"/>
+        /// </summary>
+        /// <param name="mime64content">The Mime64 string source.</param>
+        /// <param name="image">if decoding succeeds, it will contain the image file.</param>
+        /// <returns>true if decoding succeeded.</returns>
+        public static bool TryParseMime64(string mime64content, out MemoryImage image)
+        {
+            if (mime64content == null) { image = default; return false; }
+
+            var data = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
+            if (data == null) { image = default; return false; }
+
+            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data)) throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
+
+            image = data;
+            return true;
+        }
+
         public MemoryImage(BYTES image)
         {
             Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
@@ -334,28 +357,6 @@ namespace SharpGLTF.Memory
             }
 
             return mimeContent + Convert.ToBase64String(_Image.Array, _Image.Offset, _Image.Count, Base64FormattingOptions.None);
-        }
-
-        /// <summary>
-        /// Tries to parse a Mime64 string to a Byte array.
-        /// </summary>
-        /// <param name="mime64content">The Mime64 string source.</param>
-        /// <param name="data">if decoding succeeds, it will contain the decoded data</param>
-        /// <returns>true if decoding succeeded.</returns>
-        internal static bool TryParseMime64(string mime64content, out Byte[] data)
-        {
-            if (mime64content == null) { data = null; return false; }
-
-            data = mime64content.TryParseBase64Unchecked(_EmbeddedHeaders);
-            if (data == null) return false;
-
-            if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
-            if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data)) throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
-
-            return true;
         }
 
         /// <summary>

@@ -18,7 +18,7 @@ namespace SharpGLTF.IO
     /// </remarks>
     [System.ComponentModel.ImmutableObject(true)]
     [System.Diagnostics.DebuggerDisplay("{ToDebuggerDisplay(),nq}")]
-    public readonly struct JsonContent
+    public readonly struct JsonContent : ICloneable
     {
         #region debug
 
@@ -59,6 +59,8 @@ namespace SharpGLTF.IO
             if (_Content is IJsonCollection collection && collection.Count == 0)
                 _Content = null;
         }
+
+        Object ICloneable.Clone() { return new JsonContent(_Content); }
 
         public JsonContent DeepClone() { return new JsonContent(_Content); }
 

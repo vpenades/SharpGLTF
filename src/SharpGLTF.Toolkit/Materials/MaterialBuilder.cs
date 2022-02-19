@@ -14,7 +14,7 @@ namespace SharpGLTF.Materials
     /// Represents the root object of a material instance structure.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    public partial class MaterialBuilder : BaseBuilder
+    public partial class MaterialBuilder : BaseBuilder, ICloneable
     {
         #region debug
 
@@ -51,6 +51,8 @@ namespace SharpGLTF.Materials
 
         public MaterialBuilder(string name = null)
             : base(name) { }
+
+        Object ICloneable.Clone() { return new MaterialBuilder(this); }
 
         public MaterialBuilder Clone() { return new MaterialBuilder(this); }
 

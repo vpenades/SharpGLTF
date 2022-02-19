@@ -132,9 +132,9 @@ namespace SharpGLTF.Schema2
             if (String.IsNullOrWhiteSpace(_uri)) return;
 
             // Try decode Base64 embedded image.
-            if (Memory.MemoryImage.TryParseMime64(_uri, out byte[] data))
+            if (Memory.MemoryImage.TryParseMime64(_uri, out var memImage))
             {
-                _SatelliteContent = data;
+                _SatelliteContent = memImage;
             }
 
             // Then it's a regular URI
