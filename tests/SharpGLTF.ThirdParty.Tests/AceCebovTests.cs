@@ -1,24 +1,21 @@
-﻿using NUnit.Framework;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Numerics;
+
+using NUnit.Framework;
+
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Memory;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Numerics;
-using VBColor1 = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition,
-    SharpGLTF.Geometry.VertexTypes.VertexColor1,
-    SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
-using VBColor1Texture1 = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition,
-    SharpGLTF.Geometry.VertexTypes.VertexColor1Texture1,
-    SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
-using VBTexture1 = SharpGLTF.Geometry.VertexBuilder<SharpGLTF.Geometry.VertexTypes.VertexPosition,
-    SharpGLTF.Geometry.VertexTypes.VertexTexture1,
-    SharpGLTF.Geometry.VertexTypes.VertexEmpty>;
 
 namespace SharpGLTF.ThirdParty
 {
+    using VBColor1 = VertexBuilder<VertexPosition,VertexColor1,VertexEmpty>;
+    using VBColor1Texture1 = VertexBuilder<VertexPosition,VertexColor1Texture1,VertexEmpty>;
+    using VBTexture1 = VertexBuilder<VertexPosition,VertexTexture1,VertexEmpty>;
+
     internal class AceCebovTests
     {
         private static string AssetsPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");

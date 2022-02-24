@@ -2,7 +2,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)..\SharpGLTF.ruleset</CodeAnalysisRuleSet>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)..\SharpGLTF.ruleset</CodeAnalysisRuleSet>    
   </PropertyGroup>
 
   <ItemGroup>
