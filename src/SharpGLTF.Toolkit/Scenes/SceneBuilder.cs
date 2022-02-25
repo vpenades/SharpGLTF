@@ -52,10 +52,22 @@ namespace SharpGLTF.Scenes
             return clone;
         }
 
+        [Obsolete("Use LoadDefaultScene(...); or LoadAllScenes(...) instead.", true)]
         public static SceneBuilder Load(string filePath, ReadSettings settings = null)
         {
+            return LoadDefaultScene(filePath, settings);
+        }
+
+        public static SceneBuilder LoadDefaultScene(string filePath, ReadSettings settings = null)
+        {
             var mdl = ModelRoot.Load(filePath, settings);
-            return mdl.DefaultScene.ToSceneBuilder();
+            return CreateFrom(mdl.DefaultScene);
+        }
+
+        public static SceneBuilder[] LoadAllScenes(string filePath, ReadSettings settings = null)
+        {
+            var mdl = ModelRoot.Load(filePath, settings);
+            return CreateFrom(mdl);
         }
 
         #endregion

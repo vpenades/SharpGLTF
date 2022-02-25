@@ -142,7 +142,7 @@ namespace SharpGLTF.Scenes
             }
             else
             {
-                if (_Children.First().Content is SCHEMA2NODE srcOperator)
+                if (_Children[0].Content is SCHEMA2NODE srcOperator)
                 {
                     var xforms = _Children
                         .Select(item => item.ChildTransform)

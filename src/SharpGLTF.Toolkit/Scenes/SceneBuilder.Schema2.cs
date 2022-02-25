@@ -11,6 +11,463 @@ using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.Material
 namespace SharpGLTF.Scenes
 {
     /// <summary>
+    /// Defines configurable options for converting <see cref="SceneBuilder"/> to <see cref="ModelRoot"/>
+    /// </summary>
+    /// <remarks>
+    /// Used by <see cref="SceneBuilder.ToGltf2(SceneBuilderSchema2Settings)"/>
+    /// </remarks>
+    public struct SceneBuilderSchema2Settings
+    {
+        public static SceneBuilderSchema2Settings Default => new SceneBuilderSchema2Settings
+        {
+            UseStridedBuffers = true,
+            CompactVertexWeights = false,
+            GpuMeshInstancingMinCount = int.MaxValue
+        };
+
+        public static SceneBuilderSchema2Settings WithGpuInstancing => new SceneBuilderSchema2Settings
+        {
+            UseStridedBuffers = true,
+            CompactVertexWeights = false,
+            GpuMeshInstancingMinCount = 3
+        };
+
+        /// <summary>
+        /// When true, meshes will be created using strided vertices when possible.
+        /// </summary>
+        /// <remarks>
+        /// this option is not taken into account by meshes with morph targets.
+        /// </remarks>
+        public bool UseStridedBuffers { get; set; }
+
+        /// <summary>
+        /// if meshes have Skin Weights, defines the output vertex element format:<br/>
+        /// - True: Short<br/>
+        /// - False: Float<br/>
+        /// </summary>
+        public bool CompactVertexWeights { get; set; }
+
+        /// <summary>
+        /// determines the mínimum number mesh instances required to enable Gpu mesh instancing.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Set to <see cref="int.MaxValue"/> to disable gpu instancing.
+        /// </para>
+        /// <para>
+        /// If set to a small value like 10, any mesh instance collection smaller than this will be instantiated
+        /// using individual nodes, otherwise it will use Gpu Instancing extension.
+        /// </para>
+        /// </remarks>
+        public int GpuMeshInstancingMinCount { get; set; }
+    }
+
+    public partial class SceneBuilder : IConvertibleToGltf2
+    {
+        #region from SceneBuilder to Schema2
+
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
+        public ModelRoot ToGltf2()
+        {
+            return ToGltf2(new[] { this }, SceneBuilderSchema2Settings.Default);
+        }
+
+        /// <summary>
+        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <param name="settings">Conversion settings.</param>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
+        public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
+        {
+            return ToGltf2(new[] { this }, settings);
+        }
+
+        /// <summary>
+        /// Converts a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
+        /// </summary>
+        /// <param name="srcScenes">A collection of scenes</param>
+        /// <param name="settings">Conversion settings.</param>
+        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
+        public static ModelRoot ToGltf2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
+        {
+            Guard.NotNull(srcScenes, nameof(srcScenes));
+
+            var context = new Schema2SceneBuilder();
+            context.GpuMeshInstancingMinCount = settings.GpuMeshInstancingMinCount;
+
+            var dstModel = ModelRoot.CreateModel();
+            context.AddGeometryResources(dstModel, srcScenes, settings);
+
+            foreach (var srcScene in srcScenes)
+            {
+                var dstScene = dstModel.UseScene(dstModel.LogicalScenes.Count);
+                srcScene.TryCopyNameAndExtrasTo(dstScene);
+
+                context.AddScene(dstScene, srcScene);
+            }
+
+            dstModel.DefaultScene = dstModel.LogicalScenes[0];
+
+            return dstModel;
+        }
+
+        #endregion
+
+        #region from Schema2 to SceneBuilder
+
+        public static SceneBuilder[] CreateFrom(ModelRoot model)
+        {
+            return model == null
+                ? Array.Empty<SceneBuilder>()
+                : CreateFrom(model.LogicalScenes).ToArray();
+        }
+
+        public static SceneBuilder CreateFrom(Scene srcScene)
+        {
+            if (srcScene == null) return null;
+
+            // gather shared mesh instances
+
+            var dstMeshIntances = _GatherMeshInstances(Node.Flatten(srcScene));
+
+            return _CreateFrom(srcScene, dstMeshIntances);
+        }
+
+        public static IEnumerable<SceneBuilder> CreateFrom(IEnumerable<Scene> srcScenes)
+        {
+            if (srcScenes == null) yield break;
+
+            // gather shared mesh instances
+
+            var dstMeshIntances = _GatherMeshInstances(srcScenes.Distinct().SelectMany(s => Node.Flatten(s)));
+
+            // process each scene
+
+            foreach (var srcScene in srcScenes)
+            {
+                yield return _CreateFrom(srcScene, dstMeshIntances);
+            }
+        }
+
+        private static SceneBuilder _CreateFrom(Scene srcScene, IReadOnlyDictionary<Node, MESHBUILDER> dstInstances)
+        {
+            // Process armatures
+
+            var dstNodes = new Dictionary<Node, NodeBuilder>();
+
+            foreach (var srcArmature in srcScene.VisualChildren)
+            {
+                var dstArmature = new NodeBuilder();
+                _CopyToNodeBuilder(dstArmature, srcArmature, dstNodes);
+            }
+
+            // TODO: we must also process the armatures of every skin, in case the joints are outside the scene.
+
+            var dstScene = new SceneBuilder();
+
+            dstScene.SetNameAndExtrasFrom(srcScene);
+
+            _AddMeshInstances(dstScene, Node.Flatten(srcScene), dstNodes, dstInstances);
+
+            // process cameras
+            var srcCameraInstances = Node.Flatten(srcScene)
+                .Where(item => item.Camera != null)
+                .ToList();
+
+            _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
+
+            var srcLightInstances = Node.Flatten(srcScene)
+                .Where(item => item.PunctualLight != null)
+                .ToList();
+
+            _AddLightInstances(dstScene, dstNodes, srcCameraInstances);
+
+            #if DEBUG
+            dstScene._VerifyConversion(srcScene);
+            #endif
+
+            return dstScene;
+        }
+
+        private static IReadOnlyDictionary<Node, MESHBUILDER> _GatherMeshInstances(IEnumerable<Node> srcNodes)
+        {
+            // filter all the nodes with meshes
+
+            var srcInstances = srcNodes
+                .Where(item => item.Mesh != null);
+
+            // create a dictionary of shared Mesh => MeshBuilder pairs.
+
+            var srcMeshes = srcInstances
+                .Select(item => item.Mesh)
+                .Distinct()
+                .ToDictionary(item => item, item => item.ToMeshBuilder());
+
+            // return a Node => MeshBuilder dictionary.
+
+            return srcInstances
+                .ToDictionary(item => item, item => srcMeshes[item.Mesh]);
+        }
+
+        private static void _AddMeshInstances(SceneBuilder dstScene, IEnumerable<Node> srcNodes, IReadOnlyDictionary<Node, NodeBuilder> nodesDict, IReadOnlyDictionary<Node, MESHBUILDER> meshesDict)
+        {
+            foreach (var srcNode in srcNodes)
+            {
+                if (!meshesDict.TryGetValue(srcNode, out var dstMesh)) continue; // nothing to do.
+
+                if (srcNode.Skin == null)
+                {
+                    // rigid mesh instance
+
+                    var dstNode = nodesDict[srcNode];
+
+                    var gpuInstancing = srcNode.GetGpuInstancing();
+
+                    if (gpuInstancing == null)
+                    {
+                        var dstInstance = dstScene.AddRigidMesh(dstMesh, dstNode);
+
+                        _CopyMorphingAnimation(dstInstance, srcNode);
+                    }
+                    else
+                    {
+                        // use gpu instancing extension
+
+                        foreach (var xinst in gpuInstancing.LocalTransforms)
+                        {
+                            var dstInstance = dstScene.AddRigidMesh(dstMesh, dstNode, xinst);
+
+                            // if we add morphing to the mesh, all meshes would morph simultaneously??
+                            _CopyMorphingAnimation(dstInstance, srcNode);
+                        }
+                    }
+                }
+                else
+                {
+                    // skinned mesh instance
+
+                    var joints = new (NodeBuilder, Matrix4x4)[srcNode.Skin.JointsCount];
+
+                    for (int i = 0; i < joints.Length; ++i)
+                    {
+                        var (j, ibm) = srcNode.Skin.GetJoint(i);
+                        joints[i] = (nodesDict[j], ibm);
+                    }
+
+                    var dstInst = dstScene.AddSkinnedMesh(dstMesh, joints);
+
+                    _CopyMorphingAnimation(dstInst, srcNode);
+                }
+            }
+        }
+
+        private static void _AddCameraInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            if (srcInstances.Count == 0) return;
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstNode = dstNodes[srcInstance];
+                var srcCam = srcInstance.Camera;
+                if (srcCam == null) continue;
+
+                CameraBuilder dstCam = null;
+
+                if (srcCam.Settings is CameraPerspective perspective) dstCam = new CameraBuilder.Perspective(perspective);
+                if (srcCam.Settings is CameraOrthographic orthographic) dstCam = new CameraBuilder.Orthographic(orthographic);
+
+                if (dstCam != null)
+                {
+                    dstCam.SetNameAndExtrasFrom(srcCam);
+                    dstScene.AddCamera(dstCam, dstNode);
+                }
+            }
+        }
+
+        private static void _AddLightInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            if (srcInstances.Count == 0) return;
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstNode = dstNodes[srcInstance];
+                var srcLight = srcInstance.PunctualLight;
+                if (srcLight == null) continue;
+
+                LightBuilder dstLight = null;
+                if (srcLight.LightType == PunctualLightType.Directional) dstLight = new LightBuilder.Directional(srcLight);
+                if (srcLight.LightType == PunctualLightType.Point) dstLight = new LightBuilder.Point(srcLight);
+                if (srcLight.LightType == PunctualLightType.Spot) dstLight = new LightBuilder.Spot(srcLight);
+
+                if (dstLight != null)
+                {
+                    dstLight.SetNameAndExtrasFrom(srcInstance);
+                    dstScene.AddLight(dstLight, dstNode);
+                }
+            }
+        }
+
+        private static void _CopyToNodeBuilder(NodeBuilder dstNode, Node srcNode, IDictionary<Node, NodeBuilder> nodeMapping)
+        {
+            Guard.NotNull(srcNode, nameof(srcNode));
+            Guard.NotNull(dstNode, nameof(dstNode));
+
+            dstNode.SetNameAndExtrasFrom(srcNode);
+
+            dstNode.LocalTransform = srcNode.LocalTransform;
+
+            _CopyTransformAnimation(dstNode, srcNode);
+
+            if (nodeMapping == null) return;
+
+            nodeMapping[srcNode] = dstNode;
+
+            foreach (var srcChild in srcNode.VisualChildren)
+            {
+                var dstChild = dstNode.CreateNode();
+                _CopyToNodeBuilder(dstChild, srcChild, nodeMapping);
+            }
+        }
+
+        private static void _CopyTransformAnimation(NodeBuilder dstNode, Node srcNode)
+        {
+            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
+            {
+                var name = anim.Name;
+                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                var curves = srcNode.GetCurveSamplers(anim);
+
+                if (curves.Scale != null) dstNode.UseScale(name).SetCurve(curves.Scale);
+                if (curves.Rotation != null) dstNode.UseRotation(name).SetCurve(curves.Rotation);
+                if (curves.Translation != null) dstNode.UseTranslation(name).SetCurve(curves.Translation);
+            }
+        }
+
+        private static void _CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
+        {
+            bool hasDefaultMorphing = false;
+
+            var defMorphWeights = srcNode.GetMorphWeights();
+            if (defMorphWeights != null && defMorphWeights.Count > 0)
+            {
+                dstInst.Content.UseMorphing().SetValue(defMorphWeights.ToArray());
+                hasDefaultMorphing = true;
+            }
+
+            if (!hasDefaultMorphing) return;
+
+            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
+            {
+                var name = anim.Name;
+                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+                var curves = srcNode.GetCurveSamplers(anim);
+
+                var srcMorphing = curves.GetMorphingSampler<ArraySegment<float>>();
+                if (srcMorphing != null)
+                {
+                    var dstMorphing = dstInst.Content.UseMorphing(name);
+                    dstMorphing.SetCurve(srcMorphing);
+
+                    _VerifyCurveConversion(srcMorphing, dstMorphing, (a, b) => a.AsSpan().SequenceEqual(b));
+                }
+            }
+        }
+
+        #endregion
+
+        #region utilities
+
+        internal static void _VerifyCurveConversion<T>(IAnimationSampler<T> a, Animations.IConvertibleCurve<T> b, Func<T, T, bool> equalityComparer)
+        {
+            if (a.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE)
+            {
+                if (b.MaxDegree != 3) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToSplineCurve();
+
+                foreach (var (ak, av) in a.GetCubicKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+
+                    if (!equalityComparer(av.TangentIn, bv.TangentIn)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av.Value, bv.Value)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av.TangentOut, bv.TangentOut)) throw new ArgumentException(nameof(b));
+                }
+            }
+            else if (a.InterpolationMode == AnimationInterpolationMode.LINEAR)
+            {
+                if (b.MaxDegree != 1) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToLinearCurve();
+
+                foreach (var (ak, av) in a.GetLinearKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                }
+            }
+
+            if (a.InterpolationMode == AnimationInterpolationMode.STEP)
+            {
+                if (b.MaxDegree != 0) throw new ArgumentException(nameof(b.MaxDegree));
+
+                var bb = b.ToStepCurve();
+
+                foreach (var (ak, av) in a.GetLinearKeys())
+                {
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                }
+            }
+        }
+
+        internal void _VerifyConversion(Scene gltfScene)
+        {
+            // renderable instances
+
+            var renderableInstCount = this.Instances
+                .Select(item => item.Content.GetGeometryAsset())
+                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
+                .Count();
+
+            // check if we have created the same amount of instances defined in the SceneBuilder.
+
+            var renderableGltfCount = Node.Flatten(gltfScene)
+                .Where(item => item.Mesh != null)
+                .Sum(item => item.GetGpuInstancing()?.Count ?? 1);
+
+            if (renderableInstCount != renderableGltfCount)
+            {
+                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableGltfCount}");
+            }
+
+            // create a viewer to compare against
+
+            var gltfViewOptions = new Runtime.RuntimeOptions();
+            gltfViewOptions.IsolateMemory = false;
+            gltfViewOptions.GpuMeshInstancing = Runtime.MeshInstancing.Enabled;
+
+            var gltfView = Runtime.SceneTemplate
+                .Create(gltfScene, gltfViewOptions)
+                .CreateInstance();
+
+            var renderableViewCount = gltfView.Sum(item => item.InstanceCount);
+
+            if (renderableInstCount != renderableViewCount)
+            {
+                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableViewCount}");
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
     /// Helper class to create a Schema2.Scene from one or multiple <see cref="SceneBuilder"/> instances.
     /// </summary>
     class Schema2SceneBuilder
@@ -221,386 +678,6 @@ namespace SharpGLTF.Scenes
         public interface IOperator<T>
         {
             void ApplyTo(T target, Schema2SceneBuilder context);
-        }
-
-        #endregion
-    }
-
-    public struct SceneBuilderSchema2Settings
-    {
-        public static SceneBuilderSchema2Settings Default => new SceneBuilderSchema2Settings
-        {
-            UseStridedBuffers = true,
-            CompactVertexWeights = false,
-            GpuMeshInstancingMinCount = int.MaxValue
-        };
-
-        public static SceneBuilderSchema2Settings WithGpuInstancing => new SceneBuilderSchema2Settings
-        {
-            UseStridedBuffers = true,
-            CompactVertexWeights = false,
-            GpuMeshInstancingMinCount = 3
-        };
-
-        public bool UseStridedBuffers;
-
-        public bool CompactVertexWeights;
-
-        public int GpuMeshInstancingMinCount;
-    }
-
-    public partial class SceneBuilder : IConvertibleToGltf2
-    {
-        #region from SceneBuilder to Schema2
-
-        /// <summary>
-        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
-        /// </summary>
-        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToGltf2()
-        {
-            return ToGltf2(new[] { this }, SceneBuilderSchema2Settings.Default);
-        }
-
-        /// <summary>
-        /// Converts this <see cref="SceneBuilder"/> instance into a <see cref="ModelRoot"/> instance.
-        /// </summary>
-        /// <param name="settings">Conversion settings.</param>
-        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public ModelRoot ToGltf2(SceneBuilderSchema2Settings settings)
-        {
-            return ToGltf2(new[] { this }, settings);
-        }
-
-        /// <summary>
-        /// Converts a collection of <see cref="SceneBuilder"/> instances to a single <see cref="ModelRoot"/> instance.
-        /// </summary>
-        /// <param name="srcScenes">A collection of scenes</param>
-        /// <param name="settings">Conversion settings.</param>
-        /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
-        public static ModelRoot ToGltf2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
-        {
-            Guard.NotNull(srcScenes, nameof(srcScenes));
-
-            var context = new Schema2SceneBuilder();
-            context.GpuMeshInstancingMinCount = settings.GpuMeshInstancingMinCount;
-
-            var dstModel = ModelRoot.CreateModel();
-            context.AddGeometryResources(dstModel, srcScenes, settings);
-
-            foreach (var srcScene in srcScenes)
-            {
-                var dstScene = dstModel.UseScene(dstModel.LogicalScenes.Count);
-                srcScene.TryCopyNameAndExtrasTo(dstScene);
-
-                context.AddScene(dstScene, srcScene);
-            }
-
-            dstModel.DefaultScene = dstModel.LogicalScenes[0];
-
-            return dstModel;
-        }
-
-        #endregion
-
-        #region from Schema2 to SceneBuilder
-
-        public static SceneBuilder CreateFrom(Scene srcScene)
-        {
-            if (srcScene == null) return null;
-
-            // Process armatures
-
-            var dstNodes = new Dictionary<Node, NodeBuilder>();
-
-            foreach (var srcArmature in srcScene.VisualChildren)
-            {
-                var dstArmature = new NodeBuilder();
-                _CopyToNodeBuilder(dstArmature, srcArmature, dstNodes);
-            }
-
-            // TODO: we must also process the armatures of every skin, in case the joints are outside the scene.
-
-            var dstScene = new SceneBuilder();
-
-            dstScene.SetNameAndExtrasFrom(srcScene);
-
-            // process mesh instances
-            var srcMeshInstances = Node.Flatten(srcScene)
-                .Where(item => item.Mesh != null)
-                .ToList();
-
-            _AddMeshInstances(dstScene, dstNodes, srcMeshInstances);
-
-            // process cameras
-            var srcCameraInstances = Node.Flatten(srcScene)
-                .Where(item => item.Camera != null)
-                .ToList();
-
-            _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
-
-            var srcLightInstances = Node.Flatten(srcScene)
-                .Where(item => item.PunctualLight != null)
-                .ToList();
-
-            _AddLightInstances(dstScene, dstNodes, srcCameraInstances);
-
-            #if DEBUG
-            dstScene._VerifyConversion(srcScene);
-            #endif
-
-            return dstScene;
-        }
-
-        private static void _AddMeshInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
-        {
-            var dstMeshes = srcInstances
-                            .Select(item => item.Mesh)
-                            .Distinct()
-                            .ToDictionary(item => item, item => item.ToMeshBuilder());
-
-            foreach (var srcInstance in srcInstances)
-            {
-                var dstMesh = dstMeshes[srcInstance.Mesh];
-
-                if (srcInstance.Skin == null)
-                {
-                    var dstNode = dstNodes[srcInstance];
-
-                    var gpuInstancing = srcInstance.GetGpuInstancing();
-
-                    if (gpuInstancing != null)
-                    {
-                        foreach (var xinst in gpuInstancing.LocalTransforms)
-                        {
-                            var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode, xinst);
-
-                            // if we add morphing the the mesh, all meshes would morph simultaneously??
-                            _CopyMorphingAnimation(dstInst, srcInstance);
-                        }
-                    }
-                    else
-                    {
-                        var dstInst = dstScene.AddRigidMesh(dstMesh, dstNode);
-
-                        _CopyMorphingAnimation(dstInst, srcInstance);
-                    }
-                }
-                else
-                {
-                    var joints = new (NodeBuilder, Matrix4x4)[srcInstance.Skin.JointsCount];
-
-                    for (int i = 0; i < joints.Length; ++i)
-                    {
-                        var (j, ibm) = srcInstance.Skin.GetJoint(i);
-                        joints[i] = (dstNodes[j], ibm);
-                    }
-
-                    var dstInst = dstScene.AddSkinnedMesh(dstMesh, joints);
-
-                    _CopyMorphingAnimation(dstInst, srcInstance);
-                }
-            }
-        }
-
-        private static void _AddCameraInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
-        {
-            if (srcInstances.Count == 0) return;
-
-            foreach (var srcInstance in srcInstances)
-            {
-                var dstNode = dstNodes[srcInstance];
-                var srcCam = srcInstance.Camera;
-                if (srcCam == null) continue;
-
-                CameraBuilder dstCam = null;
-
-                if (srcCam.Settings is CameraPerspective perspective) dstCam = new CameraBuilder.Perspective(perspective);
-                if (srcCam.Settings is CameraOrthographic orthographic) dstCam = new CameraBuilder.Orthographic(orthographic);
-
-                if (dstCam != null)
-                {
-                    dstCam.SetNameAndExtrasFrom(srcCam);
-                    dstScene.AddCamera(dstCam, dstNode);
-                }
-            }
-        }
-
-        private static void _AddLightInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
-        {
-            if (srcInstances.Count == 0) return;
-
-            foreach (var srcInstance in srcInstances)
-            {
-                var dstNode = dstNodes[srcInstance];
-                var srcLight = srcInstance.PunctualLight;
-                if (srcLight == null) continue;
-
-                LightBuilder dstLight = null;
-                if (srcLight.LightType == PunctualLightType.Directional) dstLight = new LightBuilder.Directional(srcLight);
-                if (srcLight.LightType == PunctualLightType.Point) dstLight = new LightBuilder.Point(srcLight);
-                if (srcLight.LightType == PunctualLightType.Spot) dstLight = new LightBuilder.Spot(srcLight);
-
-                if (dstLight != null)
-                {
-                    dstLight.SetNameAndExtrasFrom(srcInstance);
-                    dstScene.AddLight(dstLight, dstNode);
-                }
-            }
-        }
-
-        private static void _CopyToNodeBuilder(NodeBuilder dstNode, Node srcNode, IDictionary<Node, NodeBuilder> nodeMapping)
-        {
-            Guard.NotNull(srcNode, nameof(srcNode));
-            Guard.NotNull(dstNode, nameof(dstNode));
-
-            dstNode.SetNameAndExtrasFrom(srcNode);
-
-            dstNode.LocalTransform = srcNode.LocalTransform;
-
-            _CopyTransformAnimation(dstNode, srcNode);
-
-            if (nodeMapping == null) return;
-
-            nodeMapping[srcNode] = dstNode;
-
-            foreach (var srcChild in srcNode.VisualChildren)
-            {
-                var dstChild = dstNode.CreateNode();
-                _CopyToNodeBuilder(dstChild, srcChild, nodeMapping);
-            }
-        }
-
-        private static void _CopyTransformAnimation(NodeBuilder dstNode, Node srcNode)
-        {
-            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
-            {
-                var name = anim.Name;
-                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-                var curves = srcNode.GetCurveSamplers(anim);
-
-                if (curves.Scale != null) dstNode.UseScale(name).SetCurve(curves.Scale);
-                if (curves.Rotation != null) dstNode.UseRotation(name).SetCurve(curves.Rotation);
-                if (curves.Translation != null) dstNode.UseTranslation(name).SetCurve(curves.Translation);
-            }
-        }
-
-        private static void _CopyMorphingAnimation(InstanceBuilder dstInst, Node srcNode)
-        {
-            bool hasDefaultMorphing = false;
-
-            var defMorphWeights = srcNode.GetMorphWeights();
-            if (defMorphWeights != null && defMorphWeights.Count > 0)
-            {
-                dstInst.Content.UseMorphing().SetValue(defMorphWeights.ToArray());
-                hasDefaultMorphing = true;
-            }
-
-            if (!hasDefaultMorphing) return;
-
-            foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
-            {
-                var name = anim.Name;
-                if (string.IsNullOrWhiteSpace(name)) name = anim.LogicalIndex.ToString(System.Globalization.CultureInfo.InvariantCulture);
-
-                var curves = srcNode.GetCurveSamplers(anim);
-
-                var srcMorphing = curves.GetMorphingSampler<ArraySegment<float>>();
-                if (srcMorphing != null)
-                {
-                    var dstMorphing = dstInst.Content.UseMorphing(name);
-                    dstMorphing.SetCurve(srcMorphing);
-
-                    _VerifyCurveConversion(srcMorphing, dstMorphing, (a, b) => a.AsSpan().SequenceEqual(b));
-                }
-            }
-        }
-
-        #endregion
-
-        #region utilities
-
-        internal static void _VerifyCurveConversion<T>(IAnimationSampler<T> a, Animations.IConvertibleCurve<T> b, Func<T, T, bool> equalityComparer)
-        {
-            if (a.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE)
-            {
-                if (b.MaxDegree != 3) throw new ArgumentException(nameof(b.MaxDegree));
-
-                var bb = b.ToSplineCurve();
-
-                foreach (var (ak, av) in a.GetCubicKeys())
-                {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
-
-                    if (!equalityComparer(av.TangentIn, bv.TangentIn)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av.Value, bv.Value)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av.TangentOut, bv.TangentOut)) throw new ArgumentException(nameof(b));
-                }
-            }
-            else if (a.InterpolationMode == AnimationInterpolationMode.LINEAR)
-            {
-                if (b.MaxDegree != 1) throw new ArgumentException(nameof(b.MaxDegree));
-
-                var bb = b.ToLinearCurve();
-
-                foreach (var (ak, av) in a.GetLinearKeys())
-                {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
-                }
-            }
-
-            if (a.InterpolationMode == AnimationInterpolationMode.STEP)
-            {
-                if (b.MaxDegree != 0) throw new ArgumentException(nameof(b.MaxDegree));
-
-                var bb = b.ToStepCurve();
-
-                foreach (var (ak, av) in a.GetLinearKeys())
-                {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
-                }
-            }
-        }
-
-        internal void _VerifyConversion(Scene gltfScene)
-        {
-            // renderable instances
-
-            var renderableInstCount = this.Instances
-                .Select(item => item.Content.GetGeometryAsset())
-                .Where(item => !Geometry.MeshBuilderToolkit.IsEmpty(item))
-                .Count();
-
-            // check if we have created the same amount of instances defined in the SceneBuilder.
-
-            var renderableGltfCount = Node.Flatten(gltfScene)
-                .Where(item => item.Mesh != null)
-                .Sum(item => item.GetGpuInstancing()?.Count ?? 1);
-
-            if (renderableInstCount != renderableGltfCount)
-            {
-                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableGltfCount}");
-            }
-
-            // create a viewer to compare against
-
-            var gltfViewOptions = new Runtime.RuntimeOptions();
-            gltfViewOptions.IsolateMemory = false;
-            gltfViewOptions.GpuMeshInstancing = Runtime.MeshInstancing.Enabled;
-
-            var gltfView = Runtime.SceneTemplate
-                .Create(gltfScene, gltfViewOptions)
-                .CreateInstance();
-
-            var renderableViewCount = gltfView.Sum(item => item.InstanceCount);
-
-            if (renderableInstCount != renderableViewCount)
-            {
-                throw new InvalidOperationException($"Expected {this.Instances.Count}, but found {renderableViewCount}");
-            }
         }
 
         #endregion

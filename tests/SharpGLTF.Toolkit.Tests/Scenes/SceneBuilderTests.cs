@@ -728,7 +728,7 @@ namespace SharpGLTF.Scenes
         public void CreateSceneComposition()
         {
             // load Polly model
-            var polly = SceneBuilder.Load(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
+            var polly = SceneBuilder.LoadDefaultScene(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
             
             var xform0 = Matrix4x4.CreateFromYawPitchRoll(1, 0, 0) * Matrix4x4.CreateTranslation(1.5f, 0, 0);
             var xform1 = Matrix4x4.CreateFromYawPitchRoll(0, 1, 0) * Matrix4x4.CreateTranslation(-1.5f, 1, 0);
@@ -897,6 +897,43 @@ namespace SharpGLTF.Scenes
             }
 
             return mesh1;
+        }
+
+
+        [Test]
+        public void TestWholeModelConversionRoundtrip()
+        {
+            // create a cube mesh. This mesh will be shared along the way:
+
+            var cube = new MeshBuilder<VertexPosition,VertexEmpty,VertexEmpty>("Cube");
+            cube.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
+
+            // create a gltf with 2 scenes:
+
+            var model1 = ModelRoot.CreateModel();
+            var m = model1.CreateMesh(cube);
+            model1.UseScene("Scene1").CreateNode("Node1").Mesh = m;
+            model1.UseScene("Scene2").CreateNode("Node2").Mesh = m;
+
+            // convert to SceneBuilder:
+
+            var scenes = SceneBuilder.CreateFrom(model1).ToArray();
+            Assert.AreEqual(2, scenes.Length);
+
+            var mesh1 = scenes[0].Instances[0].Content.GetGeometryAsset();
+            var mesh2 = scenes[1].Instances[0].Content.GetGeometryAsset();
+
+            Assert.AreSame(mesh1, mesh2, "both scenes must share the same MeshBuilder");
+
+            // convert back to gltf:
+
+            var model2 = SceneBuilder.ToGltf2(scenes, SceneBuilderSchema2Settings.Default);
+
+            // verify the mesh is still shared.
+
+            Assert.AreEqual(2, model2.LogicalScenes.Count);
+            Assert.AreEqual(2, model2.LogicalNodes.Count);
+            Assert.AreEqual(1, model2.LogicalMeshes.Count); // check the mesh is shared between the 2 scenes
         }
 
     }

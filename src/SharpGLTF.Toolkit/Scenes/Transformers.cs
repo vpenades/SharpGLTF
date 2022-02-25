@@ -15,6 +15,12 @@ namespace SharpGLTF.Scenes
     /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a transform to the underlaying content object (usually a Mesh, a Camera or a light)
     /// </summary>
+    /// <remarks>
+    /// Base class of:<br/>
+    /// <see cref="FixedTransformer"/><br/>
+    /// <see cref="RigidTransformer"/><br/>
+    /// <see cref="SkinnedTransformer"/><br/>
+    /// </remarks>
     public abstract class ContentTransformer
     {
         #region debug
@@ -143,7 +149,7 @@ namespace SharpGLTF.Scenes
 
         public readonly struct DeepCloneContext
         {
-            public DeepCloneContext(IReadOnlyDictionary<NodeBuilder, NodeBuilder> nmap)
+            internal DeepCloneContext(IReadOnlyDictionary<NodeBuilder, NodeBuilder> nmap)
             {
                 _NodeMap = nmap;
             }
@@ -169,13 +175,13 @@ namespace SharpGLTF.Scenes
     {
         #region lifecycle
 
-        internal FixedTransformer(Object content, Transforms.AffineTransform transform)
+        internal FixedTransformer(Object content, TRANSFORM transform)
             : base(content)
         {
             _ChildTransform = transform;
         }
 
-        internal FixedTransformer(Object content, NodeBuilder parentNode, Transforms.AffineTransform childTransform)
+        internal FixedTransformer(Object content, NodeBuilder parentNode, TRANSFORM childTransform)
             : base(content)
         {
             _ParentNode = parentNode;
