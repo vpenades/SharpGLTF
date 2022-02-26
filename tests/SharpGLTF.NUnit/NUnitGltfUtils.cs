@@ -62,19 +62,19 @@ namespace SharpGLTF
 
             string validationPath = null;
 
-            if (fileName.ToLower().EndsWith(".glb"))
+            if (fileName.ToLowerInvariant().EndsWith(".glb"))
             {
                 model.SaveGLB(fileName, settings);
                 validationPath = fileName;
             }
-            else if (fileName.ToLower().EndsWith(".gltf"))
+            else if (fileName.ToLowerInvariant().EndsWith(".gltf"))
             {
                 if (settings == null) settings = new WriteSettings { JsonIndented = true };
 
                 model.Save(fileName, settings);
                 validationPath = fileName;
             }
-            else if (fileName.ToLower().EndsWith(".obj"))
+            else if (fileName.ToLowerInvariant().EndsWith(".obj"))
             {
                 // skip exporting to obj if gpu instancing is there
                 if (Node.Flatten(model.DefaultScene).Any(n => n.GetGpuInstancing() != null)) return fileName;                
@@ -82,7 +82,7 @@ namespace SharpGLTF
                 fileName = fileName.Replace(" ", "_");
                 model.SaveAsWavefront(fileName);
             }
-            else if (fileName.ToLower().EndsWith(".plotly"))
+            else if (fileName.ToLowerInvariant().EndsWith(".plotly"))
             {
                 fileName = fileName.Replace(".plotly", ".html");
 

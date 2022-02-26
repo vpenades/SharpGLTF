@@ -240,7 +240,7 @@ namespace SharpGLTF
     {
         public static void AttachToCurrentTest(this Plotting.Point2Series points, string fileName)
         {
-            System.Diagnostics.Debug.Assert(fileName.ToLower().EndsWith(".html"));
+            System.Diagnostics.Debug.Assert(fileName.ToLowerInvariant().EndsWith(".html"));
 
             fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName);
 

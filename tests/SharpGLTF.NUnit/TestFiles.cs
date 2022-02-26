@@ -26,7 +26,7 @@ namespace SharpGLTF
             {
                 _TestFilesDir = System.IO.Path.Combine(wdir, "TestFiles");
 
-                if (wdir.ToLower().EndsWith("tests") && System.IO.Directory.Exists(_TestFilesDir))
+                if (wdir.ToLowerInvariant().EndsWith("tests") && System.IO.Directory.Exists(_TestFilesDir))
                 {
                     examplesFound = true;
                     break;
@@ -198,8 +198,8 @@ namespace SharpGLTF
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
-                .Where(item => !item.ToLower().Contains("gltf-draco"))
-                .Where(item => !item.ToLower().Contains("gltf-meshopt")) // not supported yet
+                .Where(item => !item.ToLowerInvariant().Contains("gltf-draco"))
+                .Where(item => !item.ToLowerInvariant().Contains("gltf-meshopt")) // not supported yet
                 .Where(item => skipAlways.All(f => !item.Contains(f)))                
                 .OrderBy(item => item)                
                 .ToList();
@@ -218,7 +218,7 @@ namespace SharpGLTF
         public static IEnumerable<string> GetMeshIntancingModelPaths()
         {
             var fromBabylon = GetBabylonJSModelsPaths()
-                .Where(item => item.ToLower().Contains("teapot"));
+                .Where(item => item.ToLowerInvariant().Contains("teapot"));
 
             var meshInstPath = _UsingInternalFiles("gltf-GpuMeshInstancing");
 

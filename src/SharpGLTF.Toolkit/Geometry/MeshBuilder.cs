@@ -61,7 +61,7 @@ namespace SharpGLTF.Geometry
 
         Object ICloneable.Clone()
         {
-            return new MeshBuilder<TMaterial, TvG, TvM,TvS>(this);
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(this);
         }
 
         IMeshBuilder<TMaterial> IMeshBuilder<TMaterial>.Clone(Func<TMaterial, TMaterial> materialCloneCallback)

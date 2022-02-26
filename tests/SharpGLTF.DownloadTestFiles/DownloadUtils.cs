@@ -59,7 +59,7 @@ namespace SharpGLTF
                     wc.DownloadFile(remoteUri, localFilePath);
                 }
 
-                if (localFilePath.ToLower().EndsWith(".zip"))
+                if (localFilePath.ToLowerInvariant().EndsWith(".zip"))
                 {
                     Console.WriteLine($"Extracting {localFilePath}...");
 

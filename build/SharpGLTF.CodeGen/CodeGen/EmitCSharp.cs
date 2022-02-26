@@ -272,8 +272,8 @@ namespace SharpGLTF.CodeGen
 
                     var str = value as String;
 
-                    if (str.ToLower() == "false") return false;
-                    if (str.ToLower() == "true") return true;
+                    if (str.ToLowerInvariant() == "false") return false;
+                    if (str.ToLowerInvariant() == "true") return true;
                     throw new NotImplementedException();
                 }
 
