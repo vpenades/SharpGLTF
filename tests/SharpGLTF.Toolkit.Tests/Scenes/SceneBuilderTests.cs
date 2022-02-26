@@ -936,5 +936,39 @@ namespace SharpGLTF.Scenes
             Assert.AreEqual(1, model2.LogicalMeshes.Count); // check the mesh is shared between the 2 scenes
         }
 
+        [Test]
+        public void TestSceneAddition()
+        {
+            // create a cube mesh. This mesh will be shared along the way:
+
+            var cube = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>("Cube");
+            cube.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
+
+            // create a scene
+
+            var scene1 = new SceneBuilder();
+            scene1.AddRigidMesh(cube, Matrix4x4.Identity);
+
+            // create another scene
+
+            var scene2 = new SceneBuilder();
+            scene2.AddScene(scene1, Matrix4x4.CreateTranslation(4, 0, 0));
+
+            Assert.AreEqual(new Vector3(4, 0, 0), scene2.Instances.First().Content.GetPoseWorldMatrix().Translation);
+
+
+            scene2.AddScene(scene1, Matrix4x4.CreateTranslation(2, 0, 0));
+            scene2.AddScene(scene1, Matrix4x4.CreateTranslation(0, 0, 0));
+
+            // convert to gltf
+
+            var gltf = scene2.ToGltf2();
+
+            Assert.AreEqual(1, gltf.LogicalMeshes.Count);
+            Assert.AreEqual(3, gltf.LogicalNodes.Count);
+
+            gltf.AttachToCurrentTest("Three cubes.glb");
+        }
+
     }
 }

@@ -158,6 +158,7 @@ namespace SharpGLTF.Scenes
 
             public NodeBuilder GetNode(NodeBuilder node)
             {
+                if (node == null) return null;
                 if (_NodeMap == null) return node;
                 return _NodeMap.TryGetValue(node, out NodeBuilder clone) ? clone : node;
             }
@@ -240,7 +241,11 @@ namespace SharpGLTF.Scenes
 
         public NodeBuilder ParentNode => _ParentNode;
 
-        public TRANSFORM ChildTransform => _ChildTransform;
+        public TRANSFORM ChildTransform
+        {
+            get => _ChildTransform;
+            set => _ChildTransform = value;
+        }
 
         #endregion
 

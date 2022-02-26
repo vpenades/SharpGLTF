@@ -21,7 +21,7 @@ namespace SharpGLTF.Transforms
     /// <remarks>
     /// <para>
     /// Depending on how <see cref="AffineTransform"/> structures are created, the underlaying<br/>
-    /// fields must be interprested as a Matrix4x3 or a Scale/Rotation/Translation chain.
+    /// fields must be interpreted as a Matrix4x3 or a Scale/Rotation/Translation chain.
     /// </para>
     /// <para>
     /// This approach allows <see cref="AffineTransform"/> preserving the source transform, avoiding loosing<br/>

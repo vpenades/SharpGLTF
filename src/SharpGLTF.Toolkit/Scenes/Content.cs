@@ -40,7 +40,7 @@ namespace SharpGLTF.Scenes
 
         public MeshContent(MESHBUILDER mesh)
         {
-            _Mesh = mesh;
+            this._Mesh = mesh;
         }
 
         public Object Clone()
@@ -50,7 +50,7 @@ namespace SharpGLTF.Scenes
 
         private MeshContent(MeshContent other)
         {
-            this._Mesh = other._Mesh?.Clone(m => m.Clone());
+            this._Mesh = other._Mesh;
         }
 
         #endregion
