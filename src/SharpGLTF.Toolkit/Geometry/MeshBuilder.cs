@@ -44,7 +44,7 @@ namespace SharpGLTF.Geometry
     /// <item><see cref="VertexJoints8"/></item>
     /// </list>
     /// </typeparam>
-    public class MeshBuilder<TMaterial, TvG, TvM, TvS> : BaseBuilder, IMeshBuilder<TMaterial>
+    public class MeshBuilder<TMaterial, TvG, TvM, TvS> : BaseBuilder, IMeshBuilder<TMaterial>, ICloneable
         where TvG : struct, IVertexGeometry
         where TvM : struct, IVertexMaterial
         where TvS : struct, IVertexSkinning
@@ -57,6 +57,11 @@ namespace SharpGLTF.Geometry
             // this is the recomended preprocesor for release/production
             _VertexPreprocessor = new VertexPreprocessor<TvG, TvM, TvS>();
             _VertexPreprocessor.SetSanitizerPreprocessors();
+        }
+
+        Object ICloneable.Clone()
+        {
+            return new MeshBuilder<TMaterial, TvG, TvM,TvS>(this);
         }
 
         IMeshBuilder<TMaterial> IMeshBuilder<TMaterial>.Clone(Func<TMaterial, TMaterial> materialCloneCallback)
