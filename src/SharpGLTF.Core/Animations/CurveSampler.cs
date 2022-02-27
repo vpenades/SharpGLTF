@@ -316,6 +316,8 @@ namespace SharpGLTF.Animations
 
         public static Single[] Subtract(ROLIST left, ROLIST right)
         {
+            Guard.NotNull(left, nameof(left));
+            Guard.NotNull(right, nameof(right));
             Guard.MustBeEqualTo(right.Count, left.Count, nameof(right));
 
             var dst = new Single[left.Count];

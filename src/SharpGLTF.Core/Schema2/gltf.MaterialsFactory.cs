@@ -43,6 +43,8 @@ namespace SharpGLTF.Schema2
         /// </param>
         public void InitializePBRMetallicRoughness(params string[] extensionNames)
         {
+            Guard.NotNull(extensionNames, nameof(extensionNames));
+
             if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
@@ -597,7 +599,7 @@ namespace SharpGLTF.Schema2
         public float AttenuationDistance
         {
             get => (float)_attenuationDistance.AsValue(0);
-            set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException();
+            set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException(nameof(value));
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)

@@ -63,7 +63,7 @@ namespace SharpGLTF.Materials
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private TextureTransformBuilder _Transform;
 
-        public int CoordinateSet { get; set; } = 0;
+        public int CoordinateSet { get; set; }
 
         public TEXMIPMAP MinFilter { get; set; } = TEXMIPMAP.DEFAULT;
 
@@ -75,6 +75,8 @@ namespace SharpGLTF.Materials
 
         public static bool AreEqualByContent(TextureBuilder x, TextureBuilder y)
         {
+            if (x == null || y == null) return true;
+
             if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
 
             if (!BaseBuilder.AreEqualByContent(x, y)) return false;

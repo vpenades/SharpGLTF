@@ -279,7 +279,7 @@ namespace SharpGLTF.Schema2
                     if (va.Value.Encoding == EncodingType.UNSIGNED_BYTE) continue;
                     if (va.Value.Encoding == EncodingType.UNSIGNED_SHORT) continue;
 
-                    if (va.Key.StartsWith("TEXCOORD_")) return true;
+                    if (va.Key.StartsWith("TEXCOORD_", StringComparison.OrdinalIgnoreCase)) return true;
                 }
 
                 return false;

@@ -27,6 +27,8 @@ namespace SharpGLTF.Scenes
         protected LightBuilder(LightBuilder other)
             : base(other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this.Color = other.Color;
             this.Intensity = other.Intensity;
         }

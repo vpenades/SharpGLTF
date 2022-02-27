@@ -144,6 +144,7 @@ namespace SharpGLTF.Scenes
         {
             Guard.NotNull(mesh, nameof(mesh));
             Guard.IsTrue(meshWorldMatrix.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(meshWorldMatrix));
+            Guard.NotNull(joints, nameof(joints));
             GuardAll.NotNull(joints, nameof(joints));
 
             var instance = new InstanceBuilder(this);

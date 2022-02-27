@@ -159,7 +159,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets a value indicating whether creating a defensive copy before serialization is not allowed.
         /// </summary>
-        internal bool _NoCloneWatchdog { get; private set; } = false;
+        internal bool _NoCloneWatchdog { get; private set; }
 
         #endregion
 

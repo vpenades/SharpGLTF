@@ -212,6 +212,8 @@ namespace SharpGLTF.Animations
 
         public void SetCurve(IConvertibleCurve<T> convertible)
         {
+            Guard.NotNull(convertible, nameof(convertible));
+
             if (convertible.MaxDegree == 0)
             {
                 var step = convertible.ToStepCurve();
@@ -273,6 +275,8 @@ namespace SharpGLTF.Animations
 
         public void SetCurve(Schema2.IAnimationSampler<T> curve)
         {
+            Guard.NotNull(curve, nameof(curve));
+
             switch (curve.InterpolationMode)
             {
                 case Schema2.AnimationInterpolationMode.STEP:

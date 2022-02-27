@@ -383,7 +383,7 @@ namespace SharpGLTF.Schema2
                 .OfType<IReadOnlyDictionary<string, Object>>()
                 .SelectMany(item => item.Keys)
                 .Distinct()
-                .Where(item => item.StartsWith("_"));
+                .Where(item => item.StartsWith("_", StringComparison.Ordinal));
 
             foreach (var key in keys)
             {
@@ -405,7 +405,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNullOrEmpty(attribute, nameof(attribute));
 
-            attribute = attribute.ToUpper();
+            attribute = attribute.ToUpperInvariant();
             var expectedType = values.Where(item => item != null).FirstOrDefault()?.GetType();
             if (expectedType == null) return instancing;
 
@@ -800,6 +800,9 @@ namespace SharpGLTF.Schema2
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
+            Guard.NotNull(triangles, nameof(triangles));
+            Guard.NotNull(materialFunc, nameof(materialFunc));
+
             var mats = new Dictionary<TMaterial, Materials.MaterialBuilder>();
 
             Materials.MaterialBuilder useMaterial(TMaterial srcMat)

@@ -48,6 +48,7 @@ namespace SharpGLTF.Validation
 
         public void SetSchemaError(System.IO.EndOfStreamException ex)
         {
+            Guard.NotNull(ex, nameof(ex));
             SetError(new SchemaException(null, ex.Message));
         }
 

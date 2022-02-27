@@ -137,6 +137,7 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsValidURI(PARAMNAME parameterName, string gltfURI, params string[] validHeaders)
         {
+            Guard.NotNull(validHeaders, nameof(validHeaders));
             try { Guard.IsValidURI(parameterName, gltfURI, validHeaders); return this; }
             catch (ArgumentException ex) { _SchemaThrow(parameterName, ex.Message); }
             return this;

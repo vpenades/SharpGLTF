@@ -67,6 +67,7 @@ namespace SharpGLTF.Schema2
         public static Node WithSkinBinding(this Node node, Matrix4x4 meshPoseTransform, params Node[] joints)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.NotNull(joints, nameof(joints));
 
             foreach (var j in joints) Guard.MustShareLogicalParent(node, j, nameof(joints));
 
@@ -80,6 +81,7 @@ namespace SharpGLTF.Schema2
         public static Node WithSkinBinding(this Node node, params (Node Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(node, nameof(node));
+            Guard.NotNull(joints, nameof(joints));
 
             foreach (var j in joints)
             {

@@ -285,6 +285,7 @@ namespace SharpGLTF.Transforms
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Vector3 _Translation;
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             // we can only use the translation as hash code because it's the only value that
@@ -293,11 +294,13 @@ namespace SharpGLTF.Transforms
             return _Translation.GetHashCode();
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return obj is AffineTransform other && this.Equals(other);
         }
 
+        /// <inheritdoc/>
         public bool Equals(AffineTransform other)
         {
             if (this.IsSRT && other.IsSRT)
@@ -318,6 +321,10 @@ namespace SharpGLTF.Transforms
 
             return this.Matrix.Equals(other.Matrix);
         }
+
+        public static bool operator ==(in AffineTransform a, in AffineTransform b) { return a.Equals(b); }
+
+        public static bool operator !=(in AffineTransform a, in AffineTransform b) { return !a.Equals(b); }
 
         #endregion
 

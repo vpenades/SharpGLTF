@@ -22,6 +22,9 @@ namespace SharpGLTF.Schema2
         public static unsafe BufferView CreateBufferView<T>(this ModelRoot root, IReadOnlyList<T> data)
             where T : unmanaged
         {
+            Guard.NotNull(root, nameof(root));
+            Guard.NotNull(data, nameof(data));
+
             var view = root.CreateBufferView(sizeof(T) * data.Count);
 
             if (typeof(T) == typeof(int))

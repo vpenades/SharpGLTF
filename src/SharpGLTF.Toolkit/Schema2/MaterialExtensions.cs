@@ -426,6 +426,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
+            Guard.NotNull(channelKeys, nameof(channelKeys));
 
             foreach (var k in channelKeys)
             {

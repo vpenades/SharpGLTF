@@ -34,7 +34,9 @@ namespace SharpGLTF.Schema2
 
         internal PunctualLight(PunctualLightType ltype)
         {
+            #pragma warning disable CA1308 // Normalize strings to uppercase
             _type = ltype.ToString().ToLowerInvariant();
+            #pragma warning restore CA1308 // Normalize strings to uppercase
 
             if (ltype == PunctualLightType.Spot) _spot = new PunctualLightSpot();
         }

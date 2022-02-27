@@ -99,7 +99,7 @@ namespace SharpGLTF.Materials
         /// <summary>
         /// Gets or sets a value indicating whether triangles must be rendered from both sides.
         /// </summary>
-        public Boolean DoubleSided { get; set; } = false;
+        public Boolean DoubleSided { get; set; }
 
         public String ShaderStyle
         {

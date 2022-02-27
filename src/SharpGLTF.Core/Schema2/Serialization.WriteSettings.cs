@@ -60,7 +60,7 @@ namespace SharpGLTF.Schema2
 
         #region data
 
-        private System.Text.Json.JsonWriterOptions _JsonOptions = default;
+        private System.Text.Json.JsonWriterOptions _JsonOptions;
 
         #endregion
 
@@ -152,8 +152,9 @@ namespace SharpGLTF.Schema2
         /// <param name="settings">Optional settings.</param>
         public void Save(string filePath, WriteSettings settings = null)
         {
+            Guard.NotNull(filePath, nameof(filePath));
+
             bool isGltfExtension = filePath
-                .ToLower(System.Globalization.CultureInfo.InvariantCulture)
                 .EndsWith(".gltf", StringComparison.OrdinalIgnoreCase);
 
             if (isGltfExtension) SaveGLTF(filePath, settings);

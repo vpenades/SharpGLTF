@@ -145,14 +145,6 @@ namespace SharpGLTF.Schema2
             texInfo._LogicalTextureIndex = tex.LogicalIndex;
         }
 
-        private Texture TryGetTexture()
-        {
-            var texInfo = _TextureInfo?.Invoke(false);
-            if (texInfo == null) return null;
-            if (texInfo._LogicalTextureIndex < 0) return null;
-            return _Material.LogicalParent.LogicalTextures[texInfo._LogicalTextureIndex];
-        }
-
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation = 0, int? texCoordOverride = null)
         {
             if (_TextureInfo == null) throw new InvalidOperationException();
@@ -256,6 +248,12 @@ namespace SharpGLTF.Schema2
 
         public bool IsDefault => Object.Equals(Value, _ValueDefault);
 
+        public Type ValueType => _ValueDefault.GetType();
+
+        /// <summary>
+        /// Gets or sets the value of this parameter. <br/>
+        /// Valid types are <see cref="float"/> <see cref="Vector3"/> and <see cref="Vector4"/>
+        /// </summary>
         public PARAMETER Value
         {
             get => _ValueGetter();

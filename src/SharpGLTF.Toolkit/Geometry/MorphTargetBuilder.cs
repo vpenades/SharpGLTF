@@ -305,17 +305,17 @@ namespace SharpGLTF.Geometry
             return _Positions.TryGetValue(position, out List<TvG> geos) ? (IReadOnlyList<TvG>)geos : Array.Empty<TvG>();
         }
 
-        public void SetVertexDelta(Vector3 key, VertexGeometryDelta geometryDelta)
+        public void SetVertexDelta(Vector3 meshVertex, VertexGeometryDelta geometryDelta)
         {
-            if (_Positions.TryGetValue(key, out List<TvG> geos))
+            if (_Positions.TryGetValue(meshVertex, out List<TvG> geos))
             {
                 foreach (var g in geos) SetVertexDelta(g, geometryDelta, VertexMaterialDelta.Zero);
             }
         }
 
-        public void SetVertexDelta(Vector3 key, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
+        public void SetVertexDelta(Vector3 meshVertex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta)
         {
-            if (_Positions.TryGetValue(key, out List<TvG> geos))
+            if (_Positions.TryGetValue(meshVertex, out List<TvG> geos))
             {
                 foreach (var g in geos) SetVertexDelta(g, geometryDelta, materialDelta);
             }

@@ -36,6 +36,24 @@ csharp_style_var_elsewhere = false:silent
 # SA1623: Property summary documentation should match accessors
 dotnet_diagnostic.SA1623.severity = silent
 
+# CA1032: Implement standard exception constructors
+dotnet_diagnostic.CA1032.severity = silent
+
+# CA1034: Nested types should not be visible
+dotnet_diagnostic.CA1034.severity = silent
+
+# CA1721: Property names should not match get methods
+dotnet_diagnostic.CA1721.severity = silent
+
+# CA1024: Use properties where appropriate
+dotnet_diagnostic.CA1024.severity = silent
+
+# CA2225: Operator overloads have named alternates
+dotnet_diagnostic.CA2225.severity = silent
+
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.CA1707.severity = silent
+
 [*.{cs,vb}]
 #### Naming styles ####
 

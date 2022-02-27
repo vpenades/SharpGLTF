@@ -13,7 +13,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// in a <see cref="VertexBuilder{TvG, TvM, TvS}"/> structure.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Empty")]
-    public readonly struct VertexEmpty : IVertexMaterial, IVertexSkinning
+    public readonly struct VertexEmpty : IVertexMaterial, IVertexSkinning, IEquatable<VertexEmpty>
     {
         #region constructor
         public void Validate() { }
@@ -22,11 +22,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
+        public override int GetHashCode() { return 0; }
         public override bool Equals(object obj) { return obj is VertexEmpty; }
         public bool Equals(VertexEmpty other) { return true; }
         public static bool operator ==(in VertexEmpty a, in VertexEmpty b) { return true; }
         public static bool operator !=(in VertexEmpty a, in VertexEmpty b) { return false; }
-        public override int GetHashCode() { return 0; }
 
         #endregion
 
@@ -70,7 +70,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public SparseWeight8 GetBindings() { return default; }
 
         /// <inheritdoc/>
-        public void SetBindings(in SparseWeight8 weights) { throw new NotSupportedException(); }
+        public void SetBindings(in SparseWeight8 bindings) { throw new NotSupportedException(); }
 
         /// <inheritdoc/>
         public void SetBindings(params (int Index, float Weight)[] bindings) { throw new NotSupportedException(); }

@@ -280,16 +280,22 @@ namespace SharpGLTF.Geometry
         public TvM Material;
         public TvS Skinning;
 
+        /// <inheritdoc/>
+        public override int GetHashCode() { return Geometry.GetHashCode(); }
+
+        /// <inheritdoc/>
         public override bool Equals(object obj) { return obj is VertexBuilder<TvG, TvM, TvS> other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
         public bool Equals(VertexBuilder<TvG, TvM, TvS> other) { return AreEqual(this, other); }
+
         public static bool operator ==(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return AreEqual(a, b); }
+
         public static bool operator !=(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b)
         {
             return a.Geometry.Equals(b.Geometry) && a.Material.Equals(b.Material) && a.Skinning.Equals(b.Skinning);
         }
-
-        public override int GetHashCode() { return Geometry.GetHashCode(); }
 
         #endregion
 
@@ -388,6 +394,8 @@ namespace SharpGLTF.Geometry
 
         public VertexBuilder<TvG, TvM, TvS> WithMaterial(params Vector2[] uvs)
         {
+            Guard.NotNull(uvs, nameof(uvs));
+
             var v = this;
             for (int i = 0; i < uvs.Length; ++i) v.Material.SetTexCoord(i, uvs[i]);
             return v;
@@ -395,6 +403,8 @@ namespace SharpGLTF.Geometry
 
         public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, params Vector2[] uvs)
         {
+            Guard.NotNull(uvs, nameof(uvs));
+
             var v = this;
             v.Material.SetColor(0, color0);
             for (int i = 0; i < uvs.Length; ++i) v.Material.SetTexCoord(i, uvs[i]);
@@ -403,6 +413,8 @@ namespace SharpGLTF.Geometry
 
         public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, Vector4 color1, params Vector2[] uvs)
         {
+            Guard.NotNull(uvs, nameof(uvs));
+
             var v = this;
             v.Material.SetColor(0, color0);
             v.Material.SetColor(1, color1);

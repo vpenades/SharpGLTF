@@ -153,7 +153,11 @@ namespace SharpGLTF.Animations
 
         #region extended API
 
-        public void SetValue(params float[] elements) { this.Value = _Convert(elements); }
+        public void SetValue(params float[] elements)
+        {
+            Guard.NotNull(elements, nameof(elements));
+            this.Value = _Convert(elements);
+        }
 
         private static T _Convert(float[] elements)
         {

@@ -108,9 +108,9 @@ namespace SharpGLTF.Scenes
             get
             {
                 var tracks = Enumerable.Empty<string>();
-                if (_Scale != null) tracks.Concat(_Scale.Tracks.Keys);
-                if (_Rotation != null) tracks.Concat(_Rotation.Tracks.Keys);
-                if (_Translation != null) tracks.Concat(_Translation.Tracks.Keys);
+                if (_Scale != null) tracks = tracks.Concat(_Scale.Tracks.Keys);
+                if (_Rotation != null) tracks = tracks.Concat(_Rotation.Tracks.Keys);
+                if (_Translation != null) tracks = tracks.Concat(_Translation.Tracks.Keys);
                 return tracks.Distinct();
             }
         }

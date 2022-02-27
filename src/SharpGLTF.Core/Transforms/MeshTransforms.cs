@@ -43,20 +43,20 @@ namespace SharpGLTF.Transforms
         /// <summary>
         /// Transforms a vertex position from local mesh space to world space.
         /// </summary>
-        /// <param name="position">The local position of the vertex.</param>
+        /// <param name="localPosition">The local position of the vertex.</param>
         /// <param name="positionDeltas">The local position deltas of the vertex, one for each morph target, or null.</param>
         /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
         /// <returns>A position in world space.</returns>
-        V3 TransformPosition(V3 position, IReadOnlyList<V3> positionDeltas, in SparseWeight8 skinWeights);
+        V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> positionDeltas, in SparseWeight8 skinWeights);
 
         /// <summary>
         /// Transforms a vertex normal from local mesh space to world space.
         /// </summary>
-        /// <param name="normal">The local normal of the vertex.</param>
+        /// <param name="localNormal">The local normal of the vertex.</param>
         /// <param name="normalDeltas">The local normal deltas of the vertex, one for each morph target, or null.</param>
         /// <param name="skinWeights">The skin weights of the vertex, or default.</param>
         /// <returns>A normal in world space.</returns>
-        V3 TransformNormal(V3 normal, IReadOnlyList<V3> normalDeltas, in SparseWeight8 skinWeights);
+        V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> normalDeltas, in SparseWeight8 skinWeights);
 
         /// <summary>
         /// Transforms a vertex tangent from local mesh space to world space.
@@ -305,23 +305,23 @@ namespace SharpGLTF.Transforms
             _FlipFaces = determinant3x3 < 0;
         }
 
-        public V3 TransformPosition(V3 position, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> positionDeltas, in SparseWeight8 skinWeights)
         {
-            position = MorphVectors(position, morphTargets);
+            localPosition = MorphVectors(localPosition, positionDeltas);
 
-            return V3.Transform(position, _WorldMatrix);
+            return V3.Transform(localPosition, _WorldMatrix);
         }
 
-        public V3 TransformNormal(V3 normal, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> normalDeltas, in SparseWeight8 skinWeights)
         {
-            normal = MorphVectors(normal, morphTargets);
+            localNormal = MorphVectors(localNormal, normalDeltas);
 
-            return V3.Normalize(V3.TransformNormal(normal, _WorldMatrix));
+            return V3.Normalize(V3.TransformNormal(localNormal, _WorldMatrix));
         }
 
-        public V4 TransformTangent(V4 tangent, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V4 TransformTangent(V4 tangent, IReadOnlyList<V3> tangentDeltas, in SparseWeight8 skinWeights)
         {
-            var t = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), morphTargets);
+            var t = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), tangentDeltas);
 
             t = V3.Normalize(V3.TransformNormal(t, _WorldMatrix));
 
@@ -400,9 +400,9 @@ namespace SharpGLTF.Transforms
             }
         }
 
-        public V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformPosition(V3 localPosition, IReadOnlyList<V3> positionDeltas, in SparseWeight8 skinWeights)
         {
-            localPosition = MorphVectors(localPosition, morphTargets);
+            localPosition = MorphVectors(localPosition, positionDeltas);
 
             var worldPosition = V3.Zero;
 
@@ -416,9 +416,9 @@ namespace SharpGLTF.Transforms
             return worldPosition;
         }
 
-        public V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V3 TransformNormal(V3 localNormal, IReadOnlyList<V3> normalDeltas, in SparseWeight8 skinWeights)
         {
-            localNormal = MorphVectors(localNormal, morphTargets);
+            localNormal = MorphVectors(localNormal, normalDeltas);
 
             var worldNormal = V3.Zero;
 
@@ -430,9 +430,9 @@ namespace SharpGLTF.Transforms
             return V3.Normalize(localNormal);
         }
 
-        public V4 TransformTangent(V4 localTangent, IReadOnlyList<V3> morphTargets, in SparseWeight8 skinWeights)
+        public V4 TransformTangent(V4 tangent, IReadOnlyList<V3> tangentDeltas, in SparseWeight8 skinWeights)
         {
-            var localTangentV = MorphVectors(new V3(localTangent.X, localTangent.Y, localTangent.Z), morphTargets);
+            var localTangentV = MorphVectors(new V3(tangent.X, tangent.Y, tangent.Z), tangentDeltas);
 
             var worldTangent = V3.Zero;
 
@@ -443,7 +443,7 @@ namespace SharpGLTF.Transforms
 
             worldTangent = V3.Normalize(worldTangent);
 
-            return new V4(worldTangent, localTangent.W);
+            return new V4(worldTangent, tangent.W);
         }
 
         #endregion
@@ -483,6 +483,8 @@ namespace SharpGLTF.Transforms
 
         public InstancingTransform(AffineTransform[] instances)
         {
+            Guard.NotNull(instances, nameof(instances));
+
             _LocalMatrices = new TRANSFORM[instances.Length];
 
             for (int i = 0; i < _LocalMatrices.Length; ++i)

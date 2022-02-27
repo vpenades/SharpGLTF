@@ -23,6 +23,8 @@ namespace SharpGLTF.Scenes
         protected CameraBuilder(CameraBuilder other)
             : base(other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this.ZNear = other.ZNear;
             this.ZFar = other.ZFar;
         }

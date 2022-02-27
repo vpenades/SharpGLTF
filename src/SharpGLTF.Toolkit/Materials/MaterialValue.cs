@@ -26,7 +26,7 @@ namespace SharpGLTF.Materials
             if (value is Vector2 v2) return v2;
             if (value is Vector3 v3) return v3;
             if (value is Vector4 v4) return v4;
-            throw new ArgumentException(nameof(value));
+            throw new ArgumentException("Value type not supported.", nameof(value));
         }
 
         private MaterialValue(float x) { _Length = 1; _X = x; _Y = 0; _Z = 0; _W = 0; }
@@ -94,7 +94,7 @@ namespace SharpGLTF.Materials
                     case 2: return typeof(Vector2);
                     case 3: return typeof(Vector3);
                     case 4: return typeof(Vector4);
-                    default: throw new NotImplementedException();
+                    default: throw new InvalidOperationException($"{_Length} not supported.");
                 }
             }
         }
@@ -189,15 +189,27 @@ namespace SharpGLTF.Materials
             private readonly MaterialValue _Default;
             private MaterialValue _Value;
 
+            /// <inheritdoc/>
             public override int GetHashCode()
             {
                 return Key.GetHashCode() ^ _Value.GetHashCode();
             }
 
+            /// <inheritdoc/>
+            public override bool Equals(object obj)
+            {
+                return obj is _Property other && Equals(other);
+            }
+
+            /// <inheritdoc/>
             public bool Equals(_Property other)
             {
                 return AreEqual(this, other);
             }
+
+            public static bool operator ==(_Property a, _Property b) { return a.Equals(b); }
+
+            public static bool operator !=(_Property a, _Property b) { return !a.Equals(b); }
 
             public static bool AreEqual(_Property a, _Property b)
             {
@@ -272,6 +284,9 @@ namespace SharpGLTF.Materials
 
             public static bool AreEqual(Collection x, Collection y)
             {
+                Guard.NotNull(x, nameof(x));
+                Guard.NotNull(y, nameof(y));
+
                 if (x._Properties.Length != y._Properties.Length) return false;
 
                 for (int i = 0; i < x._Properties.Length; ++i)
@@ -406,12 +421,14 @@ namespace SharpGLTF.Materials
 
             public void CopyTo(Collection other)
             {
+                Guard.NotNull(other, nameof(other));
+
                 for (int i = 0; i < this._Properties.Length; ++i)
                 {
                     var src = this._Properties[i];
                     var dst = other._Properties[i];
 
-                    if (src.Name != dst.Name) throw new ArgumentException(nameof(other));
+                    if (src.Name != dst.Name) throw new ArgumentException("Naming mismatch.", nameof(other));
 
                     dst.Value = src.Value;
                 }

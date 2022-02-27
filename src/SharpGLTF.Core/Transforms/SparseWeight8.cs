@@ -214,7 +214,7 @@ namespace SharpGLTF.Transforms
         private SparseWeight8(ReadOnlySpan<IndexWeight> iw)
         {
             #if DEBUG
-            if (iw.Length != 8) throw new ArgumentException(nameof(iw));
+            if (iw.Length != 8) throw new ArgumentException("Span must contain 8 elements.", nameof(iw));
             if (!IndexWeight.IsWellFormed(iw, out var err)) throw new ArgumentException(err, nameof(iw));
             #endif
 
@@ -297,6 +297,7 @@ namespace SharpGLTF.Transforms
         public readonly int Index7;
         public readonly float Weight7;
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             // we calculate the hash form the highest weight.
@@ -314,6 +315,19 @@ namespace SharpGLTF.Transforms
 
             return h.GetHashCode();
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is SparseWeight8 other && AreEqual(this, other);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(SparseWeight8 other) { return AreEqual(this, other); }
+
+        public static bool operator ==(SparseWeight8 left, SparseWeight8 right) { return left.Equals(right); }
+
+        public static bool operator !=(SparseWeight8 left, SparseWeight8 right) { return !left.Equals(right); }
 
         internal static bool AreEqual(in SparseWeight8 x, in SparseWeight8 y)
         {
@@ -359,13 +373,6 @@ namespace SharpGLTF.Transforms
             }
 
             return true;
-        }
-
-        public bool Equals(SparseWeight8 other) { return AreEqual(this, other); }
-
-        public override bool Equals(object obj)
-        {
-            return obj is SparseWeight8 other && AreEqual(this, other);
         }
 
         #endregion
@@ -569,7 +576,7 @@ namespace SharpGLTF.Transforms
 
             for (int i = 0; i < c; ++i)
             {
-                if (sb.Length > 0) sb.Append(" ");
+                if (sb.Length > 0) sb.Append(' ');
                 sb.Append(this[i]);
             }
 

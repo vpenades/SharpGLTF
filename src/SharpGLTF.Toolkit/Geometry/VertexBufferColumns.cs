@@ -31,6 +31,8 @@ namespace SharpGLTF.Geometry
 
         public VertexBufferColumns(VertexBufferColumns other)
         {
+            Guard.NotNull(other, nameof(other));
+
             this.Positions = other.Positions;
             this.Normals = other.Normals;
             this.Tangents = other.Tangents;
@@ -129,6 +131,8 @@ namespace SharpGLTF.Geometry
 
         public VertexBufferColumns WithTransform(Transforms.IGeometryTransform transform)
         {
+            Guard.NotNull(transform, nameof(transform));
+
             var clone = new VertexBufferColumns(this);
             clone._ApplyTransform(transform);
             return clone;
