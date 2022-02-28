@@ -20,35 +20,33 @@ namespace SharpGLTF.Schema2
         Object Value { get; set; }
     }
 
-    [System.Diagnostics.DebuggerDisplay("[{_Key}, {Value}]")]
+    internal enum _MaterialParameterKey
+    {
+        Unknown = 0,
+
+        RGB,
+        RGBA,
+
+        NormalScale,
+        OcclusionStrength,
+
+        MetallicFactor,
+        RoughnessFactor,
+        SpecularFactor,
+        GlossinessFactor,
+        ClearCoatFactor,
+        ThicknessFactor,
+        TransmissionFactor,
+        AttenuationDistance,
+    }
+
+    [System.Diagnostics.DebuggerDisplay("{_Key} = {Value}")]
     readonly struct _MaterialParameter<T> : IMaterialParameter
         where T : unmanaged, IEquatable<T>
     {
-        #region constants
-
-        internal enum Key
-        {
-            RGB,
-            RGBA,
-
-            NormalScale,
-            OcclusionStrength,
-
-            MetallicFactor,
-            RoughnessFactor,
-            SpecularFactor,
-            GlossinessFactor,
-            ClearCoatFactor,
-            ThicknessFactor,
-            TransmissionFactor,
-            AttenuationDistance,
-        }
-
-        #endregion
-
         #region constructors
 
-        internal _MaterialParameter(Key key, T defval, Func<T> getter, Action<T> setter)
+        internal _MaterialParameter(_MaterialParameterKey key, T defval, Func<T> getter, Action<T> setter)
         {
             _Key = key;
             _ValueDefault = defval;
@@ -60,7 +58,7 @@ namespace SharpGLTF.Schema2
 
         #region data
 
-        private readonly Key _Key;
+        private readonly _MaterialParameterKey _Key;
         private readonly T _ValueDefault;
         private readonly Func<T> _ValueGetter;
         private readonly Action<T> _ValueSetter;

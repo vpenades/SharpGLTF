@@ -67,7 +67,7 @@ namespace SharpGLTF.Animations
         public ICurveSampler<T> ToFastSampler()
         {
             var traits = _Traits;
-            return FastCurveSampler<T>.CreateFrom(_Sequence, chunk => new LinearSampler<T>(chunk, traits)) ?? this;
+            return FastCurveSampler<T>.CreateFrom(_Sequence, chunk => new LinearSampler<T>(chunk, traits));
         }
 
         #endregion

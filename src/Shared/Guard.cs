@@ -16,7 +16,7 @@ namespace SharpGLTF
 
         public static void NotNullOrEmpty(string target, string parameterName, string message = "")
         {
-            NotNull(target, parameterName, message);
+            if (target == null) throw new ArgumentNullException(parameterName, message);
 
             if (!string.IsNullOrWhiteSpace(target)) return;
 
@@ -94,7 +94,7 @@ namespace SharpGLTF
 
         public static void NotNullOrEmpty<T>(IEnumerable<T> target, string parameterName, string message = "")
         {
-            NotNull(target, parameterName, message);
+            if (target == null) throw new ArgumentNullException(parameterName, message);
 
             if (target.Any()) return;
 

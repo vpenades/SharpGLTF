@@ -128,6 +128,7 @@ namespace SharpGLTF.Runtime
         public static void SetAnimationFrame(IEnumerable<NodeInstance> nodes, params (int TrackIdx, float Time, float Weight)[] blended)
         {
             Guard.NotNull(nodes, nameof(nodes));
+            Guard.NotNull(blended, nameof(blended));
 
             Span<int> tracks = stackalloc int[blended.Length];
             Span<float> times = stackalloc float[blended.Length];

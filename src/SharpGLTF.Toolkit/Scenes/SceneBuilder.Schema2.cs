@@ -386,17 +386,17 @@ namespace SharpGLTF.Scenes
         {
             if (a.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE)
             {
-                if (b.MaxDegree != 3) throw new ArgumentException(nameof(b.MaxDegree));
+                if (b.MaxDegree != 3) throw new ArgumentException("MaxDegree must be 3", nameof(b));
 
                 var bb = b.ToSplineCurve();
 
                 foreach (var (ak, av) in a.GetCubicKeys())
                 {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException($"Missing key {ak}", nameof(b));
 
-                    if (!equalityComparer(av.TangentIn, bv.TangentIn)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av.Value, bv.Value)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av.TangentOut, bv.TangentOut)) throw new ArgumentException(nameof(b));
+                    if (!equalityComparer(av.TangentIn, bv.TangentIn)) throw new ArgumentException("Conversion failed.", nameof(b));
+                    if (!equalityComparer(av.Value, bv.Value)) throw new ArgumentException("Conversion failed.", nameof(b));
+                    if (!equalityComparer(av.TangentOut, bv.TangentOut)) throw new ArgumentException("Conversion failed.", nameof(b));
                 }
             }
             else if (a.InterpolationMode == AnimationInterpolationMode.LINEAR)
@@ -407,8 +407,8 @@ namespace SharpGLTF.Scenes
 
                 foreach (var (ak, av) in a.GetLinearKeys())
                 {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException($"Missing key {ak}", nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException("Conversion failed.", nameof(b));
                 }
             }
 
@@ -420,8 +420,8 @@ namespace SharpGLTF.Scenes
 
                 foreach (var (ak, av) in a.GetLinearKeys())
                 {
-                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException(nameof(b));
-                    if (!equalityComparer(av, bv)) throw new ArgumentException(nameof(b));
+                    if (!bb.TryGetValue(ak, out var bv)) throw new ArgumentException($"Missing key {ak}", nameof(b));
+                    if (!equalityComparer(av, bv)) throw new ArgumentException("Conversion failed.", nameof(b));
                 }
             }
         }

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
-using PARAMETER = System.Object;
-
 namespace SharpGLTF.Schema2
 {
     /// <summary>
@@ -27,6 +25,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(key, nameof(key));
 
             Guard.NotNull(texInfo, nameof(texInfo));
+            Guard.NotNull(parameters, nameof(parameters));
 
             _Key = key;
             _Material = m;
@@ -40,10 +39,10 @@ namespace SharpGLTF.Schema2
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly String _Key;
+        private readonly Material _Material;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly Material _Material;
+        private readonly String _Key;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Func<Boolean, TextureInfo> _TextureInfo;
@@ -51,11 +50,23 @@ namespace SharpGLTF.Schema2
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly IReadOnlyList<IMaterialParameter> _Parameters;
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
-            if (_Key == null) return 0;
+            if (_Material == null) return 0;
 
-            return _Key.GetHashCode() ^ _Material.GetHashCode();
+            return _Material.GetHashCode() ^ _Key.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj) { return obj is MaterialChannel other && Equals(other); }
+
+        public bool Equals(MaterialChannel other)
+        {
+            if (this._Material == null && other._Material == null) return true;
+            if (this._Material != other._Material) return false;
+            if (this._Key != other._Key) return false;
+            return true;
         }
 
         #endregion
@@ -101,29 +112,21 @@ namespace SharpGLTF.Schema2
         {
             get
             {
-                foreach (var p in _Parameters.OfType<_MaterialParameter<Vector4>>())
-                {
-                    if (p.Name == "RGBA") return p.Value;
-                }
+                var p4 = _Parameters.OfType<_MaterialParameter<Vector4>>().SingleOrDefault();
+                if (p4.Name == "RGBA") return p4.Value;
 
-                foreach (var p in _Parameters.OfType<_MaterialParameter<Vector3>>())
-                {
-                    if (p.Name == "RGB") return new Vector4(p.Value, 1);
-                }
+                var p3 = _Parameters.OfType<_MaterialParameter<Vector3>>().SingleOrDefault();
+                if (p3.Name == "RGB") return new Vector4(p3.Value, 1);
 
                 throw new InvalidOperationException("RGB or RGBA not found.");
             }
             set
             {
-                foreach (var p in _Parameters.OfType<_MaterialParameter<Vector4>>())
-                {
-                    if (p.Name == "RGBA") { p.Value = value; return; }
-                }
+                var p4 = _Parameters.OfType<_MaterialParameter<Vector4>>().SingleOrDefault();
+                if (p4.Name == "RGBA") { p4.Value = value; return; }
 
-                foreach (var p in _Parameters.OfType<_MaterialParameter<Vector3>>())
-                {
-                    if (p.Name == "RGB") { p.Value = new Vector3(value.X, value.Y, value.Z); return; }
-                }
+                var p3 = _Parameters.OfType<_MaterialParameter<Vector3>>().SingleOrDefault();
+                if (p3.Name == "RGB") { p3.Value = new Vector3(value.X, value.Y, value.Z); return; }
 
                 throw new InvalidOperationException("RGB or RGBA not found.");
             }
@@ -132,6 +135,23 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
+
+        public float GetFactor(string key)
+        {
+            return _Parameters
+                .OfType<_MaterialParameter<float>>()
+                .Single(item => item.Name == key)
+                .Value;
+        }
+
+        public void SetFactor(string key, float value)
+        {
+            _Parameters
+                .OfType<_MaterialParameter<float>>()
+                .Single(item => item.Name == key)
+                .Value = value;
+        }
+
         private Texture _GetTexture()
         {
             var texInfo = _TextureInfo?.Invoke(false);

@@ -196,6 +196,8 @@ namespace SharpGLTF.IO
 
         public JsonContent GetNode(params IConvertible[] path)
         {
+            Guard.NotNull(path, nameof(path));
+
             var value = _JsonStaticUtils.GetNode(this._Content, path);
             return new JsonContent(value);
         }
@@ -203,6 +205,8 @@ namespace SharpGLTF.IO
         public T GetValue<T>(params IConvertible[] path)
             where T : IConvertible
         {
+            Guard.NotNull(path, nameof(path));
+
             return _JsonStaticUtils.GetValue<T>(this._Content, path);
         }
 

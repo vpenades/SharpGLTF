@@ -348,6 +348,15 @@ namespace SharpGLTF.Schema2
 
         #region API - Transforms
 
+        /// <summary>
+        /// Gets the local transform of this node in a given animation at a given time.
+        /// </summary>
+        /// <param name="animation">the animation to sample.</param>
+        /// <param name="time">the time offset within the animation.</param>
+        /// <returns>the sampled transform.</returns>
+        /// <remarks>
+        /// This is a convenience method, but it's slow, it's better to cache <see cref="GetCurveSamplers(Animation)"/>.
+        /// </remarks>
         public TRANSFORM GetLocalTransform(Animation animation, float time)
         {
             if (animation == null) return this.LocalTransform;
@@ -355,6 +364,15 @@ namespace SharpGLTF.Schema2
             return this.GetCurveSamplers(animation).GetLocalTransform(time);
         }
 
+        /// <summary>
+        /// Gets the world matrix of this node in a given animation at a given time.
+        /// </summary>
+        /// <param name="animation">the animation to sample.</param>
+        /// <param name="time">the time offset within the animation.</param>
+        /// <returns>the sampled transform.</returns>
+        /// <remarks>
+        /// This is a convenience method, but it's slow, it's better to cache <see cref="GetCurveSamplers(Animation)"/>.
+        /// </remarks>
         public Matrix4x4 GetWorldMatrix(Animation animation, float time)
         {
             if (animation == null) return this.WorldMatrix;
@@ -731,7 +749,7 @@ namespace SharpGLTF.Schema2
     /// Use <see cref="Node.GetCurveSamplers(Animation)"/> for access.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public readonly struct NodeCurveSamplers
+    public readonly struct NodeCurveSamplers : IEquatable<NodeCurveSamplers>
     {
         #region debug
 
@@ -791,6 +809,29 @@ namespace SharpGLTF.Schema2
         private readonly AnimationSampler _RotationSampler;
         private readonly AnimationSampler _TranslationSampler;
         private readonly AnimationSampler _MorphSampler;
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            return TargetNode.GetHashCode() ^ Animation.GetHashCode();
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public static bool operator ==(in NodeCurveSamplers a, in NodeCurveSamplers b) => a.Equals(b);
+        public static bool operator !=(in NodeCurveSamplers a, in NodeCurveSamplers b) => !a.Equals(b);
+
+        /// <inheritdoc />
+        public bool Equals(NodeCurveSamplers other)
+        {
+            if (this.TargetNode != other.TargetNode) return false;
+            if (this.Animation != other.Animation) return false;
+            return true;
+        }
 
         #endregion
 

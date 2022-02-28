@@ -147,8 +147,8 @@ namespace SharpGLTF.Runtime
             if (mr == null) return Vector3.One; // default value 16
 
             var diffuse = GetDiffuseColor(srcMaterial);
-            var metallic = mr.Value.Parameter.X;
-            var roughness = mr.Value.Parameter.Y;
+            var metallic = mr.Value.GetFactor("MetallicFactor");
+            var roughness = mr.Value.GetFactor("RoughnessFactor");
 
             var k = Vector3.Zero;
             k += Vector3.Lerp(diffuse, Vector3.Zero, roughness);
@@ -164,8 +164,8 @@ namespace SharpGLTF.Runtime
 
             if (mr == null) return 16; // default value = 16
 
-            var metallic = mr.Value.Parameter.X;
-            var roughness = mr.Value.Parameter.Y;
+            var metallic = mr.Value.GetFactor("MetallicFactor");
+            var roughness = mr.Value.GetFactor("RoughnessFactor");
 
             return 4 + 16 * metallic;
         }

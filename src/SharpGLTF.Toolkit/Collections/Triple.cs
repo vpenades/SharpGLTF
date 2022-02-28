@@ -5,7 +5,7 @@ using System.Text;
 
 namespace SharpGLTF.Collections
 {
-    public readonly struct Triple<T> : IReadOnlyList<T>
+    public readonly struct Triple<T> : IReadOnlyList<T>, IEquatable<Triple<T>>
     {
         public static implicit operator Triple<T>(in (T A, T B, T C) triple)
         {
@@ -22,6 +22,28 @@ namespace SharpGLTF.Collections
         public readonly T A;
         public readonly T B;
         public readonly T C;
+
+        public override int GetHashCode()
+        {
+            int h = 0;
+            h ^= A?.GetHashCode() ?? 0;
+            h ^= B?.GetHashCode() ?? 0;
+            h ^= C?.GetHashCode() ?? 0;
+            return h;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Triple<T> && Equals((Triple<T>)obj);
+        }
+
+        public bool Equals(Triple<T> other)
+        {
+            if (!this.A.Equals(other.A)) return false;
+            if (!this.B.Equals(other.B)) return false;
+            if (!this.C.Equals(other.C)) return false;
+            return true;
+        }
 
         public int Count => 3;
 

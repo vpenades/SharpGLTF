@@ -393,7 +393,7 @@ namespace SharpGLTF.Schema2
                 return null;
             }
 
-            if (primary  != null) Guard.MustShareLogicalParent(this, "this", primary, nameof(primary));
+            Guard.MustShareLogicalParent(this, "this", primary, nameof(primary));
             if (fallback != null) Guard.MustShareLogicalParent(this, "this", fallback, nameof(primary));
             if (sampler  != null) Guard.MustShareLogicalParent(this, "this", sampler, nameof(sampler));
 

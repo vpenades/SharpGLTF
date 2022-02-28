@@ -44,6 +44,19 @@ namespace SharpGLTF.Transforms
         public readonly int Index;
         public readonly float Weight;
 
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return Index.GetHashCode() ^ Weight.GetHashCode();
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is IndexWeight other && this.Equals(other);
+        }
+
+        /// <inheritdoc/>
         public bool Equals(IndexWeight other)
         {
             return this.Index == other.Index && this.Weight == other.Weight;

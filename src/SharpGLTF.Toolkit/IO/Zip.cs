@@ -155,9 +155,7 @@ namespace SharpGLTF.IO
 
             var baseName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
-            bool isGltfExtension = filePath
-                .ToLower(System.Globalization.CultureInfo.InvariantCulture)
-                .EndsWith(".gltf", StringComparison.OrdinalIgnoreCase);
+            bool isGltfExtension = filePath.EndsWith(".GLTF", StringComparison.OrdinalIgnoreCase);
 
             var context = WriteContext.Create(_WriteAsset);
 

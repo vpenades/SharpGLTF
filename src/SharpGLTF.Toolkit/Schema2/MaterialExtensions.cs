@@ -52,6 +52,7 @@ namespace SharpGLTF.Schema2
             return material;
         }
 
+        [Obsolete("don't use vector4 based parameter. Use WithChannelColor and WithChannelFactor instead.")]
         public static Material WithChannelParameter(this Material material, string channelName, Vector4 parameter)
         {
             Guard.NotNull(material, nameof(material));
@@ -59,6 +60,28 @@ namespace SharpGLTF.Schema2
             var channel = material.FindChannel(channelName).Value;
 
             channel.Parameter = parameter;
+
+            return material;
+        }
+
+        public static Material WithChannelColor(this Material material, string channelName, Vector4 color)
+        {
+            Guard.NotNull(material, nameof(material));
+
+            var channel = material.FindChannel(channelName).Value;
+
+            channel.Color = color;
+
+            return material;
+        }
+
+        public static Material WithChannelFactor(this Material material, string channelName, string paramName, float factor)
+        {
+            Guard.NotNull(material, nameof(material));
+
+            var channel = material.FindChannel(channelName).Value;
+
+            channel.SetFactor(paramName, factor);
 
             return material;
         }
@@ -105,10 +128,13 @@ namespace SharpGLTF.Schema2
             float roughnessFactor = 1
             )
         {
-            material.WithPBRMetallicRoughness();
+            Guard.NotNull(material, nameof(material));
 
-            material.WithChannelParameter("BaseColor", baseColor);
-            material.WithChannelParameter("MetallicRoughness", new Vector4(metallicFactor, roughnessFactor, 0, 0));
+            material
+                .WithPBRMetallicRoughness()
+                .WithChannelColor("BaseColor", baseColor)
+                .WithChannelFactor("MetallicRoughness", "MetallicFactor", metallicFactor)
+                .WithChannelFactor("MetallicRoughness", "RoughnessFactor", roughnessFactor);
 
             if (!string.IsNullOrWhiteSpace(baseColorImageFilePath)) material.WithChannelTexture("BaseColor", 0, baseColorImageFilePath);
             if (!string.IsNullOrWhiteSpace(metallicImageFilePath)) material.WithChannelTexture("Metallic", 0, baseColorImageFilePath);
@@ -121,6 +147,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         /// <param name="material">The <see cref="Material"/> instance to set.</param>
         /// <returns>This <see cref="Material"/> instance.</returns>
+        [Obsolete("SpecularGlossiness Extension has been declared deprecated by the Khronos Group. Use newer extensions instead.")]
         public static Material WithPBRSpecularGlossiness(this Material material)
         {
             Guard.NotNull(material, nameof(material));
