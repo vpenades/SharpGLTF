@@ -126,7 +126,7 @@ namespace SharpGLTF.Runtime
 
             if (baseColor == null) return 1;
 
-            return baseColor.Value.Parameter.W;
+            return baseColor.Value.Color.W;
         }
 
         private static Vector3 GetDiffuseColor(GLTFMATERIAL srcMaterial)
@@ -136,8 +136,8 @@ namespace SharpGLTF.Runtime
             if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
 
             if (diffuse == null) return Vector3.One;
-
-            return new Vector3(diffuse.Value.Parameter.X, diffuse.Value.Parameter.Y, diffuse.Value.Parameter.Z);
+            
+            return new Vector3(diffuse.Value.Color.X, diffuse.Value.Color.Y, diffuse.Value.Color.Z);
         }
 
         private static Vector3 GetSpecularColor(GLTFMATERIAL srcMaterial)
@@ -176,7 +176,7 @@ namespace SharpGLTF.Runtime
 
             if (emissive == null) return Vector3.Zero;
 
-            return new Vector3(emissive.Value.Parameter.X, emissive.Value.Parameter.Y, emissive.Value.Parameter.Z);
+            return new Vector3(emissive.Value.Color.X, emissive.Value.Color.Y, emissive.Value.Color.Z);
         }
 
         private Texture2D UseDiffuseTexture(GLTFMATERIAL srcMaterial)

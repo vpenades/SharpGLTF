@@ -194,8 +194,8 @@ namespace SharpGLTF.Schema2.Authoring
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             var gltf2 = scene.ToGltf2();
-            var sheenColorFactor = gltf2.LogicalMaterials[0].FindChannel("SheenColor").Value.Parameter;
-            Assert.AreEqual(new Vector4(1, 1, 1, 0), sheenColorFactor);
+            var sheenColorFactor = gltf2.LogicalMaterials[0].FindChannel("SheenColor").Value.Color;
+            Assert.AreEqual(Vector4.One, sheenColorFactor);
 
             var sheenRoughnessFactor = gltf2.LogicalMaterials[0].FindChannel("SheenRoughness").Value.Parameter;
             Assert.AreEqual(new Vector4(0.5f, 0, 0, 0), sheenRoughnessFactor);

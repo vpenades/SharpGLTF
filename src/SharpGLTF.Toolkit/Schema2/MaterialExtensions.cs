@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
 
             var ch = material.WithPBRMetallicRoughness().FindChannel("BaseColor").Value;
 
-            ch.Parameter = diffuseColor;
+            ch.Color = diffuseColor;
 
             return material;
         }
@@ -499,10 +499,10 @@ namespace SharpGLTF.Schema2
             if (material == null) return defaultColor;
 
             var channel = material.FindChannel("Diffuse");
-            if (channel.HasValue) return channel.Value.Parameter;
+            if (channel.HasValue) return channel.Value.Color;
 
             channel = material.FindChannel("BaseColor");
-            if (channel.HasValue) return channel.Value.Parameter;
+            if (channel.HasValue) return channel.Value.Color;
 
             return defaultColor;
         }
