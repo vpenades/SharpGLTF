@@ -52,11 +52,7 @@ namespace SharpGLTF
 
         protected static int GetContentHashCode(BaseBuilder x)
         {
-            #if NET6_0_OR_GREATER
             return x?.Name?.GetHashCode(StringComparison.InvariantCulture) ?? 0;
-            #else
-            return x?.Name?.GetHashCode() ?? 0;
-            #endif
         }
 
         protected static bool AreEqualByContent(BaseBuilder x, BaseBuilder y)

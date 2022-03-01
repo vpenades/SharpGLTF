@@ -18,7 +18,7 @@ namespace SharpGLTF.IO
     /// </remarks>
     [System.ComponentModel.ImmutableObject(true)]
     [System.Diagnostics.DebuggerDisplay("{ToDebuggerDisplay(),nq}")]
-    public readonly struct JsonContent : ICloneable
+    public readonly struct JsonContent : ICloneable, IEquatable<JsonContent>
     {
         #region debug
 
@@ -56,6 +56,8 @@ namespace SharpGLTF.IO
         private JsonContent(Object value)
         {
             _Content = value == null ? null : _JsonStaticUtils.Serialize(value);
+
+            // don't store empty collections.
             if (_Content is IJsonCollection collection && collection.Count == 0)
                 _Content = null;
         }
@@ -73,14 +75,17 @@ namespace SharpGLTF.IO
 
         public override int GetHashCode()
         {
-            // until I figure a correct way of handling this...
-            throw new NotSupportedException("Do not use");
+            return _Content == null ? 0 : _Content.GetHashCode();
         }
 
         public override bool Equals(object obj)
         {
-            // until I figure a correct way of handling this...
-            throw new NotSupportedException($"Use {nameof(JsonContent.AreEqualByContent)} instead.");
+            return obj is JsonContent other && Equals(other);
+        }
+
+        public bool Equals(JsonContent other)
+        {
+            return Object.Equals(this._Content, other._Content);
         }
 
         /// <summary>

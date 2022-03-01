@@ -185,15 +185,24 @@ namespace SharpGLTF.IO
             Assert.IsTrue(AreEqual(a, b));
             Assert.IsTrue(AreEqual(a, c));            
 
-            foreach (var dom in new[] { a, b, c})
+            foreach (var dom in new[] { a, b, c })
             {
                 Assert.AreEqual("me", dom.GetValue<string>("author"));
                 Assert.AreEqual(17, dom.GetValue<int>("integer1"));
                 Assert.AreEqual(15.3f, dom.GetValue<float>("single1"));
                 Assert.AreEqual(3, dom.GetValue<int>("array1", 2));
                 Assert.AreEqual(2, dom.GetValue<int>("dict2", "d", "a1"));
-            }            
+            }
 
+            Assert.AreEqual(b.GetHashCode(), c.GetHashCode());
+            Assert.AreEqual(b, c);
+
+            // clone & compare
+
+            var d = c.DeepClone();
+
+            Assert.AreEqual(c.GetHashCode(), d.GetHashCode());
+            Assert.AreEqual(c, d);
         }
 
     }

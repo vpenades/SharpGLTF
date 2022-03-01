@@ -151,7 +151,7 @@ namespace SharpGLTF.Materials
             h ^= x.AlphaCutoff.GetHashCode();
             h ^= x.DoubleSided.GetHashCode();
             h ^= x.IndexOfRefraction.GetHashCode();
-            h ^= x.ShaderStyle.GetHashCode();
+            h ^= x.ShaderStyle.GetHashCode(StringComparison.InvariantCulture);
 
             h ^= x._Channels
                 .Select(item => ChannelBuilder.GetContentHashCode(item))

@@ -246,6 +246,40 @@ namespace SharpGLTF
             return false;
         }
 
+        #if !NET6_0_OR_GREATER
+        #pragma warning disable CA1307 // Specify StringComparison for clarity
+        #pragma warning disable CA1304 // Specify CultureInfo
+
+        internal static bool Contains(this string self, string value, StringComparison comparisonType)
+        {
+            switch (comparisonType)
+            {
+                case StringComparison.OrdinalIgnoreCase:
+                case StringComparison.InvariantCultureIgnoreCase:
+                    return self.ToUpperInvariant().Contains(value.ToUpperInvariant());
+                case StringComparison.CurrentCultureIgnoreCase:
+                    return self.ToUpper().Contains(value.ToUpper());
+                default: return self.Contains(value);
+            }
+        }
+
+        internal static int GetHashCode(this string text, StringComparison comparisonType)
+        {
+            switch (comparisonType)
+            {
+                case StringComparison.OrdinalIgnoreCase:
+                case StringComparison.InvariantCultureIgnoreCase:
+                    return text.ToUpperInvariant().GetHashCode();
+                case StringComparison.CurrentCultureIgnoreCase:
+                    return text.ToUpper().GetHashCode();
+                default: return text.GetHashCode();
+            }
+        }
+
+        #pragma warning restore CA1304 // Specify CultureInfo
+        #pragma warning restore CA1307 // Specify StringComparison for clarity
+        #endif
+
         internal static int GetContentHashCode<T>(this IEnumerable<T> collection, int count = int.MaxValue)
         {
             if (collection == null) return 0;

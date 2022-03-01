@@ -20,6 +20,8 @@ namespace SharpGLTF.IO
 
     struct _JsonStaticUtils
     {
+        #region serialization
+
         public static string ToJson(Object obj, JSONOPTIONS options)
         {
             if (obj == null) return String.Empty;
@@ -175,7 +177,11 @@ namespace SharpGLTF.IO
             return true;
         }
 
-        public static bool AreEqualByContent(Object x, Object y, float precission)
+        #endregion
+
+        #region equality
+
+        public static bool AreEqualByContent(Object x, Object y, float precission = 0)
         {
             #pragma warning disable IDE0041 // Use 'is null' check
             if (Object.ReferenceEquals(x, y)) return true;
@@ -185,35 +191,17 @@ namespace SharpGLTF.IO
 
             if (x is IConvertible xval && y is IConvertible yval)
             {
-                return AreEqual(xval, yval, precission);
+                return AreValuesEqual(xval, yval, precission);
             }
 
             if (x is IReadOnlyList<object> xarr && y is IReadOnlyList<object> yarr)
             {
-                if (xarr.Count != yarr.Count) return false;
-                int c = xarr.Count;
-
-                for (int i = 0; i < c; ++i)
-                {
-                    if (!AreEqualByContent(xarr[i], yarr[i], precission)) return false;
-                }
-
-                return true;
+                return _JsonArray.AreEqualByContent(xarr, yarr, precission);
             }
 
             if (x is IReadOnlyDictionary<string, object> xdic && y is IReadOnlyDictionary<string, object> ydic)
             {
-                if (xdic.Count != ydic.Count) return false;
-
-                foreach (var key in xdic.Keys)
-                {
-                    if (!xdic.TryGetValue(key, out Object xdval)) return false;
-                    if (!ydic.TryGetValue(key, out Object ydval)) return false;
-
-                    if (!AreEqualByContent(xdval, ydval, precission)) return false;
-                }
-
-                return true;
+                return _JsonObject.AreEqualByContent(xdic, ydic, precission);
             }
 
             bool isValidType(Object z)
@@ -230,30 +218,33 @@ namespace SharpGLTF.IO
             return false;
         }
 
-        private static bool AreEqual(IConvertible x, IConvertible y, float precission)
+        private static bool AreValuesEqual(IConvertible x, IConvertible y, float precission = 0)
         {
             var xc = x.GetTypeCode();
             var yc = y.GetTypeCode();
 
-            if (xc == TypeCode.Decimal || yc == TypeCode.Decimal)
+            if (precission > 0)
             {
-                var xf = y.ToDecimal(CULTURE.InvariantCulture);
-                var yf = y.ToDecimal(CULTURE.InvariantCulture);
-                return Math.Abs((double)(xf - yf)) < precission;
-            }
+                if (xc == TypeCode.Decimal || yc == TypeCode.Decimal)
+                {
+                    var xf = y.ToDecimal(CULTURE.InvariantCulture);
+                    var yf = y.ToDecimal(CULTURE.InvariantCulture);
+                    return Math.Abs((double)(xf - yf)) <= precission;
+                }
 
-            if (xc == TypeCode.Double || yc == TypeCode.Double)
-            {
-                var xf = y.ToDouble(CULTURE.InvariantCulture);
-                var yf = y.ToDouble(CULTURE.InvariantCulture);
-                return Math.Abs(xf - yf) < precission;
-            }
+                if (xc == TypeCode.Double || yc == TypeCode.Double)
+                {
+                    var xf = y.ToDouble(CULTURE.InvariantCulture);
+                    var yf = y.ToDouble(CULTURE.InvariantCulture);
+                    return Math.Abs(xf - yf) <= precission;
+                }
 
-            if (xc == TypeCode.Single || yc == TypeCode.Single)
-            {
-                var xf = y.ToSingle(CULTURE.InvariantCulture);
-                var yf = y.ToSingle(CULTURE.InvariantCulture);
-                return Math.Abs(xf - yf) < precission;
+                if (xc == TypeCode.Single || yc == TypeCode.Single)
+                {
+                    var xf = y.ToSingle(CULTURE.InvariantCulture);
+                    var yf = y.ToSingle(CULTURE.InvariantCulture);
+                    return Math.Abs(xf - yf) <= precission;
+                }
             }
 
             if (xc == yc) return Object.Equals(x, y);
@@ -296,7 +287,7 @@ namespace SharpGLTF.IO
 
                 foreach (var kvp in xdic.OrderBy(item => item.Key))
                 {
-                    h ^= kvp.Key.GetHashCode();
+                    h ^= kvp.Key.GetHashCode(StringComparison.InvariantCulture);
                     h ^= GetStructureHashCode(kvp.Value);
                     h *= 17;
                 }
@@ -306,11 +297,14 @@ namespace SharpGLTF.IO
 
             throw new ArgumentException($"Invalid type: {x.GetType()}", nameof(x));
         }
+
+        #endregion
     }
 
     /// <summary>
     /// Represents an inmutable Json Array.
     /// </summary>
+    [System.Diagnostics.DebuggerDisplay("Json List")]
     readonly struct _JsonArray : IReadOnlyList<object>, IJsonCollection, IList
     {
         #region constructor
@@ -414,7 +408,44 @@ namespace SharpGLTF.IO
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly Array _Array;
+
+        public override int GetHashCode()
+        {
+            if (_Array == null || _Array.Length == 0) return 0;
+
+            int h = 0;
+            foreach (var item in _Array)
+            {
+                h ^= item.GetHashCode();
+                h *= 17;
+            }
+
+            return h;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IReadOnlyList<object> other && AreEqualByContent(this, other);
+        }
+
+        public static bool AreEqualByContent(IReadOnlyList<object> xarr, IReadOnlyList<object> yarr, float precission = 0)
+        {
+            if (Object.ReferenceEquals(xarr, yarr)) return true;
+            if (xarr == null) return false;
+            if (yarr == null) return false;
+            if (xarr.Count != yarr.Count) return false;
+
+            int c = xarr.Count;
+
+            for (int i = 0; i < c; ++i)
+            {
+                if (!_JsonStaticUtils.AreEqualByContent(xarr[i], yarr[i], precission)) return false;
+            }
+
+            return true;
+        }
 
         #endregion
 
@@ -454,11 +485,12 @@ namespace SharpGLTF.IO
     }
 
     /// <summary>
-    /// Represents an inmutable Json Object.
+    /// Represents an inmutable Json Object (a Dictionary).
     /// </summary>
     /// <remarks>
     /// Supported by converter <see href="https://github.com/dotnet/runtime/blob/76904319b41a1dd0823daaaaae6e56769ed19ed3/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Converters/Collection/IReadOnlyDictionaryOfTKeyTValueConverter.cs"/>
     /// </remarks>
+    [System.Diagnostics.DebuggerDisplay("Json Object")]
     readonly struct _JsonObject : IReadOnlyDictionary<string, object>, IDictionary, IJsonCollection
     {
         #region constructor
@@ -544,7 +576,46 @@ namespace SharpGLTF.IO
 
         #region data
 
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly Dictionary<String, Object> _Dictionary;
+
+        public override int GetHashCode()
+        {
+            if (_Dictionary == null || _Dictionary.Count == 0) return 0;
+
+            int h = 0;
+            foreach (var item in _Dictionary)
+            {
+                h ^= item.Key.GetHashCode(StringComparison.InvariantCulture);
+                h ^= item.Value.GetHashCode();
+                h *= 17;
+            }
+
+            return h;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is IReadOnlyDictionary<string, object> other && AreEqualByContent(this, other);
+        }
+
+        public static bool AreEqualByContent(IReadOnlyDictionary<string, object> xdic, IReadOnlyDictionary<string, object> ydic, float precission = 0)
+        {
+            if (Object.ReferenceEquals(xdic, ydic)) return true;
+            if (xdic == null) return false;
+            if (ydic == null) return false;
+            if (xdic.Count != ydic.Count) return false;
+
+            foreach (var key in xdic.Keys)
+            {
+                if (!xdic.TryGetValue(key, out Object xdval)) return false;
+                if (!ydic.TryGetValue(key, out Object ydval)) return false;
+
+                if (!_JsonStaticUtils.AreEqualByContent(xdval, ydval, precission)) return false;
+            }
+
+            return true;
+        }
 
         #endregion
 

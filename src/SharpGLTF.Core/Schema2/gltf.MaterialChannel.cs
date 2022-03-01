@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2
         {
             if (_Material == null) return 0;
 
-            return _Material.GetHashCode() ^ _Key.GetHashCode();
+            return _Material.GetHashCode() ^ _Key.GetHashCode(StringComparison.InvariantCulture);
         }
 
         /// <inheritdoc />

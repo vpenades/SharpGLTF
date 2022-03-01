@@ -179,7 +179,7 @@ namespace SharpGLTF.Geometry
             var attr = accessor.Attribute;
             attr.Name = name;
 
-            return new SharpGLTF.Memory.MemoryAccessor(accessor.Data, attr);
+            return new Memory.MemoryAccessor(accessor.Data, attr);
         }
 
         internal void CopyToMesh(Mesh dstMesh, Converter<TMaterial, Material> materialEvaluator)
