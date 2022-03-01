@@ -158,8 +158,8 @@ namespace SharpGLTF.IO
             bool isGltfExtension = filePath.EndsWith(".GLTF", StringComparison.OrdinalIgnoreCase);
 
             var context = WriteContext.Create(_WriteAsset);
-
-            if (!isGltfExtension) context.WithBinarySettings();
+            if (isGltfExtension) context.WithTextSettings();
+            else context.WithBinarySettings();
 
             settings?.CopyTo(context);
 

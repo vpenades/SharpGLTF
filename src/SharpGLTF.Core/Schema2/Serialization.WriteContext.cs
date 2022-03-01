@@ -71,7 +71,7 @@ namespace SharpGLTF.Schema2
             }
 
             var context = Create(_saveFile);
-            context.ImageWriting = ResourceWriteMode.SatelliteFile;
+            context.ImageWriting = ResourceWriteMode.Default;
             context.JsonIndented = true;
             context.CurrentDirectory = dinfo;
             return context;
@@ -95,11 +95,22 @@ namespace SharpGLTF.Schema2
             Guard.IsTrue(stream.CanWrite, nameof(stream));
 
             var context = Create((fn, d) => stream.Write(d.Array, d.Offset, d.Count));
-            context.ImageWriting = ResourceWriteMode.Embedded;
+            context.ImageWriting = ResourceWriteMode.Default;
             context.MergeBuffers = true;
             context.JsonIndented = false;
 
             return context.WithBinarySettings();
+        }
+
+        public WriteContext WithTextSettings()
+        {
+            if (ImageWriting == ResourceWriteMode.Default) ImageWriting = ResourceWriteMode.SatelliteFile;
+            if (ImageWriting == ResourceWriteMode.BufferView) ImageWriting = ResourceWriteMode.SatelliteFile;
+
+            MergeBuffers = true;
+            JsonIndented = false;
+
+            return this;
         }
 
         public WriteContext WithBinarySettings()

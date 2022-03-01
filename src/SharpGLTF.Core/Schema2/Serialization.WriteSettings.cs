@@ -199,6 +199,8 @@ namespace SharpGLTF.Schema2
                     .WithSettingsFrom(settings);
             }
 
+            context.WithTextSettings();
+
             var name = Path.GetFileNameWithoutExtension(filePath);
 
             context.WriteTextSchema2(name, this);
@@ -274,12 +276,7 @@ namespace SharpGLTF.Schema2
                 .CreateFromStream(stream)
                 .WithSettingsFrom(settings);
 
-            if (settings != null)
-            {
-                // override settings with required values for GLB writing.
-                context.MergeBuffers = true;
-                context.ImageWriting = ResourceWriteMode.Default;
-            }
+            context.WithBinarySettings();
 
             context.WriteBinarySchema2("model", this);
         }
