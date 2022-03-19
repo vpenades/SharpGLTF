@@ -17,11 +17,15 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             var path = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith("Suzanne.gltf"));
 
-            var suzanne = ModelRoot.Load(path, ValidationMode.TryFix);
+            var suzanne1 = ModelRoot.Load(path, ValidationMode.TryFix);
 
-            path = suzanne.AttachToCurrentTest("suzanne.glb");
+            path = suzanne1.AttachToCurrentTest("suzanne.glb");
 
-            Assert.Less(1024*1024, new System.IO.FileInfo(path).Length);
+            var suzanne2 = ModelRoot.Load(path);
+
+            Assert.AreEqual(suzanne1.LogicalMeshes.Count, suzanne2.LogicalMeshes.Count);
+
+            Assert.Less( new System.IO.FileInfo(path).Length, 1024*512);
         }
     }
 }
