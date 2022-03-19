@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>    
+  </PropertyGroup>
+
+  <Import Project="..\..\src\Analyzers.props" />
+
+  <PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
+    <!-- Prevent warnings from unused code in dependencies -->
+    <TrimmerDefaultAction>link</TrimmerDefaultAction>
+    <RootNamespace>SharpGLTF</RootNamespace>
+  </PropertyGroup>
+
+  <!-- https://docs.microsoft.com/en-us/dotnet/core/deploying/trimming/prepare-libraries-for-trimming -->
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SharpGLTF.Core\SharpGLTF.Core.csproj" />
+    <ProjectReference Include="..\..\src\SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj" />
+
+    <!-- Analyze the whole library, even if attributed with "IsTrimmable" -->
+    <TrimmerRootAssembly Include="SharpGLTF.Core" />
+    <TrimmerRootAssembly Include="SharpGLTF.Toolkit" />
+  </ItemGroup>
+
+</Project>

@@ -22,13 +22,17 @@ namespace SharpGLTF.IO
     {
         #region debug
 
+        internal const string _JsonTrimmingError1 = "JSON serialization and deserialization might require types that cannot be statically analyzed. Use the overload that takes a JsonTypeInfo or JsonSerializerContext, or make sure all of the required types are preserved.";
+
         private string ToDebuggerDisplay()
         {
             if (_Content == null) return null;
 
             var options = new JSONOPTIONS();
             options.WriteIndented = true;
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             return ToJson(options);
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         }
 
         #endregion
@@ -132,6 +136,9 @@ namespace SharpGLTF.IO
         /// <param name="value">The value to convert.</param>
         /// <param name="options">Options to control the conversion behavior.</param>
         /// <returns>A <see cref="JsonContent"/> object.</returns>
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(_JsonTrimmingError1)]
+        #endif
         public static JsonContent Serialize(Object value, JSONOPTIONS options = null)
         {
             if (value == null) return default;
@@ -170,16 +177,25 @@ namespace SharpGLTF.IO
             return root == null ? default : new JsonContent(_JsonStaticUtils.Deserialize(root.RootElement));
         }
 
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(_JsonTrimmingError1)]
+        #endif
         public string ToJson(JSONOPTIONS options = null)
         {
             return _JsonStaticUtils.ToJson(_Content, options);
         }
 
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(_JsonTrimmingError1)]
+        #endif
         public Object Deserialize(Type type, JSONOPTIONS options = null)
         {
             return _JsonStaticUtils.Deserialize(_Content, type, options);
         }
 
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(_JsonTrimmingError1)]
+        #endif
         public T Deserialize<T>(JSONOPTIONS options = null)
         {
             return (T)_JsonStaticUtils.Deserialize(_Content, typeof(T), options);

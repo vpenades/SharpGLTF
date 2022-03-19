@@ -18,6 +18,11 @@
   <Import Project="..\Analyzers.props" />
   <Import Project="..\Testing.props" />
   <Import Project="..\SourceLink.props" />
+
+  <PropertyGroup>
+    <IsTrimmable>true</IsTrimmable>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+  </PropertyGroup>
   
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />

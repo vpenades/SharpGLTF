@@ -22,6 +22,9 @@ namespace SharpGLTF.IO
     {
         #region serialization
 
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(JsonContent._JsonTrimmingError1)]
+        #endif
         public static string ToJson(Object obj, JSONOPTIONS options)
         {
             if (obj == null) return String.Empty;
@@ -54,6 +57,9 @@ namespace SharpGLTF.IO
             throw new ArgumentException($"Can't serialize {value.GetType().Name}", nameof(value));
         }
 
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.RequiresUnreferencedCode(JsonContent._JsonTrimmingError1)]
+        #endif
         public static Object Deserialize(Object obj, Type type, JSONOPTIONS options = null)
         {
             if (options == null)

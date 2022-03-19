@@ -57,6 +57,12 @@ dotnet_diagnostic.CA1707.severity = silent
 # CA1815: Override equals and operator equals on value types
 dotnet_diagnostic.CA1815.severity = silent
 
+# IL2026: Using dynamic types might cause types or members to be removed by trimmer.
+dotnet_diagnostic.IL2026.severity = error
+csharp_style_throw_expression = true:suggestion
+dotnet_diagnostic.IL2046.severity = error
+dotnet_diagnostic.IL2109.severity = error
+
 [*.{cs,vb}]
 #### Naming styles ####
 
@@ -140,3 +146,4 @@ dotnet_style_qualification_for_event = false:silent
 
 # CA1014: Mark assemblies with CLSCompliant
 dotnet_diagnostic.CA1014.severity = silent
+dotnet_style_namespace_match_folder = true:suggestion
