@@ -9,7 +9,7 @@
 
   <ItemGroup>    
     <PackageReference Include="GltfValidator" Version="2.0.0-dev.3.5.202109201056" />    
-    <PackageReference Include="nunit" Version="3.13.2" />
+    <PackageReference Include="nunit" Version="3.13.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
