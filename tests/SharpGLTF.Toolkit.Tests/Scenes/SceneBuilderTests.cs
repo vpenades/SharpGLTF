@@ -439,7 +439,7 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("skinned.gltf");
         }
 
-        [Test]
+        [Test(Description = "Creates a morph animated cube")]
         public void CreateAllAnimationTypesScene()
         {
             // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
@@ -453,30 +453,38 @@ namespace SharpGLTF.Scenes
                 .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));
-
-            var scene = new SceneBuilder();
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));            
 
             var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
-            mesh1.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
-            var inst1 = scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
+            mesh1.AddCube(pink, Matrix4x4.Identity);            
 
             var mesh2 = VPOSNRM.CreateCompatibleMesh("shape2");
-            mesh2.AddCube(pink, Matrix4x4.Identity);
-            var inst2 = scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(2, 0, 0));
+            mesh2.AddCube(yellow, Matrix4x4.Identity);            
+
+            var scene = new SceneBuilder();            
+
+            var inst1 = scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
+
+            // meshes intended to support animation must be created using an armature
+            var armature = new NodeBuilder();
+            armature.LocalTransform = Matrix4x4.CreateTranslation(2, 0, 0);
+            var inst2 = scene.AddRigidMesh(mesh2, armature); 
 
             scene.AttachToCurrentTest("static.glb");
             scene.AttachToCurrentTest("static.gltf");
 
-            var morphBuilder = mesh2.UseMorphTarget(0);
+            // up to this point, the scene has two plain unanimated cubes.
 
+            var morphBuilder = mesh2.UseMorphTarget(0);
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(0), (Vector3.UnitY, Vector3.Zero));
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(1), (Vector3.UnitY, Vector3.Zero));
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(2), (Vector3.UnitY, Vector3.Zero));
             morphBuilder.SetVertexDelta(morphBuilder.Positions.ElementAt(3), (Vector3.UnitY, Vector3.Zero));
 
+            // set default value.
             inst2.Content.UseMorphing().SetValue(1);
             
+            // ser animation curve.
             var curve = inst2.Content.UseMorphing().UseTrackBuilder("Default");
             curve.SetPoint(0, true, 0);
             curve.SetPoint(1, true, 1);
@@ -484,7 +492,13 @@ namespace SharpGLTF.Scenes
 
             var gltf = scene.ToGltf2();
 
-            // Assert.AreEqual(1, gltf.LogicalMeshes[1].MorphWeights[0]);
+            TestContext.WriteLine(gltf.GetJsonPreview());
+
+            var meshIdx = 1;
+
+            Assert.AreEqual(1, gltf.LogicalMeshes[meshIdx].Primitives[0].MorphTargetsCount);
+            Assert.AreEqual(1, gltf.LogicalMeshes[meshIdx].MorphWeights[0]);
+            Assert.AreEqual(1, gltf.LogicalAnimations.Count);
 
             scene.AttachToCurrentTest("mopth.glb");
             scene.AttachToCurrentTest("mopth.gltf");

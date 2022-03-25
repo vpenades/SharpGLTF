@@ -100,6 +100,12 @@ namespace SharpGLTF.Scenes
 
         #region API
 
+        /// <summary>
+        /// Adds a mesh instance to the scene, attached to an animatable <see cref="NodeBuilder"/>
+        /// </summary>
+        /// <param name="mesh">The mesh to add.</param>
+        /// <param name="node">The node to which the mesh will be attached.</param>
+        /// <returns>The instance representing this mesh-node pair.</returns>
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, NodeBuilder node)
         {
             Guard.NotNull(mesh, nameof(mesh));
@@ -113,6 +119,16 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
+        /// <summary>
+        /// Adds a mesh instance to the scene, at the given location.
+        /// </summary>
+        /// <param name="mesh">The mesh to add.</param>
+        /// <param name="meshWorldTransform">The location of the mesh.</param>
+        /// <returns>The instance representing this mesh.</returns>
+        /// <remarks>
+        /// Mesh instances with a fixed transform cannot be animated,
+        /// If you need morph animations, use <see cref="AddRigidMesh(MESHBUILDER, NodeBuilder)"/> instead.
+        /// </remarks>
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, Transforms.AffineTransform meshWorldTransform)
         {
             Guard.NotNull(mesh, nameof(mesh));
@@ -125,6 +141,17 @@ namespace SharpGLTF.Scenes
             return instance;
         }
 
+        /// <summary>
+        /// Adds a mesh instance to the scene, at the given location, relative to the given node.
+        /// </summary>
+        /// <param name="mesh">The mesh to add.</param>
+        /// <param name="node">The parent node.</param>
+        /// <param name="instanceTransform">The location of the mesh.</param>
+        /// <returns>The instance representing this mesh.</returns>
+        /// <remarks>
+        /// Mesh instances with a fixed transform cannot be animated,
+        /// If you need morph animations, use <see cref="AddRigidMesh(MESHBUILDER, NodeBuilder)"/> instead.
+        /// </remarks>
         public InstanceBuilder AddRigidMesh(MESHBUILDER mesh, NodeBuilder node, Transforms.AffineTransform instanceTransform)
         {
             Guard.NotNull(mesh, nameof(mesh));

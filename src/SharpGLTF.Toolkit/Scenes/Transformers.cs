@@ -115,6 +115,8 @@ namespace SharpGLTF.Scenes
 
         public Animations.AnimatableProperty<ArraySegment<float>> UseMorphing()
         {
+            if (this is FixedTransformer) throw new InvalidOperationException($"Internal {nameof(FixedTransformer)} does not support animations. Use {nameof(SceneBuilder.AddRigidMesh)}(MeshBuilder mesh, NodeBuilder node) to add an animatable instance");
+
             if (_Morphings == null)
             {
                 _Morphings = new Animations.AnimatableProperty<ArraySegment<float>>();

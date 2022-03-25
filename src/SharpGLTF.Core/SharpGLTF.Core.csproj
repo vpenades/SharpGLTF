@@ -29,7 +29,7 @@
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
   </ItemGroup>  
   
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net5.0' AND  '$(TargetFramework)' != 'net6.0'">    
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1'">    
     <PackageReference Include="System.Text.Json" Version="5.0.2" />
   </ItemGroup>
 
