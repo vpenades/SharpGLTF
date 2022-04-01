@@ -118,7 +118,7 @@ namespace SharpGLTF.Schema2
             // Binary settings should allow BufferView and SatelliteFile ImageWriting modes:
 
             if (ImageWriting == ResourceWriteMode.Default) ImageWriting = ResourceWriteMode.BufferView;
-            if (ImageWriting == ResourceWriteMode.Embedded) ImageWriting = ResourceWriteMode.BufferView;
+            if (ImageWriting == ResourceWriteMode.EmbeddedAsBase64) ImageWriting = ResourceWriteMode.BufferView;
 
             MergeBuffers = true;
             JsonIndented = false;
@@ -205,12 +205,15 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
 
-            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, this.MergeBuffers, this.BuffersMaxSize);
+            // merge images when explicitly requested.
+            var mergeImages = this.ImageWriting == ResourceWriteMode.BufferView;
+
+            model = this._PreprocessSchema2(model, mergeImages, this.MergeBuffers, this.BuffersMaxSize);
             Guard.NotNull(model, nameof(model));
 
             model._PrepareBuffersForSatelliteWriting(this, baseName);
 
-            model._PrepareImagesForWriting(this, baseName, ResourceWriteMode.SatelliteFile);
+            model._PrepareImagesForWriting(this, baseName, false, ResourceWriteMode.SatelliteFile);
 
             _ValidateBeforeWriting(model);
 
@@ -234,7 +237,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
             Guard.NotNull(model, nameof(model));
 
-            model = this._PreprocessSchema2(model, this.ImageWriting == ResourceWriteMode.BufferView, true, int.MaxValue);
+            // merge images for all cases except for satellite files
+            var mergeImages = this.ImageWriting != ResourceWriteMode.SatelliteFile;
+
+            model = this._PreprocessSchema2(model, mergeImages, true, int.MaxValue);
             Guard.NotNull(model, nameof(model));
 
             var ex = _BinarySerialization.IsBinaryCompatible(model);
@@ -242,7 +248,7 @@ namespace SharpGLTF.Schema2
 
             model._PrepareBuffersForInternalWriting();
 
-            model._PrepareImagesForWriting(this, baseName, ResourceWriteMode.Embedded);
+            model._PrepareImagesForWriting(this, baseName, true, ResourceWriteMode.BufferView);
 
             _ValidateBeforeWriting(model);
 
