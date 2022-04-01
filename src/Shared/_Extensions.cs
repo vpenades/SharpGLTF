@@ -216,6 +216,9 @@ namespace SharpGLTF
             if (check.HasFlag(MatrixCheck.Identity) && matrix != Matrix4x4.Identity) return false;
             if (check.HasFlag(MatrixCheck.IdentityColumn4))
             {
+                // glTF validator requires 4th column to be (0,0,0,1)
+                // so it means the glTF standard does not allow rounding errors.
+                // https://github.com/vpenades/SharpGLTF/issues/130#issuecomment-1086306019
                 if (matrix.M14 != 0) return false;
                 if (matrix.M24 != 0) return false;
                 if (matrix.M34 != 0) return false;

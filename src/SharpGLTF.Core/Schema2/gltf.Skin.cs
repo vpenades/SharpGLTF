@@ -120,7 +120,19 @@ namespace SharpGLTF.Schema2
 
             _FindCommonAncestor(joints.Select(item => item.Joint));
 
-            foreach (var j in joints) { Guard.IsTrue(j.InverseBindMatrix._IsFinite(), nameof(joints)); }
+            // fix 4th column to meet gltf schema specification and gltf Validator.
+            for (int i = 0; i < joints.Length; ++i)
+            {
+                var ibm = joints[i].InverseBindMatrix;
+                ibm.M14 = 0;
+                ibm.M24 = 0;
+                ibm.M34 = 0;
+                ibm.M44 = 1;
+
+                Guard.IsTrue(ibm.IsValid(_Extensions.MatrixCheck.InverseBindMatrix), nameof(joints));
+
+                joints[i] = (joints[i].Joint, ibm);
+            }
 
             // inverse bind matrices accessor
 
