@@ -436,6 +436,8 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(joints, nameof(joints));
             Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Joint)), nameof(joints));
 
+            GuardAll.AreTrue(joints.Select(item => item.InverseBindMatrix.IsValid(_Extensions.MatrixCheck.InverseBindMatrix, 0.01f)), nameof(joints), idx => $"matrix {idx} is invalid");
+
             _MeshPoseWorldTransform = null;
             _Joints.Clear();
             _Joints.AddRange(joints.Select(item => (item.Joint, (Matrix4x4?)item.InverseBindMatrix)));

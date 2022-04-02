@@ -208,7 +208,7 @@ namespace SharpGLTF
             InverseBindMatrix = Invertible | IdentityColumn4
         }
 
-        internal static bool IsValid(this in Matrix4x4 matrix, MatrixCheck check)
+        internal static bool IsValid(this in Matrix4x4 matrix, MatrixCheck check, float tolerance = 0)
         {
             if (!matrix._IsFinite()) return false;
 
@@ -216,13 +216,13 @@ namespace SharpGLTF
             if (check.HasFlag(MatrixCheck.Identity) && matrix != Matrix4x4.Identity) return false;
             if (check.HasFlag(MatrixCheck.IdentityColumn4))
             {
-                // glTF validator requires 4th column to be (0,0,0,1)
-                // so it means the glTF standard does not allow rounding errors.
-                // https://github.com/vpenades/SharpGLTF/issues/130#issuecomment-1086306019
+                // Acording to gltf schema
+                // "The fourth row of each matrix MUST be set to [0.0, 0.0, 0.0, 1.0]."
+                // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins-overview
                 if (matrix.M14 != 0) return false;
                 if (matrix.M24 != 0) return false;
                 if (matrix.M34 != 0) return false;
-                if (matrix.M44 != 1) return false;
+                if (Math.Abs(matrix.M44 - 1) > tolerance) return false;
             }
 
             if (check.HasFlag(MatrixCheck.Invertible) && !Matrix4x4.Invert(matrix, out _)) return false;

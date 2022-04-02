@@ -247,10 +247,11 @@ namespace SharpGLTF
             foreach (var val in collection) Guard.NotNull(val, parameterName, message);
         }
 
-        public static void AreTrue(IEnumerable<bool> collection, string parameterName, string message = "")
+        public static void AreTrue(IEnumerable<bool> collection, string parameterName, Func<int,string> messageFunc = null)
         {
             Guard.NotNull(collection, nameof(collection));
-            foreach (var val in collection) Guard.IsTrue(val, parameterName, message);
+            int index = 0;
+            foreach (var val in collection) { Guard.IsTrue(val, parameterName, messageFunc?.Invoke(index) ?? String.Empty); ++index; }
         }
 
         public static void MustBeEqualTo<TValue>(IEnumerable<TValue> collection, TValue expected, string parameterName)
