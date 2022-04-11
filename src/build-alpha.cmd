@@ -1,5 +1,5 @@
 @echo off
-set VERSIONSUFFIX=alpha0026
+set VERSIONSUFFIX=alpha0027
 
 echo Building %VERSIONSUFFIX%
 
