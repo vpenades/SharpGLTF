@@ -175,10 +175,8 @@ namespace SharpGLTF.Schema2
             Guard.MustBeGreaterThan(zfar, (float)_zfarExclusiveMinimum, nameof(zfar));
             Guard.MustBeGreaterThan(zfar, znear, nameof(zfar));
             Guard.MustBeLessThan(zfar, float.PositiveInfinity, nameof(zfar));
-
-            // these are considered warnings
-            // Guard.MustBeGreaterThan(xmag, 0, nameof(xmag));
-            // Guard.MustBeGreaterThan(ymag, 0, nameof(ymag));
+            Guard.MustBeGreaterThan(xmag, 0, nameof(xmag));
+            Guard.MustBeGreaterThan(ymag, 0, nameof(ymag));
         }
 
         #endregion

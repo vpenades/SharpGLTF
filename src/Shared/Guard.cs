@@ -24,6 +24,18 @@ namespace SharpGLTF
             throw new ArgumentException(message, parameterName);
         }
 
+        public static void FileNameMustBeValid(string fileName, string parameterName, string message = "")
+        {
+            Guard.NotNullOrEmpty(fileName, parameterName, message);
+
+            var invalid = System.IO.Path.GetInvalidFileNameChars();
+
+            if (!fileName.Any(c => invalid.Contains(c))) return;
+
+            if (string.IsNullOrWhiteSpace(message)) message = $"{fileName} is invalid or does not exist.";
+            throw new ArgumentException(message, parameterName);
+        }
+
         public static void FilePathMustBeValid(string filePath, string parameterName, string message = "")
         {
             // based on https://referencesource.microsoft.com/#mscorlib/system/io/file.cs,3360368484a9f131
