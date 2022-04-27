@@ -34,6 +34,7 @@ namespace SharpGLTF.Schema2
             return new ReadContext(callback);
         }
 
+        [Obsolete("Use CreateFromDirectory")]
         public static ReadContext CreateFromFile(string filePath)
         {
             Guard.NotNull(filePath, nameof(filePath));

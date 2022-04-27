@@ -13,6 +13,50 @@ namespace SharpGLTF.Schema2.LoadAndSave
     internal class RegressionTests
     {
         [Test]
+        public void LoadWithRelativeAndAbsolutePath()
+        {
+            // store current directory
+
+            var cdir = Environment.CurrentDirectory;
+
+            var modelPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\RelativePaths.gltf");
+
+            // absolute path            
+
+            var model1 = ModelRoot.Load(modelPath, Validation.ValidationMode.TryFix);
+            Assert.NotNull(model1);
+            Assert.AreEqual(4, model1.LogicalImages.Count);
+
+            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+
+            // local path            
+
+            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(modelPath);
+            var modelFile = System.IO.Path.GetFileName(modelPath);
+
+            var model2 = ModelRoot.Load(modelFile, Validation.ValidationMode.TryFix);
+            Assert.NotNull(model2);
+            Assert.AreEqual(4, model2.LogicalImages.Count);
+
+            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+
+            // relative path:
+
+            modelFile = System.IO.Path.Combine(System.IO.Path.GetFileName(Environment.CurrentDirectory), modelFile);
+            Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(Environment.CurrentDirectory);
+
+            var model3 = ModelRoot.Load(modelFile, Validation.ValidationMode.TryFix);
+            Assert.NotNull(model3);
+            Assert.AreEqual(4, model3.LogicalImages.Count);
+
+            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+
+            // restore current directory
+
+            Environment.CurrentDirectory = cdir;
+        }
+
+        [Test]
         public void LoadSuzanneTest()
         {
             var path1 = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith("Suzanne.gltf"));
