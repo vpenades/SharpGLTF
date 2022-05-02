@@ -103,7 +103,10 @@ namespace SharpGLTF.IO
 
             foreach (var img in images)
             {
-                var imgName = firstImg ? baseName : $"{baseName}_{files.Count}.{img.FileExtension}";
+                var imgName = firstImg
+                    ? $"{baseName}.{img.FileExtension}"
+                    : $"{baseName}_{files.Count}.{img.FileExtension}";
+
                 files[imgName] = new BYTES(img.Content.ToArray());
                 firstImg = false;
             }
