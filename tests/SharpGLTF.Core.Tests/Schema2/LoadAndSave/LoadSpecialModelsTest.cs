@@ -197,7 +197,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var mesh = model.DefaultScene
                 .EvaluateTriangles<Geometry.VertexTypes.VertexPositionNormalTangent, Geometry.VertexTypes.VertexTexture1>()
-                .ToMeshBuilder( m => m.ToMaterialBuilder() );            
+                .ToMeshBuilder();            
 
             var editableScene = new Scenes.SceneBuilder();
             editableScene.AddRigidMesh(mesh, Matrix4x4.Identity);

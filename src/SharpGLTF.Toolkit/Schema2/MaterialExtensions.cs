@@ -547,6 +547,19 @@ namespace SharpGLTF.Schema2
             return null;
         }
 
+        public static TextureTransform GetDiffuseTextureTransform(this Material material)
+        {
+            if (material == null) return null;
+
+            var channel = material.FindChannel("Diffuse");
+            if (channel.HasValue) return channel.Value.TextureTransform;
+
+            channel = material.FindChannel("BaseColor");
+            if (channel.HasValue) return channel.Value.TextureTransform;
+
+            return null;
+        }
+
         #endregion
     }
 }

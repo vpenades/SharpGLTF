@@ -231,7 +231,13 @@ namespace SharpGLTF.IO
 
         public void AddModel(ModelRoot model)
         {
-            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene))
+            // retrieve a "snapshot" of all the triangles of the scene
+            var triangles = Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene);
+
+            // bake the material transforms into the UV coordinates
+            triangles = EvaluatedTriangle<VGEOMETRY, VMATERIAL, VEMPTY>.TransformTextureCoordsByMaterial(triangles);
+
+            foreach (var triangle in triangles)
             {
                 var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);
@@ -242,9 +248,16 @@ namespace SharpGLTF.IO
         {
             var options = new Runtime.RuntimeOptions();
             options.IsolateMemory = false;
+            // options.BakeTextureTransforms = true;
             options.GpuMeshInstancing = Runtime.MeshInstancing.SingleMesh;
 
-            foreach (var triangle in Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, options, animation, time))
+            // retrieve a "snapshot" of all the triangles of the scene
+            var triangles = Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, options, animation, time);
+
+            // bake the material transforms into the UV coordinates
+            triangles = EvaluatedTriangle<VGEOMETRY, VMATERIAL, VEMPTY>.TransformTextureCoordsByMaterial(triangles);
+
+            foreach (var triangle in triangles)
             {
                 var dstMaterial = GetMaterialFromTriangle(triangle.Material);
                 this.AddTriangle(dstMaterial, triangle.A, triangle.B, triangle.C);

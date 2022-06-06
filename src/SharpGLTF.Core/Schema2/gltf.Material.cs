@@ -114,6 +114,7 @@ namespace SharpGLTF.Schema2
         ///   - "SpecularGlossiness"
         /// </param>
         /// <returns>A <see cref="MaterialChannel"/> structure. or null if it does not exist</returns>
+        [System.Diagnostics.DebuggerStepThrough]
         public MaterialChannel? FindChannel(string channelKey)
         {
             foreach (var ch in Channels)

@@ -535,78 +535,12 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh, MESHXFORM xform = null)
+        public static IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> EvaluateTriangles<TvG, TvM, TvS>(this Mesh mesh, MESHXFORM xform = null)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
             where TvS : struct, IVertexSkinning
         {
-            if (xform != null && !xform.Visible) mesh = null;
-            if (mesh == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, VertexBuilder<TvG, TvM, TvS>, Material)>();
-
-            var primitives = _GatherMeshGeometry<TvG>(mesh);
-
-            return Transforms.InstancingTransform.Evaluate(xform)
-                .SelectMany
-                (
-                    xinst => primitives.SelectMany
-                    (
-                        prim =>
-                        {
-                            var xvertices = xinst != null ? prim.Vertices.WithTransform(xinst) : prim.Vertices;
-                            return _EvaluateTriangles<TvG, TvM, TvS>(prim.Material, xvertices, prim.Triangles);
-                        }
-
-                    )
-                );
-        }
-
-        private static IReadOnlyList<(Material Material, VertexBufferColumns Vertices, IEnumerable<(int, int, int)> Triangles)> _GatherMeshGeometry<TvG>(Mesh mesh)
-            where TvG : struct, IVertexGeometry
-        {
-            var primitives = mesh.Primitives
-                            .Where(prim => prim.GetTriangleIndices().Any())
-                            .Select(prim => (prim.Material, prim.GetVertexColumns(), (IEnumerable<(int, int, int)>)prim.GetTriangleIndices().ToList()))
-                            .ToList();
-
-            bool needsNormals = default(TvG).TryGetNormal(out Vector3 nrm);
-            bool needsTangents = default(TvG).TryGetTangent(out Vector4 tgt);
-
-            if (needsNormals)
-            {
-                var prims = primitives
-                    .Where(p => p.Item2.Normals == null)
-                    .Select(p => (p.Item2, p.Item3))
-                    .ToList();
-
-                if (prims.Any()) VertexBufferColumns.CalculateSmoothNormals(prims);
-            }
-
-            if (needsTangents)
-            {
-                var prims = primitives
-                    .Where(p => p.Item2.Tangents == null && p.Item2.TexCoords0 != null)
-                    .Select(p => (p.Item2, p.Item3))
-                    .ToList();
-
-                if (prims.Any()) VertexBufferColumns.CalculateTangents(prims);
-            }
-
-            return primitives;
-        }
-
-        private static IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, Material Material)> _EvaluateTriangles<TvG, TvM, TvS>(Material material, VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
-            where TvG : struct, IVertexGeometry
-            where TvM : struct, IVertexMaterial
-            where TvS : struct, IVertexSkinning
-        {
-            foreach (var (ta, tb, tc) in indices)
-            {
-                var va = vertices.GetVertex<TvG, TvM, TvS>(ta);
-                var vb = vertices.GetVertex<TvG, TvM, TvS>(tb);
-                var vc = vertices.GetVertex<TvG, TvM, TvS>(tc);
-
-                yield return (va, vb, vc, material);
-            }
+            return EvaluatedTriangle<TvG, TvM, TvS>.GetTrianglesFromMesh(mesh, xform);
         }
 
         #endregion
@@ -708,7 +642,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var tri in srcScene.EvaluateTriangles<VertexPositionNormal, VertexColor1Texture1>(options, animation, time))
             {
-                var material = materialFunc(tri.Item4);
+                var material = materialFunc(tri.Material);
 
                 mesh.UsePrimitive(material).AddTriangle(tri.A, tri.B, tri.C);
             }
@@ -793,6 +727,16 @@ namespace SharpGLTF.Schema2
             }
 
             return dstMesh;
+        }
+
+        public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS> ToMeshBuilder<TvG, TvM, TvS>(this IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> triangles)
+            where TvG : struct, IVertexGeometry
+            where TvM : struct, IVertexMaterial
+            where TvS : struct, IVertexSkinning
+        {
+            return triangles
+                .Select(item => (item.A, item.B, item.C, item.Material))
+                .ToMeshBuilder(m => m.ToMaterialBuilder());
         }
 
         public static MeshBuilder<Materials.MaterialBuilder, TvG, TvM, TvS> ToMeshBuilder<TMaterial, TvG, TvM, TvS>(this IEnumerable<(VertexBuilder<TvG, TvM, TvS> A, VertexBuilder<TvG, TvM, TvS> B, VertexBuilder<TvG, TvM, TvS> C, TMaterial Material)> triangles, Converter<TMaterial, Materials.MaterialBuilder> materialFunc)

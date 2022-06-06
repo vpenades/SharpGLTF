@@ -240,11 +240,11 @@ namespace SharpGLTF.Schema2
         /// <param name="animation">An <see cref="Animation"/> instance, or null.</param>
         /// <param name="time">The animation time.</param>
         /// <returns>A collection of triangles in world space.</returns>
-        public static IEnumerable<(VertexBuilder<TvG, TvM, VertexEmpty> A, VertexBuilder<TvG, TvM, VertexEmpty> B, VertexBuilder<TvG, TvM, VertexEmpty> C, Material Material)> EvaluateTriangles<TvG, TvM>(this Scene scene, Runtime.RuntimeOptions options = null, Animation animation = null, float time = 0)
+        public static IEnumerable<EvaluatedTriangle<TvG, TvM, VertexEmpty>> EvaluateTriangles<TvG, TvM>(this Scene scene, Runtime.RuntimeOptions options = null, Animation animation = null, float time = 0)
             where TvG : struct, IVertexGeometry
             where TvM : struct, IVertexMaterial
         {
-            if (scene == null) return Enumerable.Empty<(VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, VertexBuilder<TvG, TvM, VertexEmpty>, Material)>();
+            if (scene == null) return Enumerable.Empty<EvaluatedTriangle<TvG, TvM, VertexEmpty>>();
 
             var instance = Runtime.SceneTemplate
                 .Create(scene, options)
