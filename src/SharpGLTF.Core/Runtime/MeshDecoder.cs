@@ -9,6 +9,13 @@ using XYZW = System.Numerics.Vector4;
 
 namespace SharpGLTF.Runtime
 {
+    /// <summary>
+    /// Exposes an API to allow decoding a geometry mesh.
+    /// </summary>
+    /// <typeparam name="TMaterial">The primitive's material type</typeparam>
+    /// <remarks>
+    /// Implemented by <see cref="_MeshDecoder{TMaterial}"/>
+    /// </remarks>
     public interface IMeshDecoder<TMaterial>
         where TMaterial : class
     {
@@ -18,6 +25,12 @@ namespace SharpGLTF.Runtime
         IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives { get; }
     }
 
+    /// <summary>
+    /// Exposes an API to get geometry data from a mesh primitive
+    /// </summary>
+    /// <remarks>
+    /// Implemented by <see cref="_MeshPrimitiveDecoder"/>
+    /// </remarks>
     public interface IMeshPrimitiveDecoder
     {
         #region properties
@@ -70,21 +83,32 @@ namespace SharpGLTF.Runtime
 
         XYZW GetTangent(int vertexIndex);
 
-        IReadOnlyList<XYZ> GetPositionDeltas(int vertexIndex);
-
-        IReadOnlyList<XYZ> GetNormalDeltas(int vertexIndex);
-
-        IReadOnlyList<XYZ> GetTangentDeltas(int vertexIndex);
-
         XY GetTextureCoord(int vertexIndex, int textureSetIndex);
 
         XYZW GetColor(int vertexIndex, int colorSetIndex);
 
         Transforms.SparseWeight8 GetSkinWeights(int vertexIndex);
 
+        IReadOnlyList<XYZ> GetPositionDeltas(int vertexIndex);
+
+        IReadOnlyList<XYZ> GetNormalDeltas(int vertexIndex);
+
+        IReadOnlyList<XYZ> GetTangentDeltas(int vertexIndex);
+
+        IReadOnlyList<XY> GetTextureCoordDeltas(int vertexIndex, int textureSetIndex);
+
+        IReadOnlyList<XYZW> GetColorDeltas(int vertexIndex, int colorSetIndex);
+
         #endregion
     }
 
+    /// <summary>
+    /// Exposes an API to get geometry data from a mesh primitive
+    /// </summary>
+    /// <typeparam name="TMaterial">The material type used by the primitive</typeparam>
+    /// <remarks>
+    /// Implemented by <see cref="_MeshPrimitiveDecoder{TMaterial}"/>
+    /// </remarks>
     public interface IMeshPrimitiveDecoder<TMaterial> : IMeshPrimitiveDecoder
         where TMaterial : class
     {
