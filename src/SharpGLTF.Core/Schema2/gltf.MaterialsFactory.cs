@@ -612,4 +612,26 @@ namespace SharpGLTF.Schema2
             yield return new MaterialChannel(material, "VolumeAttenuation", onCreate => null, attColorParam, attDistParam);
         }
     }
+
+    internal sealed partial class MaterialEmissiveStrength
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialEmissiveStrength(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_emissiveStrength < _emissiveStrengthMinimum) throw new ArgumentOutOfRangeException(nameof(EmissiveStrength)); 
+        }
+
+        public static float DefaultEmissiveStrength => (float)_emissiveStrengthDefault;
+
+        public float EmissiveStrength
+        {
+            get => (float)(this._emissiveStrength ?? _emissiveStrengthDefault);
+            set => this._emissiveStrength = ((double)value).AsNullable(_emissiveStrengthDefault);
+        }
+    }
 }
