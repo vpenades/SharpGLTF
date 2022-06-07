@@ -128,6 +128,8 @@ namespace SharpGLTF.Schema2
 
             EvaluatedTriangle<TvG, TvM, TvS> _getTransformedTriangle(EvaluatedTriangle<TvG, TvM, TvS> triangle)
             {
+                if (triangle.Material == null) return triangle;
+
                 if (!xformDict.TryGetValue(triangle.Material, out var xform))
                 {
                     xform = triangle.Material.GetDiffuseTextureTransform()
