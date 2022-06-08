@@ -4,20 +4,8 @@
     <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
     <AssemblyName>SharpGLTF.Toolkit</AssemblyName>
     <RootNamespace>SharpGLTF</RootNamespace>    
-    <LangVersion>7.3</LangVersion>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
-  </PropertyGroup>
-
-  <Import Project="..\PackageInfo.props" />
-  <Import Project="..\Version.props" />
-  <Import Project="..\Analyzers.props" />
-  <Import Project="..\Testing.props" />
-  <Import Project="..\SourceLink.props" />
-
-  <PropertyGroup>
-    <IsTrimmable>true</IsTrimmable>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-  </PropertyGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />

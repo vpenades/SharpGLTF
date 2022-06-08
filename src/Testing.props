@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project>
-
-  <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <InternalsVisibleTo Include="SharpGLTF.Core.Tests"/>
-    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests"/>
-  </ItemGroup>  
-	
-</Project>

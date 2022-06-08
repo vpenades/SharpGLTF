@@ -6,13 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		src\Analyzers.props = src\Analyzers.props
-		src\PackageInfo.props = src\PackageInfo.props
+		src\Directory.Build.props = src\Directory.Build.props
 		README.md = README.md
 		SharpGLTF.ruleset = SharpGLTF.ruleset
-		src\SourceLink.props = src\SourceLink.props
-		src\Testing.props = src\Testing.props
-		src\Version.props = src\Version.props
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{072B725F-773F-4751-9616-E9778897C1D2}"
@@ -49,7 +45,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Plotly", "example
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.ThirdParty.Tests", "tests\SharpGLTF.ThirdParty.Tests\SharpGLTF.ThirdParty.Tests.csproj", "{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.Trimmed.App", "tests\SharpGLTF.Trimmed.App\SharpGLTF.Trimmed.App.csproj", "{A09437F7-403C-44A2-B1FE-15CC535B64CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Trimmed.App", "tests\SharpGLTF.Trimmed.App\SharpGLTF.Trimmed.App.csproj", "{A09437F7-403C-44A2-B1FE-15CC535B64CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
