@@ -18,7 +18,7 @@ namespace SharpGLTF.IO
         int Count { get; }
     }
 
-    struct _JsonStaticUtils
+    static class _JsonStaticUtils
     {
         #region serialization
 

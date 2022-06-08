@@ -328,7 +328,7 @@ namespace SharpGLTF.Collections
             #endregion
         }
 
-        struct _IndexCollection : IEnumerable<int>
+        readonly struct _IndexCollection : IEnumerable<int>
         {
             public _IndexCollection(ValueListSet<T> source) { _Source = source; }
 

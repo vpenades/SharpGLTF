@@ -63,12 +63,12 @@ namespace SharpGLTF
             return v.X._IsFinite() && v.Y._IsFinite() && v.Z._IsFinite();
         }
 
-        internal static bool _IsFinite(this Vector4 v)
+        internal static bool _IsFinite(this in Vector4 v)
         {
             return v.X._IsFinite() && v.Y._IsFinite() && v.Z._IsFinite() && v.W._IsFinite();
         }
 
-        internal static bool _IsFinite(this Matrix4x4 v)
+        internal static bool _IsFinite(this in Matrix4x4 v)
         {
             if (!(v.M11._IsFinite() && v.M12._IsFinite() && v.M13._IsFinite() && v.M14._IsFinite())) return false;
             if (!(v.M21._IsFinite() && v.M22._IsFinite() && v.M23._IsFinite() && v.M24._IsFinite())) return false;

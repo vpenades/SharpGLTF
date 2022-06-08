@@ -287,11 +287,26 @@ namespace SharpGLTF.IO
         #region nested types
 
         [System.Diagnostics.DebuggerDisplay("{DiffuseColor} {DiffuseTexture.ToDebuggerDisplay()}")]
-        public struct Material
+        public struct Material : IEquatable<Material>
         {
             public Vector3 DiffuseColor;
             public Vector3 SpecularColor;
-            public Memory.MemoryImage DiffuseTexture;
+            public Memory.MemoryImage DiffuseTexture;            
+
+            public readonly override int GetHashCode()
+            {
+                return DiffuseColor.GetHashCode() ^ SpecularColor.GetHashCode() ^ DiffuseTexture.GetHashCode();
+            }
+
+            public readonly override bool Equals(object obj) { return obj is Material other && this.Equals(other); }
+
+            public readonly bool Equals(Material other)
+            {
+                if (this.DiffuseColor != other.DiffuseColor) return false;
+                if (this.SpecularColor != other.SpecularColor) return false;
+                if (this.DiffuseTexture != other.DiffuseTexture) return false;
+                return true;
+            }
         }
 
         #endregion

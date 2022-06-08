@@ -124,16 +124,21 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("POSITION")]
         public Vector3 Position;
-        public override bool Equals(object obj) { return obj is VertexPosition other && AreEqual(this, other); }
-        public bool Equals(VertexPosition other) { return AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Position.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexPosition other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexPosition other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexPosition a, in VertexPosition b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexPosition a, in VertexPosition b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexPosition a, in VertexPosition b)
         {
             return a.Position == b.Position;
-        }
-
-        public override int GetHashCode() { return Position.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -158,13 +163,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector3 GetPosition() { return this.Position; }
+        public readonly Vector3 GetPosition() { return this.Position; }
 
         /// <inheritdoc/>
-        public bool TryGetNormal(out Vector3 normal) { normal = default; return false; }
+        public readonly bool TryGetNormal(out Vector3 normal) { normal = default; return false; }
 
         /// <inheritdoc/>
-        public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
+        public readonly bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
         /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
@@ -224,16 +229,20 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("NORMAL")]
         public Vector3 Normal;
 
-        public override bool Equals(object obj) { return obj is VertexPositionNormal other && AreEqual(this, other); }
-        public bool Equals(VertexPositionNormal other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Position.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexPositionNormal other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexPositionNormal other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexPositionNormal a, in VertexPositionNormal b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexPositionNormal a, in VertexPositionNormal b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexPositionNormal a, in VertexPositionNormal b)
         {
             return a.Position == b.Position && a.Normal == b.Normal;
-        }
-
-        public override int GetHashCode() { return Position.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -259,13 +268,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector3 GetPosition() { return this.Position; }
+        public readonly Vector3 GetPosition() { return this.Position; }
 
         /// <inheritdoc/>
-        public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
+        public readonly bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
 
         /// <inheritdoc/>
-        public bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
+        public readonly bool TryGetTangent(out Vector4 tangent) { tangent = default; return false; }
 
         /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
@@ -285,7 +294,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -325,16 +334,20 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
 
-        public override bool Equals(object obj) { return obj is VertexPositionNormalTangent other && AreEqual(this, other); }
-        public bool Equals(VertexPositionNormalTangent other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Position.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexPositionNormalTangent other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexPositionNormalTangent other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexPositionNormalTangent a, in VertexPositionNormalTangent b)
         {
             return a.Position == b.Position && a.Normal == b.Normal && a.Tangent == b.Tangent;
-        }
-
-        public override int GetHashCode() { return Position.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -347,7 +360,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexGeometry.SetTangent(in Vector4 tangent) { this.Tangent = tangent; }
 
         /// <inheritdoc/>
-        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
+        public readonly VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormalTangent)baseValue, this);
         }
@@ -361,13 +374,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector3 GetPosition() { return this.Position; }
+        public readonly Vector3 GetPosition() { return this.Position; }
 
         /// <inheritdoc/>
-        public bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
+        public readonly bool TryGetNormal(out Vector3 normal) { normal = this.Normal; return true; }
 
         /// <inheritdoc/>
-        public bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
+        public readonly bool TryGetTangent(out Vector4 tangent) { tangent = this.Tangent; return true; }
 
         /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform)
@@ -473,16 +486,20 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("TANGENTDELTA")]
         public Vector3 TangentDelta;
 
-        public override bool Equals(object obj) { return obj is VertexGeometryDelta other && AreEqual(this, other); }
-        public bool Equals(VertexGeometryDelta other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return PositionDelta.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexGeometryDelta other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexGeometryDelta other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexGeometryDelta a, in VertexGeometryDelta b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexGeometryDelta a, in VertexGeometryDelta b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexGeometryDelta a, in VertexGeometryDelta b)
         {
             return a.PositionDelta == b.PositionDelta && a.NormalDelta == b.NormalDelta && a.TangentDelta == b.TangentDelta;
-        }
-
-        public override int GetHashCode() { return PositionDelta.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -495,13 +512,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexGeometry.SetTangent(in Vector4 tangent) { this.TangentDelta = new Vector3(tangent.X, tangent.Y, tangent.Z); }
 
         /// <inheritdoc/>
-        public Vector3 GetPosition() { return this.PositionDelta; }
+        public readonly Vector3 GetPosition() { return this.PositionDelta; }
 
         /// <inheritdoc/>
-        public bool TryGetNormal(out Vector3 normal) { normal = this.NormalDelta; return true; }
+        public readonly bool TryGetNormal(out Vector3 normal) { normal = this.NormalDelta; return true; }
 
         /// <inheritdoc/>
-        public bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.TangentDelta, 0); return true; }
+        public readonly bool TryGetTangent(out Vector4 tangent) { tangent = new Vector4(this.TangentDelta, 0); return true; }
 
         /// <inheritdoc/>
         public void ApplyTransform(in Matrix4x4 xform) { throw new NotSupportedException(); }

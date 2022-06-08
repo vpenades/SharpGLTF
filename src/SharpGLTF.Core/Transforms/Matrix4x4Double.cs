@@ -341,7 +341,7 @@ namespace SharpGLTF.Transforms
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public readonly override int GetHashCode()
         {
             unchecked
             {
@@ -385,14 +385,14 @@ namespace SharpGLTF.Transforms
         /// </summary>
         /// <param name="other">The matrix to compare this instance to.</param>
         /// <returns>True if the matrices are equal; False otherwise.</returns>
-        public bool Equals(Matrix4x4Double other) => this == other;
+        public readonly bool Equals(Matrix4x4Double other) => this == other;
 
         /// <summary>
         /// Returns a boolean indicating whether the given Object is equal to this matrix instance.
         /// </summary>
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this matrix; False otherwise.</returns>
-        public override bool Equals(object obj) => (obj is Matrix4x4Double other) && (this == other);
+        public readonly override bool Equals(object obj) => (obj is Matrix4x4Double other) && (this == other);
 
         #endregion Public Fields
 

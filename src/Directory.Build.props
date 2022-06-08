@@ -113,7 +113,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)SharpGLTF.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Shared\SharpGLTF.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <!-- Source Control =================================================================================== -->

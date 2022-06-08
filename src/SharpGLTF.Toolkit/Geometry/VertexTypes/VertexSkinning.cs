@@ -138,8 +138,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights;
 
-        public override bool Equals(object obj) { return obj is VertexJoints4 other && AreEqual(this, other); }
-        public bool Equals(VertexJoints4 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly int MaxBindings => 4;
+
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Joints.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexJoints4 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexJoints4 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexJoints4 a, in VertexJoints4 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexJoints4 a, in VertexJoints4 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexJoints4 a, in VertexJoints4 b)
@@ -149,11 +158,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             // to be already sorted by weight, unless filled manually.
 
             return a.Joints == b.Joints && a.Weights == b.Weights;
-        }
-
-        public override int GetHashCode() { return Joints.GetHashCode(); }
-
-        public int MaxBindings => 4;
+        }        
 
         #endregion
 
@@ -173,7 +178,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public SparseWeight8 GetBindings() { return SparseWeight8.Create(this.Joints, this.Weights); }
+        public readonly SparseWeight8 GetBindings() { return SparseWeight8.Create(this.Joints, this.Weights); }
 
         /// <inheritdoc/>
         public void SetBindings(in SparseWeight8 bindings) { this = new VertexJoints4(bindings); }
@@ -182,7 +187,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void SetBindings(params (int Index, float Weight)[] bindings) { this = new VertexJoints4(bindings); }
 
         /// <inheritdoc/>
-        public (int Index, float Weight) GetBinding(int index)
+        public readonly (int Index, float Weight) GetBinding(int index)
         {
             switch (index)
             {
@@ -205,7 +210,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -289,8 +294,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         [VertexAttribute("WEIGHTS_1")]
         public Vector4 Weights1;
 
-        public override bool Equals(object obj) { return obj is VertexJoints8 other && AreEqual(this, other); }
-        public bool Equals(VertexJoints8 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly int MaxBindings => 8;
+
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Joints0.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexJoints8 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexJoints8 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexJoints8 a, in VertexJoints8 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexJoints8 a, in VertexJoints8 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexJoints8 a, in VertexJoints8 b)
@@ -303,29 +317,25 @@ namespace SharpGLTF.Geometry.VertexTypes
                 && a.Weights0 == b.Weights0 && a.Weights1 == b.Weights1;
         }
 
-        public override int GetHashCode() { return Joints0.GetHashCode(); }
-
-        public int MaxBindings => 8;
-
         #endregion
 
         #region properties
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.JointsLow => this.Joints0;
+        readonly Vector4 IVertexSkinning.JointsLow => this.Joints0;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.JointsHigh => this.Joints1;
+        readonly Vector4 IVertexSkinning.JointsHigh => this.Joints1;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.WeightsLow => this.Weights0;
+        readonly Vector4 IVertexSkinning.WeightsLow => this.Weights0;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.WeightsHigh => this.Weights1;
+        readonly Vector4 IVertexSkinning.WeightsHigh => this.Weights1;
 
         #endregion
 
         #region API
 
         /// <inheritdoc/>
-        public SparseWeight8 GetBindings() { return SparseWeight8.CreateUnchecked(this.Joints0, this.Joints1, this.Weights0, this.Weights1); }
+        public readonly SparseWeight8 GetBindings() { return SparseWeight8.CreateUnchecked(this.Joints0, this.Joints1, this.Weights0, this.Weights1); }
 
         /// <inheritdoc/>
         public void SetBindings(in SparseWeight8 weights) { this = new VertexJoints8(weights); }
@@ -334,7 +344,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void SetBindings(params (int Index, float Weight)[] bindings) { this = new VertexJoints8(bindings); }
 
         /// <inheritdoc/>
-        public (int Index, float Weight) GetBinding(int index)
+        public readonly (int Index, float Weight) GetBinding(int index)
         {
             switch (index)
             {

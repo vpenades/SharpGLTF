@@ -7,8 +7,10 @@ using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
 
 namespace SharpGLTF.Scenes
 {
-    public struct TransformChainBuilder
+    public readonly struct TransformChainBuilder
     {
+        #region constructors
+
         public static implicit operator TransformChainBuilder(NodeBuilder node)
         {
             return new TransformChainBuilder(node);
@@ -42,10 +44,20 @@ namespace SharpGLTF.Scenes
             _ChildTransform = child;
         }
 
+        #endregion
+
+        #region data
+
         private readonly NodeBuilder _ParentTransform;
         private readonly TRANSFORM? _ChildTransform;
 
+        #endregion
+
+        #region properties
+
         public NodeBuilder Parent => _ParentTransform;
         public TRANSFORM? Child => _ChildTransform;
+
+        #endregion
     }
 }

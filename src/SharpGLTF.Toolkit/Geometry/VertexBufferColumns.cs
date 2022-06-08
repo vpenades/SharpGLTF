@@ -456,7 +456,7 @@ namespace SharpGLTF.Geometry
 
         #region nested types
 
-        struct _NormalTangentAgent : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+        readonly struct _NormalTangentAgent : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
         {
             public _NormalTangentAgent(VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
             {

@@ -121,22 +121,26 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Color;
 
         /// <inheritdoc/>
-        public int MaxColors => 1;
+        public readonly int MaxColors => 1;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 0;
+        public readonly int MaxTextCoords => 0;
 
-        public override bool Equals(object obj) { return obj is VertexColor1 other && AreEqual(this, other); }
-        public bool Equals(VertexColor1 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor1 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor1 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor1 a, in VertexColor1 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor1 a, in VertexColor1 b) { return !AreEqual(a, b); }
 
         public static bool AreEqual(in VertexColor1 a, in VertexColor1 b)
         {
             return a.Color == b.Color;
-        }
-
-        public override int GetHashCode() { return Color.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -159,14 +163,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             throw new NotSupportedException();
         }
@@ -218,22 +222,25 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector4 Color1;
 
         /// <inheritdoc/>
-        public int MaxColors => 2;
+        public readonly int MaxColors => 2;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 0;
+        public readonly int MaxTextCoords => 0;
 
-        public override bool Equals(object obj) { return obj is VertexColor2 other && AreEqual(this, other); }
-        public bool Equals(VertexColor2 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor2 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor2 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor2 a, in VertexColor2 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor2 a, in VertexColor2 b) { return !AreEqual(a, b); }
-
         public static bool AreEqual(in VertexColor2 a, in VertexColor2 b)
         {
             return a.Color0 == b.Color0 && a.Color1 == b.Color1;
-        }
-
-        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -261,7 +268,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             if (index == 0) return Color0;
             if (index == 1) return Color1;
@@ -269,7 +276,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index) { throw new NotSupportedException(); }
+        public readonly Vector2 GetTexCoord(int index) { throw new NotSupportedException(); }
 
         #endregion
     }
@@ -313,21 +320,25 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord;
 
         /// <inheritdoc/>
-        public int MaxColors => 0;
+        public readonly int MaxColors => 0;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 1;
+        public readonly int MaxTextCoords => 1;
 
-        public override bool Equals(object obj) { return obj is VertexTexture1 other && AreEqual(this, other); }
-        public bool Equals(VertexTexture1 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return TexCoord.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexTexture1 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexTexture1 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexTexture1 a, in VertexTexture1 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexTexture1 a, in VertexTexture1 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexTexture1 a, in VertexTexture1 b)
         {
             return a.TexCoord == b.TexCoord;
-        }
-
-        public override int GetHashCode() { return TexCoord.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -350,13 +361,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             throw new NotSupportedException();
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return TexCoord;
@@ -409,21 +420,25 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord1;
 
         /// <inheritdoc/>
-        public int MaxColors => 0;
+        public readonly int MaxColors => 0;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 2;
+        public readonly int MaxTextCoords => 2;
 
-        public override bool Equals(object obj) { return obj is VertexTexture2 other && AreEqual(this, other); }
-        public bool Equals(VertexTexture2 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexTexture2 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexTexture2 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexTexture2 a, in VertexTexture2 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexTexture2 a, in VertexTexture2 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexTexture2 a, in VertexTexture2 b)
         {
             return a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }
-
-        public override int GetHashCode() { return TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -451,13 +466,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             throw new NotSupportedException();
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             if (index == 0) return TexCoord0;
             if (index == 1) return TexCoord1;
@@ -511,21 +526,25 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord;
 
         /// <inheritdoc/>
-        public int MaxColors => 1;
+        public readonly int MaxColors => 1;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 1;
+        public readonly int MaxTextCoords => 1;
 
-        public override bool Equals(object obj) { return obj is VertexColor1Texture1 other && AreEqual(this, other); }
-        public bool Equals(VertexColor1Texture1 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return TexCoord.GetHashCode() ^ Color.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor1Texture1 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor1Texture1 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexColor1Texture1 a, in VertexColor1Texture1 b)
         {
             return a.TexCoord == b.TexCoord && a.Color == b.Color;
-        }
-
-        public override int GetHashCode() { return TexCoord.GetHashCode() ^ Color.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -549,14 +568,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return TexCoord;
@@ -614,21 +633,25 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord1;
 
         /// <inheritdoc/>
-        public int MaxColors => 1;
+        public readonly int MaxColors => 1;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 2;
+        public readonly int MaxTextCoords => 2;
 
-        public override bool Equals(object obj) { return obj is VertexColor1Texture2 other && AreEqual(this, other); }
-        public bool Equals(VertexColor1Texture2 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor1Texture2 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor1Texture2 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexColor1Texture2 a, in VertexColor1Texture2 b)
         {
             return a.Color == b.Color && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }
-
-        public override int GetHashCode() { return Color.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+        }        
 
         #endregion
 
@@ -657,14 +680,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
             return Color;
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             switch (index)
             {
@@ -685,7 +708,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -726,29 +749,32 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord;
 
         /// <inheritdoc/>
-        public int MaxColors => 2;
+        public readonly int MaxColors => 2;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 1;
+        public readonly int MaxTextCoords => 1;
 
-        public override bool Equals(object obj) { return obj is VertexColor2Texture1 other && AreEqual(this, other); }
-        public bool Equals(VertexColor2Texture1 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor2Texture1 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor2Texture1 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return !AreEqual(a, b); }
-
         public static bool AreEqual(in VertexColor2Texture1 a, in VertexColor2Texture1 b)
         {
             return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord == b.TexCoord;
-        }
-
-        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord.GetHashCode(); }
+        }        
 
         #endregion
 
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor2Texture1)baseValue, this);
         }
@@ -773,7 +799,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             switch (index)
             {
@@ -784,7 +810,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             switch (index)
             {
@@ -804,7 +830,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -850,29 +876,32 @@ namespace SharpGLTF.Geometry.VertexTypes
         public Vector2 TexCoord1;
 
         /// <inheritdoc/>
-        public int MaxColors => 2;
+        public readonly int MaxColors => 2;
 
         /// <inheritdoc/>
-        public int MaxTextCoords => 2;
+        public readonly int MaxTextCoords => 2;
 
-        public override bool Equals(object obj) { return obj is VertexColor2Texture2 other && AreEqual(this, other); }
-        public bool Equals(VertexColor2Texture2 other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexColor2Texture2 other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexColor2Texture2 other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return !AreEqual(a, b); }
-
         public static bool AreEqual(in VertexColor2Texture2 a, in VertexColor2Texture2 b)
         {
             return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }
-
-        public override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
+        }        
 
         #endregion
 
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor2Texture2)baseValue, this);
         }
@@ -899,7 +928,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             switch (index)
             {
@@ -910,7 +939,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             switch (index)
             {
@@ -931,7 +960,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"ΔC₀:{Color0Delta} ΔC₁:{Color1Delta} ΔUV₀:{TexCoord0Delta}  ΔUV₁:{TexCoord1Delta}";
+        private readonly string _GetDebuggerDisplay() => $"ΔC₀:{Color0Delta} ΔC₁:{Color1Delta} ΔUV₀:{TexCoord0Delta}  ΔUV₁:{TexCoord1Delta}";
 
         #endregion
 
@@ -1121,24 +1150,27 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <inheritdoc/>
         public int MaxTextCoords { get; }
 
-        public override bool Equals(object obj) { return obj is VertexMaterialDelta other && AreEqual(this, other); }
-        public bool Equals(VertexMaterialDelta other) { return AreEqual(this, other); }
+        /// <inheritdoc/>
+        public readonly override int GetHashCode() { return Color0Delta.GetHashCode() ^ Color1Delta.GetHashCode() ^ TexCoord0Delta.GetHashCode() ^ TexCoord1Delta.GetHashCode(); }
+
+        /// <inheritdoc/>
+        public readonly override bool Equals(object obj) { return obj is VertexMaterialDelta other && AreEqual(this, other); }
+
+        /// <inheritdoc/>
+        public readonly bool Equals(VertexMaterialDelta other) { return AreEqual(this, other); }
         public static bool operator ==(in VertexMaterialDelta a, in VertexMaterialDelta b) { return AreEqual(a, b); }
         public static bool operator !=(in VertexMaterialDelta a, in VertexMaterialDelta b) { return !AreEqual(a, b); }
-
         public static bool AreEqual(in VertexMaterialDelta a, in VertexMaterialDelta b)
         {
             return a.Color0Delta == b.Color0Delta && a.Color1Delta == b.Color1Delta && a.TexCoord0Delta == b.TexCoord0Delta && a.TexCoord1Delta == b.TexCoord1Delta;
-        }
-
-        public override int GetHashCode() { return Color0Delta.GetHashCode() ^ Color1Delta.GetHashCode() ^ TexCoord0Delta.GetHashCode() ^ TexCoord1Delta.GetHashCode(); }
+        }        
 
         #endregion
 
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexMaterialDelta)baseValue, this);
         }
@@ -1175,7 +1207,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector4 GetColor(int index)
+        public readonly Vector4 GetColor(int index)
         {
             switch (index)
             {
@@ -1186,7 +1218,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         }
 
         /// <inheritdoc/>
-        public Vector2 GetTexCoord(int index)
+        public readonly Vector2 GetTexCoord(int index)
         {
             switch (index)
             {
