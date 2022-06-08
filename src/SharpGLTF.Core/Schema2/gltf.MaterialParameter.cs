@@ -29,6 +29,7 @@ namespace SharpGLTF.Schema2
 
         NormalScale,
         OcclusionStrength,
+        EmissiveStrength,
 
         MetallicFactor,
         RoughnessFactor,

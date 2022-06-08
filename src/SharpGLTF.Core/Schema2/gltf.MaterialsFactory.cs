@@ -117,7 +117,7 @@ namespace SharpGLTF.Schema2
                 () => _GetOcclusionTexture(false)?.Strength ?? MaterialOcclusionTextureInfo.StrengthDefault,
                 value => _GetOcclusionTexture(true).Strength = value);
 
-            var emissiveParam = new _MaterialParameter<Vector3>(
+            var emissiveFactorParam = new _MaterialParameter<Vector3>(
                 _MaterialParameterKey.RGB,
                 _emissiveFactorDefault,
                 () => this._emissiveFactor.AsValue(_emissiveFactorDefault),
@@ -125,7 +125,7 @@ namespace SharpGLTF.Schema2
 
             yield return new MaterialChannel(this, "Normal", _GetNormalTexture, normalParam);
             yield return new MaterialChannel(this, "Occlusion", _GetOcclusionTexture, occlusionParam);
-            yield return new MaterialChannel(this, "Emissive", _GetEmissiveTexture, emissiveParam);
+            yield return new MaterialChannel(this, "Emissive", _GetEmissiveTexture, emissiveFactorParam, MaterialEmissiveStrength.GetParameter(this));
         }
 
         private MaterialNormalTextureInfo _GetNormalTexture(bool create)
@@ -626,12 +626,27 @@ namespace SharpGLTF.Schema2
             if (_emissiveStrength < _emissiveStrengthMinimum) throw new ArgumentOutOfRangeException(nameof(EmissiveStrength)); 
         }
 
-        public static float DefaultEmissiveStrength => (float)_emissiveStrengthDefault;
+        public const float DefaultEmissiveStrength = (float)_emissiveStrengthDefault;
 
         public float EmissiveStrength
         {
             get => (float)(this._emissiveStrength ?? _emissiveStrengthDefault);
             set => this._emissiveStrength = ((double)value).AsNullable(_emissiveStrengthDefault);
+        }
+
+        public static _MaterialParameter<float> GetParameter(Material material)
+        {
+            float _getter() { return material.GetExtension<MaterialEmissiveStrength>()?.EmissiveStrength ?? 1; }
+
+            void _setter(float value)
+            {
+                value = Math.Max((float)_emissiveStrengthMinimum, value);
+
+                if (value == DefaultEmissiveStrength) { material.RemoveExtensions<MaterialEmissiveStrength>(); }
+                else { material.UseExtension<MaterialEmissiveStrength>().EmissiveStrength = value; }
+            }
+
+            return new _MaterialParameter<float>(_MaterialParameterKey.EmissiveStrength, DefaultEmissiveStrength, _getter, _setter);
         }
     }
 }

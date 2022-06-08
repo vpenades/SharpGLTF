@@ -25,15 +25,8 @@ namespace SharpGLTF.Materials
             // at a given time, and non equal at another. Furthermore, it would imply having
             // a hash code that changes over time. As a consequence, it could be impossible
             // to use MaterialBuilder as a dictionary Key.
-            
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
 
-            var srcMaterial = new MaterialBuilder()
-                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
-                .WithAlpha(AlphaMode.MASK, 0.7f)
-                .WithUnlitShader()
-                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f));
+            var srcMaterial = _CreateUnlitMaterial();
 
             var clnMaterial = srcMaterial.Clone();
 
@@ -55,114 +48,140 @@ namespace SharpGLTF.Materials
         [Test]
         public void CreateUnlit()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var material = _CreateUnlitMaterial();
 
-            var srcMaterial = new MaterialBuilder()
-                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
-                .WithAlpha(AlphaMode.MASK, 0.7f)
-                .WithUnlitShader()
-                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f));
-
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
-        }
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
 
         [Test]
         public void CreateMetallicRoughness()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var material = _CreateMetallicRoughnessMaterial();
 
-            var srcMaterial = new MaterialBuilder()                
-                .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(tex1, 0.3f)
-                .WithOcclusion(tex1, 0.4f)
-
-                .WithMetallicRoughnessShader()
-                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithMetallicRoughness(tex1, 0.2f, 0.4f);
-
-            // example of setting additional parameters for a given channel.
-            srcMaterial.GetChannel(KnownChannel.BaseColor)
-                .Texture
-                .WithCoordinateSet(1)
-                .WithSampler(TextureWrapMode.CLAMP_TO_EDGE, TextureWrapMode.MIRRORED_REPEAT, TextureMipMapFilter.LINEAR_MIPMAP_LINEAR, TextureInterpolationFilter.NEAREST)
-                .WithTransform(Vector2.One*0.2f, Vector2.One*0.3f,0.1f, 2);
-                
-
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));            
-        }
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
 
         [Test]
         public void CreateClearCoat()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var material = _CreateClearCoatMaterial();
 
-            var srcMaterial = new MaterialBuilder()                
-                .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(tex1, 0.3f)
-                .WithOcclusion(tex1, 0.4f)
-
-                .WithMetallicRoughnessShader()
-                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithMetallicRoughness(tex1, 0.2f, 0.4f)
-
-                .WithClearCoat(tex1, 1)
-                .WithClearCoatNormal(tex1)
-                .WithClearCoatRoughness(tex1, 1);
-
-
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
-        }
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
 
         [Test]
         public void CreateVolume()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var material = _CreateVolumeMaterial();
 
-            var srcMaterial = new MaterialBuilder()
-                .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithMetallicRoughnessShader()
-                    .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithMetallicRoughness(tex1, 0.2f, 0.4f)
-
-                .WithVolumeAttenuation(Vector3.One * 0.3f, 0.6f)
-                .WithVolumeThickness(tex1, 0.4f);
-
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
-        }
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
 
         [Test]
         public void CreateSpecularGlossiness()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var material = _CreateSpecularGlossinessMaterial();
 
-            var srcMaterial = new MaterialBuilder()                
-                .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(tex1, 0.3f)
-                .WithOcclusion(tex1, 0.4f)
-
-                .WithSpecularGlossinessShader()
-                    .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                    .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
-                
-            
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, Schema2Roundtrip(srcMaterial)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, srcMaterial.Clone()));
-        }
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
 
         [Test]
         public void CreateSpecularGlossinessWithFallback()
+        {
+            var material = _CreateSpecularGlossinessMaterialWithFallback();
+
+            // check
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }
+
+        private static MaterialBuilder _CreateUnlitMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder("Unlit Material")
+                .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
+                .WithAlpha(AlphaMode.MASK, 0.7f);
+
+            material.WithUnlitShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f));
+
+            return material;
+        }
+
+        private static MaterialBuilder _CreateMetallicRoughnessMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder("Metallic Roughness Material")
+                .WithAlpha(AlphaMode.MASK, 0.6f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f), 6)
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f);
+
+            material.WithMetallicRoughnessShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                .WithMetallicRoughness(tex1, 0.2f, 0.4f);                
+
+            // example of setting additional parameters for a given channel.
+            material.GetChannel(KnownChannel.BaseColor)
+                .Texture
+                .WithCoordinateSet(1)
+                .WithSampler(TextureWrapMode.CLAMP_TO_EDGE, TextureWrapMode.MIRRORED_REPEAT, TextureMipMapFilter.LINEAR_MIPMAP_LINEAR, TextureInterpolationFilter.NEAREST)
+                .WithTransform(Vector2.One * 0.2f, Vector2.One * 0.3f, 0.1f, 2);
+
+            return material;
+        }
+
+        private static MaterialBuilder _CreateVolumeMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder("Volume Material")
+                .WithAlpha(AlphaMode.MASK, 0.6f);
+
+            material.WithMetallicRoughnessShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
+
+            material.WithVolumeAttenuation(Vector3.One * 0.3f, 0.6f)
+                .WithVolumeThickness(tex1, 0.4f);
+
+            return material;
+        }
+
+        private static MaterialBuilder _CreateClearCoatMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder("Clear Coat Material")
+                .WithAlpha(AlphaMode.MASK, 0.6f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f);
+
+            material.WithMetallicRoughnessShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
+
+            material.WithClearCoat(tex1, 1)
+                .WithClearCoatNormal(tex1)
+                .WithClearCoatRoughness(tex1, 1);
+
+            return material;
+        }
+
+        [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
+        private static MaterialBuilder _CreateSpecularGlossinessMaterialWithFallback()
         {
             var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
             var tex1 = System.IO.Path.Combine(assetsPath, "shannon.webp");
@@ -173,15 +192,15 @@ namespace SharpGLTF.Materials
                 // fallback and primary material must have exactly the same properties
                 .WithDoubleSide(true)
                 .WithAlpha(AlphaMode.MASK, 0.75f)
-                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f), 4)
                 .WithNormal(tex1, 0.3f)
-                .WithOcclusion(tex1, 0.4f)
+                .WithOcclusion(tex1, 0.4f);
 
-                // primary must use Specular Glossiness shader.
-                .WithSpecularGlossinessShader()
-                    .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 1.0f))
-                    .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
-            
+            // primary must use Specular Glossiness shader.
+            primary.WithSpecularGlossinessShader()
+                .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 1.0f))
+                .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
+
             // set fallback textures for engines that don't support WEBP texture format
             primary.GetChannel(KnownChannel.Normal).Texture.FallbackImage = tex2;
             primary.GetChannel(KnownChannel.Emissive).Texture.FallbackImage = tex2;
@@ -193,12 +212,29 @@ namespace SharpGLTF.Materials
             primary.WithMetallicRoughnessFallback(tex1, new Vector4(0.7f, 0, 0, 1), String.Empty, 0.6f, 0.7f);
             primary.CompatibilityFallback.GetChannel(KnownChannel.BaseColor).Texture.FallbackImage = tex2;
 
-            // check
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(primary, Schema2Roundtrip(primary)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(primary, primary.Clone()));
+            return primary;
         }
 
-        private static MaterialBuilder Schema2Roundtrip(MaterialBuilder srcMaterial)
+        [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
+        private static MaterialBuilder _CreateSpecularGlossinessMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder()
+                .WithAlpha(AlphaMode.MASK, 0.6f)
+                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
+                .WithNormal(tex1, 0.3f)
+                .WithOcclusion(tex1, 0.4f);
+
+            material.WithSpecularGlossinessShader()
+                .WithDiffuse(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
+
+            return material;
+        }        
+
+        private static MaterialBuilder _Schema2Roundtrip(MaterialBuilder srcMaterial)
         {
             // converts a MaterialBuilder to a Schema2.Material and back to a MaterialBuilder
 

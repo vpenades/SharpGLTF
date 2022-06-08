@@ -48,15 +48,18 @@ namespace SharpGLTF.Materials
     /// Enumeration of channel properties used in <see cref="ChannelBuilder.Parameters"/>
     /// </summary>
     /// <remarks>
-    /// This enumeration must match <see cref="Schema2.MaterialParameter.Key"/>
+    /// This enumeration must match <see cref="Schema2._MaterialParameterKey"/>
     /// </remarks>
     public enum KnownProperty
     {
+        Unknown = 0,
+
         RGB,
         RGBA,
 
         NormalScale,
         OcclusionStrength,
+        EmissiveStrength,
 
         MetallicFactor,
         RoughnessFactor,
@@ -132,7 +135,11 @@ namespace SharpGLTF.Materials
         {
             switch (key)
             {
-                case KnownChannel.Emissive: yield return new _Property(KnownProperty.RGB, Vector3.Zero); break;
+                case KnownChannel.Emissive:
+                    yield return new _Property(KnownProperty.RGB, Vector3.Zero);
+                    yield return new _Property(KnownProperty.EmissiveStrength, 1f);
+                    break;
+
                 case KnownChannel.Normal: yield return new _Property(KnownProperty.NormalScale, 1f); break;
                 case KnownChannel.Occlusion: yield return new _Property(KnownProperty.OcclusionStrength, 1f); break;
 

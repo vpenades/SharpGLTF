@@ -318,6 +318,7 @@ namespace SharpGLTF.Materials
         /// Sets <see cref="ShaderStyle"/> to use <see cref="SHADERPBRSPECULARGLOSSINESS"/>.
         /// </summary>
         /// <returns>This <see cref="MaterialBuilder"/>.</returns>
+        [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         public MaterialBuilder WithSpecularGlossinessShader() { _SetShader(SHADERPBRSPECULARGLOSSINESS); return this; }
 
         public MaterialBuilder WithAlpha(AlphaMode alphaMode = AlphaMode.OPAQUE, Single alphaCutoff = 0.5f)
@@ -424,15 +425,17 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithEmissive(Vector3 rgb)
+        public MaterialBuilder WithEmissive(Vector3 rgb, float strength = 1)
         {
-            return WithChannelParam(KnownChannel.Emissive, KnownProperty.RGB, rgb);
+            WithChannelParam(KnownChannel.Emissive, KnownProperty.EmissiveStrength, strength);
+            WithChannelParam(KnownChannel.Emissive, KnownProperty.RGB, rgb);
+            return this;
         }
 
-        public MaterialBuilder WithEmissive(IMAGEFILE imageFile, Vector3? rgb = null)
+        public MaterialBuilder WithEmissive(IMAGEFILE imageFile, Vector3? rgb = null, float strength = 1)
         {
             WithChannelImage(KnownChannel.Emissive, imageFile);
-            if (rgb.HasValue) WithEmissive(rgb.Value);
+            if (rgb.HasValue) WithEmissive(rgb.Value, strength);
             return this;
         }
 
