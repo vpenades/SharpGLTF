@@ -48,7 +48,7 @@
     
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
     
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -60,7 +60,7 @@
     <!-- Optimization analysis only makes sense on platforms that will be actually ran -->
 
     <!-- https://devblogs.microsoft.com/premier-developer/avoiding-struct-and-readonly-reference-performance-pitfalls-with-errorprone-net/ -->
-    <PackageReference Include="ErrorProne.NET.Structs" >
+    <PackageReference Include="ErrorProne.NET.Structs" Version="0.4.0-beta.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
