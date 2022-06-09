@@ -12,6 +12,7 @@ using VERTEX = SharpGLTF.Geometry.VertexTypes.VertexPositionNormal;
 
 namespace SharpGLTF.ThirdParty
 {
+
     public class EdMackeyTests
     {
         [Test]
@@ -51,8 +52,13 @@ namespace SharpGLTF.ThirdParty
 
             // save the model in different formats
 
-            scene.AttachToCurrentTest("mesh.glb");
-            scene.AttachToCurrentTest("mesh.gltf");
+            AttachmentInfo
+                .From("mesh.glb")
+                .WriteFile(f => scene.ToGltf2().Save(f.FullName));
+
+            AttachmentInfo
+                .From("mesh.gltf")
+                .WriteFile(f => scene.ToGltf2().Save(f.FullName));
         }
 
     }

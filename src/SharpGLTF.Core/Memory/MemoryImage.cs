@@ -83,6 +83,9 @@ namespace SharpGLTF.Memory
         /// <param name="mime64content">The Mime64 string source.</param>
         /// <param name="image">if decoding succeeds, it will contain the image file.</param>
         /// <returns>true if decoding succeeded.</returns>
+        /// <remarks>
+        /// The string must be haedered with a mime prefix like:     "data:image/png;base64,"
+        /// </remarks>
         public static bool TryParseMime64(string mime64content, out MemoryImage image)
         {
             if (mime64content == null) { image = default; return false; }
