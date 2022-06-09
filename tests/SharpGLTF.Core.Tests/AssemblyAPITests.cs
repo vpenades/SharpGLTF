@@ -56,7 +56,7 @@ namespace SharpGLTF
 
             var API = DumpAssemblyAPI.GetTypeSignature(type.GetTypeInfo()).OrderBy(item => item).ToArray();
 
-            TestContext.CurrentContext.AttachText("TestAPI.txt", API);
+            AttachmentInfo.From("TestAPI.txt").WriteTextLines(API);
 
             foreach (var l in API)
             {
@@ -72,9 +72,14 @@ namespace SharpGLTF
 
             var assembly = typeof(Schema2.ModelRoot).Assembly;
 
-            var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToArray();
+            var API = DumpAssemblyAPI
+                .GetAssemblySignature(assembly)
+                .OrderBy(item => item)
+                .ToArray();
 
-            TestContext.CurrentContext.AttachText($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
+            AttachmentInfo
+                .From($"API.Core.{Schema2.Asset.AssemblyInformationalVersion}.txt")
+                .WriteTextLines(API);            
 
             _CheckBackwardsCompatibility("API.Core.1.0.0-alpha0011.txt", API);
         }
@@ -86,9 +91,14 @@ namespace SharpGLTF
 
             var assembly = typeof(Schema2.Toolkit).Assembly;
 
-            var API = DumpAssemblyAPI.GetAssemblySignature(assembly).OrderBy(item => item).ToArray();
+            var API = DumpAssemblyAPI
+                .GetAssemblySignature(assembly)
+                .OrderBy(item => item)
+                .ToArray();
 
-            TestContext.CurrentContext.AttachText($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt", API);
+            AttachmentInfo
+                .From($"API.Toolkit.{Schema2.Asset.AssemblyInformationalVersion}.txt")
+                .WriteTextLines(API);
 
             _CheckBackwardsCompatibility("API.Toolkit.1.0.0-alpha0011.txt", API);
         }

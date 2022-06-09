@@ -10,7 +10,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// <summary>
     /// Test cases for models found in <see href="https://github.com/bghgary/glTF-Asset-Generator"/>
     /// </summary>
-    [TestFixture]
+    [TestFixture]    
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?")]
     [Category("Model Load and Save")]
     public class LoadGeneratedTests
     {

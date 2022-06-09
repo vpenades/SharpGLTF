@@ -7,7 +7,7 @@
 
   <PropertyGroup>
     <Authors>Vicente Penades</Authors>    
-    <Copyright>Copyright (c) 2021 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) 2022 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
   </PropertyGroup>  
 
@@ -101,9 +101,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugSymbols>true</DebugSymbols>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>    
+    
+    <DebugSymbols>true</DebugSymbols>    
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <IncludeSymbols>true</IncludeSymbols>    
     
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
@@ -122,7 +124,12 @@
 
     <!-- https://github.com/dotnet/sourcelink/blob/main/docs/README.md -->
     
+    <!-- better alternative than source link -->
     <EmbedAllSources>true</EmbedAllSources>
+    
+    <!-- conceal source code full paths -->
+    <PathMap>$(MSBuildProjectDirectory)=X:\sources</PathMap>
+    
     <!-- Optional: Embed source files that are not tracked by the source control manager in the PDB -->
     <!--<EmbedUntrackedSources>true</EmbedUntrackedSources>-->
     

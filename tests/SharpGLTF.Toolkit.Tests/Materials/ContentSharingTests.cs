@@ -63,8 +63,15 @@ namespace SharpGLTF.Materials
             var tex1Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "shannon.png"));
             var tex2Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "Texture1.jpg"));
 
-            var tex1 = tex1Bytes.AttachToCurrentTest("shared-shannon.png");
-            var tex2 = tex2Bytes.AttachToCurrentTest("subdir\\shared-in-dir-Texture1.jpg");
+            var tex1 = AttachmentInfo
+                .From("shared-shannon.png")
+                .WriteAllBytes(tex1Bytes)
+                .FullName;
+
+            var tex2 = AttachmentInfo
+                .From("subdir\\shared-in-dir-Texture1.jpg")
+                .WriteAllBytes(tex2Bytes)
+                .FullName;
 
             // create a material using our shared texture
             var material1 = new MaterialBuilder()                

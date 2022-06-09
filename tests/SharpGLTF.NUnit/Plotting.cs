@@ -235,27 +235,22 @@ namespace SharpGLTF
         }
     }
 
-
     public static class PlottingNUnit
     {
         public static void AttachToCurrentTest(this Plotting.Point2Series points, string fileName)
         {
             System.Diagnostics.Debug.Assert(fileName.ToLowerInvariant().EndsWith(".html"));
 
-            fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName);
-
-            points.DrawToFile(fileName);
-
-            if (System.IO.File.Exists(fileName)) NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            NUnit.Framework.AttachmentInfo
+                .From(fileName)
+                .WriteFile(f => points.DrawToFile(f.FullName));
         }
 
         public static void AttachToCurrentTest(this IEnumerable<Plotting.Point2Series> series, string fileName)
         {
-            fileName = NUnit.Framework.TestContext.CurrentContext.GetAttachmentPath(fileName);
-
-            Plotting.Point2Series.DrawToFile(fileName, series.ToArray());
-
-            if (System.IO.File.Exists(fileName)) NUnit.Framework.TestContext.AddTestAttachment(fileName);
+            NUnit.Framework.AttachmentInfo
+                .From(fileName)
+                .WriteFile(f => Plotting.Point2Series.DrawToFile(f.FullName, series.ToArray()));
         }
     }
 }

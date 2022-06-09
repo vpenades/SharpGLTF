@@ -42,14 +42,7 @@ namespace SharpGLTF
             return path;
         }
 
-        public static void AttachText(this TestContext context, string fileName, string[] lines)
-        {
-            fileName = context.GetAttachmentPath(fileName, true);
-
-            System.IO.File.WriteAllLines(fileName, lines.ToArray());
-
-            TestContext.AddTestAttachment(fileName);
-        }
+        
 
         public static void AttachShowDirLink(this TestContext context)
         {
@@ -63,30 +56,6 @@ namespace SharpGLTF
             linkPath = ShortcutUtils.CreateLink(linkPath, targetPath);
 
             TestContext.AddTestAttachment(linkPath);
-        }
-
-        public static string AttachToCurrentTest(this Byte[] data, string fileName)
-        {
-            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-
-            System.IO.File.WriteAllBytes(fileName, data);
-
-            TestContext.AddTestAttachment(fileName);
-
-            return fileName;
-        }
-
-        public static T AttachToCurrentTest<T>(this T target, string fileName, Action<T, System.IO.FileInfo> onSave)
-        {
-            var filePath = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-
-            var finfo = new System.IO.FileInfo(filePath);
-
-            onSave(target, finfo);
-
-            if (System.IO.File.Exists(filePath)) TestContext.AddTestAttachment(filePath);
-
-            return target;
         }
     }
 }

@@ -10,6 +10,7 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2.LoadAndSave
 {
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?")]
     internal class RegressionTests
     {
         [Test]

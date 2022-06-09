@@ -11,6 +11,7 @@ using Plotly;
 namespace SharpGLTF.Runtime
 {
     [Category("Core.Runtime")]
+    [AttachmentPathFormat("*/TestResults/Runtime/?")]
     public class SceneTemplateTests
     {
         [Test]
@@ -95,9 +96,9 @@ namespace SharpGLTF.Runtime
             var scenePlot = new PlotlyScene();
             scenePlot.AppendTriangles(worldTriangles, c=>c);
 
-            scenePlot
-                .ToHtml()
-                .AttachToCurrentTest("result.html", (content, finfo) => System.IO.File.WriteAllText(finfo.FullName, content));
+            AttachmentInfo
+                .From("result.html")
+                .WriteAllText(scenePlot.ToHtml());
         }
 
         [Test]

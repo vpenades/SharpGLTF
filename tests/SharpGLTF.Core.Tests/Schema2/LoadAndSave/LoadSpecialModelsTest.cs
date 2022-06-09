@@ -12,6 +12,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// Test cases for models found in <see href="https://github.com/KhronosGroup/glTF-Blender-Exporter"/>
     /// </summary>
     [TestFixture]
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?")]
     [Category("Model Load and Save")]
     public class LoadSpecialModelsTest
     {

@@ -29,15 +29,13 @@ namespace SharpGLTF
 
         public static void AttachToCurrentTest(this ModelRoot model, string fileName, Animation animation, float time)
         {
+            // wavefront does't like files paths with spaces because
+            // some implementations would not find the material file
             fileName = fileName.Replace(" ", "_");
 
-            // find the output path for the current test
-            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-
-            model.SaveAsWavefront(fileName, animation, time);
-
-            // Attach the saved file to the current test
-            TestContext.AddTestAttachment(fileName);
+            AttachmentInfo
+                .From(fileName)
+                .WriteFile(f => model.SaveAsWavefront(f.FullName, animation, time));
         }
 
         public static string AttachToCurrentTest<TvG, TvM, TvS>(this Geometry.MeshBuilder<TvG, TvM, TvS> mesh, string fileName)
@@ -57,22 +55,23 @@ namespace SharpGLTF
 
         public static string AttachToCurrentTest(this ModelRoot model, string fileName, WriteSettings settings = null)
         {
-            // find the output path for the current test
-            fileName = TestContext.CurrentContext.GetAttachmentPath(fileName, true);
-
             string validationPath = null;
 
             if (fileName.ToLowerInvariant().EndsWith(".glb"))
             {
-                model.SaveGLB(fileName, settings);
-                validationPath = fileName;
+                validationPath = fileName = AttachmentInfo
+                    .From(fileName)
+                    .WriteFile(f => model.SaveGLB(f.FullName, settings))
+                    .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".gltf"))
             {
                 if (settings == null) settings = new WriteSettings { JsonIndented = true };
 
-                model.Save(fileName, settings);
-                validationPath = fileName;
+                validationPath = fileName = AttachmentInfo
+                    .From(fileName)
+                    .WriteFile(f => model.Save(f.FullName, settings))
+                    .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".obj"))
             {
@@ -80,7 +79,11 @@ namespace SharpGLTF
                 if (Node.Flatten(model.DefaultScene).Any(n => n.GetGpuInstancing() != null)) return fileName;                
 
                 fileName = fileName.Replace(" ", "_");
-                model.SaveAsWavefront(fileName);
+
+                fileName = AttachmentInfo
+                    .From(fileName)
+                    .WriteFile(f => model.SaveAsWavefront(f.FullName))
+                    .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".plotly"))
             {
@@ -90,11 +93,11 @@ namespace SharpGLTF
                     .ToPlotly()
                     .ToHtml();
 
-                System.IO.File.WriteAllText(fileName, html);
-            }
-
-            // Attach the saved file to the current test
-            TestContext.AddTestAttachment(fileName);            
+                fileName = AttachmentInfo
+                    .From(fileName)
+                    .WriteAllText(html)
+                    .FullName;
+            }           
 
             if (validationPath != null)
             {
