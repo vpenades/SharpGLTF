@@ -42,16 +42,17 @@ namespace SharpGLTF.Geometry
 
             foreach (var srcMesh in meshBuilders)
             {
+                var srcPrims = srcMesh
+                    .Primitives
+                    .Where(item => item.Vertices.Count > 0);
+
                 var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name, srcMesh.Extras);
 
-                foreach (var srcPrim in srcMesh.Primitives)
+                bool useStrided = settings.UseStridedBuffers;
+                vertexEncodings.ColorEncoding = null;
+
+                foreach (var srcPrim in srcPrims)
                 {
-                    if (srcPrim.Vertices.Count == 0) continue;
-
-                    vertexEncodings.ColorEncoding = null;
-
-                    bool useStrided = settings.UseStridedBuffers;
-
                     if (srcPrim.MorphTargets.Count > 0)
                     {
                         // if the primitive has morphing, it is better not to use strided vertex buffers.
@@ -64,7 +65,10 @@ namespace SharpGLTF.Geometry
                             vertexEncodings.ColorEncoding = EncodingType.FLOAT;
                         }
                     }
+                }
 
+                foreach (var srcPrim in srcPrims)
+                {
                     var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
                     if (useStrided) dstPrim.SetStridedVertices(srcPrim, vertexEncodings);
