@@ -70,6 +70,8 @@ namespace SharpGLTF.Transforms
 
     public interface IGeometryInstancing
     {
+        int InstancesCount { get; }
+
         /// <summary>
         /// Gets the list of instances produced by this transform.
         /// </summary>
@@ -507,15 +509,16 @@ namespace SharpGLTF.Transforms
 
         #region properties
 
+        /// <inheritdoc/>
+        public int InstancesCount => _LocalMatrices.Length;
+
         /// <summary>
         /// Gets the local matrices for every instanced mesh
         /// </summary>
         public IReadOnlyList<TRANSFORM> LocalMatrices => _LocalMatrices;
 
-        /// <summary>
-        /// Gets the local transforms for every instanced mesh
-        /// </summary>
-        public IReadOnlyList<RigidTransform> WorldTransforms => UpdateInstances();
+        /// <inheritdoc/>
+        public IReadOnlyList<RigidTransform> WorldTransforms => UpdateInstances();        
 
         #endregion
 

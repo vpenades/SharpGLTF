@@ -87,7 +87,7 @@ namespace SharpGLTF.Runtime
 
         XYZW GetColor(int vertexIndex, int colorSetIndex);
 
-        Transforms.SparseWeight8 GetSkinWeights(int vertexIndex);
+        SparseWeight8 GetSkinWeights(int vertexIndex);
 
         IReadOnlyList<XYZ> GetPositionDeltas(int vertexIndex);
 
@@ -137,71 +137,79 @@ namespace SharpGLTF.Runtime
             return meshes.Select(item => item.Decode(options)).ToArray();
         }
 
-        public static XYZ GetPosition(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
+        public static XYZ GetPosition(this IMeshPrimitiveDecoder primitive, int vertexIdx, IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(vertexIdx, 0, primitive.VertexCount - 1, nameof(vertexIdx));
             Guard.NotNull(xform, nameof(xform));
 
-            var p = primitive.GetPosition(idx);
-            var d = primitive.GetPositionDeltas(idx);
-            var w = primitive.GetSkinWeights(idx);
+            var p = primitive.GetPosition(vertexIdx);
+            var d = primitive.GetPositionDeltas(vertexIdx);
+            var w = primitive.GetSkinWeights(vertexIdx);
 
             return xform.TransformPosition(p, d, w);
         }
 
-        public static XYZ GetNormal(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
+        public static XYZ GetNormal(this IMeshPrimitiveDecoder primitive, int vertexIdx, IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(vertexIdx, 0, primitive.VertexCount - 1, nameof(vertexIdx));
             Guard.NotNull(xform, nameof(xform));
 
-            var n = primitive.GetNormal(idx);
-            var d = primitive.GetNormalDeltas(idx);
-            var w = primitive.GetSkinWeights(idx);
+            var n = primitive.GetNormal(vertexIdx);
+            var d = primitive.GetNormalDeltas(vertexIdx);
+            var w = primitive.GetSkinWeights(vertexIdx);
 
             return xform.TransformNormal(n, d, w);
         }
 
-        public static XYZW GetTangent(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
+        public static XYZW GetTangent(this IMeshPrimitiveDecoder primitive, int vertexIdx, IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(vertexIdx, 0, primitive.VertexCount - 1, nameof(vertexIdx));
             Guard.NotNull(xform, nameof(xform));
 
-            var t = primitive.GetTangent(idx);
-            var d = primitive.GetTangentDeltas(idx);
-            var w = primitive.GetSkinWeights(idx);
+            var t = primitive.GetTangent(vertexIdx);
+            var d = primitive.GetTangentDeltas(vertexIdx);
+            var w = primitive.GetSkinWeights(vertexIdx);
 
             return xform.TransformTangent(t, d, w);
         }
 
-        public static XY GetTextureCoord(this IMeshPrimitiveDecoder primitive, int idx, int textureSetIndex,
-            IMaterialTransform xform)
+        public static XY GetTextureCoord(this IMeshPrimitiveDecoder primitive, int vertexIdx, int textureSetIndex, IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(vertexIdx, 0, primitive.VertexCount - 1, nameof(vertexIdx));
             Guard.MustBeBetweenOrEqualTo(textureSetIndex, 0, primitive.TexCoordsCount - 1, nameof(textureSetIndex));
             Guard.NotNull(xform, nameof(xform));
 
-            var tc = primitive.GetTextureCoord(idx, textureSetIndex);
-            var tcd = primitive.GetTextureCoordDeltas(idx, textureSetIndex);
+            var tc = primitive.GetTextureCoord(vertexIdx, textureSetIndex);
 
-            return xform.MorphTexCoord(tc, tcd);
+            if (xform is IMaterialTransform mxform)
+            {
+                var tcd = primitive.GetTextureCoordDeltas(vertexIdx, textureSetIndex);
+                tc = mxform.MorphTexCoord(tc, tcd);
+            }
+
+            return tc;            
         }
 
-        public static XYZW GetColor(this IMeshPrimitiveDecoder primitive, int idx, int colorSetIndex,
-            IMaterialTransform xform)
+        public static XYZW GetColor(this IMeshPrimitiveDecoder primitive, int vertexIdx, int colorSetIndex, IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(vertexIdx, 0, primitive.VertexCount - 1, nameof(vertexIdx));
             Guard.MustBeBetweenOrEqualTo(colorSetIndex, 0, primitive.ColorsCount - 1, nameof(colorSetIndex));
             Guard.NotNull(xform, nameof(xform));
 
-            var c = primitive.GetColor(idx, colorSetIndex);
-            var cd = primitive.GetColorDeltas(idx, colorSetIndex);
+            var c = primitive.GetColor(vertexIdx, colorSetIndex);
 
-            return xform.MorphColors(c, cd);
+            if (xform is IMaterialTransform mxform)
+            {
+                var cd = primitive.GetColorDeltas(vertexIdx, colorSetIndex);
+                c = mxform.MorphColors(c, cd);
+            }
+
+            return c;                
         }
 
         public static (XYZ Min, XYZ Max) EvaluateBoundingBox(this Schema2.Scene scene, float samplingTimeStep = 1.0f)
@@ -369,13 +377,13 @@ namespace SharpGLTF.Runtime
                 .SelectMany(item => meshes[item.Template.LogicalMeshIndex].GetWorldVertices(item.Transform));
         }
 
-        public static IEnumerable<XYZ> GetWorldVertices<TMaterial>(this IMeshDecoder<TMaterial> mesh, Transforms.IGeometryTransform xform)
+        public static IEnumerable<XYZ> GetWorldVertices<TMaterial>(this IMeshDecoder<TMaterial> mesh, IGeometryTransform xform)
             where TMaterial : class
         {
             Guard.NotNull(mesh, nameof(mesh));
             Guard.NotNull(xform, nameof(xform));
 
-            foreach (var childXform in Transforms.InstancingTransform.Evaluate(xform))
+            foreach (var childXform in InstancingTransform.Evaluate(xform))
             {
                 foreach (var primitive in mesh.Primitives)
                 {

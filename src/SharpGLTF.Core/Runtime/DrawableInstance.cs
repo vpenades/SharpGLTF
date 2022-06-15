@@ -55,19 +55,22 @@ namespace SharpGLTF.Runtime
         #region data
 
         /// <summary>
-        /// Represents what to draw.
+        /// Represents WHAT to draw.
         /// </summary>
         public readonly IDrawableTemplate Template;
 
         /// <summary>
-        /// Represents where to draw the <see cref="Template"/>.
+        /// Represents WHERE to draw the <see cref="Template"/>.
         /// </summary>
         /// <remarks>
         /// This value can be casted to any of:
         /// <list type="table">
+        /// <item><see cref="Transforms.MorphTransform"/></item>
         /// <item><see cref="Transforms.RigidTransform"/></item>
         /// <item><see cref="Transforms.SkinnedTransform"/></item>
         /// <item><see cref="Transforms.InstancingTransform"/></item>
+        /// <item><see cref="Transforms.IGeometryInstancing"/></item>
+        /// <item><see cref="Transforms.IMaterialTransform"/></item>
         /// </list>
         /// </remarks>
         public readonly Transforms.IGeometryTransform Transform;
@@ -75,7 +78,12 @@ namespace SharpGLTF.Runtime
         #endregion
 
         #region properties
-        public int InstanceCount => (this.Transform as Transforms.InstancingTransform)?.LocalMatrices.Count ?? 1;
+
+        /// <summary>
+        /// If <see cref="Transform"/> has instancing support,
+        /// it gets the number of times we need to render <see cref="Template"/>
+        /// </summary>
+        public int InstanceCount => this.Transform is Transforms.IGeometryInstancing instancing ? instancing.InstancesCount : 1;
 
         #endregion
     }
