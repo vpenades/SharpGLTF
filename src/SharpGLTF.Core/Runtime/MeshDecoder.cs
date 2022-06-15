@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using SharpGLTF.Transforms;
 using XY = System.Numerics.Vector2;
 using XYZ = System.Numerics.Vector3;
 using XYZW = System.Numerics.Vector4;
@@ -140,7 +140,7 @@ namespace SharpGLTF.Runtime
         public static XYZ GetPosition(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount + 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
             Guard.NotNull(xform, nameof(xform));
 
             var p = primitive.GetPosition(idx);
@@ -153,7 +153,7 @@ namespace SharpGLTF.Runtime
         public static XYZ GetNormal(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount + 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
             Guard.NotNull(xform, nameof(xform));
 
             var n = primitive.GetNormal(idx);
@@ -166,7 +166,7 @@ namespace SharpGLTF.Runtime
         public static XYZW GetTangent(this IMeshPrimitiveDecoder primitive, int idx, Transforms.IGeometryTransform xform)
         {
             Guard.NotNull(primitive, nameof(primitive));
-            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount + 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
             Guard.NotNull(xform, nameof(xform));
 
             var t = primitive.GetTangent(idx);
@@ -174,6 +174,34 @@ namespace SharpGLTF.Runtime
             var w = primitive.GetSkinWeights(idx);
 
             return xform.TransformTangent(t, d, w);
+        }
+
+        public static XY GetTextureCoord(this IMeshPrimitiveDecoder primitive, int idx, int textureSetIndex,
+            IMaterialTransform xform)
+        {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(textureSetIndex, 0, primitive.TexCoordsCount - 1, nameof(textureSetIndex));
+            Guard.NotNull(xform, nameof(xform));
+
+            var tc = primitive.GetTextureCoord(idx, textureSetIndex);
+            var tcd = primitive.GetTextureCoordDeltas(idx, textureSetIndex);
+
+            return xform.MorphTexCoord(tc, tcd);
+        }
+
+        public static XYZW GetColor(this IMeshPrimitiveDecoder primitive, int idx, int colorSetIndex,
+            IMaterialTransform xform)
+        {
+            Guard.NotNull(primitive, nameof(primitive));
+            Guard.MustBeBetweenOrEqualTo(idx, 0, primitive.VertexCount - 1, nameof(idx));
+            Guard.MustBeBetweenOrEqualTo(colorSetIndex, 0, primitive.ColorsCount - 1, nameof(colorSetIndex));
+            Guard.NotNull(xform, nameof(xform));
+
+            var c = primitive.GetColor(idx, colorSetIndex);
+            var cd = primitive.GetColorDeltas(idx, colorSetIndex);
+
+            return xform.MorphColors(c, cd);
         }
 
         public static (XYZ Min, XYZ Max) EvaluateBoundingBox(this Schema2.Scene scene, float samplingTimeStep = 1.0f)
