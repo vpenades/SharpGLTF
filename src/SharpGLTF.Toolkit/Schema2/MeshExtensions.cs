@@ -315,7 +315,7 @@ namespace SharpGLTF.Schema2
             var root = primitive.LogicalParent.LogicalParent;
 
             var accessors = memAccessors.ToDictionary(item => item.Attribute.Name, item => root.CreateVertexAccessor(item));
-
+            
             primitive.SetMorphTargetAccessors(targetIndex, accessors);
 
             return primitive;

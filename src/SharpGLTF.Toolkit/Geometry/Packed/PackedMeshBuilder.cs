@@ -42,40 +42,56 @@ namespace SharpGLTF.Geometry
 
             foreach (var srcMesh in meshBuilders)
             {
+                // Gather all the primitives of the mesh
+
                 var srcPrims = srcMesh
                     .Primitives
-                    .Where(item => item.Vertices.Count > 0);
+                    .Where(item => item.Vertices.Count > 0)
+                    .ToList();                
 
-                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name, srcMesh.Extras);
+                // identify morph target attributes in use                
 
-                bool useStrided = settings.UseStridedBuffers;
-                vertexEncodings.ColorEncoding = null;
+                var morphTargetsAttributes = new HashSet<string>();
 
                 foreach (var srcPrim in srcPrims)
                 {
-                    if (srcPrim.MorphTargets.Count > 0)
-                    {
-                        // if the primitive has morphing, it is better not to use strided vertex buffers.
-                        useStrided = false;
-
-                        // if the primitive has color morphing, we need to ensure the vertex
-                        // color attribute encoding is FLOAT to allow negative delta values.
-                        if (PackedPrimitiveBuilder<TMaterial>._HasColorMorphTargets(srcPrim))
-                        {
-                            vertexEncodings.ColorEncoding = EncodingType.FLOAT;
-                        }
-                    }
+                    srcPrim._GatherMorphTargetAttributes(morphTargetsAttributes);                    
                 }
+
+                // adjust vertex encoding
+
+                if (morphTargetsAttributes.Count > 0)
+                {
+                    // if any primitive has morph targets, it is better not to use strided vertex buffers.
+                    settings.UseStridedBuffers = false;
+                }
+
+                bool hasColorMorph = morphTargetsAttributes.Contains("COLOR_0DELTA")
+                    || morphTargetsAttributes.Contains("COLOR_1DELTA")
+                    || morphTargetsAttributes.Contains("COLOR_2DELTA")
+                    || morphTargetsAttributes.Contains("COLOR_3DELTA");
+
+                // if any primitive has color morphing, we need to ensure the vertex
+                // color attribute encoding is FLOAT to allow negative delta values.
+
+                vertexEncodings.ColorEncoding = hasColorMorph
+                    ? EncodingType.FLOAT
+                    : (EncodingType?)null;
+
+                // Create a packed mesh
+
+                var dstMesh = new PackedMeshBuilder<TMaterial>(srcMesh.Name, srcMesh.Extras);
 
                 foreach (var srcPrim in srcPrims)
                 {
                     var dstPrim = dstMesh.AddPrimitive(srcPrim.Material, srcPrim.VerticesPerPrimitive);
 
-                    if (useStrided) dstPrim.SetStridedVertices(srcPrim, vertexEncodings);
+                    if (settings.UseStridedBuffers) dstPrim.SetStridedVertices(srcPrim, vertexEncodings);
                     else dstPrim.SetStreamedVertices(srcPrim, vertexEncodings);
 
                     dstPrim.SetIndices(srcPrim, indexEncoding);
-                    dstPrim.SetMorphTargets(srcPrim, vertexEncodings);
+
+                    if (morphTargetsAttributes.Count > 0) dstPrim.SetMorphTargets(srcPrim, vertexEncodings, morphTargetsAttributes);
                 }
 
                 yield return dstMesh;

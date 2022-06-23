@@ -5,6 +5,8 @@ using System.Text;
 
 using SharpGLTF.Schema2;
 
+using MACCESSOR = SharpGLTF.Memory.MemoryAccessor;
+
 namespace SharpGLTF.Geometry
 {
     sealed class PackedPrimitiveBuilder<TMaterial>
@@ -27,11 +29,12 @@ namespace SharpGLTF.Geometry
         private readonly int _VerticesPerPrimitive;
 
         private Type _StridedVertexType;
-        private Memory.MemoryAccessor[] _VertexAccessors;
 
-        private Memory.MemoryAccessor _IndexAccessors;
+        private MACCESSOR[] _VertexAccessors;
 
-        private readonly List<Memory.MemoryAccessor[]> _MorphTargets = new List<Memory.MemoryAccessor[]>();
+        private MACCESSOR _IndexAccessors;
+
+        private readonly List<MACCESSOR[]> _MorphTargets = new List<MACCESSOR[]>();
 
         #endregion
 
@@ -58,7 +61,7 @@ namespace SharpGLTF.Geometry
                         .Select(item => item.Name)
                         .ToList();
 
-            var vAccessors = new List<Memory.MemoryAccessor>();
+            var vAccessors = new List<MACCESSOR>();
             GuardAll.MustBeEqualTo(vAccessors.Select(item => item.Attribute.ByteOffset), 0, nameof(vAccessors));
             GuardAll.MustBeEqualTo(vAccessors.Select(item => item.Attribute.ByteStride), 0, nameof(vAccessors));
 
@@ -72,7 +75,7 @@ namespace SharpGLTF.Geometry
 
             _VertexAccessors = vAccessors.ToArray();
 
-            Memory.MemoryAccessor.SanitizeVertexAttributes(_VertexAccessors);
+            MACCESSOR.SanitizeVertexAttributes(_VertexAccessors);
         }
 
         public void SetIndices(IPrimitiveReader<TMaterial> srcPrim, EncodingType encoding)
@@ -85,28 +88,9 @@ namespace SharpGLTF.Geometry
             else Guard.NotNull(iAccessor, nameof(iAccessor));
 
             _IndexAccessors = iAccessor;
-        }
+        }        
 
-        public static bool _HasColorMorphTargets(IPrimitiveReader<TMaterial> srcPrim)
-        {
-            var vertexEncodings = new PackedEncoding();
-            vertexEncodings.ColorEncoding = EncodingType.FLOAT;
-
-            for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
-            {
-                var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
-
-                var c0Accessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_0DELTA", vertexEncodings);
-                if (c0Accessor != null && c0Accessor.Data.Any(b => b != 0)) return true;
-
-                var c1Accessor = VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_1DELTA", vertexEncodings);
-                if (c1Accessor != null && c1Accessor.Data.Any(b => b != 0)) return true;
-            }
-
-            return false;
-        }
-
-        public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncodings)
+        public void SetMorphTargets(IPrimitiveReader<TMaterial> srcPrim, PackedEncoding vertexEncodings, ISet<string> morphTargetAttributes)
         {
             bool hasPositions = _VertexAccessors.Any(item => item.Attribute.Name == "POSITION");
             bool hasNormals = _VertexAccessors.Any(item => item.Attribute.Name == "NORMAL");
@@ -114,78 +98,58 @@ namespace SharpGLTF.Geometry
 
             bool hasColors0 = _VertexAccessors.Any(item => item.Attribute.Name == "COLOR_0");
             bool hasColors1 = _VertexAccessors.Any(item => item.Attribute.Name == "COLOR_1");
-            bool hasTextCoords0 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_0");
-            bool hasTextCoords1 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_1");
+
+            bool hasTexCoords0 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_0");
+            bool hasTexCoords1 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_1");
+            bool hasTexCoords2 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_2");
+            bool hasTexCoords3 = _VertexAccessors.Any(item => item.Attribute.Name == "TEXCOORD_3");
 
             for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
             {
-                var mtv = srcPrim.MorphTargets[i].GetMorphTargetVertices(srcPrim.Vertices.Count);
+                var (pAccessor,nAccessor,tAccessor,c0Accessor, c1Accessor, uv0Accessor, uv1Accessor, uv2Accessor, uv3Accessor) = srcPrim._GetMorphTargetAccessors(i, vertexEncodings, morphTargetAttributes);
 
-                var pAccessor = !hasPositions ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "POSITIONDELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (pAccessor != null && pAccessor.Data.All(b => b == 0))
-                    pAccessor = null;
+                if (!hasPositions) pAccessor = null;
+                if (!hasNormals) nAccessor = null;
+                if (!hasTangents) tAccessor = null;
+                if (!hasColors0) c0Accessor = null;
+                if (!hasColors1) c1Accessor = null;
+                if (!hasTexCoords0) uv0Accessor = null;
+                if (!hasTexCoords1) uv1Accessor = null;
+                if (!hasTexCoords2) uv2Accessor = null;
+                if (!hasTexCoords3) uv3Accessor = null;
 
-                var nAccessor = !hasNormals ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "NORMALDELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (nAccessor != null && nAccessor.Data.All(b => b == 0))
-                    nAccessor = null;
-
-                var tAccessor = !hasTangents ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TANGENTDELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (tAccessor != null && tAccessor.Data.All(b => b == 0))
-                    tAccessor = null;
-
-                var c0Accessor = !hasColors0 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_0DELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (c0Accessor != null && c0Accessor.Data.All(b => b == 0))
-                    c0Accessor = null;
-
-                var c1Accessor = !hasColors1 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "COLOR_1DELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (c1Accessor != null && c1Accessor.Data.All(b => b == 0))
-                    c1Accessor = null;
-
-                var uv0Accessor = !hasTextCoords0 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TEXCOORD_0DELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (uv0Accessor != null && uv0Accessor.Data.All(b => b == 0))
-                    uv0Accessor = null;
-
-                var uv1Accessor = !hasTextCoords1 ? null : VertexTypes.VertexUtils.CreateVertexMemoryAccessor(mtv, "TEXCOORD_1DELTA", vertexEncodings);
-                // if delta is all 0s, then do not use the accessor
-                if (uv1Accessor != null && uv1Accessor.Data.All(b => b == 0))
-                    uv1Accessor = null;
-
-                AddMorphTarget(pAccessor, nAccessor, tAccessor, c0Accessor, c1Accessor, uv0Accessor, uv1Accessor);
+                AddMorphTarget(pAccessor, nAccessor, tAccessor, c0Accessor, c1Accessor, uv0Accessor, uv1Accessor, uv2Accessor, uv3Accessor);
             }
         }
 
-        private void AddMorphTarget(params Memory.MemoryAccessor[] morphTarget)
+        private void AddMorphTarget(params MACCESSOR[] morphTarget)
         {
-            morphTarget = morphTarget.Where(item => item != null)
-                .Select(item => _RemoveDelta(item))
+            MACCESSOR _removeDeltaSuffix(MACCESSOR accessor)
+            {
+                var name = accessor.Attribute.Name;
+                if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
+
+                name = name.Replace("DELTA", string.Empty);
+
+                var attr = accessor.Attribute;
+                attr.Name = name;
+
+                return new Memory.MemoryAccessor(accessor.Data, attr);
+            }
+
+            morphTarget = morphTarget
+                .Where(item => item != null)
+                .Select(item => _removeDeltaSuffix(item))
                 .ToArray();
 
             _MorphTargets.Add(morphTarget);
-        }
-
-        private static Memory.MemoryAccessor _RemoveDelta(Memory.MemoryAccessor accessor)
-        {
-            var name = accessor.Attribute.Name;
-            if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
-
-            name = name.Replace("DELTA", string.Empty);
-
-            var attr = accessor.Attribute;
-            attr.Name = name;
-
-            return new Memory.MemoryAccessor(accessor.Data, attr);
-        }
+        }        
 
         internal void CopyToMesh(Mesh dstMesh, Converter<TMaterial, Material> materialEvaluator)
         {
-            if (_VerticesPerPrimitive < 1 || _VerticesPerPrimitive > 3) return;
+            if (_VerticesPerPrimitive < 1 || _VerticesPerPrimitive > 3) return;            
 
+            // points
             if (_VerticesPerPrimitive == 1)
             {
                 var dstPrim = dstMesh.CreatePrimitive()
@@ -197,7 +161,7 @@ namespace SharpGLTF.Geometry
 
                 return;
             }
-            else
+            else // lines or triangles
             {
                 var pt = PrimitiveType.LINES;
                 if (_VerticesPerPrimitive == 3) pt = PrimitiveType.TRIANGLES;
@@ -215,6 +179,8 @@ namespace SharpGLTF.Geometry
         {
             for (int i = 0; i < _MorphTargets.Count; ++i)
             {
+                if (_MorphTargets[i] == null || _MorphTargets[i].Length == 0) throw new InvalidOperationException("all morph targets must have at least one accessor");
+
                 dstPrim.WithMorphTargetAccessors(i, _MorphTargets[i]);
             }
         }
@@ -231,7 +197,7 @@ namespace SharpGLTF.Geometry
             _MergeSequentialVertices(primitives.SelectMany(p => p._MorphTargets));
         }
 
-        private static void _MergeSequentialVertices(IEnumerable<Memory.MemoryAccessor[]> primitives)
+        private static void _MergeSequentialVertices(IEnumerable<MACCESSOR[]> primitives)
         {
             var vertexBuffers = new Dictionary<string, PackedBuffer>();
 
