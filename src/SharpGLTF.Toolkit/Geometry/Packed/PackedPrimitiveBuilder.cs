@@ -199,17 +199,18 @@ namespace SharpGLTF.Geometry
 
         private static void _MergeSequentialVertices(IEnumerable<MACCESSOR[]> primitives)
         {
-            var vertexBuffers = new Dictionary<string, PackedBuffer>();
+            var vertexBuffers = new Dictionary<(string, int), PackedBuffer>();
 
             foreach (var vvv in primitives)
             {
                 foreach (var v in vvv)
                 {
                     var k = v.Attribute.Name;
+                    var s = v.Attribute.ItemByteLength;
 
-                    if (!vertexBuffers.TryGetValue(k, out PackedBuffer packed))
+                    if (!vertexBuffers.TryGetValue((k,s), out PackedBuffer packed))
                     {
-                        vertexBuffers[k] = packed = new PackedBuffer();
+                        vertexBuffers[(k, s)] = packed = new PackedBuffer();
                     }
 
                     packed.AddAccessors(v);
