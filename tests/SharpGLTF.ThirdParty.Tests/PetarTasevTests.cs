@@ -42,6 +42,12 @@ namespace SharpGLTF.ThirdParty
                 new VBColor1(new VertexPosition(10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(0, 10, 0), redColor));
 
+            var tri2 = new MeshBuilder<VertexPosition, VertexColor1>("mesh2");
+            prim = tri2.UsePrimitive(material);
+            prim.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
+                new VBColor1(new VertexPosition(10, 0, 0), redColor),
+                new VBColor1(new VertexPosition(0, 10, 0), redColor));
+
             // create a morph target that will change the color from red to green only for prim2
             var greenColor = new Vector4(0f, 1f, 0f, 1f);
             foreach (var p in triangle.Primitives)
@@ -61,6 +67,7 @@ namespace SharpGLTF.ThirdParty
             // create a scene
             var scene = new Scenes.SceneBuilder();
             scene.AddRigidMesh(triangle, Matrix4x4.Identity);
+            scene.AddRigidMesh(tri2, Matrix4x4.Identity);
 
             // save the model in different formats
             var model = scene.ToGltf2();
