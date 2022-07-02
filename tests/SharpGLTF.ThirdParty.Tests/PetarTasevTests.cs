@@ -19,6 +19,8 @@ namespace SharpGLTF.ThirdParty
         [Test]
         public void MorphColor_MultiplePrimitives()
         {
+            TestContext.CurrentContext.AttachFolderBrowserShortcut();
+
             // create material
             var material = new MaterialBuilder("mat1")
                 .WithDoubleSide(true)
@@ -29,35 +31,38 @@ namespace SharpGLTF.ThirdParty
 
             // create a mesh with two primitives, one for each material
 
-            var triangle = new MeshBuilder<VertexPosition, VertexColor1>("mesh");
+            var mesh = new MeshBuilder<VertexPosition, VertexColor1>("mesh");
 
-            var prim = triangle.UsePrimitive(material);
+            var prim1 = mesh.UsePrimitive(material);
             var redColor = new Vector4(1f, 0f, 0f, 1f);
-            prim.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
+            prim1.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(0, 10, 0), redColor));
             
-            var prim2 = triangle.UsePrimitive(material2);
+            var prim2 = mesh.UsePrimitive(material2);
             prim2.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(0, 10, 0), redColor));
 
             var tri2 = new MeshBuilder<VertexPosition, VertexColor1>("mesh2");
-            prim = tri2.UsePrimitive(material);
-            prim.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
+            prim1 = tri2.UsePrimitive(material);
+            prim1.AddTriangle(new VBColor1(new VertexPosition(-10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(10, 0, 0), redColor),
                 new VBColor1(new VertexPosition(0, 10, 0), redColor));
 
             // create a morph target that will change the color from red to green only for prim2
             var greenColor = new Vector4(0f, 1f, 0f, 1f);
-            foreach (var p in triangle.Primitives)
+
+            foreach (var p in mesh.Primitives)
             {
+                if (p is not IPrimitiveBuilder pb) continue;
+
                 for (var i = 0; i < p.Vertices.Count; ++i)
                 {
                     var oldVertexPosition = p.Vertices[i];
-                    var greenMat = new VertexColor1(greenColor);
+                    var greenMat = new VertexColor1(greenColor);                    
 
-                    ((IPrimitiveBuilder)p).SetVertexDelta(0, i, default,
+                    pb.SetVertexDelta(0, i, default,
                         ReferenceEquals(p, prim2)
                             ? greenMat.Subtract(oldVertexPosition.Material)
                             : VertexMaterialDelta.Zero);
@@ -66,7 +71,7 @@ namespace SharpGLTF.ThirdParty
 
             // create a scene
             var scene = new Scenes.SceneBuilder();
-            scene.AddRigidMesh(triangle, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             scene.AddRigidMesh(tri2, Matrix4x4.Identity);
 
             // save the model in different formats
@@ -97,11 +102,20 @@ namespace SharpGLTF.ThirdParty
             // save the model in different formats
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.glb")
-                .WriteFile(f => model.Save(f.FullName, new WriteSettings() { Validation = ValidationMode.Skip }));
+                .WriteFile(f => model.Save(f.FullName));
 
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.gltf")
-                .WriteFile(f => model.Save(f.FullName, new WriteSettings() { Validation = ValidationMode.Skip }));
+                .WriteFile(f => model.Save(f.FullName));
+
+            // save evaluated frames
+
+            for(int i=0; i < 5; ++i)
+            {
+                AttachmentInfo
+                .From($"ColorMorphingMultiPrim_{i}.obj")
+                .WriteFile(f => model.SaveAsWavefront(f.FullName, model.LogicalAnimations[0], (float)i / 5));
+            }
         }
     }
 }

@@ -201,8 +201,21 @@ namespace SharpGLTF.Geometry
     /// </summary>
     public interface IMorphTargetBuilder
     {
+        /// <summary>
+        /// Gets the collection of vertex positions in the base mesh
+        /// </summary>
         IReadOnlyCollection<Vector3> Positions { get; }
+
+        /// <summary>
+        /// Gets the collection of vertex geometry parts in the base mesh
+        /// </summary>
         IReadOnlyCollection<IVertexGeometry> Vertices { get; }
+
+        /// <summary>
+        /// Gets a collection of vertices sharing this vertex position.
+        /// </summary>
+        /// <param name="position">A position given by <see cref="Positions"/></param>
+        /// <returns>A collection of vertices (usually one, but can be two or more in boundaries)</returns>
         IReadOnlyList<IVertexGeometry> GetVertices(Vector3 position);
 
         /// <summary>
@@ -320,6 +333,11 @@ namespace SharpGLTF.Geometry
 
         #region API
 
+        /// <summary>
+        /// Gets a collection of vertices sharing this vertex position.
+        /// </summary>
+        /// <param name="position">A position given by <see cref="Positions"/></param>
+        /// <returns>A collection of vertices (usually one, but can be two or more in boundaries)</returns>
         public IReadOnlyList<TvG> GetVertices(Vector3 position)
         {
             return _Positions.TryGetValue(position, out List<TvG> geos)
