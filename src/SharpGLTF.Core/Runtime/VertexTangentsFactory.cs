@@ -8,6 +8,9 @@ namespace SharpGLTF.Runtime
 {
     using VERTEXKEY = System.ValueTuple<Vector3, Vector3, Vector2>;
 
+    /// <summary>
+    /// Factory used to calculate the tangents of a mesh which implements <see cref="IMeshPrimitive"/>
+    /// </summary>
     static class VertexTangentsFactory
     {
         // https://gamedev.stackexchange.com/questions/128023/how-does-mikktspace-work-for-calculating-the-tangent-space-during-normal-mapping
@@ -22,14 +25,43 @@ namespace SharpGLTF.Runtime
         /// </summary>
         public interface IMeshPrimitive
         {
+            /// <summary>
+            /// gets the number of vertices.
+            /// </summary>
             int VertexCount { get; }
 
+            /// <summary>
+            /// Gets the position of a given vertex.
+            /// </summary>
+            /// <param name="idx">The Vertex Index</param>
+            /// <returns>The local vertex position.</returns>
             Vector3 GetVertexPosition(int idx);
+
+            /// <summary>
+            /// Gets the normal of a given vertex.
+            /// </summary>
+            /// <param name="idx">The Vertex Index</param>
+            /// <returns>The local vertex normal.</returns>
             Vector3 GetVertexNormal(int idx);
+
+            /// <summary>
+            /// Gets the texture coordinate of a given vertex.
+            /// </summary>
+            /// <param name="idx">The Vertex Index</param>
+            /// <returns>The local texture coordinate.</returns>
             Vector2 GetVertexTexCoord(int idx);
 
+            /// <summary>
+            /// Sets the tangent for the given vertex
+            /// </summary>
+            /// <param name="idx">The vertex index to set</param>
+            /// <param name="tangent">The tangent that will be set to the vertex</param>
             void SetVertexTangent(int idx, Vector4 tangent);
 
+            /// <summary>
+            /// Gets a sequence of triangles, where each triangle is defined by three vertex indices.
+            /// </summary>
+            /// <returns>A collection of triangles</returns>
             IEnumerable<(int A, int B, int C)> GetTriangleIndices();
         }
 

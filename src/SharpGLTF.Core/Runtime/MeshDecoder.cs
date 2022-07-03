@@ -19,9 +19,24 @@ namespace SharpGLTF.Runtime
     public interface IMeshDecoder<TMaterial>
         where TMaterial : class
     {
+        /// <summary>
+        /// Mesh Name
+        /// </summary>
         string Name { get; }
+
+        /// <summary>
+        /// Mesh Extras
+        /// </summary>
         Object Extras { get; }
+
+        /// <summary>
+        /// Mesh Logical index in the original glTF model.
+        /// </summary>
         int LogicalIndex { get; }
+
+        /// <summary>
+        /// Collection of mesh primitives
+        /// </summary>
         IReadOnlyList<IMeshPrimitiveDecoder<TMaterial>> Primitives { get; }
     }
 
@@ -77,26 +92,85 @@ namespace SharpGLTF.Runtime
 
         #region API
 
+        /// <summary>
+        /// Gets the position for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns>A vertex relative position.</returns>
         XYZ GetPosition(int vertexIndex);
 
+        /// <summary>
+        /// Gets the normal for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns></returns>
         XYZ GetNormal(int vertexIndex);
 
+        /// <summary>
+        /// Gets the tangent for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns></returns>
         XYZW GetTangent(int vertexIndex);
 
+        /// <summary>
+        /// Gets the UV coordinate for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <param name="textureSetIndex">The texture set index.</param>
+        /// <returns></returns>
         XY GetTextureCoord(int vertexIndex, int textureSetIndex);
 
+        /// <summary>
+        /// Gets the color for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <param name="colorSetIndex">The color set index.</param>
+        /// <returns></returns>
         XYZW GetColor(int vertexIndex, int colorSetIndex);
 
+        /// <summary>
+        /// Gets the skin weights for the given vertex.
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns></returns>
         SparseWeight8 GetSkinWeights(int vertexIndex);
 
+        /// <summary>
+        /// Gets the sequence of position deltas for the given vertex. (morph targets)
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns>A collection of position deltas, one delta per morph target.</returns>
         IReadOnlyList<XYZ> GetPositionDeltas(int vertexIndex);
 
+        /// <summary>
+        /// Gets the sequence of normals deltas for the given vertex. (morph targets)
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns>A collection of normal deltas, one delta per morph target.</returns>
         IReadOnlyList<XYZ> GetNormalDeltas(int vertexIndex);
 
+        /// <summary>
+        /// Gets the sequence of tangent deltas for the given vertex. (morph targets)
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <returns>A collection of tangent deltas, one delta per morph target.</returns>
         IReadOnlyList<XYZ> GetTangentDeltas(int vertexIndex);
 
+        /// <summary>
+        /// Gets the sequence of texture coordinate deltas for the given vertex. (morph targets)
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <param name="textureSetIndex">The texture set index.</param>
+        /// <returns>A collection of texture coordinate deltas, one delta per morph target.</returns>
         IReadOnlyList<XY> GetTextureCoordDeltas(int vertexIndex, int textureSetIndex);
 
+        /// <summary>
+        /// Gets the sequence of color deltas for the given vertex. (morph targets)
+        /// </summary>
+        /// <param name="vertexIndex">The vertex index.</param>
+        /// <param name="colorSetIndex">The color set index.</param>
+        /// <returns>A collection of color deltas, one delta per morph target.</returns>
         IReadOnlyList<XYZW> GetColorDeltas(int vertexIndex, int colorSetIndex);
 
         #endregion

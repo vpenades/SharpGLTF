@@ -6,18 +6,42 @@ using System.Text;
 
 namespace SharpGLTF.Runtime
 {
+    /// <summary>
+    /// Factory used to calculate the normals of a mesh which implements <see cref="IMeshPrimitive"/>
+    /// </summary>
     static class VertexNormalsFactory
     {
+        /// <summary>
+        /// This interface must be implemented by a mesh, or a proxy of a mesh,
+        /// in order to calculate its normals
+        /// </summary>
         #pragma warning disable CA1034 // Nested types should not be visible
         public interface IMeshPrimitive
         #pragma warning restore CA1034 // Nested types should not be visible
         {
+            /// <summary>
+            /// gets the number of vertices.
+            /// </summary>
             int VertexCount { get; }
 
+            /// <summary>
+            /// Gets the position of a given vertex.
+            /// </summary>
+            /// <param name="idx">The Vertex Index</param>
+            /// <returns>The local vertex position.</returns>
             Vector3 GetVertexPosition(int idx);
 
+            /// <summary>
+            /// Sets the normal for the given vertex
+            /// </summary>
+            /// <param name="idx">The vertex index to set</param>
+            /// <param name="normal">The normal that will be set to the vertex</param>
             void SetVertexNormal(int idx, Vector3 normal);
 
+            /// <summary>
+            /// Gets a sequence of triangles, where each triangle is defined by three vertex indices.
+            /// </summary>
+            /// <returns>A collection of triangles</returns>
             IEnumerable<(int A, int B, int C)> GetTriangleIndices();
         }
 
