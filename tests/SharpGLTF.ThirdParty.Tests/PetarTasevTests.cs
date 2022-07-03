@@ -5,6 +5,7 @@ using NUnit.Framework;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 
@@ -110,7 +111,9 @@ namespace SharpGLTF.ThirdParty
 
             // save evaluated frames
 
-            for(int i=0; i < 5; ++i)
+            var aaa = model.LogicalMeshes[0].Decode();
+
+            for (int i=0; i < 5; ++i)
             {
                 AttachmentInfo
                 .From($"ColorMorphingMultiPrim_{i}.obj")

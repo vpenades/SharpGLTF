@@ -467,12 +467,22 @@ namespace SharpGLTF.Runtime
 
             if (morphs.TryGetValue("TEXCOORD_0", out SCHEMA2ACCESSOR uv0Accessor))
             {
-                _TexCoordDeltas = uv0Accessor.AsVector2Array() as IReadOnlyList<XY>;
+                _TexCoordDeltas_0 = uv0Accessor.AsVector2Array() as IReadOnlyList<XY>;
+            }
+
+            if (morphs.TryGetValue("TEXCOORD_1", out SCHEMA2ACCESSOR uv1Accessor))
+            {
+                _TexCoordDeltas_1 = uv1Accessor.AsVector2Array() as IReadOnlyList<XY>;
             }
 
             if (morphs.TryGetValue("COLOR_0", out SCHEMA2ACCESSOR c0Accessor))
             {
-                _ColorDeltas = c0Accessor.AsVector4Array() as IReadOnlyList<XYZW>;
+                _ColorDeltas_0 = c0Accessor.AsVector4Array() as IReadOnlyList<XYZW>;
+            }
+
+            if (morphs.TryGetValue("COLOR_1", out SCHEMA2ACCESSOR c1Accessor))
+            {
+                _ColorDeltas_1 = c1Accessor.AsVector4Array() as IReadOnlyList<XYZW>;
             }
         }
 
@@ -486,11 +496,13 @@ namespace SharpGLTF.Runtime
         private IReadOnlyList<XYZ> _NormalsDeltas;
         private IReadOnlyList<XYZ> _TangentsDeltas;
 
-        // morph target deltas for uv set 0
-        private IReadOnlyList<XY> _TexCoordDeltas;
+        // morph target deltas for uv sets
+        private IReadOnlyList<XY> _TexCoordDeltas_0;
+        private IReadOnlyList<XY> _TexCoordDeltas_1;
 
-        // morph target deltas for color set 0
-        private IReadOnlyList<XYZW> _ColorDeltas;
+        // morph target deltas for color sets
+        private IReadOnlyList<XYZW> _ColorDeltas_0;
+        private IReadOnlyList<XYZW> _ColorDeltas_1;
 
         private XYZ[] _GeneratedNormals;
         private XYZ[] _GeneratedTangents;
@@ -502,8 +514,8 @@ namespace SharpGLTF.Runtime
         public int VertexCount => _PositionsDeltas?.Count ?? 0;
         public bool HasNormals => _NormalsDeltas != null;
         public bool HasTangents => _TangentsDeltas != null;
-        public bool HasTexCoord(int set) => set == 0 && _TexCoordDeltas != null;
-        public bool HasColor(int set) => set == 0 && _ColorDeltas != null;
+        public bool HasTexCoord(int set) => set == 0 && _TexCoordDeltas_0 != null;
+        public bool HasColor(int set) => set == 0 && _ColorDeltas_0 != null;
 
         #endregion
 
@@ -511,23 +523,41 @@ namespace SharpGLTF.Runtime
 
         public XYZ GetPositionBase(int vertexIndex) { return _Geometry.GetPosition(vertexIndex); }
 
-        public XYZ GetPositionDelta(int vertexIndex) { return _PositionsDeltas[vertexIndex]; }
+        public XYZ GetPositionDelta(int vertexIndex) { return _PositionsDeltas == null ? XYZ.Zero : _PositionsDeltas[vertexIndex]; }
 
         public XYZ GetNormalBase(int vertexIndex) { return _Geometry.GetNormal(vertexIndex); }
 
-        public XYZ GetNormalDelta(int vertexIndex) { return _NormalsDeltas[vertexIndex]; }
+        public XYZ GetNormalDelta(int vertexIndex) { return _NormalsDeltas == null ? XYZ.Zero : _NormalsDeltas[vertexIndex]; }
 
         public XYZW GetTangentBase(int vertexIndex) { return _Geometry.GetTangent(vertexIndex); }
 
-        public XYZ GetTangentDelta(int vertexIndex) { return _TangentsDeltas[vertexIndex]; }
+        public XYZ GetTangentDelta(int vertexIndex) { return _TangentsDeltas == null ? XYZ.Zero : _TangentsDeltas[vertexIndex]; }
 
         public XY GetTextureCoord(int vertexIndex, int set) { return _Geometry.GetTextureCoord(vertexIndex, set); }
 
-        public XY GetTextureCoordDelta(int vertexIndex, int set) { return set != 0? XY.Zero : _TexCoordDeltas[vertexIndex]; }
+        public XY GetTextureCoordDelta(int vertexIndex, int set)
+        {
+            switch(set)
+            {
+                case 0: return _TexCoordDeltas_0 == null ? XY.Zero : _TexCoordDeltas_0[vertexIndex];
+                case 1: return _TexCoordDeltas_1 == null ? XY.Zero : _TexCoordDeltas_1[vertexIndex];
+            }            
+
+            return XY.Zero;
+        }
 
         public XYZW GetColor(int vertexIndex, int set) { return _Geometry.GetColor(vertexIndex, set); }
 
-        public XYZW GetColorDelta(int vertexIndex, int set) { return set != 0 ? XYZW.Zero : _ColorDeltas[vertexIndex]; }
+        public XYZW GetColorDelta(int vertexIndex, int set)
+        {
+            switch(set)
+            {
+                case 0: return _ColorDeltas_0 == null ? XYZW.Zero : _ColorDeltas_0[vertexIndex];
+                case 1: return _ColorDeltas_1 == null ? XYZW.Zero : _ColorDeltas_1[vertexIndex];
+            }
+
+            return XYZW.Zero;
+        }
 
         #endregion
 
