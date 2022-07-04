@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace SharpGLTF.Schema2.LoadAndSave
 {
     [TestFixture]
-    [AttachmentPathFormat("*/TestResults/LoadAndSave/?")]
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]
     [Category("Model Load and Save")]
     public class LoadInvalidTests
     {

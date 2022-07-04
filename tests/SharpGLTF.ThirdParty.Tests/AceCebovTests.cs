@@ -17,7 +17,7 @@ namespace SharpGLTF.ThirdParty
     using VBTexture1 = VertexBuilder<VertexPosition,VertexTexture1,VertexEmpty>;
 
     [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?")]
+    [AttachmentPathFormat("*\\?", true)]
     internal class AceCebovTests
     {
         [Test]
@@ -95,11 +95,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("ColorMorphing.glb")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             AttachmentInfo
                 .From("ColorMorphing.gltf")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
         }
 
         [Test]
@@ -173,11 +173,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("TextureMorphing.glb")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             AttachmentInfo
                 .From("TextureMorphing.gltf")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
         }
 
         [Test]
@@ -254,11 +254,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("ColorAndTextureMorphing.glb")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             AttachmentInfo
                 .From("ColorAndTextureMorphing.gltf")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
         }
     }
 }

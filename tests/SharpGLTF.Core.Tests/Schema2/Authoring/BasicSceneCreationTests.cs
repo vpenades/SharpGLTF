@@ -70,8 +70,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a model with a triangle mesh")]
         public void CreateSceneWithSolidTriangle()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create model
@@ -114,8 +113,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a model with a textured triangle mesh")]
         public void CreateSceneWithTexturedTriangle()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // we'll use our icon as the source texture
@@ -161,8 +159,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates an interleaved scene using a toolkit utilities")]
         public void CreateSceneWithInterleavedQuadMesh()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var vertices = new[]
@@ -191,8 +188,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a scene with a perspective camera")]
         public void CreateSceneWithCamera()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             
             var model = ModelRoot.CreateModel();

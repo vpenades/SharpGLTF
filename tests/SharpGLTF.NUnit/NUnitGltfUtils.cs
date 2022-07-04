@@ -14,10 +14,10 @@ namespace SharpGLTF
     {
         public static void AttachGltfValidatorLinks(this TestContext context)
         {
-            context.AttachLink("🌍 Khronos Validator", "http://github.khronos.org/glTF-Validator/");
-            context.AttachLink("🌍 BabylonJS Sandbox", "https://sandbox.babylonjs.com/");
-            context.AttachLink("🌍 Don McCurdy Sandbox", "https://gltf-viewer.donmccurdy.com/");
-            context.AttachLink("🌍 VirtualGIS Cesium Sandbox", "https://www.virtualgis.io/gltfviewer/");
+            // new AttachmentInfo(context, "🌍 Khronos Validator.lnk").WriteLink("http://github.khronos.org/glTF-Validator/");
+            // new AttachmentInfo(context, "🌍 BabylonJS Sandbox.lnk").WriteLink("https://sandbox.babylonjs.com/");
+            // new AttachmentInfo(context, "🌍 Don McCurdy Sandbox.lnk").WriteLink("https://gltf-viewer.donmccurdy.com/");
+            // new AttachmentInfo(context, "🌍 VirtualGIS Cesium Sandbox.lnk").WriteLink("https://www.virtualgis.io/gltfviewer/");
         }        
 
         public static void AttachToCurrentTest(this Scenes.SceneBuilder scene, string fileName)
@@ -35,7 +35,7 @@ namespace SharpGLTF
 
             AttachmentInfo
                 .From(fileName)
-                .WriteFile(f => model.SaveAsWavefront(f.FullName, animation, time));
+                .WriteObject(f => model.SaveAsWavefront(f.FullName, animation, time));
         }
 
         public static string AttachToCurrentTest<TvG, TvM, TvS>(this Geometry.MeshBuilder<TvG, TvM, TvS> mesh, string fileName)
@@ -61,7 +61,7 @@ namespace SharpGLTF
             {
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteFile(f => model.SaveGLB(f.FullName, settings))
+                    .WriteObject(f => model.SaveGLB(f.FullName, settings))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".gltf"))
@@ -70,7 +70,7 @@ namespace SharpGLTF
 
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteFile(f => model.Save(f.FullName, settings))
+                    .WriteObject(f => model.Save(f.FullName, settings))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".obj"))
@@ -82,7 +82,7 @@ namespace SharpGLTF
 
                 fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteFile(f => model.SaveAsWavefront(f.FullName))
+                    .WriteObject(f => model.SaveAsWavefront(f.FullName))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".plotly"))

@@ -9,7 +9,7 @@ using NUnit.Framework;
 namespace SharpGLTF
 {
     [TestFixture]
-    [AttachmentPathFormat("*/TestResults/Animations/?")]
+    [AttachmentPathFormat("*/TestResults/Animations/?", true)]
     [Category("Core.Animations")]
     public class AnimationSamplingTests
     {

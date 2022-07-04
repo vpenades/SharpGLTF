@@ -216,7 +216,6 @@ namespace SharpGLTF.IO
         [Test]
         public void TestJsonExtendedCharacters()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create a test model

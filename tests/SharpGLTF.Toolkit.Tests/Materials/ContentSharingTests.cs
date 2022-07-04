@@ -56,8 +56,7 @@ namespace SharpGLTF.Materials
 
         [Test]
         public void WriteTwoModelsWithSharedTexture()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             var tex1Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "shannon.png"));

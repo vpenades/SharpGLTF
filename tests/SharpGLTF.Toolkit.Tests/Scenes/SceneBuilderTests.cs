@@ -24,8 +24,7 @@ namespace SharpGLTF.Scenes
     {
         [Test(Description ="Creates a simple cube.")]
         public void CreateCubeScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();            
@@ -43,8 +42,7 @@ namespace SharpGLTF.Scenes
 
         [Test(Description = "Creates a simple cube.")]
         public void CreateCubeSceneWithExtras()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();
@@ -68,8 +66,7 @@ namespace SharpGLTF.Scenes
 
         [Test(Description ="Creates a cube attached to an animated node.")]
         public void CreateAnimatedCubeScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();
@@ -101,8 +98,7 @@ namespace SharpGLTF.Scenes
 
         [Test(Description = "Checks that non convex quads are created correctly.")]
         public void CreateNonConvexQuadsScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             
             var mesh = new MeshBuilder<VertexPosition>();
@@ -143,8 +139,7 @@ namespace SharpGLTF.Scenes
         [TestCase(false)]
         [TestCase(true)]
         public void CreateSceneWithRandomShapes(bool useGpuInstancing)
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random(177);
@@ -225,8 +220,7 @@ namespace SharpGLTF.Scenes
 
         [Test]
         public void CreateSceneWithMixedVertexFormats()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var scene = new SceneBuilder();
@@ -245,8 +239,7 @@ namespace SharpGLTF.Scenes
         
         [Test]
         public void CreateSkinnedScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             
             // create two materials
@@ -332,8 +325,7 @@ namespace SharpGLTF.Scenes
 
         [Test]
         public void CreateDoubleSkinnedScene()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create two materials
@@ -443,8 +435,7 @@ namespace SharpGLTF.Scenes
         public void CreateAllAnimationTypesScene()
         {
             // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
-
-            TestContext.CurrentContext.AttachShowDirLink();
+                        
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create two materials
@@ -510,8 +501,7 @@ namespace SharpGLTF.Scenes
             // SceneBuilder API supports reusing a NodeBuilder in multiple instances with different content.
             // but glTF nodes can only hold one mesh per node, so if we find this case we need to internally
             // add an additional child node to give room to the the extra mesh.
-
-            TestContext.CurrentContext.AttachShowDirLink();
+                        
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var m = MaterialBuilder.CreateDefault();
@@ -544,8 +534,7 @@ namespace SharpGLTF.Scenes
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         public void TestRoundTrip(string path)
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             path = TestFiles
@@ -616,7 +605,6 @@ namespace SharpGLTF.Scenes
         [TestCase("GearboxAssy.glb")]        
         public void ExportMeshes(string path)
         {
-            TestContext.CurrentContext.AttachShowDirLink();
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             path = TestFiles
@@ -663,7 +651,7 @@ namespace SharpGLTF.Scenes
 
             schema.CreateMesh("Empty2");
 
-            var fileName = TestContext.CurrentContext.GetAttachmentPath("empty.glb", true);
+            var fileName = AttachmentInfo.From("empty.glb").File.FullName;
 
             Assert.Throws<SharpGLTF.Validation.SchemaException>(() => schema.SaveGLB(fileName));
         }
@@ -673,8 +661,7 @@ namespace SharpGLTF.Scenes
         {
             // Schema2 does NOT allow meshes to be empty, or meshes with empty MeshPrimitives.
             // but MeshBuilder and SceneBuilder should be able to handle them.
-
-            TestContext.CurrentContext.AttachShowDirLink();
+                        
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random(177);
@@ -810,8 +797,7 @@ namespace SharpGLTF.Scenes
         public void CreateMorphScene()
         {
             // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
-
-            TestContext.CurrentContext.AttachShowDirLink();
+                        
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var meshMorphs = CreateMeshWith16MorphTargets();

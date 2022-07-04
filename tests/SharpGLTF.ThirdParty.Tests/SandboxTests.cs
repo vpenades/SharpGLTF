@@ -18,7 +18,7 @@ namespace SharpGLTF.ThirdParty
     using VBColor1 = VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>;
 
     [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?")]
+    [AttachmentPathFormat("*\\?", true)]
     internal class SandboxTests
     {
         [Test]
@@ -54,8 +54,6 @@ namespace SharpGLTF.ThirdParty
         [Test]
         public void TestMorphColorTargets2()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
             // create material
             var material = new MaterialBuilder("mat1")
                 .WithDoubleSide(true)
@@ -141,10 +139,10 @@ namespace SharpGLTF.ThirdParty
 
             var fF= AttachmentInfo
                 .From("ColorMorphingMultiPrim.gltf")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             AttachmentInfo.From("ColorMorphingMultiPrim.glb")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
             
         }
     }

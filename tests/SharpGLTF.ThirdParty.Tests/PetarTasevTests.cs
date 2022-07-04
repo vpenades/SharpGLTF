@@ -14,14 +14,12 @@ namespace SharpGLTF.ThirdParty
     using VBColor1 = VertexBuilder<VertexPosition,VertexColor1,VertexEmpty>;
     
     [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?")]
+    [AttachmentPathFormat("*\\?", true)]
     public class PetarTasevTests
     {
         [Test]
         public void MorphColor_MultiplePrimitives()
         {
-            TestContext.CurrentContext.AttachFolderBrowserShortcut();
-
             // create material
             var material = new MaterialBuilder("mat1")
                 .WithDoubleSide(true)
@@ -103,11 +101,11 @@ namespace SharpGLTF.ThirdParty
             // save the model in different formats
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.glb")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.gltf")
-                .WriteFile(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f.FullName));
 
             // save evaluated frames
 
@@ -117,7 +115,7 @@ namespace SharpGLTF.ThirdParty
             {
                 AttachmentInfo
                 .From($"ColorMorphingMultiPrim_{i}.obj")
-                .WriteFile(f => model.SaveAsWavefront(f.FullName, model.LogicalAnimations[0], (float)i / 5));
+                .WriteObject(f => model.SaveAsWavefront(f.FullName, model.LogicalAnimations[0], (float)i / 5));
             }
         }
     }

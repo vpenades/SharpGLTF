@@ -11,7 +11,7 @@ using Plotly;
 namespace SharpGLTF.Runtime
 {
     [Category("Core.Runtime")]
-    [AttachmentPathFormat("*/TestResults/Runtime/?")]
+    [AttachmentPathFormat("*/TestResults/Runtime/?", true)]
     public class SceneTemplateTests
     {
         [Test]

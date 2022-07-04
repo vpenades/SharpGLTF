@@ -50,8 +50,6 @@ namespace SharpGLTF
         [Test(Description = "proof of concept to dump the whole public API of an assembly")]
         public void DumpTestAPI()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
             var type = typeof(TestClass);
 
             var API = DumpAssemblyAPI.GetTypeSignature(type.GetTypeInfo()).OrderBy(item => item).ToArray();
@@ -68,8 +66,6 @@ namespace SharpGLTF
         [Test(Description ="Checks if we have introduced a breaking change between the current and previous API")]
         public void DumpCoreAPI()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
             var assembly = typeof(Schema2.ModelRoot).Assembly;
 
             var API = DumpAssemblyAPI
@@ -87,8 +83,6 @@ namespace SharpGLTF
         [Test(Description = "Checks if we have introduced a breaking change between the current and previous API")]
         public void DumpToolkitAPI()
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
             var assembly = typeof(Schema2.Toolkit).Assembly;
 
             var API = DumpAssemblyAPI

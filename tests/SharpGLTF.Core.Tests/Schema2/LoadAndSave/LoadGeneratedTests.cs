@@ -11,7 +11,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
     /// Test cases for models found in <see href="https://github.com/bghgary/glTF-Asset-Generator"/>
     /// </summary>
     [TestFixture]    
-    [AttachmentPathFormat("*/TestResults/LoadAndSave/?")]
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]
     [Category("Model Load and Save")]
     public class LoadGeneratedTests
     {
@@ -29,8 +29,6 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase(false)]
         public void LoadGeneratedModels(bool isNegativeCase)
         {
-            TestContext.CurrentContext.AttachShowDirLink();
-
             var files = TestFiles.GetReferenceModelPaths(isNegativeCase);
 
             bool passed = true;

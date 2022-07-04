@@ -23,8 +23,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a scene with lights")]
         public void CreateSceneWithWithLightsExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var root = ModelRoot.CreateModel();
@@ -45,8 +44,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a quad mesh with a complex material")]
         public void CreateSceneWithSpecularGlossinessExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
@@ -87,8 +85,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a quad mesh with a complex material")]
         public void CreateSceneWithClearCoatExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
@@ -127,8 +124,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a quad mesh with a complex material")]
         public void CreateSceneWithTransmissionExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
@@ -164,8 +160,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test(Description = "Creates a quad mesh with a complex material")]
         public void CreateSceneWithsSheenExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestFiles.KhronosSampleModelsDirectory, "2.0", "SpecGlossVsMetalRough", "glTF");
@@ -208,8 +203,7 @@ namespace SharpGLTF.Schema2.Authoring
         [TestCase("shannon.webp")]
         [TestCase("FlightHelmet_baseColor_basis.ktx2")]
         public void CreateSceneWithTextureImageExtension(string textureFileName)
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
@@ -250,8 +244,7 @@ namespace SharpGLTF.Schema2.Authoring
 
         [Test]
         public void CrateSceneWithTextureTransformExtension()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");

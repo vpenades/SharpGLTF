@@ -23,8 +23,7 @@ namespace SharpGLTF.Geometry
     {
         [Test(Description = "Creates a scene using a mesh builder helper class")]
         public void CreateSceneWithMeshBuilder()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create a material
@@ -56,8 +55,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description = "Creates a scene with 4 meshes, where the meshes have been initialized so they can share the same vertex and index buffers")]
         public void CreateSceneWithSharedBuffers()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create materials
@@ -121,8 +119,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description = "Creates a node animated scene.")]
         public void CreateSceneWithAnimatedMeshBuilder()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             // create a material
@@ -160,8 +157,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description = "Creates a skinned animated scene.")]
         public void CreateSceneWithSkinnedAnimatedMeshBuilder()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             
             // create animation sequence with 4 frames
@@ -245,8 +241,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description = "Creates a textured terrain mesh.")]
         public void CreateSceneWithTerrain()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // texture path
@@ -292,8 +287,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description = "Creates a scene with 1 million points cloud.")]        
         public void CreateSceneWithPointCloud()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = new MaterialBuilder("material1").WithUnlitShader();            
@@ -348,8 +342,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description ="Creates a single mesh with multiple cubes.")]
         public void CreateMeshWithRandomCubes()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random();
@@ -386,8 +379,7 @@ namespace SharpGLTF.Geometry
 
         [Test(Description ="Simulates animating mesh visibility by setting scale to (0,0,0)")]
         public void CreateSceneWithAnimatedVisibility()
-        {
-            TestContext.CurrentContext.AttachShowDirLink();
+        {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             // create a mesh
