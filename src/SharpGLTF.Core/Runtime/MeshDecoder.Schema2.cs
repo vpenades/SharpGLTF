@@ -514,8 +514,27 @@ namespace SharpGLTF.Runtime
         public int VertexCount => _PositionsDeltas?.Count ?? 0;
         public bool HasNormals => _NormalsDeltas != null;
         public bool HasTangents => _TangentsDeltas != null;
-        public bool HasTexCoord(int set) => set == 0 && _TexCoordDeltas_0 != null;
-        public bool HasColor(int set) => set == 0 && _ColorDeltas_0 != null;
+        public bool HasTexCoord(int set)
+        {
+            switch(set)
+            {
+                case 0: return _TexCoordDeltas_0 != null;
+                case 1: return _TexCoordDeltas_1 != null;
+            }
+
+            return false;
+        }
+
+        public bool HasColor(int set)
+        {
+            switch (set)
+            {
+                case 0: return _ColorDeltas_0 != null;
+                case 1: return _ColorDeltas_1 != null;
+            }
+
+            return false;
+        }
 
         #endregion
 
