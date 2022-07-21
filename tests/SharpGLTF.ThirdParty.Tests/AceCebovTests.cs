@@ -95,11 +95,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("ColorMorphing.glb")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             AttachmentInfo
                 .From("ColorMorphing.gltf")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
         }
 
         [Test]
@@ -173,11 +173,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("TextureMorphing.glb")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             AttachmentInfo
                 .From("TextureMorphing.gltf")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
         }
 
         [Test]
@@ -254,11 +254,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("ColorAndTextureMorphing.glb")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             AttachmentInfo
                 .From("ColorAndTextureMorphing.gltf")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
         }
     }
 }

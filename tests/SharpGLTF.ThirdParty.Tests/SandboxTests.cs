@@ -139,10 +139,10 @@ namespace SharpGLTF.ThirdParty
 
             var fF= AttachmentInfo
                 .From("ColorMorphingMultiPrim.gltf")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             AttachmentInfo.From("ColorMorphingMultiPrim.glb")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
             
         }
     }

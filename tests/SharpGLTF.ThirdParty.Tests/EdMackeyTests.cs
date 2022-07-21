@@ -54,11 +54,11 @@ namespace SharpGLTF.ThirdParty
 
             AttachmentInfo
                 .From("mesh.glb")
-                .WriteObject(f => scene.ToGltf2().Save(f.FullName));
+                .WriteObject(f => scene.ToGltf2().Save(f));
 
             AttachmentInfo
                 .From("mesh.gltf")
-                .WriteObject(f => scene.ToGltf2().Save(f.FullName));
+                .WriteObject(f => scene.ToGltf2().Save(f));
         }
 
     }

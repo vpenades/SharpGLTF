@@ -243,14 +243,14 @@ namespace SharpGLTF
 
             NUnit.Framework.AttachmentInfo
                 .From(fileName)
-                .WriteObject(f => points.DrawToFile(f.FullName));
+                .WriteObject(f => points.DrawToFile(f));
         }
 
         public static void AttachToCurrentTest(this IEnumerable<Plotting.Point2Series> series, string fileName)
         {
             NUnit.Framework.AttachmentInfo
                 .From(fileName)
-                .WriteObject(f => Plotting.Point2Series.DrawToFile(f.FullName, series.ToArray()));
+                .WriteObject(f => Plotting.Point2Series.DrawToFile(f, series.ToArray()));
         }
     }
 }

@@ -101,11 +101,11 @@ namespace SharpGLTF.ThirdParty
             // save the model in different formats
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.glb")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             AttachmentInfo
                 .From("ColorMorphingMultiPrim.gltf")
-                .WriteObject(f => model.Save(f.FullName));
+                .WriteObject(f => model.Save(f));
 
             // save evaluated frames
 
@@ -115,7 +115,7 @@ namespace SharpGLTF.ThirdParty
             {
                 AttachmentInfo
                 .From($"ColorMorphingMultiPrim_{i}.obj")
-                .WriteObject(f => model.SaveAsWavefront(f.FullName, model.LogicalAnimations[0], (float)i / 5));
+                .WriteObject(f => model.SaveAsWavefront(f, model.LogicalAnimations[0], (float)i / 5));
             }
         }
     }

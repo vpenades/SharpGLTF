@@ -35,7 +35,7 @@ namespace SharpGLTF
 
             AttachmentInfo
                 .From(fileName)
-                .WriteObject(f => model.SaveAsWavefront(f.FullName, animation, time));
+                .WriteObject(f => model.SaveAsWavefront(f, animation, time));
         }
 
         public static string AttachToCurrentTest<TvG, TvM, TvS>(this Geometry.MeshBuilder<TvG, TvM, TvS> mesh, string fileName)
@@ -61,7 +61,7 @@ namespace SharpGLTF
             {
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteObject(f => model.SaveGLB(f.FullName, settings))
+                    .WriteObject(f => model.SaveGLB(f, settings))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".gltf"))
@@ -70,7 +70,7 @@ namespace SharpGLTF
 
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteObject(f => model.Save(f.FullName, settings))
+                    .WriteObject(f => model.Save(f, settings))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".obj"))
@@ -82,7 +82,7 @@ namespace SharpGLTF
 
                 fileName = AttachmentInfo
                     .From(fileName)
-                    .WriteObject(f => model.SaveAsWavefront(f.FullName))
+                    .WriteObject(f => model.SaveAsWavefront(f))
                     .FullName;
             }
             else if (fileName.ToLowerInvariant().EndsWith(".plotly"))
