@@ -125,7 +125,7 @@ namespace SharpGLTF.Runtime
             {
                 var b = _Meshes[inst.Template.LogicalMeshIndex].BoundingSphere;
 
-                if (inst.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix.ToXna());
+                if (inst.Transform is Transforms.RigidTransform statXform) b = b.Transform(statXform.WorldMatrix);
 
                 if (inst.Transform is Transforms.SkinnedTransform skinXform)
                 {
@@ -134,7 +134,7 @@ namespace SharpGLTF.Runtime
 
                     var bb = b;
 
-                    foreach (var xb in skinXform.SkinMatrices.Select(item => bb.Transform(item.ToXna())))
+                    foreach (var xb in skinXform.SkinMatrices.Select(item => bb.Transform(item)))
                     {
                         b = BoundingSphere.CreateMerged(b, xb);
                     }

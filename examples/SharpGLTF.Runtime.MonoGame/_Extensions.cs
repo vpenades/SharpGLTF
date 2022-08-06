@@ -8,16 +8,6 @@ namespace SharpGLTF.Runtime
 {
     static class _Extensions
     {
-        public static Vector2 ToXna(this System.Numerics.Vector2 v)
-        {
-            return new Vector2(v.X, v.Y);
-        }
-
-        public static Vector3 ToXna(this System.Numerics.Vector3 v)
-        {
-            return new Vector3(v.X, v.Y, v.Z);
-        }
-
         public static Vector4 ToXna(this System.Numerics.Vector4 v)
         {
             return new Vector4(v.X, v.Y, v.Z, v.W);
@@ -32,18 +22,6 @@ namespace SharpGLTF.Runtime
                 m.M31, m.M32, m.M33, m.M34,
                 m.M41, m.M42, m.M43, m.M44
                 );
-        }       
-
-        public static BoundingSphere CreateBoundingSphere(this Schema2.Mesh mesh)
-        {
-            var points = mesh
-                .Primitives
-                .Select(item => item.GetVertexAccessor("POSITION"))
-                .Where(item => item != null)
-                .SelectMany(item => item.AsVector3Array())
-                .Select(item => item.ToXna());
-
-            return BoundingSphere.CreateFromPoints(points);
         }
     }
 }

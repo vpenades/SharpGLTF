@@ -78,9 +78,7 @@ namespace SharpGLTF.Runtime
 
             if (modelXform is Transforms.RigidTransform statXform)
             {
-                var statTransform = statXform.WorldMatrix.ToXna();
-
-                worldXform = Matrix.Multiply(statTransform, worldXform);
+                worldXform = Matrix.Multiply(statXform.WorldMatrix, worldXform);
 
                 foreach (var effect in mesh.Effects)
                 {

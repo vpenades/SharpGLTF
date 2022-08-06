@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>SharpGLTF.Runtime</RootNamespace>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1641" />    
+    <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />    
   </ItemGroup>
 
   <ItemGroup>
