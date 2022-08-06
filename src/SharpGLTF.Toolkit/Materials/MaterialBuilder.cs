@@ -466,35 +466,7 @@ namespace SharpGLTF.Materials
             WithChannelImage(KnownChannel.MetallicRoughness, imageFile);
             WithMetallicRoughness(metallic, roughness);
             return this;
-        }
-
-        public MaterialBuilder WithDiffuse(Vector4 rgba) { return WithChannelParam(KnownChannel.Diffuse, KnownProperty.RGBA, rgba); }
-
-        public MaterialBuilder WithDiffuse(IMAGEFILE imageFile, Vector4? rgba = null)
-        {
-            WithChannelImage(KnownChannel.Diffuse, imageFile);
-            if (rgba.HasValue) WithDiffuse(rgba.Value);
-            return this;
-        }
-
-        public MaterialBuilder WithSpecularGlossiness(Vector3? specular = null, float? glossiness = null)
-        {
-            if (!specular.HasValue && !glossiness.HasValue) return this;
-
-            var channel = UseChannel(KnownChannel.SpecularGlossiness);
-
-            if (specular.HasValue) channel.Parameters[KnownProperty.SpecularFactor] = specular.Value;
-            if (glossiness.HasValue) channel.Parameters[KnownProperty.GlossinessFactor] = glossiness.Value;
-
-            return this;
-        }
-
-        public MaterialBuilder WithSpecularGlossiness(IMAGEFILE imageFile, Vector3? specular = null, float? glossiness = null)
-        {
-            WithChannelImage(KnownChannel.SpecularGlossiness, imageFile);
-            WithSpecularGlossiness(specular, glossiness);
-            return this;
-        }
+        }        
 
         public MaterialBuilder WithClearCoatNormal(IMAGEFILE imageFile)
         {
@@ -555,6 +527,42 @@ namespace SharpGLTF.Materials
             // WithChannelParam(KnownChannel.VolumeAttenuation, new Vector4(color, distance));
             WithChannelParam(KnownChannel.VolumeAttenuation, KnownProperty.RGB, color);
             WithChannelParam(KnownChannel.VolumeAttenuation, KnownProperty.AttenuationDistance, distance);
+            return this;
+        }
+
+        #endregion
+
+        #region API - OBSOLETE
+
+        [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithBaseColor instead.")]
+        public MaterialBuilder WithDiffuse(Vector4 rgba) { return WithChannelParam(KnownChannel.Diffuse, KnownProperty.RGBA, rgba); }
+
+        [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithBaseColor instead.")]
+        public MaterialBuilder WithDiffuse(IMAGEFILE imageFile, Vector4? rgba = null)
+        {
+            WithChannelImage(KnownChannel.Diffuse, imageFile);
+            if (rgba.HasValue) WithDiffuse(rgba.Value);
+            return this;
+        }
+
+        [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithSpecularColor instead.")]
+        public MaterialBuilder WithSpecularGlossiness(Vector3? specular = null, float? glossiness = null)
+        {
+            if (!specular.HasValue && !glossiness.HasValue) return this;
+
+            var channel = UseChannel(KnownChannel.SpecularGlossiness);
+
+            if (specular.HasValue) channel.Parameters[KnownProperty.SpecularFactor] = specular.Value;
+            if (glossiness.HasValue) channel.Parameters[KnownProperty.GlossinessFactor] = glossiness.Value;
+
+            return this;
+        }
+
+        [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithSpecularColor instead.")]
+        public MaterialBuilder WithSpecularGlossiness(IMAGEFILE imageFile, Vector3? specular = null, float? glossiness = null)
+        {
+            WithChannelImage(KnownChannel.SpecularGlossiness, imageFile);
+            WithSpecularGlossiness(specular, glossiness);
             return this;
         }
 
