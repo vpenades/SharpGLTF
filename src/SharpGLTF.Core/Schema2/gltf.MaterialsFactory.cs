@@ -105,6 +105,9 @@ namespace SharpGLTF.Schema2
             channels = this.GetExtension<MaterialVolume>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
 
+            channels = this.GetExtension<MaterialIridescence>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
+
             var normalParam = new _MaterialParameter<float>(
                 _MaterialParameterKey.NormalScale,
                 MaterialNormalTextureInfo.ScaleDefault,
@@ -647,6 +650,86 @@ namespace SharpGLTF.Schema2
             }
 
             return new _MaterialParameter<float>(_MaterialParameterKey.EmissiveStrength, DefaultEmissiveStrength, _getter, _setter);
+        }
+    }
+
+
+    internal sealed partial class MaterialIridescence
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialIridescence(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_iridescenceTexture, _iridescenceThicknessTexture);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            /*
+            if (_attenuationColor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.X, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Y, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Z, 0, float.MaxValue, nameof(_attenuationColor));
+            }
+
+            if (_thicknessFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_thicknessFactor.Value, _thicknessFactorMinimum, float.MaxValue, nameof(_thicknessFactor));
+            }*/
+        }
+
+        private TextureInfo _GetIridescenceTexture(bool create)
+        {
+            if (create && _iridescenceTexture == null) _iridescenceTexture = new TextureInfo();
+            return _iridescenceTexture;
+        }
+
+        private TextureInfo _GetIridescenceThicknessTexture(bool create)
+        {
+            if (create && _iridescenceThicknessTexture == null) _iridescenceThicknessTexture = new TextureInfo();
+            return _iridescenceThicknessTexture;
+        }
+
+        public float IridescenceFactor
+        {
+            get => (float)_iridescenceFactor.AsValue(_iridescenceFactorDefault);
+            set => _iridescenceFactor = ((double)value).AsNullable(_iridescenceFactorDefault, _iridescenceFactorMinimum, _iridescenceFactorMaximum);
+        }
+
+        public float IridescenceIndexOfRefraction
+        {
+            get => (float)_iridescenceIor.AsValue(_iridescenceIorDefault);
+            set => _iridescenceIor = ((double)value).AsNullable(_iridescenceIorDefault, _iridescenceIorMinimum, double.MaxValue);
+        }
+
+        public float IridescenceThicknessMinimum
+        {
+            get => (float)_iridescenceThicknessMinimum.AsValue(_iridescenceThicknessMinimumDefault);
+            set => _iridescenceThicknessMinimum = ((double)value).AsNullable(_iridescenceThicknessMinimumDefault, _iridescenceThicknessMinimumMinimum, double.MaxValue);
+        }
+
+        public float IridescenceThicknessMaximum
+        {
+            get => (float)_iridescenceThicknessMaximum.AsValue(_iridescenceThicknessMaximumDefault);
+            set => _iridescenceThicknessMaximum = ((double)value).AsNullable(_iridescenceThicknessMaximumDefault, _iridescenceThicknessMaximumMinimum, double.MaxValue);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var factor = new _MaterialParameter<float>(_MaterialParameterKey.IridescenceFactor, (float)_iridescenceFactorDefault, () => IridescenceFactor, v => IridescenceFactor = v);
+            var idxRef = new _MaterialParameter<float>(_MaterialParameterKey.IndexOfRefraction, (float)_iridescenceIorDefault, () => IridescenceIndexOfRefraction, v => IridescenceIndexOfRefraction = v);
+
+            yield return new MaterialChannel(material, "Iridescence", _GetIridescenceTexture, factor, idxRef);
+
+            var thkMin = new _MaterialParameter<float>(_MaterialParameterKey.Minimum, (float)_iridescenceThicknessMinimumDefault, () => IridescenceThicknessMinimum, v => IridescenceThicknessMinimum = v);
+            var thkMax = new _MaterialParameter<float>(_MaterialParameterKey.Maximum, (float)_iridescenceThicknessMaximumDefault, () => IridescenceThicknessMaximum, v => IridescenceThicknessMaximum = v);
+
+            yield return new MaterialChannel(material, "IridescenceThickness", _GetIridescenceThicknessTexture, thkMin, thkMax);
         }
     }
 }

@@ -282,8 +282,6 @@ namespace SharpGLTF
 
         public IEnumerable<string> GetPaths(params string[] basePath)
         {
-            if (Name.Contains("Iridescence")) yield break; // still under development
-
             var rootPath = System.IO.Path.Combine(basePath);
 
             foreach(var variant in Variants)

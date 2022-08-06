@@ -31,6 +31,10 @@ namespace SharpGLTF.Schema2
         OcclusionStrength,
         EmissiveStrength,
 
+        Minimum, Maximum,
+
+        IndexOfRefraction,
+
         MetallicFactor,
         RoughnessFactor,
         SpecularFactor,
@@ -38,6 +42,7 @@ namespace SharpGLTF.Schema2
         ClearCoatFactor,
         ThicknessFactor,
         TransmissionFactor,
+        IridescenceFactor,
         AttenuationDistance,
     }
 

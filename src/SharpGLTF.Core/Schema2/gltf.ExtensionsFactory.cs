@@ -37,6 +37,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Material, MaterialVolume>("KHR_materials_volume");
             RegisterExtension<Material, MaterialEmissiveStrength>("KHR_materials_emissive_strength");
             RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness");
+            RegisterExtension<Material, MaterialIridescence>("KHR_materials_iridescence");
 
             RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform");
 

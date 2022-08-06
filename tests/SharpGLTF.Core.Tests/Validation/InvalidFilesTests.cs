@@ -59,8 +59,7 @@ namespace SharpGLTF.Validation
             var files = TestFiles
                 .GetKhronosValidationPaths()
                 .Where(item => item.EndsWith(".gltf"))
-                .Where(item => !item.Contains("KHR_materials_variants"))
-                .Where(item => !item.Contains("KHR_materials_iridescence"));
+                .Where(item => !item.Contains("KHR_materials_variants"));
 
             foreach (var f in files)
             {

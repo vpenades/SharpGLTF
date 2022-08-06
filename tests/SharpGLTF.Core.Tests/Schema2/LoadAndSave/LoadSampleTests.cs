@@ -54,13 +54,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var perf_clone = perf.ElapsedMilliseconds;
 
-            var unsupportedExtensions = new[] { "MSFT_lod", "EXT_lights_image_based" };
-
-            // check extensions used
-            if (unsupportedExtensions.All(uex => !model.ExtensionsUsed.Contains(uex)))
+            if (!f.Contains("Iridescence")) // the iridescence sample models declares using IOR but it's not actually used
             {
-                var detectedExtensions = model.GatherUsedExtensions().ToArray();
-                CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+                var unsupportedExtensions = new[] { "MSFT_lod", "EXT_lights_image_based" };
+
+                // check extensions used
+                if (unsupportedExtensions.All(uex => !model.ExtensionsUsed.Contains(uex)))
+                {
+                    var detectedExtensions = model.GatherUsedExtensions().ToArray();
+                    CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+                }
             }
 
             // Save models
@@ -161,6 +164,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             roundtripInstanced.AttachToCurrentTest($"{ff}.roundtrip.instancing.glb");            
         }
 
+        [TestCase("IridescenceMetallicSpheres.gltf")]
         [TestCase("SpecGlossVsMetalRough.gltf")]
         [TestCase(@"TextureTransformTest.gltf")]
         [TestCase(@"UnlitTest\glTF-Binary\UnlitTest.glb")]                                                
@@ -169,7 +173,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase(@"glTF-Quantized\AnimatedMorphCube.gltf")]
         [TestCase(@"glTF-Quantized\Duck.gltf")]
         [TestCase(@"glTF-Quantized\Lantern.gltf")]
-        [TestCase(@"MosquitoInAmber.glb")]
+        [TestCase(@"MosquitoInAmber.glb")]        
         public void LoadModelsWithExtensions(string filePath)
         {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -178,18 +182,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .GetSampleModelsPaths()
                 .FirstOrDefault(item => item.EndsWith(filePath));
 
-            var model = ModelRoot.Load(filePath);
-            Assert.NotNull(model);
-
-            // do a model clone and compare it
-            _AssertAreEqual(model, model.DeepClone());
-
-            // evaluate and save all the triangles to a Wavefront Object
-
-            filePath = System.IO.Path.GetFileNameWithoutExtension(filePath);
-            model.AttachToCurrentTest(filePath + "_wf.obj");
-            model.AttachToCurrentTest(filePath + ".glb");
-            model.AttachToCurrentTest(filePath + ".gltf");
+            _LoadModel(filePath);
         }
 
         [Test]

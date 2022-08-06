@@ -37,6 +37,7 @@ namespace SharpGLTF
             processors.Add(new VolumeExtension());
             processors.Add(new SpecularExtension());
             processors.Add(new ClearCoatExtension());
+            processors.Add(new IridescenceExtension());
             processors.Add(new TransmissionExtension());
             processors.Add(new EmissiveStrengthExtension());
             processors.Add(new SpecularGlossinessExtension());
