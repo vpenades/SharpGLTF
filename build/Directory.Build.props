@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  
+  <!-- https://blog.johnnyreilly.com/2021/07/14/directory-build-props-c-sharp-9-for-all -->
+
+  <!-- Legal =================================================================================== -->
+
+  <PropertyGroup>
+    <Authors>Vicente Penades</Authors>    
+    <Copyright>Copyright (c) 2022 Vicente Penades</Copyright>
+    <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
+  </PropertyGroup>  
+
+  <!-- Configuration =================================================================================== -->
+
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  
+  <!-- Testing & Analysers =================================================================================== -->  
+
+  <PropertyGroup>
+    <NoWarn>1701;1702;1591;CA1062;CA1304;CA1310;CA1000</NoWarn>
+  </PropertyGroup>  
+
+  <PropertyGroup>
+    <!-- Enable all FxCop rules with NetAnalyzers
+    https://docs.microsoft.com/es-es/visualstudio/code-quality/migrate-from-fxcop-analyzers-to-net-analyzers?view=vs-2022#migration-steps
+    -->
+    
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <!-- <CodeAnalysisRuleSet>$(MsBuildThisFileDirectory)..\solution.ruleset</CodeAnalysisRuleSet>  -->  
+    
+  </PropertyGroup>
+
+  <ItemGroup>
+    
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
+    
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="6.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    
+  </ItemGroup>  
+  
+</Project>

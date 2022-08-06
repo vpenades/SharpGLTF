@@ -22,6 +22,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Core", "src\SharpGLTF.Core\SharpGLTF.Core.csproj", "{B1DA4F42-AB6A-4021-9989-674B1394E8A2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{D7D51F42-D08C-4DDA-88DA-AF008F10B644}"
+	ProjectSection(SolutionItems) = preProject
+		build\Directory.Build.props = build\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Toolkit", "src\SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj", "{41690879-1F91-4555-A40A-F67B01868D7E}"
 EndProject
