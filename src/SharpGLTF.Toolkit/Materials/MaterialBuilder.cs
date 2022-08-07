@@ -530,6 +530,22 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        public MaterialBuilder WithIridiscence(IMAGEFILE imageFile, float factor = 0f, float ior = 1.3f)
+        {
+            WithChannelImage(KnownChannel.Iridescence, imageFile);            
+            WithChannelParam(KnownChannel.Iridescence, KnownProperty.IridescenceFactor, factor);
+            WithChannelParam(KnownChannel.Iridescence, KnownProperty.IndexOfRefraction, ior);
+            return this;
+        }
+
+        public MaterialBuilder WithIridiscenceThickness(IMAGEFILE imageFile, float min = 100f, float max = 400f)
+        {
+            WithChannelImage(KnownChannel.IridescenceThickness, imageFile);
+            WithChannelParam(KnownChannel.IridescenceThickness, KnownProperty.Minimum, min);
+            WithChannelParam(KnownChannel.IridescenceThickness, KnownProperty.Maximum, max);
+            return this;
+        }
+
         #endregion
 
         #region API - OBSOLETE

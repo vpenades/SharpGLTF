@@ -158,6 +158,25 @@ namespace SharpGLTF.Materials
             return material;
         }
 
+        private static MaterialBuilder _CreateIridescenceMaterial()
+        {
+            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+
+            var material = new MaterialBuilder("Volume Material")
+                .WithAlpha(AlphaMode.OPAQUE);
+
+            material.WithMetallicRoughnessShader()
+                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
+                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
+
+            material
+                .WithIridiscence(default, 0, 1.3f)
+                .WithIridiscenceThickness(default, 100, 400);
+
+            return material;
+        }
+
         private static MaterialBuilder _CreateClearCoatMaterial()
         {
             var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");

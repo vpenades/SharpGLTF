@@ -667,20 +667,25 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            base.OnValidateContent(validate);
+            base.OnValidateContent(validate);            
 
-            /*
-            if (_attenuationColor.HasValue)
+            if (_iridescenceFactor.HasValue)
             {
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.X, 0, float.MaxValue, nameof(_attenuationColor));
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Y, 0, float.MaxValue, nameof(_attenuationColor));
-                Guard.MustBeBetweenOrEqualTo(_attenuationColor.Value.Z, 0, float.MaxValue, nameof(_attenuationColor));
+                Guard.MustBeBetweenOrEqualTo(_iridescenceFactor.Value, _iridescenceFactorMinimum, _iridescenceFactorMaximum, nameof(_iridescenceFactor));
             }
 
-            if (_thicknessFactor.HasValue)
+            if (_iridescenceIor.HasValue)
             {
-                Guard.MustBeBetweenOrEqualTo(_thicknessFactor.Value, _thicknessFactorMinimum, float.MaxValue, nameof(_thicknessFactor));
-            }*/
+                Guard.MustBeBetweenOrEqualTo(_iridescenceIor.Value, _iridescenceIorMinimum, double.MaxValue, nameof(_iridescenceIor));
+            }
+
+            var thickMin = _iridescenceThicknessMinimum ?? _iridescenceThicknessMinimumDefault;
+            var thickMax = _iridescenceThicknessMaximum ?? _iridescenceThicknessMaximumDefault;
+
+            Guard.MustBeBetweenOrEqualTo(thickMin, _iridescenceThicknessMinimumMinimum, thickMax, nameof(_iridescenceThicknessMinimum));
+            Guard.MustBeBetweenOrEqualTo(thickMax, thickMin, double.MaxValue, nameof(_iridescenceThicknessMaximum));
+
+            
         }
 
         private TextureInfo _GetIridescenceTexture(bool create)
