@@ -100,21 +100,17 @@
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    
-    <DebugSymbols>true</DebugSymbols>    
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-
-    <IncludeSymbols>true</IncludeSymbols>    
-    
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">    
+    <DebugSymbols>true</DebugSymbols>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>    
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>    
   </PropertyGroup>
 
   <!-- strong name signing -->
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
+    <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Shared\SharpGLTF.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
