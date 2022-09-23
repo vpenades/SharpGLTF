@@ -141,11 +141,14 @@ namespace SharpGLTF.IO
             var ajson = a.ToJson();
             var bjson = b.ToJson();
 
-            if (ajson != bjson) return false;
+            if (ajson == bjson) return true;
 
-            Assert.IsTrue(JsonContent.AreEqualByContent(a, b, 0.0001f));
+            // Net6.0 has better roundtrip handling that netstandard/net4
+            #if NET6_0_OR_GREATER            
+            return false;
+            #endif
 
-            return true;
+            return JsonContent.AreEqualByContent(a, b, 0.0001f);
         }
 
         [Test]
