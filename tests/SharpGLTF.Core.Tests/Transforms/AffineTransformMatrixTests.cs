@@ -76,7 +76,7 @@ namespace SharpGLTF.Transforms
             // test normalization with uneven scaling
 
             testMatrix(Matrix4x4.CreateScale(0.0001f) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3), 0.0001f);
-            testMatrix(Matrix4x4.CreateScale(1000) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3), 0.0001f);
+            testMatrix(Matrix4x4.CreateScale(1000) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3), 0.0002f);
 
             var SxR = Matrix4x4.CreateScale(5, 1, 1) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3);   // Decomposable
             var RxS = Matrix4x4.CreateFromYawPitchRoll(1, 2, 3) * Matrix4x4.CreateScale(5, 1, 1);   // Not Decomposable            

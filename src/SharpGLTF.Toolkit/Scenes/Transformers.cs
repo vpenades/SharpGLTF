@@ -436,7 +436,10 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(joints, nameof(joints));
             Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Joint)), nameof(joints));
 
-            GuardAll.AreTrue(joints.Select(item => item.InverseBindMatrix.IsValid(_Extensions.MatrixCheck.InverseBindMatrix, 0.01f)), nameof(joints), idx => $"matrix {idx} is invalid");
+            for(int i=0; i < joints.Length; ++i)
+            {
+                Transforms.Matrix4x4Factory.GuardMatrix($"{nameof(joints)}[{i}]", joints[i].InverseBindMatrix, Transforms.Matrix4x4Factory.MatrixCheck.InverseBindMatrix, 0.01f);
+            }            
 
             _MeshPoseWorldTransform = null;
             _Joints.Clear();

@@ -178,11 +178,7 @@ namespace SharpGLTF.Transforms
 
         public AffineTransform(Matrix4x4 matrix)
         {
-            Guard.IsTrue(matrix._IsFinite(), nameof(matrix));
-            Guard.MustBeEqualTo(matrix.M14, 0, nameof(matrix.M14));
-            Guard.MustBeEqualTo(matrix.M24, 0, nameof(matrix.M24));
-            Guard.MustBeEqualTo(matrix.M34, 0, nameof(matrix.M34));
-            Guard.MustBeEqualTo(matrix.M44, 1, nameof(matrix.M44));
+            Matrix4x4Factory.GuardMatrix(nameof(matrix), matrix, Matrix4x4Factory.MatrixCheck.WorldTransform);
 
             _Representation = DATA_MAT;
 
@@ -470,51 +466,12 @@ namespace SharpGLTF.Transforms
         #endregion
 
         #region API
-
-        private void _VerifyDefined()
-        {
-            if (_Representation == DATA_UNDEFINED) throw new InvalidOperationException("Undefined");
-        }
-
-        private Matrix4x4 _GetMatrix()
-        {
-            if (IsMatrix)
-            {
-                return new Matrix4x4
-                (
-                    _M11, _M12, _M13, 0,
-                    _M21, _M22, _M23, 0,
-                    _M31, _M32, _M33, 0,
-                    _Translation.X,
-                    _Translation.Y,
-                    _Translation.Z, 1
-                );
-            }
-            else if (IsSRT)
-            {
-                var m = Matrix4x4.CreateScale(this.Scale) * Matrix4x4.CreateFromQuaternion(this.Rotation);
-                m.Translation = this.Translation;
-                return m;
-            }
-            else
-            {
-                _VerifyDefined();
-                return default;
-            }
-        }
-
-        private Vector3 _GetScale()
-        {
-            if (IsSRT) return new Vector3(_M11, _M12, _M13);
-            throw new InvalidOperationException(_RequiresSRTError);
-        }
-
-        private Quaternion _GetRotation()
-        {
-            if (IsSRT) return new Quaternion(_M21, _M22, _M23, _M31);
-            throw new InvalidOperationException(_RequiresSRTError);
-        }
-
+        
+        /// <summary>
+        /// If this object represents a <see cref="Matrix4x4"/>, it returns a decomposed representation.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException">The matrix cannot be decomposed.</exception>
         public AffineTransform GetDecomposed()
         {
             return TryDecompose(out AffineTransform xform)
@@ -651,6 +608,54 @@ namespace SharpGLTF.Transforms
                 + _Vector3Transform(a.Translation * b.Scale, b.Rotation);
 
             return new AffineTransform(s, r, t);
+        }
+        
+        #endregion
+
+        #region internals
+
+        private void _VerifyDefined()
+        {
+            if (_Representation == DATA_UNDEFINED) throw new InvalidOperationException("Undefined");
+        }
+
+        private Matrix4x4 _GetMatrix()
+        {
+            if (IsMatrix)
+            {
+                return new Matrix4x4
+                (
+                    _M11, _M12, _M13, 0,
+                    _M21, _M22, _M23, 0,
+                    _M31, _M32, _M33, 0,
+                    _Translation.X,
+                    _Translation.Y,
+                    _Translation.Z, 1
+                );
+            }
+            else if (IsSRT)
+            {
+                var m = Matrix4x4.CreateScale(this.Scale) * Matrix4x4.CreateFromQuaternion(this.Rotation);
+                m.Translation = this.Translation;
+                return m;
+            }
+            else
+            {
+                _VerifyDefined();
+                return default;
+            }
+        }
+
+        private Vector3 _GetScale()
+        {
+            if (IsSRT) return new Vector3(_M11, _M12, _M13);
+            throw new InvalidOperationException(_RequiresSRTError);
+        }
+
+        private Quaternion _GetRotation()
+        {
+            if (IsSRT) return new Quaternion(_M21, _M22, _M23, _M31);
+            throw new InvalidOperationException(_RequiresSRTError);
         }
 
         /// <summary>

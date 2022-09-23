@@ -127,7 +127,7 @@ namespace SharpGLTF.Schema2
             {
                 var ibm = joints[i].InverseBindMatrix;
 
-                Guard.IsTrue(ibm.IsValid(_Extensions.MatrixCheck.InverseBindMatrix, 0.01f), nameof(joints));
+                Transforms.Matrix4x4Factory.GuardMatrix($"{nameof(joints)}[{i}]", ibm, Transforms.Matrix4x4Factory.MatrixCheck.InverseBindMatrix, 0.01f);                
 
                 // fourth column (row in schema) is within tolerance
                 // so we can enforce exact values,

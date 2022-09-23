@@ -278,18 +278,18 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsMatrix(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustInvert = true, bool mustDecompose = true)
         {
-            var flags = _Extensions.MatrixCheck.NonZero;
-            if (mustInvert) flags |= _Extensions.MatrixCheck.Invertible;
-            if (mustDecompose) flags |= _Extensions.MatrixCheck.Decomposable;
+            var flags = Transforms.Matrix4x4Factory.MatrixCheck.NonZero;
+            if (mustInvert) flags |= Transforms.Matrix4x4Factory.MatrixCheck.Invertible;
+            if (mustDecompose) flags |= Transforms.Matrix4x4Factory.MatrixCheck.Decomposable;
             if (!matrix.IsValid(flags)) _DataThrow(pname, "Invalid Matrix");
             return this;
         }
 
         public OUTTYPE IsMatrix4x3(PARAMNAME pname, in System.Numerics.Matrix4x4 matrix, bool mustInvert = true, bool mustDecompose = true)
         {
-            var flags = _Extensions.MatrixCheck.IdentityColumn4;
-            if (mustInvert) flags |= _Extensions.MatrixCheck.Invertible;
-            if (mustDecompose) flags |= _Extensions.MatrixCheck.Decomposable;
+            var flags = Transforms.Matrix4x4Factory.MatrixCheck.IdentityColumn4;
+            if (mustInvert) flags |= Transforms.Matrix4x4Factory.MatrixCheck.Invertible;
+            if (mustDecompose) flags |= Transforms.Matrix4x4Factory.MatrixCheck.Decomposable;
 
             if (!matrix.IsValid(flags)) _DataThrow(pname, "Invalid Matrix");
             return this;

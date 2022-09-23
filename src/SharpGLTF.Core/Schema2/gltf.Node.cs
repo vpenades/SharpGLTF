@@ -188,52 +188,6 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1721 // Property names should not match get methods
 
         /// <summary>
-        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
-        /// </summary>
-        public TRANSFORM LocalTransform
-        {
-            get => TRANSFORM.CreateFromAny(_matrix, _scale, _rotation, _translation);
-            set
-            {
-                Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
-                Guard.IsTrue(value.IsValid, nameof(value));
-
-                if (value.IsMatrix && this.IsTransformAnimated)
-                {
-                    value = value.GetDecomposed(); // animated nodes require a decomposed transform.
-                }
-
-                if (value.IsMatrix)
-                {
-                    _matrix = value.Matrix.AsNullable(Matrix4x4.Identity);
-                    _scale = null;
-                    _rotation = null;
-                    _translation = null;
-                }
-                else if (value.IsSRT)
-                {
-                    _matrix = null;
-                    _scale = value.Scale.AsNullable(Vector3.One);
-                    _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
-                    _translation = value.Translation.AsNullable(Vector3.Zero);
-                }
-                else
-                {
-                    throw new ArgumentException("Undefined", nameof(value));
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
-        /// </summary>
-        public Matrix4x4 LocalMatrix
-        {
-            get => LocalTransform.Matrix;
-            set => LocalTransform = value;
-        }
-
-        /// <summary>
         /// Gets or sets the world <see cref="Matrix4x4"/> of this <see cref="Node"/>.
         /// </summary>
         public Matrix4x4 WorldMatrix
@@ -245,10 +199,30 @@ namespace SharpGLTF.Schema2
             }
             set
             {
+                Transforms.Matrix4x4Factory.GuardMatrix(nameof(value), value, Transforms.Matrix4x4Factory.MatrixCheck.WorldTransform);
+
                 var vs = VisualParent;
                 LocalMatrix = vs == null ? value : Transforms.Matrix4x4Factory.WorldToLocal(vs.WorldMatrix, value);
             }
         }
+
+        /// <summary>
+        /// Gets or sets the local Scale, Rotation and Translation of this <see cref="Node"/>.
+        /// </summary>
+        public TRANSFORM LocalTransform
+        {
+            get => TRANSFORM.CreateFromAny(_matrix, _scale, _rotation, _translation);
+            set => _SetLocalTransform(value);
+        }
+
+        /// <summary>
+        /// Gets or sets the local transform <see cref="Matrix4x4"/> of this <see cref="Node"/>.
+        /// </summary>
+        public Matrix4x4 LocalMatrix
+        {
+            get => LocalTransform.Matrix;
+            set => LocalTransform = value;
+        }        
 
         /// <summary>
         /// Gets the local <see cref="Transforms.Matrix4x4Double"/> of this <see cref="Node"/>.
@@ -536,6 +510,36 @@ namespace SharpGLTF.Schema2
             return new NodeCurveSamplers(this, animation);
         }
 
+        private void _SetLocalTransform(TRANSFORM value)
+        {
+            Guard.IsFalse(this._skin.HasValue, _NOTRANSFORMMESSAGE);
+            Guard.IsTrue(value.IsValid, nameof(value));
+
+            if (value.IsMatrix && this.IsTransformAnimated)
+            {
+                value = value.GetDecomposed(); // animated nodes require a decomposed transform.
+            }
+
+            if (value.IsMatrix)
+            {
+                _matrix = value.Matrix.AsNullable(Matrix4x4.Identity);
+                _scale = null;
+                _rotation = null;
+                _translation = null;
+            }
+            else if (value.IsSRT)
+            {
+                _matrix = null;
+                _scale = value.Scale.AsNullable(Vector3.One);
+                _rotation = value.Rotation.Sanitized().AsNullable(Quaternion.Identity);
+                _translation = value.Translation.AsNullable(Vector3.Zero);
+            }
+            else
+            {
+                throw new ArgumentException("Undefined", nameof(value));
+            }
+        }
+
         #endregion
 
         #region validation
@@ -693,7 +697,7 @@ namespace SharpGLTF.Schema2
             // TODO: nameless nodes with decomposed transform
             // could be considered intrinsic.
 
-            Guard.IsTrue(basisTransform.IsValid(_Extensions.MatrixCheck.WorldTransform), nameof(basisTransform));
+            Transforms.Matrix4x4Factory.GuardMatrix(nameof(basisTransform), basisTransform, Transforms.Matrix4x4Factory.MatrixCheck.WorldTransform);
 
             // gather all root nodes:
             var rootNodes = this.LogicalNodes
