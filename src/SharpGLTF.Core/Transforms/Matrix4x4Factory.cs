@@ -119,6 +119,28 @@ namespace SharpGLTF.Transforms
 
         #region API
 
+        public static Matrix4x4 CreateFromRows(Vector3 rowX, Vector3 rowY, Vector3 rowZ)
+        {
+            return new Matrix4x4
+                (
+                rowX.X, rowX.Y, rowX.Z, 0,
+                rowY.X, rowY.Y, rowY.Z, 0,
+                rowZ.X, rowZ.Y, rowZ.Z, 0,
+                0, 0, 0, 1
+                );
+        }
+
+        public static Matrix4x4 CreateFromRows(Vector3 rowX, Vector3 rowY, Vector3 rowZ, Vector3 translation)
+        {
+            return new Matrix4x4
+                (
+                rowX.X, rowX.Y, rowX.Z, 0,
+                rowY.X, rowY.Y, rowY.Z, 0,
+                rowZ.X, rowZ.Y, rowZ.Z, 0,
+                translation.X, translation.Y, translation.Z, 1
+                );
+        }
+
         /// <summary>
         /// Evaluates a <see cref="Matrix4x4"/> transform based on the available parameters.
         /// </summary>
@@ -149,12 +171,9 @@ namespace SharpGLTF.Transforms
         public static Matrix4x4 WorldToLocal(in Matrix4x4 parentWorld, in Matrix4x4 childWorld)
         {
             GuardMatrix(nameof(parentWorld), parentWorld, MatrixCheck.WorldTransform);
-            GuardMatrix(nameof(childWorld), childWorld, MatrixCheck.WorldTransform);
+            GuardMatrix(nameof(childWorld), childWorld, MatrixCheck.WorldTransform);            
 
-            var parentInverse = parentWorld.Inverse();
-            parentInverse.M44 = 1f;
-
-            return childWorld * parentInverse;
+            return childWorld * parentWorld.Inverse();
         }
 
         /// <summary>

@@ -83,10 +83,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(node, nameof(node));
             Guard.NotNull(joints, nameof(joints));
 
-            foreach (var j in joints)
+            foreach (var (j, ibm) in joints)
             {
-                Guard.MustShareLogicalParent(node, j.Joint, nameof(joints));
-                Guard.IsTrue(Matrix4x4.Invert(j.InverseBindMatrix, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+                Guard.MustShareLogicalParent(node, j, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(ibm, out _), nameof(joints), "Invalid Matrix");
             }
 
             var skin = node.LogicalParent.CreateSkin();
@@ -119,10 +119,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(joints, nameof(joints));
             Guard.MustShareLogicalParent(node, mesh, nameof(mesh));
 
-            foreach (var j in joints)
+            foreach (var (j, ibm) in joints)
             {
-                Guard.MustShareLogicalParent(node, j.Joint, nameof(joints));
-                Guard.IsTrue(Matrix4x4.Invert(j.InverseBindMatrix, out Matrix4x4 r), nameof(joints), "Invalid Matrix");
+                Guard.MustShareLogicalParent(node, j, nameof(joints));
+                Guard.IsTrue(Matrix4x4.Invert(ibm, out _), nameof(joints), "Invalid Matrix");
             }
 
             // TODO: the joints must be visible in the visual tree that contains node.

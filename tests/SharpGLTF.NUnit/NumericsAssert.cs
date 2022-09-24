@@ -7,7 +7,7 @@ using NUnit.Framework;
 
 namespace SharpGLTF
 {
-    [System.Diagnostics.DebuggerStepThrough]
+    // [System.Diagnostics.DebuggerStepThrough]
     public static class NumericsAssert
     {
         public static double UnitError(this Vector3 v) { return v.LengthError(1); }
@@ -114,11 +114,17 @@ namespace SharpGLTF
             Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
         }
 
-        public static void AreEqual(Vector3 expected, Vector3 actual, double tolerance = 0)
+        public static float AreEqual(Vector3 expected, Vector3 actual, double tolerance = 0)
         {
             Assert.AreEqual(expected.X, actual.X, tolerance, "X");
             Assert.AreEqual(expected.Y, actual.Y, tolerance, "Y");
             Assert.AreEqual(expected.Z, actual.Z, tolerance, "Z");
+
+            // get tolerance
+            var tx = Math.Abs(expected.X - actual.X);
+            var ty = Math.Abs(expected.Y - actual.Y);
+            var tz = Math.Abs(expected.Z - actual.Z);
+            return Math.Max(tx, Math.Max(ty, tz));
         }
 
         public static void AreEqual(Vector4 expected, Vector4 actual, double tolerance = 0)
@@ -158,6 +164,22 @@ namespace SharpGLTF
             Assert.AreEqual(expected.M42, actual.M42, tolerance, "M42");
             Assert.AreEqual(expected.M43, actual.M43, tolerance, "M43");
             Assert.AreEqual(expected.M44, actual.M44, tolerance, "M44");
+        }
+
+        public static float AreGeometryicallyEquivalent(Matrix4x4 expected, Matrix4x4 actual, double tolerance = 0)
+        {
+            var expectedX = Vector3.Transform(Vector3.UnitX, expected);
+            var expectedY = Vector3.Transform(Vector3.UnitY, expected);
+            var expectedZ = Vector3.Transform(Vector3.UnitZ, expected);
+
+            var actualX = Vector3.Transform(Vector3.UnitX, actual);
+            var actualY = Vector3.Transform(Vector3.UnitY, actual);
+            var actualZ = Vector3.Transform(Vector3.UnitZ, actual);
+
+            var tx = AreEqual(expectedX, actualX, tolerance);
+            var ty = AreEqual(expectedY, actualY, tolerance);
+            var tz = AreEqual(expectedZ, actualZ, tolerance);
+            return Math.Max(tx, Math.Max(ty, tz));
         }
 
         public static void IsInvertible(Matrix3x2 matrix)

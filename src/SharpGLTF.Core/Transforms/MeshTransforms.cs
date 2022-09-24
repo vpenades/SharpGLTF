@@ -471,6 +471,8 @@ namespace SharpGLTF.Transforms
         {
             if (!Matrix4x4Double.Invert(jointWorldTransform, out Matrix4x4Double invJoint)) Guard.IsTrue(false, nameof(jointWorldTransform), "Matrix cannot be inverted.");
 
+            if (jointWorldTransform.M44 == 1) invJoint.M44 = 1; // fix precission loss;
+
             if (meshWorldTransform == Matrix4x4Double.Identity) return invJoint;
 
             return meshWorldTransform * invJoint;

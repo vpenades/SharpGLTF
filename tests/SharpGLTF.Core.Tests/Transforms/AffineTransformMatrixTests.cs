@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
+using System.Xml;
 
 using NUnit.Framework;
 
@@ -124,6 +125,32 @@ namespace SharpGLTF.Transforms
 
             NumericsAssert.AreEqual(mat_ab, srt_ab.Matrix, 0.0001f);
             NumericsAssert.AreEqual(mat_ba, srt_ba.Matrix, 0.0001f);
+        }
+
+
+        [TestCase(true, 1, 10, 100, 0, 0, 0, 5,5,5)]
+        [TestCase(true, 1, 1, 1, 0, 0, 0, 0, 0, 0)]
+        [TestCase(true, 1, 1, 1, 2, 0, -1, 100, 50, 0)]
+        [TestCase(true, 5, 5, 5, 1, 2, 3, 100, 50, 0)]
+        [TestCase(false, 1, 2, 3, 1, 2, 3, 1, 2, 3)]
+        [TestCase(false, 1, 2, 30, 1, 2, 3, 1, 2, 3)]
+        [TestCase(false, -1, -2, 3, 0, 1, 0, 1, 0, 0)]
+        public void TestAffineTransformInverse(bool isInvertibleToSRT, float sx, float sy, float sz, float y, float p, float r, float tx, float ty, float tz)
+        {
+            var xf = new AffineTransform(new Vector3(sx, sy, sz), Quaternion.CreateFromYawPitchRoll(y, p, r), new Vector3(tx, ty, tz));
+
+            Assert.IsTrue(AffineTransform.TryInvert(xf, out var xi));            
+            Assert.IsTrue(Matrix4x4.Invert(xf.Matrix, out var mi));
+            mi.M44 = 1f;
+
+            if (isInvertibleToSRT) Assert.IsTrue(xi.IsSRT);
+
+            var xmi = xi.Matrix;
+
+            var tolerance = NumericsAssert.AreGeometryicallyEquivalent(mi, xmi, 0.00001f);
+            TestContext.WriteLine(tolerance);
+
+            Assert.IsTrue(AffineTransform.AreGeometricallyEquivalent(mi, xi, 0.00001f));
         }
     }    
 }

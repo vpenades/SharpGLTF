@@ -369,6 +369,8 @@ namespace SharpGLTF.Animations
 
         #region IConvertibleCurve API
 
+        #pragma warning disable CA1033 // Interface methods should be callable by child types
+
         IReadOnlyDictionary<float, T> IConvertibleCurve<T>.ToStepCurve()
         {
             if (MaxDegree != 0) throw new NotSupportedException();
@@ -496,6 +498,8 @@ namespace SharpGLTF.Animations
 
             return d;
         }
+
+        #pragma warning restore CA1033 // Interface methods should be callable by child types
 
         #endregion
     }

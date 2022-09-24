@@ -179,6 +179,8 @@ namespace SharpGLTF
         {
             if (!Matrix4x4.Invert(src, out Matrix4x4 dst)) Guard.IsTrue(false, nameof(src), "Matrix cannot be inverted.");
 
+            if (src.M44 == 1) dst.M44 = 1; // fix precission loss;
+
             return dst;
         }        
 

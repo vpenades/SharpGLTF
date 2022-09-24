@@ -86,11 +86,16 @@ namespace SharpGLTF.Materials
     {
         private IReadOnlyList<KnownChannel> _GetValidChannels()
         {
+
             switch (ShaderStyle)
             {
                 case SHADERUNLIT: return _UnlitChannels;
                 case SHADERPBRMETALLICROUGHNESS: return _MetRouChannels;
+
+                #pragma warning disable CS0618 // Type or member is obsolete
                 case SHADERPBRSPECULARGLOSSINESS: return _SpeGloChannels;
+                #pragma warning restore CS0618 // Type or member is obsolete
+
                 default: throw new NotImplementedException();
             }
         }
@@ -121,12 +126,13 @@ namespace SharpGLTF.Materials
             KnownChannel.VolumeAttenuation
         };
 
+        [Obsolete("Deprecated by Khronos")]
         private static readonly KnownChannel[] _SpeGloChannels = new[]
         {
             KnownChannel.Normal,
             KnownChannel.Occlusion,
             KnownChannel.Emissive,
-
+            
             KnownChannel.Diffuse,
             KnownChannel.SpecularGlossiness,
         };

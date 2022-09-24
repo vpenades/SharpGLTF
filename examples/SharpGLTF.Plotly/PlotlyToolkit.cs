@@ -90,8 +90,10 @@ namespace SharpGLTF
             var baseColor = material.GetChannel(KnownChannel.BaseColor);
             if (baseColor != null) color = (Vector4)baseColor.Parameters[KnownProperty.RGBA];
 
+            #pragma warning disable CS0618 // Type or member is obsolete
             var diffuseColor = material.GetChannel(KnownChannel.Diffuse);
             if (diffuseColor != null) color = (Vector4)diffuseColor.Parameters[KnownProperty.RGBA];
+            #pragma warning restore CS0618 // Type or member is obsolete
 
             color *= 0.8f;
             color *= 255;
