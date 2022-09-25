@@ -92,7 +92,12 @@ namespace SharpGLTF.Transforms
         {
             return new AffineTransform(matrix);
         }
-        
+
+        public static implicit operator AffineTransform(Quaternion rotation)
+        {
+            return new AffineTransform(rotation);
+        }
+
         public static AffineTransform CreateDecomposed(Matrix4x4 matrix)
         {
             if (!Matrix4x4.Decompose(matrix, out var s, out var r, out var t)) throw new ArgumentException("Can't decompose", nameof(matrix));
@@ -151,6 +156,14 @@ namespace SharpGLTF.Transforms
             : this(scale ?? Vector3.One, rotation ?? Quaternion.Identity, translation ?? Vector3.Zero)
         { }
 
+        public AffineTransform(Quaternion rotation)
+            : this(Vector3.One, rotation, Vector3.Zero)
+        { }
+
+        public AffineTransform(Quaternion rotation, Vector3 translation)
+            : this(Vector3.One, rotation, translation)
+        { }
+
         public AffineTransform(Vector3 scale, Quaternion rotation, Vector3 translation)
         {
             rotation = rotation.Sanitized();
@@ -195,7 +208,7 @@ namespace SharpGLTF.Transforms
             _M33 = matrix.M33;
 
             _Translation = matrix.Translation;
-        }
+        }              
 
         #endregion
 
