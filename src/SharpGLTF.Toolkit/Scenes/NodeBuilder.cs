@@ -408,9 +408,57 @@ namespace SharpGLTF.Scenes
             return (MATRIX)Transforms.SkinnedTransform.CalculateInverseBinding(mwx, this.WorldMatrixPrecise);
         }
 
+        /// <summary>
+        /// Sets the local transform of this node.
+        /// Optionally it is possible keep children from being affected by this node transformation change.
+        /// </summary>        
+        /// <param name="newLocalTransform">the new local transform</param>
+        /// <param name="keepChildrenInPlace">true to keep children in their world positions.</param>        
+        public void SetLocalTransform(TRANSFORM newLocalTransform, bool keepChildrenInPlace)
+        {
+            if (this.LocalTransform == newLocalTransform) return;
+
+            // keep old transform for later use
+            var oldLocalTransform = this.LocalTransform; 
+
+            // set local transform
+            this.LocalTransform = newLocalTransform;
+
+            if (keepChildrenInPlace)
+            {
+                // since the local "parent's transform" has changed,
+                // we need to apply an offset to the child
+                // nodes so they stay in their original world
+                // positions. The end result would be that the
+                // child nodes have been visually unaffected
+                // by the local "parent's transform" change.
+
+                TRANSFORM.TryInvert(newLocalTransform, out var newLocalInverse);
+
+                for (int i = 0; i < this.VisualChildren.Count; ++i)
+                {
+                    var child = this.VisualChildren[i];
+
+                    var w = child.LocalTransform;
+
+                    var isSRT = w.IsSRT;
+
+                    w *= oldLocalTransform; // to World (old)
+                    w *= newLocalInverse; // back to local                
+
+                    if (w.IsSRT != isSRT)
+                    {
+                        throw new ArgumentException("child transform cannot be preserved due to uneven scale", nameof(keepChildrenInPlace));
+                    }
+
+                    child.LocalTransform = w;
+                }
+            }
+        }
+
         #endregion
 
-        #region With* API
+        #region With* API        
 
         public NodeBuilder WithLocalTranslation(Vector3 translation)
         {
