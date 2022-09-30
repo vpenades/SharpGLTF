@@ -4,7 +4,11 @@ using System.Numerics;
 using System.Text;
 using System.Xml;
 
+using Newtonsoft.Json;
+
 using NUnit.Framework;
+
+using Plotly;
 
 namespace SharpGLTF.Transforms
 {
@@ -102,15 +106,30 @@ namespace SharpGLTF.Transforms
             Assert.IsTrue(asDecomposed.IsIdentity);
         }
 
-        [Test]
-        public void TestAffineTransformMult()
+        [TestCase(false, false, false, false)]
+        [TestCase(false, false, false, true)]
+        [TestCase(false, false, true, false)]
+        [TestCase(false, false, true, true)]
+        [TestCase(false, true, false, false)]
+        [TestCase(false, true, false, true)]
+        [TestCase(false, true, true, false)]
+        [TestCase(false, true, true, true)]
+        [TestCase(true, false, false, false)]
+        [TestCase(true, false, false, true)]
+        [TestCase(true, false, true, false)]
+        [TestCase(true, false, true, true)]
+        [TestCase(true, true, false, false)]
+        [TestCase(true, true, false, true)]
+        [TestCase(true, true, true, false)]
+        [TestCase(true, true, true, true)]
+        public void TestAffineTransformMult(bool sa, bool sb, bool ra, bool rb)
         {
-            var s_a = new Vector3(1, 2, 4);
-            var r_a = Quaternion.CreateFromYawPitchRoll(1, 2, 3);
-            var t_a = Vector3.Zero;
+            var s_a = sa ? new Vector3(1, 2, 4) : Vector3.One;
+            var r_a = ra ? Quaternion.CreateFromYawPitchRoll(1, 2, 3) : Quaternion.Identity;
+            var t_a = new Vector3(1, 5, -9);
 
-            var s_b = new Vector3(1, 1, 1);
-            var r_b = Quaternion.CreateFromYawPitchRoll(1, 0, 2);
+            var s_b = sb ? new Vector3(1, 2, 4) : Vector3.One;
+            var r_b = rb ? Quaternion.CreateFromYawPitchRoll(1, 0, 2) : Quaternion.Identity;
             var t_b = new Vector3(3, -4, 2);
 
             var mat_a = Matrix4x4.CreateScale(s_a) * Matrix4x4.CreateFromQuaternion(r_a) * Matrix4x4.CreateTranslation(t_a);
@@ -123,8 +142,11 @@ namespace SharpGLTF.Transforms
             var srt_ab = AffineTransform.Multiply(srt_a, srt_b);
             var srt_ba = AffineTransform.Multiply(srt_b, srt_a);
 
-            NumericsAssert.AreEqual(mat_ab, srt_ab.Matrix, 0.0001f);
-            NumericsAssert.AreEqual(mat_ba, srt_ba.Matrix, 0.0001f);
+            TestContext.WriteLine($"A({sa},{ra}) x B({sb},{rb}) = {srt_ab.IsSRT}");
+            TestContext.WriteLine($"B({sb},{rb}) x A({sa},{ra}) = {srt_ba.IsSRT}");
+
+            NumericsAssert.AreEqual(mat_ab, srt_ab.Matrix, 0.00001f);
+            NumericsAssert.AreEqual(mat_ba, srt_ba.Matrix, 0.00001f);
         }
 
 

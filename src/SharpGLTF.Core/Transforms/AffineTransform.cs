@@ -616,34 +616,35 @@ namespace SharpGLTF.Transforms
         /// </returns>
         public static AffineTransform Multiply(in AffineTransform a, in AffineTransform b)
         {
-            // if any of the two operators is a matrix, do a matrix multiplication.
-            if (a.IsMatrix || b.IsMatrix)
-            {
-                return new AffineTransform(a.Matrix * b.Matrix);
-            }
-
             Guard.IsFalse(a._Representation == DATA_UNDEFINED, nameof(a));
             Guard.IsFalse(b._Representation == DATA_UNDEFINED, nameof(b));
-
-            // if the B operator has an uneven scale AND a rotation, do a matrix multiplication
-            // which produces a squeezed matrix and cannot be decomposed.
-
-            var sb = b.Scale;
-
-            if (!(sb.X == sb.Y && sb.X == sb.Z) && b.Rotation != Quaternion.Identity)
+            
+            if (a.IsMatrix || b.IsMatrix)
             {
+                // if any of the two operators is a matrix,
+                // do a matrix multiplication.
+
                 return new AffineTransform(a.Matrix * b.Matrix);
             }
+            
+            var sb = b.Scale;
 
-            // we're safe to make a decomposed multiplication
+            if (sb.X != sb.Y || sb.X != sb.Z)
+            {
+                // If the B operator has an uneven scale,                
+                // do a matrix multiplication which produces
+                // a sheared matrix that cannot be decomposed.
 
-            var s = _Vector3Transform(b.Scale * _Vector3Transform(a.Scale, a.Rotation), Quaternion.Inverse(a.Rotation));
+                return new AffineTransform(a.Matrix * b.Matrix);
+            }            
 
-            var r = Quaternion.Multiply(b.Rotation, a.Rotation);
+            var s = sb * a.Scale;
+            
+            var rb = b.Rotation;
 
-            var t
-                = b.Translation
-                + _Vector3Transform(a.Translation * b.Scale, b.Rotation);
+            var r = Quaternion.Multiply(rb, a.Rotation);            
+            
+            var t = b.Translation + _Vector3Transform(a.Translation * sb, rb);
 
             return new AffineTransform(s, r, t);
         }
