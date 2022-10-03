@@ -61,10 +61,22 @@ namespace SharpGLTF.Diagnostics
         {
             get
             {
-                if (_Value.Dimensions == Schema2.DimensionType.SCALAR) return _Value.AsScalarArray().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.DimensionType.VEC2) return _Value.AsVector2Array().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.DimensionType.VEC3) return _Value.AsVector3Array().Cast<Object>().ToArray();
-                if (_Value.Dimensions == Schema2.DimensionType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();
+                if (_Value == null) return null;
+                if (Source == null) return null;
+
+                if (Source.IsIndexBuffer)
+                {
+                    return _Value.AsIndicesArray().Cast<Object>().ToArray();
+                }
+
+                if (Source.IsVertexBuffer)
+                {
+                    if (_Value.Dimensions == Schema2.DimensionType.SCALAR) return _Value.AsScalarArray().Cast<Object>().ToArray();
+                    if (_Value.Dimensions == Schema2.DimensionType.VEC2) return _Value.AsVector2Array().Cast<Object>().ToArray();
+                    if (_Value.Dimensions == Schema2.DimensionType.VEC3) return _Value.AsVector3Array().Cast<Object>().ToArray();
+                    if (_Value.Dimensions == Schema2.DimensionType.VEC4) return _Value.AsVector4Array().Cast<Object>().ToArray();                    
+                }
+
                 if (_Value.Dimensions == Schema2.DimensionType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
 
                 var itemByteSz = _Value.Format.ByteSize;
