@@ -10,6 +10,7 @@ using NUnit.Framework;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 
@@ -144,6 +145,43 @@ namespace SharpGLTF.ThirdParty
             AttachmentInfo.From("ColorMorphingMultiPrim.glb")
                 .WriteObject(f => model.Save(f));
             
+        }
+
+        [Test]
+        public void TestSharedMaterials()
+        {
+            var red = new MaterialBuilder()
+                .WithDoubleSide(true)
+                .WithMetallicRoughness(0.9f, 0.1f)
+                .WithMetallicRoughnessShader()
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 0, 1));
+
+            VBColor1 v1 = new VBColor1(new Vector3(1, 0, 0));
+            VBColor1 v2 = new VBColor1(new Vector3(0, 1, 0));
+            VBColor1 v3 = new VBColor1(new Vector3(0, 0, 1));
+
+            var mesh1 = VBColor1.CreateCompatibleMesh("some mesh 1");
+            mesh1.UsePrimitive(red).AddTriangle(v1, v2, v3);
+            mesh1.UsePrimitive(red).AddTriangle(v1, v2, v3);
+
+            var mesh2 = VBColor1.CreateCompatibleMesh("some mesh 2");
+            mesh2.UsePrimitive(red).AddTriangle(v1, v2, v3);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
+            scene.AddRigidMesh(mesh2, Matrix4x4.CreateTranslation(10,0,0));
+
+            var gltf = scene.ToGltf2();
+        }
+
+
+        [Test]
+        public void TestLoadWideStridefile()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/158
+
+            var gltf = ModelRoot.Load(ResourceInfo.From("Gotoarchi\\test1.gltf"));
+            Assert.NotNull(gltf);
         }
     }
 }

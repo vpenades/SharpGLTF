@@ -394,7 +394,7 @@ namespace SharpGLTF.Schema2
                 // strided buffer detected
                 if (overlap)
                 {
-                    ok = group.Sum(item => item.Format.ByteSizePadded) == group.Key.ByteStride;
+                    ok = group.Sum(item => item.Format.ByteSizePadded) <= group.Key.ByteStride;
                 }
 
                 // sequential buffer detected
