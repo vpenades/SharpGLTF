@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+
 using SharpGLTF.Validation;
 using BYTES = System.ArraySegment<byte>;
 
@@ -51,6 +53,20 @@ namespace SharpGLTF.Schema2
             get => GetSatelliteContent();
             set => SetSatelliteContent(value);
         }
+
+        /// <summary>
+        /// When set to a FileName or a relative File Path, it will be used to write the texture.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When null, the default file name will be used.
+        /// </para>
+        /// <para>
+        /// if not sure about the image extension, using "name.*" as extension will replace
+        /// the extension with the appropiate one before writing.
+        /// </para>
+        /// </remarks>
+        public String AlternateWriteFileName { get; set; }
 
         internal int _SourceBufferViewIndex => _bufferView.AsValue(-1);
 
@@ -199,7 +215,20 @@ namespace SharpGLTF.Schema2
             var imimg = _SatelliteContent.Value;
             Memory.MemoryImage._Verify(imimg, nameof(imimg));
 
-            satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+            if (string.IsNullOrWhiteSpace(AlternateWriteFileName))
+            {
+                satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+            }
+            else
+            {
+                satelliteUri = AlternateWriteFileName;
+                if (satelliteUri.EndsWith(".*"))
+                {
+                    satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+                }
+
+                if (System.IO.Path.IsPathRooted(satelliteUri)) throw new InvalidOperationException(nameof(AlternateWriteFileName) + " must be a relative path");
+            }            
 
             satelliteUri = writer.WriteImage(satelliteUri, imimg);
 

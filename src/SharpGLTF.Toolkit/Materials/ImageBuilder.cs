@@ -66,7 +66,25 @@ namespace SharpGLTF.Materials
         #endregion
 
         #region data
-        public IMAGEFILE Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets the in-memory representation of the image file.
+        /// </summary>
+        public IMAGEFILE Content { get; set; }        
+
+        /// <summary>
+        /// When set to a FileName or a relative File Path, it will be used to write the texture.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When null, the default file name will be used.
+        /// </para>
+        /// <para>
+        /// if not sure about the image extension, using ".*" as extension will replace
+        /// the extension with the appropiate one before writing.
+        /// </para>
+        /// </remarks>
+        public String AlternateWriteFileName { get; set; }
 
         public static bool AreEqualByContent(ImageBuilder x, ImageBuilder y)
         {
@@ -93,6 +111,8 @@ namespace SharpGLTF.Materials
         #endregion
 
         #region API
+
+        public static bool IsEmpty(ImageBuilder ib) { return ib == null || ib.Content.IsEmpty; }
 
         public static bool IsValid(ImageBuilder ib) { return ib != null && ib.Content.IsValid; }
 

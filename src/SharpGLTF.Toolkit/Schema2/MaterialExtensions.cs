@@ -366,7 +366,9 @@ namespace SharpGLTF.Schema2
             ImageBuilder _convert(Image src)
             {
                 if (src == null) return null;
-                return ImageBuilder.From(src.Content, src.Name, src.Extras.DeepClone());
+                var dst = ImageBuilder.From(src.Content, src.Name, src.Extras.DeepClone());
+                dst.AlternateWriteFileName = src.AlternateWriteFileName;
+                return dst;
             }
 
             dstChannel.Texture.PrimaryImage = _convert(srcChannel.Texture.PrimaryImage);
@@ -485,24 +487,14 @@ namespace SharpGLTF.Schema2
 
             if (ImageBuilder.IsValid(srcTex.PrimaryImage))
             {
-                primary = dstChannel
-                    .LogicalParent
-                    .LogicalParent
-                    .UseImageWithContent(srcTex.PrimaryImage.Content);
-
-                srcTex.PrimaryImage.TryCopyNameAndExtrasTo(primary);
+                primary = _ConvertToImage(dstChannel, srcTex.PrimaryImage);
             }
 
             if (primary == null) return;
 
             if (ImageBuilder.IsValid(srcTex.FallbackImage))
             {
-                fallback = dstChannel
-                    .LogicalParent
-                    .LogicalParent
-                    .UseImageWithContent(srcTex.FallbackImage.Content);
-
-                srcTex.FallbackImage.TryCopyNameAndExtrasTo(fallback);
+                fallback = _ConvertToImage(dstChannel, srcTex.FallbackImage);
             }
 
             var dstTex = dstChannel.SetTexture(srcTex.CoordinateSet, primary, fallback, srcTex.WrapS, srcTex.WrapT, srcTex.MinFilter, srcTex.MagFilter);
@@ -515,6 +507,20 @@ namespace SharpGLTF.Schema2
             {
                 dstChannel.SetTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.CoordinateSetOverride);
             }
+        }
+
+        private static Image _ConvertToImage(MaterialChannel dstChannel, ImageBuilder srcImage)
+        {
+            var dstImage = dstChannel
+                    .LogicalParent
+                    .LogicalParent
+                    .UseImageWithContent(srcImage.Content);
+
+            dstImage.AlternateWriteFileName = srcImage.AlternateWriteFileName;
+
+            srcImage.TryCopyNameAndExtrasTo(dstImage);
+
+            return dstImage;
         }
 
         #endregion

@@ -6,8 +6,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
-
 namespace SharpGLTF.Materials
 {
     /// <summary>
@@ -291,7 +289,7 @@ namespace SharpGLTF.Materials
         #region API * With
 
         /// <summary>
-        /// Sets <see cref="MaterialBuilder.ShaderStyle"/>.
+        /// Sets <see cref="ShaderStyle"/>.
         /// </summary>
         /// <param name="shader">
         /// A valid shader style, which can be one of these values:
@@ -357,9 +355,9 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(KnownChannel channelKey, IMAGEFILE primaryImage)
+        public MaterialBuilder WithChannelImage(KnownChannel channelKey, ImageBuilder primaryImage)
         {
-            if (primaryImage.IsEmpty)
+            if (ImageBuilder.IsEmpty(primaryImage))
             {
                 this.GetChannel(channelKey)?.RemoveTexture();
                 return this;
@@ -372,7 +370,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(string channelKey, IMAGEFILE primaryImage)
+        public MaterialBuilder WithChannelImage(string channelKey, ImageBuilder primaryImage)
         {
             this.UseChannel(channelKey)
                 .UseTexture()
@@ -386,7 +384,7 @@ namespace SharpGLTF.Materials
         /// </summary>
         /// <param name="fallback">
         /// A <see cref="MaterialBuilder"/> instance
-        /// that must have a <see cref="MaterialBuilder.ShaderStyle"/>
+        /// that must have a <see cref="ShaderStyle"/>
         /// of type <see cref="SHADERPBRMETALLICROUGHNESS"/></param>
         /// <returns>This <see cref="MaterialBuilder"/>.</returns>
         public MaterialBuilder WithFallback(MaterialBuilder fallback)
@@ -396,7 +394,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithMetallicRoughnessFallback(IMAGEFILE baseColor, Vector4? rgba, IMAGEFILE metallicRoughness, float? metallic, float? roughness)
+        public MaterialBuilder WithMetallicRoughnessFallback(ImageBuilder baseColor, Vector4? rgba, ImageBuilder metallicRoughness, float? metallic, float? roughness)
         {
             var fallback = this
                 .Clone()
@@ -411,14 +409,14 @@ namespace SharpGLTF.Materials
 
         #region API * With for specific channels
 
-        public MaterialBuilder WithNormal(IMAGEFILE imageFile, float scale = 1)
+        public MaterialBuilder WithNormal(ImageBuilder imageFile, float scale = 1)
         {
             WithChannelImage(KnownChannel.Normal, imageFile);
             WithChannelParam(KnownChannel.Normal, KnownProperty.NormalScale, scale);
             return this;
         }
 
-        public MaterialBuilder WithOcclusion(IMAGEFILE imageFile, float strength = 1)
+        public MaterialBuilder WithOcclusion(ImageBuilder imageFile, float strength = 1)
         {
             WithChannelImage(KnownChannel.Occlusion, imageFile);
             WithChannelParam(KnownChannel.Occlusion, KnownProperty.OcclusionStrength, strength);
@@ -432,7 +430,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithEmissive(IMAGEFILE imageFile, Vector3? rgb = null, float strength = 1)
+        public MaterialBuilder WithEmissive(ImageBuilder imageFile, Vector3? rgb = null, float strength = 1)
         {
             WithChannelImage(KnownChannel.Emissive, imageFile);
             if (rgb.HasValue) WithEmissive(rgb.Value, strength);
@@ -444,7 +442,7 @@ namespace SharpGLTF.Materials
             return WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, rgba);
         }
 
-        public MaterialBuilder WithBaseColor(IMAGEFILE imageFile, Vector4? rgba = null)
+        public MaterialBuilder WithBaseColor(ImageBuilder imageFile, Vector4? rgba = null)
         {
             WithChannelImage(KnownChannel.BaseColor, imageFile);
             if (rgba.HasValue) WithBaseColor(rgba.Value);
@@ -461,20 +459,20 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithMetallicRoughness(IMAGEFILE imageFile, float? metallic = null, float? roughness = null)
+        public MaterialBuilder WithMetallicRoughness(ImageBuilder imageFile, float? metallic = null, float? roughness = null)
         {
             WithChannelImage(KnownChannel.MetallicRoughness, imageFile);
             WithMetallicRoughness(metallic, roughness);
             return this;
         }        
 
-        public MaterialBuilder WithClearCoatNormal(IMAGEFILE imageFile)
+        public MaterialBuilder WithClearCoatNormal(ImageBuilder imageFile)
         {
             WithChannelImage(KnownChannel.ClearCoatNormal, imageFile);
             return this;
         }
 
-        public MaterialBuilder WithClearCoat(IMAGEFILE imageFile, float intensity)
+        public MaterialBuilder WithClearCoat(ImageBuilder imageFile, float intensity)
         {
             WithChannelImage(KnownChannel.ClearCoat, imageFile);
             // WithChannelParam(KnownChannel.ClearCoat, new Vector4(intensity, 0, 0, 0));
@@ -482,7 +480,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithClearCoatRoughness(IMAGEFILE imageFile, float roughness)
+        public MaterialBuilder WithClearCoatRoughness(ImageBuilder imageFile, float roughness)
         {
             WithChannelImage(KnownChannel.ClearCoatRoughness, imageFile);
             // WithChannelParam(KnownChannel.ClearCoatRoughness, new Vector4(roughness, 0, 0, 0));
@@ -490,7 +488,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithTransmission(IMAGEFILE imageFile, float intensity)
+        public MaterialBuilder WithTransmission(ImageBuilder imageFile, float intensity)
         {
             WithChannelImage(KnownChannel.Transmission, imageFile);
             // WithChannelParam(KnownChannel.Transmission, new Vector4(intensity, 0, 0, 0));
@@ -498,7 +496,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithSpecularColor(IMAGEFILE imageFile, Vector3? rgb = null)
+        public MaterialBuilder WithSpecularColor(ImageBuilder imageFile, Vector3? rgb = null)
         {
             WithChannelImage(KnownChannel.SpecularColor, imageFile);
             // if (rgb.HasValue) WithChannelParam(KnownChannel.SpecularColor, new Vector4(rgb.Value, 0));
@@ -506,7 +504,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithSpecularFactor(IMAGEFILE imageFile, float factor)
+        public MaterialBuilder WithSpecularFactor(ImageBuilder imageFile, float factor)
         {
             WithChannelImage(KnownChannel.SpecularFactor, imageFile);
             // WithChannelParam(KnownChannel.SpecularFactor, new Vector4(factor, 0, 0, 0));
@@ -514,7 +512,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithVolumeThickness(IMAGEFILE imageFile, float factor)
+        public MaterialBuilder WithVolumeThickness(ImageBuilder imageFile, float factor)
         {
             WithChannelImage(KnownChannel.VolumeThickness, imageFile);
             // WithChannelParam(KnownChannel.VolumeThickness, new Vector4(factor, 0, 0, 0));
@@ -530,7 +528,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithIridiscence(IMAGEFILE imageFile, float factor = 0f, float ior = 1.3f)
+        public MaterialBuilder WithIridiscence(ImageBuilder imageFile, float factor = 0f, float ior = 1.3f)
         {
             WithChannelImage(KnownChannel.Iridescence, imageFile);            
             WithChannelParam(KnownChannel.Iridescence, KnownProperty.IridescenceFactor, factor);
@@ -538,7 +536,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithIridiscenceThickness(IMAGEFILE imageFile, float min = 100f, float max = 400f)
+        public MaterialBuilder WithIridiscenceThickness(ImageBuilder imageFile, float min = 100f, float max = 400f)
         {
             WithChannelImage(KnownChannel.IridescenceThickness, imageFile);
             WithChannelParam(KnownChannel.IridescenceThickness, KnownProperty.Minimum, min);
@@ -554,7 +552,7 @@ namespace SharpGLTF.Materials
         public MaterialBuilder WithDiffuse(Vector4 rgba) { return WithChannelParam(KnownChannel.Diffuse, KnownProperty.RGBA, rgba); }
 
         [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithBaseColor instead.")]
-        public MaterialBuilder WithDiffuse(IMAGEFILE imageFile, Vector4? rgba = null)
+        public MaterialBuilder WithDiffuse(ImageBuilder imageFile, Vector4? rgba = null)
         {
             WithChannelImage(KnownChannel.Diffuse, imageFile);
             if (rgba.HasValue) WithDiffuse(rgba.Value);
@@ -575,7 +573,7 @@ namespace SharpGLTF.Materials
         }
 
         [Obsolete("This channel is used by KHR_materials_pbrSpecularGlossiness extension, which has been deprecated by Khronos; use WithSpecularColor instead.")]
-        public MaterialBuilder WithSpecularGlossiness(IMAGEFILE imageFile, Vector3? specular = null, float? glossiness = null)
+        public MaterialBuilder WithSpecularGlossiness(ImageBuilder imageFile, Vector3? specular = null, float? glossiness = null)
         {
             WithChannelImage(KnownChannel.SpecularGlossiness, imageFile);
             WithSpecularGlossiness(specular, glossiness);
