@@ -105,13 +105,13 @@ namespace SharpGLTF.Schema2
         /// Gets the Angle, in radians, from centre of spotlight where falloff begins.
         /// Must be greater than or equal to 0 and less than outerConeAngle.
         /// </summary>
-        public Single InnerConeAngle => this._spot == null ? 0 : (Single)this._spot.InnerConeAngle;
+        public Single InnerConeAngle => this._spot?.InnerConeAngle ?? 0;
 
         /// <summary>
         /// Gets Angle, in radians, from centre of spotlight where falloff ends.
         /// Must be greater than innerConeAngle and less than or equal to PI / 2.0.
         /// </summary>
-        public Single OuterConeAngle => this._spot == null ? 0 : (Single)this._spot.OuterConeAngle;
+        public Single OuterConeAngle => this._spot?.OuterConeAngle ?? 0;
 
         /// <summary>
         /// Gets or sets the RGB value for light's color in linear space.

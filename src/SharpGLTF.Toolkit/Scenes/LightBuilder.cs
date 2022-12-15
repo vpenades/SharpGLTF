@@ -10,7 +10,12 @@ namespace SharpGLTF.Scenes
     /// </summary>
     public abstract class LightBuilder : BaseBuilder
     {
-        #region lifecycle
+        #region lifecycle        
+        protected LightBuilder()
+        {
+            this.Color = Vector3.One;
+            this.Intensity = 1f;
+        }
 
         protected LightBuilder(Schema2.PunctualLight light)
         {
@@ -61,8 +66,16 @@ namespace SharpGLTF.Scenes
         public sealed class Directional : LightBuilder
         {
             #region lifecycle
+
+            public Directional()
+                : base()
+            { }
+
             internal Directional(Schema2.PunctualLight light)
-                : base(light) { }
+                : base(light)
+            {
+                System.Diagnostics.Debug.Assert(light.LightType == Schema2.PunctualLightType.Directional);
+            }
 
             public override LightBuilder Clone()
             {
@@ -81,9 +94,16 @@ namespace SharpGLTF.Scenes
         {
             #region lifecycle
 
+            public Point()
+                : base()
+            {
+                this.Range = float.PositiveInfinity;
+            }
+
             internal Point(Schema2.PunctualLight light)
                 : base(light)
             {
+                System.Diagnostics.Debug.Assert(light.LightType == Schema2.PunctualLightType.Point);
                 this.Range = light.Range;
             }
 
@@ -119,9 +139,18 @@ namespace SharpGLTF.Scenes
         {
             #region lifecycle
 
+            public Spot()
+                : base()
+            {
+                this.Range = float.PositiveInfinity;
+                this.InnerConeAngle = 0;
+                this.OuterConeAngle = 0.7853981633974483f;
+            }
+
             internal Spot(Schema2.PunctualLight light)
                 : base(light)
             {
+                System.Diagnostics.Debug.Assert(light.LightType == Schema2.PunctualLightType.Spot);
                 this.Range = light.Range;
                 this.InnerConeAngle = light.InnerConeAngle;
                 this.OuterConeAngle = light.OuterConeAngle;
