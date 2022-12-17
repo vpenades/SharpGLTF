@@ -22,15 +22,17 @@ namespace SharpGLTF.Scenes
         {
             UseStridedBuffers = true,
             CompactVertexWeights = false,
-            GpuMeshInstancingMinCount = int.MaxValue
+            GpuMeshInstancingMinCount = int.MaxValue,
+            MergeBuffers = true
         };
 
         public static SceneBuilderSchema2Settings WithGpuInstancing => new SceneBuilderSchema2Settings
         {
             UseStridedBuffers = true,
             CompactVertexWeights = false,
-            GpuMeshInstancingMinCount = 3
-        };
+            GpuMeshInstancingMinCount = 3,
+            MergeBuffers = true
+        };        
 
         /// <summary>
         /// When true, meshes will be created using strided vertices when possible.
@@ -60,6 +62,12 @@ namespace SharpGLTF.Scenes
         /// </para>
         /// </remarks>
         public int GpuMeshInstancingMinCount { get; set; }
+
+        /// <summary>
+        /// Merges all the Buffer objects into a single big buffer.<br/>
+        /// Default value is TRUE.
+        /// </summary>
+        public bool MergeBuffers { get; set; }
     }
 
     public partial class SceneBuilder : IConvertibleToGltf2
@@ -110,6 +118,8 @@ namespace SharpGLTF.Scenes
             }
 
             dstModel.DefaultScene = dstModel.LogicalScenes[0];
+
+            if (settings.MergeBuffers) dstModel.MergeBuffers();
 
             return dstModel;
         }
