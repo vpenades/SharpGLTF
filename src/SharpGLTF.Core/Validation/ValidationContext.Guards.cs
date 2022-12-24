@@ -154,7 +154,7 @@ namespace SharpGLTF.Validation
         #region link
 
         [System.Diagnostics.DebuggerStepThrough]
-        internal void _LinkThrow(PARAMNAME pname, string msg) { throw new LinkException(_Current, $"{pname.ToString()}: {msg}"); }
+        internal void _LinkThrow(PARAMNAME pname, string msg) { throw new LinkException(_Current, $"{pname}: {msg}"); }
 
         public OUTTYPE EnumsAreEqual<TValue>(PARAMNAME parameterName, TValue value, TValue expected)
                 where TValue : Enum
@@ -192,14 +192,14 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsAnyOf<T>(PARAMNAME parameterName, T value, params T[] values)
         {
-            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value} is invalid.");
+            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value} is not one of [{string.Join(' ',values)}].");
 
             return this;
         }
 
         public OUTTYPE IsAnyOf(PARAMNAME parameterName, Memory.AttributeFormat value, params Memory.AttributeFormat[] values)
         {
-            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value} is invalid.");
+            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value._GetDebuggerDisplay()} is not one of [{string.Join(' ', values.Select(item=>item._GetDebuggerDisplay()))}].");
 
             return this;
         }
