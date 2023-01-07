@@ -150,9 +150,11 @@ namespace SharpGLTF.Scenes
         {
             if (srcScenes == null) yield break;
 
+            srcScenes = srcScenes.Distinct();
+
             // gather shared mesh instances
 
-            var dstMeshIntances = _GatherMeshInstances(srcScenes.Distinct().SelectMany(s => Node.Flatten(s)));
+            var dstMeshIntances = _GatherMeshInstances(srcScenes.SelectMany(s => Node.Flatten(s)));
 
             // process each scene
 
@@ -162,7 +164,7 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        private static SceneBuilder _CreateFrom(Scene srcScene, IReadOnlyDictionary<Node, MESHBUILDER> dstInstances)
+        private static SceneBuilder _CreateFrom(Scene srcScene, IReadOnlyDictionary<Node, MESHBUILDER> meshInstances)
         {
             // Process armatures
 
@@ -180,20 +182,36 @@ namespace SharpGLTF.Scenes
 
             dstScene.SetNameAndExtrasFrom(srcScene);
 
-            _AddMeshInstances(dstScene, Node.Flatten(srcScene), dstNodes, dstInstances);
+            // process mesh instances
+
+            _AddMeshInstances(dstScene, Node.Flatten(srcScene), dstNodes, meshInstances);
 
             // process cameras
+
             var srcCameraInstances = Node.Flatten(srcScene)
                 .Where(item => item.Camera != null)
                 .ToList();
 
             _AddCameraInstances(dstScene, dstNodes, srcCameraInstances);
 
+            // process lights
+
             var srcLightInstances = Node.Flatten(srcScene)
                 .Where(item => item.PunctualLight != null)
                 .ToList();
 
             _AddLightInstances(dstScene, dstNodes, srcCameraInstances);
+
+            // process empty nodes with at least name or extras
+
+            var emptyInstances = Node.Flatten(srcScene)
+                .Except(meshInstances.Keys)
+                .Except(srcCameraInstances)
+                .Except(srcLightInstances)
+                .Where(item => item.Name != null)
+                .ToList();
+
+            _AddEmptyInstances(dstScene, dstNodes, emptyInstances);
 
             #if DEBUG
             dstScene._VerifyConversion(srcScene);
@@ -317,6 +335,18 @@ namespace SharpGLTF.Scenes
                     dstLight.SetNameAndExtrasFrom(srcInstance);
                     dstScene.AddLight(dstLight, dstNode);
                 }
+            }
+        }
+
+        private static void _AddEmptyInstances(SceneBuilder dstScene, IReadOnlyDictionary<Node, NodeBuilder> dstNodes, IReadOnlyList<Node> srcInstances)
+        {
+            if (srcInstances.Count == 0) return;
+
+            foreach (var srcInstance in srcInstances)
+            {
+                var dstNode = dstNodes[srcInstance];
+                
+                dstScene.AddNode(dstNode);
             }
         }
 

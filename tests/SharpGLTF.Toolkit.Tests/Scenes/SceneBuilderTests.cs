@@ -657,6 +657,27 @@ namespace SharpGLTF.Scenes
         }
 
         [Test]
+        public void TestEmptyNodeRoundtrip()
+        {
+            // create a scenebuilder with an empty node
+            var sb = new SceneBuilder();
+
+            sb.AddNode(new NodeBuilder()); // unnamed nodes will be optimized out
+            sb.AddNode(new NodeBuilder("Named"));            
+
+            var gltf = sb.ToGltf2();
+
+            Assert.AreEqual(2, gltf.LogicalNodes.Count);
+
+            // roundtrip
+            sb = SceneBuilder.CreateFrom(gltf.DefaultScene);
+
+            var instance = sb.Instances.FirstOrDefault(item => item.Name == "Named");
+
+            Assert.NotNull(instance);            
+        }
+
+        [Test]
         public void CreateSceneWithEmptyMeshes()
         {
             // Schema2 does NOT allow meshes to be empty, or meshes with empty MeshPrimitives.
