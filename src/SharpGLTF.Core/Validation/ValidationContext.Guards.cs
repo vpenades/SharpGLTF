@@ -192,14 +192,18 @@ namespace SharpGLTF.Validation
 
         public OUTTYPE IsAnyOf<T>(PARAMNAME parameterName, T value, params T[] values)
         {
-            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value} is not one of [{string.Join(' ',values)}].");
+            string separator = " ";
+
+            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value} is not one of [{string.Join(separator, values)}].");
 
             return this;
         }
 
         public OUTTYPE IsAnyOf(PARAMNAME parameterName, Memory.AttributeFormat value, params Memory.AttributeFormat[] values)
         {
-            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value._GetDebuggerDisplay()} is not one of [{string.Join(' ', values.Select(item=>item._GetDebuggerDisplay()))}].");
+            string separator = " ";
+
+            if (!values.Contains(value)) _LinkThrow(parameterName, $"value {value._GetDebuggerDisplay()} is not one of [{string.Join(separator, values.Select(item=>item._GetDebuggerDisplay()))}].");
 
             return this;
         }
