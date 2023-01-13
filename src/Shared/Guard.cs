@@ -74,6 +74,24 @@ namespace SharpGLTF
             throw new ArgumentException(message, parameterName);
         }
 
+        public static void MustExist(System.IO.FileInfo finfo, string parameterName, string message = "")
+        {
+            if (finfo == null) throw new ArgumentNullException(nameof(finfo));
+            if (finfo.Exists) return;
+
+            if (string.IsNullOrWhiteSpace(message)) message = $"{finfo.FullName} is invalid or does not exist.";
+            throw new ArgumentException(message, parameterName);
+        }
+
+        public static void MustExist(System.IO.DirectoryInfo dinfo, string parameterName, string message = "")
+        {
+            if (dinfo == null) throw new ArgumentNullException(nameof(dinfo));
+            if (dinfo.Exists) return;
+
+            if (string.IsNullOrWhiteSpace(message)) message = $"{dinfo.FullName} is invalid or does not exist.";
+            throw new ArgumentException(message, parameterName);
+        }
+
         #endregion
 
         #region null / empty
