@@ -347,9 +347,10 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public _StaticBufferBuilder(int bufferIndex)
+        public _StaticBufferBuilder(int bufferIndex, int initialCapacity = 0)
         {
             _BufferIndex = bufferIndex;
+            _Data = new List<byte>(initialCapacity);
         }
 
         #endregion
@@ -360,7 +361,7 @@ namespace SharpGLTF.Schema2
         private readonly int _BufferIndex;
 
         // accumulated data
-        private readonly List<Byte> _Data = new List<byte>();
+        private readonly List<Byte> _Data;
 
         #endregion
 
