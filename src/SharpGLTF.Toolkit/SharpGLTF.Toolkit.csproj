@@ -5,6 +5,7 @@
     <AssemblyName>SharpGLTF.Toolkit</AssemblyName>
     <RootNamespace>SharpGLTF</RootNamespace>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>    
+    <Platforms>AnyCPU;x64;x86</Platforms>    
   </PropertyGroup>  
 
   <ItemGroup>
