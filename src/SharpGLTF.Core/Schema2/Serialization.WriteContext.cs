@@ -45,22 +45,20 @@ namespace SharpGLTF.Schema2
             return context;
         }
 
+        [Obsolete("Use CreateFromDirectory", true)]
         public static WriteContext CreateFromFile(string filePath)
         {
             Guard.FilePathMustBeValid(filePath, nameof(filePath));
 
-            if (!Path.IsPathRooted(filePath)) filePath = Path.GetFullPath(filePath);
+            var finfo = new System.IO.FileInfo(filePath);
 
-            var dir = Path.GetDirectoryName(filePath);
-
-            return CreateFromDirectory(dir);
+            return CreateFromDirectory(finfo.Directory);
         }
 
-        public static WriteContext CreateFromDirectory(string directoryPath)
+        public static WriteContext CreateFromDirectory(DirectoryInfo dinfo)
         {
-            Guard.DirectoryPathMustExist(directoryPath, nameof(directoryPath));
-
-            var dinfo = new DirectoryInfo(directoryPath);
+            Guard.NotNull(dinfo, nameof(dinfo));
+            Guard.MustExist(dinfo, nameof(dinfo));            
 
             void _saveFile(string rawUri, BYTES data)
             {
@@ -105,10 +103,7 @@ namespace SharpGLTF.Schema2
         public WriteContext WithTextSettings()
         {
             if (ImageWriting == ResourceWriteMode.Default) ImageWriting = ResourceWriteMode.SatelliteFile;
-            if (ImageWriting == ResourceWriteMode.BufferView) ImageWriting = ResourceWriteMode.SatelliteFile;
-
-            MergeBuffers = true;
-            JsonIndented = false;
+            if (ImageWriting == ResourceWriteMode.BufferView) ImageWriting = ResourceWriteMode.SatelliteFile;            
 
             return this;
         }
@@ -120,7 +115,10 @@ namespace SharpGLTF.Schema2
             if (ImageWriting == ResourceWriteMode.Default) ImageWriting = ResourceWriteMode.BufferView;
             if (ImageWriting == ResourceWriteMode.EmbeddedAsBase64) ImageWriting = ResourceWriteMode.BufferView;
 
+            // merging buffers is mandatory for GLB since the format only supports a single buffer.
             MergeBuffers = true;
+
+            // there's no point in writing an indented json that's going to be written into a binary file.
             JsonIndented = false;
 
             return this;
@@ -203,6 +201,9 @@ namespace SharpGLTF.Schema2
         public void WriteTextSchema2(string baseName, MODEL model)
         {
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
+            Guard.FilePathMustBeValid(baseName, nameof(baseName));
+            if (System.IO.Path.IsPathRooted(baseName)) throw new ArgumentException("path must be relative", nameof(baseName));
+
             Guard.NotNull(model, nameof(model));
 
             // merge images when explicitly requested.
@@ -235,7 +236,12 @@ namespace SharpGLTF.Schema2
         public void WriteBinarySchema2(string baseName, MODEL model)
         {
             Guard.NotNullOrEmpty(baseName, nameof(baseName));
+            Guard.FilePathMustBeValid(baseName, nameof(baseName));
+            if (System.IO.Path.IsPathRooted(baseName)) throw new ArgumentException("path must be relative", nameof(baseName));
+
             Guard.NotNull(model, nameof(model));
+
+            
 
             // merge images for all cases except for satellite files
             var mergeImages = this.ImageWriting != ResourceWriteMode.SatelliteFile;

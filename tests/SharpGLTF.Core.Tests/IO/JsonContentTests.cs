@@ -258,18 +258,5 @@ namespace SharpGLTF.IO
 
             Assert.IsTrue(roundtripModel.LogicalImages[0].Content.IsPng);
         }
-    }
-
-    [Category("Core.IO")]
-    public class ContextTests
-    {
-        [Test]
-        public void TestCurrentDirectoryLoad()
-        {
-            // for some reason, System.IO.Path.GetFullPath() does not recogninze an empty string as the current directory.
-
-            var currDirContext0 = Schema2.ReadContext.CreateFromDirectory(string.Empty);
-            Assert.NotNull(currDirContext0);            
-        }
-    }
+    }    
 }

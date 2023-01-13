@@ -32,29 +32,17 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(callback, nameof(callback));
 
             return new ReadContext(callback);
-        }
+        }        
 
-        [Obsolete("Use CreateFromDirectory")]
-        public static ReadContext CreateFromFile(string filePath)
+        public static ReadContext CreateFromDirectory(DirectoryInfo dinfo)
         {
-            Guard.NotNull(filePath, nameof(filePath));
-            Guard.FilePathMustExist(filePath, nameof(filePath));
-
-            var dir = Path.GetDirectoryName(filePath);
-            return CreateFromDirectory(dir);
-        }
-
-        public static ReadContext CreateFromDirectory(string directoryPath)
-        {
-            Guard.NotNull(directoryPath, nameof(directoryPath));
-
-            if (string.IsNullOrEmpty(directoryPath)) directoryPath = Environment.CurrentDirectory;
-            else directoryPath = System.IO.Path.GetFullPath(directoryPath);
+            Guard.NotNull(dinfo, nameof(dinfo));
+            Guard.MustExist(dinfo, nameof(dinfo));
 
             string _uriSolver(string rawUri)
             {
                 var path = Uri.UnescapeDataString(rawUri);
-                return Path.Combine(directoryPath, path);
+                return Path.Combine(dinfo.FullName, path);
             }
 
             BYTES _loadFile(string rawUri)
@@ -156,6 +144,7 @@ namespace SharpGLTF.Schema2
         public Validation.ValidationResult Validate(string resourceName)
         {
             Guard.FilePathMustBeValid(resourceName, nameof(resourceName));
+            if (System.IO.Path.IsPathRooted(resourceName)) throw new ArgumentException("path must be relative", nameof(resourceName));
 
             var root = this.ReadAllBytesToEnd(resourceName);
 
@@ -178,6 +167,7 @@ namespace SharpGLTF.Schema2
         public MODEL ReadSchema2(string resourceName)
         {
             Guard.FilePathMustBeValid(resourceName, nameof(resourceName));
+            if (System.IO.Path.IsPathRooted(resourceName)) throw new ArgumentException("path must be relative", nameof(resourceName));
 
             var root = this.ReadAllBytesToEnd(resourceName);
 
