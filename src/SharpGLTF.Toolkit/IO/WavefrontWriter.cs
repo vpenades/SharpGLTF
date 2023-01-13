@@ -62,7 +62,8 @@ namespace SharpGLTF.IO
             foreach (var fileNameAndGenerator in _GetFileGenerators(System.IO.Path.GetFileNameWithoutExtension(filePath)))
             {
                 var fpath = System.IO.Path.Combine(dir, fileNameAndGenerator.Key);
-                System.IO.File.WriteAllBytes(fpath, fileNameAndGenerator.Value().ToUnderlayingArray());
+                using var fs = File.OpenWrite(fpath);
+                fileNameAndGenerator.Value(fs);
             }
         }
 
@@ -83,26 +84,31 @@ namespace SharpGLTF.IO
             var files = new Dictionary<String, BYTES>();
             foreach (var fileNameAndGenerator in _GetFileGenerators(baseName)) 
             {
-                files[fileNameAndGenerator.Key] = fileNameAndGenerator.Value();
+                using var mem = new MemoryStream();
+                fileNameAndGenerator.Value(mem);
+
+                mem.TryGetBuffer(out var bytes);
+
+                files[fileNameAndGenerator.Key] = bytes;
             }
 
             return files;
         }
 
-        private IReadOnlyDictionary<String, Func<BYTES>> _GetFileGenerators(string baseName) 
+        private IReadOnlyDictionary<String, Action<Stream>> _GetFileGenerators(string baseName) 
         {
             Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
 
-            var fileGenerators = new Dictionary<String, Func<BYTES>>();
+            var fileGenerators = new Dictionary<String, Action<Stream>>();
 
             var materials = _GetMaterialFileGenerator(fileGenerators, baseName, _Mesh.Primitives.Select(item => item.Material));
 
-            fileGenerators[baseName + ".obj"] = () => _WriteTextContent(sw => _GetGeometryContent(sw, materials, baseName + ".mtl"));
+            fileGenerators[baseName + ".obj"] = fs => _GetGeometryContent(new StreamWriter(fs), materials, baseName + ".mtl");
 
             return fileGenerators;
         }
 
-        private static IReadOnlyDictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Func<BYTES>> fileGenerators, string baseName, IEnumerable<Material> materials)
+        private static IReadOnlyDictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Action<Stream>> fileGenerators, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
             var images = materials
@@ -119,7 +125,10 @@ namespace SharpGLTF.IO
                     ? $"{baseName}.{img.FileExtension}"
                     : $"{baseName}_{fileGenerators.Count}.{img.FileExtension}";
 
-                fileGenerators[imgName] = () => new BYTES(img.Content.ToArray());
+                fileGenerators[imgName] = fs => {
+                    var bytes = img.Content.ToArray();
+                    fs.Write(bytes, 0, bytes.Length);
+                };
                 firstImg = false;
 
                 imageNameByImage[img] = imgName;
@@ -134,8 +143,9 @@ namespace SharpGLTF.IO
             }
 
             // write material library
-            fileGenerators[baseName + ".mtl"] = () => _WriteTextContent(sw => 
+            fileGenerators[baseName + ".mtl"] = fs =>
             {
+                var sw = new StreamWriter(fs);
                 foreach (var m in materials) 
                 {
                     sw.WriteLine($"newmtl {mmap[m]}");
@@ -151,7 +161,7 @@ namespace SharpGLTF.IO
 
                     sw.WriteLine();
                 }
-            });
+            };
 
             return mmap;
         }
@@ -217,20 +227,6 @@ namespace SharpGLTF.IO
                 }
 
                 baseVertexIndex += p.Vertices.Count;
-            }
-        }
-
-        private static BYTES _WriteTextContent(Action<StreamWriter> generator)
-        {
-            using (var mem = new System.IO.MemoryStream())
-            {
-                using (var tex = new System.IO.StreamWriter(mem))
-                {
-                    generator(tex);
-                }
-
-                mem.TryGetBuffer(out var bytes);
-                return bytes;
             }
         }
 
