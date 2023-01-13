@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 using BYTES = System.ArraySegment<System.Byte>;
+using LAZYBYTES = System.Lazy<System.ArraySegment<System.Byte>>;
 
 namespace SharpGLTF.Memory
 {
@@ -103,27 +105,20 @@ namespace SharpGLTF.Memory
             return true;
         }
 
-        public MemoryImage(BYTES image)
-        {
-            Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
-
-            _Image = image;
-            _SourcePathHint = null;
-        }
+        public MemoryImage(BYTES image) 
+            : this(_ToLazy(image), null) { }
 
         public MemoryImage(Byte[] image)
-        {
-            if (image != null) Guard.IsTrue(_IsImage(image), nameof(image), GuardError_MustBeValidImage);
+            : this(_ToLazy(image), null) { }
 
-            _Image = image == null ? default : new BYTES(image);
-            _SourcePathHint = null;
-        }
+        public MemoryImage(Func<BYTES> factory)
+            : this(new LAZYBYTES(factory), null) { }
 
         public MemoryImage(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
             {
-                _Image = default;
+                _LazyImage = _ToLazy(default(BYTES));
                 _SourcePathHint = null;
             }
             else
@@ -134,28 +129,49 @@ namespace SharpGLTF.Memory
 
                 Guard.IsTrue(_IsImage(data), nameof(filePath), GuardError_MustBeValidImage);
 
-                _Image = new BYTES(data);
+                _LazyImage = _ToLazy(data);
                 _SourcePathHint = filePath;
             }
-        }
-
-        internal MemoryImage(BYTES image, string filePath)
-            : this(image)
-        {
-            _SourcePathHint = filePath;
-        }
+        }        
 
         internal MemoryImage(Byte[] image, string filePath)
-            : this(image)
+            : this(_ToLazy(image), filePath) { }
+
+        internal MemoryImage(BYTES image, string filePath)
+            : this(_ToLazy(image), filePath) { }
+
+        internal MemoryImage(MemoryImage image, string filePath)
         {
+            _LazyImage = image._LazyImage;
+            _SourcePathHint = filePath ?? image._SourcePathHint;
+        }
+
+        internal MemoryImage(LAZYBYTES image, string filePath)
+        {
+            _LazyImage = image;
             _SourcePathHint = filePath;
+        }        
+
+        private static LAZYBYTES _ToLazy(Byte[] bytes)
+        {
+            return _ToLazy(new BYTES(bytes));
+        }
+        private static LAZYBYTES _ToLazy(BYTES bytes)
+        {
+            #if NETSTANDARD2_0
+            return new LAZYBYTES(()=> bytes);
+            #else
+            return new LAZYBYTES(bytes);
+            #endif
         }
 
         #endregion
 
         #region data
 
-        private readonly BYTES _Image;
+        private readonly LAZYBYTES _LazyImage;
+
+        private BYTES _Image => _LazyImage == null ? default : _LazyImage.Value;
 
         /// <remarks>
         /// This field must NOT be used for equality checks, it has the same face value as a code comment.
