@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -84,9 +85,7 @@ namespace SharpGLTF.IO
 
             var materials = _WriteMaterials(files, baseName, _Mesh.Primitives.Select(item => item.Material));
 
-            var geocontent = _GetGeometryContent(materials, baseName + ".mtl");
-
-            _WriteTextContent(files, baseName + ".obj", geocontent);
+            files[baseName + ".obj"] = _WriteTextContent( sw => _GetGeometryContent(sw, materials, baseName + ".mtl"));
 
             return files;
         }
@@ -115,62 +114,58 @@ namespace SharpGLTF.IO
 
             var mmap = new Dictionary<Material, string>();
 
-            var sb = new StringBuilder();
-
-            foreach (var m in materials)
-            {
-                mmap[m] = $"Material_{mmap.Count}";
-
-                sb.AppendLine($"newmtl {mmap[m]}");
-                sb.AppendLine("illum 2");
-                sb.AppendLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
-                sb.AppendLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
-                sb.AppendLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
-
-                if (m.DiffuseTexture.IsValid)
-                {
-                    var imgName = files.FirstOrDefault(kvp => new Memory.MemoryImage(kvp.Value) == m.DiffuseTexture ).Key;
-                    sb.AppendLine($"map_Kd {imgName}");
-                }
-
-                sb.AppendLine();
-            }
-
             // write material library
-            _WriteTextContent(files, baseName + ".mtl", sb);
+            files[baseName + ".mtl"] = _WriteTextContent(sw => 
+            {
+                foreach (var m in materials) 
+                {
+                    mmap[m] = $"Material_{mmap.Count}";
+
+                    sw.WriteLine($"newmtl {mmap[m]}");
+                    sw.WriteLine("illum 2");
+                    sw.WriteLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
+                    sw.WriteLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
+                    sw.WriteLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
+
+                    if (m.DiffuseTexture.IsValid) {
+                        var imgName = files.FirstOrDefault(kvp => new Memory.MemoryImage(kvp.Value) == m.DiffuseTexture).Key;
+                        sw.WriteLine($"map_Kd {imgName}");
+                    }
+
+                    sw.WriteLine();
+                }
+            });
 
             return mmap;
         }
 
-        private StringBuilder _GetGeometryContent(IReadOnlyDictionary<Material, string> materials, string mtlLib)
+        private void _GetGeometryContent(StreamWriter sw, IReadOnlyDictionary<Material, string> materials, string mtlLib)
         {
-            var sb = new StringBuilder();
+            sw.WriteLine($"mtllib {mtlLib}");
 
-            sb.AppendLine($"mtllib {mtlLib}");
-
-            sb.AppendLine();
+            sw.WriteLine();
 
             foreach (var p in _Mesh.Primitives)
             {
                 foreach (var v in p.Vertices)
                 {
                     var pos = v.Position;
-                    sb.AppendLine(Invariant($"v {pos.X} {pos.Y} {pos.Z}"));
+                    sw.WriteLine(Invariant($"v {pos.X} {pos.Y} {pos.Z}"));
                 }
             }
 
-            sb.AppendLine();
+            sw.WriteLine();
 
             foreach (var p in _Mesh.Primitives)
             {
                 foreach (var v in p.Vertices)
                 {
                     var nrm = v.Geometry.Normal;
-                    sb.AppendLine(Invariant($"vn {nrm.X} {nrm.Y} {nrm.Z}"));
+                    sw.WriteLine(Invariant($"vn {nrm.X} {nrm.Y} {nrm.Z}"));
                 }
             }
 
-            sb.AppendLine();
+            sw.WriteLine();
 
             foreach (var p in _Mesh.Primitives)
             {
@@ -179,13 +174,13 @@ namespace SharpGLTF.IO
                     var uv = v.Material.TexCoord;
                     uv.Y = 1 - uv.Y;
 
-                    sb.AppendLine(Invariant($"vt {uv.X} {uv.Y}"));
+                    sw.WriteLine(Invariant($"vt {uv.X} {uv.Y}"));
                 }
             }
 
-            sb.AppendLine();
+            sw.WriteLine();
 
-            sb.AppendLine("g default");
+            sw.WriteLine("g default");
 
             var baseVertexIndex = 1;
 
@@ -193,7 +188,7 @@ namespace SharpGLTF.IO
             {
                 var mtl = materials[p.Material];
 
-                sb.AppendLine($"usemtl {mtl}");
+                sw.WriteLine($"usemtl {mtl}");
 
                 foreach (var t in p.Triangles)
                 {
@@ -201,27 +196,24 @@ namespace SharpGLTF.IO
                     var b = t.B + baseVertexIndex;
                     var c = t.C + baseVertexIndex;
 
-                    sb.AppendLine(Invariant($"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}"));
+                    sw.WriteLine(Invariant($"f {a}/{a}/{a} {b}/{b}/{b} {c}/{c}/{c}"));
                 }
 
                 baseVertexIndex += p.Vertices.Count;
             }
-
-            return sb;
         }
 
-        private static void _WriteTextContent(IDictionary<string, BYTES> files, string fileName, StringBuilder sb)
+        private static BYTES _WriteTextContent(Action<StreamWriter> generator)
         {
             using (var mem = new System.IO.MemoryStream())
             {
                 using (var tex = new System.IO.StreamWriter(mem))
                 {
-                    tex.Write(sb.ToString());
+                    generator(tex);
                 }
 
-                mem.TryGetBuffer(out BYTES content);
-
-                files[fileName] = content;
+                mem.TryGetBuffer(out var bytes);
+                return bytes;
             }
         }
 
