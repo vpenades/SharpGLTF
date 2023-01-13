@@ -6,6 +6,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 
 using static System.FormattableString;
@@ -56,14 +57,12 @@ namespace SharpGLTF.IO
         {
             Guard.NotNullOrEmpty(filePath, nameof(filePath));
 
-            var files = GetFiles(System.IO.Path.GetFileNameWithoutExtension(filePath));
-
             var dir = System.IO.Path.GetDirectoryName(filePath);
 
-            foreach (var f in files)
+            foreach (var fileNameAndGenerator in _GetFileGenerators(System.IO.Path.GetFileNameWithoutExtension(filePath)))
             {
-                var fpath = System.IO.Path.Combine(dir, f.Key);
-                System.IO.File.WriteAllBytes(fpath, f.Value.ToArray());
+                var fpath = System.IO.Path.Combine(dir, fileNameAndGenerator.Key);
+                System.IO.File.WriteAllBytes(fpath, fileNameAndGenerator.Value().ToUnderlayingArray());
             }
         }
 
@@ -82,15 +81,28 @@ namespace SharpGLTF.IO
             Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
 
             var files = new Dictionary<String, BYTES>();
-
-            var materials = _WriteMaterials(files, baseName, _Mesh.Primitives.Select(item => item.Material));
-
-            files[baseName + ".obj"] = _WriteTextContent( sw => _GetGeometryContent(sw, materials, baseName + ".mtl"));
+            foreach (var fileNameAndGenerator in _GetFileGenerators(baseName)) 
+            {
+                files[fileNameAndGenerator.Key] = fileNameAndGenerator.Value();
+            }
 
             return files;
         }
 
-        private static IReadOnlyDictionary<Material, string> _WriteMaterials(IDictionary<String, BYTES> files, string baseName, IEnumerable<Material> materials)
+        private IReadOnlyDictionary<String, Func<BYTES>> _GetFileGenerators(string baseName) 
+        {
+            Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
+
+            var fileGenerators = new Dictionary<String, Func<BYTES>>();
+
+            var materials = _GetMaterialFileGenerator(fileGenerators, baseName, _Mesh.Primitives.Select(item => item.Material));
+
+            fileGenerators[baseName + ".obj"] = () => _WriteTextContent(sw => _GetGeometryContent(sw, materials, baseName + ".mtl"));
+
+            return fileGenerators;
+        }
+
+        private static IReadOnlyDictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Func<BYTES>> fileGenerators, string baseName, IEnumerable<Material> materials)
         {
             // write all image files
             var images = materials
@@ -100,27 +112,32 @@ namespace SharpGLTF.IO
 
             bool firstImg = true;
 
+            var imageNameByImage = new Dictionary<MemoryImage, string>();
             foreach (var img in images)
             {
                 var imgName = firstImg
                     ? $"{baseName}.{img.FileExtension}"
-                    : $"{baseName}_{files.Count}.{img.FileExtension}";
+                    : $"{baseName}_{fileGenerators.Count}.{img.FileExtension}";
 
-                files[imgName] = new BYTES(img.Content.ToArray());
+                fileGenerators[imgName] = () => new BYTES(img.Content.ToArray());
                 firstImg = false;
+
+                imageNameByImage[img] = imgName;
             }
 
             // write materials
 
             var mmap = new Dictionary<Material, string>();
+            foreach (var m in materials) 
+            {
+                mmap[m] = $"Material_{mmap.Count}";
+            }
 
             // write material library
-            files[baseName + ".mtl"] = _WriteTextContent(sw => 
+            fileGenerators[baseName + ".mtl"] = () => _WriteTextContent(sw => 
             {
                 foreach (var m in materials) 
                 {
-                    mmap[m] = $"Material_{mmap.Count}";
-
                     sw.WriteLine($"newmtl {mmap[m]}");
                     sw.WriteLine("illum 2");
                     sw.WriteLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
@@ -128,7 +145,7 @@ namespace SharpGLTF.IO
                     sw.WriteLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
 
                     if (m.DiffuseTexture.IsValid) {
-                        var imgName = files.FirstOrDefault(kvp => new Memory.MemoryImage(kvp.Value) == m.DiffuseTexture).Key;
+                        var imgName = imageNameByImage[m.DiffuseTexture];
                         sw.WriteLine($"map_Kd {imgName}");
                     }
 
