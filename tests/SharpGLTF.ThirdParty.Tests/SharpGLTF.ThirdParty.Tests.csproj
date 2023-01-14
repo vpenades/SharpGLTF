@@ -5,7 +5,6 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF.ThirdParty</RootNamespace>
     <LangVersion>latest</LangVersion>
-    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

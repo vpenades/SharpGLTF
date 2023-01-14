@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
 
 using NUnit.Framework;
@@ -118,14 +117,7 @@ namespace SharpGLTF.Schema2.Authoring
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // we'll use our icon as the source texture
-            var workDirectory = new DirectoryInfo(TestContext.CurrentContext.WorkDirectory);
-            var testDirectory = workDirectory;
-            do {
-                testDirectory = testDirectory.Parent;
-            } while (testDirectory.Name != "tests");
-            var sharpGltfDirectory = testDirectory.Parent;
-
-            var imagePath = Path.Combine(sharpGltfDirectory.FullName, "build\\Icons\\glTF2Sharp.png");
+            var imagePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "..\\..\\..\\..\\..\\build\\Icons\\glTF2Sharp.png");
 
             // create a basic scene
             var model = ModelRoot.CreateModel();
