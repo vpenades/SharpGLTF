@@ -27,7 +27,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
-    <PackageReference Include="System.Drawing.Common"  Version="6.0.0" />
   </ItemGroup>  
 
 </Project>
