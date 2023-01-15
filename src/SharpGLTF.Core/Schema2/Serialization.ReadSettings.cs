@@ -91,14 +91,12 @@ namespace SharpGLTF.Schema2
         public static Validation.ValidationResult Validate(string filePath)
         {
             Guard.NotNull(filePath, nameof(filePath));
-            Guard.FilePathMustExist(filePath, nameof(filePath));
+            var finfo = new System.IO.FileInfo(filePath);
+            Guard.MustExist(finfo, nameof(filePath));
 
-            var dir = Path.GetDirectoryName(filePath);
-            filePath = System.IO.Path.GetFileName(filePath);
-
-            var context = ReadContext.CreateFromDirectory(dir);
-
-            return context.Validate(filePath);
+            return ReadContext
+                .CreateFromDirectory(finfo.Directory)
+                .Validate(finfo.Name);
         }
 
         #endregion
@@ -122,15 +120,18 @@ namespace SharpGLTF.Schema2
 
             if (!(settings is ReadContext context))
             {
-                Guard.FilePathMustExist(filePath, nameof(filePath));
+                var finfo = new System.IO.FileInfo(filePath);
 
-                var dir = Path.GetDirectoryName(filePath);
-                filePath = System.IO.Path.GetFileName(filePath);
+                Guard.MustExist(finfo, nameof(filePath));
 
                 context = ReadContext
-                    .CreateFromDirectory(dir)
+                    .CreateFromDirectory(finfo.Directory)
                     .WithSettingsFrom(settings);
+
+                filePath = finfo.Name;
             }
+
+            // at this point, filePath must be a path "relative to context"            
 
             return context.ReadSchema2(filePath);
         }

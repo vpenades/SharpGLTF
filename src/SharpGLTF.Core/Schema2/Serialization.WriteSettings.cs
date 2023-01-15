@@ -172,16 +172,22 @@ namespace SharpGLTF.Schema2
         /// <param name="settings">Optional settings.</param>
         public void SaveGLB(string filePath, WriteSettings settings = null)
         {
+            Guard.NotNull(filePath, nameof(filePath));
+
             if (!(settings is WriteContext context))
             {
+                var finfo = new System.IO.FileInfo(filePath);
+
                 context = WriteContext
-                    .CreateFromFile(filePath)
+                    .CreateFromDirectory(finfo.Directory)
                     .WithSettingsFrom(settings);
+
+                filePath = finfo.Name;
             }
 
-            context.WithBinarySettings();
-
             var name = Path.GetFileNameWithoutExtension(filePath);
+
+            context.WithBinarySettings();
 
             context.WriteBinarySchema2(name, this);
         }
@@ -196,17 +202,23 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public void SaveGLTF(string filePath, WriteSettings settings = null)
         {
+            Guard.NotNull(filePath, nameof(filePath));
+
             if (!(settings is WriteContext context))
             {
-                context = WriteContext
-                    .CreateFromFile(filePath)
-                    .WithSettingsFrom(settings);
-            }
+                var finfo = new System.IO.FileInfo(filePath);
 
-            context.WithTextSettings();
+                context = WriteContext
+                    .CreateFromDirectory(finfo.Directory)
+                    .WithSettingsFrom(settings);
+
+                filePath = finfo.Name;
+            }
 
             var name = Path.GetFileNameWithoutExtension(filePath);
 
+            context.WithTextSettings();
+            
             context.WriteTextSchema2(name, this);
         }
 

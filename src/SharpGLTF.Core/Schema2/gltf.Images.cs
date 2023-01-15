@@ -55,15 +55,17 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// When set to a FileName or a relative File Path, it will be used to write the texture.
+        /// When set to a FileName or a relative File Path,
+        /// it will be used as the file name of the texture being written.<br/>
+        /// When null, a default file name will be used.
         /// </summary>
-        /// <remarks>
+        /// <remarks>        
         /// <para>
-        /// When null, the default file name will be used.
+        /// if not sure about the image extension, using .* as extension will replace
+        /// the extension with the appropiate one at the time of writing.
         /// </para>
         /// <para>
-        /// if not sure about the image extension, using "name.*" as extension will replace
-        /// the extension with the appropiate one before writing.
+        /// For more advanced scenarios, you can also use: <see cref="WriteSettings.ImageWriteCallback"/>
         /// </para>
         /// </remarks>
         public String AlternateWriteFileName { get; set; }
