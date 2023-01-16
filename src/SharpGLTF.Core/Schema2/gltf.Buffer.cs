@@ -220,7 +220,8 @@ namespace SharpGLTF.Schema2
 
             // begin merge
 
-            var sbbuilder = new _StaticBufferBuilder(0);
+            var reservedMemory = (int) (totalLen * 1.01); // increase by 1%
+            var sbbuilder = new _StaticBufferBuilder(0, reservedMemory);
 
             foreach (var bv in views) bv._IsolateBufferMemory(sbbuilder);
 
