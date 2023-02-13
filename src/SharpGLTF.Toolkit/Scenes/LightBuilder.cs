@@ -6,8 +6,14 @@ using System.Text;
 namespace SharpGLTF.Scenes
 {
     /// <summary>
-    /// Represents a light object.
+    /// Represents the base class light object.
     /// </summary>
+    /// <remarks>
+    /// Derived types are:<br/>
+    /// - <see cref="Directional"/><br/>
+    /// - <see cref="Point"/><br/>
+    /// - <see cref="Spot"/><br/>
+    /// </remarks>
     public abstract class LightBuilder : BaseBuilder
     {
         #region lifecycle        
