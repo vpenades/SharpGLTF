@@ -218,6 +218,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    /// <summary>
+    /// <see cref="MaterialPBRSpecularGlossiness"/> has been deprecated by khronos in favour of <see cref="MaterialPBRMetallicRoughness"/> + <see cref="MaterialSpecular"/>
+    /// </summary>
     internal sealed partial class MaterialPBRSpecularGlossiness
     {
         #pragma warning disable CA1801 // Review unused parameters
