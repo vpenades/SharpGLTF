@@ -41,7 +41,9 @@ namespace SharpGLTF
             processors.Add(new TransmissionExtension());
             processors.Add(new EmissiveStrengthExtension());
             processors.Add(new SpecularGlossinessExtension());
-            
+
+            // cesium outlines
+            processors.Add(new CesiumPrimitiveOutlineExtension());
 
             // lights
             processors.Add(new LightsPunctualExtension());
