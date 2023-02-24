@@ -46,6 +46,7 @@ namespace Example1
             // save the model in different formats
 
             var model = scene.ToGltf2();
+            model.LogicalMeshes[0].Primitives[0].AddCesiumOutline(4);
             model.SaveAsWavefront("mesh.obj");
             model.SaveGLB("mesh.glb");
             model.SaveGLTF("mesh.gltf");
