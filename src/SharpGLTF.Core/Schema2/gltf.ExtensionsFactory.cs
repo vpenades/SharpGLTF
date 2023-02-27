@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Node, AgiNodeArticulations>("AGI_articulations");
             RegisterExtension<Node, AgiNodeStkMetadata>("AGI_stk_metadata");
 
-            RegisterExtension<Mesh, CESIUM_primitive_outlineglTFprimitiveextension>("CESIUM_primitive_outline");
+            RegisterExtension<MeshPrimitive, CESIUM_primitive_outlineglTFprimitiveextension>("CESIUM_primitive_outline");
         }
 
         #endregion

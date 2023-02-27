@@ -10,6 +10,7 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
+using System.Diagnostics;
 
 namespace SharpGLTF.Scenes
 {
@@ -22,6 +23,46 @@ namespace SharpGLTF.Scenes
     [Category("Toolkit.Scenes")]
     public partial class SceneBuilderTests
     {
+        [Test(Description = "Creates a simple triangle with Cesium outlining")]
+        public void CreateCesiumOutlineTriangleScene()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var material = MaterialBuilder.CreateDefault();
+
+            var mesh = new MeshBuilder<VertexPosition>("mesh");
+
+            var prim = mesh.UsePrimitive(material);
+            prim.AddTriangle(new VertexPosition(-10, 0, 0), new VertexPosition(10, 0, 0), new VertexPosition(0, 10, 0));
+
+            var scene = new SceneBuilder();
+
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var outlineBytes = new List<byte>();
+            var outlines = new List<uint>() { 0, 1, 1, 2, 2, 0 };
+
+            foreach (var outline in outlines)
+            {
+                var bytes = BitConverter.GetBytes(outline).ToList();
+                outlineBytes.AddRange(bytes);
+            }
+
+            var model = scene.ToGltf2();
+            var buffer = model.UseBufferView(outlineBytes.ToArray());
+            var accessor = model.CreateAccessor("Cesium outlines");
+            accessor.SetData(buffer, 0, outlineBytes.Count / 4, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
+
+            model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(accessor.LogicalIndex);
+
+            var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
+            Assert.True(cesiumOutlineExtension.Indices == accessor.LogicalIndex);
+
+            scene.AttachToCurrentTest("cesium_outline_triangle.glb");
+            scene.AttachToCurrentTest("cesium_outline_triangle.gltf");
+            scene.AttachToCurrentTest("cesium_outline_triangle.plotly");
+        }
+
         [Test(Description ="Creates a simple cube.")]
         public void CreateCubeScene()
         {            

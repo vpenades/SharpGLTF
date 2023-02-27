@@ -12,17 +12,11 @@
     }
     partial class MeshPrimitive
     {
-        // call using sample: model.LogicalMeshes[0].Primitives[0].AddCesiumOutline(4);
-
-        public void AddCesiumOutline(int? indices)
+        public void SetCesiumOutline(int? indices)
         {
-            if (indices != null) { this.RemoveExtensions<CESIUM_primitive_outlineglTFprimitiveextension>(); return; }
-            var ext = new CESIUM_primitive_outlineglTFprimitiveextension(this);
+            if (indices == null) { RemoveExtensions<CESIUM_primitive_outlineglTFprimitiveextension>(); return; }
+            var ext = UseExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
             ext.Indices = indices;
-
-            // what to do next?
-            SetExtension(ext);
-            UseExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
         }
     }
 }
