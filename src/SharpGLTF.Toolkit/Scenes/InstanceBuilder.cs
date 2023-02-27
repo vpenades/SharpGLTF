@@ -82,7 +82,9 @@ namespace SharpGLTF.Scenes
             get
             {
                 var asset = Content.GetGeometryAsset();
-                return asset != null ? asset.Materials : Enumerable.Empty<Materials.MaterialBuilder>();
+                return asset != null
+                    ? asset.Materials
+                    : Enumerable.Empty<Materials.MaterialBuilder>();
             }
         }
 

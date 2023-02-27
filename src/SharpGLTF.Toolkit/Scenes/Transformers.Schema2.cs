@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Xml.Linq;
 
 using SharpGLTF.Schema2;
 
@@ -12,7 +14,7 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Groups instances of the same mesh being attached to the same node.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Rigid Node[{_DebugName,nq}] = GpuMeshInstances[{_Children.Count}]")]
+    [System.Diagnostics.DebuggerDisplay("_MeshInstancing Node[{_DebugName,nq}] = GpuMeshInstances[{_Children.Count}]")]
     internal readonly struct _MeshInstancing : SCHEMA2SCENE
     {
         #region debug
@@ -125,6 +127,8 @@ namespace SharpGLTF.Scenes
         {
             if (_Children.Count < _GpuMinCount)
             {
+                // add fixed instances as individual nodes.
+
                 foreach (var srcChild in _Children)
                 {
                     if (srcChild.Content is SCHEMA2NODE srcOperator)
@@ -142,6 +146,8 @@ namespace SharpGLTF.Scenes
             }
             else
             {
+                // add fixed instances using GPU instancing extension.
+
                 if (_Children[0].Content is SCHEMA2NODE srcOperator)
                 {
                     var xforms = _Children
@@ -177,6 +183,56 @@ namespace SharpGLTF.Scenes
         #endregion
     }
 
+    /// <summary>
+    /// helper class used to build <see cref="FixedTransformer"/> into a <see cref="Scene"/>
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("_FixedIntance Node[{_DebugName,nq}] = {Content}")]
+    internal readonly struct _FixedIntance : SCHEMA2SCENE
+    {
+        #region debug
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private string _DebugName => _srcChild?.Name ?? "*";
+
+        #endregion
+
+        #region lifecycle
+
+        public _FixedIntance(FixedTransformer fixedXformer)
+        {
+            _srcChild = fixedXformer;
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly FixedTransformer _srcChild;
+
+        #endregion
+
+        #region API
+
+        void SCHEMA2SCENE.ApplyTo(Scene dstScene, Schema2SceneBuilder context)
+        {
+            if (!(_srcChild.Content is SCHEMA2NODE schema2Target))
+            {
+                throw new InvalidOperationException("Operator expected");
+            }
+
+            var dstNode = dstScene.CreateNode();
+            dstNode.Name = _srcChild.Name;
+            dstNode.Extras = _srcChild.Extras.DeepClone();
+            dstNode.LocalTransform = _srcChild.ChildTransform;
+
+            schema2Target.ApplyTo(dstNode, context);
+
+            System.Diagnostics.Debug.Assert(dstNode.WorldMatrix == _srcChild.GetPoseWorldMatrix(), "Transform mismatch!");
+        }
+
+        #endregion
+    }
+
     partial class RigidTransformer : SCHEMA2SCENE
     {
         void SCHEMA2SCENE.ApplyTo(Scene dstScene, Schema2SceneBuilder context)
@@ -187,7 +243,10 @@ namespace SharpGLTF.Scenes
 
                 schema2Target.ApplyTo(dstNode, context);
 
-                Schema2SceneBuilder.SetMorphAnimation(dstNode, this.Morphings);
+                if (schema2Target is MeshContent)
+                {
+                    Schema2SceneBuilder.SetMorphAnimation(dstNode, this.Morphings);
+                }                                
 
                 System.Diagnostics.Debug.Assert(dstNode.WorldMatrix == this.GetPoseWorldMatrix(), "Transform mismatch!");
             }

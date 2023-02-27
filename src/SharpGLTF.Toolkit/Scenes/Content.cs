@@ -13,7 +13,7 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Represents a dummy, empty content of <see cref="ContentTransformer.Content"/>.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Custom")]
+    [System.Diagnostics.DebuggerDisplay("EmptyContent")]
     partial class EmptyContent : ICloneable
     {
         #region lifecycle
@@ -30,7 +30,7 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Represents a <see cref="MESHBUILDER"/> content of <see cref="ContentTransformer.Content"/>.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Mesh")]
+    [System.Diagnostics.DebuggerDisplay("MeshContent => {_Mesh}")]
     partial class MeshContent :
         IRenderableContent,
         ICloneable,
@@ -92,7 +92,7 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Represents a <see cref="CameraBuilder"/> content of <see cref="ContentTransformer.Content"/>.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Camera")]
+    [System.Diagnostics.DebuggerDisplay("CameraContent => {_Camera}")]
     partial class CameraContent : ICloneable
     {
         #region lifecycle
@@ -135,7 +135,7 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Represents a <see cref="LightBuilder"/> content of <see cref="ContentTransformer.Content"/>.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Light")]
+    [System.Diagnostics.DebuggerDisplay("LightContent => {_Light}")]
     partial class LightContent : ICloneable
     {
         #region lifecycle

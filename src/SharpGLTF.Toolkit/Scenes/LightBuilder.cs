@@ -68,7 +68,7 @@ namespace SharpGLTF.Scenes
         #region Nested types
 
         /// <inheritdoc/>
-        [System.Diagnostics.DebuggerDisplay("Directional")]
+        [System.Diagnostics.DebuggerDisplay("LightBuilder.Directional")]
         public sealed class Directional : LightBuilder
         {
             #region lifecycle
@@ -95,7 +95,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.DebuggerDisplay("Point")]
+        [System.Diagnostics.DebuggerDisplay("LightBuilder.Point")]
         public sealed class Point : LightBuilder
         {
             #region lifecycle
@@ -140,7 +140,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.DebuggerDisplay("Spot")]
+        [System.Diagnostics.DebuggerDisplay("LightBuilder.Spot")]
         public sealed class Spot : LightBuilder
         {
             #region lifecycle
