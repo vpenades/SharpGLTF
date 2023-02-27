@@ -40,6 +40,45 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("cube.plotly");
         }
 
+        [Test(Description = "Creates a simple cube with a light.")]
+        public void CreateCubeWithLightScene()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var material = MaterialBuilder.CreateDefault();
+
+            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);
+
+            var scene = new SceneBuilder();
+
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var light = new LightBuilder.Point
+            {
+                Color = new Vector3(1, 0, 0),
+                Intensity = 3,
+                Range = 10,
+            };
+            
+            scene.AddLight(light, new NodeBuilder("light").WithLocalTranslation(new Vector3(0, 100, 0)) );
+            scene.AddLight(light, Matrix4x4.CreateTranslation(0, -100, 0));
+
+            var lightInstances = scene.Instances
+                .Select(item => item.Content.Content)
+                .OfType<LightContent>()
+                .ToList();
+
+            Assert.AreEqual(2, lightInstances.Count);
+
+            var gltf = scene.ToGltf2();
+
+            Assert.AreEqual(2, gltf.LogicalPunctualLights.Count);
+
+            gltf.AttachToCurrentTest("cube.glb");
+            gltf.AttachToCurrentTest("cube.gltf");
+            gltf.AttachToCurrentTest("cube.plotly");
+        }
+
         [Test(Description = "Creates a simple cube.")]
         public void CreateCubeSceneWithExtras()
         {            

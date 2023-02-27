@@ -24,7 +24,7 @@ namespace SharpGLTF.Scenes
 
     partial class CameraContent : SCHEMA2NODE
     {
-        public void ApplyTo(Node dstNode, Schema2SceneBuilder context)
+        void SCHEMA2NODE.ApplyTo(Node dstNode, Schema2SceneBuilder context)
         {
             if (_Camera is CameraBuilder.Orthographic ortho)
             {
@@ -42,7 +42,7 @@ namespace SharpGLTF.Scenes
 
     partial class LightContent : SCHEMA2NODE
     {
-        public void ApplyTo(Node dstNode, Schema2SceneBuilder context)
+        void SCHEMA2NODE.ApplyTo(Node dstNode, Schema2SceneBuilder context)
         {
             if (_Light is LightBuilder.Directional directional)
             {

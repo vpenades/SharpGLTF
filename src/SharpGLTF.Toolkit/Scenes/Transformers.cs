@@ -88,6 +88,10 @@ namespace SharpGLTF.Scenes
         /// <summary>
         /// Gets the content of this transformer.<br/>
         /// </summary>
+        /// <remarks>
+        /// Available types for this object are:
+        /// <see cref="MeshContent"/>, <see cref="CameraContent"/>, <see cref="LightContent"/>.
+        /// </remarks>
         internal Object Content => _Content;
 
         public Animations.AnimatableProperty<ArraySegment<float>> Morphings => _Morphings;
@@ -105,7 +109,19 @@ namespace SharpGLTF.Scenes
         /// If this <see cref="ContentTransformer"/> contains a <see cref="MESHBUILDER"/>.
         /// </summary>
         /// <returns>A <see cref="MESHBUILDER"/> instance, or NULL.</returns>
-        public virtual MESHBUILDER GetGeometryAsset() { return (_Content as IRenderableContent)?.GetGeometryAsset(); }
+        public MESHBUILDER GetGeometryAsset() { return (_Content as IRenderableContent)?.GetGeometryAsset(); }
+
+        /// <summary>
+        /// It this <see cref="ContentTransformer"/> contains a <see cref="CameraBuilder"/>
+        /// </summary>
+        /// <returns>A <see cref="CameraBuilder"/> instance, or NULL.</returns>
+        public CameraBuilder GetCameraAsset() { return (_Content as CameraContent)?.Camera; }
+
+        /// <summary>
+        /// It this <see cref="ContentTransformer"/> contains a <see cref="LightBuilder"/>
+        /// </summary>
+        /// <returns>A <see cref="LightBuilder"/> instance, or NULL.</returns>
+        public LightBuilder GetLightAsset() { return (_Content as LightContent)?.Light; }
 
         /// <summary>
         /// If this <see cref="ContentTransformer"/> uses a <see cref="NodeBuilder"/> armature, it returns the root of the armature.
@@ -173,7 +189,7 @@ namespace SharpGLTF.Scenes
     /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies a fixed <see cref="Matrix4x4"/> transform to the underlaying content.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Fixed Node[{_DebugName,nq}] = {Content}")]
+    [System.Diagnostics.DebuggerDisplay("FixedTransformer Node[{_DebugName,nq}] = {Content}")]
     public partial class FixedTransformer : ContentTransformer
     {
         #region lifecycle
@@ -270,7 +286,7 @@ namespace SharpGLTF.Scenes
     /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transform of a single <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Rigid Node[{_DebugName,nq}] = {Content}")]
+    [System.Diagnostics.DebuggerDisplay("RigidTransformer Node[{_DebugName,nq}] = {Content}")]
     public partial class RigidTransformer : ContentTransformer
     {
         #region lifecycle
@@ -340,7 +356,7 @@ namespace SharpGLTF.Scenes
     /// Represents the transform of a <see cref="InstanceBuilder.Content"/>.<br/>
     /// Applies the transforms of many <see cref="NodeBuilder"/> to the underlaying content.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("Skinned Node[{_DebugName,nq}] = {Content}")]
+    [System.Diagnostics.DebuggerDisplay("SkinnedTransformer Node[{_DebugName,nq}] = {Content}")]
     public partial class SkinnedTransformer : ContentTransformer
     {
         #region lifecycle

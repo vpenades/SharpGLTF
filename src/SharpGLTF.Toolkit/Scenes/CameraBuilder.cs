@@ -8,6 +8,11 @@ namespace SharpGLTF.Scenes
     /// <summary>
     /// Represents an camera object.
     /// </summary>
+    /// <remarks>
+    /// Derived types are:<br/>
+    /// - <see cref="Orthographic"/><br/>
+    /// - <see cref="Perspective"/><br/>
+    /// </remarks>
     public abstract class CameraBuilder : BaseBuilder
     {
         #region lifecycle
@@ -75,7 +80,7 @@ namespace SharpGLTF.Scenes
         #pragma warning disable CA1034 // Nested types should not be visible
 
         /// <inheritdoc/>
-        [System.Diagnostics.DebuggerDisplay("Orthographic ({XMag},{YMag})  {ZNear} < {ZFar}")]
+        [System.Diagnostics.DebuggerDisplay("CameraBuilder.Orthographic ({XMag},{YMag})  {ZNear} < {ZFar}")]
         public sealed class Orthographic : CameraBuilder
         {
             #region lifecycle
@@ -133,7 +138,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        [System.Diagnostics.DebuggerDisplay("Perspective {AspectRatio} {VerticalFOV}   {ZNear} < {ZFar}")]
+        [System.Diagnostics.DebuggerDisplay("CameraBuilder.Perspective {AspectRatio} {VerticalFOV}   {ZNear} < {ZFar}")]
         public sealed partial class Perspective : CameraBuilder
         {
             #region lifecycle
