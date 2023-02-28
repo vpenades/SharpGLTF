@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public static class CesiumOutline
+    public static class CesiumToolkit
     {
         public static Accessor CreateCesiumOutlineAccessor(ModelRoot model, IReadOnlyList<uint> outlines)
         {

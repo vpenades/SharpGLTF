@@ -11,6 +11,7 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace SharpGLTF.Scenes
 {
@@ -41,7 +42,7 @@ namespace SharpGLTF.Scenes
 
             var outlines = new ReadOnlyCollection<uint>(new List<uint> { 0, 1, 1, 2, 2, 0 });
             var model = scene.ToGltf2();
-            var accessor = CesiumOutline.CreateCesiumOutlineAccessor(model, outlines);
+            var accessor = CesiumToolkit.CreateCesiumOutlineAccessor(model, outlines);
             model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(accessor);
 
             var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
