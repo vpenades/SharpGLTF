@@ -32,6 +32,12 @@ namespace SharpGLTF.Schema2
 
     public static class CesiumToolkit
     {
+        /// <summary>
+        /// Creates an accessor to store Cesium outline vertex indices
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="outlines"></param>
+        /// <returns></returns>
         public static Accessor CreateCesiumOutlineAccessor(ModelRoot model, IReadOnlyList<uint> outlines)
         {
             var outlineBytes = new List<byte>();
@@ -45,6 +51,37 @@ namespace SharpGLTF.Schema2
             var accessor = model.CreateAccessor("Cesium outlines");
             accessor.SetData(buffer, 0, outlineBytes.Count / 4, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
             return accessor;
+        }
+
+        /// <summary>
+        /// Checks if all the indices in the Cesium Outline Extension are existing in the primitive indices 
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>boolean, true is valid false is not valid</returns>
+        public static bool ValidateCesiumOutlineExtension(ModelRoot model)
+        {
+            foreach (var mesh in model.LogicalMeshes)
+            {
+                foreach (var meshPrimitive in mesh.Primitives)
+                {
+                    var cesiumOutlineExtension = meshPrimitive.GetExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
+                    if (cesiumOutlineExtension != null)
+                    {
+                        var accessor = model.LogicalAccessors[(int)cesiumOutlineExtension.Indices];
+                        var accessorIndices = accessor.AsIndicesArray();
+                        var meshPrimitiveIndices = meshPrimitive.GetIndices();
+                        foreach (var accessorIndice in accessorIndices)
+                        {
+                            var contains = meshPrimitiveIndices.Contains(accessorIndice);
+                            if (!contains)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }
