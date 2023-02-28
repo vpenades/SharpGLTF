@@ -20,6 +20,7 @@ namespace SharpGLTF.Scenes
     using SKINNEDVERTEX4 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
     using SKINNEDVERTEX8 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8>;
 
+
     [Category("Toolkit.Scenes")]
     public partial class SceneBuilderTests
     {
