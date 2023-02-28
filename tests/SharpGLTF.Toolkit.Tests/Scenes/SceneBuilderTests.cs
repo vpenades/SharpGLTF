@@ -11,6 +11,7 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
 using System.Diagnostics;
+using System.Collections.ObjectModel;
 
 namespace SharpGLTF.Scenes
 {
@@ -18,7 +19,7 @@ namespace SharpGLTF.Scenes
 
     using SKINNEDVERTEX4 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
     using SKINNEDVERTEX8 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8>;
-
+    using Buffer = Schema2.Buffer;
 
     [Category("Toolkit.Scenes")]
     public partial class SceneBuilderTests
@@ -39,21 +40,10 @@ namespace SharpGLTF.Scenes
 
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
-            var outlineBytes = new List<byte>();
-            var outlines = new List<uint>() { 0, 1, 1, 2, 2, 0 };
-
-            foreach (var outline in outlines)
-            {
-                var bytes = BitConverter.GetBytes(outline).ToList();
-                outlineBytes.AddRange(bytes);
-            }
-
+            var outlines = new ReadOnlyCollection<uint>(new List<uint> { 0, 1, 1, 2, 2, 0 });
             var model = scene.ToGltf2();
-            var buffer = model.UseBufferView(outlineBytes.ToArray());
-            var accessor = model.CreateAccessor("Cesium outlines");
-            accessor.SetData(buffer, 0, outlineBytes.Count / 4, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
-
-            model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(accessor.LogicalIndex);
+            var accessor = CesiumOutline.CreateCesiumOutlineAccessor(model, outlines);
+            model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(accessor);
 
             var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
             Assert.True(cesiumOutlineExtension.Indices == accessor.LogicalIndex);
