@@ -19,7 +19,6 @@ namespace SharpGLTF.Scenes
 
     using SKINNEDVERTEX4 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints4>;
     using SKINNEDVERTEX8 = VertexBuilder<VertexPosition, VertexEmpty, VertexJoints8>;
-    using Buffer = Schema2.Buffer;
 
     [Category("Toolkit.Scenes")]
     public partial class SceneBuilderTests
@@ -53,18 +52,18 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("cesium_outline_triangle.plotly");
         }
 
-        [Test(Description ="Creates a simple cube.")]
+        [Test(Description = "Creates a simple cube.")]
         public void CreateCubeScene()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            var material = MaterialBuilder.CreateDefault();            
+            var material = MaterialBuilder.CreateDefault();
 
-            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);            
+            var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);
 
             var scene = new SceneBuilder();
 
-            scene.AddRigidMesh(mesh, Matrix4x4.Identity);                       
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             scene.AttachToCurrentTest("cube.glb");
             scene.AttachToCurrentTest("cube.gltf");
@@ -90,8 +89,8 @@ namespace SharpGLTF.Scenes
                 Intensity = 3,
                 Range = 10,
             };
-            
-            scene.AddLight(light, new NodeBuilder("light").WithLocalTranslation(new Vector3(0, 100, 0)) );
+
+            scene.AddLight(light, new NodeBuilder("light").WithLocalTranslation(new Vector3(0, 100, 0)));
             scene.AddLight(light, Matrix4x4.CreateTranslation(0, -100, 0));
 
             var lightInstances = scene.Instances
@@ -112,7 +111,7 @@ namespace SharpGLTF.Scenes
 
         [Test(Description = "Creates a simple cube.")]
         public void CreateCubeSceneWithExtras()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();
@@ -134,9 +133,9 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("cube.plotly");
         }
 
-        [Test(Description ="Creates a cube attached to an animated node.")]
+        [Test(Description = "Creates a cube attached to an animated node.")]
         public void CreateAnimatedCubeScene()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();
@@ -168,9 +167,9 @@ namespace SharpGLTF.Scenes
 
         [Test(Description = "Checks that non convex quads are created correctly.")]
         public void CreateNonConvexQuadsScene()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
-            
+
             var mesh = new MeshBuilder<VertexPosition>();
             var prim = mesh.UsePrimitive(MaterialBuilder.CreateDefault());
 
@@ -181,10 +180,10 @@ namespace SharpGLTF.Scenes
             Assert.AreEqual((4, 5, 6, 7), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(0, 0.5f, 2), new VertexPosition(1, 0, 2), new VertexPosition(0, 1, 2), new VertexPosition(-1, 0, 2));
-            Assert.AreEqual((8,9,10,11), idx);
+            Assert.AreEqual((8, 9, 10, 11), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 3), new VertexPosition(0, 1, 3), new VertexPosition(0.5f, 0, 3), new VertexPosition(0, -1, 3));
-            Assert.AreEqual((12,13,14,15), idx);
+            Assert.AreEqual((12, 13, 14, 15), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(-1, 0, 4));
             Assert.AreEqual((-1, 16, 17, 18), idx);
@@ -193,7 +192,7 @@ namespace SharpGLTF.Scenes
             Assert.AreEqual((-1, -1, -1, -1), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(0, 0, 5), new VertexPosition(10, -1, 5), new VertexPosition(9, 0, 5), new VertexPosition(10, 1, 5));
-            Assert.AreEqual((19,20,21,22), idx);
+            Assert.AreEqual((19, 20, 21, 22), idx);
 
             idx = prim.AddQuadrangle(new VertexPosition(10, -1, 6), new VertexPosition(9, 0, 6), new VertexPosition(10, 1, 6), new VertexPosition(0, 0, 6));
             Assert.AreEqual((23, 24, 25, 26), idx);
@@ -205,11 +204,11 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("NonConvexQuads.glb");
             scene.AttachToCurrentTest("NonConvexQuads.gltf");
         }
-        
+
         [TestCase(false)]
         [TestCase(true)]
         public void CreateSceneWithRandomShapes(bool useGpuInstancing)
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random(177);
@@ -230,11 +229,11 @@ namespace SharpGLTF.Scenes
                 .Select(mat =>
                 {
                     var mesh = VPOSNRM.CreateCompatibleMesh("shape");
-                    #if DEBUG
+#if DEBUG
                     mesh.VertexPreprocessor.SetValidationPreprocessors();
-                    #else
+#else
                     mesh.VertexPreprocessor.SetSanitizerPreprocessors();
-                    #endif
+#endif
                     mesh.AddSphere(mat, 0.5f, Matrix4x4.Identity);
                     mesh.Validate();
                     return mesh;
@@ -246,11 +245,11 @@ namespace SharpGLTF.Scenes
                 .Select(mat =>
                 {
                     var mesh = VPOSNRM.CreateCompatibleMesh("shape");
-                    #if DEBUG
+#if DEBUG
                     mesh.VertexPreprocessor.SetValidationPreprocessors();
-                    #else
+#else
                     mesh.VertexPreprocessor.SetSanitizerPreprocessors();
-                    #endif
+#endif
                     mesh.AddCube(mat, Matrix4x4.Identity);
                     mesh.Validate();
                     return mesh;
@@ -263,11 +262,11 @@ namespace SharpGLTF.Scenes
             var scene = new SceneBuilder();
 
             for (int i = 0; i < 100; ++i)
-            {                
+            {
                 var mesh = meshes[rnd.Next(0, 20)];
 
                 // create random transform
-                var r = rnd.NextQuaternion();                
+                var r = rnd.NextQuaternion();
                 var t = rnd.NextVector3() * 25;
 
                 scene.AddRigidMesh(mesh, (r, t));
@@ -275,7 +274,7 @@ namespace SharpGLTF.Scenes
 
             // collapse to glTF
 
-            
+
             var gltf = scene.ToGltf2(useGpuInstancing ? SceneBuilderSchema2Settings.WithGpuInstancing : SceneBuilderSchema2Settings.Default);
 
             var bounds = Runtime.MeshDecoder.EvaluateBoundingBox(gltf.DefaultScene);
@@ -290,7 +289,7 @@ namespace SharpGLTF.Scenes
 
         [Test]
         public void CreateSceneWithMixedVertexFormats()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var scene = new SceneBuilder();
@@ -306,96 +305,10 @@ namespace SharpGLTF.Scenes
 
             scene.AttachToCurrentTest("scene.glb");
         }
-        
+
         [Test]
         public void CreateSkinnedScene()
-        {            
-            TestContext.CurrentContext.AttachGltfValidatorLinks();
-            
-            // create two materials
-
-            var pink = new MaterialBuilder("material1")
-                .WithChannelParam(KnownChannel.BaseColor,KnownProperty.RGBA, new Vector4(1, 0, 1, 1))
-                .WithDoubleSide(true);
-
-            var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1))
-                .WithDoubleSide(true);
-
-            // create the mesh            
-
-            const int jointIdx0 = 0; // index of joint node 0
-            const int jointIdx1 = 1; // index of joint node 1
-            const int jointIdx2 = 2; // index of joint node 2
-
-            var v1 = new SKINNEDVERTEX4(new Vector3(-10, 0, +10), (jointIdx0, 1));
-            var v2 = new SKINNEDVERTEX4(new Vector3(+10, 0, +10), (jointIdx0, 1));
-            var v3 = new SKINNEDVERTEX4(new Vector3(+10, 0, -10), (jointIdx0, 1));
-            var v4 = new SKINNEDVERTEX4(new Vector3(-10, 0, -10), (jointIdx0, 1));
-
-            var v5 = new SKINNEDVERTEX4(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v6 = new SKINNEDVERTEX4(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v7 = new SKINNEDVERTEX4(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-            var v8 = new SKINNEDVERTEX4(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
-
-            var v9  = new SKINNEDVERTEX4(new Vector3(-5, 80, +5), (jointIdx2, 1));
-            var v10 = new SKINNEDVERTEX4(new Vector3(+5, 80, +5), (jointIdx2, 1));
-            var v11 = new SKINNEDVERTEX4(new Vector3(+5, 80, -5), (jointIdx2, 1));
-            var v12 = new SKINNEDVERTEX4(new Vector3(-5, 80, -5), (jointIdx2, 1));
-
-            var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
-
-            #if DEBUG
-            mesh.VertexPreprocessor.SetValidationPreprocessors();
-            #else
-            mesh.VertexPreprocessor.SetSanitizerPreprocessors();
-            #endif
-
-            mesh.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
-            mesh.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
-            mesh.UsePrimitive(pink).AddQuadrangle(v3, v4, v8, v7);
-            mesh.UsePrimitive(pink).AddQuadrangle(v4, v1, v5, v8);
-
-            mesh.UsePrimitive(yellow).AddQuadrangle(v5, v6, v10, v9);
-            mesh.UsePrimitive(yellow).AddQuadrangle(v6, v7, v11, v10);
-            mesh.UsePrimitive(yellow).AddQuadrangle(v7, v8, v12, v11);
-            mesh.UsePrimitive(yellow).AddQuadrangle(v8, v5, v9, v12);
-
-            mesh.Validate();
-            
-            // create the skeleton armature for the skinned mesh.
-
-            var armature = new NodeBuilder("Skeleton");
-            var joint0 = armature.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
-            var joint1 = joint0.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
-            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
-
-            joint1.UseRotation("Base Track")
-                .WithPoint(1, Quaternion.Identity)
-                .WithPoint(2, Quaternion.CreateFromYawPitchRoll(0, 1, 0))
-                .WithPoint(3, Quaternion.CreateFromYawPitchRoll(0, 0, 1))
-                .WithPoint(4, Quaternion.Identity);
-
-            // create scene
-
-            var scene = new SceneBuilder();
-
-            scene.AddSkinnedMesh
-                (
-                mesh,
-                Matrix4x4.Identity,
-                joint0, // joint used for skinning joint index 0
-                joint1, // joint used for skinning joint index 1
-                joint2  // joint used for skinning joint index 2
-                );
-
-            scene.AttachToCurrentTest("skinned.glb");
-            scene.AttachToCurrentTest("skinned.gltf");
-        }
-
-        [Test]
-        public void CreateDoubleSkinnedScene()
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create two materials
@@ -431,11 +344,97 @@ namespace SharpGLTF.Scenes
 
             var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
 
-            #if DEBUG
+#if DEBUG
             mesh.VertexPreprocessor.SetValidationPreprocessors();
-            #else
+#else
             mesh.VertexPreprocessor.SetSanitizerPreprocessors();
-            #endif
+#endif
+
+            mesh.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
+            mesh.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
+            mesh.UsePrimitive(pink).AddQuadrangle(v3, v4, v8, v7);
+            mesh.UsePrimitive(pink).AddQuadrangle(v4, v1, v5, v8);
+
+            mesh.UsePrimitive(yellow).AddQuadrangle(v5, v6, v10, v9);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v6, v7, v11, v10);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v7, v8, v12, v11);
+            mesh.UsePrimitive(yellow).AddQuadrangle(v8, v5, v9, v12);
+
+            mesh.Validate();
+
+            // create the skeleton armature for the skinned mesh.
+
+            var armature = new NodeBuilder("Skeleton");
+            var joint0 = armature.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
+            var joint1 = joint0.CreateNode("Joint 1").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
+            var joint2 = joint1.CreateNode("Joint 2").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
+
+            joint1.UseRotation("Base Track")
+                .WithPoint(1, Quaternion.Identity)
+                .WithPoint(2, Quaternion.CreateFromYawPitchRoll(0, 1, 0))
+                .WithPoint(3, Quaternion.CreateFromYawPitchRoll(0, 0, 1))
+                .WithPoint(4, Quaternion.Identity);
+
+            // create scene
+
+            var scene = new SceneBuilder();
+
+            scene.AddSkinnedMesh
+                (
+                mesh,
+                Matrix4x4.Identity,
+                joint0, // joint used for skinning joint index 0
+                joint1, // joint used for skinning joint index 1
+                joint2  // joint used for skinning joint index 2
+                );
+
+            scene.AttachToCurrentTest("skinned.glb");
+            scene.AttachToCurrentTest("skinned.gltf");
+        }
+
+        [Test]
+        public void CreateDoubleSkinnedScene()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            // create two materials
+
+            var pink = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1))
+                .WithDoubleSide(true);
+
+            var yellow = new MaterialBuilder("material2")
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1))
+                .WithDoubleSide(true);
+
+            // create the mesh            
+
+            const int jointIdx0 = 0; // index of joint node 0
+            const int jointIdx1 = 1; // index of joint node 1
+            const int jointIdx2 = 2; // index of joint node 2
+
+            var v1 = new SKINNEDVERTEX4(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX4(new Vector3(+10, 0, +10), (jointIdx0, 1));
+            var v3 = new SKINNEDVERTEX4(new Vector3(+10, 0, -10), (jointIdx0, 1));
+            var v4 = new SKINNEDVERTEX4(new Vector3(-10, 0, -10), (jointIdx0, 1));
+
+            var v5 = new SKINNEDVERTEX4(new Vector3(-10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v6 = new SKINNEDVERTEX4(new Vector3(+10, 40, +10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v7 = new SKINNEDVERTEX4(new Vector3(+10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+            var v8 = new SKINNEDVERTEX4(new Vector3(-10, 40, -10), (jointIdx0, 0.5f), (jointIdx1, 0.5f));
+
+            var v9 = new SKINNEDVERTEX4(new Vector3(-5, 80, +5), (jointIdx2, 1));
+            var v10 = new SKINNEDVERTEX4(new Vector3(+5, 80, +5), (jointIdx2, 1));
+            var v11 = new SKINNEDVERTEX4(new Vector3(+5, 80, -5), (jointIdx2, 1));
+            var v12 = new SKINNEDVERTEX4(new Vector3(-5, 80, -5), (jointIdx2, 1));
+
+            var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
+
+#if DEBUG
+            mesh.VertexPreprocessor.SetValidationPreprocessors();
+#else
+            mesh.VertexPreprocessor.SetSanitizerPreprocessors();
+#endif
 
             mesh.UsePrimitive(pink).AddQuadrangle(v1, v2, v6, v5);
             mesh.UsePrimitive(pink).AddQuadrangle(v2, v3, v7, v6);
@@ -464,7 +463,7 @@ namespace SharpGLTF.Scenes
 
             // create the skeleton armature 2 for the skinned mesh.
 
-            var armature2 = new NodeBuilder("Skeleton2").WithLocalTranslation(new Vector3(100,0,0));
+            var armature2 = new NodeBuilder("Skeleton2").WithLocalTranslation(new Vector3(100, 0, 0));
             var joint3 = armature2.CreateNode("Joint 3").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
             var joint4 = joint3.CreateNode("Joint 4").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
             var joint5 = joint4.CreateNode("Joint 5").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
@@ -505,7 +504,7 @@ namespace SharpGLTF.Scenes
         public void CreateAllAnimationTypesScene()
         {
             // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
-                        
+
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // create two materials
@@ -514,22 +513,22 @@ namespace SharpGLTF.Scenes
                 .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
 
             var yellow = new MaterialBuilder("material2")
-                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));            
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 1, 0, 1));
 
             var mesh1 = VPOSNRM.CreateCompatibleMesh("shape1");
-            mesh1.AddCube(pink, Matrix4x4.Identity);            
+            mesh1.AddCube(pink, Matrix4x4.Identity);
 
             var mesh2 = VPOSNRM.CreateCompatibleMesh("shape2");
-            mesh2.AddCube(yellow, Matrix4x4.Identity);            
+            mesh2.AddCube(yellow, Matrix4x4.Identity);
 
-            var scene = new SceneBuilder();            
+            var scene = new SceneBuilder();
 
             var inst1 = scene.AddRigidMesh(mesh1, Matrix4x4.Identity);
 
             // meshes intended to support animation must be created using an armature
             var armature = new NodeBuilder();
             armature.LocalTransform = Matrix4x4.CreateTranslation(2, 0, 0);
-            var inst2 = scene.AddRigidMesh(mesh2, armature); 
+            var inst2 = scene.AddRigidMesh(mesh2, armature);
 
             scene.AttachToCurrentTest("static.glb");
             scene.AttachToCurrentTest("static.gltf");
@@ -544,7 +543,7 @@ namespace SharpGLTF.Scenes
 
             // set default value.
             inst2.Content.UseMorphing().SetValue(1);
-            
+
             // ser animation curve.
             var curve = inst2.Content.UseMorphing().UseTrackBuilder("Default");
             curve.SetPoint(0, true, 0);
@@ -571,7 +570,7 @@ namespace SharpGLTF.Scenes
             // SceneBuilder API supports reusing a NodeBuilder in multiple instances with different content.
             // but glTF nodes can only hold one mesh per node, so if we find this case we need to internally
             // add an additional child node to give room to the the extra mesh.
-                        
+
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var m = MaterialBuilder.CreateDefault();
@@ -591,7 +590,7 @@ namespace SharpGLTF.Scenes
             scene.AttachToCurrentTest("instanced.glb");
             scene.AttachToCurrentTest("instanced.gltf");
         }
-        
+
 
         [TestCase("AnimatedMorphCube.glb")]
         [TestCase("AnimatedMorphSphere.glb")]
@@ -599,12 +598,12 @@ namespace SharpGLTF.Scenes
         [TestCase("BoxAnimated.glb")]
         [TestCase("BrainStem.glb")]
         [TestCase("CesiumMan.glb")]
-        [TestCase("GearboxAssy.glb")]        
+        [TestCase("GearboxAssy.glb")]
         [TestCase("OrientationTest.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         public void TestRoundTrip(string path)
-        {            
+        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             path = TestFiles
@@ -612,11 +611,11 @@ namespace SharpGLTF.Scenes
                 .FirstOrDefault(item => item.Contains(path));
 
             var srcModel = Schema2.ModelRoot.Load(path, Validation.ValidationMode.TryFix);
-            Assert.NotNull(srcModel);            
+            Assert.NotNull(srcModel);
 
             // perform roundtrip
 
-            var srcScene = Toolkit.ToSceneBuilder(srcModel.DefaultScene);            
+            var srcScene = Toolkit.ToSceneBuilder(srcModel.DefaultScene);
 
             var rowModel = srcScene.ToGltf2();
 
@@ -671,8 +670,8 @@ namespace SharpGLTF.Scenes
             }
         }
 
-        
-        [TestCase("GearboxAssy.glb")]        
+
+        [TestCase("GearboxAssy.glb")]
         public void ExportMeshes(string path)
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -691,7 +690,7 @@ namespace SharpGLTF.Scenes
             var srcScene = srcModel.DefaultScene.ToSceneBuilder();
 
             // export all the individual meshes to OBJ:            
-            for(int i=0; i < srcScene.Instances.Count; ++i)
+            for (int i = 0; i < srcScene.Instances.Count; ++i)
             {
                 var inst = srcScene.Instances[i].Content;
 
@@ -703,7 +702,7 @@ namespace SharpGLTF.Scenes
                     newScene.AddRigidMesh(mesh.Mesh, inst.GetPoseWorldMatrix());
 
                     newScene.AttachToCurrentTest($"result_{i}.obj");
-                }                
+                }
             }
         }
 
@@ -717,7 +716,7 @@ namespace SharpGLTF.Scenes
 
             var schema = sb.ToGltf2();
 
-            Assert.AreEqual(0, schema.LogicalMeshes.Count,"SceneBuilder should detect empty meshes and remove them.");
+            Assert.AreEqual(0, schema.LogicalMeshes.Count, "SceneBuilder should detect empty meshes and remove them.");
 
             schema.CreateMesh("Empty2");
 
@@ -733,7 +732,7 @@ namespace SharpGLTF.Scenes
             var sb = new SceneBuilder();
 
             sb.AddNode(new NodeBuilder()); // unnamed nodes will be optimized out
-            sb.AddNode(new NodeBuilder("Named"));            
+            sb.AddNode(new NodeBuilder("Named"));
 
             var gltf = sb.ToGltf2();
 
@@ -744,7 +743,7 @@ namespace SharpGLTF.Scenes
 
             var instance = sb.Instances.FirstOrDefault(item => item.Name == "Named");
 
-            Assert.NotNull(instance);            
+            Assert.NotNull(instance);
         }
 
         [Test]
@@ -752,7 +751,7 @@ namespace SharpGLTF.Scenes
         {
             // Schema2 does NOT allow meshes to be empty, or meshes with empty MeshPrimitives.
             // but MeshBuilder and SceneBuilder should be able to handle them.
-                        
+
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var rnd = new Random(177);
@@ -805,7 +804,7 @@ namespace SharpGLTF.Scenes
         }
 
 
-        [Test(Description ="Regression test for #37")]
+        [Test(Description = "Regression test for #37")]
         public void CreateNodeBuilderWithWorldMatrix()
         {
             var nbr = new NodeBuilder("Dummy1");
@@ -821,7 +820,7 @@ namespace SharpGLTF.Scenes
         {
             // load Polly model
             var polly = SceneBuilder.LoadDefaultScene(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
-            
+
             var xform0 = Matrix4x4.CreateFromYawPitchRoll(1, 0, 0) * Matrix4x4.CreateTranslation(1.5f, 0, 0);
             var xform1 = Matrix4x4.CreateFromYawPitchRoll(0, 1, 0) * Matrix4x4.CreateTranslation(-1.5f, 1, 0);
 
@@ -888,7 +887,7 @@ namespace SharpGLTF.Scenes
         public void CreateMorphScene()
         {
             // 3D View 7.1908.9012.0 has an issue displaying off-center meshes with animated morph targets.
-                        
+
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var meshMorphs = CreateMeshWith16MorphTargets();
@@ -910,7 +909,7 @@ namespace SharpGLTF.Scenes
 
             var wwww = new float[16];
 
-            for(int i=0; i < 16; ++i)
+            for (int i = 0; i < 16; ++i)
             {
                 Array.Clear(wwww, 0, wwww.Length);
                 wwww[i] = 1;
@@ -922,14 +921,14 @@ namespace SharpGLTF.Scenes
             for (int i = 16; i < 24; ++i)
             {
                 Array.Clear(wwww, 0, wwww.Length);
-                for(int j=0; j < wwww.Length; ++j) wwww[j] = (float)rnd.NextDouble();
+                for (int j = 0; j < wwww.Length; ++j) wwww[j] = (float)rnd.NextDouble();
                 morphAnim.SetPoint(i, true, wwww);
             }
 
             scene.AttachToCurrentTest("morph-anim.glb");
             scene.AttachToCurrentTest("morph-anim.gltf");
             scene.ToGltf2().DefaultScene.ToSceneBuilder().AttachToCurrentTest("morph-anim-roundtrip.glb");
-        }        
+        }
 
         static MeshBuilder<VertexPositionNormal, VertexEmpty, VertexEmpty> CreateMeshWith16MorphTargets()
         {
@@ -984,7 +983,7 @@ namespace SharpGLTF.Scenes
                     // notice that this method works with absolute values, deltas are calculated internally.
                     // alternatively, you can also set deltas with SetVertexDelta method.
                     morphTarget.SetVertex(baseVertex, morphedVertex);
-                }                
+                }
             }
 
             return mesh1;
@@ -996,7 +995,7 @@ namespace SharpGLTF.Scenes
         {
             // create a cube mesh. This mesh will be shared along the way:
 
-            var cube = new MeshBuilder<VertexPosition,VertexEmpty,VertexEmpty>("Cube");
+            var cube = new MeshBuilder<VertexPosition, VertexEmpty, VertexEmpty>("Cube");
             cube.AddCube(MaterialBuilder.CreateDefault(), Matrix4x4.Identity);
 
             // create a gltf with 2 scenes:

@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(accessor, nameof(accessor));
             Guard.MustShareLogicalParent(LogicalParent.LogicalParent, "this", accessor, nameof(accessor));
             Guard.IsTrue(accessor.Encoding == EncodingType.UNSIGNED_INT, nameof(accessor));
-            Guard.IsTrue(accessor.Dimensions== DimensionType.SCALAR, nameof(accessor));
+            Guard.IsTrue(accessor.Dimensions == DimensionType.SCALAR, nameof(accessor));
 
             var ext = UseExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
             ext.Indices = accessor.LogicalIndex;
