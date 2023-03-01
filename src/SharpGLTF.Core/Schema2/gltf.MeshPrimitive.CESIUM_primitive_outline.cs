@@ -56,11 +56,13 @@ namespace SharpGLTF.Schema2
         {
             var outlineBytes = new List<byte>();
 
-            foreach (var outline in outlines)
+            foreach (var bytes in from outline in outlines
+                                  let bytes = BitConverter.GetBytes(outline).ToList()
+                                  select bytes)
             {
-                var bytes = BitConverter.GetBytes(outline).ToList();
                 outlineBytes.AddRange(bytes);
             }
+
             var buffer = model.UseBufferView(outlineBytes.ToArray());
             var accessor = model.CreateAccessor("Cesium outlines");
             accessor.SetData(buffer, 0, outlineBytes.Count / 4, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
@@ -68,10 +70,10 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Checks if all the indices of the Cesium outline accessor are available in the MeshPrimitive indices
+        /// Checks if all the indices of the Cesium outline accessor are within the range of in the MeshPrimitive indices
         /// </summary>
-        /// <param name="accessor"></param>
-        /// <param name="meshPrimitive"></param>
+        /// <param name="accessor">Cesium outline accessor</param>
+        /// <param name="meshPrimitive">MeshPrimitive with the CESIUM_primitive_outline extension</param>
         /// <returns>true all indices are available, false indices are missing </returns>
         internal static bool ValidateCesiumOutlineIndices(Accessor accessor, MeshPrimitive meshPrimitive)
         {
@@ -80,13 +82,14 @@ namespace SharpGLTF.Schema2
             {
                 var accessorIndices = accessor.AsIndicesArray();
                 var meshPrimitiveIndices = meshPrimitive.GetIndices();
-                foreach (var accessorIndice in accessorIndices)
+                var maxIndice = meshPrimitiveIndices.Max();
+
+                foreach (var _ in from accessorIndice in accessorIndices
+                                  let contains = accessorIndice <= maxIndice
+                                  where !contains
+                                  select new { })
                 {
-                    var contains = meshPrimitiveIndices.Contains(accessorIndice);
-                    if (!contains)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
             return true;
