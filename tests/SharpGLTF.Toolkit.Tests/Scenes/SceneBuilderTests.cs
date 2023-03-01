@@ -48,7 +48,6 @@ namespace SharpGLTF.Scenes
 
             var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
             Assert.True(cesiumOutlineExtension.Indices == accessor.LogicalIndex);
-            Assert.IsTrue(CesiumToolkit.ValidateCesiumOutlineExtension(model));
 
             scene.AttachToCurrentTest("cesium_outline_triangle.glb");
             scene.AttachToCurrentTest("cesium_outline_triangle.gltf");

@@ -6,14 +6,28 @@ namespace SharpGLTF.Schema2
 {
     partial class CESIUM_primitive_outlineglTFprimitiveextension
     {
-        internal CESIUM_primitive_outlineglTFprimitiveextension(MeshPrimitive meshPrimitive) { }
+        private MeshPrimitive meshPrimitive;
+        internal CESIUM_primitive_outlineglTFprimitiveextension(MeshPrimitive meshPrimitive)
+        {
+            this.meshPrimitive = meshPrimitive;
+        }
 
         public int? Indices
         {
             get => _indices;
             set => _indices = value;
         }
+
+        protected override void OnValidateContent(Validation.ValidationContext validate)
+        {
+            var outlineAccessor = meshPrimitive.LogicalParent.LogicalParent.LogicalAccessors[(int)_indices];
+            var isValid = CesiumToolkit.ValidateCesiumOutlineIndices(outlineAccessor, meshPrimitive);
+            validate.IsTrue(nameof(_indices), isValid, "Mismatch between accesor indices and MeshPrimitive indices");
+
+            base.OnValidateContent(validate);
+        }
     }
+
     partial class MeshPrimitive
     {
         public void SetCesiumOutline(Accessor accessor)
@@ -54,30 +68,24 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Checks if all the indices in the Cesium Outline Extension are existing in the primitive indices 
+        /// Checks if all the indices of the Cesium outline accessor are available in the MeshPrimitive indices
         /// </summary>
-        /// <param name="model"></param>
-        /// <returns>boolean, true is valid false is not valid</returns>
-        public static bool ValidateCesiumOutlineExtension(ModelRoot model)
+        /// <param name="accessor"></param>
+        /// <param name="meshPrimitive"></param>
+        /// <returns>true all indices are available, false indices are missing </returns>
+        public static bool ValidateCesiumOutlineIndices(Accessor accessor, MeshPrimitive meshPrimitive)
         {
-            foreach (var mesh in model.LogicalMeshes)
+            var cesiumOutlineExtension = meshPrimitive.GetExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
+            if (cesiumOutlineExtension != null)
             {
-                foreach (var meshPrimitive in mesh.Primitives)
+                var accessorIndices = accessor.AsIndicesArray();
+                var meshPrimitiveIndices = meshPrimitive.GetIndices();
+                foreach (var accessorIndice in accessorIndices)
                 {
-                    var cesiumOutlineExtension = meshPrimitive.GetExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
-                    if (cesiumOutlineExtension != null)
+                    var contains = meshPrimitiveIndices.Contains(accessorIndice);
+                    if (!contains)
                     {
-                        var accessor = model.LogicalAccessors[(int)cesiumOutlineExtension.Indices];
-                        var accessorIndices = accessor.AsIndicesArray();
-                        var meshPrimitiveIndices = meshPrimitive.GetIndices();
-                        foreach (var accessorIndice in accessorIndices)
-                        {
-                            var contains = meshPrimitiveIndices.Contains(accessorIndice);
-                            if (!contains)
-                            {
-                                return false;
-                            }
-                        }
+                        return false;
                     }
                 }
             }
