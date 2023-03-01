@@ -73,7 +73,7 @@ namespace SharpGLTF.Schema2
         /// <param name="accessor"></param>
         /// <param name="meshPrimitive"></param>
         /// <returns>true all indices are available, false indices are missing </returns>
-        public static bool ValidateCesiumOutlineIndices(Accessor accessor, MeshPrimitive meshPrimitive)
+        internal static bool ValidateCesiumOutlineIndices(Accessor accessor, MeshPrimitive meshPrimitive)
         {
             var cesiumOutlineExtension = meshPrimitive.GetExtension<CESIUM_primitive_outlineglTFprimitiveextension>();
             if (cesiumOutlineExtension != null)

@@ -12,6 +12,7 @@ using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Materials;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
+using SharpGLTF.Validation;
 
 namespace SharpGLTF.Scenes
 {
@@ -48,6 +49,8 @@ namespace SharpGLTF.Scenes
 
             var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
             Assert.True(cesiumOutlineExtension.Indices == accessor.LogicalIndex);
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.ValidateContent(ctx.GetContext());
 
             scene.AttachToCurrentTest("cesium_outline_triangle.glb");
             scene.AttachToCurrentTest("cesium_outline_triangle.gltf");
