@@ -52,7 +52,7 @@ namespace SharpGLTF.Schema2
         /// <param name="model"></param>
         /// <param name="outlines"></param>
         /// <returns></returns>
-        public static Accessor CreateCesiumOutlineAccessor(ModelRoot model, IReadOnlyList<uint> outlines)
+        public static Accessor CreateCesiumOutlineAccessor(ModelRoot model, IReadOnlyList<uint> outlines, string name="Cesium outlines")
         {
             var outlineBytes = new List<byte>();
 
@@ -64,7 +64,7 @@ namespace SharpGLTF.Schema2
             }
 
             var buffer = model.UseBufferView(outlineBytes.ToArray());
-            var accessor = model.CreateAccessor("Cesium outlines");
+            var accessor = model.CreateAccessor(name);
             accessor.SetData(buffer, 0, outlineBytes.Count / 4, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
             return accessor;
         }
