@@ -30,7 +30,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF extension for indicating that some edges of a primitive's triangles should be outlined.
 	/// </summary>
-	partial class CESIUM_primitive_outlineglTFprimitiveextension : ExtraProperties
+	partial class CesiumPrimitiveOutline : ExtraProperties
 	{
 	
 		private Int32? _indices;

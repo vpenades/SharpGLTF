@@ -10,7 +10,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("Ext.CESIUM_primitive_outline glTF extension", "CesiumPrimitiveOutline");
+            newEmitter.SetRuntimeName("CESIUM_primitive_outline glTF primitive extension", "CesiumPrimitiveOutline");
         }
 
         public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()

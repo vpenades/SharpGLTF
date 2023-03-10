@@ -43,12 +43,13 @@ namespace SharpGLTF.Scenes
 
             var model = scene.ToGltf2();
 
-            var outlines = new ReadOnlyCollection<uint>(new List<uint> { 0, 1, 1, 2, 2, 0});
-            var accessor = CesiumToolkit.CreateCesiumOutlineAccessor(model, outlines);
-            model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(accessor);
+            var outlines = new uint[] { 0, 1, 1, 2, 2, 0};            
+            model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(outlines);
 
-            var cesiumOutlineExtension = (CESIUM_primitive_outlineglTFprimitiveextension)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
-            Assert.True(cesiumOutlineExtension.Indices == accessor.LogicalIndex);
+            var cesiumOutlineExtension = (CesiumPrimitiveOutline)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
+            Assert.NotNull(cesiumOutlineExtension.Indices);
+            CollectionAssert.AreEqual(outlines, cesiumOutlineExtension.Indices.AsIndicesArray());
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.ValidateContent(ctx.GetContext());
 
