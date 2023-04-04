@@ -1,27 +1,38 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: "[BUG]"
-labels: bug
-assignees: vpenades
+title: ''
+labels: ''
+assignees: ''
 
 ---
-
-**Before submitting a bug**
-
-It is fairly common that loading issues are produced by malformed glTF files, so YOU MUST check the model you're trying to load with glTF Validator before submitting a bug report.
-
-    https://github.khronos.org/glTF-Validator
-
-- If glTF Validator reports the model has errors, then you must report the problem to the owner of the exporter, _not here_.
-- If glTF Validator reports no errors, then you can proceed to report the issue here.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
 
 **To Reproduce**
-If the issue is complex, or depends on loading or processing a specific model, provide a demo and the models required, otherwise it will take a lot longer to fix.
+Steps to reproduce the behavior:
+1. Go to '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-**please complete the following information:**
+**Expected behavior**
+A clear and concise description of what you expected to happen.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Desktop (please complete the following information):**
  - OS: [e.g. iOS]
- - SharpGLTF Version [e.g. Alpha-025, or From Source]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
+
+**Smartphone (please complete the following information):**
+ - Device: [e.g. iPhone6]
+ - OS: [e.g. iOS8.1]
+ - Browser [e.g. stock browser, safari]
+ - Version [e.g. 22]
+
+**Additional context**
+Add any other context about the problem here.
