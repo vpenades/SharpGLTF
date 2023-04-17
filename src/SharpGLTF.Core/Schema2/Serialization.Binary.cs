@@ -32,6 +32,21 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        internal static bool _TryReadUInt32(this System.IO.BinaryReader r, out UInt32 result)
+        {
+            try
+            {
+                result = r.ReadUInt32();
+                return true;
+            }
+            catch(System.IO.EndOfStreamException)
+            {
+                result = 0;
+                return false;
+            }
+        }
+        
+
         internal static bool _Identify(Stream stream)
         {
             Guard.NotNull(stream, nameof(stream));
@@ -80,14 +95,9 @@ namespace SharpGLTF.Schema2
                 _ReadBinaryHeader(binaryReader);
 
                 var chunks = new Dictionary<uint, Byte[]>();
-
-                // keep reading until EndOfFile
-                while (true)
+                
+                while (binaryReader._TryReadUInt32(out var chunkLength)) // keep reading until EndOfFile
                 {
-                    if (binaryReader.PeekChar() < 0) break;
-
-                    uint chunkLength = binaryReader.ReadUInt32();
-
                     if ((chunkLength & 3) != 0)
                     {
                         throw new Validation.SchemaException(null, $"The chunk must be padded to 4 bytes: {chunkLength}");
@@ -120,9 +130,23 @@ namespace SharpGLTF.Schema2
             if (version != GLTFVERSION2) throw new Validation.SchemaException(null, $"Unknown version number: {version}");
 
             uint length = binaryReader.ReadUInt32();
-            long fileLength = binaryReader.BaseStream.Length;
 
-            if (length != fileLength) throw new Validation.SchemaException(null, $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
+            uint? fileLength = null;
+
+            try
+            {
+                fileLength = (uint)binaryReader.BaseStream.Length;                
+            }
+            catch (System.NotSupportedException)
+            {
+                // Some streams like Android assets don't support getting the length
+                // https://github.com/vpenades/SharpGLTF/issues/178
+            }
+
+            if (fileLength.HasValue && length != fileLength.Value)
+            {
+                throw new Validation.SchemaException(null, $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
+            }
         }
 
         #endregion

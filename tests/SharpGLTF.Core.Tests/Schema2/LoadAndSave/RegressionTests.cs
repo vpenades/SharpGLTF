@@ -11,6 +11,7 @@ using SharpGLTF.Validation;
 namespace SharpGLTF.Schema2.LoadAndSave
 {
     [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]
+    [ResourcePathFormat("*/Assets/SpecialCases")]
     internal class RegressionTests
     {
         [Test]
@@ -20,7 +21,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var cdir = Environment.CurrentDirectory;
 
-            var modelPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\RelativePaths.gltf");
+            var modelPath = ResourceInfo.From("RelativePaths.gltf");
 
             // absolute path            
 
@@ -88,6 +89,19 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             Assert.AreEqual(suzanne1Mem, suzanne3Mem);
             Assert.AreEqual(suzanne1.LogicalMeshes.Count, suzanne3.LogicalMeshes.Count);
-        }        
+        }
+
+        [Test]
+        public void LoadBinaryWithLimitedStream()
+        {
+            var path1 = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith("BrainStem.glb"));
+
+            var bytes = System.IO.File.ReadAllBytes(path1);
+            using(var ls = new ReadOnlyTestStream(bytes))
+            {
+                var model = ModelRoot.ReadGLB(ls);
+                Assert.NotNull(model);
+            }
+        }
     }
 }
