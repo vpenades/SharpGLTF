@@ -1,13 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  
-  <!-- https://blog.johnnyreilly.com/2021/07/14/directory-build-props-c-sharp-9-for-all -->
 
   <!-- Legal =================================================================================== -->
 
   <PropertyGroup>
     <Authors>Vicente Penades</Authors>    
-    <Copyright>Copyright (c) 2022 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) 2023 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
   </PropertyGroup>  
 
