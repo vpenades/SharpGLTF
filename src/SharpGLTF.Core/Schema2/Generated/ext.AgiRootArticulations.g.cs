@@ -98,7 +98,7 @@ namespace SharpGLTF.Schema2
 		private Vector3? _pointingVector;
 		
 		private const int _stagesMinItems = 1;
-		private ChildrenCollection<AgiArticulationStage,AgiArticulation> _stages;
+		private ChildrenList<AgiArticulationStage,AgiArticulation> _stages;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -129,7 +129,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _articulationsMinItems = 1;
-		private ChildrenCollection<AgiArticulation,AgiRootArticulations> _articulations;
+		private ChildrenList<AgiArticulation,AgiRootArticulations> _articulations;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)

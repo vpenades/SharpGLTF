@@ -28,19 +28,19 @@ namespace SharpGLTF.Schema2
             _extensionsUsed = new List<string>();
             _extensionsRequired = new List<string>();
 
-            _accessors = new ChildrenCollection<Accessor, ModelRoot>(this);
-            _animations = new ChildrenCollection<Animation, ModelRoot>(this);
-            _buffers = new ChildrenCollection<Buffer, ModelRoot>(this);
-            _bufferViews = new ChildrenCollection<BufferView, ModelRoot>(this);
-            _cameras = new ChildrenCollection<Camera, ModelRoot>(this);
-            _images = new ChildrenCollection<Image, ModelRoot>(this);
-            _materials = new ChildrenCollection<Material, ModelRoot>(this);
-            _meshes = new ChildrenCollection<Mesh, ModelRoot>(this);
-            _nodes = new ChildrenCollection<Node, ModelRoot>(this);
-            _samplers = new ChildrenCollection<TextureSampler, ModelRoot>(this);
-            _scenes = new ChildrenCollection<Scene, ModelRoot>(this);
-            _skins = new ChildrenCollection<Skin, ModelRoot>(this);
-            _textures = new ChildrenCollection<Texture, ModelRoot>(this);
+            _accessors = new ChildrenList<Accessor, ModelRoot>(this);
+            _animations = new ChildrenList<Animation, ModelRoot>(this);
+            _buffers = new ChildrenList<Buffer, ModelRoot>(this);
+            _bufferViews = new ChildrenList<BufferView, ModelRoot>(this);
+            _cameras = new ChildrenList<Camera, ModelRoot>(this);
+            _images = new ChildrenList<Image, ModelRoot>(this);
+            _materials = new ChildrenList<Material, ModelRoot>(this);
+            _meshes = new ChildrenList<Mesh, ModelRoot>(this);
+            _nodes = new ChildrenList<Node, ModelRoot>(this);
+            _samplers = new ChildrenList<TextureSampler, ModelRoot>(this);
+            _scenes = new ChildrenList<Scene, ModelRoot>(this);
+            _skins = new ChildrenList<Skin, ModelRoot>(this);
+            _textures = new ChildrenList<Texture, ModelRoot>(this);
         }
 
         /// <summary>

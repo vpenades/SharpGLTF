@@ -5,7 +5,7 @@ using System.Text;
 namespace SharpGLTF.Collections
 {
     sealed class SingleChild<T, TParent>
-        where T : class, IChildOf<TParent>
+        where T : class, IChildOfList<TParent>
         where TParent : class
     {
         #region lifecycle
@@ -41,12 +41,12 @@ namespace SharpGLTF.Collections
                 }
 
                 // orphan the current child
-                if (this._Child != null) { this._Child._SetLogicalParent(null, -1); }
+                if (this._Child != null) { this._Child.SetLogicalParent(null, -1); }
                 this._Child = null;
 
                 // adopt the new child
                 this._Child = value;
-                if (this._Child != null) { this._Child._SetLogicalParent(_Parent, 0); }
+                if (this._Child != null) { this._Child.SetLogicalParent(_Parent, 0); }
             }
         }
 

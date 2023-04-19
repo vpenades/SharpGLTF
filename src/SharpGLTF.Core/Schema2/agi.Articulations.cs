@@ -11,7 +11,7 @@ namespace SharpGLTF.Schema2
     {
         internal AgiRootArticulations(ModelRoot root)
         {
-            _articulations = new ChildrenCollection<AgiArticulation, AgiRootArticulations>(this);
+            _articulations = new ChildrenList<AgiArticulation, AgiRootArticulations>(this);
         }
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public sealed partial class AgiArticulation : IChildOf<AgiRootArticulations>
+    public sealed partial class AgiArticulation : IChildOfList<AgiRootArticulations>
     {
         public static readonly ReadOnlyCollection<AgiArticulationTransformType> AgiRotationTypes =
             new ReadOnlyCollection<AgiArticulationTransformType>(new List<AgiArticulationTransformType>
@@ -63,7 +63,7 @@ namespace SharpGLTF.Schema2
 
         internal AgiArticulation()
         {
-            _stages = new ChildrenCollection<AgiArticulationStage, AgiArticulation>(this);
+            _stages = new ChildrenList<AgiArticulationStage, AgiArticulation>(this);
         }
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
@@ -124,14 +124,14 @@ namespace SharpGLTF.Schema2
 
         public AgiRootArticulations LogicalParent { get; private set; }
 
-        public void _SetLogicalParent(AgiRootArticulations parent, int index)
+        void IChildOfList<AgiRootArticulations>.SetLogicalParent(AgiRootArticulations parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;
         }
     }
 
-    public sealed partial class AgiArticulationStage : IChildOf<AgiArticulation>
+    public sealed partial class AgiArticulationStage : IChildOfList<AgiArticulation>
     {
         internal AgiArticulationStage()
         {
@@ -162,7 +162,7 @@ namespace SharpGLTF.Schema2
 
         public AgiArticulation LogicalParent { get; private set; }
 
-        public void _SetLogicalParent(AgiArticulation parent, int index)
+        void IChildOfList<AgiArticulation>.SetLogicalParent(AgiArticulation parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

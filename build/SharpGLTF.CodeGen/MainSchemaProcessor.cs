@@ -94,14 +94,14 @@ namespace SharpGLTF
             var meshClass = ctx.FindClass("Mesh");
             if (meshClass != null)
             {
-                newEmitter.SetCollectionContainer(meshClass.UseField("primitives"), "ChildrenCollection<TItem,Mesh>");
+                newEmitter.SetCollectionContainer(meshClass.UseField("primitives"), "ChildrenList<TItem,Mesh>");
             }
 
             var animationClass = ctx.FindClass("Animation");
             if (animationClass != null)
             {
-                newEmitter.SetCollectionContainer(animationClass.UseField("channels"), "ChildrenCollection<TItem,Animation>");
-                newEmitter.SetCollectionContainer(animationClass.UseField("samplers"), "ChildrenCollection<TItem,Animation>");
+                newEmitter.SetCollectionContainer(animationClass.UseField("channels"), "ChildrenList<TItem,Animation>");
+                newEmitter.SetCollectionContainer(animationClass.UseField("samplers"), "ChildrenList<TItem,Animation>");
             }
 
             var classes = ctx.Classes.ToArray();
@@ -117,7 +117,7 @@ namespace SharpGLTF
                     {
                         if (ctype.BaseClass != null && ctype.BaseClass.PersistentName == "glTF Child of Root Property")
                         {
-                            newEmitter.SetCollectionContainer(f, $"ChildrenCollection<TItem,{rootName}>");
+                            newEmitter.SetCollectionContainer(f, $"ChildrenList<TItem,{rootName}>");
                         }
                     }
                 }

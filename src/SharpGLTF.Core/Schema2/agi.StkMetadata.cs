@@ -9,7 +9,7 @@ namespace SharpGLTF.Schema2
     {
         internal AgiRootStkMetadata(ModelRoot root)
         {
-            _solarPanelGroups = new ChildrenCollection<AgiStkSolarPanelGroup, AgiRootStkMetadata>(this);
+            _solarPanelGroups = new ChildrenList<AgiStkSolarPanelGroup, AgiRootStkMetadata>(this);
         }
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
@@ -49,13 +49,13 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public sealed partial class AgiStkSolarPanelGroup : IChildOf<AgiRootStkMetadata>
+    public sealed partial class AgiStkSolarPanelGroup : IChildOfList<AgiRootStkMetadata>
     {
         public int LogicalIndex { get; private set; } = -1;
 
         public AgiRootStkMetadata LogicalParent { get; private set; }
 
-        public void _SetLogicalParent(AgiRootStkMetadata parent, int index)
+        void IChildOfList<AgiRootStkMetadata>.SetLogicalParent(AgiRootStkMetadata parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

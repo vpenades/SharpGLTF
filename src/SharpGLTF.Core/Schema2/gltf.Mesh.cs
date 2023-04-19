@@ -29,7 +29,7 @@ namespace SharpGLTF.Schema2
 
         internal Mesh()
         {
-            _primitives = new ChildrenCollection<MeshPrimitive, Mesh>(this);
+            _primitives = new ChildrenList<MeshPrimitive, Mesh>(this);
             _weights = new List<double>();
         }
 

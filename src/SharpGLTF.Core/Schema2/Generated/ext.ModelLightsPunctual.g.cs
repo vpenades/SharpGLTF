@@ -110,7 +110,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _lightsMinItems = 1;
-		private ChildrenCollection<PunctualLight,ModelRoot> _lights;
+		private ChildrenList<PunctualLight,ModelRoot> _lights;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)

@@ -65,7 +65,7 @@ namespace SharpGLTF.Schema2
     /// </list>
     /// </remarks>
     sealed partial class AnimationSampler :
-        IChildOf<Animation>,
+        IChildOfList<Animation>,
         IAnimationSampler<Vector3>,
         IAnimationSampler<Quaternion>,
         IAnimationSampler<SPARSE8>,
@@ -95,7 +95,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex { get; private set; } = -1;
 
-        void IChildOf<Animation>._SetLogicalParent(Animation parent, int index)
+        void IChildOfList<Animation>.SetLogicalParent(Animation parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

@@ -11,7 +11,7 @@ namespace SharpGLTF.Schema2
     {
         internal _ModelPunctualLights(ModelRoot root)
         {
-            _lights = new ChildrenCollection<PunctualLight, ModelRoot>(root);
+            _lights = new ChildrenList<PunctualLight, ModelRoot>(root);
         }
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()

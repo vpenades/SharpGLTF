@@ -468,10 +468,10 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _channelsMinItems = 1;
-		private ChildrenCollection<AnimationChannel,Animation> _channels;
+		private ChildrenList<AnimationChannel,Animation> _channels;
 		
 		private const int _samplersMinItems = 1;
-		private ChildrenCollection<AnimationSampler,Animation> _samplers;
+		private ChildrenList<AnimationSampler,Animation> _samplers;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -968,7 +968,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _primitivesMinItems = 1;
-		private ChildrenCollection<MeshPrimitive,Mesh> _primitives;
+		private ChildrenList<MeshPrimitive,Mesh> _primitives;
 		
 		private const int _weightsMinItems = 1;
 		private List<Double> _weights;
@@ -1202,45 +1202,45 @@ namespace SharpGLTF.Schema2
 		private List<String> _extensionsUsed;
 		
 		private const int _accessorsMinItems = 1;
-		private ChildrenCollection<Accessor,ModelRoot> _accessors;
+		private ChildrenList<Accessor,ModelRoot> _accessors;
 		
 		private const int _animationsMinItems = 1;
-		private ChildrenCollection<Animation,ModelRoot> _animations;
+		private ChildrenList<Animation,ModelRoot> _animations;
 		
 		private const int _bufferViewsMinItems = 1;
-		private ChildrenCollection<BufferView,ModelRoot> _bufferViews;
+		private ChildrenList<BufferView,ModelRoot> _bufferViews;
 		
 		private const int _buffersMinItems = 1;
-		private ChildrenCollection<Buffer,ModelRoot> _buffers;
+		private ChildrenList<Buffer,ModelRoot> _buffers;
 		
 		private const int _camerasMinItems = 1;
-		private ChildrenCollection<Camera,ModelRoot> _cameras;
+		private ChildrenList<Camera,ModelRoot> _cameras;
 		
 		private const int _imagesMinItems = 1;
-		private ChildrenCollection<Image,ModelRoot> _images;
+		private ChildrenList<Image,ModelRoot> _images;
 		
 		private const int _materialsMinItems = 1;
-		private ChildrenCollection<Material,ModelRoot> _materials;
+		private ChildrenList<Material,ModelRoot> _materials;
 		
 		private const int _meshesMinItems = 1;
-		private ChildrenCollection<Mesh,ModelRoot> _meshes;
+		private ChildrenList<Mesh,ModelRoot> _meshes;
 		
 		private const int _nodesMinItems = 1;
-		private ChildrenCollection<Node,ModelRoot> _nodes;
+		private ChildrenList<Node,ModelRoot> _nodes;
 		
 		private const int _samplersMinItems = 1;
-		private ChildrenCollection<TextureSampler,ModelRoot> _samplers;
+		private ChildrenList<TextureSampler,ModelRoot> _samplers;
 		
 		private Int32? _scene;
 		
 		private const int _scenesMinItems = 1;
-		private ChildrenCollection<Scene,ModelRoot> _scenes;
+		private ChildrenList<Scene,ModelRoot> _scenes;
 		
 		private const int _skinsMinItems = 1;
-		private ChildrenCollection<Skin,ModelRoot> _skins;
+		private ChildrenList<Skin,ModelRoot> _skins;
 		
 		private const int _texturesMinItems = 1;
-		private ChildrenCollection<Texture,ModelRoot> _textures;
+		private ChildrenList<Texture,ModelRoot> _textures;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)

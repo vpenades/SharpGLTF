@@ -51,19 +51,19 @@ namespace SharpGLTF
             var agiArticulationRootClass = ctx.FindClass("AGI_articulations glTF extension");
             if (agiArticulationRootClass != null)
             {
-                newEmitter.SetCollectionContainer(agiArticulationRootClass.UseField("articulations"), "ChildrenCollection<TItem,AgiRootArticulations>");
+                newEmitter.SetCollectionContainer(agiArticulationRootClass.UseField("articulations"), "ChildrenList<TItem,AgiRootArticulations>");
             }
 
             var agiArticulationClass = ctx.FindClass("Articulation");
             if (agiArticulationClass != null)
             {
-                newEmitter.SetCollectionContainer(agiArticulationClass.UseField("stages"), "ChildrenCollection<TItem,AgiArticulation>");
+                newEmitter.SetCollectionContainer(agiArticulationClass.UseField("stages"), "ChildrenList<TItem,AgiArticulation>");
             }
 
             var agiStkMetadataRootClass = ctx.FindClass("AGI_stk_metadata glTF extension");
             if (agiStkMetadataRootClass != null)
             {
-                newEmitter.SetCollectionContainer(agiStkMetadataRootClass.UseField("solarPanelGroups"), "ChildrenCollection<TItem,AgiRootStkMetadata>");
+                newEmitter.SetCollectionContainer(agiStkMetadataRootClass.UseField("solarPanelGroups"), "ChildrenList<TItem,AgiRootStkMetadata>");
             }
         }
     }

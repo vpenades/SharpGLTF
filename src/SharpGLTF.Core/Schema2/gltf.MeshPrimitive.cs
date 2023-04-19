@@ -7,7 +7,7 @@ using SharpGLTF.Collections;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("{_DebuggerDisplay(),nq}")]
-    public sealed partial class MeshPrimitive : IChildOf<Mesh>
+    public sealed partial class MeshPrimitive : IChildOfList<Mesh>
     {
         #region debug
 
@@ -42,7 +42,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Mesh LogicalParent { get; private set; }
 
-        void IChildOf<Mesh>._SetLogicalParent(Mesh parent, int index)
+        void IChildOfList<Mesh>.SetLogicalParent(Mesh parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

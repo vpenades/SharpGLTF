@@ -47,7 +47,7 @@ namespace SharpGLTF.Schema2
     }
 
     [System.Diagnostics.DebuggerDisplay("AnimChannel LogicalNode[{TargetNode.LogicalIndex}].{TargetNodePath}")]
-    public sealed partial class AnimationChannel : IChildOf<Animation>
+    public sealed partial class AnimationChannel : IChildOfList<Animation>
     {
         #region lifecycle
         internal AnimationChannel() { }
@@ -66,7 +66,7 @@ namespace SharpGLTF.Schema2
             _sampler = sampler.LogicalIndex;
         }
 
-        void IChildOf<Animation>._SetLogicalParent(Animation parent, int index)
+        void IChildOfList<Animation>.SetLogicalParent(Animation parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

@@ -9,7 +9,7 @@ namespace SharpGLTF.Schema2
     /// <summary>
     /// All gltf elements stored in ModelRoot must inherit from this class.
     /// </summary>
-    public abstract partial class LogicalChildOfRoot : IChildOf<ModelRoot>
+    public abstract partial class LogicalChildOfRoot : IChildOfList<ModelRoot>
     {
         #region properties
 
@@ -31,7 +31,7 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region IChildOf<ROOT>
+        #region IChildOflist<ROOT>
 
         /// <summary>
         /// Gets the <see cref="ModelRoot"/> instance that owns this object.
@@ -43,7 +43,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public int LogicalIndex { get; private set; } = -1;
 
-        void IChildOf<ModelRoot>._SetLogicalParent(ModelRoot parent, int index)
+        void IChildOfList<ModelRoot>.SetLogicalParent(ModelRoot parent, int index)
         {
             LogicalParent = parent;
             LogicalIndex = index;

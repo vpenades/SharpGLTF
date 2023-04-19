@@ -20,8 +20,8 @@ namespace SharpGLTF.Schema2
 
         internal Animation()
         {
-            _channels = new ChildrenCollection<AnimationChannel, Animation>(this);
-            _samplers = new ChildrenCollection<AnimationSampler, Animation>(this);
+            _channels = new ChildrenList<AnimationChannel, Animation>(this);
+            _samplers = new ChildrenList<AnimationSampler, Animation>(this);
         }
 
         #endregion

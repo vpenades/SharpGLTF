@@ -8,15 +8,15 @@ namespace SharpGLTF.Collections
 {
     [TestFixture]
     [Category("Core")]
-    public class ChildrenCollectionTests
+    public class ChildrenListTests
     {
-        class TestChild : IChildOf<ChildrenCollectionTests>
+        class TestChild : IChildOfList<ChildrenListTests>
         {
-            public ChildrenCollectionTests LogicalParent { get; private set; }
+            public ChildrenListTests LogicalParent { get; private set; }
 
             public int LogicalIndex { get; private set; } = -1;
 
-            public void _SetLogicalParent(ChildrenCollectionTests parent, int index)
+            void IChildOfList<ChildrenListTests>.SetLogicalParent(ChildrenListTests parent, int index)
             {
                 LogicalParent = parent;
                 LogicalIndex = index;
@@ -28,7 +28,7 @@ namespace SharpGLTF.Collections
         {
             if (System.Diagnostics.Debugger.IsAttached) return;
 
-            var list = new ChildrenCollection<TestChild, ChildrenCollectionTests>(this);
+            var list = new ChildrenList<TestChild, ChildrenListTests>(this);
             
             Assert.Throws<ArgumentNullException>(() => list.Add(null));
 
