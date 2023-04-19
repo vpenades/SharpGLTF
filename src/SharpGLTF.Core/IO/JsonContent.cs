@@ -153,7 +153,9 @@ namespace SharpGLTF.IO
                 };
             }
 
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             var json = JsonSerializer.Serialize(value, value.GetType(), options);
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
             return Parse(json);
         }

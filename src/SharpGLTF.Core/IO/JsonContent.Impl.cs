@@ -39,7 +39,9 @@ namespace SharpGLTF.IO
                 };
             }
 
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             return JsonSerializer.Serialize(obj, obj.GetType(), options);
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         }
 
         /// <summary>
@@ -74,7 +76,9 @@ namespace SharpGLTF.IO
 
             var json = ToJson(obj, options);
 
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             return JsonSerializer.Deserialize(json, type, options);
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
         }
 
         public static Object Deserialize(JSONELEMENT element)
