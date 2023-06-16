@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SharpGLTF.Core\SharpGLTF.Core.csproj" />
+    <ProjectReference Include="..\..\src\SharpGLTF.Runtime\SharpGLTF.Runtime.csproj" />
   </ItemGroup>
 
 </Project>

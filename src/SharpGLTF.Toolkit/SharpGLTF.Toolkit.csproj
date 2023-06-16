@@ -10,12 +10,12 @@
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
-    <Compile Include="..\SharpGLTF.Core\Runtime\VertexNormalsFactory.cs" Link="Geometry\VertexNormalsFactory.cs" />
-    <Compile Include="..\SharpGLTF.Core\Runtime\VertexTangentsFactory.cs" Link="Geometry\VertexTangentsFactory.cs" />
-  </ItemGroup>
+    <Compile Include="..\SharpGLTF.Runtime\Runtime\VertexNormalsFactory.cs" Link="Geometry\VertexNormalsFactory.cs" />
+    <Compile Include="..\SharpGLTF.Runtime\Runtime\VertexTangentsFactory.cs" Link="Geometry\VertexTangentsFactory.cs" />
+  </ItemGroup>  
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpGLTF.Core\SharpGLTF.Core.csproj" />
+    <ProjectReference Include="..\SharpGLTF.Runtime\SharpGLTF.Runtime.csproj" />
   </ItemGroup>  
   
 </Project>
