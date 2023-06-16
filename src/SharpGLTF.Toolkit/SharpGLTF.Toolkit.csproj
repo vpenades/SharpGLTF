@@ -10,6 +10,8 @@
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
+    <Compile Include="..\SharpGLTF.Core\Runtime\VertexNormalsFactory.cs" Link="Geometry\VertexNormalsFactory.cs" />
+    <Compile Include="..\SharpGLTF.Core\Runtime\VertexTangentsFactory.cs" Link="Geometry\VertexTangentsFactory.cs" />
   </ItemGroup>
 
   <ItemGroup>

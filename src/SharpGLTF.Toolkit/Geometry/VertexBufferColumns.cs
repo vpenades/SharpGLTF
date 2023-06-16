@@ -438,7 +438,7 @@ namespace SharpGLTF.Geometry
                 .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
                 .ToList();
 
-            VertexNormalsFactory.CalculateSmoothNormals(agents);
+            Runtime.VertexNormalsFactory.CalculateSmoothNormals(agents);
         }
 
         public static void CalculateTangents(IReadOnlyList<(VertexBufferColumns Vertices, IEnumerable<(int A, int B, int C)> Indices)> primitives)
@@ -449,14 +449,16 @@ namespace SharpGLTF.Geometry
                 .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
                 .ToList();
 
-            VertexTangentsFactory.CalculateTangents(agents);
+            Runtime.VertexTangentsFactory.CalculateTangents(agents);
         }
 
         #endregion
 
         #region nested types
 
-        readonly struct _NormalTangentAgent : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+        readonly struct _NormalTangentAgent
+            : Runtime.VertexNormalsFactory.IMeshPrimitive
+            , Runtime.VertexTangentsFactory.IMeshPrimitive
         {
             public _NormalTangentAgent(VertexBufferColumns vertices, IEnumerable<(int A, int B, int C)> indices)
             {

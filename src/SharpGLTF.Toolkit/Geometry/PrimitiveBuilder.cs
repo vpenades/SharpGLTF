@@ -856,11 +856,13 @@ namespace SharpGLTF.Geometry
     /// Helper class used to calculate Normals and Tangents of missing meshes.
     /// </summary>
     /// <typeparam name="TMaterial">default material</typeparam>
-    sealed class MeshPrimitiveNormalsAndTangents<TMaterial> : VertexNormalsFactory.IMeshPrimitive, VertexTangentsFactory.IMeshPrimitive
+    sealed class MeshPrimitiveNormalsAndTangents<TMaterial>
+        : Runtime.VertexNormalsFactory.IMeshPrimitive
+        , Runtime.VertexTangentsFactory.IMeshPrimitive
     {
         #region constructor
 
-        // TODO: we need a solution for morph targets.
+        // TODO: we need a solution for morph targets before proceeding...
 
         public static IReadOnlyDictionary<IPrimitiveReader<TMaterial>, MeshPrimitiveNormalsAndTangents<TMaterial>> GenerateNormalsTangents(IMeshBuilder<TMaterial> mesh)
         {
@@ -870,13 +872,13 @@ namespace SharpGLTF.Geometry
 
             // we can safaly generate both sets because MeshPrimitiveNormalsAndTangents will still return the good normals and tangets if they exist.
 
-            VertexNormalsFactory.CalculateSmoothNormals(pairs.Values.ToList());
-            VertexTangentsFactory.CalculateTangents(pairs.Values.ToList());
+            Runtime.VertexNormalsFactory.CalculateSmoothNormals(pairs.Values.ToList());
+            Runtime.VertexTangentsFactory.CalculateTangents(pairs.Values.ToList());
 
             return pairs;
         }
 
-        public MeshPrimitiveNormalsAndTangents(IPrimitiveReader<TMaterial> source)
+        private MeshPrimitiveNormalsAndTangents(IPrimitiveReader<TMaterial> source)
         {
             _Source = source;
         }

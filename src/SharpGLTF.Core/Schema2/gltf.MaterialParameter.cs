@@ -5,16 +5,34 @@ using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
+    /// <summary>
+    /// A parameter accessor interface
+    /// </summary>
+    /// <remarks>
+    /// Implemented by <see cref="_MaterialParameter{}"/>
+    /// </remarks>
     public interface IMaterialParameter
     {
+        /// <summary>
+        /// The name of the parameter.
+        /// </summary>
+        /// <remarks>
+        /// The value must be one of the internal enum <see cref="_MaterialParameterKey"/>
+        /// </remarks>
         string Name { get; }
 
+        /// <summary>
+        /// Gets a value indicating whether the current value is the default value.
+        /// </summary>
         bool IsDefault { get; }
 
+        /// <summary>
+        /// Gets the type of <see cref="Value"/><br/>Which can be <see cref="float"/> <see cref="Vector3"/> and <see cref="Vector4"/>
+        /// </summary>
         Type ValueType { get; }
 
         /// <summary>
-        /// Gets or sets the value of this parameter. <br/>
+        /// Gets or sets the value of this parameter.<br/>
         /// Valid types are <see cref="float"/> <see cref="Vector3"/> and <see cref="Vector4"/>
         /// </summary>
         Object Value { get; set; }
