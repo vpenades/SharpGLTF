@@ -16,6 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpGLTF.Runtime\SharpGLTF.Runtime.csproj" />
-  </ItemGroup>  
+  </ItemGroup>
   
 </Project>

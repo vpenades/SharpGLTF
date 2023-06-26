@@ -26,6 +26,6 @@
     <None Include="Schema2\Generated\*.cs">
       <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
     </None>
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>
