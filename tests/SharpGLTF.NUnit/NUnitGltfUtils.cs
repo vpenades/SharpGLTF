@@ -101,7 +101,7 @@ namespace SharpGLTF
 
             if (validationPath != null)
             {
-                var report = GltfValidator.ValidationReport.Validate(fileName);                
+                var report = GltfValidator.ValidationReport.ValidateAsync(fileName, System.Threading.CancellationToken.None).ConfigureAwait(false).GetAwaiter().GetResult();                
 
                 if (report == null) return fileName;
 
