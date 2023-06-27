@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -378,9 +379,13 @@ namespace SharpGLTF.IO
 
         protected abstract void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader);
 
-        protected static T DeserializePropertyValue<T>(ref Utf8JsonReader reader)
+        protected static T DeserializePropertyValue<
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader)
         {
-            _TryCastValue(ref reader, typeof(T), out Object v);
+            _TryCastValue<T>(ref reader, out Object v);
 
             System.Diagnostics.Debug.Assert(reader.TokenType != JSONTOKEN.StartArray);
             System.Diagnostics.Debug.Assert(reader.TokenType != JSONTOKEN.StartObject);
@@ -390,7 +395,11 @@ namespace SharpGLTF.IO
             return (T)v;
         }
 
-        protected static void DeserializePropertyList<T>(ref Utf8JsonReader reader, IList<T> list)
+        protected static void DeserializePropertyList<
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, IList<T> list)
         {
             // Guard.NotNull(reader, nameof(reader));
             Guard.NotNull(list, nameof(list));
@@ -402,7 +411,7 @@ namespace SharpGLTF.IO
 
             while (reader.Read() && reader.TokenType != JSONTOKEN.EndArray)
             {
-                if (_TryCastValue(ref reader, typeof(T), out Object item))
+                if (_TryCastValue<T>(ref reader, out Object item))
                 {
                     list.Add((T)item);
                 }
@@ -418,7 +427,11 @@ namespace SharpGLTF.IO
             System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndArray);
         }
 
-        protected static void DeserializePropertyDictionary<T>(ref Utf8JsonReader reader, IDictionary<string, T> dict)
+        protected static void DeserializePropertyDictionary<
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, IDictionary<string, T> dict)
         {
             Guard.NotNull(dict, nameof(dict));
 
@@ -433,7 +446,7 @@ namespace SharpGLTF.IO
                 {
                     var key = reader.GetString();
 
-                    if (_TryCastValue(ref reader, typeof(T), out Object val))
+                    if (_TryCastValue<T>(ref reader, out Object val))
                     {
                         dict[key] = (T)val;
                     }
@@ -448,8 +461,15 @@ namespace SharpGLTF.IO
             if (dict.Count == 0) throw new JSONEXCEPTION("Empty dictionary found.");
         }
 
-        private static bool _TryCastValue(ref Utf8JsonReader reader, Type vtype, out Object value)
+        private static bool _TryCastValue
+            <
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, out Object value)
         {
+            var vtype = typeof(T);
+
             value = null;
 
             if (reader.TokenType == JSONTOKEN.EndArray) return false;
