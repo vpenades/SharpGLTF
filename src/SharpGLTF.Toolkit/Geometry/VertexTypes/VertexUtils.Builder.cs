@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
@@ -6,6 +7,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static partial class VertexUtils
     {
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexGeometryType(params string[] vertexAttributes)
         {
             var t = typeof(VertexPosition);
@@ -14,6 +18,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             return t;
         }
 
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexMaterialType(params string[] vertexAttributes)
         {
             var colors = vertexAttributes.Contains("COLOR_0") ? 1 : 0;
@@ -29,6 +36,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetVertexMaterialType(colors, uvcoords);
         }
 
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexMaterialType(int colors, int uvcoords)
         {
             if (colors == 0)
@@ -55,6 +65,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             return typeof(VertexEmpty);
         }
 
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexSkinningType(params string[] vertexAttributes)
         {
             var joints = vertexAttributes.Contains("JOINTS_0") && vertexAttributes.Contains("WEIGHTS_0") ? 4 : 0;
@@ -66,6 +79,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             return typeof(VertexEmpty);
         }
 
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexBuilderType(params string[] vertexAttributes)
         {
             var tvg = GetVertexGeometryType(vertexAttributes);
@@ -77,6 +93,9 @@ namespace SharpGLTF.Geometry.VertexTypes
             return vtype.MakeGenericType(tvg, tvm, tvs);
         }
 
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public static Type GetVertexBuilderType(bool hasNormals, bool hasTangents, int numCols, int numUV, int numJoints)
         {
             var tvg = typeof(VertexPosition);

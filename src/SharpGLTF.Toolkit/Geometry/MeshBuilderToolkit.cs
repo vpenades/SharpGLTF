@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -108,8 +109,13 @@ namespace SharpGLTF.Geometry
 
             return maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : Schema2.EncodingType.UNSIGNED_SHORT;
         }
-
-        public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes<TMaterial>(params string[] vertexAttributes)
+        
+        public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes
+            <
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+            #endif
+            TMaterial>(params string[] vertexAttributes)
         {
             Type meshType = GetMeshBuilderType(typeof(TMaterial), vertexAttributes);
 
@@ -117,8 +123,16 @@ namespace SharpGLTF.Geometry
 
             return mesh as IMeshBuilder<TMaterial>;
         }
-
-        public static Type GetMeshBuilderType(Type materialType, string[] vertexAttributes)
+        
+        #if !NETSTANDARD
+        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
+        public static Type GetMeshBuilderType
+            (
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
+            #endif
+            Type materialType, string[] vertexAttributes)
         {
             var tvg = VertexUtils.GetVertexGeometryType(vertexAttributes);
             var tvm = VertexUtils.GetVertexMaterialType(vertexAttributes);
@@ -126,8 +140,7 @@ namespace SharpGLTF.Geometry
 
             var meshType = typeof(MeshBuilder<,,,>);
 
-            meshType = meshType.MakeGenericType(materialType, tvg, tvm, tvs);
-            return meshType;
+            return meshType.MakeGenericType(materialType, tvg, tvm, tvs);
         }
 
         public static IReadOnlyDictionary<Vector3, Vector3> CalculateSmoothNormals<TMaterial>(this IMeshBuilder<TMaterial> srcMesh)

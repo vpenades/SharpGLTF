@@ -51,7 +51,9 @@ namespace SharpGLTF.Geometry
     {
         #region lifecycle
 
-        public MeshBuilder(string name = null)
+        public MeshBuilder() : this(null) { }
+
+        public MeshBuilder(string name)
             : base(name)
         {
             // this is the recomended preprocesor for release/production
