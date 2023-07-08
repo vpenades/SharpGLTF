@@ -488,15 +488,6 @@ namespace SharpGLTF.Memory
         public readonly UInt32 LevelCount;
         public readonly UInt32 SupercompressionScheme;
 
-        public static unsafe bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
-        {
-            if (!(data is Byte[] array)) array = data?.ToArray() ?? Array.Empty<Byte>();
-
-            if (data.Count < sizeof(Ktx2Header)) { header = default; return false; }
-            header = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Ktx2Header>(array)[0];
-            return true;
-        }
-
         public bool IsValidHeader
         {
             get
@@ -506,6 +497,16 @@ namespace SharpGLTF.Memory
                 return true;
             }
         }
+
+        public static unsafe bool TryGetHeader(IReadOnlyList<Byte> data, out Ktx2Header header)
+        {
+            if (!(data is Byte[] array)) array = data?.ToArray() ?? Array.Empty<Byte>();
+
+            if (array.Length < sizeof(Ktx2Header)) { header = default; return false; }
+
+            header = System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Ktx2Header>(array)[0];
+            return true;
+        }        
 
         public static void Verify(IReadOnlyList<Byte> data, string paramName)
         {
