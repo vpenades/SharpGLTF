@@ -7,7 +7,7 @@
 
   <PropertyGroup>
     <Authors>Vicente Penades</Authors>    
-    <Copyright>Copyright (c) 2022 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) 2023 Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
   </PropertyGroup>  
 
@@ -38,7 +38,7 @@
     
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
     
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.1">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="7.0.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
