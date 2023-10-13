@@ -4,7 +4,7 @@
 
 ![GitHub](https://img.shields.io/github/license/vpenades/SharpGLTF)
 [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Core)](https://www.nuget.org/packages?q=sharpgltf)
-[![Join the chat at https://discord.gg/y9mnJQY](https://img.shields.io/discord/750776153681166467?color=%237289DA&label=SharpGLTF&logo=discord&logoColor=white)](https://discord.gg/y9mnJQY)
+[![Join the chat at https://discord.gg/ecGAbsUDbB](https://img.shields.io/discord/750776153681166467?color=%237289DA&label=SharpGLTF&logo=discord&logoColor=white)](https://discord.gg/ecGAbsUDbB)
 ---
 
 ### Overview
