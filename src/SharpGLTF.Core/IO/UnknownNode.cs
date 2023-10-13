@@ -4,6 +4,8 @@ using System.Text;
 
 using System.Text.Json;
 
+using JSONCONTENT = System.Text.Json.Nodes.JsonNode;
+
 namespace SharpGLTF.IO
 {
     /// <summary>
@@ -28,7 +30,7 @@ namespace SharpGLTF.IO
 
         private readonly string _Name;
 
-        private readonly Dictionary<String, Object> _Properties = new Dictionary<String, Object>();
+        private readonly Dictionary<String, JSONCONTENT> _Properties = new Dictionary<String, JSONCONTENT>();
 
         #endregion
 
@@ -36,7 +38,7 @@ namespace SharpGLTF.IO
 
         public string Name => _Name;
 
-        public IReadOnlyDictionary<String, Object> Properties => _Properties;
+        public IReadOnlyDictionary<String, JSONCONTENT> Properties => _Properties;
 
         #endregion
 
@@ -45,7 +47,7 @@ namespace SharpGLTF.IO
         protected override void DeserializeProperty(string property, ref Utf8JsonReader reader)
         {
             reader.Read();
-            _Properties[property] = DeserializeUnknownObject(ref reader);
+            _Properties[property] = JSONCONTENT.Parse(ref reader);
         }
 
         protected override void SerializeProperties(Utf8JsonWriter writer)

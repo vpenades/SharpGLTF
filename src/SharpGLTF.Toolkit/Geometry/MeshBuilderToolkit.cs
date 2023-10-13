@@ -7,6 +7,8 @@ using System.Text;
 
 using SharpGLTF.Geometry.VertexTypes;
 
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
+
 namespace SharpGLTF.Geometry
 {
     /// <summary>
@@ -30,7 +32,7 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets or sets the custom data of this object.
         /// </summary>
-        IO.JsonContent Extras { get; set; }
+        JSONEXTRAS Extras { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether this mesh does not contain any geometry.

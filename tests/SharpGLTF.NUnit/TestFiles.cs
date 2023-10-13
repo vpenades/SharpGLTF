@@ -193,6 +193,9 @@ namespace SharpGLTF
                 "\\meshes\\KHR_materials_volume_testing.glb", // draco compression-
                 "\\meshes\\Yeti\\MayaExport\\", // validator reports out of bounds accesor
                 "\\meshes\\Demos\\retargeting\\riggedMesh.glb", // validator reports errors
+                "\\meshes\\Buildings\\road gap.glb", // uses KHR_Draco compression  
+                "\\meshes\\Buildings\\Road corner.glb", // uses KHR_Draco compression  
+                "\\meshes\\Tests\\BadDraco\\Box-draco.glb", // uses KHR_Draco compression  
             };            
 
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);

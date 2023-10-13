@@ -142,13 +142,7 @@ namespace SharpGLTF.Validation
             catch (ArgumentException ex) { _SchemaThrow(parameterName, ex.Message); }
             return this;
         }
-
-        public OUTTYPE IsJsonSerializable(PARAMNAME parameterName, Object value)
-        {
-            if (!IO.JsonContent.IsJsonSerializable(value, out Object invalidValue)) _SchemaThrow(parameterName, $"{invalidValue?.GetType()?.Name} cannot be serialized to Json");
-            return this;
-        }
-
+        
         #endregion
 
         #region link

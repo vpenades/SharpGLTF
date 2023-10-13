@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text.Encodings.Web;
 
 using BYTES = System.ArraySegment<byte>;
 using MODEL = SharpGLTF.Schema2.ModelRoot;
@@ -247,7 +248,8 @@ namespace SharpGLTF.Schema2
         {
             var options = new System.Text.Json.JsonWriterOptions
             {
-                Indented = indented
+                Indented = indented,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
 
             using (var mm = new System.IO.MemoryStream())

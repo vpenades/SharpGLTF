@@ -254,6 +254,12 @@ namespace SharpGLTF.IO
 
             if (writer.TryWriteValue(value)) return;
 
+            if (value is System.Text.Json.Nodes.JsonNode jnode)
+            {
+                jnode.WriteTo(writer);
+                return;
+            }
+
             if (value is JsonSerializable vgltf) { vgltf.Serialize(writer); return; }
 
             if (value is System.Collections.IDictionary dict)

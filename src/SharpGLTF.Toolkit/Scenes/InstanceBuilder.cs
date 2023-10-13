@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
+
 namespace SharpGLTF.Scenes
 {
     /// <summary>
@@ -24,7 +26,7 @@ namespace SharpGLTF.Scenes
             return this;
         }
 
-        public InstanceBuilder WithExtras(IO.JsonContent extras)
+        public InstanceBuilder WithExtras(JSONEXTRAS extras)
         {
             if (this.Content != null) this.Content.Extras = extras;
             return this;
@@ -59,7 +61,7 @@ namespace SharpGLTF.Scenes
         /// <summary>
         /// Gets the custom data of this object.
         /// </summary>
-        public IO.JsonContent Extras => _ContentTransformer?.Extras ?? default;
+        public JSONEXTRAS Extras => _ContentTransformer?.Extras;
 
         /// <summary>
         /// Gets or sets the content of this instance.<br/>

@@ -5,6 +5,8 @@ using System.Linq;
 
 using SharpGLTF.Schema2;
 
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
+
 namespace SharpGLTF.Geometry
 {
     /// <summary>
@@ -98,7 +100,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private PackedMeshBuilder(string name, IO.JsonContent extras)
+        private PackedMeshBuilder(string name, JSONEXTRAS extras)
             : base(name, extras) { }
 
         #endregion

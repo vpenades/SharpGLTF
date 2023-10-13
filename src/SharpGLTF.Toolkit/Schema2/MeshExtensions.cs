@@ -9,6 +9,7 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 
 using MESHXFORM = SharpGLTF.Transforms.IGeometryTransform;
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Schema2
 {
@@ -373,24 +374,24 @@ namespace SharpGLTF.Schema2
             return instancing;
         }
 
-        public static MeshGpuInstancing WithInstanceCustomAccessors(this MeshGpuInstancing instancing, IReadOnlyList<IO.JsonContent> extras)
+        public static MeshGpuInstancing WithInstanceCustomAccessors(this MeshGpuInstancing instancing, IReadOnlyList<JSONEXTRAS> extras)
         {
             Guard.NotNull(instancing, nameof(instancing));
 
             // gather attribute keys
-            var keys = extras
-                .Select(item => item.Content)
-                .OfType<IReadOnlyDictionary<string, Object>>()
-                .SelectMany(item => item.Keys)
+            var keys = extras                
+                .OfType<System.Text.Json.Nodes.JsonObject>()
+                .SelectMany(item => item)
+                .Select(item => item.Key)
                 .Distinct()
                 .Where(item => item.StartsWith("_", StringComparison.Ordinal));
 
             foreach (var key in keys)
             {
-                Object valueGetter(IO.JsonContent extra)
+                JSONEXTRAS valueGetter(JSONEXTRAS extra)
                 {
-                    if (!(extra.Content is IReadOnlyDictionary<string, Object> dict)) return null;
-                    return dict.TryGetValue(key, out var val) ? val : null;
+                    if (!(extra is System.Text.Json.Nodes.JsonObject dict)) return null;
+                    return dict.TryGetPropertyValue(key, out var val) ? val : null;
                 }
 
                 var values = extras.Select(valueGetter).ToList();
@@ -401,27 +402,27 @@ namespace SharpGLTF.Schema2
             return instancing;
         }
 
-        public static MeshGpuInstancing WithInstanceCustomAccessor(this MeshGpuInstancing instancing, string attribute, IReadOnlyList<Object> values)
+        public static MeshGpuInstancing WithInstanceCustomAccessor(this MeshGpuInstancing instancing, string attribute, IReadOnlyList<JSONEXTRAS> values)
         {
             Guard.NotNullOrEmpty(attribute, nameof(attribute));
 
             attribute = attribute.ToUpperInvariant();
-            var expectedType = values.Where(item => item != null).FirstOrDefault()?.GetType();
-            if (expectedType == null) return instancing;
+            var firstValue = values.Where(item => item != null).FirstOrDefault() as System.Text.Json.Nodes.JsonValue;
+            if (firstValue == null) return instancing;
 
-            if (expectedType == typeof(int))
+            if (firstValue.TryGetValue<int>(out _)) // assume all integers
             {
-                var xValues = values.Select(item => item is int val ? val : 0).ToList();
+                var xValues = values.Select(item => item.GetValue<int>()).ToList();
                 return instancing.WithInstanceAccessor(attribute, xValues);
             }
 
-            if (expectedType == typeof(Single))
+            if (firstValue.TryGetValue<Single>(out _)) // assume all floats
             {
-                var xValues = values.Select(item => item is float val ? val : 0).ToList();
+                var xValues = values.Select(item => item.GetValue<float>()).ToList();
                 return instancing.WithInstanceAccessor(attribute, xValues);
             }
 
-            throw new ArgumentException(expectedType.Name);
+            throw new ArgumentException(firstValue.ToString());
         }
 
         #endregion

@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Linq;
 
 using SharpGLTF.Schema2;
+using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SharpGLTF
 {
@@ -672,7 +674,7 @@ namespace SharpGLTF
         #endregion
 
         #region serialization
-
+        
         public static Byte[] ToUnderlayingArray(this ArraySegment<Byte> segment)
         {
             if (segment.Offset == 0 && segment.Count == segment.Array.Length) return segment.Array;
@@ -737,6 +739,79 @@ namespace SharpGLTF
             }
 
             throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region json
+
+        // note: these methods have been added to newer versions of json, so they might be removed eventually        
+
+#if NET6_0_OR_GREATER
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+#endif
+        public static System.Text.Json.Nodes.JsonNode DeepClone(this System.Text.Json.Nodes.JsonNode node)
+        {
+            // issue tracking both DeepClone and DeepEquals: https://github.com/dotnet/runtime/issues/56592            
+
+            if (node == null) return null;
+
+            System.Text.Json.Nodes.JsonNode clone = null;            
+
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            if (node is System.Text.Json.Nodes.JsonValue asValue) clone = asValue.Deserialize<System.Text.Json.Nodes.JsonValue>();
+            if (node is System.Text.Json.Nodes.JsonArray asArray) clone = asArray.Deserialize<System.Text.Json.Nodes.JsonArray>();
+            if (node is System.Text.Json.Nodes.JsonObject asObject) clone = asObject.Deserialize<System.Text.Json.Nodes.JsonObject>();
+            #pragma warning enable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+
+            if (clone == null) throw new NotImplementedException();
+
+            System.Diagnostics.Debug.Assert(node.DeepEquals(clone, 0.0001));
+
+            return clone;
+        }
+
+        public static bool DeepEquals(this System.Text.Json.Nodes.JsonNode x, System.Text.Json.Nodes.JsonNode y, double precission)
+        {
+            if (x == y) return true;
+            if (x == null) return false;
+            if (y == null) return false;
+
+            if (x is System.Text.Json.Nodes.JsonValue xval && y is System.Text.Json.Nodes.JsonValue yval)
+            {
+                if (xval.TryGetValue<double>(out var xfl) && yval.TryGetValue<double>(out var yfl))
+                {
+                    return Math.Abs(xfl-yfl) <= precission;
+                }
+
+                return xval.ToJsonString() == yval.ToJsonString();
+            }
+
+            if (x is System.Text.Json.Nodes.JsonArray xarr && y is System.Text.Json.Nodes.JsonArray yarr)
+            {
+                if (xarr.Count != yarr.Count) return false;
+                for (int i = 0; i < xarr.Count; ++i)
+                {
+                    if (!xarr[i].DeepEquals(yarr[i], precission)) return false;
+                }
+                return true;
+            }
+
+            if (x is System.Text.Json.Nodes.JsonObject xobj && y is System.Text.Json.Nodes.JsonObject yobj)
+            {
+                if (xobj.Count != yobj.Count) return false;
+
+                foreach (var xkvp in xobj)
+                {
+                    if (!yobj.TryGetPropertyValue(xkvp.Key, out var yvvv)) return false;
+                    if (!xkvp.Value.DeepEquals(yvvv, precission)) return false;
+                }
+                return true;
+            }
+
+            return false;
         }
 
         #endregion

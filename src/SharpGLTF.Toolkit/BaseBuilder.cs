@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
+
 namespace SharpGLTF
 {
     public abstract class BaseBuilder
@@ -15,7 +17,7 @@ namespace SharpGLTF
             this.Name = name;
         }
 
-        protected BaseBuilder(string name, IO.JsonContent extras)
+        protected BaseBuilder(string name, JSONEXTRAS extras)
         {
             this.Name = name;
             this.Extras = extras;
@@ -26,7 +28,7 @@ namespace SharpGLTF
             Guard.NotNull(other, nameof(other));
 
             this.Name = other.Name;
-            this.Extras = other.Extras.DeepClone();
+            this.Extras = other.Extras.DeepClone();            
         }
 
         #endregion
@@ -48,7 +50,7 @@ namespace SharpGLTF
         /// <summary>
         /// Gets or sets the custom data of this object.
         /// </summary>
-        public IO.JsonContent Extras { get; set; }
+        public JSONEXTRAS Extras { get; set; }
 
         protected static int GetContentHashCode(BaseBuilder x)
         {
@@ -61,7 +63,9 @@ namespace SharpGLTF
 
             if (x.Name != y.Name) return false;
 
-            return IO.JsonContent.AreEqualByContent(x.Extras, y.Extras, 0.0001f);
+            return x.Extras.DeepEquals(y.Extras, 0.0001f);
+
+            // return IO.JsonContent.AreEqualByContent(x.Extras, y.Extras, 0.0001f);
         }
 
         #endregion
@@ -70,14 +74,18 @@ namespace SharpGLTF
 
         internal void SetNameAndExtrasFrom(BaseBuilder source)
         {
-            this.Name = source.Name;
-            this.Extras = source.Extras.DeepClone();
+            this.Name = source?.Name;
+            this.Extras = source?.Extras?.DeepClone();
         }
 
+        /// <summary>
+        /// Sets the name and extras from a Schema2 object.
+        /// </summary>
+        /// <param name="source"></param>
         internal void SetNameAndExtrasFrom(Schema2.LogicalChildOfRoot source)
         {
-            this.Name = source.Name;
-            this.Extras = source.Extras.DeepClone();
+            this.Name = source?.Name;
+            this.Extras = source?.Extras?.DeepClone();
         }
 
         /// <summary>
@@ -86,8 +94,8 @@ namespace SharpGLTF
         /// <param name="target">The target object</param>
         internal void TryCopyNameAndExtrasTo(Schema2.LogicalChildOfRoot target)
         {
-            if (this.Name != null) target.Name = this.Name;
-            if (this.Extras.Content != null) target.Extras = this.Extras.DeepClone();
+            target.Name = this?.Name;
+            target.Extras = this?.Extras?.DeepClone();
         }
 
         #endregion

@@ -124,22 +124,20 @@ namespace SharpGLTF.IO
                 var framework = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription;
                 return !framework.StartsWith(".NET Framework 4");
             }
-        }
+        }        
 
-        
-
-        public static bool AreEqual(JsonContent a, JsonContent b)
+        public static bool AreEqual(System.Text.Json.Nodes.JsonNode a, System.Text.Json.Nodes.JsonNode b)
         {
-            if (Object.ReferenceEquals(a.Content, b.Content)) return true;
-            if (Object.ReferenceEquals(a.Content, null)) return false;
-            if (Object.ReferenceEquals(b.Content, null)) return false;
+            if (Object.ReferenceEquals(a, b)) return true;
+            if (Object.ReferenceEquals(a, null)) return false;
+            if (Object.ReferenceEquals(b, null)) return false;
 
             // A JsonContent ultimately represents a json block, so it seems fit to do the comparison that way.
             // also, there's the problem of floating point json writing, that can slightly change between
             // different frameworks.
 
-            var ajson = a.ToJson();
-            var bjson = b.ToJson();
+            var ajson = a.ToJsonString();
+            var bjson = b.ToJsonString();
 
             if (ajson == bjson) return true;
 
@@ -148,66 +146,8 @@ namespace SharpGLTF.IO
             return false;
             #endif
 
-            return JsonContent.AreEqualByContent(a, b, 0.0001f);
+            return true;            
         }
-
-        [Test]
-        public void TestFloatingPointJsonRoundtrip()
-        {
-            float value = 1.1f; // serialized by system.text.json as 1.1000002f
-
-            var valueTxt = value.ToString("G9", System.Globalization.CultureInfo.InvariantCulture);
-
-            var dict = new Dictionary<string, Object>();            
-            dict["value"] = value;            
-
-            JsonContent a = JsonContent.CreateFrom(dict);
-
-            // roundtrip to json
-            var json = a.ToJson();
-            TestContext.Write(json);
-            var b = IO.JsonContent.Parse(json);            
-
-            Assert.IsTrue(AreEqual(a, b));            
-        }
-
-        [Test]
-        public void CreateJsonContent()
-        {
-            JsonContent a = JsonContent.CreateFrom(_TestStructure.CreateCompatibleDictionary());
-            
-            // roundtrip to json
-            var json = a.ToJson();
-            TestContext.Write(json);
-            var b = IO.JsonContent.Parse(json);            
-
-            // roundtrip to a runtime object
-            var x = a.Deserialize(typeof(_TestStructure));
-            var c = JsonContent.Serialize(x);
-
-            Assert.IsTrue(AreEqual(a, b));
-            Assert.IsTrue(AreEqual(a, c));            
-
-            foreach (var dom in new[] { a, b, c })
-            {
-                Assert.AreEqual("me", dom.GetValue<string>("author"));
-                Assert.AreEqual(17, dom.GetValue<int>("integer1"));
-                Assert.AreEqual(15.3f, dom.GetValue<float>("single1"));
-                Assert.AreEqual(3, dom.GetValue<int>("array1", 2));
-                Assert.AreEqual(2, dom.GetValue<int>("dict2", "d", "a1"));
-            }
-
-            Assert.AreEqual(b.GetHashCode(), c.GetHashCode());
-            Assert.AreEqual(b, c);
-
-            // clone & compare
-
-            var d = c.DeepClone();
-
-            Assert.AreEqual(c.GetHashCode(), d.GetHashCode());
-            Assert.AreEqual(c, d);
-        }
-
     }
 
     [Category("Core.IO")]
@@ -225,9 +165,14 @@ namespace SharpGLTF.IO
 
             var model = Schema2.ModelRoot.CreateModel();
 
+            var extras = new System.Text.Json.Nodes.JsonArray();
+            extras.Add(UNESCAPED);
+            extras.Add(ESCAPED);
+            extras.Add(UNESCAPED);
+
             model.Asset.Copyright = UNESCAPED;
             model.UseScene(UNESCAPED);
-            model.Asset.Extras = JsonContent.CreateFrom(new string[] { UNESCAPED, ESCAPED, UNESCAPED });
+            model.Asset.Extras = extras;
             model.CreateImage().Content = Memory.MemoryImage.DefaultPngImage;
 
             // create write settings

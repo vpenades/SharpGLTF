@@ -5,6 +5,7 @@ using System.Numerics;
 
 using MATRIX = System.Numerics.Matrix4x4;
 using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Scenes
 {
@@ -44,7 +45,7 @@ namespace SharpGLTF.Scenes
         public NodeBuilder(string name)
             : base(name) { }
 
-        public NodeBuilder(string name, IO.JsonContent extras)
+        public NodeBuilder(string name, JSONEXTRAS extras)
             : base(name, extras) { }
 
         public Dictionary<NodeBuilder, NodeBuilder> DeepClone()

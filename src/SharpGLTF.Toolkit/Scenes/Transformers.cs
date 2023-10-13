@@ -8,6 +8,7 @@ using SharpGLTF.IO;
 
 using MESHBUILDER = SharpGLTF.Geometry.IMeshBuilder<SharpGLTF.Materials.MaterialBuilder>;
 using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Scenes
 {
@@ -83,7 +84,7 @@ namespace SharpGLTF.Scenes
         /// <summary>
         /// Gets or sets the custom data of this object.
         /// </summary>
-        public abstract IO.JsonContent Extras { get; set; }
+        public abstract JSONEXTRAS Extras { get; set; }
 
         /// <summary>
         /// Gets the content of this transformer.<br/>
@@ -231,7 +232,7 @@ namespace SharpGLTF.Scenes
         private String _NodeName;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private IO.JsonContent _NodeExtras;
+        private JSONEXTRAS _NodeExtras;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private NodeBuilder _ParentNode;
@@ -251,7 +252,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        public override JsonContent Extras
+        public override JSONEXTRAS Extras
         {
             get => _NodeExtras;
             set => _NodeExtras = value;
@@ -329,7 +330,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        public override JsonContent Extras
+        public override JSONEXTRAS Extras
         {
             get => _Node.Extras;
             set => _Node.Extras = value;
@@ -403,7 +404,7 @@ namespace SharpGLTF.Scenes
         private String _NodeName;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private IO.JsonContent _NodeExtras;
+        private JSONEXTRAS _NodeExtras;
 
         /// <summary>
         /// Defines the world matrix of the mesh at the time of binding.
@@ -427,7 +428,7 @@ namespace SharpGLTF.Scenes
         }
 
         /// <inheritdoc/>
-        public override JsonContent Extras
+        public override JSONEXTRAS Extras
         {
             get => _NodeExtras;
             set => _NodeExtras = value;

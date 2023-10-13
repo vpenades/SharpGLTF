@@ -122,7 +122,11 @@ namespace SharpGLTF.Scenes
 
             var material = MaterialBuilder.CreateDefault();
             material.Name = "hello name";
-            material.Extras = IO.JsonContent.Serialize(new KeyValuePair<string, int>("hello", 16));
+
+            var extras = new System.Text.Json.Nodes.JsonObject();
+            extras["hello"] = 16;
+
+            material.Extras = extras;
 
             var mesh = new Cube<MaterialBuilder>(material).ToMesh(Matrix4x4.Identity);
             mesh.Name = "world name";

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Text.Json;
 
 using NUnit.Framework;
 
@@ -33,25 +34,27 @@ namespace SharpGLTF.Materials
 
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(material1, material2));
 
+            var extras = new System.Text.Json.Nodes.JsonObject();
+            extras["hello"] = 1;
+
             material2
                 .GetChannel(KnownChannel.BaseColor)
                 .Texture
                 .PrimaryImage
-                .Extras = IO.JsonContent.Serialize(new KeyValuePair<int, string>(1, "hello"));
+                .Extras = extras;
 
             var material3 = material2.Clone();
 
             Assert.IsFalse(MaterialBuilder.AreEqualByContent(material1, material2));
             Assert.IsTrue(MaterialBuilder.AreEqualByContent(material2, material3));
 
-            var kvp = material3.GetChannel(KnownChannel.BaseColor)
+            var dict = material3.GetChannel(KnownChannel.BaseColor)
                 .Texture
                 .PrimaryImage
-                .Extras.Deserialize<KeyValuePair<int, string>>();
+                .Extras.Deserialize<Dictionary<string,int>>();            
 
-            Assert.AreEqual(kvp.Key, 1);
-            Assert.AreEqual(kvp.Value, "hello");
-
+            Assert.AreEqual(1, dict.Count);
+            Assert.AreEqual(1, dict["hello"]);
         }
 
         [Test]

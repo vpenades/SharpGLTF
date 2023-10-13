@@ -4,6 +4,7 @@ using System.Text;
 
 using BYTES = System.ArraySegment<System.Byte>;
 using IMAGEFILE = SharpGLTF.Memory.MemoryImage;
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Materials
 {
@@ -41,12 +42,12 @@ namespace SharpGLTF.Materials
             return content.IsEmpty ? null : new ImageBuilder(content, name, default);
         }
 
-        public static ImageBuilder From(IMAGEFILE content, string name, IO.JsonContent extras)
+        public static ImageBuilder From(IMAGEFILE content, string name, JSONEXTRAS extras)
         {
             return content.IsEmpty ? null : new ImageBuilder(content, name, extras);
         }
 
-        private ImageBuilder(IMAGEFILE content, string name, IO.JsonContent extras)
+        private ImageBuilder(IMAGEFILE content, string name, JSONEXTRAS extras)
             : base(name, extras)
         {
             Content = content;

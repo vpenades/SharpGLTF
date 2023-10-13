@@ -39,7 +39,7 @@ namespace SharpGLTF.Runtime
 
         internal static Object ConvertExtras(Schema2.ExtraProperties source, RuntimeOptions options)
         {
-            if (source.Extras.Content == null) return null;
+            if (source.Extras == null) return null;
 
             if (options == null) return source.Extras;
 

@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 
-// using Newtonsoft.Json;
 using System.Text.Json;
 
 using SharpGLTF.IO;
 
 using JsonToken = System.Text.Json.JsonTokenType;
+
+// using JSONEXTRAS = SharpGLTF.IO.JsonContent;
+using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Schema2
 {
@@ -15,7 +17,7 @@ namespace SharpGLTF.Schema2
     {
         IReadOnlyCollection<JsonSerializable> Extensions { get; }
 
-        IO.JsonContent Extras { get; set; }
+        JSONEXTRAS Extras { get; set; }
     }
 
     /// <summary>
@@ -31,7 +33,7 @@ namespace SharpGLTF.Schema2
 
         private readonly List<JsonSerializable> _extensions = new List<JsonSerializable>();
 
-        private IO.JsonContent _extras;
+        private JSONEXTRAS _extras;
 
         #endregion
 
@@ -45,7 +47,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets or sets the extras content of this instance.
         /// </summary>
-        public IO.JsonContent Extras
+        public JSONEXTRAS Extras
         {
             get => _extras;
             set => _extras = value.DeepClone();
@@ -144,7 +146,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var ext in this.Extensions) ext.ValidateReferences(validate);
 
-            if (this._extras.Content is JsonSerializable js) js.ValidateReferences(validate);
+            // if (this._extras.Content is JsonSerializable js) js.ValidateReferences(validate);
         }
 
         protected override void OnValidateContent(Validation.ValidationContext validate)
@@ -156,9 +158,9 @@ namespace SharpGLTF.Schema2
                 lc.ValidateContent(validate);
             }
 
-            if (this._extras.Content is JsonSerializable js) js.ValidateContent(validate);
+            // if (this._extras.Content is JsonSerializable js) js.ValidateContent(validate);
 
-            if (this._extras.Content != null) validate.IsJsonSerializable("Extras", this._extras.Content);
+            // if (this._extras.Content != null) validate.IsJsonSerializable("Extras", this._extras.Content);
         }
 
         #endregion
@@ -178,9 +180,9 @@ namespace SharpGLTF.Schema2
             }
 
             // todo, only write _extras if it's a known serializable type.
-            var content = _extras.Content;
+            var content = _extras;
             if (content == null) return;
-            if (!IO.JsonContent.IsJsonSerializable(content)) return;
+            // if (!JSONEXTRAS.IsJsonSerializable(content)) return;
 
             SerializeProperty(writer, "extras", content);
         }
@@ -220,8 +222,8 @@ namespace SharpGLTF.Schema2
 
                 case "extras":
                     {
-                        var content = DeserializeUnknownObject(ref reader);
-                        _extras = JsonContent._Wrap(content);
+                        var content = System.Text.Json.Nodes.JsonNode.Parse(ref reader);
+                        _extras = content;
                         break;
                     }
 
@@ -241,7 +243,7 @@ namespace SharpGLTF.Schema2
 
                     var val = ExtensionsFactory.Create(parent, key);
 
-                    if (val == null) val = new UnknownNode(key);
+                    val ??= new UnknownNode(key);
 
                     val.Deserialize(ref reader);
                     extensions.Add(val);
