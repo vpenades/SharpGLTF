@@ -191,10 +191,18 @@ namespace SharpGLTF.Geometry
 
         public static void MergeBuffers(IEnumerable<PackedPrimitiveBuilder<TMaterial>> primitives)
         {
-            _MergeIndices(primitives);
-            _MergeStridedVertices(primitives.Where(p => p._StridedVertexType != null));
-            _MergeSequentialVertices(primitives.Where(p => p._StridedVertexType == null).Select(p => p._VertexAccessors));
-            _MergeSequentialVertices(primitives.SelectMany(p => p._MorphTargets));
+            try
+            {
+                _MergeIndices(primitives);
+                _MergeStridedVertices(primitives.Where(p => p._StridedVertexType != null));
+                _MergeSequentialVertices(primitives.Where(p => p._StridedVertexType == null).Select(p => p._VertexAccessors));
+                _MergeSequentialVertices(primitives.SelectMany(p => p._MorphTargets));
+            }
+            catch (OverflowException ex)
+            {
+                // https://github.com/vpenades/SharpGLTF/issues/196
+                throw new ArgumentException("the combined size of all the meshes exceeds the maximum capacity of the buffers, try disabling Buffers merging", ex);
+            }
         }
 
         private static void _MergeSequentialVertices(IEnumerable<MACCESSOR[]> primitives)

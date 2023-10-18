@@ -84,7 +84,7 @@ namespace SharpGLTF.Schema2
                 .CreatePackedMeshes(meshBuilders, settings)
                 .ToList();
 
-            PackedMeshBuilder<TMaterial>.MergeBuffers(srcMeshes);
+            if (settings.MergeBuffers) PackedMeshBuilder<TMaterial>.MergeBuffers(srcMeshes);
 
             // create schema2 meshes
 
