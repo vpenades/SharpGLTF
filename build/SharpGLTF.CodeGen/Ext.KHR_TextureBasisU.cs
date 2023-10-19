@@ -10,6 +10,8 @@ namespace SharpGLTF
     {
         private static string SchemaUri => Constants.KhronosExtensionPath("KHR_texture_basisu", "texture.KHR_texture_basisu.schema.json");
 
+        private const string ExtensionRootClassName = "KHR_texture_basisu glTF Texture Extension";
+
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
             var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
@@ -20,7 +22,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("KHR_texture_basisu glTF extension", "TextureKTX2");
+            newEmitter.SetRuntimeName(ExtensionRootClassName, "TextureKTX2");
         }
     }
 }

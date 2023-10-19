@@ -8,7 +8,10 @@ namespace SharpGLTF
 {
     class TransmissionExtension : SchemaProcessor
     {
-        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_transmission", "glTF.KHR_materials_transmission.schema.json");
+        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_transmission", "material.KHR_materials_transmission.schema.json");
+
+        private const string ExtensionRootClassName = "KHR_materials_transmission glTF Material Extension";
+
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
             var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
@@ -22,7 +25,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("KHR_materials_transmission glTF extension", "MaterialTransmission");
+            newEmitter.SetRuntimeName(ExtensionRootClassName, "MaterialTransmission");
         }
     }
 }

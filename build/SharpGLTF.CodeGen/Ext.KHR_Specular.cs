@@ -8,7 +8,10 @@ namespace SharpGLTF
 {
     class SpecularExtension : SchemaProcessor
     {
-        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_specular", "glTF.KHR_materials_specular.schema.json");
+        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_specular", "material.KHR_materials_specular.schema.json");
+
+        private const string ExtensionRootClassName = "KHR_materials_specular glTF Material Extension";
+
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
             var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
@@ -17,7 +20,7 @@ namespace SharpGLTF
             ctx.IgnoredByCodeEmitter("Texture Info");
             ctx.IgnoredByCodeEmitter("Material Normal Texture Info");
 
-            ctx.FindClass("KHR_materials_specular glTF extension")
+            ctx.FindClass(ExtensionRootClassName)
                 .GetField("specularColorFactor")
                 .SetDataType(typeof(System.Numerics.Vector3), true)
                 .SetDefaultValue("Vector3.One")
@@ -28,7 +31,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("KHR_materials_specular glTF extension", "MaterialSpecular");
+            newEmitter.SetRuntimeName(ExtensionRootClassName, "MaterialSpecular");
         }
     }
 }

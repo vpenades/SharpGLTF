@@ -10,7 +10,10 @@ namespace SharpGLTF
 {
     class IridescenceExtension : SchemaProcessor
     {
-        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_iridescence", "glTF.KHR_materials_iridescence.schema.json");
+        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_iridescence", "material.KHR_materials_iridescence.schema.json");
+
+        private const string ExtensionRootClassName = "KHR_materials_iridescence glTF Material Extension";
+
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
             var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
@@ -24,7 +27,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("KHR_materials_iridescence glTF extension", "MaterialIridescence");
+            newEmitter.SetRuntimeName(ExtensionRootClassName, "MaterialIridescence");
         }
     }
 }

@@ -7,7 +7,9 @@ namespace SharpGLTF
 {
     class EmissiveStrengthExtension : SchemaProcessor
     {
-        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_emissive_strength", "glTF.KHR_materials_emissive_strength.schema.json");
+        private static string SchemaUri => Constants.KhronosExtensionPath("KHR_materials_emissive_strength", "material.KHR_materials_emissive_strength.schema.json");
+
+        private const string ExtensionRootClassName = "KHR_materials_emissive_strength glTF Material Extension";
 
         public override IEnumerable<(string, SchemaType.Context)> Process()
         {
@@ -16,7 +18,7 @@ namespace SharpGLTF
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
 
-            var cls = ctx.FindClass("KHR_materials_emissive_strength glTF extension");
+            var cls = ctx.FindClass(ExtensionRootClassName);
             
             // straightforward extension, nothing to do
 
@@ -25,7 +27,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("KHR_materials_emissive_strength glTF extension", "MaterialEmissiveStrength");
+            newEmitter.SetRuntimeName(ExtensionRootClassName, "MaterialEmissiveStrength");
         }
     }
 }
