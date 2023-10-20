@@ -9,6 +9,17 @@ namespace SharpGLTF.SchemaReflection
     /// <summary>
     /// Base class for all schema Types
     /// </summary>
+    /// <remarks>
+    /// Derived classes:
+    /// - <see cref="StringType"/><br/>
+    /// - <see cref="ObjectType"/><br/>
+    /// - <see cref="BlittableType"/><br/>
+    /// - <see cref="EnumType"/><br/>
+    /// - <see cref="ArrayType"/><br/>
+    /// - <see cref="DictionaryType"/><br/>
+    /// - <see cref="ClassType"/><br/>
+    /// - <see cref="ReferenceType"/><br/>
+    /// </remarks>
     public abstract partial class SchemaType
     {
         #region constructor
@@ -59,6 +70,12 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }
 
+    /// <summary>
+    /// Represents an undefined <see cref="Object"/> type.
+    /// </summary>
+    /// <remarks>
+    /// undefined objects are serialized/deserialized as <see cref="System.Text.Json.Nodes.JsonNode"/>
+    /// </remarks>
     [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
     public sealed class ObjectType : SchemaType
     {
@@ -70,7 +87,7 @@ namespace SharpGLTF.SchemaReflection
 
         #region properties
 
-        public override string PersistentName => typeof(Object).Name;
+        public override string PersistentName => typeof(System.Text.Json.Nodes.JsonNode).FullName;
 
         #endregion
     }
@@ -219,6 +236,9 @@ namespace SharpGLTF.SchemaReflection
         #endregion       
     }
 
+    /// <summary>
+    /// Represents a field property within a <see cref="ClassType"/>
+    /// </summary>
     [System.Diagnostics.DebuggerDisplay("{FieldType.PersistentName} {PersistentName}")]
     public sealed class FieldInfo
     {

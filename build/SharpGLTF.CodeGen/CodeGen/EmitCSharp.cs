@@ -95,9 +95,7 @@ namespace SharpGLTF.CodeGen
 
         private string _SanitizeName(string name)
         {
-            name = name.Replace(" ", "");
-
-            return name;
+            return name.Replace(" ", "");
         }
 
         private _RuntimeType _UseType(SchemaType stype)
@@ -186,118 +184,117 @@ namespace SharpGLTF.CodeGen
 
         private string _GetRuntimeName(SchemaType type, _RuntimeField extra)
         {
-            if (type is ObjectType anyType) return typeof(Object).Name;
-            if (type is StringType strType) return typeof(String).Name;            
-
-            if (type is BlittableType blitType)
+            switch (type)
             {
-                var tname = blitType.DataType.Name;
+                case ObjectType anyType: return anyType.PersistentName;
 
-                return blitType.IsNullable ? $"{tname}?" : tname;
+                case StringType strType: return strType.PersistentName;
+
+                case BlittableType blitType:
+                    {
+                        var tname = blitType.DataType.Name;
+
+                        return blitType.IsNullable ? $"{tname}?" : tname;
+                    }
+
+                case ArrayType arrayType:
+                    {
+                        var container = extra?.CollectionContainer;
+                        if (string.IsNullOrWhiteSpace(container)) container = _DefaultCollectionContainer;
+
+                        return container.Replace("TItem", _GetRuntimeName(arrayType.ItemType));
+                    }
+
+                case DictionaryType dictType:
+                    {
+                        var key = _GetRuntimeName(dictType.KeyType);
+                        var val = _GetRuntimeName(dictType.ValueType);
+
+                        return $"Dictionary<{key},{val}>";
+                    }
+
+                case EnumType enumType: return _UseType(enumType).RuntimeName;
+
+                case ClassType classType: return _UseType(classType).RuntimeName;
+
+                default: throw new NotImplementedException();
             }
-
-            if (type is ArrayType arrayType)
-            {
-                var container = extra?.CollectionContainer;
-                if (string.IsNullOrWhiteSpace(container)) container = _DefaultCollectionContainer;
-
-                return container.Replace("TItem",_GetRuntimeName(arrayType.ItemType));
-            }            
-
-            if (type is DictionaryType dictType)
-            {
-                var key = this._GetRuntimeName(dictType.KeyType);
-                var val = this._GetRuntimeName(dictType.ValueType);                
-
-                return $"Dictionary<{key},{val}>";
-            }
-
-            if (type is EnumType enumType)
-            {
-                return _UseType(enumType).RuntimeName;
-            }
-
-            if (type is ClassType classType)
-            {
-                return _UseType(classType).RuntimeName;
-            }
-
-            throw new NotImplementedException();
         }
 
         private string _GetConstantRuntimeName(SchemaType type)
         {
-            if (type is StringType strType) return $"const {typeof(String).Name}";
-
-            if (type is BlittableType blitType)
+            switch (type)
             {
-                var tname = blitType.DataType.Name;
+                case StringType strType: return $"const {typeof(string).Name}";
 
-                if (blitType.DataType == typeof(Int32)) return $"const {tname}";
-                if (blitType.DataType == typeof(Single)) return $"const {tname}";
-                if (blitType.DataType == typeof(Double)) return $"const {tname}";
+                case BlittableType blitType:
+                    {
+                        var tname = blitType.DataType.Name;
 
-                return $"static readonly {tname}";
+                        if (blitType.DataType == typeof(int)) return $"const {tname}";
+                        if (blitType.DataType == typeof(float)) return $"const {tname}";
+                        if (blitType.DataType == typeof(double)) return $"const {tname}";
+
+                        return $"static readonly {tname}";
+                    }
+
+                case EnumType enumType: return $"const {_UseType(enumType).RuntimeName}";
+
+                case ArrayType aType: return $"static readonly {_UseType(aType).RuntimeName}";
+
+                default: throw new NotImplementedException();
             }
-
-            if (type is EnumType enumType)
-            {
-                return $"const {_UseType(enumType).RuntimeName}";
-            }
-
-            if (type is ArrayType aType)
-            {
-                return $"static readonly {_UseType(aType).RuntimeName}";
-            }
-
-            throw new NotImplementedException();
         }
 
         private Object _GetConstantRuntimeValue(SchemaType type, Object value)
         {
             if (value == null) throw new ArgumentNullException();
 
-            if (type is StringType stype)
+            switch (type)
             {
-                if (value is String) return value;
+                case StringType stype: if (value is string) return value;
 
-                return value == null ? null : System.Convert.ChangeType(value, typeof(string), System.Globalization.CultureInfo.InvariantCulture);
+                    return value == null
+                        ? null
+                        : Convert.ChangeType(value, typeof(string), System.Globalization.CultureInfo.InvariantCulture);
+
+                case BlittableType btype:
+                    {
+                        if (btype.DataType == typeof(bool).GetTypeInfo())
+                        {
+                            if (value is bool) return value;
+
+                            var str = value as string;
+
+                            if (str.ToLowerInvariant() == "false") return false;
+                            if (str.ToLowerInvariant() == "true") return true;
+                            throw new NotImplementedException();
+                        }
+
+                        if (value is string) return value;
+
+                        return value == null
+                            ? null
+                            : Convert.ChangeType(value, btype.DataType.AsType(), System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
+                case EnumType etype:
+                    {
+                        var etypeName = _GetRuntimeName(type);
+
+                        if (value is string) return $"{etypeName}.{value}";
+                        else return $"({etypeName}){value}";
+                    }
+
+                case ArrayType aType:
+                    {
+                        var atypeName = _GetRuntimeName(type);
+
+                        return value.ToString();
+                    }
+
+                default: throw new NotImplementedException();
             }
-
-            if (type is BlittableType btype)
-            {
-                if (btype.DataType == typeof(Boolean).GetTypeInfo())
-                {
-                    if (value is Boolean) return value;
-
-                    var str = value as String;
-
-                    if (str.ToLowerInvariant() == "false") return false;
-                    if (str.ToLowerInvariant() == "true") return true;
-                    throw new NotImplementedException();
-                }
-
-                if (value is String) return value;
-
-                return value == null ? null : System.Convert.ChangeType(value, btype.DataType.AsType(), System.Globalization.CultureInfo.InvariantCulture);
-            }
-
-            if (type is EnumType etype)
-            {
-                var etypeName = _GetRuntimeName(type);
-
-                if (value is String) return $"{etypeName}.{value}";
-                else return $"({etypeName}){value}";
-            }
-
-            if (type is ArrayType aType)
-            {
-                var atypeName = _GetRuntimeName(type);
-
-                return value.ToString();
-            }
-
-            throw new NotImplementedException();
         }        
 
         #endregion
