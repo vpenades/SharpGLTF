@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net471;net6.0-windows</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>SharpGLTF</RootNamespace>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>  
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SharpGLTF.Cesium\SharpGLTF.Cesium.csproj" />
+    <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+  </ItemGroup>
+
+</Project>

@@ -75,7 +75,7 @@ namespace SharpGLTF
 
         #endregion
 
-        public static void EmitCodeFromSchema(string dstFile, SchemaType.Context ctx, IReadOnlyList<SchemaProcessor> extensions)
+        public static void EmitCodeFromSchema(string projectPath, string dstFile, SchemaType.Context ctx, IReadOnlyList<SchemaProcessor> extensions)
         {
             var newEmitter = new CSharpEmitter();
             newEmitter.DeclareContext(ctx);           
@@ -87,7 +87,7 @@ namespace SharpGLTF
 
             var textOut = newEmitter.EmitContext(ctx);
 
-            var dstDir = _FindTargetDirectory(Constants.TargetProjectDirectory);
+            var dstDir = _FindTargetDirectory(projectPath);
             var dstPath = System.IO.Path.Combine(dstDir, $"{dstFile}.cs");
 
             System.IO.File.WriteAllText(dstPath, textOut);
