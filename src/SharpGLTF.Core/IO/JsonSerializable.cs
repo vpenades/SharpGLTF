@@ -470,12 +470,10 @@ namespace SharpGLTF.IO
         private static bool _TryCastValue
             <
             #if !NETSTANDARD
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
             #endif
             T>(ref Utf8JsonReader reader, out Object value)
         {
-            var vtype = typeof(T);
-
             value = null;
 
             if (reader.TokenType == JSONTOKEN.EndArray) return false;
@@ -484,9 +482,13 @@ namespace SharpGLTF.IO
 
             if (reader.TokenType == JSONTOKEN.PropertyName) reader.Read();
 
-            // untangle nullable
+            // untangle nullable            
+
+            var vtype = typeof(T);
             var ntype = Nullable.GetUnderlyingType(vtype);
             if (ntype != null) vtype = ntype;
+
+            // known types
 
             if (vtype == typeof(String)) { value = reader.AsString(); return true; }
             if (vtype == typeof(Boolean)) { value = reader.AsBoolean(); return true; }

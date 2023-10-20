@@ -764,7 +764,7 @@ namespace SharpGLTF
             if (node is System.Text.Json.Nodes.JsonValue asValue) clone = asValue.Deserialize<System.Text.Json.Nodes.JsonValue>();
             if (node is System.Text.Json.Nodes.JsonArray asArray) clone = asArray.Deserialize<System.Text.Json.Nodes.JsonArray>();
             if (node is System.Text.Json.Nodes.JsonObject asObject) clone = asObject.Deserialize<System.Text.Json.Nodes.JsonObject>();
-            #pragma warning enable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
             if (clone == null) throw new NotImplementedException();
 
