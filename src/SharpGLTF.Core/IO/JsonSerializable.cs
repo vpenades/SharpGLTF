@@ -488,7 +488,7 @@ namespace SharpGLTF.IO
             var ntype = Nullable.GetUnderlyingType(vtype);
             if (ntype != null) vtype = ntype;
 
-            // known types
+            // known types            
 
             if (vtype == typeof(String)) { value = reader.AsString(); return true; }
             if (vtype == typeof(Boolean)) { value = reader.AsBoolean(); return true; }
@@ -548,6 +548,12 @@ namespace SharpGLTF.IO
                     l[8], l[9], l[10], l[11],
                     l[12], l[13], l[14], l[15]
                     );
+                return true;
+            }
+
+            if (typeof(System.Text.Json.Nodes.JsonNode).IsAssignableFrom(vtype))
+            {
+                value = System.Text.Json.Nodes.JsonNode.Parse(ref reader);
                 return true;
             }
 
