@@ -24,8 +24,8 @@ namespace SharpGLTF.Schema2
         static ExtensionsFactory()
         {
             RegisterExtension<ModelRoot, _ModelPunctualLights>("KHR_lights_punctual");
-
             RegisterExtension<Node, _NodePunctualLight>("KHR_lights_punctual");
+
             RegisterExtension<Node, MeshGpuInstancing>("EXT_mesh_gpu_instancing");
 
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit");
@@ -44,6 +44,9 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds");
             RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp");
             RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu");
+
+            RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld");
+            RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld");            
 
             RegisterExtension<ModelRoot, AgiRootArticulations>("AGI_articulations");
             RegisterExtension<ModelRoot, AgiRootStkMetadata>("AGI_stk_metadata");

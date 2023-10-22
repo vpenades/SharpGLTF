@@ -1,0 +1,91 @@
+{
+  "extensionsUsed": ["KHR_xmp_json_ld"],
+  "extensions": {
+    "KHR_xmp_json_ld": {
+      "packets": [
+        {
+          "@context": {
+            "dc": "http://purl.org/dc/elements/1.1/",
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          },
+          "@id": "",
+          "dc:contributor": {
+            "@set": [
+              "Creator1Name",
+              "Creator2Email@email.com",
+              "Creator3Name<Email@email.com>"
+            ]
+          },
+          "dc:coverage": "Bay Area, California, United States",
+          "dc:creator": {
+            "@list": [ "CreatorName", "CreatorEmail@email.com" ]
+          },
+          "dc:date": {
+            "@list": [ "1997-07-16T19:20:30+01:00" ]
+          },
+          "dc:description": {
+            "@type": "rdf:Alt",
+            "rdf:_1": {
+              "@language": "en-us",
+              "@value": "text"
+            }
+          },
+          "dc:format": "model/gltf-binary",
+          "dc:identifier": "urn:stock-id:292930",
+          "dc:language": {
+            "@set": [ "en" ]
+          },
+          "dc:publisher": {
+            "@set": [ "Company" ]
+          },
+          "dc:relation": {
+            "@set": [ "https://www.khronos.org/" ]
+          },
+          "dc:rights": {
+            "@type": "rdf:Alt",
+            "rdf:_1": {
+              "@language": "en-us",
+              "@value": "BSD"
+            }
+          },
+          "dc:source": "http://related_resource.org/derived_from_this.gltf",
+          "dc:subject": {
+            "@set": [ "architecture" ]
+          },
+          "dc:title": {
+            "@type": "rdf:Alt",
+            "rdf:_1": {
+              "@language": "en-us",
+              "@value": "MyModel"
+            },
+            "rdf:_2": {
+              "@language": "it-it",
+              "@value": "Mio Modello"
+            }
+          },
+          "dc:type": {
+            "@set": [ "Physical Object" ]
+          }
+        }
+      ]
+    }
+  },
+  "asset": {
+    "version": "2.0",
+    "extensions": {
+      "KHR_xmp_json_ld": {
+        "packet": 0
+      }
+    }
+  },
+  "images": [
+    {
+      "uri": "texture.png",
+      "extensions": {
+        "KHR_xmp_json_ld": {
+          "packet": 0
+        }
+      }
+    }
+  ]
+}

@@ -53,9 +53,12 @@ namespace SharpGLTF
             processors.Add(new AgiArticulationsExtension());
             processors.Add(new AgiStkMetadataExtension());
 
+            // other
+            processors.Add(new XmpJsonLdExtension());
+
             // ----------------------------------------------  process all files
 
-            foreach(var processor in processors)
+            foreach (var processor in processors)
             {
                 foreach(var (targetFileName, schema) in processor.Process())
                 {
