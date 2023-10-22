@@ -18,7 +18,7 @@ namespace SharpGLTF.Schema2
         public static ModelRoot CreateModel()
         {
             var root = new ModelRoot();
-            root._asset = Asset.CreateDefault(string.Empty);
+            root.Asset = Asset.CreateDefault(string.Empty);
 
             return root;
         }
@@ -87,9 +87,7 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region properties
-
-        public Asset Asset => _asset;
+        #region properties        
 
         public IEnumerable<String> ExtensionsUsed               => _extensionsUsed;
 

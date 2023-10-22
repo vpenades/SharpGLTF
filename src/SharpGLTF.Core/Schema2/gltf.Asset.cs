@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using SharpGLTF.Collections;
+
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("{Version} {MinVersion} {Generator} {Copyright}")]
-    public sealed partial class Asset
+    public sealed partial class Asset : Collections.IChildOfList<ModelRoot>
     {
         #region lifecycle
 
@@ -26,9 +28,21 @@ namespace SharpGLTF.Schema2
             };
         }
 
-        #endregion
+        void IChildOfList<ModelRoot>.SetLogicalParent(ModelRoot parent, int index)
+        {
+            _LogicalParent = parent;
+            _LogicalIndex = index;
+        }
 
-        #region properties
+        private ModelRoot _LogicalParent;
+        private int _LogicalIndex;
+
+        ModelRoot IChildOfList<ModelRoot>.LogicalParent => _LogicalParent;
+        int IChildOfList<ModelRoot>.LogicalIndex => _LogicalIndex;
+
+        #endregion        
+
+        #region properties        
 
         public static string AssemblyInformationalVersion
         {
@@ -49,9 +63,9 @@ namespace SharpGLTF.Schema2
         public string Copyright { get => _copyright; set => _copyright = value.AsEmptyNullable(); }
         public string Generator { get => _generator; set => _generator = value.AsEmptyNullable(); }
 
-        public Version Version      => Version.TryParse(   _version, out Version ver) ? ver : ZEROVERSION;
+        public Version Version => Version.TryParse(_version, out Version ver) ? ver : ZEROVERSION;
 
-        public Version MinVersion   => Version.TryParse(_minVersion, out Version ver) ? ver : MINVERSION;
+        public Version MinVersion => Version.TryParse(_minVersion, out Version ver) ? ver : MINVERSION;        
 
         #endregion
 
@@ -76,8 +90,17 @@ namespace SharpGLTF.Schema2
             validate.IsGreaterOrEqual(nameof(Version), Version, MINVERSION);
 
             // if (MinVersion > MAXVERSION) result.AddSemanticError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
-        }
+        }        
 
         #endregion
+    }
+
+    partial class ModelRoot
+    {
+        public Asset Asset
+        {
+            get => _asset;
+            set => GetChildSetter(this).SetProperty(ref _asset, value);
+        }
     }
 }

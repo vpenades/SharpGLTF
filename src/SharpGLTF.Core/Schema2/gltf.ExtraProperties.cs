@@ -57,6 +57,11 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        protected static Collections.ChildSetter<T> GetChildSetter<T>(T owner) where T:ExtraProperties
+        {
+            return new Collections.ChildSetter<T>(owner);
+        }
+
         public T GetExtension<T>()
             where T : JsonSerializable
         {
