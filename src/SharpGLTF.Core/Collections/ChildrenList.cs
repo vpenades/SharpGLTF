@@ -13,7 +13,7 @@ namespace SharpGLTF.Collections
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TParent"></typeparam>
     [System.Diagnostics.DebuggerDisplay("{Count}")]
-    sealed class ChildrenList<T, TParent> : IList<T>, IReadOnlyList<T>
+    public sealed class ChildrenList<T, TParent> : IList<T>, IReadOnlyList<T>
         where T : class, IChildOfList<TParent>
         where TParent : class
     {

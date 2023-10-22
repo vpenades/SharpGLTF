@@ -8,7 +8,7 @@ namespace SharpGLTF.Collections
     /// Implemented by children of <see cref="ChildrenList{T, TParent}"/>
     /// </summary>
     /// <typeparam name="TParent">The type of the parent class containing the collection.</typeparam>
-    interface IChildOfList<TParent>
+    public interface IChildOfList<TParent>
         where TParent : class
     {
         /// <summary>

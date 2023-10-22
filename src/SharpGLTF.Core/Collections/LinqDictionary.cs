@@ -12,7 +12,7 @@ namespace SharpGLTF.Collections
     /// <typeparam name="TKey">The dictionary key type.</typeparam>
     /// <typeparam name="TValueIn">The internal value type.</typeparam>
     /// <typeparam name="TValueOut">The exposed value type.</typeparam>
-    readonly struct ReadOnlyLinqDictionary<TKey, TValueIn, TValueOut> : IReadOnlyDictionary<TKey, TValueOut>
+    public readonly struct ReadOnlyLinqDictionary<TKey, TValueIn, TValueOut> : IReadOnlyDictionary<TKey, TValueOut>
     {
         #region lifecycle
 
@@ -81,7 +81,7 @@ namespace SharpGLTF.Collections
         #endregion
     }
 
-    readonly struct LinqDictionary<TKey, TValueIn, TValueOut> : IDictionary<TKey, TValueOut>
+    public readonly struct LinqDictionary<TKey, TValueIn, TValueOut> : IDictionary<TKey, TValueOut>
     {
         #region lifecycle
 
