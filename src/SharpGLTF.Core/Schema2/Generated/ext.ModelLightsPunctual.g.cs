@@ -27,6 +27,10 @@ namespace SharpGLTF.Schema2
 {
 	using Collections;
 
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class PunctualLightSpot : ExtraProperties
 	{
 	
@@ -63,6 +67,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A directional, point, or spot light.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class PunctualLight : LogicalChildOfRoot
 	{
 	
@@ -106,6 +114,10 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class _ModelPunctualLights : ExtraProperties
 	{
 	

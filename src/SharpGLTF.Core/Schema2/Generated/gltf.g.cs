@@ -174,6 +174,10 @@ namespace SharpGLTF.Schema2
 	}
 
 
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class LogicalChildOfRoot : ExtraProperties
 	{
 	
@@ -200,6 +204,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `accessor.sparse.count`. Indices **MUST** strictly increase.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AccessorSparseIndices : ExtraProperties
 	{
 	
@@ -236,6 +244,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An object pointing to a buffer view containing the deviating accessor values. The number of elements is equal to `accessor.sparse.count` times number of components. The elements have the same component type as the base accessor. The elements are tightly packed. Data **MUST** be aligned following the same rules as the base accessor.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AccessorSparseValues : ExtraProperties
 	{
 	
@@ -268,6 +280,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Sparse storage of accessor values that deviate from their initialization value.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AccessorSparse : ExtraProperties
 	{
 	
@@ -303,6 +319,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A typed view into a buffer view that contains raw binary data.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Accessor : LogicalChildOfRoot
 	{
 	
@@ -369,6 +389,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The descriptor of the animated property.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AnimationChannelTarget : ExtraProperties
 	{
 	
@@ -399,6 +423,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An animation channel combines an animation sampler with a target property being animated.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AnimationChannel : ExtraProperties
 	{
 	
@@ -429,6 +457,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An animation sampler combines timestamps with a sequence of output values and defines an interpolation algorithm.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AnimationSampler : ExtraProperties
 	{
 	
@@ -464,6 +496,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A keyframe animation.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Animation : LogicalChildOfRoot
 	{
 	
@@ -496,6 +532,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Metadata about the glTF asset.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Asset : ExtraProperties
 	{
 	
@@ -534,6 +574,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A buffer points to binary geometry, animation, or skins.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Buffer : LogicalChildOfRoot
 	{
 	
@@ -565,6 +609,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A view into a buffer generally representing a subset of the buffer.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class BufferView : LogicalChildOfRoot
 	{
 	
@@ -612,6 +660,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// An orthographic camera containing properties to create an orthographic projection matrix.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class CameraOrthographic : ExtraProperties
 	{
 	
@@ -652,6 +704,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A perspective camera containing properties to create a perspective projection matrix.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class CameraPerspective : ExtraProperties
 	{
 	
@@ -695,6 +751,10 @@ namespace SharpGLTF.Schema2
 	/// A camera's projection.
 	/// A node **MAY** reference a camera to apply a transform to place the camera in the scene.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Camera : LogicalChildOfRoot
 	{
 	
@@ -729,6 +789,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Reference to a texture.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class TextureInfo : ExtraProperties
 	{
 	
@@ -761,6 +825,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MaterialPBRMetallicRoughness : ExtraProperties
 	{
 	
@@ -807,6 +875,10 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MaterialNormalTextureInfo : TextureInfo
 	{
 	
@@ -831,6 +903,10 @@ namespace SharpGLTF.Schema2
 	
 	}
 
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MaterialOcclusionTextureInfo : TextureInfo
 	{
 	
@@ -860,6 +936,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The material appearance of a primitive.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Material : LogicalChildOfRoot
 	{
 	
@@ -919,6 +999,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Geometry to be rendered with the given material.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MeshPrimitive : ExtraProperties
 	{
 	
@@ -964,6 +1048,10 @@ namespace SharpGLTF.Schema2
 	/// A set of primitives to be rendered.
 	/// Its global transform is defined by a node that references it.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Mesh : LogicalChildOfRoot
 	{
 	
@@ -998,6 +1086,10 @@ namespace SharpGLTF.Schema2
 	/// When the node contains `skin`, all `mesh.primitives` **MUST** contain `JOINTS_0` and `WEIGHTS_0` attributes.
 	/// A node **MAY** have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), `matrix` **MUST NOT** be present.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Node : LogicalChildOfRoot
 	{
 	
@@ -1058,6 +1150,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Texture sampler properties for filtering and wrapping modes.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class TextureSampler : LogicalChildOfRoot
 	{
 	
@@ -1098,6 +1194,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The root nodes of a scene.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Scene : LogicalChildOfRoot
 	{
 	
@@ -1125,6 +1225,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Joints and matrices defining a skin.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Skin : LogicalChildOfRoot
 	{
 	
@@ -1160,6 +1264,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// A texture and its sampler.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Texture : LogicalChildOfRoot
 	{
 	
@@ -1190,6 +1298,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The root object for a glTF asset.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class ModelRoot : ExtraProperties
 	{
 	
@@ -1295,6 +1407,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// Image data used to create a texture. Image **MAY** be referenced by an URI (or IRI) or a buffer view index.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class Image : LogicalChildOfRoot
 	{
 	

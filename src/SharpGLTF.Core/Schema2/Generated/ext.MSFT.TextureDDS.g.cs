@@ -30,6 +30,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF extension to specify textures using the DirectDraw Surface file format (DDS).
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class TextureDDS : ExtraProperties
 	{
 	
