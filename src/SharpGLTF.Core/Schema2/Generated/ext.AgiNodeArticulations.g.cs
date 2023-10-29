@@ -30,6 +30,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF Extension for an individual node in a glTF model, to associate it with the model's root AGI_articulations object.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class AgiNodeArticulations : ExtraProperties
 	{
 	

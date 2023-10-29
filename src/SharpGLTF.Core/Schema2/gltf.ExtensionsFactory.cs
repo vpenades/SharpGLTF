@@ -108,6 +108,9 @@ namespace SharpGLTF.Schema2
 
             if (name == null) return null;
 
+            // Instance creation on AOT compiled binaries depends on classes defining:
+            // [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+
             var instance = Activator.CreateInstance
                 (
                 extType,

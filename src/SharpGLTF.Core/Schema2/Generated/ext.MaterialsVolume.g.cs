@@ -30,6 +30,10 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// glTF extension that defines the parameters for the volume of a material.
 	/// </summary>
+	#if NET6_0_OR_GREATER
+	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+	#endif
+	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MaterialVolume : ExtraProperties
 	{
 	

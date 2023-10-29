@@ -559,6 +559,9 @@ namespace SharpGLTF.IO
 
             if (typeof(JsonSerializable).IsAssignableFrom(vtype))
             {
+                // Instance creation on AOT compiled binaries depends on classes defining:
+                // [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+
                 var item = Activator.CreateInstance(vtype, true) as JsonSerializable;
 
                 // System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.StartObject);

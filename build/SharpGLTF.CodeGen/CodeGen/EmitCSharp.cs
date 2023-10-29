@@ -618,7 +618,13 @@ namespace SharpGLTF.CodeGen
 
 
             foreach (var l in ClassSummary.EmitSummary(0)) yield return l;
-            
+
+            yield return "#if NET6_0_OR_GREATER";
+            yield return "[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]";
+            yield return "#endif";
+
+            yield return "[global::System.CodeDom.Compiler.GeneratedCodeAttribute(\"SharpGLTF.CodeGen\", \"1.0.0.0\")]";
+
             yield return ClassDeclaration;
             yield return "{";
 
