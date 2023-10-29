@@ -173,7 +173,7 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Buffer"/> instance.</returns>
         public Buffer UseBuffer(Byte[] content)
         {
-            Guard.IsFalse(content == null, nameof(content));
+            Guard.NotNull(content, nameof(content));
 
             foreach (var b in this.LogicalBuffers)
             {

@@ -305,14 +305,14 @@ namespace SharpGLTF.Runtime
 
         void VertexNormalsFactory.IMeshPrimitive.SetVertexNormal(int idx, XYZ normal)
         {
-            if (_Normals == null) _Normals = new XYZ[VertexCount];
+            _Normals ??= new XYZ[VertexCount];
             if (!(_Normals is XYZ[])) return; // if it's not a plain array, it's a glTF source, so we prevent writing existing normals.            
             _Normals[idx] = normal;
         }
 
         void VertexTangentsFactory.IMeshPrimitive.SetVertexTangent(int idx, XYZW tangent)
         {
-            if (_Tangents == null) _Tangents = new XYZW[VertexCount];
+            _Tangents ??= new XYZW[VertexCount];
             if (!(_Tangents is XYZW[])) return; // if it's not a plain array, it's a glTF source, so we prevent writing existing tangents.            
             _Tangents[idx] = tangent;
         }        
