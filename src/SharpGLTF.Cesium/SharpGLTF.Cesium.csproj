@@ -16,4 +16,8 @@
     <ProjectReference Include="..\SharpGLTF.Core\SharpGLTF.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	 <Folder Include="Schema2\Generated\" />
+  </ItemGroup>
+
 </Project>
