@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-	 <Folder Include="Schema2\Generated\" />
+    <Folder Include="Schema2\Generated\" />
   </ItemGroup>
 
 </Project>
