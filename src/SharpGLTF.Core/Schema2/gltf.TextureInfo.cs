@@ -4,7 +4,7 @@ using System.Numerics;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("LogicalTexture[{_LogicalTextureIndex}]")]
-    internal partial class TextureInfo
+    public partial class TextureInfo
     {
         #region properties
 
