@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="nunit" Version="3.13.3" />
+    <PackageReference Include="nunit" Version="3.14.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="GltfValidator" Version="2.0.0-dev.3.8.202306260919" />    
     <PackageReference Include="TestAttachments.NUnit" Version="3.0.0-Preview-20220721-1621" />    
