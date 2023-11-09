@@ -378,25 +378,18 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(instancing, nameof(instancing));
 
-            // gather attribute keys
-            var keys = extras                
+            // gather all attribute keys that begin with _ , as in _FEATURE_ID_1
+            var keys = extras
                 .OfType<System.Text.Json.Nodes.JsonObject>()
                 .SelectMany(item => item)
                 .Select(item => item.Key)
                 .Distinct()
                 .Where(item => item.StartsWith("_", StringComparison.Ordinal));
 
+            // for each attribute key found, fill the IDs
             foreach (var key in keys)
             {
-                JSONEXTRAS valueGetter(JSONEXTRAS extra)
-                {
-                    if (!(extra is System.Text.Json.Nodes.JsonObject dict)) return null;
-                    return dict.TryGetPropertyValue(key, out var val) ? val : null;
-                }
-
-                var values = extras.Select(valueGetter).ToList();
-
-                instancing.WithInstanceCustomAccessor(key, values);
+                instancing.WithInstanceCustomAccessor(key, extras);
             }
 
             return instancing;
@@ -407,22 +400,50 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(attribute, nameof(attribute));
 
             attribute = attribute.ToUpperInvariant();
-            var firstValue = values.Where(item => item != null).FirstOrDefault() as System.Text.Json.Nodes.JsonValue;
-            if (firstValue == null) return instancing;
 
-            if (firstValue.TryGetValue<int>(out _)) // assume all integers
+            var integers = _SelectAttribute<int>(values, attribute);
+            if (integers != null)
             {
-                var xValues = values.Select(item => item.GetValue<int>()).ToList();
-                return instancing.WithInstanceAccessor(attribute, xValues);
+                return instancing.WithInstanceAccessor(attribute, integers);                
             }
 
-            if (firstValue.TryGetValue<Single>(out _)) // assume all floats
+            var floats = _SelectAttribute<float>(values, attribute);
+            if (floats != null)
             {
-                var xValues = values.Select(item => item.GetValue<float>()).ToList();
-                return instancing.WithInstanceAccessor(attribute, xValues);
+                return instancing.WithInstanceAccessor(attribute, floats);
             }
 
-            throw new ArgumentException(firstValue.ToString());
+            throw new ArgumentException($"Can't retrieve {attribute} from values", nameof(attribute));
+        }
+
+        /// <summary>
+        /// Takes a list of <see cref="JSONEXTRAS"/> and selects a specific property of a specific data type.
+        /// </summary>        
+        private static IReadOnlyList<T> _SelectAttribute<T>(IReadOnlyList<JSONEXTRAS> values, string propertyName)
+        {
+            var result = new List<T>();
+
+            foreach(var item in values)
+            {
+                var value = item;
+
+                // resolve property
+
+                if (value is System.Text.Json.Nodes.JsonObject obj) 
+                {
+                    if (!obj.TryGetPropertyValue(propertyName, out value)) return null;                    
+                }
+
+                // resolve value
+
+                if (!(value is System.Text.Json.Nodes.JsonValue jval)) return null;
+
+                if (!jval.TryGetValue(out T tval)) return null;
+
+                result.Add(tval);                
+            }
+
+            return result;
         }
 
         #endregion

@@ -542,6 +542,8 @@ namespace SharpGLTF.Scenes
         [Test]
         public void CreateSharedNodeInstanceScene()
         {
+            // Note, this is NOT GPU instancing, it's about SceneBuilder's instance concept.
+
             // SceneBuilder API supports reusing a NodeBuilder in multiple instances with different content.
             // but glTF nodes can only hold one mesh per node, so if we find this case we need to internally
             // add an additional child node to give room to the the extra mesh.
@@ -562,8 +564,11 @@ namespace SharpGLTF.Scenes
             scene.AddRigidMesh(cube, joint0);
             scene.AddRigidMesh(sphere, joint0);
 
-            scene.AttachToCurrentTest("instanced.glb");
-            scene.AttachToCurrentTest("instanced.gltf");
+            var gltf = scene.ToGltf2();
+            Assert.AreEqual(3, gltf.LogicalNodes.Count);
+
+            gltf.AttachToCurrentTest("instanced.glb");
+            gltf.AttachToCurrentTest("instanced.gltf");
         }
         
 
