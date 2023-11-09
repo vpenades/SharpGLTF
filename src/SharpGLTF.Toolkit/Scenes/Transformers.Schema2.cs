@@ -162,11 +162,9 @@ namespace SharpGLTF.Scenes
 
                     srcOperator.ApplyTo(dstNode, context);
 
-
                     dstNode
                         .UseGpuInstancing()
                         .WithInstanceAccessors(xforms);
-                        // Todo BT: How to get the extras? .WithInstanceCustomAccessor(extras);
 
                     #if DEBUG
                     var dstInstances = dstNode.GetGpuInstancing();

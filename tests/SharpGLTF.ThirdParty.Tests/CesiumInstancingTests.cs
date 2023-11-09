@@ -24,24 +24,18 @@ namespace SharpGLTF.ThirdParty
             var quaternion = Quaternion.CreateFromYawPitchRoll(0, 0, 0);
             var scale = Vector3.One;
 
-            sceneBuilder.AddRigidMesh(meshBuilder, new AffineTransform(scale, quaternion, new Vector3(-10, 0, 10)));
-            sceneBuilder.AddRigidMesh(meshBuilder, new AffineTransform(scale, quaternion, new Vector3(0, 0, 0)));
+            sceneBuilder.
+                    AddRigidMesh(meshBuilder, new AffineTransform(scale, quaternion, new Vector3(-10, 0, 10))).
+                    WithExtras(JsonNode.Parse("{\"_FEATURE_ID_0\":0}"));
+            sceneBuilder.
+                    AddRigidMesh(meshBuilder, new AffineTransform(scale, quaternion, new Vector3(0, 0, 0))).
+                    WithExtras(JsonNode.Parse("{\"_FEATURE_ID_0\":1}"));
 
-            var extras = new List<JsonNode>();
-            var jsonNode = JsonNode.Parse("{\"_FEATURE_ID_0\":0}");
-            var jsonNode1 = JsonNode.Parse("{\"_FEATURE_ID_0\":1}");
-            extras.Add(jsonNode);
-            extras.Add(jsonNode1);
-
-            // BT todo: pass in the extras, but how?
             var instancedModel = sceneBuilder.ToGltf2(settings);
 
             var dstPath = AttachmentInfo
                 .From("instanced_model_with_feature_id.glb")
                 .WriteObject(f => instancedModel.SaveGLB(f));
-
-
-
         }
     }
 }
