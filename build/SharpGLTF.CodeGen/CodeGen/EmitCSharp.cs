@@ -248,7 +248,7 @@ namespace SharpGLTF.CodeGen
 
         private Object _GetConstantRuntimeValue(SchemaType type, Object value)
         {
-            if (value == null) throw new ArgumentNullException();
+            if (value == null) throw new ArgumentNullException(nameof(value));
 
             switch (type)
             {

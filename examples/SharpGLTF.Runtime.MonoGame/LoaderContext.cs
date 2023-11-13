@@ -102,7 +102,7 @@ namespace SharpGLTF.Runtime
 
         private void _WriteMeshPrimitive(MeshPrimitiveReader srcPrim, SRCMATERIAL srcMaterial)
         {
-            if (srcMaterial == null) srcMaterial = GetDefaultMaterial();
+            srcMaterial ??= GetDefaultMaterial();
 
             var effect = _MatFactory.GetMaterial(srcMaterial, srcPrim.IsSkinned);
 

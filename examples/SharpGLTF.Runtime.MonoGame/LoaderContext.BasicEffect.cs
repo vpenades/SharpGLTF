@@ -181,12 +181,12 @@ namespace SharpGLTF.Runtime
 
         private Texture2D UseDiffuseTexture(GLTFMATERIAL srcMaterial)
         {
-            var diffuse = srcMaterial.FindChannel("Diffuse");
+            var diffuse = srcMaterial.FindChannel("Diffuse")
+                ?? srcMaterial.FindChannel("BaseColor");
 
-            if (diffuse == null) diffuse = srcMaterial.FindChannel("BaseColor");
-            if (diffuse == null) return null;
-
-            return UseTexture(diffuse, null);
+            return diffuse == null
+                ? null
+                : UseTexture(diffuse, null);
         }
 
         #endregion

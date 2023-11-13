@@ -154,6 +154,14 @@ namespace SharpGLTF.Scenes
                         .Select(item => item.ChildTransform)
                         .ToList();
 
+                    var extras = _Children
+                        .Select(item => item.Extras)
+                        .ToList();
+
+                    // we require all extras to exist and be of JsonObject type
+                    // so we can retrieve a shared attribute name.
+                    if (!extras.All(item => item is System.Text.Json.Nodes.JsonObject)) extras = null;                    
+
                     if (!(dst is Node dstNode)) dstNode = dst.CreateNode();
 
                     System.Diagnostics.Debug.Assert(dstNode.Mesh == null);
@@ -162,9 +170,11 @@ namespace SharpGLTF.Scenes
 
                     srcOperator.ApplyTo(dstNode, context);
 
-                    dstNode
+                    var gpuInstExt = dstNode
                         .UseGpuInstancing()
                         .WithInstanceAccessors(xforms);
+
+                    if (extras != null) gpuInstExt.WithInstanceCustomAccessors(extras);
 
                     #if DEBUG
                     var dstInstances = dstNode.GetGpuInstancing();

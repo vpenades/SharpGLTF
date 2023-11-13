@@ -120,10 +120,8 @@ namespace SharpGLTF.Schema2
         internal KeyValuePair<IntegerArray, MemoryAccessor>? _GetSparseMemoryAccessor()
         {
             return this._sparse == null
-                ?
-                (KeyValuePair<IntegerArray, MemoryAccessor>?)null
-                :
-                this._sparse._CreateMemoryAccessors(this);
+                ? (KeyValuePair<IntegerArray, MemoryAccessor>?)null
+                : this._sparse._CreateMemoryAccessors(this);
         }
 
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
