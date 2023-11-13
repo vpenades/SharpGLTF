@@ -11,4 +11,23 @@
     <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="10.9.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Schemas\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Schemas\EXT_mesh_features\schema\featureId.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Schemas\EXT_mesh_features\schema\featureIdAttribute.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Schemas\EXT_mesh_features\schema\featureIdTexture.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Schemas\EXT_mesh_features\schema\mesh.primitive.EXT_mesh_features.schema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
