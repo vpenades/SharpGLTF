@@ -38,7 +38,7 @@ namespace SharpGLTF.Cesium
 
             var model = scene.ToGltf2();
 
-            var featureIds = new List<FeatureID>() { new FeatureID(1) };
+            var featureIds = new List<MeshExtMeshFeatureID>() { new MeshExtMeshFeatureID(1) };
             model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
 
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();

@@ -11,11 +11,11 @@ namespace SharpGLTF.Schema2
         internal MeshExtMeshFeatures(MeshPrimitive meshPrimitive)
         {
             _meshPrimitive = meshPrimitive;
-            _featureIds = new List<FeatureID>();
+            _featureIds = new List<MeshExtMeshFeatureID>();
         }
 
 
-        public List<FeatureID> FeatureIds
+        public List<MeshExtMeshFeatureID> FeatureIds
         {
             get
             {
@@ -40,9 +40,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public partial class FeatureID
+    public partial class MeshExtMeshFeatureID
     {
-        public FeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null)
+        public MeshExtMeshFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null)
         {
             _featureCount = featureCount;
             _attribute = attribute == null ? 0 : attribute;
@@ -53,7 +53,7 @@ namespace SharpGLTF.Schema2
 
     public static class ExtMeshFeatures
     {
-        public static void SetFeatureIds(this MeshPrimitive primitive, List<FeatureID> list)
+        public static void SetFeatureIds(this MeshPrimitive primitive, List<MeshExtMeshFeatureID> list)
         {
             if (list == null) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
 

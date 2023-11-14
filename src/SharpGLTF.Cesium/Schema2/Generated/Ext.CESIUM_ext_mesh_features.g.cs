@@ -28,56 +28,20 @@ namespace SharpGLTF.Schema2
 	using Collections;
 
 	/// <summary>
-	/// Reference to a texture.
-	/// </summary>
-	#if NET6_0_OR_GREATER
-	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-	#endif
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class TextureInfo : ExtraProperties
-	{
-	
-		private Int32 _index;
-		
-		private const Int32 _texCoordDefault = 0;
-		private const Int32 _texCoordMinimum = 0;
-		private Int32? _texCoord = _texCoordDefault;
-		
-	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
-		{
-			base.SerializeProperties(writer);
-			SerializeProperty(writer, "index", _index);
-			SerializeProperty(writer, "texCoord", _texCoord, _texCoordDefault);
-		}
-	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
-		{
-			switch (jsonPropertyName)
-			{
-				case "index": _index = DeserializePropertyValue<Int32>(ref reader); break;
-				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(ref reader); break;
-				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
-			}
-		}
-	
-	}
-
-	/// <summary>
 	/// A texture containing feature IDs
 	/// </summary>
 	#if NET6_0_OR_GREATER
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class FeatureIDTextureinEXT_mesh_features : TextureInfo
+	partial class MeshExtMeshFeatureIDTexture : TextureInfo
 	{
-        private static readonly Int32[] _channelsDefault = new Int32[1] { 0 };
-        private const int _channelsMinItems = 1;
-        private Int32[] _channels = _channelsDefault;
-
-
-        protected override void SerializeProperties(Utf8JsonWriter writer)
+	
+		private const int _channelsMinItems = 1;
+		private List<Int32> _channels;
+		
+	
+		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "channels", _channels, _channelsMinItems);
@@ -101,7 +65,7 @@ namespace SharpGLTF.Schema2
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class FeatureID : ExtraProperties
+	partial class MeshExtMeshFeatureID : ExtraProperties
 	{
 	
 		private Int32? _attribute;
@@ -117,7 +81,7 @@ namespace SharpGLTF.Schema2
 		private const Int32 _propertyTableMinimum = 0;
 		private Int32? _propertyTable;
 		
-		private FeatureIDTextureinEXT_mesh_features _texture;
+		private MeshExtMeshFeatureIDTexture _texture;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -140,7 +104,7 @@ namespace SharpGLTF.Schema2
 				case "label": _label = DeserializePropertyValue<String>(ref reader); break;
 				case "nullFeatureId": _nullFeatureId = DeserializePropertyValue<Int32?>(ref reader); break;
 				case "propertyTable": _propertyTable = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "texture": _texture = DeserializePropertyValue<FeatureIDTextureinEXT_mesh_features>(ref reader); break;
+				case "texture": _texture = DeserializePropertyValue<MeshExtMeshFeatureIDTexture>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -158,7 +122,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _featureIdsMinItems = 1;
-		private List<FeatureID> _featureIds;
+		private List<MeshExtMeshFeatureID> _featureIds;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -171,7 +135,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "featureIds": DeserializePropertyList<FeatureID>(ref reader, _featureIds); break;
+				case "featureIds": DeserializePropertyList<MeshExtMeshFeatureID>(ref reader, _featureIds); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
