@@ -21,7 +21,7 @@ namespace SharpGLTF
 
             processors.Add(new MainSchemaProcessor());
 
-            // ---------------------------------------------- Add extensions            
+            //// ---------------------------------------------- Add extensions            
 
             // material extensions       
             processors.Add(new UnlitExtension());
@@ -55,6 +55,8 @@ namespace SharpGLTF
 
             // other
             processors.Add(new XmpJsonLdExtension());
+
+            processors.Add(new ExtInstanceFeaturesExtension());
 
             // ----------------------------------------------  process all files
 

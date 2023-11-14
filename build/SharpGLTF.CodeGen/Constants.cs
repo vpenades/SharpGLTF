@@ -15,6 +15,8 @@ namespace SharpGLTF
         /// </summary>
         public static string LocalRepoDirectory => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location), "glTF");
 
+        public static string ProgramDirectory => System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
         #endregion
 
         #region main schema paths
@@ -49,6 +51,11 @@ namespace SharpGLTF
         internal static string VendorExtensionPath(string ext, string json)
         {
             return System.IO.Path.Combine(VendorSchemaDir, ext, "schema", json);
+        }
+
+        internal static string CustomExtensionsPath(string ext, string json)
+        {
+            return System.IO.Path.Combine(ProgramDirectory, "Schemas", ext, "schema", json);
         }
 
         #endregion
