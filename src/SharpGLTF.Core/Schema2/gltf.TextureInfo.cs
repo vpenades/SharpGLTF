@@ -8,7 +8,7 @@ namespace SharpGLTF.Schema2
     {
         #region properties
 
-        internal int _LogicalTextureIndex
+        public int _LogicalTextureIndex
         {
             get => _index;
             set => _index = value;

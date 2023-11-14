@@ -25,14 +25,14 @@ using System.Text.Json;
 
 namespace SharpGLTF.Schema2
 {
-	using Collections;
+    using Collections;
 
-	/// <summary>
-	/// A texture containing feature IDs
-	/// </summary>
-	#if NET6_0_OR_GREATER
+    /// <summary>
+    /// A texture containing feature IDs
+    /// </summary>
+#if NET6_0_OR_GREATER
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-	#endif
+#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MeshExtMeshFeatureIDTexture : TextureInfo
 	{
@@ -55,16 +55,15 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
-	
-	}
+    }
 
-	/// <summary>
-	/// Feature IDs stored in an attribute or texture.
-	/// </summary>
-	#if NET6_0_OR_GREATER
+    /// <summary>
+    /// Feature IDs stored in an attribute or texture.
+    /// </summary>
+#if NET6_0_OR_GREATER
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-	#endif
-	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
+#endif
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MeshExtMeshFeatureID : ExtraProperties
 	{
 	

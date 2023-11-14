@@ -40,14 +40,26 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    public partial class MeshExtMeshFeatureIDTexture
+    {
+        public MeshExtMeshFeatureIDTexture(List<int> channels, int? index = null, int? texCoord = null)
+        {
+            _channels = channels;
+            if (index.HasValue) _LogicalTextureIndex = (int)index;
+            if (texCoord.HasValue) TextureCoordinate = (int)texCoord;
+        }
+    }
+
     public partial class MeshExtMeshFeatureID
     {
-        public MeshExtMeshFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null)
+        public MeshExtMeshFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null, int? nullFeatureId = null, MeshExtMeshFeatureIDTexture texture = null)
         {
             _featureCount = featureCount;
             _attribute = attribute;
             _label = label;
             _propertyTable = propertyTable;
+            _nullFeatureId = nullFeatureId;
+            _texture = texture;
         }
     }
 

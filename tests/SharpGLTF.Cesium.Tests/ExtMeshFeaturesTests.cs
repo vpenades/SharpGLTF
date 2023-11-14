@@ -26,7 +26,6 @@ namespace SharpGLTF.Cesium
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             var material = MaterialBuilder.CreateDefault();
-
             var mesh = new MeshBuilder<VertexPosition>("mesh");
 
             var prim = mesh.UsePrimitive(material);
@@ -39,8 +38,18 @@ namespace SharpGLTF.Cesium
             var model = scene.ToGltf2();
 
             // See sample https://github.com/CesiumGS/glTF/tree/proposal-EXT_mesh_features/extensions/2.0/Vendor/EXT_mesh_features#feature-id-by-vertex
-            var featureId = new MeshExtMeshFeatureID(2, 0);
-            var featureIds = new List<MeshExtMeshFeatureID>() { featureId };
+
+            // Feature ID by attribute
+            var featureIdAttribute = new MeshExtMeshFeatureID(2, 0);
+
+            // Feature ID by Texture coordinates
+            var texture = new MeshExtMeshFeatureIDTexture(new List<int>() { 0 }, 0, 0);
+            var featureIdTexture = new MeshExtMeshFeatureID(3, nullFeatureId: 0, texture: texture);
+
+            // Feature ID with property table
+            var featureIdPropertyTable = new MeshExtMeshFeatureID(3, nullFeatureId: 0, texture: texture,propertyTable:1, label:"classification");
+
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureIdAttribute, featureIdTexture, featureIdPropertyTable };
             model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
 
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
@@ -49,8 +58,8 @@ namespace SharpGLTF.Cesium
             Assert.IsTrue(cesiumExtMeshFeaturesExtension.FeatureIds.Equals(featureIds));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.ValidateContent(ctx.GetContext());
 
+            model.ValidateContent(ctx.GetContext());
             scene.AttachToCurrentTest("cesium_ext_mesh_features.glb");
             scene.AttachToCurrentTest("cesium_ext_mesh_features.gltf");
             scene.AttachToCurrentTest("cesium_ext_mesh_features.plotly");
