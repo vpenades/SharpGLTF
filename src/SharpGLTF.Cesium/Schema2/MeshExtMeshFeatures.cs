@@ -61,6 +61,14 @@ namespace SharpGLTF.Schema2
             _nullFeatureId = nullFeatureId;
             _texture = texture;
         }
+
+        public int? Attribute
+        {
+            get
+            {
+                return _attribute;
+            }
+        }
     }
 
     public static class ExtMeshFeatures
