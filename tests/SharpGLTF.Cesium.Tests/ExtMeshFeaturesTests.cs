@@ -45,7 +45,7 @@ namespace SharpGLTF.Cesium
             // See sample https://github.com/CesiumGS/glTF/tree/proposal-EXT_mesh_features/extensions/2.0/Vendor/EXT_mesh_features#feature-id-by-vertex
 
             // Method 1: Feature ID by attribute
-            var featureIdAttribute = new MeshExtMeshFeatureID(2, 0);
+            var featureIdAttribute = new MeshExtMeshFeatureID(2, 0, label: "my_label");
 
             // Method 2: Feature ID by Texture coordinates
             var texture = new MeshExtMeshFeatureIDTexture(new List<int>() { 0 }, 0, 0);
