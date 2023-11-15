@@ -1,4 +1,5 @@
 ﻿using SharpGLTF.Validation;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -76,6 +77,14 @@ namespace SharpGLTF.Schema2
         public static void SetFeatureIds(this MeshPrimitive primitive, List<MeshExtMeshFeatureID> list)
         {
             if (list == null) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
+
+            // Guard that the custom vertex attribute (_FEATURE_ID_{attribute}) exists when FeatureID has attribute set
+            foreach (var item in list) {
+                if (item.Attribute.HasValue) {
+                    var expectedVertexAttribute = $"_FEATURE_ID_{item.Attribute}";
+                    Guard.NotNull(primitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute);
+                }
+            };
 
             var ext = primitive.UseExtension<MeshExtMeshFeatures>();
             ext.FeatureIds = list;
