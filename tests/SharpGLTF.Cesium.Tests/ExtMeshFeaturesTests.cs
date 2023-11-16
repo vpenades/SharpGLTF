@@ -20,6 +20,7 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+
         [Test(Description = "Creates a simple triangle with Cesium EXT_Mesh_Features")]
         public void AddExtMeshFeatures()
         {
@@ -48,7 +49,7 @@ namespace SharpGLTF.Cesium
             var featureIdAttribute = new MeshExtMeshFeatureID(2, 0, label: "my_label");
 
             // Method 2: Feature ID by Texture coordinates
-            var texture = new MeshExtMeshFeatureIDTexture(new List<int>() { 0 }, 0, 0);
+            var texture = new MeshExtMeshFeatureIDTexture(new List<int>(0) { }, 0, 0);
             var featureIdTexture = new MeshExtMeshFeatureID(3, nullFeatureId: 0, texture: texture);
 
             // Method 3: Feature ID with property table

@@ -1,11 +1,10 @@
 ﻿using SharpGLTF.Validation;
-using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
-    public partial class MeshExtMeshFeatures
+    partial class MeshExtMeshFeatures
     {
         private MeshPrimitive _meshPrimitive;
 
@@ -40,6 +39,10 @@ namespace SharpGLTF.Schema2
     {
         public MeshExtMeshFeatureIDTexture(List<int> channels, int? index = null, int? texCoord = null)
         {
+            Guard.NotNullOrEmpty(channels, nameof(channels));
+            Guard.MustBeGreaterThanOrEqualTo((int)index, 0, nameof(index));
+            Guard.MustBeGreaterThanOrEqualTo((int)texCoord, 0, nameof(index));
+
             _channels = channels;
             if (index.HasValue) _LogicalTextureIndex = (int)index;
             if (texCoord.HasValue) TextureCoordinate = (int)texCoord;
@@ -61,7 +64,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// The number of unique features in the attribute or texture.
         /// </summary>
-        public int? FeatureCount { get => _featureCount; }
+        public int FeatureCount { get => _featureCount; }
 
         /// <summary>
         /// A value that indicates that no feature is associated with this vertex or texel.
@@ -93,27 +96,31 @@ namespace SharpGLTF.Schema2
 
     public static class ExtMeshFeatures
     {
-        public static void SetFeatureIds(this MeshPrimitive primitive, List<MeshExtMeshFeatureID> list)
+
+        /// <summary>
+        /// Set the FeatureIds for a MeshPrimitive
+        /// </summary>
+        /// <param name="primitive"></param>
+        /// <param name="featureIds"></param>
+        public static void SetFeatureIds(this MeshPrimitive primitive, List<MeshExtMeshFeatureID> featureIds)
         {
-            if (list == null) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
+            if (featureIds == null) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
 
-            Guard.NotNullOrEmpty(list, nameof(list));
+            Guard.NotNullOrEmpty(featureIds, nameof(featureIds));
 
-            foreach (var item in list)
+            foreach (var featureId in featureIds)
             {
-                ValidateFeature(primitive, item);
-            };
+                ValidateFeature(primitive, featureId);
+           };
 
             var ext = primitive.UseExtension<MeshExtMeshFeatures>();
-            ext.FeatureIds = list;
+            ext.FeatureIds = featureIds;
         }
 
         private static void ValidateFeature(MeshPrimitive primitive, MeshExtMeshFeatureID item)
         {
-            if (item.FeatureCount.HasValue)
-            {
-                Guard.MustBeGreaterThanOrEqualTo((int)item.FeatureCount, 1, nameof(item.FeatureCount));
-            }
+            Guard.MustBeGreaterThanOrEqualTo((int)item.FeatureCount, 1, nameof(item.FeatureCount));
+            
             if (item.NullFeatureId.HasValue)
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.NullFeatureId, 0, nameof(item.NullFeatureId));
@@ -130,14 +137,8 @@ namespace SharpGLTF.Schema2
                 var expectedVertexAttribute = $"_FEATURE_ID_{item.Attribute}";
                 Guard.NotNull(primitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute);
             }
-            if (item.Texture != null)
-            {
-                // todo check the texture
-            }
             if (item.PropertyTable.HasValue)
             {
-                // The index of the property table containing per-feature property values.
-                // Only applicable when using the `EXT_structural_metadata` extension.
                 Guard.MustBeGreaterThanOrEqualTo((int)item.PropertyTable, 0, nameof(item.PropertyTable));
             }
         }
