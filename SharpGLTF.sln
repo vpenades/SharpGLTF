@@ -58,7 +58,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Runtime.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Cesium", "src\SharpGLTF.Cesium\SharpGLTF.Cesium.csproj", "{9FA2AFB3-B150-428D-9D6C-48F60010FFF3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.Cesium.Tests", "tests\SharpGLTF.Cesium.Tests\SharpGLTF.Cesium.Tests.csproj", "{94011062-791E-4D34-ACA8-09AAAD49B299}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Cesium.Tests", "tests\SharpGLTF.Cesium.Tests\SharpGLTF.Cesium.Tests.csproj", "{94011062-791E-4D34-ACA8-09AAAD49B299}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.Agi", "src\SharpGLTF.Agi\SharpGLTF.Agi.csproj", "{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -138,6 +140,10 @@ Global
 		{94011062-791E-4D34-ACA8-09AAAD49B299}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{94011062-791E-4D34-ACA8-09AAAD49B299}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{94011062-791E-4D34-ACA8-09AAAD49B299}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -161,6 +167,7 @@ Global
 		{3925E45C-E7AA-4396-9567-4D8B1D1EF1C6} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 		{9FA2AFB3-B150-428D-9D6C-48F60010FFF3} = {072B725F-773F-4751-9616-E9778897C1D2}
 		{94011062-791E-4D34-ACA8-09AAAD49B299} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
+		{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3} = {072B725F-773F-4751-9616-E9778897C1D2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1D7BBAD9-834C-4981-AC96-0AA5226FC43F}

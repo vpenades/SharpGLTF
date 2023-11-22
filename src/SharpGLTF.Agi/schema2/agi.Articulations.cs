@@ -6,7 +6,7 @@ using System.Linq;
 using SharpGLTF.Collections;
 
 namespace SharpGLTF.Schema2
-{
+{    
     public sealed partial class AgiRootArticulations
     {
         internal AgiRootArticulations(ModelRoot root)

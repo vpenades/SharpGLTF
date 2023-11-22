@@ -62,6 +62,9 @@ namespace SharpGLTF
 
         public static string CesiumProjectDirectory => "src\\SharpGLTF.Cesium\\Schema2\\Generated";
 
+        public static string AgiProjectDirectory => "src\\SharpGLTF.Agi\\Schema2\\Generated";
+
+
         /// <summary>
         /// namespace of the emitted generated code
         /// </summary>

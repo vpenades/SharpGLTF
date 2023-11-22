@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0</TargetFrameworks>
+    <AssemblyName>SharpGLTF.Agi</AssemblyName>
+    <RootNamespace>SharpGLTF</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>
+      Provides additional extensions support for SharpGLTF:
+      - AGI_articulations
+      - AGI_stk_metadata
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
+    <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
+    <Compile Include="..\SharpGLTF.Core\Schema2\_Extensions.cs" Link="Schema2\_Extensions.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpGLTF.Core\SharpGLTF.Core.csproj" />
+  </ItemGroup>  
+
+</Project>

@@ -46,12 +46,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu");
 
             RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld");
-            RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld");            
-
-            RegisterExtension<ModelRoot, AgiRootArticulations>("AGI_articulations");
-            RegisterExtension<ModelRoot, AgiRootStkMetadata>("AGI_stk_metadata");
-            RegisterExtension<Node, AgiNodeArticulations>("AGI_articulations");
-            RegisterExtension<Node, AgiNodeStkMetadata>("AGI_stk_metadata");
+            RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld");                        
         }
 
         #endregion

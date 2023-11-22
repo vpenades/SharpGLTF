@@ -8,6 +8,7 @@ namespace SharpGLTF
 {
     class AgiStkMetadataExtension : SchemaProcessor
     {
+        public override string GetTargetProject() { return Constants.AgiProjectDirectory; }
         private static string RootSchemaUri => Constants.VendorExtensionPath("AGI_stk_metadata", "glTF.AGI_stk_metadata.schema.json");
         private static string NodeSchemaUri => Constants.VendorExtensionPath("AGI_stk_metadata", "node.AGI_stk_metadata.schema.json");
 
