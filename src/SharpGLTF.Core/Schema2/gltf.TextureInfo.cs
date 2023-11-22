@@ -9,7 +9,7 @@ namespace SharpGLTF.Schema2
     /// - <see cref="MaterialOcclusionTextureInfo"/>
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("LogicalTexture[{_LogicalTextureIndex}]")]
-    internal partial class TextureInfo
+    public partial class TextureInfo
     {
         #region lifecycle
 
@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        internal int _LogicalTextureIndex
+        public int _LogicalTextureIndex
         {
             get => _index;
             set => _index = value;
