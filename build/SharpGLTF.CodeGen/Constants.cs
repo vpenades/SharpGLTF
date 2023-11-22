@@ -11,9 +11,15 @@ namespace SharpGLTF
         public static string RemoteSchemaRepo = "https://github.com/KhronosGroup/glTF.git";
 
         /// <summary>
+        /// Program directory
+        /// </summary>
+        public static string ProgramDirectory => System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location);
+
+        /// <summary>
         /// Directory where the schema is downloaded and used as source
         /// </summary>
-        public static string LocalRepoDirectory => System.IO.Path.Combine(System.IO.Path.GetDirectoryName(typeof(Program).Assembly.Location), "glTF");
+        public static string LocalRepoDirectory => System.IO.Path.Combine(ProgramDirectory, "glTF");
+
 
         #endregion
 
@@ -50,6 +56,12 @@ namespace SharpGLTF
         {
             return System.IO.Path.Combine(VendorSchemaDir, ext, "schema", json);
         }
+
+        internal static string CustomExtensionsPath(string ext, string json)
+        {
+            return System.IO.Path.Combine(ProgramDirectory, "Schemas", ext, "schema", json);
+        }
+
 
         #endregion
 

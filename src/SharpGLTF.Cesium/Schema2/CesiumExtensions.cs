@@ -21,6 +21,8 @@ namespace SharpGLTF.Schema2
             _CesiumRegistered = true;
 
             ExtensionsFactory.RegisterExtension<MeshPrimitive, CesiumPrimitiveOutline>("CESIUM_primitive_outline");
+            ExtensionsFactory.RegisterExtension<MeshPrimitive, MeshExtMeshFeatures>("EXT_mesh_features");
+
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpGLTF.CodeGen;
+using SharpGLTF.SchemaReflection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -56,19 +58,21 @@ namespace SharpGLTF
             // other
             processors.Add(new XmpJsonLdExtension());
 
+            processors.Add(new ExtMeshFeaturesExtension());
+
             // ----------------------------------------------  process all files
 
             foreach (var processor in processors)
             {
-                foreach(var (targetFileName, schema) in processor.Process())
+                foreach (var (targetFileName, schema) in processor.Process())
                 {
                     System.Console.WriteLine($"Emitting {targetFileName}...");
 
                     SchemaProcessing.EmitCodeFromSchema(processor.GetTargetProject(), targetFileName, schema, processors);
                 }
-            }            
+            }
         }
 
         #endregion     
-    }    
+    }
 }
