@@ -47,6 +47,8 @@ namespace SharpGLTF.Schema2
             if (index.HasValue) _LogicalTextureIndex = (int)index;
             if (texCoord.HasValue) TextureCoordinate = (int)texCoord;
         }
+
+        public int Index { get => _LogicalTextureIndex; }
     }
 
     public partial class MeshExtMeshFeatureID
@@ -96,7 +98,6 @@ namespace SharpGLTF.Schema2
 
     public static class ExtMeshFeatures
     {
-
         /// <summary>
         /// Set the FeatureIds for a MeshPrimitive
         /// </summary>
@@ -111,7 +112,7 @@ namespace SharpGLTF.Schema2
             foreach (var featureId in featureIds)
             {
                 ValidateFeature(primitive, featureId);
-           };
+            };
 
             var ext = primitive.UseExtension<MeshExtMeshFeatures>();
             ext.FeatureIds = featureIds;
@@ -120,7 +121,7 @@ namespace SharpGLTF.Schema2
         private static void ValidateFeature(MeshPrimitive primitive, MeshExtMeshFeatureID item)
         {
             Guard.MustBeGreaterThanOrEqualTo((int)item.FeatureCount, 1, nameof(item.FeatureCount));
-            
+
             if (item.NullFeatureId.HasValue)
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.NullFeatureId, 0, nameof(item.NullFeatureId));
@@ -141,7 +142,15 @@ namespace SharpGLTF.Schema2
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.PropertyTable, 0, nameof(item.PropertyTable));
             }
+            if (item.Texture != null)
+            {
+                Guard.MustBeGreaterThanOrEqualTo((int)item.Texture.TextureCoordinate, 0, nameof(item.Texture.TextureCoordinate));
+                var expectedTexCoordAttribute = $"TEXCOORD_{item.Texture.TextureCoordinate}";
+                Guard.NotNull(primitive.GetVertexAccessor(expectedTexCoordAttribute), expectedTexCoordAttribute);
+
+                var image = primitive.LogicalParent.LogicalParent.LogicalImages[item.Texture.Index];
+                Guard.NotNull(image, "Texture " + nameof(item.Texture.Index));
+            }
         }
     }
-
 }
