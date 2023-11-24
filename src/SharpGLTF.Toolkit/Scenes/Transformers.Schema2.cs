@@ -135,7 +135,7 @@ namespace SharpGLTF.Scenes
                     {
                         var dstNode = dst.CreateNode();
                         dstNode.Name = srcChild.Name;
-                        dstNode.Extras = srcChild.Extras.DeepClone();
+                        dstNode.Extras = srcChild.Extras?.DeepClone();
                         dstNode.LocalTransform = srcChild.ChildTransform;
 
                         srcOperator.ApplyTo(dstNode, context);
@@ -232,7 +232,7 @@ namespace SharpGLTF.Scenes
 
             var dstNode = dstScene.CreateNode();
             dstNode.Name = _srcChild.Name;
-            dstNode.Extras = _srcChild.Extras.DeepClone();
+            dstNode.Extras = _srcChild.Extras?.DeepClone();
             dstNode.LocalTransform = _srcChild.ChildTransform;
 
             schema2Target.ApplyTo(dstNode, context);

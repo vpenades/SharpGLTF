@@ -155,16 +155,24 @@ namespace SharpGLTF.Memory
         private Single _GetNormalizedS16(int byteOffset) { return Math.Max(_GetValueS16(byteOffset) / 32767.0f, -1); }
         private void _SetNormalizedS16(int byteOffset, Single value) { _SetValueS16(byteOffset, (Single)Math.Round(value * 32767.0f)); }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private T _GetValue<T>(int byteOffset)
             where T : unmanaged
         {
             return System.Runtime.InteropServices.MemoryMarshal.Read<T>(_Data.Span.Slice(byteOffset));
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private void _SetValue<T>(int byteOffset, T value)
             where T : unmanaged
         {
-            System.Runtime.InteropServices.MemoryMarshal.Write<T>(_Data.Span.Slice(byteOffset), ref value);
+            var dst = _Data.Span.Slice(byteOffset);
+
+            #if NET8_0_OR_GREATER
+            System.Runtime.InteropServices.MemoryMarshal.Write<T>(dst, value);
+            #else
+            System.Runtime.InteropServices.MemoryMarshal.Write<T>(dst, ref value);
+            #endif
         }
 
         #endregion
@@ -1236,9 +1244,9 @@ namespace SharpGLTF.Memory
 
         bool ICollection<Single[]>.IsReadOnly => false;
 
-        #pragma warning disable CA1819 // Properties should not return arrays
+#pragma warning disable CA1819 // Properties should not return arrays
         public Single[] this[int index]
-        #pragma warning restore CA1819 // Properties should not return arrays
+#pragma warning restore CA1819 // Properties should not return arrays
         {
             get
             {

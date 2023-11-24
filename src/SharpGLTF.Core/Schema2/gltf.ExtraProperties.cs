@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
         public JSONEXTRAS Extras
         {
             get => _extras;
-            set => _extras = value.DeepClone();
+            set => _extras = value?.DeepClone();
         }
 
         #endregion

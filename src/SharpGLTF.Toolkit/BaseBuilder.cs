@@ -28,7 +28,7 @@ namespace SharpGLTF
             Guard.NotNull(other, nameof(other));
 
             this.Name = other.Name;
-            this.Extras = other.Extras.DeepClone();            
+            this.Extras = other.Extras?.DeepClone();            
         }
 
         #endregion
@@ -62,6 +62,10 @@ namespace SharpGLTF
             if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;
 
             if (x.Name != y.Name) return false;
+
+            if (x.Extras == null && y.Extras == null) return true;
+            if (x.Extras == null) return false;
+            if (y.Extras == null) return false;
 
             return x.Extras.DeepEquals(y.Extras, 0.0001f);
 
