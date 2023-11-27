@@ -1,6 +1,7 @@
 ﻿using SharpGLTF.Validation;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SharpGLTF.Schema2
 {
@@ -29,10 +30,14 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            var extInstanceFeatures = (MeshExtInstanceFeatures)_node.Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
+            var extInstanceFeatures = _node.Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
+            validate.NotNull(nameof(extInstanceFeatures), extInstanceFeatures);
+            var ext = (MeshExtInstanceFeatures)extInstanceFeatures;
+            var extMeshGpInstancing = _node.Extensions.Where(item => item is MeshGpuInstancing).FirstOrDefault();
+            validate.NotNull(nameof(extMeshGpInstancing), extMeshGpInstancing);
 
-            validate.NotNull(nameof(FeatureIds), extInstanceFeatures.FeatureIds);
-            validate.IsTrue(nameof(FeatureIds), extInstanceFeatures.FeatureIds.Count > 0, "Instance FeatureIds has items");
+            validate.NotNull(nameof(FeatureIds), ext.FeatureIds);
+            validate.IsTrue(nameof(FeatureIds), ext.FeatureIds.Count > 0, "Instance FeatureIds has items");
 
             base.OnValidateContent(validate);
         }
@@ -91,6 +96,9 @@ namespace SharpGLTF.Schema2
             if (instanceFeatureIds == null) { node.RemoveExtensions<MeshExtInstanceFeatures>(); return; }
 
             Guard.NotNullOrEmpty(instanceFeatureIds, nameof(instanceFeatureIds));
+
+            var extMeshGpInstancing = node.Extensions.Where(item => item is MeshGpuInstancing).FirstOrDefault();
+            Guard.NotNull(extMeshGpInstancing, nameof(extMeshGpInstancing));
 
             foreach (var instanceFeatureId in instanceFeatureIds)
             {

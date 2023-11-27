@@ -27,10 +27,11 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            var extMeshFeatures = (MeshExtMeshFeatures)_meshPrimitive.Extensions.Where(item => item is MeshExtMeshFeatures).FirstOrDefault();
-
-            validate.NotNull(nameof(FeatureIds), extMeshFeatures.FeatureIds);
-            validate.IsTrue(nameof(FeatureIds), extMeshFeatures.FeatureIds.Count > 0, "FeatureIds has items");
+            var extMeshFeatures = _meshPrimitive.Extensions.Where(item => item is MeshExtMeshFeatures).FirstOrDefault();
+            validate.NotNull(nameof(extMeshFeatures), extMeshFeatures);
+            var ext = (MeshExtMeshFeatures)extMeshFeatures;
+            validate.NotNull(nameof(FeatureIds), ext.FeatureIds);
+            validate.IsTrue(nameof(FeatureIds), ext.FeatureIds.Count > 0, "FeatureIds has items");
 
             base.OnValidateContent(validate);
         }
