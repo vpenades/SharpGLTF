@@ -101,30 +101,30 @@ namespace SharpGLTF.Schema2
             ext.FeatureIds = instanceFeatureIds;
         }
 
-        private static void ValidateInstanceFeatureId(Node node, MeshExtInstanceFeatureID item)
+        private static void ValidateInstanceFeatureId(Node node, MeshExtInstanceFeatureID instanceFeatureId)
         {
-            Guard.MustBeGreaterThanOrEqualTo((int)item.FeatureCount, 1, nameof(item.FeatureCount));
+            Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.FeatureCount, 1, nameof(instanceFeatureId.FeatureCount));
 
-            if (item.NullFeatureId.HasValue)
+            if (instanceFeatureId.NullFeatureId.HasValue)
             {
-                Guard.MustBeGreaterThanOrEqualTo((int)item.NullFeatureId, 0, nameof(item.NullFeatureId));
+                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.NullFeatureId, 0, nameof(instanceFeatureId.NullFeatureId));
             }
-            if (item.Label != null)
+            if (instanceFeatureId.Label != null)
             {
                 var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
-                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(item.Label, regex), nameof(item.Label));
+                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(instanceFeatureId.Label, regex), nameof(instanceFeatureId.Label));
             }
-            if (item.Attribute.HasValue)
+            if (instanceFeatureId.Attribute.HasValue)
             {
-                Guard.MustBeGreaterThanOrEqualTo((int)item.Attribute, 0, nameof(item.Attribute));
-                // todo: check attribute
-                // Guard that the custom vertex attribute (_FEATURE_ID_{attribute}) exists when FeatureID has attribute set
-                // var expectedVertexAttribute = $"_FEATURE_ID_{item.Attribute}";
-                // Guard.NotNull(primitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute);
+                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.Attribute, 0, nameof(instanceFeatureId.Attribute));
+                var expectedVertexAttribute = $"_FEATURE_ID_{instanceFeatureId.Attribute}";
+                var gpuInstancing = node.GetGpuInstancing();
+                var featureIdAccessors = gpuInstancing.GetAccessor(expectedVertexAttribute);
+                Guard.NotNull(featureIdAccessors, expectedVertexAttribute);
             }
-            if (item.PropertyTable.HasValue)
+            if (instanceFeatureId.PropertyTable.HasValue)
             {
-                Guard.MustBeGreaterThanOrEqualTo((int)item.PropertyTable, 0, nameof(item.PropertyTable));
+                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.PropertyTable, 0, nameof(instanceFeatureId.PropertyTable));
             }
         }
     }
