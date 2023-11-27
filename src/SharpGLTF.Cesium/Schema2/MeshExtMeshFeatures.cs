@@ -1,6 +1,7 @@
 ﻿using SharpGLTF.Validation;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace SharpGLTF.Schema2
 {
@@ -26,7 +27,7 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            var extMeshFeatures = (MeshExtMeshFeatures)_meshPrimitive.Extensions.FirstOrDefault();
+            var extMeshFeatures = (MeshExtMeshFeatures)_meshPrimitive.Extensions.Where(item => item is MeshExtMeshFeatures).FirstOrDefault();
 
             validate.NotNull(nameof(FeatureIds), extMeshFeatures.FeatureIds);
             validate.IsTrue(nameof(FeatureIds), extMeshFeatures.FeatureIds.Count > 0, "FeatureIds has items");
