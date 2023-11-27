@@ -29,7 +29,7 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            var extInstanceFeatures = (MeshExtInstanceFeatures)_node.Extensions.FirstOrDefault();
+            var extInstanceFeatures = (MeshExtInstanceFeatures)_node.Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
 
             validate.NotNull(nameof(FeatureIds), extInstanceFeatures.FeatureIds);
             validate.IsTrue(nameof(FeatureIds), extInstanceFeatures.FeatureIds.Count > 0, "Instance FeatureIds has items");
@@ -40,6 +40,10 @@ namespace SharpGLTF.Schema2
 
     public partial class MeshExtInstanceFeatureID
     {
+        public MeshExtInstanceFeatureID()
+        {
+        }
+
         public MeshExtInstanceFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null, int? nullFeatureId = null)
         {
             _featureCount = featureCount;
