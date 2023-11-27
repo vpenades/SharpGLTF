@@ -19,7 +19,7 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
-        [Test(Description = "Creates a simple triangle with Cesium EXT_Instance_Features")]
+        [Test(Description = "Creates a gpu_instancing glTF from a tree with Cesium EXT_Instance_Features")]
         public void AddExtGpuInstanceFeatures()
         {
             var settings = SceneBuilderSchema2Settings.WithGpuInstancing;
