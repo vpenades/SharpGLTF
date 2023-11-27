@@ -1,0 +1,25 @@
+name: SharpGLTF
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0.x' ]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup dotnet ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build
+      - name: Test
+        run: dotnet test ./tests/SharpGLTF.Cesium.Tests/SharpGLTF.Cesium.Tests.csproj

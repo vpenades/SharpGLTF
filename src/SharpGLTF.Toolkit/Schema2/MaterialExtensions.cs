@@ -366,7 +366,7 @@ namespace SharpGLTF.Schema2
             ImageBuilder _convert(Image src)
             {
                 if (src == null) return null;
-                var dst = ImageBuilder.From(src.Content, src.Name, src.Extras.DeepClone());
+                var dst = ImageBuilder.From(src.Content, src.Name, src.Extras?.DeepClone());
                 dst.AlternateWriteFileName = src.AlternateWriteFileName;
                 return dst;
             }

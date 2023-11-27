@@ -47,7 +47,7 @@ namespace SharpGLTF.Runtime
 
             return callback != null
                 ? callback(source)
-                : (options.IsolateMemory ? source.Extras.DeepClone() : source.Extras);
+                : (options.IsolateMemory ? source.Extras?.DeepClone() : source.Extras);
         }
     }
 }

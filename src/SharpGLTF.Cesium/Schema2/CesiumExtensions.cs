@@ -22,6 +22,8 @@ namespace SharpGLTF.Schema2
 
             ExtensionsFactory.RegisterExtension<MeshPrimitive, CesiumPrimitiveOutline>("CESIUM_primitive_outline");
             ExtensionsFactory.RegisterExtension<Node, MeshExtInstanceFeatures>("EXT_instance_features");
+            ExtensionsFactory.RegisterExtension<MeshPrimitive, MeshExtMeshFeatures>("EXT_mesh_features");
+
         }
     }
 }

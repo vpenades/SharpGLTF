@@ -3,12 +3,43 @@ using System.Numerics;
 
 namespace SharpGLTF.Schema2
 {
+    /// <remarks>
+    /// Derived classes:<br/>
+    /// - <see cref="MaterialNormalTextureInfo"/><br/>
+    /// - <see cref="MaterialOcclusionTextureInfo"/>
+    /// </remarks>
     [System.Diagnostics.DebuggerDisplay("LogicalTexture[{_LogicalTextureIndex}]")]
-    internal partial class TextureInfo
+    public partial class TextureInfo
     {
+        #region lifecycle
+
+        public TextureInfo() { }
+
+        public TextureInfo(TextureInfo other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+
+            _index = other._index;
+            _texCoord = other._texCoord;
+
+            this.Extras = other.Extras;
+
+            // TODO: should copy all extensions, not only TextureTransform.
+
+            var otherXform = other.GetExtension<TextureTransform>();
+
+            if (otherXform != null && !otherXform.IsDefault)
+            {
+                var thisXform = other.UseExtension<TextureTransform>();
+                otherXform.CopyTo(thisXform);
+            }
+        }
+
+        #endregion
+
         #region properties
 
-        internal int _LogicalTextureIndex
+        public int _LogicalTextureIndex
         {
             get => _index;
             set => _index = value;
@@ -122,11 +153,35 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+
+        #region API
+
+        internal void CopyTo(TextureTransform other)
+        {
+            if (other == null) throw new ArgumentNullException(nameof(other));
+            other.TextureCoordinateOverride = this.TextureCoordinateOverride;
+            other.Rotation = this.Rotation;
+            other.Offset = this.Offset;
+            other.Scale = this.Scale;            
+        }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerDisplay("Normal LogicalTexture[{_LogicalTextureIndex}] x {Scale}")]
     internal sealed partial class MaterialNormalTextureInfo
     {
+        #region lifecycle
+
+        public MaterialNormalTextureInfo() { }
+
+        public MaterialNormalTextureInfo(MaterialNormalTextureInfo other) :base(other)
+        {
+            _scale = other._scale;
+        }
+
+        #endregion
+
         #region properties
 
         public static Single ScaleDefault => (float)_scaleDefault;
@@ -143,6 +198,17 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("Occlusion LogicalTexture[{_LogicalTextureIndex}] x {Strength}")]
     internal sealed partial class MaterialOcclusionTextureInfo
     {
+        #region lifecycle
+
+        public MaterialOcclusionTextureInfo() { }
+
+        public MaterialOcclusionTextureInfo(MaterialOcclusionTextureInfo other) : base(other)
+        {
+            _strength = other._strength;
+        }
+
+        #endregion
+
         #region properties
 
         public static Single StrengthDefault => (float)_strengthDefault;

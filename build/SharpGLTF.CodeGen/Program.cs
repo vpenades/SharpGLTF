@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpGLTF.CodeGen;
+using SharpGLTF.SchemaReflection;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,38 +25,40 @@ namespace SharpGLTF
 
             //// ---------------------------------------------- Add extensions            
 
-            // material extensions       
-            processors.Add(new UnlitExtension());
-            processors.Add(new IorExtension());
-            processors.Add(new SheenExtension());
-            processors.Add(new VolumeExtension());
-            processors.Add(new SpecularExtension());
-            processors.Add(new ClearCoatExtension());
-            processors.Add(new IridescenceExtension());
-            processors.Add(new TransmissionExtension());
-            processors.Add(new EmissiveStrengthExtension());
-            processors.Add(new SpecularGlossinessExtension());
+            //// material extensions       
+            //processors.Add(new UnlitExtension());
+            //processors.Add(new IorExtension());
+            //processors.Add(new SheenExtension());
+            //processors.Add(new VolumeExtension());
+            //processors.Add(new SpecularExtension());
+            //processors.Add(new ClearCoatExtension());
+            //processors.Add(new IridescenceExtension());
+            //processors.Add(new TransmissionExtension());
+            //processors.Add(new EmissiveStrengthExtension());
+            //processors.Add(new SpecularGlossinessExtension());
 
-            // cesium outlines
-            processors.Add(new CesiumPrimitiveOutlineExtension());
+            //// cesium outlines
+            //processors.Add(new CesiumPrimitiveOutlineExtension());
 
-            // lights
-            processors.Add(new LightsPunctualExtension());
+            //// lights
+            //processors.Add(new LightsPunctualExtension());
 
-            // gpu mesh instancing
-            processors.Add(new MeshGpuInstancingExtension());
+            //// gpu mesh instancing
+            //processors.Add(new MeshGpuInstancingExtension());
 
-            // textures
-            processors.Add(new TextureTransformExtension());
-            processors.Add(new TextureDDSExtension());
-            processors.Add(new TextureWebpExtension());
-            processors.Add(new TextureKtx2Extension());
+            //// textures
+            //processors.Add(new TextureTransformExtension());
+            //processors.Add(new TextureDDSExtension());
+            //processors.Add(new TextureWebpExtension());
+            //processors.Add(new TextureKtx2Extension());
 
-            processors.Add(new AgiArticulationsExtension());
-            processors.Add(new AgiStkMetadataExtension());
+            //processors.Add(new AgiArticulationsExtension());
+            //processors.Add(new AgiStkMetadataExtension());
 
-            // other
-            processors.Add(new XmpJsonLdExtension());
+            //// other
+            //processors.Add(new XmpJsonLdExtension());
+
+            //processors.Add(new ExtMeshFeaturesExtension());
 
             processors.Add(new ExtInstanceFeaturesExtension());
 
@@ -62,15 +66,15 @@ namespace SharpGLTF
 
             foreach (var processor in processors)
             {
-                foreach(var (targetFileName, schema) in processor.Process())
+                foreach (var (targetFileName, schema) in processor.Process())
                 {
                     System.Console.WriteLine($"Emitting {targetFileName}...");
 
                     SchemaProcessing.EmitCodeFromSchema(processor.GetTargetProject(), targetFileName, schema, processors);
                 }
-            }            
+            }
         }
 
         #endregion     
-    }    
+    }
 }

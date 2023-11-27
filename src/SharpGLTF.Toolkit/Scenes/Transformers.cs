@@ -215,7 +215,7 @@ namespace SharpGLTF.Scenes
 
             this._ParentNode = args.GetNode(other._ParentNode);
             this._NodeName = other._NodeName;
-            this._NodeExtras = other._NodeExtras.DeepClone();
+            this._NodeExtras = other._NodeExtras?.DeepClone();
             this._ChildTransform = other._ChildTransform;
         }
 
@@ -380,7 +380,7 @@ namespace SharpGLTF.Scenes
             Guard.NotNull(other, nameof(other));
 
             this._NodeName = other._NodeName;
-            this._NodeExtras = other._NodeExtras.DeepClone();
+            this._NodeExtras = other._NodeExtras?.DeepClone();
             this._MeshPoseWorldTransform = other._MeshPoseWorldTransform;
 
             foreach (var (joint, inverseBindMatrix) in other._Joints)

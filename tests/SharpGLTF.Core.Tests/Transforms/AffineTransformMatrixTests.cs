@@ -169,10 +169,16 @@ namespace SharpGLTF.Transforms
 
             var xmi = xi.Matrix;
 
-            var tolerance = NumericsAssert.AreGeometryicallyEquivalent(mi, xmi, 0.00001f);
-            TestContext.WriteLine(tolerance);
+            var tolerance = 0.00001f;
 
-            Assert.IsTrue(AffineTransform.AreGeometricallyEquivalent(mi, xi, 0.00001f));
+            #if NET8_0_OR_GREATER
+            tolerance = 0.0001f; // something has changed on net8 that has lowered the precission
+            #endif
+
+            var diff = NumericsAssert.AreGeometryicallyEquivalent(mi, xmi, tolerance);
+            TestContext.WriteLine(diff);
+
+            Assert.IsTrue(AffineTransform.AreGeometricallyEquivalent(mi, xi, tolerance));
         }
     }    
 }

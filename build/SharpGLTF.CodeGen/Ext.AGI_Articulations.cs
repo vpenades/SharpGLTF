@@ -8,6 +8,7 @@ namespace SharpGLTF
 {
     class AgiArticulationsExtension : SchemaProcessor
     {
+        public override string GetTargetProject() { return Constants.AgiProjectDirectory; }
         private static string RootSchemaUri => Constants.VendorExtensionPath("AGI_articulations", "glTF.AGI_articulations.schema.json");
         private static string NodeSchemaUri => Constants.VendorExtensionPath("AGI_articulations", "node.AGI_articulations.schema.json");
 

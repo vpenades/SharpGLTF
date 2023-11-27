@@ -201,8 +201,8 @@ namespace SharpGLTF.Runtime
             {
                 if (element.VertexElementFormat == VertexElementFormat.Vector2)
                 {
-                    var dst = _Vertex.Slice(element.Offset, sizeof(XY));
-                    System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);
+                    var dst = _Vertex.Slice(element.Offset);
+                    System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, XY>(dst)[0] = value;
                     return;
                 }
 
@@ -213,8 +213,8 @@ namespace SharpGLTF.Runtime
             {
                 if (element.VertexElementFormat == VertexElementFormat.Vector3)
                 {
-                    var dst = _Vertex.Slice(element.Offset, sizeof(XYZ));
-                    System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);
+                    var dst = _Vertex.Slice(element.Offset);
+                    System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, XYZ>(dst)[0] = value;
                     return;
                 }
 
@@ -227,8 +227,8 @@ namespace SharpGLTF.Runtime
 
                 switch (element.VertexElementFormat)
                 {
-                    case VertexElementFormat.Vector4:                        
-                        System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);
+                    case VertexElementFormat.Vector4:
+                        System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, XYZW>(dst)[0] = value;
                         return;
 
                     case VertexElementFormat.Byte4:
@@ -259,35 +259,35 @@ namespace SharpGLTF.Runtime
             {
                 if (element.VertexElementFormat != VertexElementFormat.Byte4) throw new ArgumentException(nameof(element));
                 
-                var dst = _Vertex.Slice(element.Offset, sizeof(Microsoft.Xna.Framework.Graphics.PackedVector.Byte4));
-                System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);                
+                var dst = _Vertex.Slice(element.Offset);
+                System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Microsoft.Xna.Framework.Graphics.PackedVector.Byte4>(dst)[0] = value;
             }
 
             public unsafe void SetValue(VertexElement element, Microsoft.Xna.Framework.Graphics.PackedVector.NormalizedByte4 value)
             {
                 if (element.VertexElementFormat != VertexElementFormat.Byte4) throw new ArgumentException(nameof(element));
 
-                var dst = _Vertex.Slice(element.Offset, sizeof(Microsoft.Xna.Framework.Graphics.PackedVector.Byte4));
-                System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);
+                var dst = _Vertex.Slice(element.Offset);
+                System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Microsoft.Xna.Framework.Graphics.PackedVector.NormalizedByte4>(dst)[0] = value;
             }
 
             public unsafe void SetValue(VertexElement element, Microsoft.Xna.Framework.Graphics.PackedVector.Short4 value)
             {
                 if (element.VertexElementFormat != VertexElementFormat.Short4) throw new ArgumentException(nameof(element));
 
-                var dst = _Vertex.Slice(element.Offset, sizeof(Microsoft.Xna.Framework.Graphics.PackedVector.Short4));
-                System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);
+                var dst = _Vertex.Slice(element.Offset);
+                System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Microsoft.Xna.Framework.Graphics.PackedVector.Short4>(dst)[0] = value;
             }
 
             public unsafe void SetValue(VertexElement element, Microsoft.Xna.Framework.Graphics.PackedVector.NormalizedShort4 value)
             {
                 if (element.VertexElementFormat != VertexElementFormat.NormalizedShort4) throw new ArgumentException(nameof(element));
                 
-                var dst = _Vertex.Slice(element.Offset, sizeof(Microsoft.Xna.Framework.Graphics.PackedVector.NormalizedShort4));
-                System.Runtime.InteropServices.MemoryMarshal.Write(dst, ref value);                
+                var dst = _Vertex.Slice(element.Offset);
+                System.Runtime.InteropServices.MemoryMarshal.Cast<Byte, Microsoft.Xna.Framework.Graphics.PackedVector.NormalizedShort4>(dst)[0] = value;
             }
 
-            #endregion
+        #endregion
         }
 
         #endregion

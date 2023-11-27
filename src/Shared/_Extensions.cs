@@ -5,8 +5,6 @@ using System.Numerics;
 using System.Linq;
 
 using SharpGLTF.Schema2;
-using System.Text.Json;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SharpGLTF
 {
@@ -743,27 +741,40 @@ namespace SharpGLTF
 
         #endregion
 
-        #region json
+        #region json        
 
-        // note: these methods have been added to newer versions of json, so they might be removed eventually        
+        #if NET6_0
 
-#if NET6_0_OR_GREATER
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
-        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
-#endif
+        /// <summary>
+        /// Creates a new instance of the <see cref="JsonNode"/>.
+        /// All children nodes are recursively cloned.
+        /// </summary>
+        /// <remarks>
+        /// DeepClone is available in System.Text.Json v8.0.0 or higher
+        /// so we need to provide a (much slower) implementation for net6.0.
+        /// </remarks>
+        /// <param name="node">The node to clone.</param>
+        /// <returns>A clone of <paramref name="node"/>.</returns>        
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+        [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+        [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+        #endif
         public static System.Text.Json.Nodes.JsonNode DeepClone(this System.Text.Json.Nodes.JsonNode node)
         {
             // issue tracking both DeepClone and DeepEquals: https://github.com/dotnet/runtime/issues/56592            
 
-            if (node == null) return null;
+            if (node == null) throw new ArgumentNullException(nameof(node));
 
             System.Text.Json.Nodes.JsonNode clone = null;            
 
             #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-            if (node is System.Text.Json.Nodes.JsonValue asValue) clone = asValue.Deserialize<System.Text.Json.Nodes.JsonValue>();
-            if (node is System.Text.Json.Nodes.JsonArray asArray) clone = asArray.Deserialize<System.Text.Json.Nodes.JsonArray>();
-            if (node is System.Text.Json.Nodes.JsonObject asObject) clone = asObject.Deserialize<System.Text.Json.Nodes.JsonObject>();
+            switch(node)
+            {
+                case System.Text.Json.Nodes.JsonValue asValue: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonValue>(asValue); break;
+                case System.Text.Json.Nodes.JsonArray asArray: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonArray>(asArray); break;
+                case System.Text.Json.Nodes.JsonObject asObject: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonObject>(asObject); break;
+            }            
             #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
             if (clone == null) throw new NotImplementedException();
@@ -773,17 +784,42 @@ namespace SharpGLTF
             return clone;
         }
 
+        #endif        
+
         public static bool DeepEquals(this System.Text.Json.Nodes.JsonNode x, System.Text.Json.Nodes.JsonNode y, double precission)
         {
+            #if !NET6_0
+
+            return System.Text.Json.Nodes.JsonNode.DeepEquals(x, y);
+
+            #else
+
             if (x == y) return true;
             if (x == null) return false;
             if (y == null) return false;
 
-            if (x is System.Text.Json.Nodes.JsonValue xval && y is System.Text.Json.Nodes.JsonValue yval)
+            if (x is System.Text.Json.Nodes.JsonValue xval && y is System.Text.Json.Nodes.JsonValue yval)            
             {
-                if (xval.TryGetValue<double>(out var xfl) && yval.TryGetValue<double>(out var yfl))
+                // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Nodes/JsonValueOfT.cs#L88
+
+                if (xval.TryGetValue<int>(out var xi) && yval.TryGetValue<int>(out var yi))
                 {
-                    return Math.Abs(xfl-yfl) <= precission;
+                    return xi == yi;
+                }
+
+                if (xval.TryGetValue<long>(out var xl) && yval.TryGetValue<long>(out var yl))
+                {
+                    return xl == yl;
+                }
+
+                if (xval.TryGetValue<float>(out var xs) && yval.TryGetValue<float>(out var ys))
+                {
+                    return Math.Abs(xs - ys) <= precission;
+                }
+
+                if (xval.TryGetValue<double>(out var xd) && yval.TryGetValue<double>(out var yd))
+                {
+                    return Math.Abs(xd - yd) <= precission;
                 }
 
                 return xval.ToJsonString() == yval.ToJsonString();
@@ -812,6 +848,8 @@ namespace SharpGLTF
             }
 
             return false;
+
+            #endif
         }
 
         #endregion
