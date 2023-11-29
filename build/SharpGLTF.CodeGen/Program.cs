@@ -15,7 +15,7 @@ namespace SharpGLTF
 
         static void Main(string[] args)
         {
-            SchemaDownload.Syncronize(Constants.RemoteSchemaRepo, Constants.LocalRepoDirectory);
+            // SchemaDownload.Syncronize(Constants.RemoteSchemaRepo, Constants.LocalRepoDirectory);
 
             var processors = new List<SchemaProcessor>();
 
@@ -59,6 +59,9 @@ namespace SharpGLTF
             processors.Add(new XmpJsonLdExtension());
 
             processors.Add(new ExtMeshFeaturesExtension());
+
+            processors.Add(new ExtStructuralMetadataExtension());
+
 
             // ----------------------------------------------  process all files
 
