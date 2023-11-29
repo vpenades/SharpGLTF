@@ -8,7 +8,7 @@ namespace SharpGLTF
     {
         public override string GetTargetProject() { return Constants.CesiumProjectDirectory; }
 
-        private static string RootSchemaUri => Constants.CustomExtensionsPath("EXT_instance_features", "node.EXT_instance_features.schema.json");
+        private static string NodeSchemaUri => Constants.CustomExtensionsPath("EXT_instance_features", "node.EXT_instance_features.schema.json");
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
@@ -23,7 +23,7 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessNode()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
+            var ctx = SchemaProcessing.LoadSchemaContext(NodeSchemaUri);
             ctx.IgnoredByCodeEmitter("glTF Property");
             ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
             ctx.IgnoredByCodeEmitter("Texture Info");
