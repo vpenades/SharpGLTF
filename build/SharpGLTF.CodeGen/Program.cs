@@ -15,7 +15,7 @@ namespace SharpGLTF
 
         static void Main(string[] args)
         {
-            // SchemaDownload.Syncronize(Constants.RemoteSchemaRepo, Constants.LocalRepoDirectory);
+            SchemaDownload.Syncronize(Constants.RemoteSchemaRepo, Constants.LocalRepoDirectory);
 
             var processors = new List<SchemaProcessor>();
 

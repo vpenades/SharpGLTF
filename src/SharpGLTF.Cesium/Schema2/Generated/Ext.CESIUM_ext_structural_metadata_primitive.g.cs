@@ -28,35 +28,35 @@ namespace SharpGLTF.Schema2
 	using Collections;
 
 	/// <summary>
-	/// Structural metadata about a glTF element.
+	/// Structural metadata about a glTF primitive.
 	/// </summary>
 	#if NET6_0_OR_GREATER
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class EXT_structural_metadataglTFextension : ExtraProperties
+	partial class EXT_structural_metadataglTFMeshPrimitiveextension : ExtraProperties
 	{
 	
-		private const Int32 _indexMinimum = 0;
-		private Int32? _index;
+		private const int _propertyAttributesMinItems = 1;
+		private List<Int32> _propertyAttributes;
 		
-		private const Int32 _propertyTableMinimum = 0;
-		private Int32? _propertyTable;
+		private const int _propertyTexturesMinItems = 1;
+		private List<Int32> _propertyTextures;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializeProperty(writer, "index", _index);
-			SerializeProperty(writer, "propertyTable", _propertyTable);
+			SerializeProperty(writer, "propertyAttributes", _propertyAttributes, _propertyAttributesMinItems);
+			SerializeProperty(writer, "propertyTextures", _propertyTextures, _propertyTexturesMinItems);
 		}
 	
 		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
 		{
 			switch (jsonPropertyName)
 			{
-				case "index": _index = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "propertyTable": _propertyTable = DeserializePropertyValue<Int32?>(ref reader); break;
+				case "propertyAttributes": DeserializePropertyList<Int32>(ref reader, _propertyAttributes); break;
+				case "propertyTextures": DeserializePropertyList<Int32>(ref reader, _propertyTextures); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
