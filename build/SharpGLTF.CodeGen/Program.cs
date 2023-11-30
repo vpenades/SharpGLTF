@@ -60,6 +60,8 @@ namespace SharpGLTF
 
             processors.Add(new ExtMeshFeaturesExtension());
 
+            processors.Add(new ExtInstanceFeaturesExtension());
+
             processors.Add(new ExtStructuralMetadataExtension());
 
 

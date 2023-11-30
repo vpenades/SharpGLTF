@@ -20,7 +20,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var validation = ModelRoot.Validate(path);
 
-            Assert.IsTrue(validation.HasErrors);
+            Assert.That(validation.HasErrors, Is.True);
         }
     }
 }

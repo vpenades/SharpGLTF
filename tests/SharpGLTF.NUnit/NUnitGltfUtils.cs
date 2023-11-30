@@ -57,7 +57,7 @@ namespace SharpGLTF
         {
             string validationPath = null;
 
-            if (fileName.ToLowerInvariant().EndsWith(".glb"))
+            if (fileName.ToUpperInvariant().EndsWith(".GLB"))
             {
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
@@ -110,7 +110,7 @@ namespace SharpGLTF
                     TestContext.WriteLine(report.ToString());
                 }
 
-                Assert.AreNotEqual(GltfValidator.Severity.Error, report.Severity);
+                Assert.That(report.Severity, Is.Not.EqualTo(GltfValidator.Severity.Error));
             }
 
             return fileName;

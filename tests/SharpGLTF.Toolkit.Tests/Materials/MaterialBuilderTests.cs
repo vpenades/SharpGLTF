@@ -31,18 +31,18 @@ namespace SharpGLTF.Materials
             var clnMaterial = srcMaterial.Clone();
 
             // srcMaterial and clnMaterial are two different objects, so plain equality checks must apply to reference checks
-            Assert.IsFalse(srcMaterial == clnMaterial);
-            Assert.AreNotEqual(srcMaterial, clnMaterial);
-            Assert.AreNotEqual(srcMaterial.GetHashCode(), clnMaterial.GetHashCode());
+            Assert.That(clnMaterial != srcMaterial);
+            Assert.That(clnMaterial, Is.Not.EqualTo(srcMaterial));
+            Assert.That(clnMaterial.GetHashCode(), Is.Not.EqualTo(srcMaterial.GetHashCode()));
 
             // checking the materials represent the same "material" must be made with AreEqualByContent method.
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(srcMaterial, clnMaterial));
+            Assert.That(MaterialBuilder.AreEqualByContent(srcMaterial, clnMaterial));
 
             var bag = new HashSet<MaterialBuilder>();
             bag.Add(srcMaterial);
             bag.Add(clnMaterial);
 
-            Assert.AreEqual(2, bag.Count);
+            Assert.That(bag, Has.Count.EqualTo(2));
         }
 
         [Test]
@@ -50,8 +50,8 @@ namespace SharpGLTF.Materials
         {
             var material = _CreateUnlitMaterial();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
         }        
 
         [Test]
@@ -59,8 +59,8 @@ namespace SharpGLTF.Materials
         {
             var material = _CreateMetallicRoughnessMaterial();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
         }        
 
         [Test]
@@ -68,8 +68,8 @@ namespace SharpGLTF.Materials
         {
             var material = _CreateClearCoatMaterial();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
         }        
 
         [Test]
@@ -77,8 +77,8 @@ namespace SharpGLTF.Materials
         {
             var material = _CreateVolumeMaterial();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
         }        
 
         [Test]
@@ -86,8 +86,8 @@ namespace SharpGLTF.Materials
         {
             var material = _CreateSpecularGlossinessMaterial();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
         }        
 
         [Test]
@@ -96,8 +96,8 @@ namespace SharpGLTF.Materials
             var material = _CreateSpecularGlossinessMaterialWithFallback();
 
             // check
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
         }
 
         private static MaterialBuilder _CreateUnlitMaterial()

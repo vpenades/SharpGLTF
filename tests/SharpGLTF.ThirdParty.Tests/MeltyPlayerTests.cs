@@ -79,7 +79,7 @@ namespace SharpGLTF.ThirdParty
 
             var satellites = ModelRoot.GetSatellitePaths(resultPath0.FullName);
 
-            Assert.AreEqual(4, satellites.Length);
+            Assert.That(satellites, Has.Length.EqualTo(4));
         }
 
         [Test]
@@ -156,7 +156,7 @@ namespace SharpGLTF.ThirdParty
 
             var gltf = scene.ToGltf2();
 
-            Assert.AreEqual(1, gltf.LogicalMeshes.Count);
+            Assert.That(gltf.LogicalMeshes, Has.Count.EqualTo(1));
 
             var outFiles = new[]
             {

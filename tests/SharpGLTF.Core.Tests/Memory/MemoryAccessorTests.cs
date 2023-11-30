@@ -25,18 +25,18 @@ namespace SharpGLTF.Memory
             pos = attributes[0];
             nrm = attributes[1];
 
-            Assert.AreEqual(24, byteStride);
+            Assert.That(byteStride, Is.EqualTo(24));
 
-            Assert.AreEqual(baseOffset + 0, pos.ByteOffset);
-            Assert.AreEqual(24, pos.ByteStride);
-            Assert.AreEqual(5, pos.ItemsCount);
+            Assert.That(pos.ByteOffset, Is.EqualTo(baseOffset + 0));
+            Assert.That(pos.ByteStride, Is.EqualTo(24));
+            Assert.That(pos.ItemsCount, Is.EqualTo(5));
 
-            Assert.AreEqual(baseOffset + 12, nrm.ByteOffset);
-            Assert.AreEqual(24, nrm.ByteStride);
-            Assert.AreEqual(5, nrm.ItemsCount);
+            Assert.That(nrm.ByteOffset, Is.EqualTo(baseOffset + 12));
+            Assert.That(nrm.ByteStride, Is.EqualTo(24));
+            Assert.That(nrm.ItemsCount, Is.EqualTo(5));
 
-            Assert.IsTrue(pos.IsValidVertexAttribute);
-            Assert.IsTrue(nrm.IsValidVertexAttribute);
+            Assert.That(pos.IsValidVertexAttribute, Is.True);
+            Assert.That(nrm.IsValidVertexAttribute, Is.True);
         }
     }
 }

@@ -107,6 +107,22 @@ namespace SharpGLTF.Materials
 
         public float IndexOfRefraction { get; set; } = 1.5f;
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// Material builder uses default class equality, but NUnit4 does some weird trickery on equality
+        /// </remarks>
+        public override int GetHashCode() { return base.GetHashCode(); }
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// MaterialBuilder objects use reference comparison by default.<br/>
+        /// For content equality use <see cref="AreEqualByContent(MaterialBuilder, MaterialBuilder)"/>
+        /// </remarks>
+        public override bool Equals(object obj)
+        {
+            return Object.ReferenceEquals(this, obj);
+        }       
+
         public static bool AreEqualByContent(MaterialBuilder x, MaterialBuilder y)
         {
             if ((x, y).AreSameReference(out bool areTheSame)) return areTheSame;

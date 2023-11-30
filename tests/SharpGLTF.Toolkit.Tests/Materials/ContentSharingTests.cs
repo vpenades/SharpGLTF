@@ -32,7 +32,7 @@ namespace SharpGLTF.Materials
 
             var material2 = material1.Clone();
 
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material1, material2));
+            Assert.That(MaterialBuilder.AreEqualByContent(material1, material2));
 
             var extras = new System.Text.Json.Nodes.JsonObject();
             extras["hello"] = 1;
@@ -45,16 +45,16 @@ namespace SharpGLTF.Materials
 
             var material3 = material2.Clone();
 
-            Assert.IsFalse(MaterialBuilder.AreEqualByContent(material1, material2));
-            Assert.IsTrue(MaterialBuilder.AreEqualByContent(material2, material3));
+            Assert.That(MaterialBuilder.AreEqualByContent(material1, material2), Is.False);
+            Assert.That(MaterialBuilder.AreEqualByContent(material2, material3), Is.True);
 
             var dict = material3.GetChannel(KnownChannel.BaseColor)
                 .Texture
                 .PrimaryImage
                 .Extras.Deserialize<Dictionary<string,int>>();            
 
-            Assert.AreEqual(1, dict.Count);
-            Assert.AreEqual(1, dict["hello"]);
+            Assert.That(dict, Has.Count.EqualTo(1));
+            Assert.That(dict["hello"], Is.EqualTo(1));
         }
 
         [Test]
@@ -99,7 +99,7 @@ namespace SharpGLTF.Materials
 
             string imageSharingHook(WriteContext ctx, string uri, Memory.MemoryImage image)
             {
-                Assert.IsTrue(new string[] { tex1, tex2 }.Contains(image.SourcePath) );
+                Assert.That(new string[] { tex1, tex2 }, Does.Contain(image.SourcePath));
 
                 if (File.Exists(image.SourcePath))
                 {
@@ -140,14 +140,14 @@ namespace SharpGLTF.Materials
             var satellites2 = ModelRoot.GetSatellitePaths(path2);
             var satellites3 = ModelRoot.GetSatellitePaths(path3);
 
-            Assert.IsTrue(satellites1.Contains("shared-shannon.png"));
-            Assert.IsTrue(satellites1.Contains("subdir/shared-in-dir-Texture1.jpg"));
+            Assert.That(satellites1, Does.Contain("shared-shannon.png"));
+            Assert.That(satellites1, Does.Contain("subdir/shared-in-dir-Texture1.jpg"));
 
-            Assert.IsTrue(satellites2.Contains("shared-shannon.png"));
-            Assert.IsTrue(satellites2.Contains("subdir/shared-in-dir-Texture1.jpg"));
+            Assert.That(satellites2, Does.Contain("shared-shannon.png"));
+            Assert.That(satellites2, Does.Contain("subdir/shared-in-dir-Texture1.jpg"));
 
-            Assert.IsTrue(satellites3.Contains("shared-shannon.png"));
-            Assert.IsTrue(satellites3.Contains("subdir/shared-in-dir-Texture1.jpg"));
+            Assert.That(satellites3, Does.Contain("shared-shannon.png"));
+            Assert.That(satellites3, Does.Contain("subdir/shared-in-dir-Texture1.jpg"));
         }
 
     }

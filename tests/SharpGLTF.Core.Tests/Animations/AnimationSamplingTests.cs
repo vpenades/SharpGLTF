@@ -49,35 +49,35 @@ namespace SharpGLTF
             void checkSegment(int time, (float,int)[] segment)
             {
                 // should check all times are incremental
-                Assert.Greater(segment.Length, 1);
-                Assert.LessOrEqual(segment.First().Item1, time);
-                Assert.Greater(segment.Last().Item1, time);
+                Assert.That(segment.Length, Is.GreaterThan(1));
+                Assert.That(segment.First().Item1, Is.LessThanOrEqualTo(time));
+                Assert.That(segment.Last().Item1, Is.GreaterThan(time));
             }
 
 
             var r0 = Animations.CurveSampler.SplitByTime(anim0).ToArray();
-            Assert.AreEqual(1, r0.Length);
-            Assert.AreEqual(1, r0[0].Length);
+            Assert.That(r0, Has.Length.EqualTo(1));
+            Assert.That(r0[0], Has.Length.EqualTo(1));
 
             var r1 = Animations.CurveSampler.SplitByTime(anim1).ToArray();
-            Assert.AreEqual(1, r1.Length);
-            Assert.AreEqual(2, r1[0].Length);
+            Assert.That(r1, Has.Length.EqualTo(1));
+            Assert.That(r1[0], Has.Length.EqualTo(2));
 
             var r2 = Animations.CurveSampler.SplitByTime(anim2).ToArray();
-            Assert.AreEqual(4, r2.Length);
-            Assert.AreEqual(3, r2[0].Length); 
-            Assert.AreEqual(2, r2[1].Length); checkSegment(1, r2[1]);
-            Assert.AreEqual(2, r2[2].Length); checkSegment(2, r2[2]);
-            Assert.AreEqual(3, r2[3].Length); checkSegment(3, r2[3]);
+            Assert.That(r2, Has.Length.EqualTo(4));
+            Assert.That(r2[0], Has.Length.EqualTo(3)); 
+            Assert.That(r2[1], Has.Length.EqualTo(2)); checkSegment(1, r2[1]);
+            Assert.That(r2[2], Has.Length.EqualTo(2)); checkSegment(2, r2[2]);
+            Assert.That(r2[3], Has.Length.EqualTo(3)); checkSegment(3, r2[3]);
 
             var r3 = Animations.CurveSampler.SplitByTime(anim3).ToArray();
-            Assert.AreEqual(6, r3.Length);
-            Assert.AreEqual(1, r3[0].Length); 
-            Assert.AreEqual(1, r3[1].Length); 
-            Assert.AreEqual(3, r3[2].Length); 
-            Assert.AreEqual(4, r3[3].Length); checkSegment(3, r3[3]);
-            Assert.AreEqual(4, r3[3].Length); checkSegment(4, r3[4]);
-            Assert.AreEqual(1, r3[5].Length);
+            Assert.That(r3, Has.Length.EqualTo(6));
+            Assert.That(r3[0], Has.Length.EqualTo(1)); 
+            Assert.That(r3[1], Has.Length.EqualTo(1)); 
+            Assert.That(r3[2], Has.Length.EqualTo(3)); 
+            Assert.That(r3[3], Has.Length.EqualTo(4)); checkSegment(3, r3[3]);
+            Assert.That(r3[3], Has.Length.EqualTo(4)); checkSegment(4, r3[4]);
+            Assert.That(r3[5], Has.Length.EqualTo(1));
         }
 
         [Test]
@@ -93,8 +93,8 @@ namespace SharpGLTF
 
             foreach (var k in curve)
             {
-                Assert.AreEqual(k.Item2, slowSampler.GetPoint(k.Item1));
-                Assert.AreEqual(k.Item2, fastSampler.GetPoint(k.Item1));
+                Assert.That(slowSampler.GetPoint(k.Item1), Is.EqualTo(k.Item2));
+                Assert.That(fastSampler.GetPoint(k.Item1), Is.EqualTo(k.Item2));
             }
 
             for(float t=0; t < 100; t+=0.232f)
@@ -102,7 +102,7 @@ namespace SharpGLTF
                 var dv = slowSampler.GetPoint(t);
                 var fv = fastSampler.GetPoint(t);
 
-                Assert.AreEqual(dv, fv);
+                Assert.That(fv, Is.EqualTo(dv));
             }
         }
 

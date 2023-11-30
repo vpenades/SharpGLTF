@@ -84,7 +84,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 }*/
             }
 
-            Assert.IsTrue(passed);
+            Assert.That(passed);
         }        
     }
 }

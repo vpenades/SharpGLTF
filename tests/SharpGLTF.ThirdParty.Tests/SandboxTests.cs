@@ -127,13 +127,13 @@ namespace SharpGLTF.ThirdParty
 
             // Assert
             var morphedColor = triangles[1].A.GetMaterial().GetColor(0);
-            Assert.AreEqual(0.5f, morphedColor.X);
-            Assert.AreEqual(0.5f, morphedColor.Y);
-            Assert.AreEqual(0, morphedColor.Z);
-            Assert.AreEqual(1, morphedColor.W);
+            Assert.That(morphedColor.X, Is.EqualTo(0.5f));
+            Assert.That(morphedColor.Y, Is.EqualTo(0.5f));
+            Assert.That(morphedColor.Z, Is.EqualTo(0));
+            Assert.That(morphedColor.W, Is.EqualTo(1));
 
             morphedColor = triangles[0].A.GetMaterial().GetColor(0);
-            Assert.AreEqual(redColor, morphedColor);
+            Assert.That(morphedColor, Is.EqualTo(redColor));
 
 
             
@@ -181,7 +181,7 @@ namespace SharpGLTF.ThirdParty
             // https://github.com/vpenades/SharpGLTF/issues/158
 
             var gltf = ModelRoot.Load(ResourceInfo.From("Gotoarchi\\test1.gltf"));
-            Assert.NotNull(gltf);
+            Assert.That(gltf, Is.Not.Null);
         }
     }
 }

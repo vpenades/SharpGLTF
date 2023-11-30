@@ -67,7 +67,7 @@ namespace SharpGLTF
         private readonly string _BabylonJsMeshesDir;
         private readonly string _BabylonJsPlaygroundDir;
 
-        private readonly string[] _BabylonJsInvalidFiles = { };
+        private readonly string[] _BabylonJsInvalidFiles = Array.Empty<string>();
 
         private string _GeneratedModelsDir;        
 

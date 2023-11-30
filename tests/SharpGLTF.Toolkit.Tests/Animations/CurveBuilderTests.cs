@@ -32,7 +32,7 @@ namespace SharpGLTF.Animations
             // convert and resample the curve to a linear and cubic curves.
 
             var convertible = curve as IConvertibleCurve<Vector3>;
-            Assert.NotNull(convertible);
+            Assert.That(convertible, Is.Not.Null);
 
             var linear = convertible.ToLinearCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
             var spline = convertible.ToSplineCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
@@ -81,7 +81,7 @@ namespace SharpGLTF.Animations
             // convert and resample the curve to a linear and cubic curves.
 
             var convertible = curve as IConvertibleCurve<Quaternion>;
-            Assert.NotNull(convertible);
+            Assert.That(convertible, Is.Not.Null);
 
             var linear = convertible.ToLinearCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
             var spline = convertible.ToSplineCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
@@ -130,7 +130,7 @@ namespace SharpGLTF.Animations
             // convert and resample the curve to a linear and cubic curves.
 
             var convertible = curve as IConvertibleCurve<Transforms.SparseWeight8>;
-            Assert.NotNull(convertible);
+            Assert.That(convertible, Is.Not.Null);
 
             var linear = convertible.ToLinearCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
             var spline = convertible.ToSplineCurve().Select(kvp => (kvp.Key, kvp.Value)).CreateSampler();
@@ -143,14 +143,14 @@ namespace SharpGLTF.Animations
                 var ls = linear.GetPoint(t);
                 var ss = spline.GetPoint(t);
 
-                Assert.AreEqual(cc[0], ls[0], 0.02f);
-                Assert.AreEqual(cc[1], ls[1], 0.02f);
+                Assert.That(ls[0], Is.EqualTo(cc[0]).Within(0.02f));
+                Assert.That(ls[1], Is.EqualTo(cc[1]).Within(0.02f));
 
-                Assert.AreEqual(cc[0], ss[0], 0.02f);
-                Assert.AreEqual(cc[1], ss[1], 0.02f);
+                Assert.That(ss[0], Is.EqualTo(cc[0]).Within(0.02f));
+                Assert.That(ss[1], Is.EqualTo(cc[1]).Within(0.02f));
 
-                Assert.AreEqual(ls[0], ss[0], 0.02f);
-                Assert.AreEqual(ls[1], ss[1], 0.02f);
+                Assert.That(ss[0], Is.EqualTo(ls[0]).Within(0.02f));
+                Assert.That(ss[1], Is.EqualTo(ls[1]).Within(0.02f));
             }
 
             // plot the curve.
@@ -190,7 +190,7 @@ namespace SharpGLTF.Animations
             instanceNode.SetAnimationFrame(0, 7);
             var nodeMatrix = instanceNode.LocalMatrix;
 
-            Assert.AreEqual(new Vector3(1, 2, 3), nodeMatrix.Translation);
+            Assert.That(nodeMatrix.Translation, Is.EqualTo(new Vector3(1, 2, 3)));
         }
 
     }
