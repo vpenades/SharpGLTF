@@ -20,7 +20,6 @@ namespace SharpGLTF
         /// </summary>
         public static string LocalRepoDirectory => System.IO.Path.Combine(ProgramDirectory, "glTF");
 
-
         #endregion
 
         #region main schema paths

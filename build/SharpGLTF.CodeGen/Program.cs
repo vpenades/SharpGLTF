@@ -60,6 +60,8 @@ namespace SharpGLTF
 
             processors.Add(new ExtMeshFeaturesExtension());
 
+            processors.Add(new ExtInstanceFeaturesExtension());
+
             // ----------------------------------------------  process all files
 
             foreach (var processor in processors)
