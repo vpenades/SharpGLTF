@@ -62,12 +62,12 @@ namespace SharpGLTF
 
             public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath, System.Threading.CancellationToken cancellationToken)
             {
-                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath);
+                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
 
                 filePath = System.IO.Path.GetFileName(filePath);
                 filePath = System.IO.Path.Combine(Constants.MainSchemaDir, filePath);
 
-                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath);
+                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
 
                 throw new System.IO.FileNotFoundException(filePath);
             }
