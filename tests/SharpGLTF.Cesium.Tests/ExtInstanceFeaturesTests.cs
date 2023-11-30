@@ -49,11 +49,10 @@ namespace SharpGLTF.Cesium
 
             var cesiumExtInstanceFeaturesExtension = (MeshExtInstanceFeatures)model.LogicalNodes[0].Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
 
-            Assert.NotNull(cesiumExtInstanceFeaturesExtension.FeatureIds);
-
-            Assert.IsTrue(cesiumExtInstanceFeaturesExtension.FeatureIds.Equals(featureIds));
-            Assert.IsTrue(cesiumExtInstanceFeaturesExtension.FeatureIds[0].Equals(featureId0));
-            Assert.IsTrue(cesiumExtInstanceFeaturesExtension.FeatureIds[1].Equals(featureId1));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds, Is.Not.Null);
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds.Equals(featureIds));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[0].Equals(featureId0));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[1].Equals(featureId1));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.ValidateContent(ctx.GetContext());
