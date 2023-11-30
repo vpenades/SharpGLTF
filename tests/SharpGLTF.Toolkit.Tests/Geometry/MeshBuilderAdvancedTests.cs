@@ -106,11 +106,11 @@ namespace SharpGLTF.Geometry
             model.MergeBuffers();
 
             // checks
-            Assert.AreEqual(1, model.LogicalBuffers.Count);
-            Assert.AreEqual(2, model.LogicalBufferViews.Count);
-            Assert.IsTrue(model.LogicalBufferViews[0].IsVertexBuffer);
-            Assert.IsTrue(model.LogicalBufferViews[1].IsIndexBuffer);
-            Assert.AreEqual(2, model.LogicalMaterials.Count);
+            Assert.That(model.LogicalBuffers, Has.Count.EqualTo(1));
+            Assert.That(model.LogicalBufferViews, Has.Count.EqualTo(2));
+            Assert.That(model.LogicalBufferViews[0].IsVertexBuffer);
+            Assert.That(model.LogicalBufferViews[1].IsIndexBuffer);
+            Assert.That(model.LogicalMaterials, Has.Count.EqualTo(2));
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
@@ -144,7 +144,7 @@ namespace SharpGLTF.Geometry
 
             var pivot = new NodeBuilder("RootNode").WithLocalTranslation("track1", keyframes);
 
-            Assert.AreEqual(4, pivot.UseTranslation("track1").Keys.Count);
+            Assert.That(pivot.UseTranslation("track1").Keys, Has.Count.EqualTo(4));
 
             // create scene
 

@@ -16,7 +16,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             var v2 = new VertexCustom2(0.3f, Vector4.One);
             var v1 = new VertexColor1Texture1Custom1(v2);
             
-            Assert.AreEqual(0.3f, v1.CustomId);
+            Assert.That(v1.CustomId, Is.EqualTo(0.3f));
         }
 
         [Test]
@@ -24,7 +24,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             var v1 = new VertexColor1Texture1Custom1(Vector4.One, Vector2.One, 0.3f);
             var v2 = v1.ConvertToMaterial<VertexCustom2>();
-            Assert.AreEqual(0.3f, v2.CustomId0);
+            Assert.That(v2.CustomId0, Is.EqualTo(0.3f));
         }
 
     }

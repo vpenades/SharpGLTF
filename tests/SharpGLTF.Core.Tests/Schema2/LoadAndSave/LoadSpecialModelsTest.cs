@@ -32,7 +32,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\white space.gltf");
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             model.AttachToCurrentTest("white space.glb");
         }
@@ -49,7 +49,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // load Polly model
             var model = ModelRoot.Load(TestFiles.GetPollyFileModelPath(), Validation.ValidationMode.TryFix);
 
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var triangles = model.DefaultScene
                 .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexTexture1>(null, model.LogicalAnimations[0], 0.5f)
@@ -114,7 +114,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var path = TestFiles.GetUniVRMModelPath();
             
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var flattenExtensions = model.GatherUsedExtensions().ToArray();
 
@@ -127,7 +127,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var path = "Assets\\SpecialCases\\shrekshao.glb";
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
         }
 
         [Test]
@@ -151,7 +151,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var node5_R_00 = sampler.GetPoint(0);
             var node5_R_01 = sampler.GetPoint(1);
 
-            Assert.AreEqual(node5_R_00, node5_R_01);
+            Assert.That(node5_R_01, Is.EqualTo(node5_R_00));
 
             model.AttachToCurrentTest("mouse_00.obj", model.LogicalAnimations[1], 0f);
             model.AttachToCurrentTest("mouse_01.obj", model.LogicalAnimations[1], 1f);
@@ -206,8 +206,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // write to dictionary
             var wcontext = WriteContext.CreateFromDictionary(dictionary);
             model.Save("avocado.gltf", wcontext);
-            Assert.IsTrue(dictionary.ContainsKey("avocado.gltf"));
-            Assert.IsTrue(dictionary.ContainsKey("avocado.bin"));
+            Assert.That(dictionary.ContainsKey("avocado.gltf"), Is.True);
+            Assert.That(dictionary.ContainsKey("avocado.bin"), Is.True);
 
             // read back from dictionary
             var rcontext = ReadContext.CreateFromDictionary(dictionary);
@@ -232,7 +232,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             rsettings.JsonPreprocessor = _RemoveEmptyArrayJsonProcessor;
 
             var model = ModelRoot.Load(path, rsettings);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             // save the model, using a hook to modify the json before writing it to the file.
 
@@ -246,7 +246,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             model = ModelRoot.Load(path);
 
-            Assert.AreEqual(model.Asset.Generator, "postprocessed json");
+            Assert.That("postprocessed json", Is.EqualTo(model.Asset.Generator));
         }
 
 

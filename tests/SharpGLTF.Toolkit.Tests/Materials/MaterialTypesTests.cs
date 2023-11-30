@@ -16,7 +16,7 @@ namespace SharpGLTF.Materials
             var knownPropertyValues = Enum.GetNames(typeof(KnownProperty));
             var schemaPropertyValues = Enum.GetNames(typeof(Schema2._MaterialParameterKey));            
 
-            CollectionAssert.AreEqual(schemaPropertyValues, knownPropertyValues);
+            Assert.That(schemaPropertyValues, Is.EqualTo(knownPropertyValues));
         }
     }
 }

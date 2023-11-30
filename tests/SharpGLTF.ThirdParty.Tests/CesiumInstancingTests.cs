@@ -33,19 +33,19 @@ namespace SharpGLTF.ThirdParty
             settings.GpuMeshInstancingMinCount = 0;
             var instancedModel = sceneBuilder.ToGltf2(settings);
 
-            Assert.AreEqual(1,instancedModel.LogicalNodes.Count);
+            Assert.That(instancedModel.LogicalNodes.Count, Is.EqualTo(1));
 
             var node = instancedModel.LogicalNodes[0];
             var instances = node.GetExtension<MeshGpuInstancing>();
-            Assert.NotNull(instances);
+            Assert.That(instances, Is.Not.Null);
 
-            Assert.AreEqual(2, instances.Accessors.Count);
-            CollectionAssert.Contains(instances.Accessors.Keys, "TRANSLATION");
-            CollectionAssert.Contains(instances.Accessors.Keys, "_FEATURE_ID_0");
+            Assert.That(instances.Accessors, Has.Count.EqualTo(2));
+            Assert.That(instances.Accessors.Keys, Does.Contain("TRANSLATION"));
+            Assert.That(instances.Accessors.Keys, Does.Contain("_FEATURE_ID_0"));
 
             var ids = instances.Accessors["_FEATURE_ID_0"].AsIndicesArray();
 
-            CollectionAssert.AreEqual(new int[] { 0, 1 }, ids);
+            Assert.That(ids, Is.EqualTo(new int[] { 0, 1 }));
 
             var dstPath = AttachmentInfo
                 .From("instanced_model_with_feature_id.glb")

@@ -49,8 +49,8 @@ namespace SharpGLTF.Transforms
 
                 NumericsAssert.AreEqual(o, m, tolerance);
 
-                Assert.IsTrue(Matrix4x4.Decompose(m, out _, out _, out _));
-                Assert.IsTrue(Matrix4x4.Invert(m, out _));
+                Assert.That(Matrix4x4.Decompose(m, out _, out _, out _), Is.True);
+                Assert.That(Matrix4x4.Invert(m, out _), Is.True);
             }
 
             void testSkewed(Func<Matrix4x4, Matrix4x4> mf, float tolerance = 0)
@@ -59,14 +59,14 @@ namespace SharpGLTF.Transforms
 
                 var o = m = mf(m);
 
-                Assert.IsFalse(Matrix4x4.Decompose(m, out _, out _, out _));
+                Assert.That(Matrix4x4.Decompose(m, out _, out _, out _), Is.False);
 
                 Matrix4x4Factory.NormalizeMatrix(ref m);
 
                 NumericsAssert.AreEqual(o, m, tolerance);                
 
-                Assert.IsTrue(Matrix4x4.Decompose(m, out _, out _, out _));
-                Assert.IsTrue(Matrix4x4.Invert(m, out _));               
+                Assert.That(Matrix4x4.Decompose(m, out _, out _, out _), Is.True);
+                Assert.That(Matrix4x4.Invert(m, out _), Is.True);               
             }
             
             testSkewed(m => { m.M12 += 0.34f; return m; }, 0.34f);
@@ -86,10 +86,10 @@ namespace SharpGLTF.Transforms
             var SxR = Matrix4x4.CreateScale(5, 1, 1) * Matrix4x4.CreateFromYawPitchRoll(1, 2, 3);   // Decomposable
             var RxS = Matrix4x4.CreateFromYawPitchRoll(1, 2, 3) * Matrix4x4.CreateScale(5, 1, 1);   // Not Decomposable            
 
-            Assert.IsTrue(Matrix4x4.Decompose(SxR, out _, out _, out _));
+            Assert.That(Matrix4x4.Decompose(SxR, out _, out _, out _), Is.True);
             testMatrix(SxR, 0.0001f);
 
-            Assert.IsFalse(Matrix4x4.Decompose(RxS, out _, out _, out _));
+            Assert.That(Matrix4x4.Decompose(RxS, out _, out _, out _), Is.False);
             testMatrix(RxS, 100);           
         }
 
@@ -102,8 +102,8 @@ namespace SharpGLTF.Transforms
             NumericsAssert.AreEqual(Matrix4x4.Identity, asMatrix.Matrix);
             NumericsAssert.AreEqual(Matrix4x4.Identity, asDecomposed.Matrix);
 
-            Assert.IsTrue(asMatrix.IsIdentity);
-            Assert.IsTrue(asDecomposed.IsIdentity);
+            Assert.That(asMatrix.IsIdentity, Is.True);
+            Assert.That(asDecomposed.IsIdentity, Is.True);
         }
 
         [TestCase(false, false, false, false)]
@@ -161,11 +161,11 @@ namespace SharpGLTF.Transforms
         {
             var xf = new AffineTransform(new Vector3(sx, sy, sz), Quaternion.CreateFromYawPitchRoll(y, p, r), new Vector3(tx, ty, tz));
 
-            Assert.IsTrue(AffineTransform.TryInvert(xf, out var xi));            
-            Assert.IsTrue(Matrix4x4.Invert(xf.Matrix, out var mi));
+            Assert.That(AffineTransform.TryInvert(xf, out var xi), Is.True);            
+            Assert.That(Matrix4x4.Invert(xf.Matrix, out var mi), Is.True);
             mi.M44 = 1f;
 
-            if (isInvertibleToSRT) Assert.IsTrue(xi.IsSRT);
+            if (isInvertibleToSRT) Assert.That(xi.IsSRT, Is.True);
 
             var xmi = xi.Matrix;
 
@@ -178,7 +178,7 @@ namespace SharpGLTF.Transforms
             var diff = NumericsAssert.AreGeometryicallyEquivalent(mi, xmi, tolerance);
             TestContext.WriteLine(diff);
 
-            Assert.IsTrue(AffineTransform.AreGeometricallyEquivalent(mi, xi, tolerance));
+            Assert.That(AffineTransform.AreGeometricallyEquivalent(mi, xi, tolerance), Is.True);
         }
     }    
 }

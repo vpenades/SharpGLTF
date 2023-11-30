@@ -26,8 +26,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // absolute path            
 
             var model1 = ModelRoot.Load(modelPath, Validation.ValidationMode.TryFix);
-            Assert.NotNull(model1);
-            Assert.AreEqual(4, model1.LogicalImages.Count);
+            Assert.That(model1, Is.Not.Null);
+            Assert.That(model1.LogicalImages, Has.Count.EqualTo(4));
 
             TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
@@ -37,8 +37,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var modelFile = System.IO.Path.GetFileName(modelPath);
 
             var model2 = ModelRoot.Load(modelFile, Validation.ValidationMode.TryFix);
-            Assert.NotNull(model2);
-            Assert.AreEqual(4, model2.LogicalImages.Count);
+            Assert.That(model2, Is.Not.Null);
+            Assert.That(model2.LogicalImages, Has.Count.EqualTo(4));
 
             TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
@@ -48,8 +48,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Environment.CurrentDirectory = System.IO.Path.GetDirectoryName(Environment.CurrentDirectory);
 
             var model3 = ModelRoot.Load(modelFile, Validation.ValidationMode.TryFix);
-            Assert.NotNull(model3);
-            Assert.AreEqual(4, model3.LogicalImages.Count);
+            Assert.That(model3, Is.Not.Null);
+            Assert.That(model3.LogicalImages, Has.Count.EqualTo(4));
 
             TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
@@ -74,8 +74,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var suzanne2 = ModelRoot.Load(path2);
             var suzanne2Mem = suzanne1.LogicalBuffers.Sum(item => item.Content.Length);
 
-            Assert.AreEqual(suzanne1Mem, suzanne2Mem);
-            Assert.AreEqual(suzanne1.LogicalMeshes.Count, suzanne2.LogicalMeshes.Count);
+            Assert.That(suzanne2Mem, Is.EqualTo(suzanne1Mem));
+            Assert.That(suzanne2.LogicalMeshes, Has.Count.EqualTo(suzanne1.LogicalMeshes.Count));
 
             // scenebuilder roundtrip
 
@@ -87,8 +87,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var suzanne3 = ModelRoot.Load(path3);
             var suzanne3Mem = suzanne1.LogicalBuffers.Sum(item => item.Content.Length);
 
-            Assert.AreEqual(suzanne1Mem, suzanne3Mem);
-            Assert.AreEqual(suzanne1.LogicalMeshes.Count, suzanne3.LogicalMeshes.Count);
+            Assert.That(suzanne3Mem, Is.EqualTo(suzanne1Mem));
+            Assert.That(suzanne3.LogicalMeshes, Has.Count.EqualTo(suzanne1.LogicalMeshes.Count));
         }
 
         [Test]
@@ -100,7 +100,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             using(var ls = new ReadOnlyTestStream(bytes))
             {
                 var model = ModelRoot.ReadGLB(ls);
-                Assert.NotNull(model);
+                Assert.That(model, Is.Not.Null);
             }
         }
     }

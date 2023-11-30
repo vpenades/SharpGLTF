@@ -28,13 +28,13 @@ namespace SharpGLTF.IO
 
             Schema2.ModelRoot model = scene.ToGltf2();
 
-            Assert.AreEqual("SphereMesh", model.LogicalMeshes[0].Name);
-            Assert.AreEqual("Sphere", model.LogicalNodes[0].Name);            
+            Assert.That(model.LogicalMeshes[0].Name, Is.EqualTo("SphereMesh"));
+            Assert.That(model.LogicalNodes[0].Name, Is.EqualTo("Sphere"));            
 
             model = _ZipRoundtrip(model);
 
-            Assert.AreEqual("SphereMesh", model.LogicalMeshes[0].Name);
-            Assert.AreEqual("Sphere", model.LogicalNodes[0].Name);
+            Assert.That(model.LogicalMeshes[0].Name, Is.EqualTo("SphereMesh"));
+            Assert.That(model.LogicalNodes[0].Name, Is.EqualTo("Sphere"));
         }
 
 

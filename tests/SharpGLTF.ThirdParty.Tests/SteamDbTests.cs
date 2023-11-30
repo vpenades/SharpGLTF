@@ -38,11 +38,11 @@ namespace SharpGLTF.ThirdParty
 
             var model = sceneBuilder.ToGltf2();
 
-            Assert.AreEqual("alternateTextureName.*", model.LogicalImages[0].AlternateWriteFileName);
+            Assert.That(model.LogicalImages[0].AlternateWriteFileName, Is.EqualTo("alternateTextureName.*"));
 
             model = model.DeepClone();
 
-            Assert.AreEqual("alternateTextureName.*", model.LogicalImages[0].AlternateWriteFileName);
+            Assert.That(model.LogicalImages[0].AlternateWriteFileName, Is.EqualTo("alternateTextureName.*"));
 
             var dstPath = AttachmentInfo
                 .From("model.gltf")
@@ -50,7 +50,7 @@ namespace SharpGLTF.ThirdParty
 
             var altPath = System.IO.Path.Combine(dstPath.Directory.FullName, "alternateTextureName.png");
 
-            Assert.IsTrue(System.IO.File.Exists(altPath));
+            Assert.That(System.IO.File.Exists(altPath));
         }
     }
 }

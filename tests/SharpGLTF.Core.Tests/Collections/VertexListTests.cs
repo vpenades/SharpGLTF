@@ -23,11 +23,11 @@ namespace SharpGLTF.Collections
 
             var floats = new float[] { positiveZero, negativeZero };
             var integers = System.Runtime.InteropServices.MemoryMarshal.Cast<float, uint>(floats);
-            Assert.AreNotEqual(integers[0], integers[1]);
+            Assert.That(integers[1], Is.Not.EqualTo(integers[0]));
 
             var positiveHash = positiveZero.GetHashCode();
             var negativeHash = negativeZero.GetHashCode();
-            Assert.AreEqual(positiveHash, negativeHash);
+            Assert.That(negativeHash, Is.EqualTo(positiveHash));
         }
 
         [System.Diagnostics.DebuggerDisplay("{Value}")]
@@ -52,19 +52,19 @@ namespace SharpGLTF.Collections
             var list = new VertexList<_VertexExample>();
 
             list.Use(5);
-            Assert.AreEqual(1, list.Count);
+            Assert.That(list, Has.Count.EqualTo(1));
 
             list.Use(7);
-            Assert.AreEqual(2, list.Count);
-            Assert.AreEqual(5, list[0].Value);
-            Assert.AreEqual(7, list[1].Value);
+            Assert.That(list, Has.Count.EqualTo(2));
+            Assert.That(list[0].Value, Is.EqualTo(5));
+            Assert.That(list[1].Value, Is.EqualTo(7));
 
             list.Use(5);
-            Assert.AreEqual(2, list.Count);
+            Assert.That(list, Has.Count.EqualTo(2));
 
             var list2 = new VertexList<_VertexExample>();
             list.CopyTo(list2);
-            Assert.AreEqual(2, list2.Count);
+            Assert.That(list2, Has.Count.EqualTo(2));
 
         }
 
@@ -78,27 +78,27 @@ namespace SharpGLTF.Collections
 
             var vlist = new ValueListSet<XYZ>();
 
-            var idx0 = vlist.Use(a); Assert.AreEqual(0, idx0);
-            var idx1 = vlist.Use(b); Assert.AreEqual(1, idx1);
-            var idx2 = vlist.Use(a); Assert.AreEqual(0, idx2);
+            var idx0 = vlist.Use(a); Assert.That(idx0, Is.EqualTo(0));
+            var idx1 = vlist.Use(b); Assert.That(idx1, Is.EqualTo(1));
+            var idx2 = vlist.Use(a); Assert.That(idx2, Is.EqualTo(0));
 
-            Assert.AreEqual(a, vlist[idx0]);
-            Assert.AreEqual(b, vlist[idx1]);
-            Assert.AreEqual(a, vlist[idx2]);
+            Assert.That(vlist[idx0], Is.EqualTo(a));
+            Assert.That(vlist[idx1], Is.EqualTo(b));
+            Assert.That(vlist[idx2], Is.EqualTo(a));
 
-            CollectionAssert.AreEqual(new[] { a, b }, vlist.ToArray());
+            Assert.That(new[] { a, b }, Is.EqualTo(vlist.ToArray()));
 
             vlist.Use(c);
             vlist.Use(d);
-            CollectionAssert.AreEqual(new[] { a, b, c, d }, vlist.ToArray());
+            Assert.That(new[] { a, b, c, d }, Is.EqualTo(vlist.ToArray()));
 
             var vlist2 = new ValueListSet<XYZ>();
             vlist.CopyTo(vlist2);
 
-            Assert.AreEqual(vlist[0], vlist2[0]);
-            Assert.AreEqual(vlist[1], vlist2[1]);
-            Assert.AreEqual(vlist[2], vlist2[2]);
-            Assert.AreEqual(vlist[3], vlist2[3]);
+            Assert.That(vlist2[0], Is.EqualTo(vlist[0]));
+            Assert.That(vlist2[1], Is.EqualTo(vlist[1]));
+            Assert.That(vlist2[2], Is.EqualTo(vlist[2]));
+            Assert.That(vlist2[3], Is.EqualTo(vlist[3]));
 
         }
 

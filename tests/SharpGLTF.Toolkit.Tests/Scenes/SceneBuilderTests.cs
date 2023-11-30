@@ -69,11 +69,11 @@ namespace SharpGLTF.Scenes
                 .OfType<LightContent>()
                 .ToList();
 
-            Assert.AreEqual(2, lightInstances.Count);
+            Assert.That(lightInstances, Has.Count.EqualTo(2));
 
             var gltf = scene.ToGltf2();
 
-            Assert.AreEqual(2, gltf.LogicalPunctualLights.Count);
+            Assert.That(gltf.LogicalPunctualLights, Has.Count.EqualTo(2));
 
             gltf.AttachToCurrentTest("cube.glb");
             gltf.AttachToCurrentTest("cube.gltf");
@@ -149,28 +149,28 @@ namespace SharpGLTF.Scenes
             var prim = mesh.UsePrimitive(MaterialBuilder.CreateDefault());
 
             var idx = prim.AddQuadrangle(new VertexPosition(0, -1, 0), new VertexPosition(1, 0, 0), new VertexPosition(0, 1, 0), new VertexPosition(-1, 0, 0));
-            Assert.AreEqual((0, 1, 2, 3), idx);
+            Assert.That(idx, Is.EqualTo((0, 1, 2, 3)));
 
             idx = prim.AddQuadrangle(new VertexPosition(0, -1, 1), new VertexPosition(1, 0, 1), new VertexPosition(0, 1, 1), new VertexPosition(0.5f, 0, 1));
-            Assert.AreEqual((4, 5, 6, 7), idx);
+            Assert.That(idx, Is.EqualTo((4, 5, 6, 7)));
 
             idx = prim.AddQuadrangle(new VertexPosition(0, 0.5f, 2), new VertexPosition(1, 0, 2), new VertexPosition(0, 1, 2), new VertexPosition(-1, 0, 2));
-            Assert.AreEqual((8,9,10,11), idx);
+            Assert.That(idx, Is.EqualTo((8,9,10,11)));
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 3), new VertexPosition(0, 1, 3), new VertexPosition(0.5f, 0, 3), new VertexPosition(0, -1, 3));
-            Assert.AreEqual((12,13,14,15), idx);
+            Assert.That(idx, Is.EqualTo((12,13,14,15)));
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(-1, 0, 4));
-            Assert.AreEqual((-1, 16, 17, 18), idx);
+            Assert.That(idx, Is.EqualTo((-1, 16, 17, 18)));
 
             idx = prim.AddQuadrangle(new VertexPosition(1, 0, 4), new VertexPosition(1, 0, 4), new VertexPosition(0, 1, 4), new VertexPosition(0, 1, 4));
-            Assert.AreEqual((-1, -1, -1, -1), idx);
+            Assert.That(idx, Is.EqualTo((-1, -1, -1, -1)));
 
             idx = prim.AddQuadrangle(new VertexPosition(0, 0, 5), new VertexPosition(10, -1, 5), new VertexPosition(9, 0, 5), new VertexPosition(10, 1, 5));
-            Assert.AreEqual((19,20,21,22), idx);
+            Assert.That(idx, Is.EqualTo((19,20,21,22)));
 
             idx = prim.AddQuadrangle(new VertexPosition(10, -1, 6), new VertexPosition(9, 0, 6), new VertexPosition(10, 1, 6), new VertexPosition(0, 0, 6));
-            Assert.AreEqual((23, 24, 25, 26), idx);
+            Assert.That(idx, Is.EqualTo((23, 24, 25, 26)));
 
             var scene = new SceneBuilder();
 
@@ -531,9 +531,9 @@ namespace SharpGLTF.Scenes
 
             var meshIdx = 1;
 
-            Assert.AreEqual(1, gltf.LogicalMeshes[meshIdx].Primitives[0].MorphTargetsCount);
-            Assert.AreEqual(1, gltf.LogicalMeshes[meshIdx].MorphWeights[0]);
-            Assert.AreEqual(1, gltf.LogicalAnimations.Count);
+            Assert.That(gltf.LogicalMeshes[meshIdx].Primitives[0].MorphTargetsCount, Is.EqualTo(1));
+            Assert.That(gltf.LogicalMeshes[meshIdx].MorphWeights[0], Is.EqualTo(1));
+            Assert.That(gltf.LogicalAnimations.Count, Is.EqualTo(1));
 
             scene.AttachToCurrentTest("mopth.glb");
             scene.AttachToCurrentTest("mopth.gltf");
@@ -565,7 +565,7 @@ namespace SharpGLTF.Scenes
             scene.AddRigidMesh(sphere, joint0);
 
             var gltf = scene.ToGltf2();
-            Assert.AreEqual(3, gltf.LogicalNodes.Count);
+            Assert.That(gltf.LogicalNodes.Count, Is.EqualTo(3));
 
             gltf.AttachToCurrentTest("instanced.glb");
             gltf.AttachToCurrentTest("instanced.gltf");
@@ -591,7 +591,7 @@ namespace SharpGLTF.Scenes
                 .FirstOrDefault(item => item.Contains(path));
 
             var srcModel = Schema2.ModelRoot.Load(path, Validation.ValidationMode.TryFix);
-            Assert.NotNull(srcModel);            
+            Assert.That(srcModel, Is.Not.Null);            
 
             // perform roundtrip
 
@@ -612,14 +612,14 @@ namespace SharpGLTF.Scenes
             var rowTris = rowModel.DefaultScene.EvaluateTriangles().ToList();
             var colTris = colModel.DefaultScene.EvaluateTriangles().ToList();
 
-            Assert.AreEqual(srcTris.Count, rowTris.Count);
-            Assert.AreEqual(srcTris.Count, colTris.Count);
+            Assert.That(rowTris, Has.Count.EqualTo(srcTris.Count));
+            Assert.That(colTris, Has.Count.EqualTo(srcTris.Count));
 
             var srcRep = Reporting.ModelReport.CreateReportFrom(srcModel);
             var rowRep = Reporting.ModelReport.CreateReportFrom(rowModel);
             var colRep = Reporting.ModelReport.CreateReportFrom(colModel);
 
-            Assert.AreEqual(srcRep.NumTriangles, rowRep.NumTriangles);
+            Assert.That(rowRep.NumTriangles, Is.EqualTo(srcRep.NumTriangles));
             NumericsAssert.AreEqual(srcRep.Bounds.Min, rowRep.Bounds.Min, 0.0001f);
             NumericsAssert.AreEqual(srcRep.Bounds.Max, rowRep.Bounds.Max, 0.0001f);
 
@@ -662,7 +662,7 @@ namespace SharpGLTF.Scenes
 
             // load the glTF model
             var srcModel = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
-            Assert.NotNull(srcModel);
+            Assert.That(srcModel, Is.Not.Null);
 
             srcModel.AttachToCurrentTest("GearBoxAssy.plotly");
 
@@ -696,7 +696,7 @@ namespace SharpGLTF.Scenes
 
             var schema = sb.ToGltf2();
 
-            Assert.AreEqual(0, schema.LogicalMeshes.Count,"SceneBuilder should detect empty meshes and remove them.");
+            Assert.That(schema.LogicalMeshes.Count, Is.EqualTo(0), "SceneBuilder should detect empty meshes and remove them.");
 
             schema.CreateMesh("Empty2");
 
@@ -716,14 +716,14 @@ namespace SharpGLTF.Scenes
 
             var gltf = sb.ToGltf2();
 
-            Assert.AreEqual(2, gltf.LogicalNodes.Count);
+            Assert.That(gltf.LogicalNodes.Count, Is.EqualTo(2));
 
             // roundtrip
             sb = SceneBuilder.CreateFrom(gltf.DefaultScene);
 
             var instance = sb.Instances.FirstOrDefault(item => item.Name == "Named");
 
-            Assert.NotNull(instance);            
+            Assert.That(instance, Is.Not.Null);            
         }
 
         [Test]
@@ -767,16 +767,16 @@ namespace SharpGLTF.Scenes
 
             var model = scene.ToGltf2();
 
-            Assert.AreEqual(3, model.LogicalMaterials.Count);
-            CollectionAssert.AreEquivalent(new[] { "material0", "material2", "material3" }, model.LogicalMaterials.Select(item => item.Name));
+            Assert.That(model.LogicalMaterials, Has.Count.EqualTo(3));
+            Assert.That(model.LogicalMaterials.Select(item => item.Name), Is.EquivalentTo(new[] { "material0", "material2", "material3" }));
 
-            Assert.AreEqual(2, model.LogicalMeshes.Count);
+            Assert.That(model.LogicalMeshes, Has.Count.EqualTo(2));
 
-            Assert.AreEqual("mesh1", model.LogicalMeshes[0].Name);
-            Assert.AreEqual(2, model.LogicalMeshes[0].Primitives.Count);
+            Assert.That(model.LogicalMeshes[0].Name, Is.EqualTo("mesh1"));
+            Assert.That(model.LogicalMeshes[0].Primitives, Has.Count.EqualTo(2));
 
-            Assert.AreEqual("mesh3", model.LogicalMeshes[1].Name);
-            Assert.AreEqual(1, model.LogicalMeshes[1].Primitives.Count);
+            Assert.That(model.LogicalMeshes[1].Name, Is.EqualTo("mesh3"));
+            Assert.That(model.LogicalMeshes[1].Primitives, Has.Count.EqualTo(1));
 
             // save the model as GLB
 
@@ -988,12 +988,12 @@ namespace SharpGLTF.Scenes
             // convert to SceneBuilder:
 
             var scenes = SceneBuilder.CreateFrom(model1).ToArray();
-            Assert.AreEqual(2, scenes.Length);
+            Assert.That(scenes, Has.Length.EqualTo(2));
 
             var mesh1 = scenes[0].Instances[0].Content.GetGeometryAsset();
             var mesh2 = scenes[1].Instances[0].Content.GetGeometryAsset();
 
-            Assert.AreSame(mesh1, mesh2, "both scenes must share the same MeshBuilder");
+            Assert.That(mesh2, Is.SameAs(mesh1), "both scenes must share the same MeshBuilder");
 
             // convert back to gltf:
 
@@ -1001,9 +1001,9 @@ namespace SharpGLTF.Scenes
 
             // verify the mesh is still shared.
 
-            Assert.AreEqual(2, model2.LogicalScenes.Count);
-            Assert.AreEqual(2, model2.LogicalNodes.Count);
-            Assert.AreEqual(1, model2.LogicalMeshes.Count); // check the mesh is shared between the 2 scenes
+            Assert.That(model2.LogicalScenes, Has.Count.EqualTo(2));
+            Assert.That(model2.LogicalNodes, Has.Count.EqualTo(2));
+            Assert.That(model2.LogicalMeshes, Has.Count.EqualTo(1)); // check the mesh is shared between the 2 scenes
         }
 
         [Test]
@@ -1024,7 +1024,7 @@ namespace SharpGLTF.Scenes
             var scene2 = new SceneBuilder();
             scene2.AddScene(scene1, Matrix4x4.CreateTranslation(4, 0, 0));
 
-            Assert.AreEqual(new Vector3(4, 0, 0), scene2.Instances.First().Content.GetPoseWorldMatrix().Translation);
+            Assert.That(scene2.Instances[0].Content.GetPoseWorldMatrix().Translation, Is.EqualTo(new Vector3(4, 0, 0)));
 
 
             scene2.AddScene(scene1, Matrix4x4.CreateTranslation(2, 0, 0));
@@ -1034,8 +1034,8 @@ namespace SharpGLTF.Scenes
 
             var gltf = scene2.ToGltf2();
 
-            Assert.AreEqual(1, gltf.LogicalMeshes.Count);
-            Assert.AreEqual(3, gltf.LogicalNodes.Count);
+            Assert.That(gltf.LogicalMeshes, Has.Count.EqualTo(1));
+            Assert.That(gltf.LogicalNodes, Has.Count.EqualTo(3));
 
             gltf.AttachToCurrentTest("Three cubes.glb");
         }

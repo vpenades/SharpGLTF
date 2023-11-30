@@ -33,38 +33,38 @@ namespace SharpGLTF.Collections
             Assert.Throws<ArgumentNullException>(() => list.Add(null));
 
             var item1 = new TestChild();
-            Assert.IsNull(item1.LogicalParent);
-            Assert.AreEqual(-1, item1.LogicalIndex);
+            Assert.That(item1.LogicalParent, Is.Null);
+            Assert.That(item1.LogicalIndex, Is.EqualTo(-1));
 
             var item2 = new TestChild();
-            Assert.IsNull(item2.LogicalParent);
-            Assert.AreEqual(-1, item2.LogicalIndex);
+            Assert.That(item2.LogicalParent, Is.Null);
+            Assert.That(item2.LogicalIndex, Is.EqualTo(-1));
 
             list.Add(item1);
-            Assert.AreSame(this, item1.LogicalParent);
-            Assert.AreEqual(0, item1.LogicalIndex);
+            Assert.That(item1.LogicalParent, Is.SameAs(this));
+            Assert.That(item1.LogicalIndex, Is.EqualTo(0));
 
             Assert.Throws<ArgumentException>(() => list.Add(item1));
 
             list.Remove(item1);
-            Assert.IsNull(item1.LogicalParent);
-            Assert.AreEqual(-1, item1.LogicalIndex);
+            Assert.That(item1.LogicalParent, Is.Null);
+            Assert.That(item1.LogicalIndex, Is.EqualTo(-1));
 
             list.Add(item1);
-            Assert.AreSame(this, item1.LogicalParent);
-            Assert.AreEqual(0, item1.LogicalIndex);
+            Assert.That(item1.LogicalParent, Is.SameAs(this));
+            Assert.That(item1.LogicalIndex, Is.EqualTo(0));
 
             list.Insert(0, item2);
-            Assert.AreSame(this, item2.LogicalParent);
-            Assert.AreEqual(0, item2.LogicalIndex);
-            Assert.AreSame(this, item1.LogicalParent);
-            Assert.AreEqual(1, item1.LogicalIndex);
+            Assert.That(item2.LogicalParent, Is.SameAs(this));
+            Assert.That(item2.LogicalIndex, Is.EqualTo(0));
+            Assert.That(item1.LogicalParent, Is.SameAs(this));
+            Assert.That(item1.LogicalIndex, Is.EqualTo(1));
 
             list.RemoveAt(0);
-            Assert.IsNull(item2.LogicalParent);
-            Assert.AreEqual(-1, item2.LogicalIndex);
-            Assert.AreSame(this, item1.LogicalParent);
-            Assert.AreEqual(0, item1.LogicalIndex);
+            Assert.That(item2.LogicalParent, Is.Null);
+            Assert.That(item2.LogicalIndex, Is.EqualTo(-1));
+            Assert.That(item1.LogicalParent, Is.SameAs(this));
+            Assert.That(item1.LogicalIndex, Is.EqualTo(0));
 
         }
 
