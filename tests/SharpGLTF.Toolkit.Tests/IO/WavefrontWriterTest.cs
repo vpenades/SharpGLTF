@@ -28,7 +28,7 @@ namespace SharpGLTF.IO
 
             var pngPath = System.IO.Path.ChangeExtension(outPath, ".png");
 
-            Assert.IsTrue(System.IO.File.Exists(pngPath));
+            Assert.That(System.IO.File.Exists(pngPath));
         }
     }
 }

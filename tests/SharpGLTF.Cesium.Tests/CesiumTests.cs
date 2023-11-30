@@ -46,8 +46,8 @@ namespace SharpGLTF
             model.LogicalMeshes[0].Primitives[0].SetCesiumOutline(outlines);
 
             var cesiumOutlineExtension = (CesiumPrimitiveOutline)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
-            Assert.NotNull(cesiumOutlineExtension.Indices);
-            CollectionAssert.AreEqual(outlines, cesiumOutlineExtension.Indices.AsIndicesArray());
+            Assert.That(cesiumOutlineExtension.Indices, Is.Not.Null);            
+            Assert.That(outlines, Is.EqualTo(cesiumOutlineExtension.Indices.AsIndicesArray()));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.ValidateContent(ctx.GetContext());

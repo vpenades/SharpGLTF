@@ -93,10 +93,10 @@ namespace SharpGLTF.ThirdParty
 
             // Assert
             var morphedColor = triangles[1].A.GetMaterial().GetColor(0);
-            Assert.AreEqual(expMorphColor, morphedColor);
+            Assert.That(morphedColor, Is.EqualTo(expMorphColor));
             
             morphedColor = triangles[0].A.GetMaterial().GetColor(0);
-            Assert.AreEqual(redColor, morphedColor);
+            Assert.That(morphedColor, Is.EqualTo(redColor));
 
             // save the model in different formats
             AttachmentInfo

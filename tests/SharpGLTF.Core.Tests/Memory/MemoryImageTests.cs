@@ -19,13 +19,13 @@ namespace SharpGLTF.Memory
             var image2 = new MemoryImage(MemoryImage.DefaultPngImage, "second_reference.png");
             var image3 = MemoryImage.Empty;
 
-            Assert.AreEqual(image1.GetHashCode(), image2.GetHashCode());
-            Assert.AreEqual(image1, image2);
-            Assert.IsTrue(MemoryImage.AreEqual(image1, image2));
+            Assert.That(image2.GetHashCode(), Is.EqualTo(image1.GetHashCode()));
+            Assert.That(image2, Is.EqualTo(image1));
+            Assert.That(MemoryImage.AreEqual(image1, image2), Is.True);
 
-            Assert.AreNotEqual(image1.GetHashCode(), image3.GetHashCode());
-            Assert.AreNotEqual(image1, image3);
-            Assert.IsFalse(MemoryImage.AreEqual(image1, image3));
+            Assert.That(image3.GetHashCode(), Is.Not.EqualTo(image1.GetHashCode()));
+            Assert.That(image3, Is.Not.EqualTo(image1));
+            Assert.That(MemoryImage.AreEqual(image1, image3), Is.False);
         }
     }
 }

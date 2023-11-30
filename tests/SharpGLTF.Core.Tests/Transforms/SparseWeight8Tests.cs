@@ -31,40 +31,41 @@ namespace SharpGLTF.Transforms
 
             // creation mode 1
             var sparse = SparseWeight8.Create(array1);
-            Assert.AreEqual(array2.Sum(), sparse.WeightSum);
-            CollectionAssert.AreEqual(array2, sparse.Expand(array2.Length));            
+            Assert.That(sparse.WeightSum, Is.EqualTo(array2.Sum()));
+            Assert.That(sparse.Expand(array2.Length), Is.EqualTo(array2));            
 
             // creation mode 2
             var indexedSparse = SparseWeight8.Create(array3);
-            Assert.AreEqual(array2.Sum(), indexedSparse.WeightSum, 0.000001f);
-            CollectionAssert.AreEqual(array2, indexedSparse.Expand(array2.Length));
+            Assert.That(indexedSparse.WeightSum, Is.EqualTo(array2.Sum()).Within(0.000001f));
+            Assert.That(indexedSparse.Expand(array2.Length), Is.EqualTo(array2));
 
-            Assert.IsTrue(SparseWeight8.AreEqual(sparse, indexedSparse));
+            Assert.That(SparseWeight8.AreEqual(sparse, indexedSparse));
 
             // sort by weights
             var sByWeights = SparseWeight8.OrderedByWeight(sparse);
-            Assert.AreEqual(array2.Sum(), sByWeights.WeightSum);
-            CollectionAssert.AreEqual(array2, sByWeights.Expand(array2.Length));
+            Assert.That(sByWeights.WeightSum, Is.EqualTo(array2.Sum()));
+            Assert.That(sByWeights.Expand(array2.Length), Is.EqualTo(array2));
             CheckWeightOrdered(sByWeights);
 
             // sort by indices
             var sByIndices = SparseWeight8.OrderedByIndex(sByWeights);
-            Assert.AreEqual(array2.Sum(), sByIndices.WeightSum);
-            CollectionAssert.AreEqual(array2, sByIndices.Expand(array2.Length));
-            CheckIndexOrdered(sByWeights);
+            CheckIndexOrdered(sByIndices);
+            Assert.That(sByIndices.WeightSum, Is.EqualTo(array2.Sum()));
+            Assert.That(sByIndices.Expand(array2.Length), Is.EqualTo(array2));
+            
 
             // equality
-            Assert.IsTrue(SparseWeight8.AreEqual(sByIndices, sByWeights));
-            Assert.AreEqual(sByIndices.GetHashCode(), sByWeights.GetHashCode());
+            Assert.That(SparseWeight8.AreEqual(sByIndices, sByWeights), Is.True);
+            Assert.That(sByWeights.GetHashCode(), Is.EqualTo(sByIndices.GetHashCode()));
 
             // sum
             var sum = SparseWeight8.Add(sByIndices, sByWeights);
-            Assert.AreEqual(array2.Sum() * 2, sum.WeightSum);
+            Assert.That(sum.WeightSum, Is.EqualTo(array2.Sum() * 2));
 
             // complement normalization
             if (!array2.Any(item => item<0))
             {
-                Assert.GreaterOrEqual(sparse.GetNormalizedWithComplement(int.MaxValue).WeightSum, 1);
+                Assert.That(sparse.GetNormalizedWithComplement(int.MaxValue).WeightSum, Is.GreaterThanOrEqualTo(1));
             }
         }
 
@@ -82,43 +83,43 @@ namespace SharpGLTF.Transforms
                 (7, 1)
                 );
 
-            Assert.AreEqual(3, sparse[5]);
-            Assert.AreEqual(1, sparse[7]);
-            Assert.AreEqual(2, sparse[8]);
-            Assert.AreEqual(9, sparse[9]);
+            Assert.That(sparse[5], Is.EqualTo(3));
+            Assert.That(sparse[7], Is.EqualTo(1));
+            Assert.That(sparse[8], Is.EqualTo(2));
+            Assert.That(sparse[9], Is.EqualTo(9));
         }
 
         [Test]
         public void TestCreateSparseFromVectors()
         {
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 SparseWeight8.Create(new System.Numerics.Vector4(0, 1, 2, 3), new System.Numerics.Vector4(1, 1, 1, 1)).Expand(4),
-                SparseWeight8.Create(1, 1, 1, 1).Expand(4)
+                Is.EqualTo(SparseWeight8.Create(1, 1, 1, 1).Expand(4))
                 );
 
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 SparseWeight8.Create(new System.Numerics.Vector4(0, 1, 2, 3), new System.Numerics.Vector4(1, 2, 3, 4)).Expand(4),
-                SparseWeight8.Create(1, 2, 3, 4).Expand(4)
+                Is.EqualTo(SparseWeight8.Create(1, 2, 3, 4).Expand(4))
                 );
 
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 SparseWeight8.Create(new System.Numerics.Vector4(0, 1, 2, 3), new System.Numerics.Vector4(4, 3, 2, 1)).Expand(4),
-                SparseWeight8.Create(4, 3, 2, 1).Expand(4)
+                Is.EqualTo(SparseWeight8.Create(4, 3, 2, 1).Expand(4))
                 );
 
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 SparseWeight8.Create(new System.Numerics.Vector4(0, 2, 2, 3), new System.Numerics.Vector4(4, 3, 2, 1)).Expand(4),
-                SparseWeight8.Create(4, 0, 5, 1).Expand(4)
+                Is.EqualTo(SparseWeight8.Create(4, 0, 5, 1).Expand(4))
                 );
 
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 SparseWeight8.Create(new System.Numerics.Vector4(1, 1, 1, 1), new System.Numerics.Vector4(1, 1, 1, 1)).Expand(4),
-                SparseWeight8.Create(0, 4, 0, 0).Expand(4)
+                Is.EqualTo(SparseWeight8.Create(0, 4, 0, 0).Expand(4))
                 );
         }
 
@@ -162,24 +163,40 @@ namespace SharpGLTF.Transforms
 
         static void CheckWeightOrdered(SparseWeight8 sparse)
         {
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight0), Math.Abs(sparse.Weight1));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight1), Math.Abs(sparse.Weight2));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight2), Math.Abs(sparse.Weight3));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight3), Math.Abs(sparse.Weight4));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight4), Math.Abs(sparse.Weight5));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight5), Math.Abs(sparse.Weight6));
-            Assert.GreaterOrEqual(Math.Abs(sparse.Weight6), Math.Abs(sparse.Weight7));
+            Assert.Multiple(() =>
+            {
+                Assert.That(Math.Abs(sparse.Weight0), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight1)));
+                Assert.That(Math.Abs(sparse.Weight1), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight2)));
+                Assert.That(Math.Abs(sparse.Weight2), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight3)));
+                Assert.That(Math.Abs(sparse.Weight3), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight4)));
+                Assert.That(Math.Abs(sparse.Weight4), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight5)));
+                Assert.That(Math.Abs(sparse.Weight5), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight6)));
+                Assert.That(Math.Abs(sparse.Weight6), Is.GreaterThanOrEqualTo(Math.Abs(sparse.Weight7)));
+            });
         }
 
         static void CheckIndexOrdered(SparseWeight8 sparse)
         {
-            Assert.LessOrEqual(sparse.Index0, sparse.Index0);
-            Assert.LessOrEqual(sparse.Index1, sparse.Index1);
-            Assert.LessOrEqual(sparse.Index2, sparse.Index2);
-            Assert.LessOrEqual(sparse.Index3, sparse.Index3);
-            Assert.LessOrEqual(sparse.Index4, sparse.Index4);
-            Assert.LessOrEqual(sparse.Index5, sparse.Index5);
-            Assert.LessOrEqual(sparse.Index6, sparse.Index6);
+            var pairs = sparse.GetIndexedWeights();
+
+            bool zeroFound = false;
+            long lastIndex = long.MinValue;
+
+            foreach(var (index,weight) in pairs)
+            {
+                if (weight == 0) zeroFound = true;
+
+                if (zeroFound)
+                {
+                    Assert.That(index, Is.EqualTo(0));
+                    Assert.That(weight, Is.EqualTo(0));
+                    continue;
+                }
+
+                Assert.That(index, Is.GreaterThan(lastIndex));
+
+                lastIndex = index;
+            }            
         }
 
         [Test]
@@ -189,20 +206,20 @@ namespace SharpGLTF.Transforms
                 .Create(0, 0, 0, 0, 0, 0.1f, 0.7f, 0, 0, 0, 0.1f)
                 .GetNormalizedWithComplement(int.MaxValue);
             
-            Assert.AreEqual(0.1f, sparse1[5]);
-            Assert.AreEqual(0.7f, sparse1[6]);
-            Assert.AreEqual(0.1f, sparse1[10]);
-            Assert.AreEqual(0.1f, sparse1[int.MaxValue], 0.0000001f);
-            Assert.AreEqual(1, sparse1.WeightSum);
+            Assert.That(sparse1[5], Is.EqualTo(0.1f));
+            Assert.That(sparse1[6], Is.EqualTo(0.7f));
+            Assert.That(sparse1[10], Is.EqualTo(0.1f));
+            Assert.That(sparse1[int.MaxValue], Is.EqualTo(0.1f).Within(0.0000001f));
+            Assert.That(sparse1.WeightSum, Is.EqualTo(1));
         }
 
         [Test]
         public void TestSparseEquality()
         {
-            Assert.IsTrue(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1)));
+            Assert.That(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1)), Is.True);
 
-            Assert.IsFalse(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1, 0.25f)));
-            Assert.IsFalse(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(1, 0)));
+            Assert.That(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(0, 1, 0.25f)), Is.False);
+            Assert.That(SparseWeight8.AreEqual(SparseWeight8.Create(0, 1), SparseWeight8.Create(1, 0)), Is.False);
 
             // check if two "half weights" are equal to one "full weight"
             //Assert.IsTrue(SparseWeight8.AreWeightsEqual(SparseWeight8.Create((3, 5), (3, 5)), SparseWeight8.Create((3, 10))));
@@ -211,14 +228,14 @@ namespace SharpGLTF.Transforms
         [Test]
         public void TestSparseWeightsLinearInterpolation1()
         {
-            var x = SparseWeight8.Create(0,0,1,2); CollectionAssert.AreEqual(new[] { 0f, 0f, 1f, 2f }, x.Expand(4));
-            var y = SparseWeight8.Create(1,2,0,0); CollectionAssert.AreEqual(new[] { 1f, 2f, 0f, 0f }, y.Expand(4));
+            var x = SparseWeight8.Create(0,0,1,2); Assert.That(x.Expand(4), Is.EqualTo(new[] { 0f, 0f, 1f, 2f }));
+            var y = SparseWeight8.Create(1,2,0,0); Assert.That(y.Expand(4), Is.EqualTo(new[] { 1f, 2f, 0f, 0f }));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
-            Assert.AreEqual(0.5f, z[0]);
-            Assert.AreEqual(1, z[1]);
-            Assert.AreEqual(0.5f, z[2]);
-            Assert.AreEqual(1, z[3]);
+            Assert.That(z[0], Is.EqualTo(0.5f));
+            Assert.That(z[1], Is.EqualTo(1));
+            Assert.That(z[2], Is.EqualTo(0.5f));
+            Assert.That(z[3], Is.EqualTo(1));
         }
 
         [Test]
@@ -228,15 +245,15 @@ namespace SharpGLTF.Transforms
             var ay = new float[] { 0, 0, 0.2f, 0, 0.1f,    0,    0, 0, 0, 0,    0, 0, 0.2f };
             var cc = Math.Min(ax.Length, ay.Length);
 
-            var x = SparseWeight8.Create(ax); CollectionAssert.AreEqual(ax, x.Expand(ax.Length));
-            var y = SparseWeight8.Create(ay); CollectionAssert.AreEqual(ay, y.Expand(ay.Length));
+            var x = SparseWeight8.Create(ax); Assert.That(x.Expand(ax.Length), Is.EqualTo(ax));
+            var y = SparseWeight8.Create(ay); Assert.That(y.Expand(ay.Length), Is.EqualTo(ay));
 
             var z = SparseWeight8.InterpolateLinear(x, y, 0.5f);
 
             for (int i=0; i < cc; ++i)
             {
                 var w = (ax[i] + ay[i]) / 2;
-                Assert.AreEqual(w, z[i]);
+                Assert.That(z[i], Is.EqualTo(w));
             }
         }
 
@@ -246,25 +263,25 @@ namespace SharpGLTF.Transforms
             var a = SparseWeight8.Create(0, 0, 0.2f, 0, 0, 0, 1);
             var b = SparseWeight8.Create(1, 1, 0.4f, 0, 0, 1, 0);
             var t = SparseWeight8.Subtract(b, a);
-            Assert.AreEqual(1, t[0]);
-            Assert.AreEqual(1, t[1]);
-            Assert.AreEqual(0.2f, t[2]);
-            Assert.AreEqual(0, t[3]);
-            Assert.AreEqual(0, t[4]);
-            Assert.AreEqual(1, t[5]);
-            Assert.AreEqual(-1, t[6]);
+            Assert.That(t[0], Is.EqualTo(1));
+            Assert.That(t[1], Is.EqualTo(1));
+            Assert.That(t[2], Is.EqualTo(0.2f));
+            Assert.That(t[3], Is.EqualTo(0));
+            Assert.That(t[4], Is.EqualTo(0));
+            Assert.That(t[5], Is.EqualTo(1));
+            Assert.That(t[6], Is.EqualTo(-1));
 
             var lr = SparseWeight8.InterpolateLinear(a, b, 0.4f);
             var cr = SparseWeight8.InterpolateCubic(a, t, b, t, 0.4f);
 
-            Assert.AreEqual(lr[0], cr[0], 0.000001f);
-            Assert.AreEqual(lr[1], cr[1], 0.000001f);
-            Assert.AreEqual(lr[2], cr[2], 0.000001f);
-            Assert.AreEqual(lr[3], cr[3], 0.000001f);
-            Assert.AreEqual(lr[4], cr[4], 0.000001f);
-            Assert.AreEqual(lr[5], cr[5], 0.000001f);
-            Assert.AreEqual(lr[6], cr[6], 0.000001f);
-            Assert.AreEqual(lr[7], cr[7], 0.000001f);
+            Assert.That(cr[0], Is.EqualTo(lr[0]).Within(0.000001f));
+            Assert.That(cr[1], Is.EqualTo(lr[1]).Within(0.000001f));
+            Assert.That(cr[2], Is.EqualTo(lr[2]).Within(0.000001f));
+            Assert.That(cr[3], Is.EqualTo(lr[3]).Within(0.000001f));
+            Assert.That(cr[4], Is.EqualTo(lr[4]).Within(0.000001f));
+            Assert.That(cr[5], Is.EqualTo(lr[5]).Within(0.000001f));
+            Assert.That(cr[6], Is.EqualTo(lr[6]).Within(0.000001f));
+            Assert.That(cr[7], Is.EqualTo(lr[7]).Within(0.000001f));
         }
 
         [Test]
@@ -274,17 +291,17 @@ namespace SharpGLTF.Transforms
 
             var b = a.GetTrimmed(4);
 
-            Assert.AreEqual(4, b.GetNonZeroWeights().Count());
+            Assert.That(b.GetNonZeroWeights().Count(), Is.EqualTo(4));
             
-            Assert.AreEqual(a[0], b[0]);
-            Assert.AreEqual(a[3], b[3]);
-            Assert.AreEqual(a[7], b[7]);
-            Assert.AreEqual(a[9], b[9]);
+            Assert.That(b[0], Is.EqualTo(a[0]));
+            Assert.That(b[3], Is.EqualTo(a[3]));
+            Assert.That(b[7], Is.EqualTo(a[7]));
+            Assert.That(b[9], Is.EqualTo(a[9]));
 
-            Assert.AreEqual(0, b.Weight4);
-            Assert.AreEqual(0, b.Weight5);
-            Assert.AreEqual(0, b.Weight6);
-            Assert.AreEqual(0, b.Weight7);            
+            Assert.That(b.Weight4, Is.EqualTo(0));
+            Assert.That(b.Weight5, Is.EqualTo(0));
+            Assert.That(b.Weight6, Is.EqualTo(0));
+            Assert.That(b.Weight7, Is.EqualTo(0));            
         }
     }
 }

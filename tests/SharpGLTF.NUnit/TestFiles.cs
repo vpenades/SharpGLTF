@@ -35,7 +35,7 @@ namespace SharpGLTF
                 wdir = System.IO.Path.GetDirectoryName(wdir);
             }
 
-            Assert.IsTrue(examplesFound, "TestFiles directory not found; please, run '1_DownloadTestFiles.cmd' before running the tests.");            
+            Assert.That(examplesFound, "TestFiles directory not found; please, run '1_DownloadTestFiles.cmd' before running the tests.");            
 
             _AssetFilesDir = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_TestFilesDir), "Assets");
         }
@@ -201,8 +201,8 @@ namespace SharpGLTF
             var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
 
             return files
-                .Where(item => !item.ToLowerInvariant().Contains("gltf-draco"))
-                .Where(item => !item.ToLowerInvariant().Contains("gltf-meshopt")) // not supported yet
+                .Where(item => !item.ToUpperInvariant().Contains("GLTF-DRACO"))
+                .Where(item => !item.ToUpperInvariant().Contains("GLTF-MESHOPT")) // not supported yet
                 .Where(item => skipAlways.All(f => !item.Contains(f)))                
                 .OrderBy(item => item)                
                 .ToList();

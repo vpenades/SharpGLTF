@@ -39,8 +39,8 @@ namespace SharpGLTF.Runtime
             GC.Collect();
             GC.WaitForFullGCComplete();
 
-            Assert.IsFalse(result.Item2.TryGetTarget(out Schema2.ModelRoot model));
-            Assert.Null(model);
+            Assert.That(result.Item2.TryGetTarget(out Schema2.ModelRoot model), Is.False);
+            Assert.That(model, Is.Null);
         }
 
         private static (SceneTemplate, WeakReference<Schema2.ModelRoot>) LoadModelTemplate(string path)
@@ -120,7 +120,7 @@ namespace SharpGLTF.Runtime
             foreach(var p in vertices)
             {
                 var d = (p - center).Length();
-                Assert.LessOrEqual(d, radius + 0.0001f);
+                Assert.That(d, Is.LessThanOrEqualTo(radius + 0.0001f));
             }
         }
 

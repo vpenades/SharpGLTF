@@ -60,7 +60,7 @@ namespace SharpGLTF.ThirdParty
                     greenColor));
             }
 
-            Assert.AreEqual(3, morphTargetBuilder.Vertices.Count);
+            Assert.That(morphTargetBuilder.Vertices, Has.Count.EqualTo(3));
 
             // save the model in different formats
             var model = scene.ToGltf2();
@@ -79,13 +79,13 @@ namespace SharpGLTF.ThirdParty
 
             var triangles = Schema2.Toolkit
                 .EvaluateTriangles(model.DefaultScene, null, model.LogicalAnimations[0], 0.5f)
-                .ToArray();
+                .ToList();
 
             var morphedColor = triangles[0].A.GetMaterial().GetColor(0);
-            Assert.AreEqual(0.5f, morphedColor.X);
-            Assert.AreEqual(0.5f, morphedColor.Y);
-            Assert.AreEqual(0, morphedColor.Z);
-            Assert.AreEqual(1, morphedColor.W);
+            Assert.That(morphedColor.X, Is.EqualTo(0.5f));
+            Assert.That(morphedColor.Y, Is.EqualTo(0.5f));
+            Assert.That(morphedColor.Z, Is.EqualTo(0));
+            Assert.That(morphedColor.W, Is.EqualTo(1));
 
             // save the model in different formats
             // model.AttachToCurrentTest("ColorAndTextureMorphing.glb");
@@ -140,7 +140,7 @@ namespace SharpGLTF.ThirdParty
                     Vector2.One));
             }
 
-            Assert.AreEqual(3, morphTargetBuilder.Vertices.Count);
+            Assert.That(morphTargetBuilder.Vertices, Has.Count.EqualTo(3));
 
             // save the model in different formats
             var model = scene.ToGltf2();
@@ -162,8 +162,8 @@ namespace SharpGLTF.ThirdParty
                 .ToArray();
 
             var morphedTextCoord = triangles[0].A.GetMaterial().GetTexCoord(0);
-            Assert.AreEqual(0.5f, morphedTextCoord.X);
-            Assert.AreEqual(0.5f, morphedTextCoord.Y);
+            Assert.That(morphedTextCoord.X, Is.EqualTo(0.5f));
+            Assert.That(morphedTextCoord.Y, Is.EqualTo(0.5f));
 
             // save the model in different formats
             // model.AttachToCurrentTest("ColorAndTextureMorphing.glb");
@@ -221,7 +221,7 @@ namespace SharpGLTF.ThirdParty
                     new VertexColor1Texture1(morphToTransparentGrey, Vector2.One)));
             }
 
-            Assert.AreEqual(3, morphTargetBuilder.Vertices.Count);
+            Assert.That(morphTargetBuilder.Vertices, Has.Count.EqualTo(3));
 
             // save the model in different formats
             var model = scene.ToGltf2();
@@ -243,8 +243,8 @@ namespace SharpGLTF.ThirdParty
                 .ToArray();
 
             var morphedTextCoord = triangles[0].A.GetMaterial().GetTexCoord(0);
-            Assert.AreEqual(0.5f, morphedTextCoord.X);
-            Assert.AreEqual(0.5f, morphedTextCoord.Y);
+            Assert.That(morphedTextCoord.X, Is.EqualTo(0.5f));
+            Assert.That(morphedTextCoord.Y, Is.EqualTo(0.5f));
 
             // save the model in different formats
             // model.AttachToCurrentTest("ColorAndTextureMorphing.glb");

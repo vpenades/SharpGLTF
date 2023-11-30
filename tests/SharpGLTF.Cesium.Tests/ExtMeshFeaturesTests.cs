@@ -54,18 +54,18 @@ namespace SharpGLTF.Cesium
 
             // Validate the FeatureIds
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
-            Assert.NotNull(cesiumExtMeshFeaturesExtension.FeatureIds);
+            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
 
-            Assert.IsTrue(cesiumExtMeshFeaturesExtension.FeatureIds.Equals(featureIds));
+            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds.Equals(featureIds));
 
             // Check there should be a custom vertex attribute with name _FEATURE_ID_{attribute}
             var attribute = cesiumExtMeshFeaturesExtension.FeatureIds[0].Attribute;
-            Assert.IsTrue(attribute == 0);
+            Assert.That(attribute == 0);
             var primitive = model.LogicalMeshes[0].Primitives[0];
             var featureIdVertexAccessor = primitive.GetVertexAccessor($"_FEATURE_ID_{attribute}");
-            Assert.NotNull(featureIdVertexAccessor);
+            Assert.That(featureIdVertexAccessor, Is.Not.Null);
             var items = featureIdVertexAccessor.AsScalarArray();
-            Assert.AreEqual(items, new List<int> { featureId, featureId, featureId });
+            Assert.That(items, Is.EqualTo(new List<int> { featureId, featureId, featureId }));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
 
@@ -117,15 +117,15 @@ namespace SharpGLTF.Cesium
             primitive.SetFeatureIds(featureIds);
 
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)primitive.Extensions.FirstOrDefault();
-            Assert.NotNull(cesiumExtMeshFeaturesExtension.FeatureIds);
+            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
 
-            Assert.IsTrue(cesiumExtMeshFeaturesExtension.FeatureIds.Equals(featureIds));
+            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.EqualTo(featureIds));
             var featureId = cesiumExtMeshFeaturesExtension.FeatureIds[0];
             var texCoord = featureId.Texture.TextureCoordinate;
 
             var textureIdVertexAccessor = primitive.GetVertexAccessor($"TEXCOORD_{texCoord}");
-            Assert.NotNull(textureIdVertexAccessor);
-            Assert.IsTrue(textureIdVertexAccessor.AsVector2Array().Count == 4);
+            Assert.That(textureIdVertexAccessor, Is.Not.Null);
+            Assert.That(textureIdVertexAccessor.AsVector2Array(), Has.Count.EqualTo(4));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
 

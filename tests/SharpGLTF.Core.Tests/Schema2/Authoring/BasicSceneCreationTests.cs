@@ -23,8 +23,8 @@ namespace SharpGLTF.Schema2.Authoring
 
             var scene = root.UseScene("Empty Scene");
 
-            Assert.NotNull(scene);
-            Assert.AreEqual("Empty Scene", root.DefaultScene.Name);
+            Assert.That(scene, Is.Not.Null);
+            Assert.That(root.DefaultScene.Name, Is.EqualTo("Empty Scene"));
         }
 
         [Test(Description = "Creates an empty model")]
@@ -62,10 +62,10 @@ namespace SharpGLTF.Schema2.Authoring
             var json = rootBis.Extras.ToJsonString();
             var c = JSONEXTRAS.Parse(json);
 
-            Assert.IsTrue(JsonContentTests.AreEqual(a, b));
-            Assert.IsTrue(JsonContentTests.AreEqual(a, extras));
-            Assert.IsTrue(JsonContentTests.AreEqual(b, extras));
-            Assert.IsTrue(JsonContentTests.AreEqual(c, extras));
+            Assert.That(JsonContentTests.AreEqual(a, b), Is.True);
+            Assert.That(JsonContentTests.AreEqual(a, extras), Is.True);
+            Assert.That(JsonContentTests.AreEqual(b, extras), Is.True);
+            Assert.That(JsonContentTests.AreEqual(c, extras), Is.True);
 
             // Assert.AreEqual(2, c.GetValue<int>("dict1","D","T"));
         }

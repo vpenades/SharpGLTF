@@ -30,11 +30,11 @@ namespace SharpGLTF.Geometry.VertexTypes
             var w1 = Transforms.SparseWeight8.CreateUnchecked(new Vector4(3, 2, 1, 0), new Vector4(7, 6, 5, 4), new Vector4(1, 2, 3, 4) * 0.6f, new Vector4(1, 2, 3, 4) * 0.4f);
 
             // the index/weight pairs are ordered diferently...
-            Assert.AreNotEqual(w0.Index0, w1.Index0);
-            Assert.AreNotEqual(w0.Weight0, w1.Weight0);
+            Assert.That(w1.Index0, Is.Not.EqualTo(w0.Index0));
+            Assert.That(w1.Weight0, Is.Not.EqualTo(w0.Weight0));
 
             // but they should be effectively the same.
-            Assert.AreEqual(w0, w1);
+            Assert.That(w1, Is.EqualTo(w0));
 
             var v0 = new VERTEXSKINNED4()
                 .WithGeometry(p)
@@ -44,7 +44,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 .WithGeometry(p)
                 .WithSkinning(w1);
 
-            Assert.AreEqual(v0, v1);
+            Assert.That(v1, Is.EqualTo(v0));
 
             var v2 = new VERTEXSKINNED8()
                 .WithGeometry(p)
@@ -54,7 +54,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 .WithGeometry(p)
                 .WithSkinning(w1);
 
-            Assert.AreEqual(v0, v1);
+            Assert.That(v1, Is.EqualTo(v0));
         }
 
         [Test]
@@ -109,12 +109,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var sparse = v4.GetBindings();
 
-            Assert.AreEqual(1, sparse.WeightSum, 0.00001f);
+            Assert.That(sparse.WeightSum, Is.EqualTo(1).Within(0.00001f));
 
-            Assert.AreEqual(0.333333f, sparse[5], 0.00001f);
-            Assert.AreEqual(0.277777f, sparse[3], 0.00001f);
-            Assert.AreEqual(0.222222f, sparse[1], 0.00001f);
-            Assert.AreEqual(0.166666f, sparse[2], 0.00001f);
+            Assert.That(sparse[5], Is.EqualTo(0.333333f).Within(0.00001f));
+            Assert.That(sparse[3], Is.EqualTo(0.277777f).Within(0.00001f));
+            Assert.That(sparse[1], Is.EqualTo(0.222222f).Within(0.00001f));
+            Assert.That(sparse[2], Is.EqualTo(0.166666f).Within(0.00001f));
         }
     }
 }

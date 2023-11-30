@@ -38,7 +38,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             try
             {
                 model = ModelRoot.Load(f, settings);
-                Assert.NotNull(model);
+                Assert.That(model, Is.Not.Null);
             }
             catch (Exception ex)
             {
@@ -62,7 +62,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 if (unsupportedExtensions.All(uex => !model.ExtensionsUsed.Contains(uex)))
                 {
                     var detectedExtensions = model.GatherUsedExtensions().ToArray();
-                    CollectionAssert.AreEquivalent(model.ExtensionsUsed, detectedExtensions);
+                    Assert.That(detectedExtensions, Is.EquivalentTo(model.ExtensionsUsed));
                 }
             }
 
@@ -83,12 +83,12 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var aa = a.GetLogicalChildrenFlattened().ToList();
             var bb = b.GetLogicalChildrenFlattened().ToList();
 
-            Assert.AreEqual(aa.Count, bb.Count);
+            Assert.That(bb, Has.Count.EqualTo(aa.Count));
 
-            CollectionAssert.AreEqual
+            Assert.That
                 (
                 aa.Select(item => item.GetType()),
-                bb.Select(item => item.GetType())
+                Is.EqualTo(bb.Select(item => item.GetType()))
                 );
         }
 
@@ -155,8 +155,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var rtripDefBounds = Runtime.MeshDecoder.EvaluateBoundingBox(roundtripDefault.DefaultScene);
             var rtripGpuBounds = Runtime.MeshDecoder.EvaluateBoundingBox(roundtripInstanced.DefaultScene);
 
-            Assert.AreEqual(modelBounds, rtripDefBounds);
-            Assert.AreEqual(modelBounds, rtripGpuBounds);
+            Assert.That(rtripDefBounds, Is.EqualTo(modelBounds));
+            Assert.That(rtripGpuBounds, Is.EqualTo(modelBounds));
 
             // save results
 
@@ -193,15 +193,15 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.EndsWith(@"UnlitTest\glTF-Binary\UnlitTest.glb"));
 
             var model = ModelRoot.Load(f);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
-            Assert.IsTrue(model.LogicalMaterials[0].Unlit);
+            Assert.That(model.LogicalMaterials[0].Unlit, Is.True);
 
             // do a model roundtrip
             var modelBis = ModelRoot.ParseGLB(model.WriteGLB());
-            Assert.NotNull(modelBis);
+            Assert.That(modelBis, Is.Not.Null);
 
-            Assert.IsTrue(modelBis.LogicalMaterials[0].Unlit);
+            Assert.That(modelBis.LogicalMaterials[0].Unlit, Is.True);
         }
 
         [Test]
@@ -212,12 +212,12 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.EndsWith("lights.gltf"));
 
             var model = ModelRoot.Load(f);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
-            Assert.AreEqual(3, model.LogicalPunctualLights.Count);
+            Assert.That(model.LogicalPunctualLights, Has.Count.EqualTo(3));
 
-            Assert.AreEqual(1, model.DefaultScene.VisualChildren.ElementAt(0).PunctualLight.LogicalIndex);
-            Assert.AreEqual(0, model.DefaultScene.VisualChildren.ElementAt(1).PunctualLight.LogicalIndex);
+            Assert.That(model.DefaultScene.VisualChildren.ElementAt(0).PunctualLight.LogicalIndex, Is.EqualTo(1));
+            Assert.That(model.DefaultScene.VisualChildren.ElementAt(1).PunctualLight.LogicalIndex, Is.EqualTo(0));
         }
 
         [Test]
@@ -228,7 +228,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
 
@@ -247,7 +247,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.Contains("MorphPrimitivesTest.glb"));
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var triangles = model.DefaultScene
                 .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, null, 0)
@@ -273,7 +273,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.Contains(path));
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             path = System.IO.Path.GetFileNameWithoutExtension(path);
             model.AttachToCurrentTest(path + ".glb");
@@ -303,7 +303,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.Contains("AnimatedMorphCube.glb"));
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var anim = model.LogicalAnimations[0];
             var node = model.LogicalNodes[0];
@@ -374,7 +374,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 .FirstOrDefault(item => item.Contains("TextureTransformMultiTest.glb"));
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var materials = model.LogicalMaterials;
 
@@ -382,7 +382,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var normalTest0Mat_normal = normalTest0Mat.FindChannel("Normal").Value;
             var normalTest0Mat_normal_xform = normalTest0Mat_normal.TextureTransform;            
 
-            Assert.NotNull(normalTest0Mat_normal_xform);
+            Assert.That(normalTest0Mat_normal_xform, Is.Not.Null);
         }
 
         [Test]

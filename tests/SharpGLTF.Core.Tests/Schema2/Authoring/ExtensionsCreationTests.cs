@@ -116,7 +116,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             var gltf2 = scene.ToGltf2();
             var clearCoatFactor = gltf2.LogicalMaterials[0].FindChannel("ClearCoat").Value.GetFactor("ClearCoatFactor");
-            Assert.AreEqual(0.5f, clearCoatFactor);
+            Assert.That(clearCoatFactor, Is.EqualTo(0.5f));
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");
@@ -152,7 +152,7 @@ namespace SharpGLTF.Schema2.Authoring
 
             var gltf2 = scene.ToGltf2();
             var transmissionFactor = gltf2.LogicalMaterials[0].FindChannel("Transmission").Value.GetFactor("TransmissionFactor");
-            Assert.AreEqual(0.75f, transmissionFactor);
+            Assert.That(transmissionFactor, Is.EqualTo(0.75f));
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");            
@@ -190,10 +190,10 @@ namespace SharpGLTF.Schema2.Authoring
 
             var gltf2 = scene.ToGltf2();
             var sheenColorFactor = gltf2.LogicalMaterials[0].FindChannel("SheenColor").Value.Color;
-            Assert.AreEqual(Vector4.One, sheenColorFactor);
+            Assert.That(sheenColorFactor, Is.EqualTo(Vector4.One));
 
             var sheenRoughnessFactor = gltf2.LogicalMaterials[0].FindChannel("SheenRoughness").Value.GetFactor("RoughnessFactor");
-            Assert.AreEqual(0.5f, sheenRoughnessFactor);
+            Assert.That(sheenRoughnessFactor, Is.EqualTo(0.5f));
 
             scene.AttachToCurrentTest("result.glb");
             scene.AttachToCurrentTest("result.gltf");

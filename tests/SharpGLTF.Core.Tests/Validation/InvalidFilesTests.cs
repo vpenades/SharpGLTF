@@ -28,7 +28,7 @@ namespace SharpGLTF.Validation
 
                 var result = Schema2.ModelRoot.Validate(f);
 
-                Assert.IsTrue(result.HasErrors == report.Issues.NumErrors > 0);
+                Assert.That(result.HasErrors, Is.EqualTo(report.Issues.NumErrors > 0));
             }
         }
 
@@ -49,7 +49,7 @@ namespace SharpGLTF.Validation
 
                 var result = Schema2.ModelRoot.Validate(f);
 
-                Assert.IsTrue(result.HasErrors == report.Issues.NumErrors > 0);
+                Assert.That(result.HasErrors, Is.EqualTo(report.Issues.NumErrors > 0));
             }
         }
 
@@ -85,7 +85,7 @@ namespace SharpGLTF.Validation
                     foreach (var e in report.Issues.Messages.Where(item => item.Severity == 0)) TestContext.WriteLine($"    {e.Text}");
                 }
 
-                Assert.AreEqual(report.Issues.NumErrors > 0, result.HasErrors, result.Errors.FirstOrDefault()?.Message);                                
+                Assert.That(result.HasErrors, Is.EqualTo(report.Issues.NumErrors > 0), result.Errors.FirstOrDefault()?.Message);                                
             }
         }
     }

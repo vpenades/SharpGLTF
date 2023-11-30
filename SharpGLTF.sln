@@ -16,6 +16,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{072B725F-773
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0CBF510D-D836-40BA-95EC-E93FDBB90632}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.CodeGen", "build\SharpGLTF.CodeGen\SharpGLTF.CodeGen.csproj", "{E15F8DCC-987D-4FA8-B7B0-1F0614DC93DD}"
 EndProject
@@ -60,7 +63,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Cesium", "src\Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Cesium.Tests", "tests\SharpGLTF.Cesium.Tests\SharpGLTF.Cesium.Tests.csproj", "{94011062-791E-4D34-ACA8-09AAAD49B299}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpGLTF.Agi", "src\SharpGLTF.Agi\SharpGLTF.Agi.csproj", "{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Agi", "src\SharpGLTF.Agi\SharpGLTF.Agi.csproj", "{6BEBBB6A-932F-4AF2-B1D9-3B533BE2C8F3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

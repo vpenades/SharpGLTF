@@ -22,11 +22,11 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\XmpJsonLd.gltf");
 
             var model = ModelRoot.Load(path);
-            Assert.NotNull(model);
+            Assert.That(model, Is.Not.Null);
 
             var packets = model.GetExtension<XmpPackets>();
-            Assert.NotNull(packets);
-            Assert.AreEqual(1, packets.JsonPackets.Count);
+            Assert.That(packets, Is.Not.Null);
+            Assert.That(packets.JsonPackets.Count, Is.EqualTo(1));
 
             var packet = packets.JsonPackets[0];
 
