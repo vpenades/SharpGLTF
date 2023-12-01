@@ -93,9 +93,9 @@ namespace SharpGLTF.CodeGen
 
         #region setup & declaration
 
-        private string _SanitizeName(string name)
+        private static string _SanitizeName(string name)
         {
-            return name.Replace(" ", "");
+            return name.Replace(" ", string.Empty, StringComparison.OrdinalIgnoreCase);
         }
 
         private _RuntimeType _UseType(SchemaType stype)
@@ -149,7 +149,7 @@ namespace SharpGLTF.CodeGen
 
             foreach(var f in type.Fields)
             {
-                var runtimeName = _SanitizeName(f.PersistentName).Replace("@","at");
+                var runtimeName = _SanitizeName(f.PersistentName).Replace("@","at", StringComparison.Ordinal);
 
                 SetFieldName(f, $"_{runtimeName}");
                 SetPropertyName(f, runtimeName);
@@ -202,7 +202,7 @@ namespace SharpGLTF.CodeGen
                         var container = extra?.CollectionContainer;
                         if (string.IsNullOrWhiteSpace(container)) container = _DefaultCollectionContainer;
 
-                        return container.Replace("TItem", _GetRuntimeName(arrayType.ItemType));
+                        return container.Replace("TItem", _GetRuntimeName(arrayType.ItemType), StringComparison.Ordinal);
                     }
 
                 case DictionaryType dictType:
@@ -252,10 +252,10 @@ namespace SharpGLTF.CodeGen
 
             switch (type)
             {
-                case StringType stype: if (value is string) return value;
+                case StringType _:
 
-                    return value == null
-                        ? null
+                    return value is string
+                        ? value
                         : Convert.ChangeType(value, typeof(string), System.Globalization.CultureInfo.InvariantCulture);
 
                 case BlittableType btype:
@@ -266,15 +266,13 @@ namespace SharpGLTF.CodeGen
 
                             var str = value as string;
 
-                            if (str.ToLowerInvariant() == "false") return false;
-                            if (str.ToLowerInvariant() == "true") return true;
+                            if (str.ToUpperInvariant() == "FALSE") return false;
+                            if (str.ToUpperInvariant() == "TRUE") return true;
                             throw new NotImplementedException();
                         }
 
-                        if (value is string) return value;
-
-                        return value == null
-                            ? null
+                        return value is string
+                            ? value
                             : Convert.ChangeType(value, btype.DataType.AsType(), System.Globalization.CultureInfo.InvariantCulture);
                     }
 
