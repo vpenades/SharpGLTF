@@ -77,7 +77,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 }
 
                 /*
-                if (ShouldLoad && !filePath.ToLowerInvariant().Contains("compatibility"))
+                if (ShouldLoad && !filePath.ToUpperInvariant().Contains("COMPATIBILITY"))
                 {
                     var model = ModelRoot.Load(filePath);
                     model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(filePath), ".obj"));

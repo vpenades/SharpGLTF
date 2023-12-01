@@ -22,7 +22,7 @@ namespace SharpGLTF
 
                     LibGit2Sharp.Repository.Clone(remoteUrl, localDirectoryPath);
 
-                    Console.WriteLine($"... Clone Completed");
+                    Console.WriteLine("... Clone Completed");
 
                     return;
                 }
@@ -59,7 +59,7 @@ namespace SharpGLTF
                     wc.DownloadFile(remoteUri, localFilePath);
                 }
 
-                if (localFilePath.ToLowerInvariant().EndsWith(".zip"))
+                if (localFilePath.ToUpperInvariant().EndsWith(".ZIP"))
                 {
                     Console.WriteLine($"Extracting {localFilePath}...");
 

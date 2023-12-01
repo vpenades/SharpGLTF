@@ -26,7 +26,7 @@ namespace SharpGLTF.Cesium
             settings.GpuMeshInstancingMinCount = 0;
 
             var modelRoot = ModelRoot.Load(ResourceInfo.From("tree.glb"));
-            var meshBuilder = modelRoot.LogicalMeshes.First().ToMeshBuilder();
+            var meshBuilder = modelRoot.LogicalMeshes[0].ToMeshBuilder();
             var sceneBuilder = new SceneBuilder();
             var quaternion = Quaternion.CreateFromYawPitchRoll(0, 0, 0);
             var scale = Vector3.One;

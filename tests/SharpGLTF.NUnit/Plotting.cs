@@ -239,7 +239,7 @@ namespace SharpGLTF
     {
         public static void AttachToCurrentTest(this Plotting.Point2Series points, string fileName)
         {
-            System.Diagnostics.Debug.Assert(fileName.ToLowerInvariant().EndsWith(".html"));
+            System.Diagnostics.Debug.Assert(fileName.ToUpperInvariant().EndsWith(".HTML"));
 
             NUnit.Framework.AttachmentInfo
                 .From(fileName)
