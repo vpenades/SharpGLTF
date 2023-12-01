@@ -100,7 +100,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private bool RenameIfAvailable(string newName, ISet<string> usedNames)
+        private bool RenameIfAvailable(string newName, HashSet<string> usedNames)
         {
             if (usedNames.Contains(newName)) return false;
             this.Name = newName;

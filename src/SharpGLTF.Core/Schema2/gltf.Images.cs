@@ -234,8 +234,8 @@ namespace SharpGLTF.Schema2
 
             satelliteUri = writer.WriteImage(satelliteUri, imimg);
 
-            satelliteUri = satelliteUri.Replace("\\", "/");
-            _uri = Uri.EscapeUriString(satelliteUri);
+            satelliteUri = satelliteUri.Replace("\\", "/", StringComparison.Ordinal);
+            _uri = satelliteUri._EscapeStringInternal();
             _mimeType = null;
         }
 

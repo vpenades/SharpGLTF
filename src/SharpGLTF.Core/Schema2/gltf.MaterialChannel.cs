@@ -15,7 +15,7 @@ namespace SharpGLTF.Schema2
     /// to have an homogeneous and easy to use API.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Channel {_Key}")]
-    public readonly struct MaterialChannel
+    public readonly struct MaterialChannel : IEquatable<MaterialChannel>
     {
         #region lifecycle
 
@@ -49,16 +49,14 @@ namespace SharpGLTF.Schema2
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly IReadOnlyList<IMaterialParameter> _Parameters;
-
-        /// <inheritdoc />
+        
         public override int GetHashCode()
         {
             if (_Material == null) return 0;
 
             return _Material.GetHashCode() ^ _Key.GetHashCode(StringComparison.InvariantCulture);
         }
-
-        /// <inheritdoc />
+        
         public override bool Equals(object obj) { return obj is MaterialChannel other && Equals(other); }
 
         public bool Equals(MaterialChannel other)
@@ -68,6 +66,9 @@ namespace SharpGLTF.Schema2
             if (this._Key != other._Key) return false;
             return true;
         }
+
+        public static bool operator ==(in MaterialChannel a, in MaterialChannel b) { return a.Equals(b); }
+        public static bool operator !=(in MaterialChannel a, in MaterialChannel b) { return !a.Equals(b); }
 
         #endregion
 

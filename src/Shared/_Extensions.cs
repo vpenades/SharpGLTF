@@ -191,6 +191,23 @@ namespace SharpGLTF
 
         #endregion
 
+        #region string extensions
+
+        #if NETSTANDARD2_0
+        internal static bool StartsWith(this string text, char c)
+        {
+            return text.StartsWith(c.ToString());
+        }
+
+        internal static string Replace(this string text, string oldText, string newText, StringComparison comparison)
+        {
+            if (comparison == StringComparison.Ordinal) return text.Replace(oldText, newText);
+            throw new NotImplementedException();
+        }
+        #endif
+
+        #endregion
+
         #region linq
 
         public static bool AreSameReference<T>(this (T x, T y) refs, out bool result)
@@ -310,6 +327,18 @@ namespace SharpGLTF
             {
                 array[i] = value;
             }
+        }
+
+        internal static IReadOnlyList<T> EnsureList<T>(this IEnumerable<T> collection)
+        {
+            return collection is IReadOnlyList<T> list
+                ? list
+                : collection.ToList();
+        }
+
+        internal static bool IsEmpty<T>(this IReadOnlyList<T> list)
+        {
+            return list.Count == 0;
         }
 
         internal static int IndexOf<T>(this IReadOnlyList<T> collection, T value)
@@ -563,7 +592,7 @@ namespace SharpGLTF
                                 if (!ptr.MoveNext()) break;
                                 var b = ptr.Current;
 
-                                if (!_IsDegenerated(a, b)) yield return ((int)a, (int)b);
+                                if (!_IsDegeneratedSegment(a, b)) yield return ((int)a, (int)b);
                             }
                         }
 
@@ -591,7 +620,7 @@ namespace SharpGLTF
                                 if (!ptr.MoveNext()) break;
                                 var c = ptr.Current;
 
-                                if (!_IsDegenerated(a, b, c)) yield return ((int)a, (int)b, (int)c);
+                                if (!_IsDegeneratedTriangle(a, b, c)) yield return ((int)a, (int)b, (int)c);
                             }
                         }
 
@@ -612,7 +641,7 @@ namespace SharpGLTF
                                 if (!ptr.MoveNext()) break;
                                 var c = ptr.Current;
 
-                                if (!_IsDegenerated(a, b, c)) yield return ((int)a, (int)b, (int)c);
+                                if (!_IsDegeneratedTriangle(a, b, c)) yield return ((int)a, (int)b, (int)c);
 
                                 b = c;
                             }
@@ -637,7 +666,7 @@ namespace SharpGLTF
                                 if (!ptr.MoveNext()) break;
                                 var c = ptr.Current;
 
-                                if (!_IsDegenerated(a, b, c))
+                                if (!_IsDegeneratedTriangle(a, b, c))
                                 {
                                     if (reversed) yield return ((int)b, (int)a, (int)c);
                                     else yield return ((int)a, (int)b, (int)c);
@@ -656,12 +685,12 @@ namespace SharpGLTF
             }
         }
 
-        private static bool _IsDegenerated(uint a, uint b)
+        private static bool _IsDegeneratedSegment(uint a, uint b)
         {
             return a == b;
         }
 
-        private static bool _IsDegenerated(uint a, uint b, uint c)
+        private static bool _IsDegeneratedTriangle(uint a, uint b, uint c)
         {
             if (a == b) return true;
             if (a == c) return true;
@@ -727,9 +756,9 @@ namespace SharpGLTF
                 return Convert.FromBase64String(content);
             }
 
-            if (content.StartsWith(",", StringComparison.OrdinalIgnoreCase))
+            if (content.StartsWith(','))
             {
-                content = content.Substring(",".Length);
+                content = content.Substring(1);
 
                 if (content.Length == 1) return new Byte[] { Byte.Parse(content, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture) };
 
@@ -741,7 +770,15 @@ namespace SharpGLTF
 
         #endregion
 
-        #region json        
+        #region json
+
+        public static string _EscapeStringInternal(this string uri)
+        {
+            // https://stackoverflow.com/questions/4396598/whats-the-difference-between-escapeuristring-and-escapedatastring
+            #pragma warning disable SYSLIB0013 // Type or member is obsolete
+            return Uri.EscapeUriString(uri);
+            #pragma warning restore SYSLIB0013 // Type or member is obsolete
+        }
 
         #if NET6_0
 

@@ -186,7 +186,7 @@ namespace SharpGLTF.Memory
 
             if (weights0 == null) throw new ArgumentNullException(nameof(weights0));
 
-            if (weights0.Attribute.Encoding != weights1.Attribute.Encoding) throw new ArgumentException("WEIGHTS_0 and WEIGHTS_1 format mismatch.", nameof(weights1.Attribute));
+            if (weights0.Attribute.Encoding != weights1.Attribute.Encoding) throw new ArgumentException("WEIGHTS_0 and WEIGHTS_1 format mismatch.", nameof(weights1));
 
             var len = weights0.Attribute.ItemByteLength;
             Span<Byte> dst = stackalloc byte[len * 2];

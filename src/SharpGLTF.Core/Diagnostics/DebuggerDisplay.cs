@@ -86,11 +86,12 @@ namespace SharpGLTF.Diagnostics
 
             var vcounts = prim.VertexAccessors.Values
                 .Select(item => item.Count)
-                .Distinct();
+                .Distinct()
+                .ToList();
 
             var vcount = vcounts.First();
 
-            if (vcounts.Count() > 1)
+            if (vcounts.Count > 1)
             {
                 var vAccessors = prim.VertexAccessors
                     .OrderBy(item => item.Key, Memory.MemoryAccessInfo.NameComparer)
