@@ -80,7 +80,7 @@ namespace SharpGLTF.Geometry
     {
         #region debug
 
-        internal string _GetDebuggerDisplay()
+        internal readonly string _GetDebuggerDisplay()
         {
             var txt = "Vertex";
 
@@ -281,7 +281,7 @@ namespace SharpGLTF.Geometry
         public TvS Skinning;
 
         /// <inheritdoc/>
-        public override int GetHashCode() { return Geometry.GetHashCode(); }
+        public readonly override int GetHashCode() { return Geometry.GetHashCode(); }
 
         /// <inheritdoc/>
         public override bool Equals(object obj) { return obj is VertexBuilder<TvG, TvM, TvS> other && AreEqual(this, other); }
@@ -304,7 +304,7 @@ namespace SharpGLTF.Geometry
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         public Vector3 Position
         {
-            get => Geometry.GetPosition();
+            readonly get => Geometry.GetPosition();
             set => Geometry.SetPosition(value);
         }
 
@@ -312,7 +312,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public void Validate()
+        public readonly void Validate()
         {
             VertexPreprocessorLambdas.ValidateVertexGeometry(Geometry);
             VertexPreprocessorLambdas.ValidateVertexMaterial(Material);
@@ -333,11 +333,11 @@ namespace SharpGLTF.Geometry
 
         #pragma warning restore CA1000 // Do not declare static members on generic types
 
-        IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
+        readonly IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
 
-        IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
+        readonly IVertexMaterial IVertexBuilder.GetMaterial() { return this.Material; }
 
-        IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
+        readonly IVertexSkinning IVertexBuilder.GetSkinning() { return this.Skinning; }
 
         void IVertexBuilder.SetGeometry(IVertexGeometry geometry)
         {
@@ -361,21 +361,21 @@ namespace SharpGLTF.Geometry
 
         #region With* fluent API
 
-        public VertexBuilder<TvG, TvM, TvS> TransformedBy(in Matrix4x4 transform)
+        public readonly VertexBuilder<TvG, TvM, TvS> TransformedBy(in Matrix4x4 transform)
         {
             var clone = this;
             clone.Geometry.ApplyTransform(transform);
             return clone;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position)
         {
             var v = this;
             v.Geometry.SetPosition(position);
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal)
         {
             var v = this;
             v.Geometry.SetPosition(position);
@@ -383,7 +383,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal, in Vector4 tangent)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithGeometry(in Vector3 position, in Vector3 normal, in Vector4 tangent)
         {
             var v = this;
             v.Geometry.SetPosition(position);
@@ -392,7 +392,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithMaterial(params Vector2[] uvs)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithMaterial(params Vector2[] uvs)
         {
             Guard.NotNull(uvs, nameof(uvs));
 
@@ -401,7 +401,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, params Vector2[] uvs)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, params Vector2[] uvs)
         {
             Guard.NotNull(uvs, nameof(uvs));
 
@@ -411,7 +411,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, Vector4 color1, params Vector2[] uvs)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithMaterial(in Vector4 color0, Vector4 color1, params Vector2[] uvs)
         {
             Guard.NotNull(uvs, nameof(uvs));
 
@@ -422,14 +422,14 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithSkinning(in Transforms.SparseWeight8 sparse)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithSkinning(in Transforms.SparseWeight8 sparse)
         {
             var v = this;
             v.Skinning.SetBindings(sparse);
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int Index, float Weight)[] bindings)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithSkinning(params (int Index, float Weight)[] bindings)
         {
             var v = this;
 
@@ -440,7 +440,7 @@ namespace SharpGLTF.Geometry
             return v;
         }
 
-        public VertexBuilder<TvG, TvM, TvS> WithSkinning(IEnumerable<(int Index, float Weight)> bindings)
+        public readonly VertexBuilder<TvG, TvM, TvS> WithSkinning(IEnumerable<(int Index, float Weight)> bindings)
         {
             var v = this;
 
@@ -486,11 +486,11 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        public IVertexGeometry GetGeometry() { return Geometry; }
+        public readonly IVertexGeometry GetGeometry() { return Geometry; }
 
-        public IVertexMaterial GetMaterial() { return Material; }
+        public readonly IVertexMaterial GetMaterial() { return Material; }
 
-        public IVertexSkinning GetSkinning() { return Skinning; }
+        public readonly IVertexSkinning GetSkinning() { return Skinning; }
 
         public void SetGeometry(IVertexGeometry geometry) { this.Geometry = geometry; }
 
@@ -498,7 +498,13 @@ namespace SharpGLTF.Geometry
 
         public void SetSkinning(IVertexSkinning skinning) { this.Skinning = skinning; }
 
-        public IVertexBuilder ConvertToType(Type vertexType)
+        public readonly IVertexBuilder ConvertToType
+            (
+            #if NET6_0_OR_GREATER
+            [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+            #endif
+            Type vertexType
+            )
         {
             var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
 

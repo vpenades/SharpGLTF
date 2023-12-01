@@ -27,6 +27,10 @@ namespace SharpGLTF.Geometry
         /// <returns>A collectio of <see cref="PackedMeshBuilder{TMaterial}"/> meshes.</returns>
         internal static IEnumerable<PackedMeshBuilder<TMaterial>> CreatePackedMeshes(IEnumerable<IMeshBuilder<TMaterial>> meshBuilders, Scenes.SceneBuilderSchema2Settings settings)
         {
+            Guard.NotNull(meshBuilders, nameof(meshBuilders));
+
+            meshBuilders = meshBuilders.EnsureList();
+
             try
             {
                 foreach (var m in meshBuilders) m.Validate();

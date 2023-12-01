@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Xml.Linq;
 
 using SharpGLTF.Schema2;
 
@@ -36,7 +34,9 @@ namespace SharpGLTF.Scenes
         {
             // gather all FixedTransformers with renderables
 
-            var renderables = instances.Where(item => item.HasRenderableContent);
+            var renderables = instances
+                .Where(item => item.HasRenderableContent)
+                .ToList();
 
             // gather all renderables attached to the scene root.
 
@@ -68,9 +68,14 @@ namespace SharpGLTF.Scenes
 
         private _MeshInstancing(NodeBuilder parentNode, IEnumerable<FixedTransformer> children, int gpuMinCount)
         {
-            System.Diagnostics.Debug.Assert(children.All(item => item.ParentNode == parentNode), "all items must have the same parentNode");
+            Guard.NotNull(children,nameof(children));
 
             #if DEBUG
+
+            children = children.EnsureList();
+
+            System.Diagnostics.Debug.Assert(children.All(item => item.ParentNode == parentNode), "all items must have the same parentNode");
+
             var hasMoreThanOne = children
                 .Select(item => item.Content)
                 .Cast<IRenderableContent>()

@@ -129,7 +129,7 @@ namespace SharpGLTF.Geometry
                 var name = accessor.Attribute.Name;
                 if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
 
-                name = name.Replace("DELTA", string.Empty);
+                name = name.Replace("DELTA", string.Empty, StringComparison.Ordinal);
 
                 var attr = accessor.Attribute;
                 attr.Name = name;

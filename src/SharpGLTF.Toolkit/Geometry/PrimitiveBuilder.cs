@@ -106,6 +106,9 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets the type of the vertex used by this primitive.
         /// </summary>
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
         /// <summary>

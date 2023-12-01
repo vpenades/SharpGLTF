@@ -95,7 +95,7 @@ namespace SharpGLTF.IO
             return files;
         }
 
-        private IReadOnlyDictionary<String, Action<Stream>> _GetFileGenerators(string baseName) 
+        private Dictionary<String, Action<Stream>> _GetFileGenerators(string baseName) 
         {
             Guard.IsFalse(baseName.Any(c => char.IsWhiteSpace(c)), nameof(baseName), "Whitespace characters not allowed in filename");
 
@@ -108,8 +108,10 @@ namespace SharpGLTF.IO
             return fileGenerators;
         }
 
-        private static IReadOnlyDictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Action<Stream>> fileGenerators, string baseName, IEnumerable<Material> materials)
+        private static Dictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Action<Stream>> fileGenerators, string baseName, IEnumerable<Material> materials)
         {
+            if (!(materials is List<Material>)) materials = materials.ToList();
+
             // write all image files
             var images = materials
                 .Select(item => item.DiffuseTexture)

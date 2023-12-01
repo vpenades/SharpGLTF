@@ -272,6 +272,9 @@ namespace SharpGLTF.Schema2
         public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IEnumerable<MemoryAccessor> memAccessors)
         {
             Guard.NotNull(memAccessors, nameof(memAccessors));
+
+            memAccessors = memAccessors.EnsureList();
+
             Guard.IsTrue(memAccessors.All(item => item != null), nameof(memAccessors));
 
             foreach (var va in memAccessors) primitive.WithVertexAccessor(va);
@@ -362,7 +365,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(instancing, nameof(instancing));
             Guard.NotNull(transforms, nameof(transforms));
 
-            var xfrms = transforms.Select(item => item.GetDecomposed());
+            var xfrms = transforms
+                .Select(item => item.GetDecomposed())
+                .ToList();
+
             var hasS = xfrms.Any(item => item.Scale != Vector3.One);
             var hasR = xfrms.Any(item => item.Rotation != Quaternion.Identity);
             var hasT = xfrms.Any(item => item.Translation != Vector3.Zero);
@@ -384,7 +390,7 @@ namespace SharpGLTF.Schema2
                 .SelectMany(item => item)
                 .Select(item => item.Key)
                 .Distinct()
-                .Where(item => item.StartsWith("_", StringComparison.Ordinal));
+                .Where(item => item.StartsWith('_'));
 
             // for each attribute key found, fill the IDs
             foreach (var key in keys)
@@ -419,7 +425,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Takes a list of <see cref="JSONEXTRAS"/> and selects a specific property of a specific data type.
         /// </summary>        
-        private static IReadOnlyList<T> _SelectAttribute<T>(IReadOnlyList<JSONEXTRAS> values, string propertyName)
+        private static List<T> _SelectAttribute<T>(IReadOnlyList<JSONEXTRAS> values, string propertyName)
         {
             var result = new List<T>();
 
@@ -475,14 +481,18 @@ namespace SharpGLTF.Schema2
             if (xform != null && !xform.Visible) yield break;
 
             var points = prim.GetPointIndices();
-            if (!points.Any()) yield break;
 
-            var vertices = prim.GetVertexColumns();
-            var vtype = vertices.GetCompatibleVertexType();
+            VertexBufferColumns vertices = null;
+            Type vtype = null;
 
             foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
-                var xvertices = xinst != null ? vertices.WithTransform(xinst) : vertices;
+                vertices ??= prim.GetVertexColumns();
+                vtype ??= vertices.GetCompatibleVertexType();
+
+                var xvertices = xinst != null
+                    ? vertices.WithTransform(xinst)
+                    : vertices;
 
                 foreach (var t in points)
                 {

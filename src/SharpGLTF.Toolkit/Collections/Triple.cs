@@ -7,6 +7,8 @@ namespace SharpGLTF.Collections
 {
     public readonly struct Triple<T> : IReadOnlyList<T>, IEquatable<Triple<T>>
     {
+        #region constructors
+
         public static implicit operator Triple<T>(in (T A, T B, T C) triple)
         {
             return new Triple<T>(triple.A, triple.B, triple.C);
@@ -18,6 +20,10 @@ namespace SharpGLTF.Collections
             B = @b;
             C = @c;
         }
+
+        #endregion
+
+        #region data
 
         public readonly T A;
         public readonly T B;
@@ -45,6 +51,20 @@ namespace SharpGLTF.Collections
             return true;
         }
 
+        public static bool operator ==(in Triple<T> left, in Triple<T> right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(in Triple<T> left, in Triple<T> right)
+        {
+            return !left.Equals(right);
+        }
+
+        #endregion
+
+        #region properties
+
         public int Count => 3;
 
         public T this[int index]
@@ -61,6 +81,10 @@ namespace SharpGLTF.Collections
             }
         }
 
+        #endregion
+
+        #region API
+
         public IEnumerator<T> GetEnumerator()
         {
             yield return A;
@@ -74,5 +98,7 @@ namespace SharpGLTF.Collections
             yield return B;
             yield return C;
         }
+
+        #endregion
     }
 }

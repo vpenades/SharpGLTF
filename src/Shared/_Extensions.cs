@@ -328,9 +328,11 @@ namespace SharpGLTF
                 array[i] = value;
             }
         }
-
+        
         internal static IReadOnlyList<T> EnsureList<T>(this IEnumerable<T> collection)
         {
+            // prevents CA1851: Possible multiple enumerations...
+
             return collection is IReadOnlyList<T> list
                 ? list
                 : collection.ToList();
