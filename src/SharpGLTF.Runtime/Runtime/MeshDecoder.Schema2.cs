@@ -61,7 +61,9 @@ namespace SharpGLTF.Runtime
         {
             if (_Primitives.Length == 0) return;
 
-            var geometries = _Primitives.Select(item => item._Geometry);
+            var geometries = _Primitives
+                .Select(item => item._Geometry)
+                .ToList();
 
             // we can only skip normals and tangents calculation if all the
             // primitives have them. If we get a case in wich some primitives
@@ -77,9 +79,12 @@ namespace SharpGLTF.Runtime
 
             var morphTargetsCount = _Primitives.Min(item => item.MorphTargetsCount);
 
+            var targets = new List<_MorphTargetDecoder>();
+
             for (int i = 0; i < morphTargetsCount; ++i)
             {
-                var targets = _Primitives.Select(item => item._MorphTargets[i]);
+                targets.Clear();
+                targets.AddRange(_Primitives.Select(item => item._MorphTargets[i]));
 
                 hasNormals = targets.All(item => item.HasNormals);
                 hasTangents = targets.All(item => item.HasTangents);
