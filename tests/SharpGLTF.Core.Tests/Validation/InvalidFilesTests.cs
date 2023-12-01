@@ -43,6 +43,11 @@ namespace SharpGLTF.Validation
             {
                 var json = System.IO.File.ReadAllText(f + ".report.json");
                 var report = GltfValidator.ValidationReport.Parse(json);
+                
+                if (report.Issues.Messages.Any(item => item.Code.Contains("GLB_CHUNK_TOO_BIG")) && report.Issues.NumErrors > 0)
+                {
+                    // System.Diagnostics.Debugger.Break();
+                }
 
                 TestContext.Progress.WriteLine($"{f}...");
                 TestContext.WriteLine($"{f}...");

@@ -92,10 +92,19 @@ namespace SharpGLTF.Schema2
 
             using (var binaryReader = new BinaryReader(stream, Encoding.ASCII))
             {
-                _ReadBinaryHeader(binaryReader);
+                var bodyLen = _ReadBinaryHeader(binaryReader);
+
+                // body length can actually be smaller than the stream length,
+                // in which case, the data afterwards is considered "extra data".
+                void _checkCanRead(long count)
+                {
+                    bool canRead = (bodyLen - stream.Position - count) >= 0;
+                    if (!canRead) throw new Validation.SchemaException(null, "unexpected End of GLB block");
+                }                
 
                 var chunks = new Dictionary<uint, Byte[]>();
-                
+
+                _checkCanRead(4);
                 while (binaryReader._TryReadUInt32(out var chunkLength)) // keep reading until EndOfFile
                 {
                     if ((chunkLength & 3) != 0)
@@ -103,10 +112,12 @@ namespace SharpGLTF.Schema2
                         throw new Validation.SchemaException(null, $"The chunk must be padded to 4 bytes: {chunkLength}");
                     }
 
+                    _checkCanRead(4);
                     uint chunkId = binaryReader.ReadUInt32();
 
                     if (chunks.ContainsKey(chunkId)) throw new Validation.SchemaException(null, $"Duplicated chunk found {chunkId}");
 
+                    _checkCanRead(chunkLength);
                     var data = binaryReader.ReadBytes((int)chunkLength);
 
                     chunks[chunkId] = data;
@@ -119,7 +130,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static void _ReadBinaryHeader(BinaryReader binaryReader)
+        private static long _ReadBinaryHeader(BinaryReader binaryReader)
         {
             Guard.NotNull(binaryReader, nameof(binaryReader));
 
@@ -129,7 +140,7 @@ namespace SharpGLTF.Schema2
             uint version = binaryReader.ReadUInt32();
             if (version != GLTFVERSION2) throw new Validation.SchemaException(null, $"Unknown version number: {version}");
 
-            uint length = binaryReader.ReadUInt32();
+            uint bodyLength = binaryReader.ReadUInt32(); // length if the actual glb body
 
             uint? fileLength = null;
 
@@ -143,10 +154,16 @@ namespace SharpGLTF.Schema2
                 // https://github.com/vpenades/SharpGLTF/issues/178
             }
 
-            if (fileLength.HasValue && length != fileLength.Value)
+            // actual block can be larger than the expected block size, in which case
+            // there might be extra data after the binary file.
+            // gltfvalidator only considers this as a warning.
+
+            if (fileLength.HasValue && bodyLength > fileLength.Value)
             {
-                throw new Validation.SchemaException(null, $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
+                throw new Validation.SchemaException(null, $"The specified length of the file ({bodyLength}) is not equal to the actual length of the file ({fileLength}).");
             }
+
+            return bodyLength;
         }
 
         #endregion
