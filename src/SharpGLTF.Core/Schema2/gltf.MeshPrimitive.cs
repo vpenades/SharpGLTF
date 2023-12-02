@@ -375,38 +375,39 @@ namespace SharpGLTF.Schema2
                 validate.IsTrue(nameof(_indices), !incompatiblePrimitiveCount, "Mismatch between indices count and PrimitiveType");
             }
 
-            // check vertex attributes accessors ByteStride
+            // check access to shared BufferViews            
 
-            foreach (var group in this.VertexAccessors.Values.GroupBy(item => item.SourceBufferView))
+            var accessorsWithSharedBufferViews = this.VertexAccessors
+                .Values
+                .Distinct() // it is allowed that multiple attributes use the same accessor
+                .GroupBy(item => item.SourceBufferView);
+
+            foreach (var group in accessorsWithSharedBufferViews)
             {
-                if (!group.Skip(1).Any()) continue;
+                if (!group.Skip(1).Any()) continue; // buffer is not shared, skipping overlap tests
 
-                // if more than one accessor shares a BufferView, it must define a ByteStride
+                // if more than one accessor shares a BufferView, it can happen that:
+                // - ByteStride is 0, in which case access to the shared BufferView is sequential.
+                // - ByteStride is not 0, in which case access to the shared BufferView is interleaved.                
 
-                validate.IsGreater("ByteStride", group.Key.ByteStride, 0); // " must be defined when two or more accessors use the same BufferView."
-
-                // determine if we're sequential or strided by checking if the memory buffers overlap
-                var memories = group.Select(item => item._GetMemoryAccessor());
-                var overlap = Memory.MemoryAccessor.HaveOverlappingBuffers(memories);
-
-                bool ok = false;
-
-                // strided buffer detected
-                if (overlap)
+                if (group.Key.ByteStride > 0)
                 {
-                    ok = group.Sum(item => item.Format.ByteSizePadded) <= group.Key.ByteStride;
+                    foreach(var item in group)
+                    {
+                        if (item.Format.ByteSizePadded > group.Key.ByteStride)
+                        {
+                            validate._LinkThrow("Attributes", $"Attribute element size {item.Format.ByteSizePadded} exceeds ByteStride {group.Key.ByteStride}");
+                        }                        
+                    }                    
                 }
-
-                // sequential buffer detected
                 else
                 {
-                    ok = group.All(item => item.Format.ByteSizePadded <= group.Key.ByteStride);
-                }
-
-                if (!ok)
-                {
-                    var accessors = string.Join(" ", group.Select(item => item.LogicalIndex));
-                    validate._LinkThrow("Attributes", $"Inconsistent accessors configuration: {accessors}");
+                    var memories = group.Select(item => item._GetMemoryAccessor());
+                    var overlap = Memory.MemoryAccessor.HaveOverlappingBuffers(memories);
+                    if (overlap)
+                    {
+                        validate._LinkThrow("Attributes", $"BufferView access is expected to be sequential, but some buffers overlap.");
+                    }
                 }
             }
 
