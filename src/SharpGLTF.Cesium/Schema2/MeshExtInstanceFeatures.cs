@@ -30,14 +30,13 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext validate)
         {
-            var extInstanceFeatures = _node.Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
+            var extInstanceFeatures = _node.GetExtension<MeshExtInstanceFeatures>();
             validate.NotNull(nameof(extInstanceFeatures), extInstanceFeatures);
-            var ext = (MeshExtInstanceFeatures)extInstanceFeatures;
-            var extMeshGpInstancing = _node.Extensions.Where(item => item is MeshGpuInstancing).FirstOrDefault();
+            var extMeshGpInstancing = _node.GetExtension<MeshGpuInstancing>();
             validate.NotNull(nameof(extMeshGpInstancing), extMeshGpInstancing);
 
-            validate.NotNull(nameof(FeatureIds), ext.FeatureIds);
-            validate.IsTrue(nameof(FeatureIds), ext.FeatureIds.Count > 0, "Instance FeatureIds has items");
+            validate.NotNull(nameof(FeatureIds), extInstanceFeatures.FeatureIds);
+            validate.IsTrue(nameof(FeatureIds), extInstanceFeatures.FeatureIds.Count > 0, "Instance FeatureIds has items");
 
             base.OnValidateContent(validate);
         }
