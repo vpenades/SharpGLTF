@@ -1,8 +1,6 @@
 ﻿using SharpGLTF.Validation;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Linq;
-
 namespace SharpGLTF.Schema2
 {
     public partial class MeshExtInstanceFeatures

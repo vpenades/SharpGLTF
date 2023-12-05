@@ -54,6 +54,9 @@ namespace SharpGLTF.Schema2
 
     public partial class MeshExtMeshFeatureID
     {
+        public MeshExtMeshFeatureID()
+        {
+        }
         public MeshExtMeshFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null, int? nullFeatureId = null, MeshExtMeshFeatureIDTexture texture = null)
         {
             _featureCount = featureCount;
