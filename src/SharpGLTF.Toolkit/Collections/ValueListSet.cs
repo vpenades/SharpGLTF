@@ -67,7 +67,7 @@ namespace SharpGLTF.Collections
             get
             {
                 if (index < 0 || index >= _Count) throw new ArgumentOutOfRangeException(nameof(index));
-                if (_Entries[index].HashCode == -1) throw new ArgumentException(nameof(index));
+                if (_Entries[index].HashCode == -1) throw new ArgumentException("Invalid entry", nameof(index));
                 return _Entries[index].Value;
             }
         }
@@ -82,7 +82,7 @@ namespace SharpGLTF.Collections
         {
             if (_Count <= 0) return;
 
-            _Entries.AsSpan().Fill(default);
+            _Entries.AsSpan().Clear();
             _Buckets.AsSpan().Fill(-1);
 
             _Count = 0;

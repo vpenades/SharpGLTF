@@ -160,11 +160,13 @@ namespace SharpGLTF.Materials
                 case KnownChannel.Normal: yield return new _Property(KnownProperty.NormalScale, 1f); break;
                 case KnownChannel.Occlusion: yield return new _Property(KnownProperty.OcclusionStrength, 1f); break;
 
+                #pragma warning disable CS0618 // Type or member is obsolete - We want to warn users that this is obsolete, but not to ourselves!
                 case KnownChannel.Diffuse: yield return new _Property(KnownProperty.RGBA, Vector4.One); break;
                 case KnownChannel.SpecularGlossiness:
                     yield return new _Property(KnownProperty.SpecularFactor, Vector3.One);
                     yield return new _Property(KnownProperty.GlossinessFactor, 1f);
                     break;
+                #pragma warning restore CS0618 // Type or member is obsolete
 
                 case KnownChannel.BaseColor: yield return new _Property(KnownProperty.RGBA, Vector4.One); break;
                 case KnownChannel.MetallicRoughness:

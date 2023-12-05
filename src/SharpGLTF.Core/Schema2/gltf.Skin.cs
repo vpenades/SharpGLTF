@@ -223,19 +223,19 @@ namespace SharpGLTF.Schema2
         {
             if (nodes == null) return null;
 
+            nodes = nodes.EnsureList();
+
             foreach (var j in nodes)
             {
                 Guard.NotNull(j, nameof(nodes));
                 Guard.MustShareLogicalParent(this, j, nameof(nodes));
-            }
+            }            
 
-            var workingNodes = nodes.ToList();
-
-            var rootJoint = workingNodes.First();
+            var rootJoint = nodes.First();
 
             while (true)
             {
-                if (workingNodes.All(j => rootJoint == j || rootJoint._ContainsVisualNode(j, true))) return rootJoint;
+                if (nodes.All(j => rootJoint == j || rootJoint._ContainsVisualNode(j, true))) return rootJoint;
 
                 if (rootJoint.VisualParent == null) break;
 

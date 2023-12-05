@@ -335,7 +335,7 @@ namespace SharpGLTF.SchemaReflection
 
             public bool Equals(FieldInfo x, FieldInfo y) { return Compare(x,y) == 0; }
 
-            public int GetHashCode(FieldInfo obj) { return obj._PersistentName.GetHashCode(); }
+            public int GetHashCode(FieldInfo obj) { return obj._PersistentName.GetHashCode(StringComparison.Ordinal); }
         }
 
         private static readonly _Comparer _DefaultComparer = new _Comparer();
@@ -420,7 +420,9 @@ namespace SharpGLTF.SchemaReflection
 
         private readonly SchemaType _ReferencedType;
 
+        #pragma warning disable CA1065 // Do not raise exceptions in unexpected locations
         public override string PersistentName => throw new NotImplementedException();
+        #pragma warning restore CA1065 // Do not raise exceptions in unexpected locations
 
         #endregion
     }

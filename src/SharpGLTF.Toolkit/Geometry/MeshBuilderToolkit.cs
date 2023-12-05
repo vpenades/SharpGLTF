@@ -90,31 +90,35 @@ namespace SharpGLTF.Geometry
 
         public static Schema2.EncodingType GetOptimalIndexEncoding<TMaterial>(this IEnumerable<IMeshBuilder<TMaterial>> meshes)
         {
+            Guard.NotNull(meshes, nameof(meshes));
+
             var indices = meshes
                 .SelectMany(item => item.Primitives)
                 .Where(item => item.VerticesPerPrimitive >= 2) // points will never use index buffers
                 .SelectMany(prim => prim.GetIndices());
 
-            var maxIndex = indices.Any() ? indices.Max() : 0;
+            var maxIndex = indices.Aggregate(0, (a,b) => Math.Max(a,b));
 
             return maxIndex < 65535 ? Schema2.EncodingType.UNSIGNED_SHORT : Schema2.EncodingType.UNSIGNED_INT;
         }
 
         public static Schema2.EncodingType GetOptimalJointEncoding<TMaterial>(this IEnumerable<IMeshBuilder<TMaterial>> meshes)
         {
+            Guard.NotNull(meshes, nameof(meshes));
+
             var indices = meshes
                 .SelectMany(item => item.Primitives)
                 .SelectMany(item => item.Vertices)
                 .Select(item => item.GetSkinning().GetBindings().MaxIndex);
 
-            var maxIndex = indices.Any() ? indices.Max() : 0;
+            var maxIndex = indices.Aggregate(0, (a, b) => Math.Max(a, b));
 
             return maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : Schema2.EncodingType.UNSIGNED_SHORT;
         }
         
         public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes
             <
-            #if !NETSTANDARD
+            #if NET6_0_OR_GREATER
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
             #endif
             TMaterial>(params string[] vertexAttributes)
@@ -126,12 +130,12 @@ namespace SharpGLTF.Geometry
             return mesh as IMeshBuilder<TMaterial>;
         }
         
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetMeshBuilderType
             (
-            #if !NETSTANDARD
+            #if NET6_0_OR_GREATER
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
             #endif
             Type materialType, string[] vertexAttributes)
@@ -149,7 +153,7 @@ namespace SharpGLTF.Geometry
         {
             var posnrm = new Dictionary<Vector3, Vector3>();
 
-            void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
+            static void addDirection(Dictionary<Vector3, Vector3> dict, Vector3 pos, Vector3 dir)
             {
                 if (!dir._IsFinite()) return;
                 if (!dict.TryGetValue(pos, out Vector3 n)) n = Vector3.Zero;

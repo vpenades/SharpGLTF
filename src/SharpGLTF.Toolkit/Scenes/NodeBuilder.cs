@@ -263,6 +263,9 @@ namespace SharpGLTF.Scenes
         public static bool IsValidArmature(IEnumerable<NodeBuilder> joints)
         {
             if (joints == null) return false;
+
+            joints = joints.EnsureList();
+
             if (!joints.Any()) return false;
             if (joints.Any(item => item == null)) return false;
 

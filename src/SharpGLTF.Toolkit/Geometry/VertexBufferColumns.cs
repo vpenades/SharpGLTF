@@ -88,7 +88,7 @@ namespace SharpGLTF.Geometry
 
         #region API
 
-        private static IList<T> _IsolateColumn<T>(IList<T> column)
+        private static T[] _IsolateColumn<T>(IList<T> column)
         {
             if (column == null) return null;
 
@@ -310,7 +310,7 @@ namespace SharpGLTF.Geometry
 
         public VertexBufferColumns AddMorphTarget()
         {
-            if (_MorphTargets == null) _MorphTargets = new List<VertexBufferColumns>();
+            _MorphTargets ??= new List<VertexBufferColumns>();
             var mt = new VertexBufferColumns();
             _MorphTargets.Add(mt);
 
@@ -321,6 +321,9 @@ namespace SharpGLTF.Geometry
 
         #region API - Vertex indexing
 
+        #if NET6_0_OR_GREATER
+        [return: System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         public Type GetCompatibleVertexType()
         {
             var hasNormals = Normals != null;
@@ -395,7 +398,13 @@ namespace SharpGLTF.Geometry
             return s;
         }
 
-        public IVertexBuilder GetVertex(Type vertexType, int index)
+        public IVertexBuilder GetVertex
+            (
+            #if NET6_0_OR_GREATER
+            [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+            #endif
+            Type vertexType,
+            int index)
         {
             var g = GetVertexGeometry<VertexPositionNormalTangent>(index);
             var m = GetVertexMaterial<VertexColor2Texture2>(index);
@@ -435,8 +444,7 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(primitives, nameof(primitives));
 
             var agents = primitives
-                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
-                .ToList();
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices));
 
             Runtime.VertexNormalsFactory.CalculateSmoothNormals(agents);
         }
@@ -446,8 +454,7 @@ namespace SharpGLTF.Geometry
             Guard.NotNull(primitives, nameof(primitives));
 
             var agents = primitives
-                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices))
-                .ToList();
+                .Select(item => new _NormalTangentAgent(item.Vertices, item.Indices));
 
             Runtime.VertexTangentsFactory.CalculateTangents(agents);
         }

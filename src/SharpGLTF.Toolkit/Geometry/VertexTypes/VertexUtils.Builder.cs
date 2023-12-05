@@ -7,7 +7,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static partial class VertexUtils
     {
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexGeometryType(params string[] vertexAttributes)
@@ -18,7 +18,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return t;
         }
 
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexMaterialType(params string[] vertexAttributes)
@@ -36,7 +36,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return GetVertexMaterialType(colors, uvcoords);
         }
 
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexMaterialType(int colors, int uvcoords)
@@ -65,7 +65,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return typeof(VertexEmpty);
         }
 
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexSkinningType(params string[] vertexAttributes)
@@ -79,7 +79,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return typeof(VertexEmpty);
         }
 
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexBuilderType(params string[] vertexAttributes)
@@ -93,7 +93,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             return vtype.MakeGenericType(tvg, tvm, tvs);
         }
 
-        #if !NETSTANDARD
+        #if NET6_0_OR_GREATER
         [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         public static Type GetVertexBuilderType(bool hasNormals, bool hasTangents, int numCols, int numUV, int numJoints)

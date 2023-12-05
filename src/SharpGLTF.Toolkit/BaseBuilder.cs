@@ -98,8 +98,8 @@ namespace SharpGLTF
         /// <param name="target">The target object</param>
         internal void TryCopyNameAndExtrasTo(Schema2.LogicalChildOfRoot target)
         {
-            target.Name = this?.Name;
-            target.Extras = this?.Extras?.DeepClone();
+            target.Name = this.Name;
+            target.Extras = this.Extras?.DeepClone();
         }
 
         #endregion

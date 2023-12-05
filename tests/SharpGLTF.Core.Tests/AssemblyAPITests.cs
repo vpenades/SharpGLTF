@@ -37,7 +37,7 @@ namespace SharpGLTF
 
             public event EventHandler EventX;
 
-            public struct Structure
+            public struct SomeStructure
             {
                 public int X;
                 public int Y { get; }

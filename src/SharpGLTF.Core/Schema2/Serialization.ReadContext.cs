@@ -251,7 +251,7 @@ namespace SharpGLTF.Schema2
             catch (System.IO.EndOfStreamException ex)
             {
                 var vr = new Validation.ValidationResult(null, this.Validation);
-                vr.SetSchemaError(ex);
+                vr.SetSchemaError(ex);                
                 return (null, vr);
             }
             catch (Validation.SchemaException ex)

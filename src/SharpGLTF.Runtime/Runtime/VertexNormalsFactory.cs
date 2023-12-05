@@ -50,6 +50,8 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(primitives, nameof(primitives));
 
+            primitives = primitives.EnsureList();
+
             var normalMap = new Dictionary<Vector3, Vector3>();
 
             // calculate

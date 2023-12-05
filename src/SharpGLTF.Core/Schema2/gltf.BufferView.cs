@@ -144,12 +144,16 @@ namespace SharpGLTF.Schema2
         /// <returns>true if the buffer is interleaved</returns>
         public bool IsInterleaved(IEnumerable<Accessor> accessors)
         {
-            Guard.NotNullOrEmpty(accessors, nameof(accessors));
-            Guard.IsTrue(accessors.All(item => item.SourceBufferView == this), nameof(accessors));
+            Guard.NotNullOrEmpty(accessors, nameof(accessors));            
 
-            return accessors
-                .Select(item => item.ByteOffset)
-                .All(o => o < this.ByteStride);
+            foreach(var accessor in accessors)
+            {
+                Guard.NotNull(accessor, nameof(accessor));
+                Guard.IsTrue(accessor.SourceBufferView == this, nameof(accessors));
+                if (accessor.ByteOffset >= this.ByteStride) return false;
+            }
+
+            return true;
         }
 
         internal static bool AreEqual(BufferView bv, BYTES content, int byteStride, BufferMode? target)

@@ -55,7 +55,7 @@ namespace SharpGLTF.Cesium
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
             Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
 
-            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds.Equals(featureIds));
+            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.EqualTo(featureIds));
 
             // Check there should be a custom vertex attribute with name _FEATURE_ID_{attribute}
             var attribute = cesiumExtMeshFeaturesExtension.FeatureIds[0].Attribute;

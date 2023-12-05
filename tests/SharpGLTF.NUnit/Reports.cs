@@ -56,7 +56,7 @@ namespace SharpGLTF.Reporting
             this.VertexAttributes = new[] { "SCENE" };
         }
 
-        internal void SetFrom(IEnumerable<VisualReport> many)
+        internal void SetFrom(IReadOnlyList<VisualReport> many)
         {
             NumVertices = many.Sum(item => item.NumVertices);
             NumTriangles = many.Sum(item => item.NumTriangles);

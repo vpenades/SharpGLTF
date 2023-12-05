@@ -8,7 +8,6 @@ using SharpGLTF.IO;
 
 using JsonToken = System.Text.Json.JsonTokenType;
 
-// using JSONEXTRAS = SharpGLTF.IO.JsonContent;
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Schema2
@@ -192,7 +191,7 @@ namespace SharpGLTF.Schema2
             SerializeProperty(writer, "extras", content);
         }
 
-        private static IReadOnlyDictionary<string, JsonSerializable> _ToDictionary(JsonSerializable context, IEnumerable<JsonSerializable> serializables)
+        private static Dictionary<string, JsonSerializable> _ToDictionary(JsonSerializable context, IEnumerable<JsonSerializable> serializables)
         {
             var dict = new Dictionary<string, JsonSerializable>();
 
@@ -227,7 +226,7 @@ namespace SharpGLTF.Schema2
 
                 case "extras":
                     {
-                        var content = System.Text.Json.Nodes.JsonNode.Parse(ref reader);
+                        var content = JSONEXTRAS.Parse(ref reader);
                         _extras = content;
                         break;
                     }
@@ -236,7 +235,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        private static void _DeserializeExtensions(JsonSerializable parent, ref Utf8JsonReader reader, IList<JsonSerializable> extensions)
+        private static void _DeserializeExtensions(JsonSerializable parent, ref Utf8JsonReader reader, List<JsonSerializable> extensions)
         {
             reader.Read();
 

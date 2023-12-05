@@ -70,7 +70,7 @@ namespace SharpGLTF.Schema2
         {
             writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()));
 
-            this._uri = Uri.EscapeUriString(satelliteUri);
+            this._uri = satelliteUri._EscapeStringInternal();
             this._byteLength = _Content.Length;
         }
 

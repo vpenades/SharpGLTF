@@ -17,13 +17,11 @@ namespace SharpGLTF.Animations
 
         public static ICurveSampler<T> Create(IEnumerable<(float Key, T Value)> sequence)
         {
-            System.Diagnostics.Debug.Assert(!sequence.Skip(1).Any());
             return new FixedSampler<T>(sequence.First().Value);
         }
 
         public static ICurveSampler<T> Create(IEnumerable<(float Key, (T, T, T) Value)> sequence)
-        {
-            System.Diagnostics.Debug.Assert(!sequence.Skip(1).Any());
+        {            
             return new FixedSampler<T>(sequence.First().Value.Item2);
         }
 

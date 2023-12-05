@@ -220,12 +220,13 @@ namespace SharpGLTF.Scenes
             return dstScene;
         }
 
-        private static IReadOnlyDictionary<Node, MESHBUILDER> _GatherMeshInstances(IEnumerable<Node> srcNodes)
+        private static Dictionary<Node, MESHBUILDER> _GatherMeshInstances(IEnumerable<Node> srcNodes)
         {
             // filter all the nodes with meshes
 
             var srcInstances = srcNodes
-                .Where(item => item.Mesh != null);
+                .Where(item => item.Mesh != null)
+                .ToList();
 
             // create a dictionary of shared Mesh => MeshBuilder pairs.
 

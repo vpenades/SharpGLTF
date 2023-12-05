@@ -26,7 +26,7 @@ namespace SharpGLTF.Cesium
             settings.GpuMeshInstancingMinCount = 0;
 
             var modelRoot = ModelRoot.Load(ResourceInfo.From("tree.glb"));
-            var meshBuilder = modelRoot.LogicalMeshes.First().ToMeshBuilder();
+            var meshBuilder = modelRoot.LogicalMeshes[0].ToMeshBuilder();
             var sceneBuilder = new SceneBuilder();
             var quaternion = Quaternion.CreateFromYawPitchRoll(0, 0, 0);
             var scale = Vector3.One;
@@ -47,12 +47,12 @@ namespace SharpGLTF.Cesium
             var model = sceneBuilder.ToGltf2(settings);
             model.LogicalNodes[0].SetFeatureIds(featureIds);
 
-            var cesiumExtInstanceFeaturesExtension = (MeshExtInstanceFeatures)model.LogicalNodes[0].Extensions.Where(item => item is MeshExtInstanceFeatures).FirstOrDefault();
+            var cesiumExtInstanceFeaturesExtension = model.LogicalNodes[0].GetExtension<MeshExtInstanceFeatures>();
 
             Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds, Is.Not.Null);
-            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds.Equals(featureIds));
-            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[0].Equals(featureId0));
-            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[1].Equals(featureId1));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds, Is.EqualTo(featureIds));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[0], Is.EqualTo(featureId0));
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[1], Is.EqualTo(featureId1));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.ValidateContent(ctx.GetContext());

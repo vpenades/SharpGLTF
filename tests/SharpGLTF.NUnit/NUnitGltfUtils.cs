@@ -45,7 +45,7 @@ namespace SharpGLTF
         {
             var gl2model = ModelRoot.CreateModel();
 
-            var gl2mesh = gl2model.CreateMeshes(mesh).First();
+            var gl2mesh = gl2model.CreateMeshes(mesh)[0];
 
             var node = gl2model.UseScene(0).CreateNode();
             node.Mesh = gl2mesh;
@@ -64,7 +64,7 @@ namespace SharpGLTF
                     .WriteObject(f => model.SaveGLB(f, settings))
                     .FullName;
             }
-            else if (fileName.ToLowerInvariant().EndsWith(".gltf"))
+            else if (fileName.ToUpperInvariant().EndsWith(".GLTF"))
             {
                 if (settings == null) settings = new WriteSettings { JsonIndented = true };
 
@@ -73,7 +73,7 @@ namespace SharpGLTF
                     .WriteObject(f => model.Save(f, settings))
                     .FullName;
             }
-            else if (fileName.ToLowerInvariant().EndsWith(".obj"))
+            else if (fileName.ToUpperInvariant().EndsWith(".OBJ"))
             {
                 // skip exporting to obj if gpu instancing is there
                 if (Node.Flatten(model.DefaultScene).Any(n => n.GetGpuInstancing() != null)) return fileName;                
@@ -85,7 +85,7 @@ namespace SharpGLTF
                     .WriteObject(f => model.SaveAsWavefront(f))
                     .FullName;
             }
-            else if (fileName.ToLowerInvariant().EndsWith(".plotly"))
+            else if (fileName.ToUpperInvariant().EndsWith(".PLOTLY"))
             {
                 fileName = fileName.Replace(".plotly", ".html");
 

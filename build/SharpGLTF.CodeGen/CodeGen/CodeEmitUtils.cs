@@ -71,13 +71,13 @@ namespace SharpGLTF.CodeGen
         {
             while(true)
             {
-                var indices = _FindDescriptionKeyword(description);
-                if (indices.start < 0) return description;
+                var (start, len) = _FindDescriptionKeyword(description);
+                if (start < 0) return description;
 
-                var block = description.Substring(indices.start , indices.len);
+                var block = description.Substring(start , len);
                 var name = block.Substring(2, block.Length - 4);
 
-                description = description.Replace(block, $"<see cref=\"{name}\"/>");
+                description = description.Replace(block, $"<see cref=\"{name}\"/>", StringComparison.Ordinal);
             }
         }
 

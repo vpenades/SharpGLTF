@@ -70,6 +70,8 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(primitives, nameof(primitives));
 
+            primitives = primitives.EnsureList();
+
             var tangentsMap = new Dictionary<VERTEXKEY, (Vector3 u, Vector3 v)>();
 
             // calculate

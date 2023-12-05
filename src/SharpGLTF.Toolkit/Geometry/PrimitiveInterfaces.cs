@@ -10,6 +10,9 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
         /// </summary>
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         Type VertexType { get; }
 
         /// <summary>
@@ -72,6 +75,9 @@ namespace SharpGLTF.Geometry
         /// <summary>
         /// Gets a generic type of <see cref="VertexBuilder{TvG, TvM, TvS}"/>.
         /// </summary>
+        #if NET6_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+        #endif
         Type VertexType { get; }
 
         void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta);

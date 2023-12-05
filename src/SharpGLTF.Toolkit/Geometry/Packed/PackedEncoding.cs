@@ -19,7 +19,7 @@ namespace SharpGLTF.Geometry
             if (JointsEncoding.HasValue) return;
 
             var indices = vertices.Select(item => item.GetSkinning().GetBindings().MaxIndex);
-            var maxIndex = indices.Any() ? indices.Max() : 0;
+            var maxIndex = indices.Aggregate(0, (a, b) => Math.Max(a, b));
             JointsEncoding = maxIndex < 256 ? ENCODING.UNSIGNED_BYTE : ENCODING.UNSIGNED_SHORT;
         }
     }

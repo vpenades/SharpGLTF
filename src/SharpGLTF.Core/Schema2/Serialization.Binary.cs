@@ -45,7 +45,6 @@ namespace SharpGLTF.Schema2
                 return false;
             }
         }
-        
 
         internal static bool _Identify(Stream stream)
         {
@@ -92,34 +91,64 @@ namespace SharpGLTF.Schema2
 
             using (var binaryReader = new BinaryReader(stream, Encoding.ASCII))
             {
-                _ReadBinaryHeader(binaryReader);
+                // body length can actually be smaller than the stream length,
+                // in which case, the data afterwards is considered "extra data".
+
+                var remaining = _ReadBinaryHeader(binaryReader);
+                
+                void _checkCanRead(long count)
+                {
+                    if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
+                    if (count > int.MaxValue) throw new Validation.SchemaException(null, $"{count} bytes to read exceeds maximum capacity.");
+                    if (remaining < count) throw new Validation.SchemaException(null, "unexpected End of GLB block.");
+                    remaining -= count;
+                }                
 
                 var chunks = new Dictionary<uint, Byte[]>();
-                
-                while (binaryReader._TryReadUInt32(out var chunkLength)) // keep reading until EndOfFile
+
+                while (remaining >= 4)
                 {
+                    remaining -= 4;
+                    if (!binaryReader._TryReadUInt32(out var chunkLength)) break;
+
+                    if (chunkLength  == 0)
+                    {
+                        throw new Validation.SchemaException(null, $"The chunk must non zero size.");
+                    }                    
+
                     if ((chunkLength & 3) != 0)
                     {
                         throw new Validation.SchemaException(null, $"The chunk must be padded to 4 bytes: {chunkLength}");
                     }
 
+                    _checkCanRead(4);
                     uint chunkId = binaryReader.ReadUInt32();
 
-                    if (chunks.ContainsKey(chunkId)) throw new Validation.SchemaException(null, $"Duplicated chunk found {chunkId}");
-
+                    if (chunks.ContainsKey(chunkId))
+                    {
+                        throw new Validation.SchemaException(null, $"Duplicated chunk found {chunkId}");
+                    }
+                    
+                    _checkCanRead(chunkLength);
                     var data = binaryReader.ReadBytes((int)chunkLength);
 
                     chunks[chunkId] = data;
                 }
 
-                if (!chunks.ContainsKey(CHUNKJSON)) throw new Validation.SchemaException(null, "JSON Chunk chunk not found");
+                // finish reading remainder
+                // if (remaining > 0) { binaryReader.ReadBytes((int)remaining); }
+
+                if (!chunks.ContainsKey(CHUNKJSON)) throw new Validation.SchemaException(null, "JSON Chunk chunk not found");                
+
+                // warnings
                 // if (!chunks.ContainsKey(CHUNKBIN)) throw new Validation.SchemaException(null, "BIN Chunk chunk not found");
+                // if (remaining > 0) throw new Validation.SchemaException(null, "Extra bytes found");
 
                 return chunks;
             }
         }
 
-        private static void _ReadBinaryHeader(BinaryReader binaryReader)
+        private static long _ReadBinaryHeader(BinaryReader binaryReader)
         {
             Guard.NotNull(binaryReader, nameof(binaryReader));
 
@@ -129,24 +158,27 @@ namespace SharpGLTF.Schema2
             uint version = binaryReader.ReadUInt32();
             if (version != GLTFVERSION2) throw new Validation.SchemaException(null, $"Unknown version number: {version}");
 
-            uint length = binaryReader.ReadUInt32();
+            uint bodyLength = binaryReader.ReadUInt32(); // length of the actual glb body            
 
-            uint? fileLength = null;
-
-            try
+            try // check stream is large enough
             {
-                fileLength = (uint)binaryReader.BaseStream.Length;                
+                if (binaryReader.BaseStream.CanSeek)
+                {
+                    var fileLength = (uint)binaryReader.BaseStream.Length;
+
+                    if (bodyLength > fileLength)
+                    {
+                        throw new Validation.SchemaException(null, $"The specified length of the file ({bodyLength}) is not equal to the actual length of the file ({fileLength}).");
+                    }
+                }
             }
             catch (System.NotSupportedException)
             {
                 // Some streams like Android assets don't support getting the length
                 // https://github.com/vpenades/SharpGLTF/issues/178
-            }
+            }            
 
-            if (fileLength.HasValue && length != fileLength.Value)
-            {
-                throw new Validation.SchemaException(null, $"The specified length of the file ({length}) is not equal to the actual length of the file ({fileLength}).");
-            }
+            return bodyLength - 12;
         }
 
         #endregion

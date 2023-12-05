@@ -263,6 +263,8 @@ namespace SharpGLTF.Schema2
 
             if (srcMaterial.FindChannel("Diffuse") != null || srcMaterial.FindChannel("SpecularGlossiness") != null)
             {
+                #pragma warning disable CS0618 // Type or member is obsolete
+
                 dstMaterial.WithSpecularGlossinessShader();
                 srcMaterial.CopyChannelsTo(dstMaterial, "Diffuse", "SpecularGlossiness");
                 // srcMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
@@ -278,6 +280,7 @@ namespace SharpGLTF.Schema2
                 }
 
                 return;
+                #pragma warning restore CS0618 // Type or member is obsolete
             }
 
             if (srcMaterial.FindChannel("BaseColor") != null || srcMaterial.FindChannel("MetallicRoughness") != null)

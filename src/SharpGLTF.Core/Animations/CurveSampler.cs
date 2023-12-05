@@ -152,6 +152,8 @@ namespace SharpGLTF.Animations
         {
             Guard.NotNull(sequence, nameof(sequence));
 
+            sequence = sequence.EnsureList();
+
             if (!sequence.Any()) return (default(T), default(T), 0);
 
             (float Key, T Value)? left = null;
@@ -172,7 +174,7 @@ namespace SharpGLTF.Animations
 
                 if (item.Key > offset)
                 {
-                    if (left == null) left = prev;
+                    left ??= prev;
                     right = item;
                     break;
                 }
@@ -213,6 +215,8 @@ namespace SharpGLTF.Animations
         {
             Guard.NotNull(sequence, nameof(sequence));
 
+            sequence = sequence.EnsureList();
+
             if (!sequence.Any()) return (0, 0, 0);
 
             float? left = null;
@@ -233,7 +237,7 @@ namespace SharpGLTF.Animations
 
                 if (item > offset)
                 {
-                    if (left == null) left = prev;
+                    left ??= prev;
                     right = item;
                     break;
                 }
@@ -274,15 +278,23 @@ namespace SharpGLTF.Animations
         /// <returns>A sequence of 1 second chunks.</returns>
         internal static IEnumerable<(float, T)[]> SplitByTime<T>(this IEnumerable<(Single Time, T Value)> sequence)
         {
-            if (!sequence.Any()) yield break;
+            List<(float, T)> segment = null;
 
-            var segment = new List<(float, T)>();
             int time = 0;
+            
+            (Single Time, T Value) last = default;
 
-            var last = sequence.First();
+            bool isFirst = true;
 
             foreach (var item in sequence)
             {
+                if (isFirst)
+                {
+                    last = item;
+                    segment ??= new List<(float, T)>();
+                    isFirst = false;
+                }
+
                 var t = (int)item.Time;
 
                 if (time > t) throw new InvalidOperationException("unexpected data encountered.");
@@ -307,7 +319,7 @@ namespace SharpGLTF.Animations
                 last = item;
             }
 
-            if (segment.Count > 0) yield return segment.ToArray();
+            if (segment != null && segment.Count > 0) yield return segment.ToArray();
         }
 
         #endregion

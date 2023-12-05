@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
                 );
         }
 
-        private static IReadOnlyList<(Material Material, VertexBufferColumns Vertices, IEnumerable<(int, int, int)> Triangles)> _GatherMeshGeometry(Mesh mesh)
+        private static List<(Material Material, VertexBufferColumns Vertices, IEnumerable<(int, int, int)> Triangles)> _GatherMeshGeometry(Mesh mesh)
         {
             var primitives = mesh.Primitives
                             .Where(prim => prim.GetTriangleIndices().Any())
@@ -62,7 +62,7 @@ namespace SharpGLTF.Schema2
                     .Select(p => (p.Item2, p.Item3))
                     .ToList();
 
-                if (prims.Any()) VertexBufferColumns.CalculateSmoothNormals(prims);
+                if (prims.Count > 0) VertexBufferColumns.CalculateSmoothNormals(prims);
             }
 
             if (needsTangents)
@@ -72,7 +72,7 @@ namespace SharpGLTF.Schema2
                     .Select(p => (p.Item2, p.Item3))
                     .ToList();
 
-                if (prims.Any()) VertexBufferColumns.CalculateTangents(prims);
+                if (prims.Count > 0) VertexBufferColumns.CalculateTangents(prims);
             }
 
             return primitives;
