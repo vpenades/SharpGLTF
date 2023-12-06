@@ -4,7 +4,6 @@ using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
 

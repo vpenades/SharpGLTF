@@ -1,11 +1,57 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace SharpGLTF
 {
+    /// <summary>
+    /// Function for converting data into binary buffers
+    /// Specs see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#binary-table-format
+    /// </summary>
     public static class BinaryTable
     {
+        /// <summary>
+        /// Converts a list of primitive types into a byte array
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="values"></param>
+        /// <returns>byte array</returns>
+        public static byte[] GetBytes<T>(IReadOnlyList<T> values)
+        {
+            Guard.IsTrue(values.Count > 0, nameof(values), "values must have at least one element");
+            
+            if (typeof(T) == typeof(string))
+            {
+                return GetStringsAsBytes(values.Cast<string>().ToArray());
+            }
+            else if (typeof(T).IsPrimitive)
+            {
+                if(typeof(T) == typeof(bool))
+                {
+                    // when implementing bool, create a bitstream
+                    // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#booleans
+                    throw new NotImplementedException();
+                }
+                var size = GetSize<T>();
+                var result = new byte[values.Count * size];
+                Buffer.BlockCopy(values.ToArray(), 0, result, 0, result.Length);
+                return result;
+            }
+            else
+            {
+                // other types (like enum, mat2, mat3, mat4, vec2, vec3, vec4, array (fixed length, variable length)) are not implemented
+                // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#binary-table-format
+                throw new NotImplementedException();
+            }
+        }
+
+        /// <summary>
+        /// Creates a list of offsets for a list of strings
+        /// see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#strings
+        /// </summary>
+        /// <param name="strings"></param>
+        /// <returns></returns>
         public static byte[] GetOffsetBuffer(IReadOnlyList<string> strings)
         {
             var offsetBuffer = GetOffsets(strings);
@@ -13,13 +59,28 @@ namespace SharpGLTF
             return offsetBytes;
         }
 
-        public static byte[] GetBytes<T>(IReadOnlyList<T> values)
+        public static int GetSize<T>()
         {
+            var isValueType = typeof(T).IsValueType;
+            Guard.IsTrue(isValueType, nameof(T), "T must be a value type");
+
             var type = typeof(T);
             int size = 0;
-            if (type == typeof(float))
+            if (type == typeof(sbyte))
             {
-                size = sizeof(float);
+                size = sizeof(sbyte);
+            }
+            else if (type == typeof(byte))
+            {
+                size = sizeof(byte);
+            }
+            else if (type == typeof(short))
+            {
+                size = sizeof(short);
+            }
+            else if (type == typeof(ushort))
+            {
+                size = sizeof(ushort);
             }
             else if (type == typeof(int))
             {
@@ -29,10 +90,33 @@ namespace SharpGLTF
             {
                 size = sizeof(uint);
             }
+            else if (type == typeof(long))
+            {
+                size = sizeof(long);
+            }
+            else if (type == typeof(ulong))
+            {
+                size = sizeof(ulong);
+            }
+            else if (type == typeof(float))
+            {
+                size = sizeof(float);
+            }
+            else if (type == typeof(double))
+            {
+                size = sizeof(double);
+            }
+            else if (type == typeof(bool))
+            {
+                size = sizeof(bool);
+            }
+            return size;
+        }
 
-            var result = new byte[values.Count * size];
-            System.Buffer.BlockCopy(values.ToArray(), 0, result, 0, result.Length);
-            return result;
+        private static byte[] GetStringsAsBytes(IReadOnlyList<string> values)
+        {
+            var res = string.Join("", values);
+            return Encoding.UTF8.GetBytes(res);
         }
 
         private static List<uint> GetOffsets(IReadOnlyList<string> strings)
@@ -45,12 +129,6 @@ namespace SharpGLTF
                 offsets.Add(offsets.Last() + length);
             }
             return offsets;
-        }
-
-        public static byte[] GetStringsAsBytes(IReadOnlyList<string> values)
-        {
-            var res = string.Join("", values);
-            return Encoding.UTF8.GetBytes(res);
         }
     }
 }
