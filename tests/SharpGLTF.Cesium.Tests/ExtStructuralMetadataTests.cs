@@ -46,6 +46,45 @@ namespace SharpGLTF.Cesium
             propertyTable.Properties["id1"] = propertyTableProperty;
             ext.PropertyTables.Add( propertyTable);
 
+            var schema = new StructuralMetadataSchema();
+            schema.Id = "schema_001";
+            schema.Name = "schema 001";
+            schema.Description = "an example schema";
+            schema.Version = "3.5.1";
+            var classes = new Dictionary<string, StructuralMetadataClass>();
+            var treeClass = new StructuralMetadataClass();
+            classes["tree"] = treeClass;
+            treeClass.Name = "Tree";
+            treeClass.Description = "Woody, perennial plant.";
+
+            var speciesProperty = new ClassProperty();
+            speciesProperty.Description = "Type of tree";
+            speciesProperty.Type = ElementType.ENUM;
+            speciesProperty.EnumType = "speciesEnum";
+            speciesProperty.Required = true;
+
+            treeClass.Properties.Add("species", speciesProperty);
+
+            var ageProperty = new ClassProperty();
+            ageProperty.Description = "The age of the tree, in years";
+            ageProperty.Type = ElementType.SCALAR;
+            ageProperty.ComponentType = DataType.UINT8;
+            ageProperty.Required = true;
+
+            treeClass.Properties.Add("age", ageProperty);
+
+            var speciesEnum = new StructuralMetadataEnum();
+            schema.Enums["speciesEnum"] = speciesEnum;
+            speciesEnum.Name = "Species";
+            speciesEnum.Description = "An example enum for tree species.";
+            speciesEnum.Values.Add(new EnumValue() { Name = "Unpsecified", Value = 0 });
+            speciesEnum.Values.Add(new EnumValue() { Name = "Oak", Value = 1 });
+            speciesEnum.Values.Add(new EnumValue() { Name = "Pine", Value = 2 });
+            speciesEnum.Values.Add(new EnumValue() { Name = "Maple", Value = 3 });
+
+            schema.Classes = classes;
+            ext.Schema = schema;
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
