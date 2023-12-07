@@ -600,7 +600,7 @@ namespace SharpGLTF.Schema2
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class PropertyAttributeinEXT_structural_metadata : ExtraProperties
+	partial class PropertyAttribute : ExtraProperties
 	{
 	
 		private String _class;
@@ -642,7 +642,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _propertyAttributesMinItems = 1;
-		private List<PropertyAttributeinEXT_structural_metadata> _propertyAttributes;
+		private List<PropertyAttribute> _propertyAttributes;
 		
 		private const int _propertyTablesMinItems = 1;
 		private List<PropertyTable> _propertyTables;
@@ -669,7 +669,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "propertyAttributes": DeserializePropertyList<PropertyAttributeinEXT_structural_metadata>(ref reader, _propertyAttributes); break;
+				case "propertyAttributes": DeserializePropertyList<PropertyAttribute>(ref reader, _propertyAttributes); break;
 				case "propertyTables": DeserializePropertyList<PropertyTable>(ref reader, _propertyTables); break;
 				case "propertyTextures": DeserializePropertyList<PropertyTexture>(ref reader, _propertyTextures); break;
 				case "schema": _schema = DeserializePropertyValue<StructuralMetadataSchema>(ref reader); break;

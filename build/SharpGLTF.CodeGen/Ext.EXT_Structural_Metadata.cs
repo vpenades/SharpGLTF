@@ -15,7 +15,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetaData");
+            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetaDataRoot");
             newEmitter.SetRuntimeName("Property Table in EXT_structural_metadata", "PropertyTable");
             newEmitter.SetRuntimeName("Schema in EXT_structural_metadata", "StructuralMetadataSchema");
             newEmitter.SetRuntimeName("Property Table Property in EXT_structural_metadata", "PropertyTableProperty");
@@ -26,7 +26,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("Class in EXT_structural_metadata", "StructuralMetadataClass");
             newEmitter.SetRuntimeName("Enum Value in EXT_structural_metadata", "EnumValue");
             newEmitter.SetRuntimeName("Enum in EXT_structural_metadata", "StructuralMetadataEnum");
-
+            newEmitter.SetRuntimeName("Property Attribute in EXT_structural_metadata", "PropertyAttribute");
             newEmitter.SetRuntimeName("BOOLEAN-ENUM-MAT2-MAT3-MAT4-SCALAR-STRING-VEC2-VEC3-VEC4", "ElementType");
             newEmitter.SetRuntimeName("FLOAT32-FLOAT64-INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "DataType");
             newEmitter.SetRuntimeName("INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "IntegerType");
@@ -50,7 +50,6 @@ namespace SharpGLTF
             // for now we simply remove the default value, it can be set
             // in the constructor or on demand when the APIs are Called.
             fld.RemoveDefaultValue();
-
 
             return ctx;
         }
