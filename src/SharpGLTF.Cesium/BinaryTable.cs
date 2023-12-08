@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace SharpGLTF
@@ -65,51 +66,7 @@ namespace SharpGLTF
             Guard.IsTrue(isValueType, nameof(T), "T must be a value type");
 
             var type = typeof(T);
-            int size = 0;
-            if (type == typeof(sbyte))
-            {
-                size = sizeof(sbyte);
-            }
-            else if (type == typeof(byte))
-            {
-                size = sizeof(byte);
-            }
-            else if (type == typeof(short))
-            {
-                size = sizeof(short);
-            }
-            else if (type == typeof(ushort))
-            {
-                size = sizeof(ushort);
-            }
-            else if (type == typeof(int))
-            {
-                size = sizeof(int);
-            }
-            else if (type == typeof(uint))
-            {
-                size = sizeof(uint);
-            }
-            else if (type == typeof(long))
-            {
-                size = sizeof(long);
-            }
-            else if (type == typeof(ulong))
-            {
-                size = sizeof(ulong);
-            }
-            else if (type == typeof(float))
-            {
-                size = sizeof(float);
-            }
-            else if (type == typeof(double))
-            {
-                size = sizeof(double);
-            }
-            else if (type == typeof(bool))
-            {
-                size = sizeof(bool);
-            }
+            int size = Marshal.SizeOf(Activator.CreateInstance(type));
             return size;
         }
 

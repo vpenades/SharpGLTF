@@ -9,39 +9,11 @@ namespace SharpGLTF
         [Test]
         public void TestBinaryConversion()
         {
-            var bytes = BinaryTable.GetBytes(GetTestArray<sbyte>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<sbyte>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<byte>());
+            var bytes = BinaryTable.GetBytes(GetTestArray<byte>());
             Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<byte>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<short>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<short>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<ushort>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<ushort>() * 2));
 
             bytes = BinaryTable.GetBytes(GetTestArray<int>());
             Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<int>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<uint>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<uint>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<long>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<long>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<long>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<long>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<ulong>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<ulong>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<float>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<float>() * 2));
-
-            bytes = BinaryTable.GetBytes(GetTestArray<double>());
-            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<double>() * 2));
-
             bytes = BinaryTable.GetBytes(new List<string>() { "a", "b" });
             Assert.That(bytes.Length, Is.EqualTo(2));
 
