@@ -19,6 +19,40 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+        [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
+
+        public void CreatePointCloudWithCustomAttributesTest()
+        {
+            var material = new MaterialBuilder("material1").WithUnlitShader();
+            var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
+            var pointCloud = mesh.UsePrimitive(material, 1);
+
+            for (var x = -10; x < 10; x++)
+            {
+                for (var y = -10; y < 10; y++)
+                {
+                    for (var z = -10; z < 10; z++)
+                    {
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), 199, 4);
+
+                        pointCloud.AddPoint(vt0);
+                    }
+                }
+            }
+            var model = ModelRoot.CreateModel();
+            model.CreateMeshes(mesh);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_prointcloud_attributes.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_prointcloud_attributes.plotly");
+        }
+
+
         /// <summary>
         /// Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
         /// </summary>
