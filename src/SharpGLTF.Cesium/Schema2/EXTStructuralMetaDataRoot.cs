@@ -101,14 +101,8 @@ namespace SharpGLTF.Schema2
 
         internal void AddSchema(StructuralMetadataSchema schema, Uri schemaUri)
         {
-            if (schema != null)
-            {
-                Schema = schema;
-            }
-            if (schemaUri != null)
-            {
-                SchemaUri = schemaUri.ToString();
-            }
+            Schema ??= schema;
+            SchemaUri ??= schemaUri.ToString();
         }
 
         internal List<PropertyTable> PropertyTables
