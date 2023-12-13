@@ -20,8 +20,36 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+        [Test(Description = "ext_structural_metadata with multiple classes")]
+        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/MultipleClasses.gltf
+        public void MultipleClassesTest()
+        {
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureIds, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            // All the vertices in the triangle have the same feature ID
+            var vt0 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), 0, 100);
+            var vt1 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(10, 0, 0), new Vector3(0, 0, 1), 0, 100);
+            var vt2 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 10, 0), new Vector3(0, 0, 1), 0, 100);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            // todo: add metadata
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.plotly");
+        }
+
+
         [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
-        /// Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
+        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
 
         public void CreatePointCloudWithCustomAttributesTest()
         {

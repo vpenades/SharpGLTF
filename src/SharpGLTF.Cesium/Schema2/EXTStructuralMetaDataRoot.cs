@@ -49,7 +49,7 @@ namespace SharpGLTF.Schema2
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyTables.Clear();
-            ext.PropertyTables.Add(GetPropertyTable(modelRoot, attributes, name));
+            ext.PropertyTables.Add(GetPropertyTable(modelRoot, attributes, name, schema));
             ext.AddSchema(schema, schemaUri);
         }
 
@@ -141,8 +141,13 @@ namespace SharpGLTF.Schema2
             set { _propertyTextures = value; }
         }
 
-        protected override void OnValidateContent(ValidationContext validate)
+        protected override void OnValidateContent(ValidationContext result)
         {
+            // Schema or SchemaUri must be defined
+            Guard.IsTrue(Schema != null || SchemaUri != null, "Schema/SchemaUri", "Schema or SchemaUri must be defined");
+
+            base.OnValidateContent(result);
+
         }
     }
 
