@@ -39,7 +39,38 @@ namespace SharpGLTF.Cesium
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
+            // FeatureID 0: featureCount=1, attribute=0, porpertyTable=0 
+            var featureId0Attribute = new MeshExtMeshFeatureID(1, 0, 0);
+            // FeatureID 1: featureCount=1, attribute=1, porpertyTable=1
+            var featureId1Attribute = new MeshExtMeshFeatureID(1, 1, 1);
+
+            // Set the FeatureIds
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0Attribute, featureId1Attribute };
+            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
+
+            var schema = new StructuralMetadataSchema();
+            schema.Id = "MultipleClassesSchema";
+
+            var classes = new Dictionary<string, StructuralMetadataClass>();
+            classes["exampleMetadataClassA"] = GetExampleClassA();
+            classes["exampleMetadataClassB"] = GetExampleClassB();
+
+            schema.Classes = classes;
+            var exampleEnum = new StructuralMetadataEnum();
+            exampleEnum.Values.Add(new EnumValue() {  Name= "ExampleEnumValueA", Value = 0 });
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueB", Value = 1 });
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueC", Value = 2 });
+
+            schema.Enums.Add("exampleEnumType", exampleEnum);
+
+            // Todo: create the property tables (First example property table, Second example property table)
+
+            
+            // model.SetPropertyAttribute(propertyAttribute, schema);
+
+
             // todo: add metadata
+            model.SaveGLTF(@"d:\aaa\bert111.gltf");
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
@@ -47,6 +78,54 @@ namespace SharpGLTF.Cesium
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.plotly");
         }
 
+        private static StructuralMetadataClass GetExampleClassB()
+        {
+            var classB = new StructuralMetadataClass();
+            classB.Name = "Example metadata class B";
+            classB.Description = "Second example metadata class";
+
+            var uint16Property = new ClassProperty();
+            uint16Property.Name = "Example UINT16 property";
+            uint16Property.Description = "An example property, with component type UINT16";
+            uint16Property.Type = ElementType.SCALAR;
+            uint16Property.ComponentType = DataType.UINT16;
+
+            classB.Properties.Add("example_UINT16", uint16Property);
+
+            var float64Property = new ClassProperty();
+            float64Property.Name = "Example FLOAT64 property";
+            float64Property.Description = "An example property, with component type FLOAT64";
+            float64Property.Type = ElementType.SCALAR;
+            float64Property.ComponentType = DataType.FLOAT64;
+
+            classB.Properties.Add("example_FLOAT64", float64Property);
+            return classB;
+        }
+
+
+        private static StructuralMetadataClass GetExampleClassA()
+        {
+            var classA = new StructuralMetadataClass();
+            classA.Name = "Example metadata class A";
+            classA.Description = "First example metadata class";
+
+            var float32Property = new ClassProperty();
+            float32Property.Name = "Example FLOAT32 property";
+            float32Property.Description = "An example property, with component type FLOAT32";
+            float32Property.Type = ElementType.SCALAR;
+            float32Property.ComponentType = DataType.FLOAT32;
+
+            classA.Properties.Add("example_FLOAT32", float32Property);
+
+            var int64Property = new ClassProperty();
+            int64Property.Name = "Example INT64 property";
+            int64Property.Description = "An example property, with component type INT64";
+            int64Property.Type = ElementType.SCALAR;
+            int64Property.ComponentType = DataType.INT64;
+
+            classA.Properties.Add("example_INT64", int64Property);
+            return classA;
+        }
 
         [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
