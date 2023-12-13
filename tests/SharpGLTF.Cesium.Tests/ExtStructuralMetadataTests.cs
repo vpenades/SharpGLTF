@@ -38,7 +38,7 @@ namespace SharpGLTF.Cesium
                     {
                         // intensity values is based on x-axis values
                         // classification of points is 0 or 1 (random)
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, rand.Next(0,2));
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, rand.Next(0, 2));
 
                         pointCloud.AddPoint(vt0);
                     }
@@ -60,7 +60,7 @@ namespace SharpGLTF.Cesium
             propertyAttribute.Properties["intensity"] = intensityProperty;
             propertyAttribute.Properties["classification"] = classificationProperty;
 
-            model.SetPropertyAttribute(propertyAttribute);
+            model.SetPropertyAttribute(propertyAttribute, schemaUri: new Uri("MetadataSchema.json", UriKind.Relative));
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
@@ -68,18 +68,18 @@ namespace SharpGLTF.Cesium
         }
 
 
-        [Test(Description ="First test with ext_structural_metadata")]
+        [Test(Description = "First test with ext_structural_metadata")]
         public void TriangleWithMetadataTest()
         {
-            var  model = GetTriangleModel();
+            var model = GetTriangleModel();
 
             var schema = GetSampleSchema();
 
             var attribute = new List<int>() { 100 };
             var dict = new Dictionary<string, List<int>>();
             dict["age"] = attribute;
-            model.SetPropertyTable(schema, dict);
-            
+            model.SetPropertyTable(dict, schema: schema);
+
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
