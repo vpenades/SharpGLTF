@@ -70,8 +70,6 @@ namespace SharpGLTF.Cesium
 
 
             // todo: add metadata
-            model.SaveGLTF(@"d:\aaa\bert111.gltf");
-
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
