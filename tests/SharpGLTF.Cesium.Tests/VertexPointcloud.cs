@@ -10,14 +10,19 @@ namespace SharpGLTF
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexPointcloud : IVertexCustom
     {
-        public VertexPointcloud(float intensity, float classification)
+        public VertexPointcloud(Vector4 color, float intensity, float classification)
         {
+            // Q: How to set the color??
+            Color = color;
             Intensity = intensity;
             Classification = classification;
         }
 
         public const string INTENSITYATTRIBUTENAME = "_INTENSITY";
         public const string CLASSIFICATIONATTRIBUTENAME = "_CLASSIFICATION";
+
+        [VertexAttribute("COLOR_0", EncodingType.UNSIGNED_BYTE, true)]
+        public Vector4 Color;
 
         [VertexAttribute(INTENSITYATTRIBUTENAME, EncodingType.FLOAT, false)]
         public float Intensity;
@@ -31,7 +36,8 @@ namespace SharpGLTF
 
         public IEnumerable<string> CustomAttributes => throw new NotImplementedException();
 
-        public void SetColor(int setIndex, Vector4 color) {
+        void IVertexMaterial.SetColor(int setIndex, Vector4 color) {
+            if (setIndex == 0) this.Color = color;
         }
 
         public void SetTexCoord(int setIndex, Vector2 coord) { }

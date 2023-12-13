@@ -13,10 +13,9 @@ namespace SharpGLTF
             return vb0;
         }
 
-        internal static VertexBuilder<VertexPosition, VertexPointcloud, VertexEmpty> GetVertexPointcloud(Vector3 position, float intensity, float classification)
+        internal static VertexBuilder<VertexPosition, VertexPointcloud, VertexEmpty> GetVertexPointcloud(Vector3 position, Vector4 color, float intensity, float classification)
         {
-            var vertexPointcloud = new VertexPointcloud(intensity, classification);
-            vertexPointcloud.SetColor(0, new Vector4(1, 0, 0, 0));
+            var vertexPointcloud = new VertexPointcloud(color, intensity, classification);
             var vp0 = new VertexPosition(position);
             var vb0 = new VertexBuilder<VertexPosition, VertexPointcloud, VertexEmpty>(vp0, vertexPointcloud);
             return vb0;

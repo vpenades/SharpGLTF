@@ -26,6 +26,7 @@ namespace SharpGLTF.Cesium
             var material = new MaterialBuilder("material1").WithUnlitShader();
             var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
             var pointCloud = mesh.UsePrimitive(material, 1);
+            var greenColor = new Vector4(0f, 1f, 0f, 1f);
 
             for (var x = -10; x < 10; x++)
             {
@@ -33,7 +34,7 @@ namespace SharpGLTF.Cesium
                 {
                     for (var z = -10; z < 10; z++)
                     {
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), 199, 4);
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), greenColor, 199, 4);
 
                         pointCloud.AddPoint(vt0);
                     }
@@ -45,11 +46,10 @@ namespace SharpGLTF.Cesium
             // create a scene, a node, and assign the first mesh (the terrain)
             model.UseScene("Default")
                 .CreateNode().WithMesh(model.LogicalMeshes[0]);
-
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_prointcloud_attributes.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_prointcloud_attributes.plotly");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");
         }
 
 
