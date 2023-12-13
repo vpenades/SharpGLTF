@@ -23,7 +23,7 @@ namespace SharpGLTF.Cesium
 
         public void CreatePointCloudWithCustomAttributesTest()
         {
-            var material = new MaterialBuilder("material1");
+            var material = new MaterialBuilder("material1").WithUnlitShader();
             var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
             var pointCloud = mesh.UsePrimitive(material, 1);
             var redColor = new Vector4(1f, 0f, 0f, 1f);
@@ -34,7 +34,8 @@ namespace SharpGLTF.Cesium
                 {
                     for (var z = -10; z < 10; z++)
                     {
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, 199, 4);
+                        // intensity values on x-axis, classification on z-axis
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, z);
 
                         pointCloud.AddPoint(vt0);
                     }
@@ -46,6 +47,7 @@ namespace SharpGLTF.Cesium
             // create a scene, a node, and assign the first mesh (the terrain)
             model.UseScene("Default")
                 .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
