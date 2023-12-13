@@ -290,7 +290,7 @@ namespace SharpGLTF.Schema2
 
                 // check if it's affected by any animation channel.
 
-                bool _isTransformPath(PropertyPath path)
+                static bool _isTransformPath(PropertyPath path)
                 {
                     if (path == PropertyPath.scale) return true;
                     if (path == PropertyPath.rotation) return true;
@@ -705,7 +705,7 @@ namespace SharpGLTF.Schema2
                 .ToList();
 
             // find all the nodes that cannot be modified
-            bool isSensible(Node node)
+            static bool isSensible(Node node)
             {
                 if (node.IsTransformAnimated) return true;
                 if (node.IsTransformDecomposed) return true;

@@ -106,7 +106,9 @@ namespace SharpGLTF.Geometry
 
             for (int i = 0; i < srcPrim.MorphTargets.Count; ++i)
             {
-                var (pAccessor,nAccessor,tAccessor,c0Accessor, c1Accessor, uv0Accessor, uv1Accessor, uv2Accessor, uv3Accessor) = srcPrim._GetMorphTargetAccessors(i, vertexEncodings, morphTargetAttributes);
+                var (pAccessor, nAccessor, tAccessor,
+                    c0Accessor, c1Accessor,
+                    uv0Accessor, uv1Accessor, uv2Accessor, uv3Accessor) = srcPrim._GetMorphTargetAccessors(i, vertexEncodings, morphTargetAttributes);
 
                 if (!hasPositions) pAccessor = null;
                 if (!hasNormals) nAccessor = null;
@@ -124,7 +126,7 @@ namespace SharpGLTF.Geometry
 
         private void AddMorphTarget(params MACCESSOR[] morphTarget)
         {
-            MACCESSOR _removeDeltaSuffix(MACCESSOR accessor)
+            static MACCESSOR _removeDeltaSuffix(MACCESSOR accessor)
             {
                 var name = accessor.Attribute.Name;
                 if (!name.EndsWith("DELTA", StringComparison.Ordinal)) throw new InvalidOperationException();
@@ -134,7 +136,7 @@ namespace SharpGLTF.Geometry
                 var attr = accessor.Attribute;
                 attr.Name = name;
 
-                return new Memory.MemoryAccessor(accessor.Data, attr);
+                return new MACCESSOR(accessor.Data, attr);
             }
 
             morphTarget = morphTarget

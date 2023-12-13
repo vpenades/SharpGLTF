@@ -90,7 +90,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -147,7 +147,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor1)baseValue, this);
         }
@@ -160,7 +160,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
 
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
+        readonly void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
         /// <inheritdoc/>
         public readonly Vector4 GetColor(int index)
@@ -186,7 +186,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -247,7 +247,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor2)baseValue, this);
         }
@@ -265,7 +265,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (setIndex == 1) this.Color1 = color;
         }
 
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
+        readonly void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
 
         /// <inheritdoc/>
         public readonly Vector4 GetColor(int index)
@@ -289,7 +289,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -345,7 +345,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexTexture1)baseValue, this);
         }
@@ -356,7 +356,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord += delta.TexCoord0Delta;
         }
 
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
+        readonly void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
 
@@ -384,7 +384,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -445,7 +445,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexTexture2)baseValue, this);
         }
@@ -457,7 +457,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.TexCoord1 += delta.TexCoord1Delta;
         }
 
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
+        readonly void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
 
         void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
         {
@@ -490,7 +490,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -551,7 +551,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor1Texture1)baseValue, this);
         }
@@ -592,7 +592,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -658,7 +658,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region API
 
         /// <inheritdoc/>
-        public VertexMaterialDelta Subtract(IVertexMaterial baseValue)
+        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
         {
             return new VertexMaterialDelta((VertexColor1Texture2)baseValue, this);
         }

@@ -91,7 +91,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -146,12 +146,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetPosition(in Vector3 position) { this.Position = position; }
 
-        void IVertexGeometry.SetNormal(in Vector3 normal) { }
+        readonly void IVertexGeometry.SetNormal(in Vector3 normal) { }
 
-        void IVertexGeometry.SetTangent(in Vector4 tangent) { }
+        readonly void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
         /// <inheritdoc/>
-        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
+        public readonly VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPosition)baseValue, this);
         }
@@ -188,7 +188,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -252,10 +252,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         void IVertexGeometry.SetNormal(in Vector3 normal) { this.Normal = normal; }
 
-        void IVertexGeometry.SetTangent(in Vector4 tangent) { }
+        readonly void IVertexGeometry.SetTangent(in Vector4 tangent) { }
 
         /// <inheritdoc/>
-        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
+        public readonly VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexPositionNormal)baseValue, this);
         }
@@ -404,7 +404,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => $"Δ𝐏:{PositionDelta} Δ𝚴:{NormalDelta} Δ𝚻:{TangentDelta}";
+        private readonly string _GetDebuggerDisplay() => $"Δ𝐏:{PositionDelta} Δ𝚴:{NormalDelta} Δ𝚻:{TangentDelta}";
 
         #endregion
 
@@ -524,7 +524,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void ApplyTransform(in Matrix4x4 xform) { throw new NotSupportedException(); }
 
         /// <inheritdoc/>
-        public VertexGeometryDelta Subtract(IVertexGeometry baseValue)
+        public readonly VertexGeometryDelta Subtract(IVertexGeometry baseValue)
         {
             return new VertexGeometryDelta((VertexGeometryDelta)baseValue, this);
         }

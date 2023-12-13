@@ -18,7 +18,7 @@ namespace SharpGLTF.Memory
     {
         #region debug
 
-        internal string _GetDebuggerDisplay()
+        internal readonly string _GetDebuggerDisplay()
         {
             return Diagnostics.DebuggerDisplay.ToReport(this);
         }
@@ -84,7 +84,7 @@ namespace SharpGLTF.Memory
             this.Normalized = normalized;
         }
 
-        public MemoryAccessInfo Slice(int itemStart, int itemCount)
+        public readonly MemoryAccessInfo Slice(int itemStart, int itemCount)
         {
             var stride = _GetRowByteLength();
 
@@ -141,11 +141,11 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// number of bytes to advance to the next item.
         /// </summary>
-        public int StepByteLength => _GetRowByteLength();
+        public readonly int StepByteLength => _GetRowByteLength();
 
-        public int ItemByteLength => _GetItemByteLength();
+        public readonly int ItemByteLength => _GetItemByteLength();
 
-        public Boolean IsValidVertexAttribute
+        public readonly Boolean IsValidVertexAttribute
         {
             get
             {
@@ -166,7 +166,7 @@ namespace SharpGLTF.Memory
         /// <summary>
         /// returns true if this type can be used as a joint index.
         /// </summary>
-        public Boolean IsValidIndexer
+        public readonly Boolean IsValidIndexer
         {
             get
             {
@@ -187,7 +187,7 @@ namespace SharpGLTF.Memory
 
         #region API
 
-        private int _GetItemByteLength()
+        private readonly int _GetItemByteLength()
         {
             var xlen = Encoding.ByteLength();
 
@@ -200,7 +200,7 @@ namespace SharpGLTF.Memory
             return xlen;
         }
 
-        private int _GetRowByteLength()
+        private readonly int _GetRowByteLength()
         {
             return Math.Max(ByteStride, _GetItemByteLength());
         }
