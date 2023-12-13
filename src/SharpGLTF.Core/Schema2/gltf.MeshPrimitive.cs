@@ -273,7 +273,7 @@ namespace SharpGLTF.Schema2
 
         private bool CheckAttributesQuantizationRequired()
         {
-            bool _checkAccessors(IReadOnlyDictionary<string, Accessor> accessors)
+            static bool _checkAccessors(IReadOnlyDictionary<string, Accessor> accessors)
             {
                 foreach (var va in accessors)
                 {
@@ -380,6 +380,7 @@ namespace SharpGLTF.Schema2
             var accessorsWithSharedBufferViews = this.VertexAccessors
                 .Values
                 .Distinct() // it is allowed that multiple attributes use the same accessor
+                .Where(item => item.SourceBufferView != null) // an accessor without a BufferView is assumed to be all zeros.
                 .GroupBy(item => item.SourceBufferView);
 
             foreach (var group in accessorsWithSharedBufferViews)

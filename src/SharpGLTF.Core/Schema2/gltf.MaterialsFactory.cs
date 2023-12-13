@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public void InitializeUnlit()
         {
-            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+            this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
             this.UseExtension<MaterialUnlit>();
@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(extensionNames, nameof(extensionNames));
 
-            if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+            this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
 
             ClearExtensions();
 
@@ -67,7 +67,7 @@ namespace SharpGLTF.Schema2
         {
             if (useFallback)
             {
-                if (this._pbrMetallicRoughness == null) this._pbrMetallicRoughness = new MaterialPBRMetallicRoughness();
+                this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
             }
             else
             {

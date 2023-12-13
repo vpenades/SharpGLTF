@@ -104,7 +104,7 @@ namespace SharpGLTF.Geometry
             return method.Invoke(o, Array.Empty<Object>()) as string;
         }
 
-        private String _GetDebugWarnings()
+        private readonly String _GetDebugWarnings()
         {
             var sb = new StringBuilder();
 
@@ -284,10 +284,10 @@ namespace SharpGLTF.Geometry
         public readonly override int GetHashCode() { return Geometry.GetHashCode(); }
 
         /// <inheritdoc/>
-        public override bool Equals(object obj) { return obj is VertexBuilder<TvG, TvM, TvS> other && AreEqual(this, other); }
+        public readonly override bool Equals(object obj) { return obj is VertexBuilder<TvG, TvM, TvS> other && AreEqual(this, other); }
 
         /// <inheritdoc/>
-        public bool Equals(VertexBuilder<TvG, TvM, TvS> other) { return AreEqual(this, other); }
+        public readonly bool Equals(VertexBuilder<TvG, TvM, TvS> other) { return AreEqual(this, other); }
 
         public static bool operator ==(in VertexBuilder<TvG, TvM, TvS> a, in VertexBuilder<TvG, TvM, TvS> b) { return AreEqual(a, b); }
 
@@ -480,7 +480,7 @@ namespace SharpGLTF.Geometry
         public IVertexMaterial Material;
         public IVertexSkinning Skinning;
 
-        public override int GetHashCode() { return Geometry.GetHashCode(); }
+        public readonly override int GetHashCode() { return Geometry.GetHashCode(); }
 
         #endregion
 

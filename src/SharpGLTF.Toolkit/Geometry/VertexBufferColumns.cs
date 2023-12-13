@@ -82,7 +82,7 @@ namespace SharpGLTF.Geometry
 
         #region properties
 
-        public IReadOnlyList<VertexBufferColumns> MorphTargets => _MorphTargets != null ? _MorphTargets : (IReadOnlyList<VertexBufferColumns>)Array.Empty<VertexBufferColumns>();
+        public IReadOnlyList<VertexBufferColumns> MorphTargets => _MorphTargets ?? (IReadOnlyList<VertexBufferColumns>)Array.Empty<VertexBufferColumns>();
 
         #endregion
 
@@ -178,8 +178,6 @@ namespace SharpGLTF.Geometry
 
             var skinning = default(Transforms.SparseWeight8);
 
-            Transforms.IMaterialTransform morphMaterial = transform as Transforms.IMaterialTransform;
-
             Vector3[] morphPositions = null;
             Vector3[] morphNormals = null;
             Vector3[] morphTangents = null;
@@ -229,7 +227,7 @@ namespace SharpGLTF.Geometry
                     Tangents[i] = transform.TransformTangent(Tangents[i], morphTangents, skinning);
                 }
 
-                if (morphMaterial != null)
+                if (transform is Transforms.IMaterialTransform morphMaterial)
                 {
                     if (this.Colors0 != null)
                     {
@@ -488,15 +486,13 @@ namespace SharpGLTF.Geometry
 
             public void SetVertexNormal(int idx, Vector3 normal)
             {
-                if (_Vertices.Normals == null) _Vertices.Normals = new Vector3[_Vertices.Positions.Count];
-
+                _Vertices.Normals ??= new Vector3[_Vertices.Positions.Count];
                 _Vertices.Normals[idx] = normal;
             }
 
             public void SetVertexTangent(int idx, Vector4 tangent)
             {
-                if (_Vertices.Tangents == null) _Vertices.Tangents = new Vector4[_Vertices.Positions.Count];
-
+                _Vertices.Tangents ??= new Vector4[_Vertices.Positions.Count];
                 _Vertices.Tangents[idx] = tangent;
             }
         }

@@ -272,7 +272,7 @@ namespace SharpGLTF.Geometry
         {
             if (primitive == null) return;
 
-            if (vertexTransformFunc == null) vertexTransformFunc = v => v;
+            vertexTransformFunc ??= v => v;
 
             AddPrimitive<TMaterial>(primitive, v => vertexTransformFunc((VertexBuilder<TvG, TvM, TvS>)v));
         }
@@ -440,9 +440,7 @@ namespace SharpGLTF.Geometry
 
         private sealed class VertexListWrapper : ValueListSet<VertexBuilder<TvG, TvM, TvS>>, IReadOnlyList<IVertexBuilder>
         {
-            #pragma warning disable SA1100 // Do not prefix calls with base unless local implementation exists
             IVertexBuilder IReadOnlyList<IVertexBuilder>.this[int index] => base[index];
-            #pragma warning restore SA1100 // Do not prefix calls with base unless local implementation exists
 
             IEnumerator<IVertexBuilder> IEnumerable<IVertexBuilder>.GetEnumerator()
             {
@@ -509,7 +507,7 @@ namespace SharpGLTF.Geometry
 
         #region types
 
-        struct PointListWrapper<T> : IReadOnlyList<int>
+        readonly struct PointListWrapper<T> : IReadOnlyList<int>
         {
             public PointListWrapper(IReadOnlyList<T> vertices)
             {
@@ -765,7 +763,7 @@ namespace SharpGLTF.Geometry
 
         #region Types
 
-        private struct TriangleList : IReadOnlyList<(int A, int B, int C)>
+        private readonly struct TriangleList : IReadOnlyList<(int A, int B, int C)>
         {
             public TriangleList(IReadOnlyList<(int, int, int)> tris, IReadOnlyList<(int, int, int, int)> quads)
             {
@@ -809,7 +807,7 @@ namespace SharpGLTF.Geometry
             }
         }
 
-        private struct SurfaceList : IReadOnlyList<(int A, int B, int C, int? D)>
+        private readonly struct SurfaceList : IReadOnlyList<(int A, int B, int C, int? D)>
         {
             public SurfaceList(IReadOnlyList<(int, int, int)> tris, IReadOnlyList<(int, int, int, int)> quads)
             {
@@ -932,13 +930,13 @@ namespace SharpGLTF.Geometry
 
         public void SetVertexNormal(int idx, Vector3 normal)
         {
-            if (_Normals == null) _Normals = new Vector3[VertexCount];
+            _Normals ??= new Vector3[VertexCount];
             _Normals[idx] = normal;
         }
 
         public void SetVertexTangent(int idx, Vector4 tangent)
         {
-            if (_Tangents == null) _Tangents = new Vector4[VertexCount];
+            _Tangents ??= new Vector4[VertexCount];
             _Tangents[idx] = tangent;
         }
 

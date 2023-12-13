@@ -82,7 +82,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     {
         #region debug
 
-        private string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
+        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
 
         #endregion
 
@@ -165,13 +165,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region properties
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.JointsLow => this.Joints;
+        readonly Vector4 IVertexSkinning.JointsLow => this.Joints;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.JointsHigh => Vector4.Zero;
+        readonly Vector4 IVertexSkinning.JointsHigh => Vector4.Zero;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.WeightsLow => this.Weights;
+        readonly Vector4 IVertexSkinning.WeightsLow => this.Weights;
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        Vector4 IVertexSkinning.WeightsHigh => Vector4.Zero;
+        readonly Vector4 IVertexSkinning.WeightsHigh => Vector4.Zero;
 
         #endregion
 

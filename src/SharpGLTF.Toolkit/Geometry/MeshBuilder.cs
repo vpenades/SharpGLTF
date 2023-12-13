@@ -212,8 +212,8 @@ namespace SharpGLTF.Geometry
         {
             if (mesh == null) return;
 
-            if (materialTransform == null) materialTransform = m => m;
-            if (vertexTransform == null) vertexTransform = v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
+            materialTransform ??= m => m;
+            vertexTransform ??= v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
 
             AddMesh<TMaterial>(mesh, materialTransform, vertexTransform);
         }
@@ -223,7 +223,7 @@ namespace SharpGLTF.Geometry
             if (mesh == null) return;
 
             Guard.NotNull(materialTransform, nameof(materialTransform));
-            if (vertexTransform == null) vertexTransform = v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
+            vertexTransform ??= v => VertexBuilder<TvG, TvM, TvS>.CreateFrom(v);
 
             foreach (var p in mesh.Primitives)
             {

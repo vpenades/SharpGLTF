@@ -214,13 +214,13 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Reads the properties of the current instance from a <see cref="Utf8JsonReader"/>.
         /// </summary>
-        /// <param name="property">The name of the property.</param>
+        /// <param name="jsonPropertyName">The name of the property.</param>
         /// <param name="reader">The source reader.</param>
-        protected override void DeserializeProperty(string property, ref Utf8JsonReader reader)
+        protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
         {
-            Guard.NotNullOrEmpty(property, nameof(property));
+            Guard.NotNullOrEmpty(jsonPropertyName, nameof(jsonPropertyName));
 
-            switch (property)
+            switch (jsonPropertyName)
             {
                 case "extensions": _DeserializeExtensions(this, ref reader, _extensions); break;
 
