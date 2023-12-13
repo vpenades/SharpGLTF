@@ -23,10 +23,10 @@ namespace SharpGLTF.Cesium
 
         public void CreatePointCloudWithCustomAttributesTest()
         {
-            var material = new MaterialBuilder("material1").WithUnlitShader();
+            var material = new MaterialBuilder("material1");
             var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
             var pointCloud = mesh.UsePrimitive(material, 1);
-            var greenColor = new Vector4(0f, 1f, 0f, 1f);
+            var redColor = new Vector4(1f, 0f, 0f, 1f);
 
             for (var x = -10; x < 10; x++)
             {
@@ -34,7 +34,7 @@ namespace SharpGLTF.Cesium
                 {
                     for (var z = -10; z < 10; z++)
                     {
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), greenColor, 199, 4);
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, 199, 4);
 
                         pointCloud.AddPoint(vt0);
                     }

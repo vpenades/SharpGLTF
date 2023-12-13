@@ -12,7 +12,6 @@ namespace SharpGLTF
     {
         public VertexPointcloud(Vector4 color, float intensity, float classification)
         {
-            // Q: How to set the color??
             Color = color;
             Intensity = intensity;
             Classification = classification;
@@ -30,19 +29,21 @@ namespace SharpGLTF
         [VertexAttribute(CLASSIFICATIONATTRIBUTENAME, EncodingType.FLOAT, false)]
         public float Classification;
 
-        public int MaxColors => 0;
+        public int MaxColors => 1;
 
         public int MaxTextCoords => 0;
 
         public IEnumerable<string> CustomAttributes => throw new NotImplementedException();
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color) {
-            if (setIndex == 0) this.Color = color;
+            if (setIndex == 0) Color = color;
         }
 
         public void SetTexCoord(int setIndex, Vector2 coord) { }
 
-        public Vector4 GetColor(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
+        public Vector4 GetColor(int index) {
+            return Color;
+        }
 
         public Vector2 GetTexCoord(int index) { throw new ArgumentOutOfRangeException(nameof(index)); }
 
