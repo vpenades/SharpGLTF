@@ -5,6 +5,7 @@ using SharpGLTF.Materials;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -20,6 +21,7 @@ namespace SharpGLTF.Cesium
         }
 
         [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
+        /// Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
 
         public void CreatePointCloudWithCustomAttributesTest()
         {
@@ -27,15 +29,16 @@ namespace SharpGLTF.Cesium
             var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
             var pointCloud = mesh.UsePrimitive(material, 1);
             var redColor = new Vector4(1f, 0f, 0f, 1f);
-
+            var rand = new Random();
             for (var x = -10; x < 10; x++)
             {
                 for (var y = -10; y < 10; y++)
                 {
                     for (var z = -10; z < 10; z++)
                     {
-                        // intensity values on x-axis, classification on z-axis
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, z);
+                        // intensity values is based on x-axis values
+                        // classification of points is 0 or 1 (random)
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, rand.Next(0,2));
 
                         pointCloud.AddPoint(vt0);
                     }
@@ -48,21 +51,6 @@ namespace SharpGLTF.Cesium
             model.UseScene("Default")
                 .CreateNode().WithMesh(model.LogicalMeshes[0]);
 
-            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");
-        }
-
-
-        /// <summary>
-        /// Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
-        /// </summary>
-        [Test(Description = "ext_structural_metadata with PropertyAttributes")]
-        public void TriangleWithPropertyAttributes()
-        {
-            // todo: create a model with custom vertex attributes "_INTENSITY" and "_CLASSIFICATION"
-            var model = GetTriangleModel();
             var propertyAttribute = new Schema2.PropertyAttribute();
             propertyAttribute.Class = "exampleMetadataClass";
             var intensityProperty = new PropertyAttributeProperty();
@@ -73,12 +61,12 @@ namespace SharpGLTF.Cesium
             propertyAttribute.Properties["classification"] = classificationProperty;
 
             model.SetPropertyAttribute(propertyAttribute);
-            
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_property_attribute.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_property_attribute.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_property_attribute.plotly");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");
         }
+
 
         [Test(Description ="First test with ext_structural_metadata")]
         public void TriangleWithMetadataTest()

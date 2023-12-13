@@ -27,6 +27,10 @@ namespace SharpGLTF.Schema2
             if (propertyAttribute == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
+            // Todo: Check if this is correct, it's a kinda workaround
+            // for the OneOf issue. https://github.com/CesiumGS/glTF/blob/proposal-EXT_structural_metadata/extensions/2.0/Vendor/EXT_structural_metadata/schema/glTF.EXT_structural_metadata.schema.json#L53
+            // Here we use schemaUri but not schema
+            ext.SchemaUri = "MetadataSchema.json"; 
             ext.PropertyAttributes.Clear();
             ext.PropertyAttributes.Add(propertyAttribute);
         }
@@ -94,6 +98,12 @@ namespace SharpGLTF.Schema2
         {
             get { return _propertyTables; }
             set { _propertyTables = value; }
+        }
+
+        internal string SchemaUri
+        {
+            get { return _schemaUri; }
+            set { _schemaUri = value; }
         }
 
         internal List<PropertyAttribute> PropertyAttributes
