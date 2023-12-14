@@ -102,6 +102,11 @@ namespace SharpGLTF.Schema2
 
     public static class ExtMeshFeatures
     {
+        public static void SetFeatureId(this MeshPrimitive primitive, MeshExtMeshFeatureID featureId)
+        {
+            primitive.SetFeatureIds(new List<MeshExtMeshFeatureID>() { featureId });
+        }
+
         /// <summary>
         /// Set the FeatureIds for a MeshPrimitive
         /// </summary>
@@ -109,9 +114,7 @@ namespace SharpGLTF.Schema2
         /// <param name="featureIds"></param>
         public static void SetFeatureIds(this MeshPrimitive primitive, List<MeshExtMeshFeatureID> featureIds)
         {
-            if (featureIds == null) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
-
-            Guard.NotNullOrEmpty(featureIds, nameof(featureIds));
+            if (featureIds == null || featureIds.Count == 0) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return; }
 
             foreach (var featureId in featureIds)
             {

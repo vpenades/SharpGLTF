@@ -2,7 +2,6 @@
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SharpGLTF.Schema2
 {
@@ -51,9 +50,35 @@ namespace SharpGLTF.Schema2
         {
             if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
+            // todo add check if propertyTable.Class is in schema.Classes
+            foreach (var propertyTable in propertyTables)
+            {
+                Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
+                Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
+                Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
+
+                schema.Switch(
+                    StructuralMetadataSchema =>
+                        CheckConsistency(StructuralMetadataSchema, propertyTable),
+                    Uri =>
+                    {
+                        // do not check here, because schema is not loaded
+                    }
+                    );
+            }
+
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyTables = propertyTables;
             ext.AddSchema(schema);
+        }
+
+        private static void CheckConsistency(StructuralMetadataSchema StructuralMetadataSchema, PropertyTable propertyTable)
+        {
+            Guard.IsTrue(StructuralMetadataSchema.Classes.ContainsKey(propertyTable.Class), nameof(propertyTable.Class), $"Class {propertyTable.Class} must be defined in schema");
+            foreach (var property in propertyTable.Properties)
+            {
+                Guard.IsTrue(StructuralMetadataSchema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
+            }
         }
 
         public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, IReadOnlyList<T> values)
@@ -346,6 +371,16 @@ namespace SharpGLTF.Schema2
             get { return _normalized; }
             set { _normalized = value; }
         }
+
+        // add array property
+        public bool? Array
+        {
+            get { return _array; }
+            set { _array = value; }
+
+        }
+
+
     }
 
     public partial class PropertyTable

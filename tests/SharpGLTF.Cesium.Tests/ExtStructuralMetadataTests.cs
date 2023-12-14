@@ -20,6 +20,64 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+        [Test(Description = "ext_structural_metadata with complex types")]
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/ComplexTypes/ComplexTypes.gltf
+        public void ComplexTypesTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+            var mesh = new MeshBuilder<VertexPosition, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            // All the vertices in the triangle have the same feature ID
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), 0);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var model = scene.ToGltf2();
+
+            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
+            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
+
+            var schema = new StructuralMetadataSchema();
+
+            var exampleMetadataClass = new StructuralMetadataClass();
+            exampleMetadataClass.Name = "Example metadata class A";
+            exampleMetadataClass.Description = "First example metadata class";
+
+            var uint8ArrayProperty = new ClassProperty();
+            uint8ArrayProperty.Name = "Example variable-length ARRAY normalized INT8 property";
+            uint8ArrayProperty.Description = "An example property, with type ARRAY, with component type UINT8, normalized, and variable length";
+            uint8ArrayProperty.Type = ElementType.SCALAR;
+            uint8ArrayProperty.ComponentType = DataType.UINT8;
+            uint8ArrayProperty.Normalized = true;
+            uint8ArrayProperty.Array = true;
+
+            exampleMetadataClass.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", uint8ArrayProperty);
+
+            schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
+
+            var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
+            // todo add the complex type properties
+            var float32Property = model.GetPropertyTableProperty(new List<float>() { 100 });
+            examplePropertyTable.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", float32Property);
+
+            model.SetPropertyTable(examplePropertyTable, schema);
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.plotly");
+        }
+
+
+
         [Test(Description = "ext_structural_metadata with multiple classes")]
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/MultipleClasses.gltf
         public void MultipleClassesTest()
