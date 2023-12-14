@@ -41,7 +41,6 @@ namespace SharpGLTF.Schema2
             PropertyTable propertyTable,
             OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (propertyTable == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
             SetPropertyTables(modelRoot, new List<PropertyTable>() { propertyTable }, schema);
         }
 
@@ -50,7 +49,7 @@ namespace SharpGLTF.Schema2
             List<PropertyTable> propertyTables,
             OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (propertyTables == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
+            if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyTables = propertyTables;
