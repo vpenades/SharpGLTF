@@ -127,7 +127,6 @@ namespace SharpGLTF.Cesium
             var propertyTables = new List<PropertyTable>() { firstPropertyTable, secondPropertyTable };
             model.SetPropertyTables(propertyTables, schema);
 
-            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\MultipleClasses\MultipleClasses1.gltf");
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
