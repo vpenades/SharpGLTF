@@ -141,11 +141,11 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateContent(ValidationContext result)
         {
-            // Schema or SchemaUri must be defined
-            Guard.IsTrue(Schema != null || SchemaUri != null, "Schema/SchemaUri", "Schema or SchemaUri must be defined");
+            // Check one of schema or schemaUri is defined, but not both
+            Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
+            Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
 
             base.OnValidateContent(result);
-
         }
     }
 
