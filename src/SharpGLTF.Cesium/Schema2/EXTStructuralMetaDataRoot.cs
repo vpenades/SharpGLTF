@@ -38,55 +38,43 @@ namespace SharpGLTF.Schema2
 
         public static void SetPropertyTable(
             this ModelRoot modelRoot,
-            Dictionary<string, List<int>> attributes,
-            OneOf<StructuralMetadataSchema, Uri> schema,
-            string name = "PropertyTable"
-            )
+            PropertyTable propertyTable,
+            OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (attributes == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
+            if (propertyTable == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
+            SetPropertyTables(modelRoot, new List<PropertyTable>() { propertyTable }, schema);
+        }
+
+        public static void SetPropertyTables(
+            this ModelRoot modelRoot,
+            List<PropertyTable> propertyTables,
+            OneOf<StructuralMetadataSchema, Uri> schema)
+        {
+            if (propertyTables == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
-            ext.PropertyTables.Clear();
-            var propertyTable = GetPropertyTable(modelRoot, attributes, schema, name);
-            ext.PropertyTables.Add(propertyTable);
+            ext.PropertyTables = propertyTables;
             ext.AddSchema(schema);
         }
 
-
-        private static PropertyTable GetPropertyTable(
-            ModelRoot modelRoot,
-            Dictionary<string, List<int>> attributes,
-            OneOf<StructuralMetadataSchema, Uri> schema1,
-            string name = "PropertyTable"
-            )
+        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, IReadOnlyList<T> values)
         {
-            var propertyTable = new PropertyTable(name, attributes.FirstOrDefault().Value.Count);
-
-            // todo: what if schema is Uri?
-
-            var structuralMetadataSchema = schema1.TryPickT0(out var schema, out var remainder);
-
-            var firstClass = schema.Classes.FirstOrDefault().Value;
-
-            foreach (var property in firstClass.Properties)
-            {
-                var id = property.Key;
-                var type = property.Value.Type;
-
-                // Todo check type, for example string
-                var attribute = attributes[id];
-                var list = attribute.ConvertAll(x => (int)x);
-
-                byte[] bytes = BinaryTable.GetBytes(list);
-                var bufferView = modelRoot.UseBufferView(bytes);
-                int logicalIndex = bufferView.LogicalIndex;
-                var propertyTableProperty = new PropertyTableProperty();
-                propertyTableProperty.Values = logicalIndex;
-                propertyTable.Properties[id] = propertyTableProperty;
-            }
-
-            return propertyTable;
+            var propertyTableProperty = new PropertyTableProperty();
+            int logicalIndex = GetBufferView(model, values);
+            propertyTableProperty.Values = logicalIndex;
+            return propertyTableProperty;
         }
+
+        private static int GetBufferView<T>(this ModelRoot model, IReadOnlyList<T> values)
+        {
+            var bytesFloat32 = BinaryTable.GetBytes(values);
+            var bufferView = model.UseBufferView(bytesFloat32);
+            int logicalIndex = bufferView.LogicalIndex;
+            return logicalIndex;
+        }
+
+
+
     }
 
     public partial class EXTStructuralMetaDataRoot
@@ -367,10 +355,17 @@ namespace SharpGLTF.Schema2
         {
             _properties = new Dictionary<string, PropertyTableProperty>();
         }
-        public PropertyTable(string Class, int Count) : this()
+        public PropertyTable(string Class, int Count, string Name = "") : this()
         {
             _class = Class;
             _count = Count;
+            _name = Name;
+        }
+
+        public string Name
+        {
+            get { return _name; }
+            set { _name = value; }
         }
 
         public string Class

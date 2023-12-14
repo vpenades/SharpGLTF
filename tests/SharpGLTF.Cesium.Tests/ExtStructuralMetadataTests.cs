@@ -57,23 +57,42 @@ namespace SharpGLTF.Cesium
 
             schema.Classes = classes;
             var exampleEnum = new StructuralMetadataEnum();
-            exampleEnum.Values.Add(new EnumValue() {  Name= "ExampleEnumValueA", Value = 0 });
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueA", Value = 0 });
             exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueB", Value = 1 });
             exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueC", Value = 2 });
 
             schema.Enums.Add("exampleEnumType", exampleEnum);
 
-            // Todo: create the property tables (First example property table, Second example property table)
+            var firstPropertyTable = GetFirstPropertyTable(model);
+            var secondPropertyTable = GetSecondPropertyTable(model);
 
-            
-            // model.SetPropertyAttribute(propertyAttribute, schema);
-
-
-            // todo: add metadata
+            var propertyTables = new List<PropertyTable>() { firstPropertyTable, secondPropertyTable };
+            model.SetPropertyTables(propertyTables, schema);
+            model.SaveGLTF(@"d:\aaa\bertclass.gltf");
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.plotly");
+        }
+
+        private static PropertyTable GetFirstPropertyTable(ModelRoot model)
+        {
+            var firstPropertyTable = new PropertyTable("exampleMetadataClassA", 1, "First example property table");
+            var float32Property = model.GetPropertyTableProperty(new List<float>() { 100 });
+            firstPropertyTable.Properties.Add("example_FLOAT32", float32Property);
+            var int64Property = model.GetPropertyTableProperty(new List<long>() { 101 });
+            firstPropertyTable.Properties.Add("example_INT64", int64Property);
+            return firstPropertyTable;
+        }
+
+        private static PropertyTable GetSecondPropertyTable(ModelRoot model)
+        {
+            var secondPropertyTable = new PropertyTable("exampleMetadataClassB", 1, "First example property table");
+            var uint16Property = model.GetPropertyTableProperty(new List<ushort>() { 102 });
+            secondPropertyTable.Properties.Add("example_UINT16", uint16Property);
+            var float64Property = model.GetPropertyTableProperty(new List<double>() { 103 });
+            secondPropertyTable.Properties.Add("example_FLOAT64", float64Property);
+            return secondPropertyTable;
         }
 
         private static StructuralMetadataClass GetExampleClassB()
@@ -177,28 +196,8 @@ namespace SharpGLTF.Cesium
         [Test(Description = "First test with ext_structural_metadata")]
         public void TriangleWithMetadataTest()
         {
-            var model = GetTriangleModel();
-
-            var schema = GetSampleSchema();
-
-            var attribute = new List<int>() { 100 };
-            var dict = new Dictionary<string, List<int>>();
-            dict["age"] = attribute;
-            model.SetPropertyTable(dict, schema: schema);
-
-            // create files
-            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.plotly");
-        }
-
-        private static ModelRoot GetTriangleModel()
-        {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
-
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
-
             var mesh = new MeshBuilder<VertexPosition>("mesh");
             var prim = mesh.UsePrimitive(material);
 
@@ -207,11 +206,7 @@ namespace SharpGLTF.Cesium
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
-            return model;
-        }
-
-        private static StructuralMetadataSchema GetSampleSchema()
-        {
+            
             var schema = new StructuralMetadataSchema();
             schema.Id = "schema_001";
             schema.Name = "schema 001";
@@ -231,7 +226,18 @@ namespace SharpGLTF.Cesium
             treeClass.Properties.Add("age", ageProperty);
 
             schema.Classes = classes;
-            return schema;
+
+            var propertyTable = new PropertyTable("tree", 1, "PropertyTable");
+            var agePropertyTableProperty = model.GetPropertyTableProperty(new List<int>() { 100 });
+            propertyTable.Properties.Add("age", agePropertyTableProperty);
+
+            model.SetPropertyTable(propertyTable, schema);
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.plotly");
         }
     }
 }
