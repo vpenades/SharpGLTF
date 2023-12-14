@@ -1,4 +1,5 @@
-﻿using SharpGLTF.Validation;
+﻿using OneOf;
+using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,8 +12,7 @@ namespace SharpGLTF.Schema2
         public static void SetPropertyTexture(
             this ModelRoot modelRoot,
             PropertyTexture propertyTexture,
-            StructuralMetadataSchema schema = null,
-            Uri schemaUri = null
+            OneOf<StructuralMetadataSchema, Uri> schema
             )
         {
             if (propertyTexture == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
@@ -20,49 +20,51 @@ namespace SharpGLTF.Schema2
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyTextures.Clear();
             ext.PropertyTextures.Add(propertyTexture);
-            ext.AddSchema(schema, schemaUri);
+            ext.AddSchema(schema);
         }
 
         public static void SetPropertyAttribute(
             this ModelRoot modelRoot,
             PropertyAttribute propertyAttribute,
-            StructuralMetadataSchema schema = null,
-            Uri schemaUri = null)
+            OneOf<StructuralMetadataSchema, Uri> schema)
         {
             if (propertyAttribute == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyAttributes.Clear();
             ext.PropertyAttributes.Add(propertyAttribute);
-            ext.AddSchema(schema, schemaUri);
+            ext.AddSchema(schema);
         }
 
         public static void SetPropertyTable(
             this ModelRoot modelRoot,
             Dictionary<string, List<int>> attributes,
-            string name = "PropertyTable",
-            StructuralMetadataSchema schema = null,
-            Uri schemaUri = null
+            OneOf<StructuralMetadataSchema, Uri> schema,
+            string name = "PropertyTable"
             )
         {
             if (attributes == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
             var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
             ext.PropertyTables.Clear();
-            ext.PropertyTables.Add(GetPropertyTable(modelRoot, attributes, name, schema));
-            ext.AddSchema(schema, schemaUri);
+            var propertyTable = GetPropertyTable(modelRoot, attributes, schema, name);
+            ext.PropertyTables.Add(propertyTable);
+            ext.AddSchema(schema);
         }
 
 
         private static PropertyTable GetPropertyTable(
             ModelRoot modelRoot,
             Dictionary<string, List<int>> attributes,
-            string name = "PropertyTable",
-            StructuralMetadataSchema schema = null
-            // todo: use? Uri schemaUri = null
+            OneOf<StructuralMetadataSchema, Uri> schema1,
+            string name = "PropertyTable"
             )
         {
             var propertyTable = new PropertyTable(name, attributes.FirstOrDefault().Value.Count);
+
+            // todo: what if schema is Uri?
+
+            var structuralMetadataSchema = schema1.TryPickT0(out var schema, out var remainder);
 
             var firstClass = schema.Classes.FirstOrDefault().Value;
 
@@ -99,17 +101,12 @@ namespace SharpGLTF.Schema2
             _propertyTextures = new List<PropertyTexture>();
         }
 
-        internal void AddSchema(StructuralMetadataSchema schema, Uri schemaUri)
+        internal void AddSchema(OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (schema != null)
-            {
-                Schema = schema;
-            }
-
-            if (schemaUri != null)
-            {
-                SchemaUri = schemaUri.ToString();
-            }
+            schema.Switch(
+                StructuralMetadataSchema => _schema = StructuralMetadataSchema,
+                Uri => this.SchemaUri = Uri.ToString()
+                );
         }
 
         internal List<PropertyTable> PropertyTables

@@ -165,7 +165,8 @@ namespace SharpGLTF.Cesium
             propertyAttribute.Properties["intensity"] = intensityProperty;
             propertyAttribute.Properties["classification"] = classificationProperty;
 
-            model.SetPropertyAttribute(propertyAttribute, schemaUri: new Uri("MetadataSchema.json", UriKind.Relative));
+            var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);
+            model.SetPropertyAttribute(propertyAttribute, schemaUri );
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
