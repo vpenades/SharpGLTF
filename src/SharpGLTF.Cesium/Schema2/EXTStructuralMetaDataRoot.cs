@@ -81,7 +81,19 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, IReadOnlyList<T> values)
+        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values)
+        {
+            var propertyTableProperty = new PropertyTableProperty();
+            int logicalIndex = GetBufferView(model, values);
+            propertyTableProperty.Values = logicalIndex;
+
+            var offsets = BinaryTable.GetOffsets(values);
+            int logicalIndexOffsets = GetBufferView(model, offsets);
+            propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
+            return propertyTableProperty;
+        }
+
+        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, List<T> values)
         {
             var propertyTableProperty = new PropertyTableProperty();
             int logicalIndex = GetBufferView(model, values);
@@ -89,16 +101,26 @@ namespace SharpGLTF.Schema2
             return propertyTableProperty;
         }
 
-        private static int GetBufferView<T>(this ModelRoot model, IReadOnlyList<T> values)
+        private static int GetBufferView<T>(this ModelRoot model, List<T> values)
         {
-            var bytesFloat32 = BinaryTable.GetBytes(values);
-            var bufferView = model.UseBufferView(bytesFloat32);
+            var bytes = BinaryTable.GetBytes(values);
+            var bufferView = model.UseBufferView(bytes);
             int logicalIndex = bufferView.LogicalIndex;
             return logicalIndex;
         }
 
-
-
+        private static int GetBufferView<T>(this ModelRoot model, List<List<T>> values)
+        {
+            var bytes = new List<byte>();
+            foreach (var value in values)
+            {
+                var b = BinaryTable.GetBytes(value);
+                bytes.AddRange(b);
+            }
+            var bufferView = model.UseBufferView(bytes.ToArray());
+            int logicalIndex = bufferView.LogicalIndex;
+            return logicalIndex;
+        }
     }
 
     public partial class EXTStructuralMetaDataRoot
@@ -427,6 +449,12 @@ namespace SharpGLTF.Schema2
         {
             get { return _values; }
             set { _values = value; }
+        }
+
+        public int? ArrayOffsets
+        {
+            get { return _arrayOffsets; }
+            set { _arrayOffsets = value; }
         }
     }
 }

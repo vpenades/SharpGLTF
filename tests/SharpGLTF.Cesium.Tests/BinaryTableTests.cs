@@ -23,17 +23,6 @@ namespace SharpGLTF
             Assert.Throws<NotImplementedException>(() => BinaryTable.GetBytes(ints));
         }
 
-        [Test]
-        public void TestOffsetBufferStrings()
-        {
-            var strings = new List<string> { "hello, ", "world" };
-            var offsetBytes = BinaryTable.GetOffsetBuffer(strings);
-            Assert.That(offsetBytes.Length, Is.EqualTo(12));
-            Assert.That(BitConverter.ToInt32(offsetBytes, 0), Is.EqualTo(0));
-            Assert.That(BitConverter.ToInt32(offsetBytes, 4), Is.EqualTo(strings[0].Length));
-            Assert.That(BitConverter.ToInt32(offsetBytes, 8), Is.EqualTo(strings[0].Length + strings[1].Length));
-        }
-
         private List<T> GetTestArray<T>()
         {
             var l = new List<T>();

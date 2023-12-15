@@ -30,9 +30,9 @@ namespace SharpGLTF.Cesium
             var prim = mesh.UsePrimitive(material);
 
             // All the vertices in the triangle have the same feature ID
-            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), 0);
-            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), 0);
-            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), 0);
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-1, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), 0);
 
             prim.AddTriangle(vt0, vt1, vt2);
 
@@ -55,7 +55,7 @@ namespace SharpGLTF.Cesium
             uint8ArrayProperty.Description = "An example property, with type ARRAY, with component type UINT8, normalized, and variable length";
             uint8ArrayProperty.Type = ElementType.SCALAR;
             uint8ArrayProperty.ComponentType = DataType.UINT8;
-            uint8ArrayProperty.Normalized = true;
+            uint8ArrayProperty.Normalized = false;
             uint8ArrayProperty.Array = true;
 
             exampleMetadataClass.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", uint8ArrayProperty);
@@ -63,20 +63,23 @@ namespace SharpGLTF.Cesium
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
             var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
-            // todo add the complex type properties
-            var float32Property = model.GetPropertyTableProperty(new List<float>() { 100 });
-            examplePropertyTable.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", float32Property);
+            var list0 = new List<byte>() { 0, 1, 2, 3, 4, 5, 6, 7 };
+            var list2 = new List<List<byte>>() {
+                list0
+            };
+
+            var property = model.GetPropertyTableProperty(list2);
+            examplePropertyTable.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", property);
+
+            // todo add more complex type properties
 
             model.SetPropertyTable(examplePropertyTable, schema);
 
-            // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.plotly");
         }
-
-
 
         [Test(Description = "ext_structural_metadata with multiple classes")]
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/MultipleClasses.gltf

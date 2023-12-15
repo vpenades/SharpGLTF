@@ -24,7 +24,8 @@ namespace SharpGLTF
             
             if (typeof(T) == typeof(string))
             {
-                return GetStringsAsBytes(values.Cast<string>().ToArray());
+                // todo: implement string type
+                throw new NotImplementedException();
             }
             else if (typeof(T).IsPrimitive)
             {
@@ -47,17 +48,23 @@ namespace SharpGLTF
             }
         }
 
-        /// <summary>
-        /// Creates a list of offsets for a list of strings
-        /// see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#strings
-        /// </summary>
-        /// <param name="strings"></param>
-        /// <returns></returns>
-        public static byte[] GetOffsetBuffer(IReadOnlyList<string> strings)
+        //public static byte[] GetOffsetBuffer<T>(List<List<T>> values)
+        //{
+        //    var offsetBuffer = GetOffsets(values);
+        //    var offsetBytes = GetBytes(offsetBuffer);
+        //    return offsetBytes;
+        //}
+
+        public static List<int> GetOffsets<T>(List<List<T>> values)
         {
-            var offsetBuffer = GetOffsets(strings);
-            var offsetBytes = GetBytes(offsetBuffer);
-            return offsetBytes;
+            var offsets = new List<int>() { 0 };
+            foreach (var value in values)
+            {
+                var length = GetBytes(value).Length;
+
+                offsets.Add(offsets.Last() + (int)length);
+            }
+            return offsets;
         }
 
         public static int GetSize<T>()
@@ -70,22 +77,22 @@ namespace SharpGLTF
             return size;
         }
 
-        private static byte[] GetStringsAsBytes(IReadOnlyList<string> values)
-        {
-            var res = string.Join("", values);
-            return Encoding.UTF8.GetBytes(res);
-        }
+        //private static byte[] GetStringsAsBytes(IReadOnlyList<string> values)
+        //{
+        //    var res = string.Join("", values);
+        //    return Encoding.UTF8.GetBytes(res);
+        //}
 
-        private static List<uint> GetOffsets(IReadOnlyList<string> strings)
-        {
-            var offsets = new List<uint>() { 0 };
-            foreach (string s in strings)
-            {
-                var length = (uint)Encoding.UTF8.GetByteCount(s);
+        //private static List<uint> GetOffsets(IReadOnlyList<string> strings)
+        //{
+        //    var offsets = new List<uint>() { 0 };
+        //    foreach (string s in strings)
+        //    {
+        //        var length = (uint)Encoding.UTF8.GetByteCount(s);
 
-                offsets.Add(offsets.Last() + length);
-            }
-            return offsets;
-        }
+        //        offsets.Add(offsets.Last() + length);
+        //    }
+        //    return offsets;
+        //}
     }
 }
