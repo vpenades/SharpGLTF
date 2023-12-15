@@ -18,7 +18,13 @@ namespace SharpGLTF
             //bytes = BinaryTable.GetBytes(new List<string>() { "a", "b" });
             //Assert.That(bytes.Length, Is.EqualTo(2));
 
-            Assert.Throws<NotImplementedException>(() => BinaryTable.GetBytes(new List<bool>() { true, false }));
+            bytes  = BinaryTable.GetBytes(new List<bool>() { true, false });
+            Assert.That(bytes.Length, Is.EqualTo(1));
+            // create a bit arrat frin the byte array
+            var bits = new System.Collections.BitArray(bytes);
+            Assert.That(bits[0] == true);
+            Assert.That(bits[1] == false);
+
             var ints = new List<List<int>>();
             ints.Add(new List<int>() { 0, 1 });
             Assert.Throws<NotImplementedException>(() => BinaryTable.GetBytes(ints));

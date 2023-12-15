@@ -60,6 +60,15 @@ namespace SharpGLTF.Cesium
 
             exampleMetadataClass.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", uint8ArrayProperty);
 
+            var fixedLengthBooleanProperty = new ClassProperty();
+            fixedLengthBooleanProperty.Name = "Example fixed-length ARRAY BOOLEAN property";
+            fixedLengthBooleanProperty.Description = "An example property, with type ARRAY, with component type BOOLEAN, and fixed length ";
+            fixedLengthBooleanProperty.Type = ElementType.BOOLEAN;
+            fixedLengthBooleanProperty.Array = true;
+            fixedLengthBooleanProperty.Count = 4;
+
+            exampleMetadataClass.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", fixedLengthBooleanProperty);
+
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
             var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
@@ -68,8 +77,16 @@ namespace SharpGLTF.Cesium
                 list0
             };
 
-            var property = model.GetPropertyTableProperty(list2);
+            var property = model.GetArrayPropertyTableProperty(list2);
             examplePropertyTable.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", property);
+
+            var booleans = new List<bool>() { true, false, true, false };
+            var booleansList = new List<List<bool>>()
+            {
+                booleans
+            };
+            var propertyBooleansList = model.GetArrayPropertyTableProperty(booleansList, false);
+            examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", propertyBooleansList);
 
             // todo add more complex type properties
 

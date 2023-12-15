@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace SharpGLTF
 {
@@ -31,10 +31,12 @@ namespace SharpGLTF
             {
                 if(typeof(T) == typeof(bool))
                 {
-                    // when implementing bool, create a bitstream
-                    // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#booleans
-                    throw new NotImplementedException();
+                    var bits = new BitArray(values.Cast<bool>().ToArray());
+                    byte[] ret = new byte[(bits.Length - 1) / 8 + 1];
+                    bits.CopyTo(ret, 0);
+                    return ret;
                 }
+
                 var size = GetSize<T>();
                 var result = new byte[values.Count * size];
                 Buffer.BlockCopy(values.ToArray(), 0, result, 0, result.Length);
@@ -47,13 +49,6 @@ namespace SharpGLTF
                 throw new NotImplementedException();
             }
         }
-
-        //public static byte[] GetOffsetBuffer<T>(List<List<T>> values)
-        //{
-        //    var offsetBuffer = GetOffsets(values);
-        //    var offsetBytes = GetBytes(offsetBuffer);
-        //    return offsetBytes;
-        //}
 
         public static List<int> GetOffsets<T>(List<List<T>> values)
         {
@@ -76,23 +71,5 @@ namespace SharpGLTF
             int size = Marshal.SizeOf(Activator.CreateInstance(type));
             return size;
         }
-
-        //private static byte[] GetStringsAsBytes(IReadOnlyList<string> values)
-        //{
-        //    var res = string.Join("", values);
-        //    return Encoding.UTF8.GetBytes(res);
-        //}
-
-        //private static List<uint> GetOffsets(IReadOnlyList<string> strings)
-        //{
-        //    var offsets = new List<uint>() { 0 };
-        //    foreach (string s in strings)
-        //    {
-        //        var length = (uint)Encoding.UTF8.GetByteCount(s);
-
-        //        offsets.Add(offsets.Last() + length);
-        //    }
-        //    return offsets;
-        //}
     }
 }

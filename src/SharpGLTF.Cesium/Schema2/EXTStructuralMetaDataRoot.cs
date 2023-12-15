@@ -81,15 +81,18 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values)
+        public static PropertyTableProperty GetArrayPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values, bool CreateArrayOffsets = true)
         {
             var propertyTableProperty = new PropertyTableProperty();
             int logicalIndex = GetBufferView(model, values);
             propertyTableProperty.Values = logicalIndex;
 
-            var offsets = BinaryTable.GetOffsets(values);
-            int logicalIndexOffsets = GetBufferView(model, offsets);
-            propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
+            if (CreateArrayOffsets)
+            {
+                var offsets = BinaryTable.GetOffsets(values);
+                int logicalIndexOffsets = GetBufferView(model, offsets);
+                propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
+            }
             return propertyTableProperty;
         }
 
@@ -402,6 +405,11 @@ namespace SharpGLTF.Schema2
 
         }
 
+        public int? Count
+        {
+            get { return _count; }
+            set { _count = value; }
+        }
 
     }
 
