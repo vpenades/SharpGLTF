@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-
+using System.Reflection;
 using SharpGLTF.Memory;
 
 using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
@@ -105,13 +105,13 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var attributes = new List<MemoryAccessInfo>();
 
-            foreach (var finfo in tvg.GetFields())
+            foreach (var finfo in GetFields(tvg))
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue) attributes.Add(attribute.Value);
             }
 
-            foreach (var finfo in tvm.GetFields())
+            foreach (var finfo in GetFields(tvm))
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue)
@@ -130,7 +130,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 }
             }
 
-            foreach (var finfo in tvs.GetFields())
+            foreach (var finfo in GetFields(tvs))
             {
                 var attribute = _GetMemoryAccessInfo(finfo);
                 if (attribute.HasValue)
@@ -154,6 +154,29 @@ namespace SharpGLTF.Geometry.VertexTypes
             return array;
         }
 
+        private static FieldInfo[] GetFields(Type type)
+        {
+            //Listing these individually allows the trimmer to ensure their fields are saved.
+            if (type == typeof(VertexEmpty)) return typeof(VertexEmpty).GetFields();
+            if (type == typeof(VertexPosition)) return typeof(VertexPosition).GetFields();
+            if (type == typeof(VertexPositionNormal)) return typeof(VertexPositionNormal).GetFields();
+            if (type == typeof(VertexPositionNormalTangent)) return typeof(VertexPositionNormalTangent).GetFields();
+            if (type == typeof(VertexColor1)) return typeof(VertexColor1).GetFields();
+            if (type == typeof(VertexColor2)) return typeof(VertexColor2).GetFields();
+            if (type == typeof(VertexColor1Texture1)) return typeof(VertexColor1Texture1).GetFields();
+            if (type == typeof(VertexColor1Texture2)) return typeof(VertexColor1Texture2).GetFields();
+            if (type == typeof(VertexColor2Texture1)) return typeof(VertexColor2Texture1).GetFields();
+            if (type == typeof(VertexColor2Texture2)) return typeof(VertexColor2Texture2).GetFields();
+            if (type == typeof(VertexTexture1)) return typeof(VertexTexture1).GetFields();
+            if (type == typeof(VertexTexture2)) return typeof(VertexTexture2).GetFields();
+            if (type == typeof(VertexJoints4)) return typeof(VertexJoints4).GetFields();
+            if (type == typeof(VertexJoints8)) return typeof(VertexJoints8).GetFields();
+            if (type == typeof(VertexGeometryDelta)) return typeof(VertexGeometryDelta).GetFields();
+            if (type == typeof(VertexMaterialDelta)) return typeof(VertexMaterialDelta).GetFields();
+
+            throw new ArgumentException($"Type {type.Name} is not supported for getting fields.", nameof(type));
+        }
+
         private static MemoryAccessInfo? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
         {
             var attribute = finfo.GetCustomAttributes(true)
@@ -162,18 +185,17 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (attribute == null) return null;
 
-            var dimensions = (DIMENSIONS?)null;
+            DIMENSIONS dimensions;
 
             if (finfo.FieldType == typeof(Single)) dimensions = DIMENSIONS.SCALAR;
-            if (finfo.FieldType == typeof(Vector2)) dimensions = DIMENSIONS.VEC2;
-            if (finfo.FieldType == typeof(Vector3)) dimensions = DIMENSIONS.VEC3;
-            if (finfo.FieldType == typeof(Vector4)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Quaternion)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = DIMENSIONS.MAT4;
+            else if (finfo.FieldType == typeof(Vector2)) dimensions = DIMENSIONS.VEC2;
+            else if (finfo.FieldType == typeof(Vector3)) dimensions = DIMENSIONS.VEC3;
+            else if (finfo.FieldType == typeof(Vector4)) dimensions = DIMENSIONS.VEC4;
+            else if (finfo.FieldType == typeof(Quaternion)) dimensions = DIMENSIONS.VEC4;
+            else if (finfo.FieldType == typeof(Matrix4x4)) dimensions = DIMENSIONS.MAT4;
+            else throw new ArgumentException($"Invalid type {finfo.FieldType}");
 
-            if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
-
-            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
+            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions, attribute.Encoding, attribute.Normalized);
         }
 
         private static Converter<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
