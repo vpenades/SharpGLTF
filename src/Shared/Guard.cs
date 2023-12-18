@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -263,6 +264,42 @@ namespace SharpGLTF
             if (b is null) throw new ArgumentNullException(bName);
 
             if (a != b.LogicalParent) throw new ArgumentException("LogicalParent mismatch", bName);
+        }
+
+        #endregion
+
+        #region reflection        
+
+        public static void HasDynamicallyAccessedMembers(Type t, bool hasConstructors, bool hasMethods, bool hasProperties, bool hasFields, string parameterName)
+        {
+            #if NET6_0_OR_GREATER
+
+            System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes flags = default;
+
+            if (hasConstructors) flags
+                    |= System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors
+                    | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors;
+
+            if (hasMethods) flags
+                    |= System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicMethods
+                    ;//| System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicMethods;            
+
+            if (hasProperties) flags
+                    |= System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicProperties
+                    ;// | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicProperties;
+
+            if (hasFields) flags
+                    |= System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicFields
+                    ;// | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicFields;
+
+            var attr = t.GetCustomAttribute<System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute>();            
+
+            if (attr == null || (attr.MemberTypes & flags) != flags)
+            {
+                    throw new ArgumentException($"{parameterName} {t.Name} must define  #if NET6_0_OR_GREATER  [DynamicallyAccessedMembers({flags})] #endif");
+                }
+
+            #endif
         }
 
         #endregion

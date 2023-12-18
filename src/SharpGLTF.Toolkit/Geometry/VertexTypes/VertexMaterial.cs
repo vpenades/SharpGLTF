@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
@@ -85,6 +86,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a material Color.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor1 : IVertexMaterial, IEquatable<VertexColor1>
     {
@@ -181,6 +185,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a two material Colors.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor2 : IVertexMaterial, IEquatable<VertexColor2>
     {
@@ -284,6 +291,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Texture Coordinate.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexTexture1 : IVertexMaterial, IEquatable<VertexTexture1>
     {
@@ -379,6 +389,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two Texture Coordinates.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexTexture2 : IVertexMaterial, IEquatable<VertexTexture2>
     {
@@ -485,6 +498,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor1Texture1 : IVertexMaterial, IEquatable<VertexColor1Texture1>
     {
@@ -587,6 +603,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with a material Colors and two Texture Coordinates.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor1Texture2 : IVertexMaterial, IEquatable<VertexColor1Texture2>
     {
@@ -703,6 +722,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor2Texture1 : IVertexMaterial, IEquatable<VertexColor2Texture1>
     {
@@ -825,6 +847,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexColor2Texture2 : IVertexMaterial, IEquatable<VertexColor2Texture2>
     {
@@ -955,6 +980,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexMaterialDelta : IVertexMaterial, IEquatable<VertexMaterialDelta>
     {

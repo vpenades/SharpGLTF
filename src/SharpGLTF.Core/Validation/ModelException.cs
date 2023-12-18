@@ -30,11 +30,15 @@ namespace SharpGLTF.Validation
         {
             if (target == null) return message;
 
-            var targetTypeInfo = target.GetType().GetTypeInfo();
+            // TODO: LogicalIndex property should be decorated with DynamicAccess
+
+            var targetTypeInfo = target.GetType().GetTypeInfo();            
 
             var logicalIndexProp = targetTypeInfo.GetProperty("LogicalIndex");
 
-            var logicalIndex = logicalIndexProp != null ? (int)logicalIndexProp.GetValue(target) : -1;
+            var logicalIndex = logicalIndexProp != null
+                ? (int)logicalIndexProp.GetValue(target)
+                : -1;
 
             if (logicalIndex >= 0) return $"{targetTypeInfo.Name}[{logicalIndex}] {message}";
 

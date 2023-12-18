@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord} {CustomId}")]
     public struct VertexColor1Texture1Custom1 : IVertexCustom
     {
@@ -121,6 +125,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
     }
 
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{CustomId0} {CustomId1}")]
     public struct VertexCustom2 : IVertexCustom
     {

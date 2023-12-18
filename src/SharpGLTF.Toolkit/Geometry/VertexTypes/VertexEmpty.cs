@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -12,6 +13,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// empty <see cref="IVertexMaterial"/> or empty <see cref="IVertexSkinning"/>
     /// in a <see cref="VertexBuilder{TvG, TvM, TvS}"/> structure.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("Empty")]
     public readonly struct VertexEmpty : IVertexMaterial, IVertexSkinning, IEquatable<VertexEmpty>
     {
