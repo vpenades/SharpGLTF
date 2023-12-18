@@ -46,9 +46,9 @@ namespace SharpGLTF
             return attributeName == CUSTOMATTRIBUTENAME ? (Object)BatchId : null;
         }
 
-        public bool TryGetCustomAttribute(string attribute, out object value)
+        public bool TryGetCustomAttribute(string attributeName, out object value)
         {
-            if (attribute != CUSTOMATTRIBUTENAME) { value = null; return false; }
+            if (attributeName != CUSTOMATTRIBUTENAME) { value = null; return false; }
             value = BatchId; return true;
         }
 

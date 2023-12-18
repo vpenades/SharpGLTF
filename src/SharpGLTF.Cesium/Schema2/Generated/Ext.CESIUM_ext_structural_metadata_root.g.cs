@@ -82,7 +82,7 @@ namespace SharpGLTF.Schema2
 	/// <summary>
 	/// The type of values in `stringOffsets`.
 	/// </summary>
-	public enum StringOffsets
+	public enum ArrayOffsetType
 	{
 		UINT8,
 		UINT16,
@@ -365,8 +365,8 @@ namespace SharpGLTF.Schema2
 	partial class PropertyTableProperty : ExtraProperties
 	{
 	
-		private const StringOffsets _arrayOffsetTypeDefault = StringOffsets.UINT32;
-		private StringOffsets? _arrayOffsetType = _arrayOffsetTypeDefault;
+		private const ArrayOffsetType _arrayOffsetTypeDefault = ArrayOffsetType.UINT32;
+		private ArrayOffsetType? _arrayOffsetType = _arrayOffsetTypeDefault;
 		
 		private Int32? _arrayOffsets;
 		
@@ -378,8 +378,8 @@ namespace SharpGLTF.Schema2
 		
 		private System.Text.Json.Nodes.JsonNode _scale;
 		
-		private const StringOffsets _stringOffsetTypeDefault = StringOffsets.UINT32;
-		private StringOffsets? _stringOffsetType = _stringOffsetTypeDefault;
+		private const ArrayOffsetType _stringOffsetTypeDefault = ArrayOffsetType.UINT32;
+		private ArrayOffsetType? _stringOffsetType = _stringOffsetTypeDefault;
 		
 		private Int32? _stringOffsets;
 		
@@ -389,13 +389,13 @@ namespace SharpGLTF.Schema2
 		protected override void SerializeProperties(Utf8JsonWriter writer)
 		{
 			base.SerializeProperties(writer);
-			SerializePropertyEnumSymbol<StringOffsets>(writer, "arrayOffsetType", _arrayOffsetType, _arrayOffsetTypeDefault);
+			SerializePropertyEnumSymbol<ArrayOffsetType>(writer, "arrayOffsetType", _arrayOffsetType, _arrayOffsetTypeDefault);
 			SerializeProperty(writer, "arrayOffsets", _arrayOffsets);
 			SerializeProperty(writer, "max", _max);
 			SerializeProperty(writer, "min", _min);
 			SerializeProperty(writer, "offset", _offset);
 			SerializeProperty(writer, "scale", _scale);
-			SerializePropertyEnumSymbol<StringOffsets>(writer, "stringOffsetType", _stringOffsetType, _stringOffsetTypeDefault);
+			SerializePropertyEnumSymbol<ArrayOffsetType>(writer, "stringOffsetType", _stringOffsetType, _stringOffsetTypeDefault);
 			SerializeProperty(writer, "stringOffsets", _stringOffsets);
 			SerializeProperty(writer, "values", _values);
 		}
@@ -404,13 +404,13 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "arrayOffsetType": _arrayOffsetType = DeserializePropertyValue<StringOffsets>(ref reader); break;
+				case "arrayOffsetType": _arrayOffsetType = DeserializePropertyValue<ArrayOffsetType>(ref reader); break;
 				case "arrayOffsets": _arrayOffsets = DeserializePropertyValue<Int32?>(ref reader); break;
 				case "max": _max = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
 				case "min": _min = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
 				case "offset": _offset = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
 				case "scale": _scale = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "stringOffsetType": _stringOffsetType = DeserializePropertyValue<StringOffsets>(ref reader); break;
+				case "stringOffsetType": _stringOffsetType = DeserializePropertyValue<ArrayOffsetType>(ref reader); break;
 				case "stringOffsets": _stringOffsets = DeserializePropertyValue<Int32?>(ref reader); break;
 				case "values": _values = DeserializePropertyValue<Int32>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;

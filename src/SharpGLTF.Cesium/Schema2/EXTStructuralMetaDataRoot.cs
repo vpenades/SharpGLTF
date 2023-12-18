@@ -2,6 +2,7 @@
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace SharpGLTF.Schema2
 {
@@ -89,9 +90,17 @@ namespace SharpGLTF.Schema2
 
             if (CreateArrayOffsets)
             {
-                var offsets = BinaryTable.GetOffsets(values);
-                int logicalIndexOffsets = GetBufferView(model, offsets);
+                var arrayOffsets = BinaryTable.GetArrayOffsets(values);
+                int logicalIndexOffsets = GetBufferView(model, arrayOffsets);
                 propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
+
+                if(typeof(T) == typeof(string))
+                {
+                    var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string),CultureInfo.InvariantCulture)));
+                    var stringOffsets = BinaryTable.GetStringOffsets(stringValues);
+                    int offsets = GetBufferView(model, stringOffsets);
+                    propertyTableProperty.StringOffsets = offsets;
+                }
             }
             return propertyTableProperty;
         }
@@ -463,6 +472,12 @@ namespace SharpGLTF.Schema2
         {
             get { return _arrayOffsets; }
             set { _arrayOffsets = value; }
+        }
+
+        public int? StringOffsets
+        {
+            get { return _stringOffsets; }
+            set { _stringOffsets = value; }
         }
     }
 }

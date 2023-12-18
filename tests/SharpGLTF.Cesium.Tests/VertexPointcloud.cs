@@ -54,12 +54,12 @@ namespace SharpGLTF
             throw new NotImplementedException();
         }
 
-        public bool TryGetCustomAttribute(string attribute, out object value)
+        public bool TryGetCustomAttribute(string attributeName, out object value)
         {
-            if (attribute == INTENSITYATTRIBUTENAME) {
+            if (attributeName == INTENSITYATTRIBUTENAME) {
                 value = Intensity; return true;
             }
-            else if(attribute == CLASSIFICATIONATTRIBUTENAME)
+            else if(attributeName == CLASSIFICATIONATTRIBUTENAME)
             {
                 value = Classification; return true;
             }

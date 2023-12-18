@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SharpGLTF
 {
@@ -24,8 +25,8 @@ namespace SharpGLTF
             
             if (typeof(T) == typeof(string))
             {
-                // todo: implement string type
-                throw new NotImplementedException();
+                var res = string.Join("", values);
+                return Encoding.UTF8.GetBytes(res);
             }
             else if (typeof(T).IsPrimitive)
             {
@@ -50,14 +51,46 @@ namespace SharpGLTF
             }
         }
 
-        public static List<int> GetOffsets<T>(List<List<T>> values)
+        public static List<int> GetStringOffsets(List<string> values)
         {
             var offsets = new List<int>() { 0 };
             foreach (var value in values)
             {
-                var length = GetBytes(value).Length;
+                var length = Encoding.UTF8.GetBytes(value).Length;
+                offsets.Add(offsets.Last() + length);
+            }
 
-                offsets.Add(offsets.Last() + (int)length);
+            return offsets;
+        }
+
+
+        public static List<int> GetStringOffsets(List<List<string>> values)
+        {
+            var offsets = new List<int>() {};
+            foreach (var arr in values)
+            {
+                var arrOffsets = GetStringOffsets(arr);
+                var last = offsets.LastOrDefault();
+                foreach (var offset in arrOffsets)
+                {
+                    if(!offsets.Contains(last + offset))
+                    {
+                        offsets.Add(last + offset);
+                    }
+                }
+            }
+
+            return offsets;
+        }
+
+
+        public static List<int> GetArrayOffsets<T>(List<List<T>> values)
+        {
+            var offsets = new List<int>() { 0 };
+            foreach (var value in values)
+            {
+                offsets.Add(offsets.Last() + value.Count);
+
             }
             return offsets;
         }

@@ -30,7 +30,7 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("BOOLEAN-ENUM-MAT2-MAT3-MAT4-SCALAR-STRING-VEC2-VEC3-VEC4", "ElementType");
             newEmitter.SetRuntimeName("FLOAT32-FLOAT64-INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "DataType");
             newEmitter.SetRuntimeName("INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "IntegerType");
-            newEmitter.SetRuntimeName("UINT16-UINT32-UINT64-UINT8", "StringOffsets");
+            newEmitter.SetRuntimeName("UINT16-UINT32-UINT64-UINT8", "ArrayOffsetType");
         }
 
         public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()

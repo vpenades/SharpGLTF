@@ -69,6 +69,14 @@ namespace SharpGLTF.Cesium
 
             exampleMetadataClass.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", fixedLengthBooleanProperty);
 
+
+            var variableLengthStringArrayProperty = new ClassProperty();
+            variableLengthStringArrayProperty.Name = "Example variable-length ARRAY STRING property";
+            variableLengthStringArrayProperty.Description = "An example property, with type ARRAY, with component type STRING, and variable length";
+            variableLengthStringArrayProperty.Type = ElementType.STRING;
+            variableLengthStringArrayProperty.Array = true;
+            exampleMetadataClass.Properties.Add("example_variable_length_ARRAY_STRING", variableLengthStringArrayProperty);
+
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
             var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
@@ -87,6 +95,15 @@ namespace SharpGLTF.Cesium
             };
             var propertyBooleansList = model.GetArrayPropertyTableProperty(booleansList, false);
             examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", propertyBooleansList);
+
+            var strings = new List<string>() { "Example string 1", "Example string 2", "Example string 3" };
+            var stringsList = new List<List<string>>()
+            {
+                strings
+            };
+
+            var propertyStringsList = model.GetArrayPropertyTableProperty(stringsList);
+            examplePropertyTable.Properties.Add("example_variable_length_ARRAY_STRING", propertyStringsList);
 
             // todo add more complex type properties
 
