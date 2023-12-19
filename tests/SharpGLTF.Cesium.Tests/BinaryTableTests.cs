@@ -8,6 +8,16 @@ namespace SharpGLTF
     public class BinaryTableTests
     {
         [Test]
+        public void ConvertListofListofIntToBytes()
+        {
+            var values = new List<List<int>>();
+            values.Add(new List<int>() { 0, 1 });
+            values.Add(new List<int>() { 2, 3 });
+            var bytes = BinaryTable.GetBytesForArray(values);
+            Assert.That(bytes.Count, Is.EqualTo(BinaryTable.GetSize<int>() * 4));
+        }
+
+        [Test]
         public void ConvertVector2ToBytes()
         {
             var values = new List<System.Numerics.Vector2>();
@@ -90,19 +100,20 @@ namespace SharpGLTF
             bytes = BinaryTable.GetBytes(GetTestArray<int>());
             Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<int>() * 2));
             
-            //bytes = BinaryTable.GetBytes(new List<string>() { "a", "b" });
-            //Assert.That(bytes.Length, Is.EqualTo(2));
+            bytes = BinaryTable.GetBytes(new List<string>() { "a", "b" });
+            Assert.That(bytes.Length, Is.EqualTo(2));
 
             bytes  = BinaryTable.GetBytes(new List<bool>() { true, false });
             Assert.That(bytes.Length, Is.EqualTo(1));
-            // create a bit arrat frin the byte array
+            
             var bits = new System.Collections.BitArray(bytes);
             Assert.That(bits[0] == true);
             Assert.That(bits[1] == false);
 
-            var ints = new List<List<int>>();
-            ints.Add(new List<int>() { 0, 1 });
-            Assert.Throws<NotImplementedException>(() => BinaryTable.GetBytes(ints));
+            // test exception for datetime
+            var dates = new List<DateTime>();
+            dates.Add(new DateTime());
+            Assert.Throws<NotImplementedException>(() => BinaryTable.GetBytes(dates));
         }
 
         private static List<T> GetTestArray<T>()

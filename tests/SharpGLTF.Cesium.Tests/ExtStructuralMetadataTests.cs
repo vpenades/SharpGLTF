@@ -169,7 +169,7 @@ namespace SharpGLTF.Cesium
             exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueB", Value = 1 });
             exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueC", Value = 2 });
 
-            schema.Enums.Add("exampleEnumType1", exampleEnum);
+            schema.Enums.Add("exampleEnumType", exampleEnum);
 
             // property tables
 

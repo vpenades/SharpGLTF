@@ -14,6 +14,19 @@ namespace SharpGLTF
     /// </summary>
     public static class BinaryTable
     {
+        public static List<byte> GetBytesForArray<T>(List<List<T>> values)
+        {
+            var bytes = new List<byte>();
+            foreach (var value in values)
+            {
+                var b = GetBytes(value);
+                bytes.AddRange(b);
+            }
+
+            return bytes;
+        }
+
+
         /// <summary>
         /// Converts a list of primitive types into a byte array
         /// </summary>
