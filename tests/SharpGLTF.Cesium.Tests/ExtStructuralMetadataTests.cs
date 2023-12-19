@@ -57,7 +57,7 @@ namespace SharpGLTF.Cesium
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\SimplePropertyTexture\SimplePropertyTexture1.gltf");
+            // model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\SimplePropertyTexture\SimplePropertyTexture1.gltf");
 
             var schema = new StructuralMetadataSchema();
 
