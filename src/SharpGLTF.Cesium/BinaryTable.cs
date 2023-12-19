@@ -41,6 +41,10 @@ namespace SharpGLTF
             {
                 return Vector4ToBytes(values);
             }
+            else if(typeof(T) == typeof(Matrix4x4))
+            {
+                return Matrix4x4ToBytes(values);
+            }
             else if (typeof(T).IsPrimitive)
             {
                 if (typeof(T) == typeof(bool))
@@ -58,10 +62,41 @@ namespace SharpGLTF
             }
             else
             {
-                // other types (like mat2, mat3, mat4) are not implemented
+                // other types (like datetime, mat2, mat3) are not implemented
                 // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#binary-table-format
                 throw new NotImplementedException();
             }
+        }
+
+        private static byte[] Matrix4x4ToBytes<T>(IReadOnlyList<T> values)
+        {
+            var result = new byte[values.Count * 64];
+
+            for (int i = 0; i < values.Count; i++)
+            {
+                var mat = (Matrix4x4)(object)values[i];
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M11), 0, result, i * 64, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M12), 0, result, i * 64 + 4, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M13), 0, result, i * 64 + 8, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M14), 0, result, i * 64 + 12, 4);
+
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M21), 0, result, i * 64 + 16, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M22), 0, result, i * 64 + 20, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M23), 0, result, i * 64 + 24, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M24), 0, result, i * 64 + 28, 4);
+
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M31), 0, result, i * 64 + 32, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M32), 0, result, i * 64 + 36, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M33), 0, result, i * 64 + 40, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M34), 0, result, i * 64 + 44, 4);
+
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M41), 0, result, i * 64 + 48, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M42), 0, result, i * 64 + 52, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M43), 0, result, i * 64 + 56, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(mat.M44), 0, result, i * 64 + 60, 4);
+            }
+
+            return result;
         }
 
         private static byte[] Vector2ToBytes<T>(IReadOnlyList<T> values)

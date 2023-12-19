@@ -38,6 +38,21 @@ namespace SharpGLTF
         }
 
         [Test]
+        public void ConvertMatrix4x4ToBytes()
+        {
+            // create list of identity matrices
+            var values = new List<System.Numerics.Matrix4x4>();
+            values.Add(System.Numerics.Matrix4x4.Identity);
+
+            // convert to bytes
+            var bytes = BinaryTable.GetBytes(values);
+
+            // check size
+            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<System.Numerics.Matrix4x4>()));
+
+        }
+
+        [Test]
         public void TestGetArrayOffset()
         {
             // arrange

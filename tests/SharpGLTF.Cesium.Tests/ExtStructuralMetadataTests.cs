@@ -2,6 +2,7 @@
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
+using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
@@ -59,6 +60,14 @@ namespace SharpGLTF.Cesium
 
             exampleMetadataClass.Properties.Add("example_VEC3_FLOAT32", vector3Property);
 
+            var matrix4x4Property = new ClassProperty();
+            matrix4x4Property.Name = "Example MAT4 FLOAT32 property";
+            matrix4x4Property.Description = "An example property, with type MAT4, with component type FLOAT32";
+            matrix4x4Property.Type = ElementType.MAT4;
+            matrix4x4Property.ComponentType = DataType.FLOAT32;
+
+            exampleMetadataClass.Properties.Add("example_MAT4_FLOAT32", matrix4x4Property);
+
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
             var vector3List = new List<Vector3>() { new Vector3(3, 3.0999999046325684f, 3.200000047683716f) };
@@ -69,6 +78,12 @@ namespace SharpGLTF.Cesium
 
             examplePropertyTable.Properties.Add("example_VEC3_FLOAT32", vector3PropertyTableProperty);
 
+            var matrix4x4List = new List<Matrix4x4>() { Matrix4x4.Identity };
+
+            var matrix4x4PropertyTableProperty = model.GetPropertyTableProperty(matrix4x4List);
+
+            examplePropertyTable.Properties.Add("example_MAT4_FLOAT32", matrix4x4PropertyTableProperty);
+            
             model.SetPropertyTable(examplePropertyTable, schema);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
