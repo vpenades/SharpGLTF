@@ -51,6 +51,15 @@ namespace SharpGLTF.Schema2
         {
             if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
 
+            schema.Switch(
+                metadataschema =>
+                    CheckSchema(metadataschema),
+                Uri =>
+                {
+                    // do not check here, because schema is not loaded
+                }
+                );
+
             // todo add check if propertyTable.Class is in schema.Classes
             foreach (var propertyTable in propertyTables)
             {
@@ -59,8 +68,8 @@ namespace SharpGLTF.Schema2
                 Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
 
                 schema.Switch(
-                    StructuralMetadataSchema =>
-                        CheckConsistency(StructuralMetadataSchema, propertyTable),
+                    metadataschema =>
+                        CheckConsistency(metadataschema, propertyTable),
                     Uri =>
                     {
                         // do not check here, because schema is not loaded
@@ -73,13 +82,32 @@ namespace SharpGLTF.Schema2
             ext.AddSchema(schema);
         }
 
-        private static void CheckConsistency(StructuralMetadataSchema StructuralMetadataSchema, PropertyTable propertyTable)
+        private static void CheckSchema(StructuralMetadataSchema schema)
         {
-            Guard.IsTrue(StructuralMetadataSchema.Classes.ContainsKey(propertyTable.Class), nameof(propertyTable.Class), $"Class {propertyTable.Class} must be defined in schema");
+            // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
+            foreach(var @class in schema.Classes)
+            {
+                foreach(var property in @class.Value.Properties)
+                {
+                    if(property.Value.Type == ElementType.ENUM)
+                    {
+                        Guard.IsTrue(schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
+                    }
+                }
+            }
+        }
+
+        private static void CheckConsistency(StructuralMetadataSchema schema, PropertyTable propertyTable)
+        {
+            Guard.IsTrue(schema.Classes.ContainsKey(propertyTable.Class), nameof(propertyTable.Class), $"Class {propertyTable.Class} must be defined in schema");
             foreach (var property in propertyTable.Properties)
             {
-                Guard.IsTrue(StructuralMetadataSchema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
+                Guard.IsTrue(schema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
             }
+
+            // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
+            // foreach(var )
+
         }
 
         public static PropertyTableProperty GetArrayPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values, bool CreateArrayOffsets = true)

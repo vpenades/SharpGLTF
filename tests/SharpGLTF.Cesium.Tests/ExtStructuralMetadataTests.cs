@@ -50,6 +50,8 @@ namespace SharpGLTF.Cesium
             exampleMetadataClass.Name = "Example metadata class A";
             exampleMetadataClass.Description = "First example metadata class";
 
+            // class properties
+            
             var uint8ArrayProperty = new ClassProperty();
             uint8ArrayProperty.Name = "Example variable-length ARRAY normalized INT8 property";
             uint8ArrayProperty.Description = "An example property, with type ARRAY, with component type UINT8, normalized, and variable length";
@@ -69,7 +71,6 @@ namespace SharpGLTF.Cesium
 
             exampleMetadataClass.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", fixedLengthBooleanProperty);
 
-
             var variableLengthStringArrayProperty = new ClassProperty();
             variableLengthStringArrayProperty.Name = "Example variable-length ARRAY STRING property";
             variableLengthStringArrayProperty.Description = "An example property, with type ARRAY, with component type STRING, and variable length";
@@ -77,35 +78,59 @@ namespace SharpGLTF.Cesium
             variableLengthStringArrayProperty.Array = true;
             exampleMetadataClass.Properties.Add("example_variable_length_ARRAY_STRING", variableLengthStringArrayProperty);
 
+            var fixed_length_ARRAY_ENUM = new ClassProperty();
+            fixed_length_ARRAY_ENUM.Name = "Example fixed-length ARRAY ENUM property";
+            fixed_length_ARRAY_ENUM.Description = "An example property, with type ARRAY, with component type ENUM, and fixed length";
+            fixed_length_ARRAY_ENUM.Type = ElementType.ENUM;
+            fixed_length_ARRAY_ENUM.Array = true;
+            fixed_length_ARRAY_ENUM.Count = 2;
+            fixed_length_ARRAY_ENUM.EnumType = "exampleEnumType";
+
+            exampleMetadataClass.Properties.Add("example_fixed_length_ARRAY_ENUM", fixed_length_ARRAY_ENUM);
+
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
+            // enums
+
+            var exampleEnum = new StructuralMetadataEnum();
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueA", Value = 0 });
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueB", Value = 1 });
+            exampleEnum.Values.Add(new EnumValue() { Name = "ExampleEnumValueC", Value = 2 });
+
+            schema.Enums.Add("exampleEnumType1", exampleEnum);
+
+            // property tables
+
             var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
-            var list0 = new List<byte>() { 0, 1, 2, 3, 4, 5, 6, 7 };
             var list2 = new List<List<byte>>() {
-                list0
+                new() { 0, 1, 2, 3, 4, 5, 6, 7 }
             };
 
             var property = model.GetArrayPropertyTableProperty(list2);
             examplePropertyTable.Properties.Add("example_variable_length_ARRAY_normalized_UINT8", property);
 
-            var booleans = new List<bool>() { true, false, true, false };
             var booleansList = new List<List<bool>>()
             {
-                booleans
+                new() { true, false, true, false }
             };
             var propertyBooleansList = model.GetArrayPropertyTableProperty(booleansList, false);
             examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_BOOLEAN", propertyBooleansList);
 
-            var strings = new List<string>() { "Example string 1", "Example string 2", "Example string 3" };
             var stringsList = new List<List<string>>()
             {
-                strings
+                new() { "Example string 1", "Example string 2", "Example string 3" }
             };
 
             var propertyStringsList = model.GetArrayPropertyTableProperty(stringsList);
             examplePropertyTable.Properties.Add("example_variable_length_ARRAY_STRING", propertyStringsList);
 
-            // todo add more complex type properties
+            var enumsList = new List<List<int>>()
+            {
+                new() { 0, 1 }
+            };
+
+            var enumsProperty = model.GetArrayPropertyTableProperty(enumsList, false);
+            examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_ENUM", enumsProperty);
 
             model.SetPropertyTable(examplePropertyTable, schema);
 
