@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 using SharpGLTF.Transforms;
@@ -77,6 +78,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 4 weights.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexJoints4 : IVertexSkinning, IEquatable<VertexJoints4>
     {
@@ -205,6 +209,9 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 8 weights.
     /// </summary>
+    #if NET6_0_OR_GREATER
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
+    #endif
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexJoints8 : IVertexSkinning, IEquatable<VertexJoints8>
     {

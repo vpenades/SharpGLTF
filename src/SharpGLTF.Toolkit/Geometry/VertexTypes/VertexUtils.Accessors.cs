@@ -103,6 +103,10 @@ namespace SharpGLTF.Geometry.VertexTypes
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
 
+            Guard.HasDynamicallyAccessedMembers(tvg, false, false, false, true, nameof(firstVertex));
+            Guard.HasDynamicallyAccessedMembers(tvm, false, false, false, true, nameof(firstVertex));
+            Guard.HasDynamicallyAccessedMembers(tvs, false, false, false, true, nameof(firstVertex));
+
             var attributes = new List<MemoryAccessInfo>();
 
             foreach (var finfo in tvg.GetFields())

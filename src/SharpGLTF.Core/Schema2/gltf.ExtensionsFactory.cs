@@ -101,10 +101,9 @@ namespace SharpGLTF.Schema2
 
             var (name, parentType, extType) = _Extensions.FirstOrDefault(item => item.Name == extensionName && item.ParentType.IsAssignableFrom(ptype));
 
-            if (name == null) return null;
+            if (name == null) return null;                        
 
-            // Instance creation on AOT compiled binaries depends on classes defining:
-            // [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
+            Guard.HasDynamicallyAccessedMembers(extType, true, false, false, false, nameof(extensionName));
 
             var instance = Activator.CreateInstance
                 (
