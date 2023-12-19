@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -22,15 +23,27 @@ namespace SharpGLTF
         public static byte[] GetBytes<T>(IReadOnlyList<T> values)
         {
             Guard.IsTrue(values.Count > 0, nameof(values), "values must have at least one element");
-            
+
             if (typeof(T) == typeof(string))
             {
                 var res = string.Join("", values);
                 return Encoding.UTF8.GetBytes(res);
             }
+            else if (typeof(T) == typeof(Vector2))
+            {
+                return Vector2ToBytes(values);
+            }
+            else if (typeof(T) == typeof(Vector3))
+            {
+                return Vector3ToBytes(values);
+            }
+            else if (typeof(T) == typeof(Vector4))
+            {
+                return Vector4ToBytes(values);
+            }
             else if (typeof(T).IsPrimitive)
             {
-                if(typeof(T) == typeof(bool))
+                if (typeof(T) == typeof(bool))
                 {
                     var bits = new BitArray(values.Cast<bool>().ToArray());
                     byte[] ret = new byte[(bits.Length - 1) / 8 + 1];
@@ -45,10 +58,49 @@ namespace SharpGLTF
             }
             else
             {
-                // other types (like enum, mat2, mat3, mat4, vec2, vec3, vec4, array (fixed length, variable length)) are not implemented
+                // other types (like mat2, mat3, mat4) are not implemented
                 // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#binary-table-format
                 throw new NotImplementedException();
             }
+        }
+
+        private static byte[] Vector2ToBytes<T>(IReadOnlyList<T> values)
+        {
+            var result = new byte[values.Count * 8];
+            for (int i = 0; i < values.Count; i++)
+            {
+                var vec = (Vector2)(object)values[i];
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.X), 0, result, i * 8, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.Y), 0, result, i * 8 + 4, 4);
+            }
+            return result;
+        }
+
+        private static byte[] Vector3ToBytes<T>(IReadOnlyList<T> values)
+        {
+            var result = new byte[values.Count * 12];
+            for (int i = 0; i < values.Count; i++)
+            {
+                var vec = (Vector3)(object)values[i];
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.X), 0, result, i * 12, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.Y), 0, result, i * 12 + 4, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.Z), 0, result, i * 12 + 8, 4);
+            }
+            return result;
+        }
+
+        private static byte[] Vector4ToBytes<T>(IReadOnlyList<T> values)
+        {
+            var result = new byte[values.Count * 16];
+            for (int i = 0; i < values.Count; i++)
+            {
+                var vec = (Vector4)(object)values[i];
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.X), 0, result, i * 16, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.Y), 0, result, i * 16 + 4, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.Z), 0, result, i * 16 + 8, 4);
+                Buffer.BlockCopy(BitConverter.GetBytes(vec.W), 0, result, i * 16 + 12, 4);
+            }
+            return result;
         }
 
         public static List<int> GetStringOffsets(List<string> values)

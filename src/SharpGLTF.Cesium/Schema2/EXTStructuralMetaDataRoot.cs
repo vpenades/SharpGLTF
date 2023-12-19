@@ -104,10 +104,6 @@ namespace SharpGLTF.Schema2
             {
                 Guard.IsTrue(schema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
             }
-
-            // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
-            // foreach(var )
-
         }
 
         public static PropertyTableProperty GetArrayPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values, bool CreateArrayOffsets = true)
@@ -434,7 +430,6 @@ namespace SharpGLTF.Schema2
             set { _normalized = value; }
         }
 
-        // add array property
         public bool? Array
         {
             get { return _array; }
@@ -447,7 +442,6 @@ namespace SharpGLTF.Schema2
             get { return _count; }
             set { _count = value; }
         }
-
     }
 
     public partial class PropertyTable

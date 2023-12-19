@@ -7,6 +7,35 @@ namespace SharpGLTF
 {
     public class BinaryTableTests
     {
+        [Test]
+        public void ConvertVector2ToBytes()
+        {
+            var values = new List<System.Numerics.Vector2>();
+            values.Add(new System.Numerics.Vector2(0, 1));
+            values.Add(new System.Numerics.Vector2(2, 3));
+            var bytes = BinaryTable.GetBytes(values);
+            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<System.Numerics.Vector2>() * 2));
+        }
+
+        [Test]
+        public void ConvertVector3ToBytes()
+        {
+            var values = new List<System.Numerics.Vector3>();
+            values.Add(new System.Numerics.Vector3(0, 1, 2));
+            values.Add(new System.Numerics.Vector3(3, 4, 5));
+            var bytes = BinaryTable.GetBytes(values);
+            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<System.Numerics.Vector3>() * 2));
+        }
+
+        [Test]
+        public void ConvertVector4ToBytes()
+        {
+            var values = new List<System.Numerics.Vector4>();
+            values.Add(new System.Numerics.Vector4(0, 1, 2, 3));
+            values.Add(new System.Numerics.Vector4(4, 5, 6, 7));
+            var bytes = BinaryTable.GetBytes(values);
+            Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<System.Numerics.Vector4>() * 2));
+        }
 
         [Test]
         public void TestGetArrayOffset()

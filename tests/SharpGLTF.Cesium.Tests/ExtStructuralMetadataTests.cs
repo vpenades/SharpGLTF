@@ -20,8 +20,65 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+        [Test(Description = "ext_structural_metadata with FeatureIdAttributeAndPropertyTable")]
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/FeatureIdAttributeAndPropertyTable
+        public void FeatureIdAndPropertyTableTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+            var mesh = new MeshBuilder<VertexPosition, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            // All the vertices in the triangle have the same feature ID
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-1, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 0);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), 0);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var model = scene.ToGltf2();
+
+            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
+            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
+
+            var schema = new StructuralMetadataSchema();
+            schema.Id = "FeatureIdAttributeAndPropertyTableSchema";
+
+            var exampleMetadataClass = new StructuralMetadataClass();
+            exampleMetadataClass.Name = "Example metadata class";
+            exampleMetadataClass.Description = "An example metadata class";
+
+            var vector3Property = new ClassProperty();
+            vector3Property.Name = "Example VEC3 FLOAT32 property";
+            vector3Property.Description = "An example property, with type VEC3, with component type FLOAT32";
+            vector3Property.Type = ElementType.VEC3;
+            vector3Property.ComponentType = DataType.FLOAT32;
+
+            exampleMetadataClass.Properties.Add("example_VEC3_FLOAT32", vector3Property);
+
+            schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
+
+            var vector3List = new List<Vector3>() { new Vector3(3, 3.0999999046325684f, 3.200000047683716f) };
+
+            var vector3PropertyTableProperty = model.GetPropertyTableProperty(vector3List);
+
+            var examplePropertyTable = new PropertyTable("exampleMetadataClass", 1, "Example property table");
+
+            examplePropertyTable.Properties.Add("example_VEC3_FLOAT32", vector3PropertyTableProperty);
+
+            model.SetPropertyTable(examplePropertyTable, schema);
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.plotly");
+        }
+
         [Test(Description = "ext_structural_metadata with complex types")]
-        // sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/ComplexTypes/ComplexTypes.gltf
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/ComplexTypes/
         public void ComplexTypesTest()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -141,7 +198,7 @@ namespace SharpGLTF.Cesium
         }
 
         [Test(Description = "ext_structural_metadata with multiple classes")]
-        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/MultipleClasses.gltf
+        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/
         public void MultipleClassesTest()
         {
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
@@ -194,6 +251,55 @@ namespace SharpGLTF.Cesium
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.plotly");
         }
+
+        [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
+        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/
+
+        public void CreatePointCloudWithCustomAttributesTest()
+        {
+            var material = new MaterialBuilder("material1").WithUnlitShader();
+            var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
+            var pointCloud = mesh.UsePrimitive(material, 1);
+            var redColor = new Vector4(1f, 0f, 0f, 1f);
+            var rand = new Random();
+            for (var x = -10; x < 10; x++)
+            {
+                for (var y = -10; y < 10; y++)
+                {
+                    for (var z = -10; z < 10; z++)
+                    {
+                        // intensity values is based on x-axis values
+                        // classification of points is 0 or 1 (random)
+                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, rand.Next(0, 2));
+
+                        pointCloud.AddPoint(vt0);
+                    }
+                }
+            }
+            var model = ModelRoot.CreateModel();
+            model.CreateMeshes(mesh);
+
+            // create a scene, a node, and assign the first mesh (the terrain)
+            model.UseScene("Default")
+                .CreateNode().WithMesh(model.LogicalMeshes[0]);
+
+            var propertyAttribute = new Schema2.PropertyAttribute();
+            propertyAttribute.Class = "exampleMetadataClass";
+            var intensityProperty = new PropertyAttributeProperty();
+            intensityProperty.Attribute = "_INTENSITY";
+            var classificationProperty = new PropertyAttributeProperty();
+            classificationProperty.Attribute = "_CLASSIFICATION";
+            propertyAttribute.Properties["intensity"] = intensityProperty;
+            propertyAttribute.Properties["classification"] = classificationProperty;
+
+            var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);
+            model.SetPropertyAttribute(propertyAttribute, schemaUri);
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");
+        }
+
 
         private static PropertyTable GetFirstPropertyTable(ModelRoot model)
         {
@@ -263,55 +369,6 @@ namespace SharpGLTF.Cesium
             classA.Properties.Add("example_INT64", int64Property);
             return classA;
         }
-
-        [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
-        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/PropertyAttributesPointCloudHouse.gltf
-
-        public void CreatePointCloudWithCustomAttributesTest()
-        {
-            var material = new MaterialBuilder("material1").WithUnlitShader();
-            var mesh = new MeshBuilder<VertexPosition, VertexPointcloud, VertexEmpty>("mesh");
-            var pointCloud = mesh.UsePrimitive(material, 1);
-            var redColor = new Vector4(1f, 0f, 0f, 1f);
-            var rand = new Random();
-            for (var x = -10; x < 10; x++)
-            {
-                for (var y = -10; y < 10; y++)
-                {
-                    for (var z = -10; z < 10; z++)
-                    {
-                        // intensity values is based on x-axis values
-                        // classification of points is 0 or 1 (random)
-                        var vt0 = VertexBuilder.GetVertexPointcloud(new Vector3(x, y, z), redColor, x, rand.Next(0, 2));
-
-                        pointCloud.AddPoint(vt0);
-                    }
-                }
-            }
-            var model = ModelRoot.CreateModel();
-            model.CreateMeshes(mesh);
-
-            // create a scene, a node, and assign the first mesh (the terrain)
-            model.UseScene("Default")
-                .CreateNode().WithMesh(model.LogicalMeshes[0]);
-
-            var propertyAttribute = new Schema2.PropertyAttribute();
-            propertyAttribute.Class = "exampleMetadataClass";
-            var intensityProperty = new PropertyAttributeProperty();
-            intensityProperty.Attribute = "_INTENSITY";
-            var classificationProperty = new PropertyAttributeProperty();
-            classificationProperty.Attribute = "_CLASSIFICATION";
-            propertyAttribute.Properties["intensity"] = intensityProperty;
-            propertyAttribute.Properties["classification"] = classificationProperty;
-
-            var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);
-            model.SetPropertyAttribute(propertyAttribute, schemaUri );
-            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");
-        }
-
 
         [Test(Description = "First test with ext_structural_metadata")]
         public void TriangleWithMetadataTest()
