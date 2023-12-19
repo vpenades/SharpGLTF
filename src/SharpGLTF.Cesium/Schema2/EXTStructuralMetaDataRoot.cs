@@ -84,8 +84,15 @@ namespace SharpGLTF.Schema2
 
         private static void CheckSchema(StructuralMetadataSchema schema)
         {
+            // check schema id is defined and valid
+            if (!String.IsNullOrEmpty(schema.Id))
+            {
+                var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(schema.Id, regex), nameof(schema.Id));
+            }
+
             // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
-            foreach(var @class in schema.Classes)
+            foreach (var @class in schema.Classes)
             {
                 foreach(var property in @class.Value.Properties)
                 {
@@ -134,6 +141,15 @@ namespace SharpGLTF.Schema2
             var propertyTableProperty = new PropertyTableProperty();
             int logicalIndex = GetBufferView(model, values);
             propertyTableProperty.Values = logicalIndex;
+
+            if (typeof(T) == typeof(string))
+            {
+                var stringvalues = values.ConvertAll(x => (string)Convert.ChangeType(x, typeof(string), CultureInfo.InvariantCulture));
+                var stringOffsets = BinaryTable.GetStringOffsets(stringvalues);
+                int offsets = GetBufferView(model, stringOffsets);
+                propertyTableProperty.StringOffsets = offsets;
+            }
+
             return propertyTableProperty;
         }
 

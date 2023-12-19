@@ -2,7 +2,6 @@
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
-using SharpGLTF.Memory;
 using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
@@ -19,6 +18,88 @@ namespace SharpGLTF.Cesium
         public void SetUp()
         {
             CesiumExtensions.RegisterExtensions();
+        }
+
+        [Test(Description = "ext_structural_metadata with Multiple Feature IDs and Properties")]
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/MultipleFeatureIdsAndProperties
+        public void MultipleFeatureIdsandPropertiesTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+            var mesh = new MeshBuilder<VertexPosition, VertexWithFeatureIds, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            // All the vertices in the triangle have the same feature ID
+            var vt0 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 0, 0), new Vector3(0, 0, 1), 0, 1);
+            var vt1 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 0, 1);
+            var vt2 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 1, 0), new Vector3(0, 0, 1), 0, 1);
+
+            var vt3 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 1, 0), new Vector3(0, 0, 1), 1, 0);
+            var vt4 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 0, 0), new Vector3(0, 0, 1), 1, 0);
+            var vt5 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 1, 0);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+            prim.AddTriangle(vt3, vt4, vt5);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+
+            var model = scene.ToGltf2();
+
+            var featureId0 = new MeshExtMeshFeatureID(2, 0, 0);
+            var featureId1 = new MeshExtMeshFeatureID(2, 1, 0);
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0, featureId1 };
+
+            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
+
+            var schema = new StructuralMetadataSchema();
+            schema.Id = "MultipleFeatureIdsAndPropertiesSchema";
+
+            var exampleMetadataClass = new StructuralMetadataClass();
+            exampleMetadataClass.Name = "Example metadata class";
+            exampleMetadataClass.Description = "An example metadata class";
+
+            var vector3Property = new ClassProperty();
+            vector3Property.Name = "Example VEC3 FLOAT32 property";
+            vector3Property.Description = "An example property, with type VEC3, with component type FLOAT32";
+            vector3Property.Type = ElementType.VEC3;
+            vector3Property.ComponentType = DataType.FLOAT32;
+
+            exampleMetadataClass.Properties.Add("example_VEC3_FLOAT32", vector3Property);
+
+            var stringProperty = new ClassProperty();
+            stringProperty.Name = "Example STRING property";
+            stringProperty.Description = "An example property, with type STRING";
+            stringProperty.Type = ElementType.STRING;
+
+            exampleMetadataClass.Properties.Add("example_STRING", stringProperty);
+
+            schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
+
+            var vector3List = new List<Vector3>() { 
+                new Vector3(3, 3.0999999046325684f, 3.200000047683716f),
+                new Vector3(103, 103.0999999046325684f, 103.200000047683716f)
+
+            };
+
+            var vector3PropertyTableProperty = model.GetPropertyTableProperty(vector3List);
+
+            var examplePropertyTable = new PropertyTable("exampleMetadataClass", 2, "Example property table");
+
+            examplePropertyTable.Properties.Add("example_VEC3_FLOAT32", vector3PropertyTableProperty);
+
+            var stringList = new List<string>() { "Rain 🌧", "Thunder ⛈" };
+
+            var stringPropertyTableProperty = model.GetPropertyTableProperty(stringList);
+
+            examplePropertyTable.Properties.Add("example_STRING", stringPropertyTableProperty);
+
+            model.SetPropertyTable(examplePropertyTable, schema);
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.plotly");
         }
 
         [Test(Description = "ext_structural_metadata with FeatureIdAttributeAndPropertyTable")]
@@ -87,9 +168,9 @@ namespace SharpGLTF.Cesium
             model.SetPropertyTable(examplePropertyTable, schema);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.gltf");
-            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.plotly");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.plotly");
         }
 
         [Test(Description = "ext_structural_metadata with complex types")]
@@ -205,6 +286,7 @@ namespace SharpGLTF.Cesium
             examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_ENUM", enumsProperty);
 
             model.SetPropertyTable(examplePropertyTable, schema);
+            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\MultipleFeatureIdsAndProperties\MultipleFeatureIdsAndProperties1.gltf");
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
