@@ -94,9 +94,9 @@ namespace SharpGLTF.Schema2
             // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
             foreach (var @class in schema.Classes)
             {
-                foreach(var property in @class.Value.Properties)
+                foreach (var property in @class.Value.Properties)
                 {
-                    if(property.Value.Type == ElementType.ENUM)
+                    if (property.Value.Type == ElementType.ENUM)
                     {
                         Guard.IsTrue(schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
                     }
@@ -125,9 +125,9 @@ namespace SharpGLTF.Schema2
                 int logicalIndexOffsets = GetBufferView(model, arrayOffsets);
                 propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
 
-                if(typeof(T) == typeof(string))
+                if (typeof(T) == typeof(string))
                 {
-                    var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string),CultureInfo.InvariantCulture)));
+                    var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string), CultureInfo.InvariantCulture)));
                     var stringOffsets = BinaryTable.GetStringOffsets(stringValues);
                     int offsets = GetBufferView(model, stringOffsets);
                     propertyTableProperty.StringOffsets = offsets;
@@ -252,6 +252,8 @@ namespace SharpGLTF.Schema2
 
     public partial class PropertyTextureProperty
     {
+        // todo: how to set index?
+
         //public int Index
         //{
         //    get { return _index; }

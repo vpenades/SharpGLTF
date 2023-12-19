@@ -11,6 +11,8 @@ using System.Numerics;
 
 namespace SharpGLTF.Cesium
 {
+    using VBTexture1 = VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>;
+
     [Category("Toolkit.Scenes")]
     public class ExtStructuralMetadataTests
     {
@@ -19,6 +21,78 @@ namespace SharpGLTF.Cesium
         {
             CesiumExtensions.RegisterExtensions();
         }
+
+        [Test(Description = "ext_structural_metadata with simple property texture")]
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/SimplePropertyTexture
+        public void SimplePropertyTextureTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            // Bitmap of 16*16 pixels, containing FeatureID's (0, 1, 2, 3) in the red channel
+            var img0 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAJElEQVR42mNgYmBgoAQzDLwBgwcwY8FDzIDBDRiR8KgBNDAAAOKBAKByX2jMAAAAAElFTkSuQmCC";
+            var imageBytes = Convert.FromBase64String(img0);
+            var imageBuilder = ImageBuilder.From(imageBytes);
+
+            var material = MaterialBuilder
+                .CreateDefault()
+                .WithMetallicRoughnessShader()
+                .WithBaseColor(imageBuilder, new Vector4(1, 1, 1, 1))
+                .WithDoubleSide(true)
+                .WithAlpha(Materials.AlphaMode.OPAQUE)
+                .WithMetallicRoughness(0, 1);
+
+            var mesh = VBTexture1.CreateCompatibleMesh("mesh");
+            var prim = mesh.UsePrimitive(material);
+            prim.AddTriangle(
+                new VBTexture1(new VertexPosition(0, 0, 0), new Vector2(0, 1)),
+                new VBTexture1(new VertexPosition(1, 0, 0), new Vector2(1, 1)),
+                new VBTexture1(new VertexPosition(0, 1, 0), new Vector2(0, 0)));
+
+            prim.AddTriangle(
+                new VBTexture1(new VertexPosition(1, 0, 0), new Vector2(1, 1)),
+                new VBTexture1(new VertexPosition(1, 1, 0), new Vector2(1, 0)),
+                new VBTexture1(new VertexPosition(0, 1, 0), new Vector2(0, 0)));
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\SimplePropertyTexture\SimplePropertyTexture1.gltf");
+
+            var schema = new StructuralMetadataSchema();
+
+            schema.Id = "SimplePropertyTextureSchema";
+
+            var exampleMetadataClass = new StructuralMetadataClass();
+            exampleMetadataClass.Name = "Building properties";
+
+            var insideTemperatureProperty = new ClassProperty();
+            insideTemperatureProperty.Name = "Inside temperature";
+            insideTemperatureProperty.Type = ElementType.SCALAR;
+            insideTemperatureProperty.ComponentType = DataType.UINT8;
+
+            var outsideTemperatureProperty = new ClassProperty();
+            outsideTemperatureProperty.Name = "Outside temperature";
+            outsideTemperatureProperty.Type = ElementType.SCALAR;
+            outsideTemperatureProperty.ComponentType = DataType.UINT8;
+
+            var insulationProperty = new ClassProperty();
+            insulationProperty.Name = "Insulation Thickness";
+            insulationProperty.Type = ElementType.SCALAR;
+            insulationProperty.ComponentType = DataType.UINT8;
+            insideTemperatureProperty.Normalized = true;
+
+            exampleMetadataClass.Properties.Add("inside_temperature", insideTemperatureProperty);
+            exampleMetadataClass.Properties.Add("outside_temperature", outsideTemperatureProperty);
+            exampleMetadataClass.Properties.Add("insulation_thickness", insulationProperty);
+
+            // todo set propertytexture
+            // var insideTemperaturePropertyTexture = new PropertyTexture();
+            // insideTemperaturePropertyTexture.index = 1
+
+            var propertyTextures = new List<PropertyTexture>() {};
+        }
+
 
         [Test(Description = "ext_structural_metadata with Multiple Feature IDs and Properties")]
         // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/MultipleFeatureIdsAndProperties
@@ -29,11 +103,12 @@ namespace SharpGLTF.Cesium
             var mesh = new MeshBuilder<VertexPosition, VertexWithFeatureIds, VertexEmpty>("mesh");
             var prim = mesh.UsePrimitive(material);
 
-            // All the vertices in the triangle have the same feature ID
+            // first triangle has _feature_id_0 = 0 and _feature_id_1 = 1
             var vt0 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 0, 0), new Vector3(0, 0, 1), 0, 1);
             var vt1 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 0, 1);
             var vt2 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 1, 0), new Vector3(0, 0, 1), 0, 1);
 
+            // second triangle has _feature_id_0 = 1 and _feature_id_1 = 0
             var vt3 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 1, 0), new Vector3(0, 0, 1), 1, 0);
             var vt4 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(0, 0, 0), new Vector3(0, 0, 1), 1, 0);
             var vt5 = VertexBuilder.GetVertexWithFeatureIds(new Vector3(1, 0, 0), new Vector3(0, 0, 1), 1, 0);
@@ -286,7 +361,6 @@ namespace SharpGLTF.Cesium
             examplePropertyTable.Properties.Add("example_fixed_length_ARRAY_ENUM", enumsProperty);
 
             model.SetPropertyTable(examplePropertyTable, schema);
-            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\MultipleFeatureIdsAndProperties\MultipleFeatureIdsAndProperties1.gltf");
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
