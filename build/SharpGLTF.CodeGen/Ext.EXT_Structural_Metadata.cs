@@ -15,7 +15,8 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetaDataRoot");
+            newEmitter.SetRuntimeName("EXT_structural_metadata glTF Mesh Primitive extension", "ExtStructuralMetadataMeshPrimitive");
+            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetadataRoot");
             newEmitter.SetRuntimeName("Property Table in EXT_structural_metadata", "PropertyTable");
             newEmitter.SetRuntimeName("Schema in EXT_structural_metadata", "StructuralMetadataSchema");
             newEmitter.SetRuntimeName("Property Table Property in EXT_structural_metadata", "PropertyTableProperty");

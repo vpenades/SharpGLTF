@@ -34,7 +34,7 @@ namespace SharpGLTF.Schema2
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class EXT_structural_metadataglTFMeshPrimitiveextension : ExtraProperties
+	partial class ExtStructuralMetadataMeshPrimitive : ExtraProperties
 	{
 	
 		private const int _propertyAttributesMinItems = 1;

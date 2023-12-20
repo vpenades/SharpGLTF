@@ -22,6 +22,82 @@ namespace SharpGLTF.Cesium
             CesiumExtensions.RegisterExtensions();
         }
 
+        [Test(Description = "ext_structural_metadata with FeatureId Texture and Property Table")]
+        // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/FeatureIdTextureAndPropertyTable
+        public void FeatureIdTextureAndPropertytableTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            var img0 = "iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAIvklEQVR42u3csW5URxsG4BHBRRoklxROEQlSRCJCKShoXFJZiDSpQEqX2pYii8ZVlDZF7oNcAAURDREdpCEXQKoIlAKFEE3O4s0KoV17zxm8Z+Z8j6zvj6Nfj7Q663k968y8aXd3NxtjYk6a/U9OafDwPN+uFwA8LwA8QJ4XAO/Mw26+6Garm6vd/NbzBfA8X79fGQCXuvll/v1P3XzZ8wXwPF+/X+sjwL/zJBm6BeF5vk6/VgC8nG8nhr4Anufr9GsFwA/d/FzwAnier9OfGgC/d/NdwV8heZ6v158YAH908203/wx8ATzP1+1XBsDsL4hfdfNq4H+H5Hm+fr8yAD6Z/Z/vTZ8XwPN8/d5JQJ53EtAD5HkB4AHyfLwAMMboA5CgPO8jgAfI8wLAA+R5fQDuU/O8PgD3qXleH4D71DyvD8B9ap7XB+A+Nc/rA+B5Xh8Az/P6AHie1wfA87w+AJ7nHQXmeV4A8DyvD8AYow+A53kfAXieFwA8z+sD4HleHwDP8/oAeJ7XB8DzvD4Anuf1AfA8rw+A53l9ADzP6wPgeV4fAM/zjgLzPC8AeJ7XB2CMOaEPIBV88TzfrhcAPC8APECeFwDvfj3p5lI3W91c7eZhzxfA83z1fnUA3O7mx/n333fzdc8XwPN89X51AHzazd/z7//s5vOeL4Dn+er96gD4+JR/P+0F8DxfvV8dAOm9f9/q+QJ4nq/e2wHwvB3Akq/Punk5//6v+V8U+7wAnuer96sD4Jv5Xw///yvi7Z4vgOf56v3qAPh1/pfEj+bp8aTnC+B5vnrvJCDPOwnoAfK8APAAeT5eABhj9AFIUJ73EcAD5HkB4AHyfOAAcJ+a5/UBLE4SuU/N85Pz+gB4PrB3G5DnA3t9ADwf2NsB8LwdwJIv96l5fvJeHwDPB/b6AHg+sHcSkOedBPQAeV4AeIA8Hy8AjDH6AMZLsJQHD+83IN/6RwABIAB4ASAABABfSwBs8j7zkh/sK1dyfvw459evc370KOfLl/stoFB+7PePb9bX0Qew5Af76dOcb906/v7OnePF0GcBhfJjv398s76OPoA1trqz34QlW+hJ+7HfP75ZX8dtwBN+8M+dy/nu3Zzv3Ru2gEL4sd8/vllfRx/Aih/+8+dzfvEi5zdvcr55s/8CCuPHfv/4Zn31O4DZ3LiR8/Pnw7fQk/d+A/IffAewyfvM/gbw4f8G4D4830wfwJIf7GfPjv9T2Oz769dzvn+/3wIK5cd+//hmfR19AEt+sK9dO/5PYbPffA8e5HzxYr8FFMqP/f7xzXonAZ0E5J0EFAACgBcAAkAA8PECwBijD8AOwA6A9xFAAAgAXgAIAAHABw4AfQD6AHh9AGkT95n1AegD4Efx+gD0AfCBvT4AfQC824Bp3PvM+gD0AfCjeH0A+gB4O4A07n1mfwPQB8CP4vUB6APgA3t9APoA+MDeSUAnAXknAQWAAOAFgAAQAHy8ADDG6AOwA7AD4H0EEAACgBcAAkAA8IEDQB+APgBeH0DaxH1mfQD6APhRvD4AfQB8YK8PQB8A7zZgGvc+sz4AfQD8KF4fgD4A3g4gjXuf2d8A9AHwo3h9APoA+MBeH4A+AD6wdxLQSUDeSUABIAB4ASAABAAfLwCMMfoAJCjP+wjgAfK8APAAeT5wALhPzfP6ABYnidyn5vnJ+eQ+Nc/H9cltKp6P65P71Dwf19sB8LwdwJIv96l5fvI+uU/N83F9cp+a5+N6JwF53klAD5DnBYAHyPPxAsAYow9AgvK8jwAeIM8LAA+Q5wMHgPvUPK8PYHGSyH1qnp+c1wfA84G924A8H9jrA+D5wN4OgOftAJZ8uU/N85P3+gB4PrDXB8Dzgb2TgDzvJKAHyPMCwAPk+XgBYIzRByBB+UH+6Oho8NTgfQSwAHgBIAAsAF4ACIDjL/ep+TX9qsV1eHiYt7e3By/gTfnI758+AL7YL1tYBwcHeWdn5+2llCELeJM+8vunD4Av9ssW1oULF/Le3t7gBbxJH/n9cxuQL/bLFtb+/v7bfw5dwJv0kd8/fQB8sT9pgQ1dwJv0kd8/OwD+THYAzQeAPoDkPjW/lp9kAOgDSO5T82v5SQaAPoDkPjW/lp9kAOgDcBKOdxLQUWALgBcAAsAC4AXARAPAGKMPwG9A3g7ARwALgBcAAsAC4AVA4ABwH57XB6APYHGSyH14vkcA6ANI+gD4GF4fQLvebUC+2OsDaNfrA+CLvT6Adr0dAH8mOwB9AK3vANyH5/UBTP790wfAF3t9AO16fQB8sdcH0K53EpB3EtBJQAuAFwACwALgBUC8ADDG6APwG5C3A/ARwALgBYAAsAB4ARA4ANyH5/UB6ANYnCRyH57vEQD6AJI+AD6G1wfQrncbkC/2+gDa9foA+GKvD6BdbwfAn8kOQB9A6zsA9+F5fQCTf//0AfDFXh9Au14fAF/s9QG0650E5J0EdBLQAuAFgACwAHgBEC8AjDH6APwG5O0AfASwAHgBIAAsAF4ABA4A9+F5fQD6ABYnidyH53sEgD6ApA+Aj+H1AbTr3Qbki70+gHa9PgC+2OsDaNfbAfBnsgPQB9D6DsB9eF4fwOTfP30AfLHXB9Cu1wfAF3t9AO16JwF5JwGdBLQAeAEgACwAXgDECwBjjD4AvwF5OwAfASwAXgAIAAuAFwCBA8B9eF4fgD6AxUki9+H5HgGgDyDpA+BjeH0A7Xq3Aflirw+gXa8PgC/2+gDa9XYA/JnsAPQBtL4DcB+e1wcw+fdPHwBf7PUBtOv1AfDFXh9Au95JQN5JQCcBLQBeAAgAC4AXAPECwBijD8BvQN4OwEcAC4AXAALAAuAFQOAAcB+e1wegD2Bxksh9eL5HAOgDSPoA+BheH0C73m1AvtjrA2jX6wPgi70+gHa9HQB/JjsAfQCt7wDch+f1AUz+/dMHwBd7fQDten0AfLHXB9CudxKQdxLQSUALgBcAAsAC4AVAqPfvPyVxz6xUBN7bAAAAAElFTkSuQmCC";
+            var imageBytes0 = Convert.FromBase64String(img0);
+            var imageBuilder0 = ImageBuilder.From(imageBytes0);
+
+            var img1 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAJElEQVR42mNgYmBgoAQzDLwBgwcwY8FDzIDBDRiR8KgBNDAAAOKBAKByX2jMAAAAAElFTkSuQmCC";
+            var imageBytes1 = Convert.FromBase64String(img1);
+            var imageBuilder1 = ImageBuilder.From(imageBytes1);
+
+            var material = MaterialBuilder
+                .CreateDefault()
+                .WithMetallicRoughnessShader()
+                .WithBaseColor(imageBuilder0, new Vector4(1, 1, 1, 1))
+                .WithDoubleSide(true)
+                .WithAlpha(Materials.AlphaMode.OPAQUE)
+                .WithMetallicRoughness(0, 1)
+                .WithSpecularFactor(imageBuilder1, 0);
+            ;
+
+            var mesh = VBTexture1.CreateCompatibleMesh("mesh");
+            var prim = mesh.UsePrimitive(material);
+            prim.AddTriangle(
+                new VBTexture1(new VertexPosition(0, 0, 0), new Vector2(0, 1)),
+                new VBTexture1(new VertexPosition(1, 0, 0), new Vector2(1, 1)),
+                new VBTexture1(new VertexPosition(0, 1, 0), new Vector2(0, 0)));
+
+            prim.AddTriangle(
+                new VBTexture1(new VertexPosition(1, 0, 0), new Vector2(1, 1)),
+                new VBTexture1(new VertexPosition(1, 1, 0), new Vector2(1, 0)),
+                new VBTexture1(new VertexPosition(0, 1, 0), new Vector2(0, 0)));
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            var schema = new StructuralMetadataSchema();
+            schema.Id = "FeatureIdTextureAndPropertyTableSchema";
+
+            var buildingComponentsClass = new StructuralMetadataClass();
+            buildingComponentsClass.Name = "Building components";
+            buildingComponentsClass.Properties.Add("component", new ClassProperty() { Name = "Component", Type = ElementType.STRING });
+            buildingComponentsClass.Properties.Add("yearBuilt", new ClassProperty() { Name = "Year built", Type = ElementType.SCALAR, ComponentType = DataType.INT16 });
+            schema.Classes.Add ("buildingComponents", buildingComponentsClass);
+
+            var propertyTable = new PropertyTable();
+            propertyTable.Name = "Example property table";
+            propertyTable.Class = "buildingComponents";
+            propertyTable.Count = 4;
+
+            var componentProperty = model.GetPropertyTableProperty(new List<string>() { "Wall", "Door", "Roof", "Window" });
+            var yearBuiltProperty = model.GetPropertyTableProperty(new List<Int16>() { 1960, 1996, 1985, 2002});
+            propertyTable.Properties.Add("component", componentProperty);
+            propertyTable.Properties.Add("yearBuilt", yearBuiltProperty);
+
+            model.SetPropertyTable(propertyTable, schema);
+
+            // Set the FeatureIds, pointing to the red channel of the texture
+            var texture = new MeshExtMeshFeatureIDTexture(new List<int>() { 0 }, 1, 0);
+            var featureIdTexture = new MeshExtMeshFeatureID(4, texture: texture, propertyTable: 0);
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureIdTexture };
+            
+            var primitive = model.LogicalMeshes[0].Primitives[0];
+            primitive.SetFeatureIds(featureIds);
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.plotly");
+        }
+
+
         [Test(Description = "ext_structural_metadata with simple property texture")]
         // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/SimplePropertyTexture
         public void SimplePropertyTextureTest()
@@ -29,14 +105,19 @@ namespace SharpGLTF.Cesium
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // Bitmap of 16*16 pixels, containing FeatureID's (0, 1, 2, 3) in the red channel
-            var img0 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAJElEQVR42mNgYmBgoAQzDLwBgwcwY8FDzIDBDRiR8KgBNDAAAOKBAKByX2jMAAAAAElFTkSuQmCC";
-            var imageBytes = Convert.FromBase64String(img0);
-            var imageBuilder = ImageBuilder.From(imageBytes);
+            // var img0 = "AAABAAIAAQADAAIAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAAAAAAAAAACAPwAAAAA=";
+            var img0 = "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";
+            var imageBytes0 = Convert.FromBase64String(img0);
+            var imageBuilder0 = ImageBuilder.From(imageBytes0);
+
+            var img1 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABLUlEQVR42mVSSxbDIAh0GzUxKZrmCF3n/oerIx9pupgHIswAGtblE7bIKN0vqSOyXSOjPLAtktv9sCFxmcXj7EgsFj8zN00yYxrBZZJBRYk2LdC4WCDUfAdab7bpDm1lCyBW+7lpDnyNS34gcTQRltTPbAeEdFjcSQ0X9EOhGPYjhgLA7xh3kjxEEpMj1qQj7iAzAYoPELzYtuwK02M06WywAFDfX1MdJEoOtSZ7Allz1mYmWZDNL0pNF6ezu9jsQJUcNK7qzbWvMdSYQ8Jo7KKK8/uo4dxreHe0/HgF2/IqBen/za+Di69Sf8cZz5jmk+hcuhdd2tWLz8IE5MbFnRWT+yyU5vZJRtAOqlvq6MDeOrstu0UidsoO0Ak9xGwE+67+34salNEBSCxX7Bexg0rbq6TFvwAAAABJRU5ErkJggg==";
+            var imageBytes1 = Convert.FromBase64String(img1);
+            var imageBuilder1 = ImageBuilder.From(imageBytes1);
 
             var material = MaterialBuilder
                 .CreateDefault()
                 .WithMetallicRoughnessShader()
-                .WithBaseColor(imageBuilder, new Vector4(1, 1, 1, 1))
+                .WithBaseColor(imageBuilder0, new Vector4(1, 1, 1, 1))
                 .WithDoubleSide(true)
                 .WithAlpha(Materials.AlphaMode.OPAQUE)
                 .WithMetallicRoughness(0, 1);
@@ -56,8 +137,7 @@ namespace SharpGLTF.Cesium
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
-
-            // model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\SimplePropertyTexture\SimplePropertyTexture1.gltf");
+            model.UseImage(imageBuilder1.Content);
 
             var schema = new StructuralMetadataSchema();
 
@@ -82,17 +162,45 @@ namespace SharpGLTF.Cesium
             insulationProperty.ComponentType = DataType.UINT8;
             insideTemperatureProperty.Normalized = true;
 
-            exampleMetadataClass.Properties.Add("inside_temperature", insideTemperatureProperty);
-            exampleMetadataClass.Properties.Add("outside_temperature", outsideTemperatureProperty);
-            exampleMetadataClass.Properties.Add("insulation_thickness", insulationProperty);
+            exampleMetadataClass.Properties.Add("insideTemperature", insideTemperatureProperty);
+            exampleMetadataClass.Properties.Add("outsideTemperature", outsideTemperatureProperty);
+            exampleMetadataClass.Properties.Add("insulation", insulationProperty);
 
-            // todo set propertytexture
-            // var insideTemperaturePropertyTexture = new PropertyTexture();
-            // insideTemperaturePropertyTexture.index = 1
+            schema.Classes.Add("buildingComponents", exampleMetadataClass);
 
-            var propertyTextures = new List<PropertyTexture>() {};
+            var buildingPropertyTexture = new PropertyTexture();
+            buildingPropertyTexture.Class = "buildingComponents";
+
+            var insideTemperatureTextureProperty = new PropertyTextureProperty();
+            insideTemperatureTextureProperty._LogicalTextureIndex = 1;
+            insideTemperatureTextureProperty.TextureCoordinate = 0;
+            insideTemperatureTextureProperty.Channels = new List<int>() { 0 };
+
+            buildingPropertyTexture.Properties.Add("insideTemperature", insideTemperatureTextureProperty);
+
+            var outsideTemperatureTextureProperty = new PropertyTextureProperty();
+            outsideTemperatureTextureProperty._LogicalTextureIndex = 1;
+            outsideTemperatureTextureProperty.TextureCoordinate = 0;
+            outsideTemperatureTextureProperty.Channels = new List<int>() { 1 };
+
+            buildingPropertyTexture.Properties.Add("outsideTemperature", outsideTemperatureTextureProperty);
+
+            var insulationTextureProperty = new PropertyTextureProperty();
+            insulationTextureProperty._LogicalTextureIndex = 1;
+            insulationTextureProperty.TextureCoordinate = 0;
+            insulationTextureProperty.Channels = new List<int>() { 2 };
+
+            buildingPropertyTexture.Properties.Add("insulation", insulationTextureProperty);
+
+            model.SetPropertyTexture(buildingPropertyTexture, schema);
+            // todo: set the textures on the primitive
+            // model.LogicalMeshes[0].Primitives[0].SetPropertyTextures(new List<uint>() { 0 });
+
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.plotly");
         }
-
 
         [Test(Description = "ext_structural_metadata with Multiple Feature IDs and Properties")]
         // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/MultipleFeatureIdsAndProperties
@@ -241,6 +349,8 @@ namespace SharpGLTF.Cesium
             examplePropertyTable.Properties.Add("example_MAT4_FLOAT32", matrix4x4PropertyTableProperty);
             
             model.SetPropertyTable(examplePropertyTable, schema);
+
+            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\MultipleFeatureIdsAndProperties\MultipleFeatureIdsAndProperties1.gltf");
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");

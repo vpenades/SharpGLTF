@@ -6,33 +6,67 @@ using System.Globalization;
 
 namespace SharpGLTF.Schema2
 {
-    public static class ExtStructuralMetadata
+    public static class ExtStructuralMetadataRoot
     {
-        // sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/SimplePropertyTexture/SimplePropertyTexture.gltf
-        public static void SetPropertyTexture(
-            this ModelRoot modelRoot,
-            PropertyTexture propertyTexture,
-            OneOf<StructuralMetadataSchema, Uri> schema
-            )
-        {
-            if (propertyTexture == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
-
-            var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
-            ext.PropertyTextures.Clear();
-            ext.PropertyTextures.Add(propertyTexture);
-            ext.AddSchema(schema);
-        }
-
         public static void SetPropertyAttribute(
             this ModelRoot modelRoot,
             PropertyAttribute propertyAttribute,
             OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (propertyAttribute == null) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
+            SetPropertyAttributes(modelRoot, new List<PropertyAttribute>() { propertyAttribute }, schema);
+        }
 
-            var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
-            ext.PropertyAttributes.Clear();
-            ext.PropertyAttributes.Add(propertyAttribute);
+        public static void SetPropertyAttributes(
+this ModelRoot modelRoot,
+List<PropertyAttribute> propertyAttributes,
+OneOf<StructuralMetadataSchema, Uri> schema)
+        {
+            if (propertyAttributes == null || propertyAttributes.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
+
+            schema.Switch(
+                metadataschema =>
+                    CheckSchema(metadataschema),
+                Uri =>
+                {
+                    // do not check here, because schema is not loaded
+                }
+                );
+
+            // todo add check propertyAttribute 
+            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
+            ext.PropertyAttributes = propertyAttributes;
+            ext.AddSchema(schema);
+        }
+
+
+        public static void SetPropertyTexture(
+    this ModelRoot modelRoot,
+    PropertyTexture propertyTexture,
+    OneOf<StructuralMetadataSchema, Uri> schema)
+        {
+            SetPropertyTextures(modelRoot, new List<PropertyTexture>() { propertyTexture }, schema);
+        }
+
+
+        public static void SetPropertyTextures(
+    this ModelRoot modelRoot,
+    List<PropertyTexture> propertyTextures,
+    OneOf<StructuralMetadataSchema, Uri> schema)
+        {
+            if (propertyTextures == null || propertyTextures.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
+
+            schema.Switch(
+                metadataschema =>
+                    CheckSchema(metadataschema),
+                Uri =>
+                {
+                    // do not check here, because schema is not loaded
+                }
+                );
+
+            // todo add check propertyTexture 
+            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
+            ext.PropertyTextures = propertyTextures;
             ext.AddSchema(schema);
         }
 
@@ -49,7 +83,7 @@ namespace SharpGLTF.Schema2
             List<PropertyTable> propertyTables,
             OneOf<StructuralMetadataSchema, Uri> schema)
         {
-            if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetaDataRoot>(); return; }
+            if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
 
             schema.Switch(
                 metadataschema =>
@@ -77,7 +111,7 @@ namespace SharpGLTF.Schema2
                     );
             }
 
-            var ext = modelRoot.UseExtension<EXTStructuralMetaDataRoot>();
+            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
             ext.PropertyTables = propertyTables;
             ext.AddSchema(schema);
         }
@@ -170,11 +204,11 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    public partial class EXTStructuralMetaDataRoot
+    public partial class EXTStructuralMetadataRoot
     {
         private ModelRoot modelRoot;
 
-        internal EXTStructuralMetaDataRoot(ModelRoot modelRoot)
+        internal EXTStructuralMetadataRoot(ModelRoot modelRoot)
         {
             this.modelRoot = modelRoot;
             _propertyTables = new List<PropertyTable>();
@@ -252,13 +286,16 @@ namespace SharpGLTF.Schema2
 
     public partial class PropertyTextureProperty
     {
-        // todo: how to set index?
+        public PropertyTextureProperty()
+        {
+            _channels = new List<int>();
+        }
 
-        //public int Index
-        //{
-        //    get { return _index; }
-        //    set { _index = value; }
-        //}
+        public List<int> Channels
+        {
+            get { return _channels; }
+            set { _channels = value; }
+        }
     }
 
     public partial class PropertyAttribute

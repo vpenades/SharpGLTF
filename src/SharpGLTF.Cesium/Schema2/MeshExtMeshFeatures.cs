@@ -38,6 +38,11 @@ namespace SharpGLTF.Schema2
 
     public partial class MeshExtMeshFeatureIDTexture
     {
+        public MeshExtMeshFeatureIDTexture()
+        {
+            _channels = new List<int>();
+        }
+
         public MeshExtMeshFeatureIDTexture(List<int> channels, int? index = null, int? texCoord = null)
         {
             Guard.NotNullOrEmpty(channels, nameof(channels));
