@@ -350,8 +350,6 @@ namespace SharpGLTF.Cesium
             
             model.SetPropertyTable(examplePropertyTable, schema);
 
-            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_3dtiles_samples\samples\1.1\EXT_Structural_Metadata\MultipleFeatureIdsAndProperties\MultipleFeatureIdsAndProperties1.gltf");
-
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.gltf");
