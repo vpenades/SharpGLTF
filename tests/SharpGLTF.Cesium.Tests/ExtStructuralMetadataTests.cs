@@ -120,7 +120,8 @@ namespace SharpGLTF.Cesium
                 .WithBaseColor(imageBuilder0, new Vector4(1, 1, 1, 1))
                 .WithDoubleSide(true)
                 .WithAlpha(Materials.AlphaMode.OPAQUE)
-                .WithMetallicRoughness(0, 1);
+                .WithMetallicRoughness(0, 1)
+                .WithSpecularFactor(imageBuilder1, 0);
 
             var mesh = VBTexture1.CreateCompatibleMesh("mesh");
             var prim = mesh.UsePrimitive(material);
@@ -193,8 +194,6 @@ namespace SharpGLTF.Cesium
             buildingPropertyTexture.Properties.Add("insulation", insulationTextureProperty);
 
             model.SetPropertyTexture(buildingPropertyTexture, schema);
-            // todo: set the textures on the primitive
-            // model.LogicalMeshes[0].Primitives[0].SetPropertyTextures(new List<uint>() { 0 });
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.glb");
