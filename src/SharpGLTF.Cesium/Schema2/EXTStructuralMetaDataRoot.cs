@@ -64,7 +64,25 @@ OneOf<StructuralMetadataSchema, Uri> schema)
                 }
                 );
 
-            // todo add check propertyTexture 
+            foreach(var propertyTexture in propertyTextures)
+            {
+                foreach(var propertyTextureProperty in propertyTexture.Properties)
+                {
+                    var texCoord = propertyTextureProperty.Value.TextureCoordinate;
+                    var channels = propertyTextureProperty.Value.Channels;
+                    var index = propertyTextureProperty.Value._LogicalTextureIndex;
+                    Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
+                    Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
+                    try
+                    {
+                        var texture = modelRoot.LogicalTextures[index];
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        throw new ArgumentOutOfRangeException($"Texture index {index} does not exist");
+                    }
+                }
+            }
             var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
             ext.PropertyTextures = propertyTextures;
             ext.AddSchema(schema);

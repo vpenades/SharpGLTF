@@ -160,8 +160,14 @@ namespace SharpGLTF.Schema2
                 var expectedTexCoordAttribute = $"TEXCOORD_{item.Texture.TextureCoordinate}";
                 Guard.NotNull(primitive.GetVertexAccessor(expectedTexCoordAttribute), expectedTexCoordAttribute);
 
-                var image = primitive.LogicalParent.LogicalParent.LogicalImages[item.Texture.Index];
-                Guard.NotNull(image, "Texture " + nameof(item.Texture.Index));
+                try
+                {
+                    var texture = primitive.LogicalParent.LogicalParent.LogicalTextures[item.Texture.Index];
+                }
+                catch (System.ArgumentOutOfRangeException)
+                {
+                    throw new System.Exception($"Texture index {item.Texture.Index} does not exist");
+                }
             }
         }
     }
