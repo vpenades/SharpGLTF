@@ -190,12 +190,42 @@ OneOf<StructuralMetadataSchema, Uri> schema)
 
             foreach (var propertyTable in PropertyTables)
             {
+                Guard.NotNull(Schema.Classes[propertyTable.Class], nameof(propertyTable.Class), $"Schema must have class {propertyTable.Class}");
+
                 foreach (var property in propertyTable.Properties)
                 {
-                    Guard.IsTrue(Schema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
+                    Guard.NotNull(Schema.Classes[propertyTable.Class].Properties[property.Key], nameof(property.Key), $"Schema must have property {property.Key}");
+
+                    var values = property.Value.Values;
+                    validate.IsNullOrIndex(nameof(propertyTable), values, modelRoot.LogicalBufferViews);
+
+                    if (property.Value.ArrayOffsets.HasValue)
+                    {
+                        var arrayOffsets = property.Value.ArrayOffsets.Value;
+                        validate.IsNullOrIndex(nameof(propertyTable), arrayOffsets, modelRoot.LogicalBufferViews);
+                    }
+
+                    if (property.Value.StringOffsets.HasValue)
+                    {
+                        var stringOffsets = property.Value.StringOffsets.Value;
+                        validate.IsNullOrIndex(nameof(propertyTable), stringOffsets, modelRoot.LogicalBufferViews);
+                    }
                 }
             }
 
+            if(Schema!= null)
+            {
+                foreach (var @class in Schema.Classes)
+                {
+                    foreach (var property in @class.Value.Properties)
+                    {
+                        if (property.Value.Type == ElementType.ENUM)
+                        {
+                            Guard.IsTrue(Schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
+                        }
+                    }
+                }
+            }
 
             base.OnValidateReferences(validate);
         }
@@ -232,14 +262,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             // Check one of schema or schemaUri is defined, but not both
             Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
             Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
-
-            
-            // check if the propertyTable id is set, then the propertyTable must be defined
-
-            // loop through all the primitive and check if propertyTable is defined, then the propertyTable must be defined
-            
-
-
 
             base.OnValidateContent(result);
         }

@@ -26,13 +26,19 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        protected override void OnValidateContent(ValidationContext validate)
+        protected override void OnValidateReferences(ValidationContext validate)
         {
             var extInstanceFeatures = _node.GetExtension<MeshExtInstanceFeatures>();
             validate.NotNull(nameof(extInstanceFeatures), extInstanceFeatures);
             var extMeshGpInstancing = _node.GetExtension<MeshGpuInstancing>();
             validate.NotNull(nameof(extMeshGpInstancing), extMeshGpInstancing);
 
+            base.OnValidateReferences(validate);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            var extInstanceFeatures = _node.GetExtension<MeshExtInstanceFeatures>();
             validate.NotNull(nameof(FeatureIds), extInstanceFeatures.FeatureIds);
             validate.IsTrue(nameof(FeatureIds), extInstanceFeatures.FeatureIds.Count > 0, "Instance FeatureIds has items");
 
@@ -96,6 +102,8 @@ namespace SharpGLTF.Schema2
 
             var extMeshGpInstancing = node.Extensions.Where(item => item is MeshGpuInstancing).FirstOrDefault();
             Guard.NotNull(extMeshGpInstancing, nameof(extMeshGpInstancing));
+
+            // todo move validate in the validation function
 
             foreach (var instanceFeatureId in instanceFeatureIds)
             {
