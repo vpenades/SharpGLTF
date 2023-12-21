@@ -20,9 +20,9 @@
             ExtensionsFactory.RegisterExtension<Node, MeshExtInstanceFeatures>("EXT_instance_features");
             ExtensionsFactory.RegisterExtension<MeshPrimitive, MeshExtMeshFeatures>("EXT_mesh_features");
             ExtensionsFactory.RegisterExtension<ModelRoot, EXTStructuralMetadataRoot>("EXT_structural_metadata");
+            ExtensionsFactory.RegisterExtension<MeshPrimitive, ExtStructuralMetadataMeshPrimitive>("EXT_structural_metadata");
 
             // todo: register the rest of the extensions
-            // ExtensionsFactory.RegisterExtension<MeshPrimitive, EXTStructuralMetadataMeshPrimitive>("EXT_structural_metadata");
         }
     }
 }

@@ -110,6 +110,7 @@ namespace SharpGLTF.Cesium
             var imageBytes0 = Convert.FromBase64String(img0);
             var imageBuilder0 = ImageBuilder.From(imageBytes0);
 
+            // var img1 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABLUlEQVR42mVSSxbDIAh0GzUxKZrmCF3n/oerIx9pupgHIswAGtblE7bIKN0vqSOyXSOjPLAtktv9sCFxmcXj7EgsFj8zN00yYxrBZZJBRYk2LdC4WCDUfAdab7bpDm1lCyBW+7lpDnyNS34gcTQRltTPbAeEdFjcSQ0X9EOhGPYjhgLA7xh3kjxEEpMj1qQj7iAzAYoPELzYtuwK02M06WywAFDfX1MdJEoOtSZ7Allz1mYmWZDNL0pNF6ezu9jsQJUcNK7qzbWvMdSYQ8Jo7KKK8/uo4dxreHe0/HgF2/IqBen/za+Di69Sf8cZz5jmk+hcuhdd2tWLz8IE5MbFnRWT+yyU5vZJRtAOqlvq6MDeOrstu0UidsoO0Ak9xGwE+67+34salNEBSCxX7Bexg0rbq6TFvwAAAABJRU5ErkJggg==";
             var img1 = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABLUlEQVR42mVSSxbDIAh0GzUxKZrmCF3n/oerIx9pupgHIswAGtblE7bIKN0vqSOyXSOjPLAtktv9sCFxmcXj7EgsFj8zN00yYxrBZZJBRYk2LdC4WCDUfAdab7bpDm1lCyBW+7lpDnyNS34gcTQRltTPbAeEdFjcSQ0X9EOhGPYjhgLA7xh3kjxEEpMj1qQj7iAzAYoPELzYtuwK02M06WywAFDfX1MdJEoOtSZ7Allz1mYmWZDNL0pNF6ezu9jsQJUcNK7qzbWvMdSYQ8Jo7KKK8/uo4dxreHe0/HgF2/IqBen/za+Di69Sf8cZz5jmk+hcuhdd2tWLz8IE5MbFnRWT+yyU5vZJRtAOqlvq6MDeOrstu0UidsoO0Ak9xGwE+67+34salNEBSCxX7Bexg0rbq6TFvwAAAABJRU5ErkJggg==";
             var imageBytes1 = Convert.FromBase64String(img1);
             var imageBuilder1 = ImageBuilder.From(imageBytes1);
@@ -138,7 +139,6 @@ namespace SharpGLTF.Cesium
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
-            model.UseImage(imageBuilder1.Content);
 
             var schema = new StructuralMetadataSchema();
 
@@ -161,7 +161,7 @@ namespace SharpGLTF.Cesium
             insulationProperty.Name = "Insulation Thickness";
             insulationProperty.Type = ElementType.SCALAR;
             insulationProperty.ComponentType = DataType.UINT8;
-            insideTemperatureProperty.Normalized = true;
+            insulationProperty.Normalized = true;
 
             exampleMetadataClass.Properties.Add("insideTemperature", insideTemperatureProperty);
             exampleMetadataClass.Properties.Add("outsideTemperature", outsideTemperatureProperty);
@@ -194,6 +194,10 @@ namespace SharpGLTF.Cesium
             buildingPropertyTexture.Properties.Add("insulation", insulationTextureProperty);
 
             model.SetPropertyTexture(buildingPropertyTexture, schema);
+
+            var primitive = model.LogicalMeshes[0].Primitives[0];
+            var propertyTextures = new List<int> { 0 };
+            primitive.SetPropertyTextures(propertyTextures);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.glb");

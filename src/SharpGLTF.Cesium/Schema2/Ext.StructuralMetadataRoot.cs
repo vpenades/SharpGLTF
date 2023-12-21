@@ -73,14 +73,8 @@ OneOf<StructuralMetadataSchema, Uri> schema)
                     var index = propertyTextureProperty.Value._LogicalTextureIndex;
                     Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
                     Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
-                    try
-                    {
-                        var texture = modelRoot.LogicalTextures[index];
-                    }
-                    catch (ArgumentOutOfRangeException)
-                    {
-                        throw new ArgumentOutOfRangeException($"Texture index {index} does not exist");
-                    }
+                    Guard.IsTrue(index >= 0, nameof(index), "Index must be defined");
+                    Guard.NotNull(modelRoot.LogicalTextures[index], nameof(index), $"Texture {index} must be defined");
                 }
             }
             var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
@@ -277,6 +271,14 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             // Check one of schema or schemaUri is defined, but not both
             Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
             Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
+
+            
+            // check if the propertyTable id is set, then the propertyTable must be defined
+
+            // loop through all the primitive and check if propertyTable is defined, then the propertyTable must be defined
+            
+
+
 
             base.OnValidateContent(result);
         }

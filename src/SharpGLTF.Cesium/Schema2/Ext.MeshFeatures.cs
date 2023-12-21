@@ -153,21 +153,16 @@ namespace SharpGLTF.Schema2
             if (item.PropertyTable.HasValue)
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.PropertyTable, 0, nameof(item.PropertyTable));
+                var metadataExtension = primitive.LogicalParent.LogicalParent.GetExtension<EXTStructuralMetadataRoot>();
+                Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Meatdata extension is not found.");
+                Guard.NotNull(metadataExtension.PropertyTables[item.PropertyTable.Value], nameof(item.PropertyTable), $"Property table index {item.PropertyTable.Value} does not exist");
             }
             if (item.Texture != null)
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.Texture.TextureCoordinate, 0, nameof(item.Texture.TextureCoordinate));
                 var expectedTexCoordAttribute = $"TEXCOORD_{item.Texture.TextureCoordinate}";
                 Guard.NotNull(primitive.GetVertexAccessor(expectedTexCoordAttribute), expectedTexCoordAttribute);
-
-                try
-                {
-                    var texture = primitive.LogicalParent.LogicalParent.LogicalTextures[item.Texture.Index];
-                }
-                catch (System.ArgumentOutOfRangeException)
-                {
-                    throw new System.Exception($"Texture index {item.Texture.Index} does not exist");
-                }
+                Guard.NotNull(primitive.LogicalParent.LogicalParent.LogicalTextures[item.Texture.Index], nameof(primitive.LogicalParent.LogicalParent.LogicalTextures), $"Texture {item.Texture.Index} does not exist");
             }
         }
     }
