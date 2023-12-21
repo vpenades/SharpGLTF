@@ -23,16 +23,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         {
             if (propertyAttributes == null || propertyAttributes.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
 
-            schema.Switch(
-                metadataschema =>
-                    CheckSchema(metadataschema),
-                Uri =>
-                {
-                    // do not check here, because schema is not loaded
-                }
-                );
-
-            // todo add check propertyAttribute 
             var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
             ext.PropertyAttributes = propertyAttributes;
             ext.AddSchema(schema);
@@ -55,28 +45,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         {
             if (propertyTextures == null || propertyTextures.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
 
-            schema.Switch(
-                metadataschema =>
-                    CheckSchema(metadataschema),
-                Uri =>
-                {
-                    // do not check here, because schema is not loaded
-                }
-                );
-
-            foreach(var propertyTexture in propertyTextures)
-            {
-                foreach(var propertyTextureProperty in propertyTexture.Properties)
-                {
-                    var texCoord = propertyTextureProperty.Value.TextureCoordinate;
-                    var channels = propertyTextureProperty.Value.Channels;
-                    var index = propertyTextureProperty.Value._LogicalTextureIndex;
-                    Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
-                    Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
-                    Guard.IsTrue(index >= 0, nameof(index), "Index must be defined");
-                    Guard.NotNull(modelRoot.LogicalTextures[index], nameof(index), $"Texture {index} must be defined");
-                }
-            }
             var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
             ext.PropertyTextures = propertyTextures;
             ext.AddSchema(schema);
@@ -97,66 +65,9 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         {
             if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
 
-            schema.Switch(
-                metadataschema =>
-                    CheckSchema(metadataschema),
-                Uri =>
-                {
-                    // do not check here, because schema is not loaded
-                }
-                );
-
-            // todo add check if propertyTable.Class is in schema.Classes
-            foreach (var propertyTable in propertyTables)
-            {
-                Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
-                Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
-                Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
-
-                schema.Switch(
-                    metadataschema =>
-                        CheckConsistency(metadataschema, propertyTable),
-                    Uri =>
-                    {
-                        // do not check here, because schema is not loaded
-                    }
-                    );
-            }
-
             var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
             ext.PropertyTables = propertyTables;
             ext.AddSchema(schema);
-        }
-
-        private static void CheckSchema(StructuralMetadataSchema schema)
-        {
-            // check schema id is defined and valid
-            if (!String.IsNullOrEmpty(schema.Id))
-            {
-                var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
-                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(schema.Id, regex), nameof(schema.Id));
-            }
-
-            // check if schema class property has type of enum, then the schema enum based on enumtype must be defined
-            foreach (var @class in schema.Classes)
-            {
-                foreach (var property in @class.Value.Properties)
-                {
-                    if (property.Value.Type == ElementType.ENUM)
-                    {
-                        Guard.IsTrue(schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
-                    }
-                }
-            }
-        }
-
-        private static void CheckConsistency(StructuralMetadataSchema schema, PropertyTable propertyTable)
-        {
-            Guard.IsTrue(schema.Classes.ContainsKey(propertyTable.Class), nameof(propertyTable.Class), $"Class {propertyTable.Class} must be defined in schema");
-            foreach (var property in propertyTable.Properties)
-            {
-                Guard.IsTrue(schema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
-            }
         }
 
         public static PropertyTableProperty GetArrayPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values, bool CreateArrayOffsets = true)
@@ -266,8 +177,58 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             set { _propertyTextures = value; }
         }
 
+        protected override void OnValidateReferences(ValidationContext validate)
+        {
+            foreach (var propertyTexture in PropertyTextures)
+            {
+                foreach(var propertyTextureProperty in propertyTexture.Properties)
+                {
+                    var textureId = propertyTextureProperty.Value._LogicalTextureIndex;
+                    validate.IsNullOrIndex(nameof(propertyTexture), textureId, modelRoot.LogicalTextures);
+                }
+            }
+
+            foreach (var propertyTable in PropertyTables)
+            {
+                foreach (var property in propertyTable.Properties)
+                {
+                    Guard.IsTrue(Schema.Classes[propertyTable.Class].Properties.ContainsKey(property.Key), nameof(propertyTable.Properties), $"Property {property.Key} must be defined in schema");
+                }
+            }
+
+
+            base.OnValidateReferences(validate);
+        }
+
         protected override void OnValidateContent(ValidationContext result)
         {
+            // check schema id is defined and valid
+            if (Schema!=null && !String.IsNullOrEmpty(Schema.Id))
+            {
+                var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
+            }
+
+            foreach (var propertyTexture in PropertyTextures)
+            {
+                foreach (var propertyTextureProperty in propertyTexture.Properties)
+                {
+                    var texCoord = propertyTextureProperty.Value.TextureCoordinate;
+                    var channels = propertyTextureProperty.Value.Channels;
+                    var index = propertyTextureProperty.Value._LogicalTextureIndex;
+                    Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
+                    Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
+                    Guard.IsTrue(index >= 0, nameof(index), "Index must be defined");
+                }
+            }
+
+            foreach (var propertyTable in PropertyTables)
+            {
+                Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
+                Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
+                Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
+            }
+            
             // Check one of schema or schemaUri is defined, but not both
             Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
             Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");

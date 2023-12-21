@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpGLTF.Validation;
+using System.Collections.Generic;
 
 namespace SharpGLTF.Schema2
 {
@@ -39,6 +40,27 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        protected override void OnValidateReferences(ValidationContext validate)
+        {
+            foreach (var propertyTexture in PropertyTextures)
+            {
+                var propertyTextures = meshPrimitive.LogicalParent.LogicalParent.GetExtension<EXTStructuralMetadataRoot>().PropertyTextures;
+                validate.IsNullOrIndex(nameof(propertyTexture), propertyTexture, propertyTextures);
+            }
+
+            foreach (var propertyAttribute in PropertyAttributes)
+            {
+                var propertyAttributes = meshPrimitive.LogicalParent.LogicalParent.GetExtension<EXTStructuralMetadataRoot>().PropertyAttributes;
+                validate.IsNullOrIndex(nameof(propertyAttribute), propertyAttribute, propertyAttributes);
+            }
+
+            base.OnValidateReferences(validate);
+        }
+
+        protected override void OnValidateContent(ValidationContext result)
+        {
+            base.OnValidateContent(result);
+        }
     }
 
     partial class CesiumExtensions
