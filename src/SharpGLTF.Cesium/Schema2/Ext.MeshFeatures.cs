@@ -154,7 +154,7 @@ namespace SharpGLTF.Schema2
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)item.PropertyTable, 0, nameof(item.PropertyTable));
                 var metadataExtension = primitive.LogicalParent.LogicalParent.GetExtension<EXTStructuralMetadataRoot>();
-                Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Meatdata extension is not found.");
+                Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Metadata extension is not found.");
                 Guard.NotNull(metadataExtension.PropertyTables[item.PropertyTable.Value], nameof(item.PropertyTable), $"Property table index {item.PropertyTable.Value} does not exist");
             }
             if (item.Texture != null)

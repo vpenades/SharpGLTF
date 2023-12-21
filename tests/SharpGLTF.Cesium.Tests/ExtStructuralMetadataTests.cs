@@ -232,12 +232,6 @@ namespace SharpGLTF.Cesium
 
             var model = scene.ToGltf2();
 
-            var featureId0 = new MeshExtMeshFeatureID(2, 0, 0);
-            var featureId1 = new MeshExtMeshFeatureID(2, 1, 0);
-            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0, featureId1 };
-
-            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
-
             var schema = new StructuralMetadataSchema();
             schema.Id = "MultipleFeatureIdsAndPropertiesSchema";
 
@@ -282,6 +276,12 @@ namespace SharpGLTF.Cesium
 
             model.SetPropertyTable(examplePropertyTable, schema);
 
+            var featureId0 = new MeshExtMeshFeatureID(2, 0, 0);
+            var featureId1 = new MeshExtMeshFeatureID(2, 1, 0);
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0, featureId1 };
+
+            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.gltf");
@@ -308,9 +308,6 @@ namespace SharpGLTF.Cesium
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             var model = scene.ToGltf2();
-
-            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
-            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
 
             var schema = new StructuralMetadataSchema();
             schema.Id = "FeatureIdAttributeAndPropertyTableSchema";
@@ -353,6 +350,9 @@ namespace SharpGLTF.Cesium
             
             model.SetPropertyTable(examplePropertyTable, schema);
 
+            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
+            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.gltf");
@@ -379,9 +379,6 @@ namespace SharpGLTF.Cesium
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
 
             var model = scene.ToGltf2();
-
-            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
-            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
 
             var schema = new StructuralMetadataSchema();
 
@@ -473,6 +470,9 @@ namespace SharpGLTF.Cesium
 
             model.SetPropertyTable(examplePropertyTable, schema);
 
+            var featureId = new MeshExtMeshFeatureID(1, 0, 0);
+            model.LogicalMeshes[0].Primitives[0].SetFeatureId(featureId);
+
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.gltf");
@@ -504,8 +504,6 @@ namespace SharpGLTF.Cesium
             var featureId1Attribute = new MeshExtMeshFeatureID(1, 1, 1);
 
             // Set the FeatureIds
-            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0Attribute, featureId1Attribute };
-            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
 
             var schema = new StructuralMetadataSchema();
             schema.Id = "MultipleClassesSchema";
@@ -527,6 +525,9 @@ namespace SharpGLTF.Cesium
 
             var propertyTables = new List<PropertyTable>() { firstPropertyTable, secondPropertyTable };
             model.SetPropertyTables(propertyTables, schema);
+
+            var featureIds = new List<MeshExtMeshFeatureID>() { featureId0Attribute, featureId1Attribute };
+            model.LogicalMeshes[0].Primitives[0].SetFeatureIds(featureIds);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");

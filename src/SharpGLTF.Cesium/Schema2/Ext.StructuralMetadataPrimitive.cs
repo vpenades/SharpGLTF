@@ -7,6 +7,8 @@ namespace SharpGLTF.Schema2
         internal ExtStructuralMetadataMeshPrimitive(MeshPrimitive meshPrimitive)
         {
             this.meshPrimitive = meshPrimitive;
+            _propertyTextures = new List<int>();
+            _propertyAttributes = new List<int>();
         }
 
         private MeshPrimitive meshPrimitive;
