@@ -43,7 +43,7 @@ namespace SharpGLTF.Cesium
                 .WithDoubleSide(true)
                 .WithAlpha(Materials.AlphaMode.OPAQUE)
                 .WithMetallicRoughness(0, 1)
-                .WithSpecularFactor(imageBuilder1, 0);
+                .WithMetallicRoughness(imageBuilder1)
             ;
 
             var mesh = VBTexture1.CreateCompatibleMesh("mesh");
@@ -69,7 +69,7 @@ namespace SharpGLTF.Cesium
             buildingComponentsClass.Name = "Building components";
             buildingComponentsClass.Properties.Add("component", new ClassProperty() { Name = "Component", Type = ElementType.STRING });
             buildingComponentsClass.Properties.Add("yearBuilt", new ClassProperty() { Name = "Year built", Type = ElementType.SCALAR, ComponentType = DataType.INT16 });
-            schema.Classes.Add ("buildingComponents", buildingComponentsClass);
+            schema.Classes.Add("buildingComponents", buildingComponentsClass);
 
             var propertyTable = new PropertyTable();
             propertyTable.Name = "Example property table";
@@ -77,7 +77,7 @@ namespace SharpGLTF.Cesium
             propertyTable.Count = 4;
 
             var componentProperty = model.GetPropertyTableProperty(new List<string>() { "Wall", "Door", "Roof", "Window" });
-            var yearBuiltProperty = model.GetPropertyTableProperty(new List<Int16>() { 1960, 1996, 1985, 2002});
+            var yearBuiltProperty = model.GetPropertyTableProperty(new List<Int16>() { 1960, 1996, 1985, 2002 });
             propertyTable.Properties.Add("component", componentProperty);
             propertyTable.Properties.Add("yearBuilt", yearBuiltProperty);
 
@@ -87,11 +87,12 @@ namespace SharpGLTF.Cesium
             var texture = new MeshExtMeshFeatureIDTexture(new List<int>() { 0 }, 1, 0);
             var featureIdTexture = new MeshExtMeshFeatureID(4, texture: texture, propertyTable: 0);
             var featureIds = new List<MeshExtMeshFeatureID>() { featureIdTexture };
-            
+
             var primitive = model.LogicalMeshes[0].Primitives[0];
             primitive.SetFeatureIds(featureIds);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.plotly");
@@ -119,7 +120,7 @@ namespace SharpGLTF.Cesium
                 .WithDoubleSide(true)
                 .WithAlpha(Materials.AlphaMode.OPAQUE)
                 .WithMetallicRoughness(0, 1)
-                .WithSpecularFactor(imageBuilder1, 0);
+                .WithMetallicRoughness(imageBuilder1);
 
             var mesh = VBTexture1.CreateCompatibleMesh("mesh");
             var prim = mesh.UsePrimitive(material);
@@ -253,7 +254,7 @@ namespace SharpGLTF.Cesium
 
             schema.Classes.Add("exampleMetadataClass", exampleMetadataClass);
 
-            var vector3List = new List<Vector3>() { 
+            var vector3List = new List<Vector3>() {
                 new Vector3(3, 3.0999999046325684f, 3.200000047683716f),
                 new Vector3(103, 103.0999999046325684f, 103.200000047683716f)
 
@@ -344,7 +345,7 @@ namespace SharpGLTF.Cesium
             var matrix4x4PropertyTableProperty = model.GetPropertyTableProperty(matrix4x4List);
 
             examplePropertyTable.Properties.Add("example_MAT4_FLOAT32", matrix4x4PropertyTableProperty);
-            
+
             model.SetPropertyTable(examplePropertyTable, schema);
 
             var featureId = new MeshExtMeshFeatureID(1, 0, 0);
@@ -384,7 +385,7 @@ namespace SharpGLTF.Cesium
             exampleMetadataClass.Description = "First example metadata class";
 
             // class properties
-            
+
             var uint8ArrayProperty = new ClassProperty();
             uint8ArrayProperty.Name = "Example variable-length ARRAY normalized INT8 property";
             uint8ArrayProperty.Description = "An example property, with type ARRAY, with component type UINT8, normalized, and variable length";
@@ -663,7 +664,7 @@ namespace SharpGLTF.Cesium
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
-            
+
             var schema = new StructuralMetadataSchema();
             schema.Id = "schema_001";
             schema.Name = "schema 001";
