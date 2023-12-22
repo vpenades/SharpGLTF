@@ -19,8 +19,6 @@ namespace SharpGLTF.Schema2
             }
             set
             {
-                if (value == null) { _featureIds = null; return; }
-
                 _featureIds = value;
             }
         }
@@ -46,7 +44,6 @@ namespace SharpGLTF.Schema2
                         var metadataExtension = _node.LogicalParent.GetExtension<EXTStructuralMetadataRoot>();
                         Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Metadata extension is not found.");
                         Guard.NotNull(metadataExtension.PropertyTables[instanceFeatureId.PropertyTable.Value], nameof(instanceFeatureId.PropertyTable), $"Property table index {instanceFeatureId.PropertyTable.Value} does not exist");
-
                     }
                 }
             }

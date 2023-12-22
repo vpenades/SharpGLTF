@@ -22,7 +22,6 @@ namespace SharpGLTF.Schema2
             }
             set
             {
-                if (value == null) { _propertyTextures = null; return; }
                 _propertyTextures = value;
             }
         }
@@ -35,7 +34,6 @@ namespace SharpGLTF.Schema2
             }
             set
             {
-                if (value == null) { _propertyAttributes = null; return; }
                 _propertyAttributes = value;
             }
         }

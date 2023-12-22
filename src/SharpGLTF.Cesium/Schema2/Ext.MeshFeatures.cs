@@ -19,7 +19,6 @@ namespace SharpGLTF.Schema2
             get => _featureIds;
             set
             {
-                if (value == null) { _featureIds = null; return; }
                 _featureIds = value;
             }
         }

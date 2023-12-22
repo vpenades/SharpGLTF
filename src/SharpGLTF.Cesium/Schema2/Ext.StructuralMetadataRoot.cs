@@ -312,7 +312,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _class; }
             set
             {
-                if (value == null) { _class = null; return; }
                 _class = value;
             }
         }
@@ -322,7 +321,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _properties; }
             set
             {
-                if (value == null) { _properties = null; return; }
                 _properties = value;
             }
         }
@@ -336,8 +334,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _attribute; }
             set
             {
-
-                if (value == null) { _attribute = null; return; }
                 _attribute = value;
             }
         }
@@ -356,7 +352,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _classes; }
             set
             {
-                if (value == null) { _classes = null; return; }
                 _classes = value;
             }
         }
@@ -366,7 +361,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _id; }
             set
             {
-                if (value == null) { _id = null; return; }
                 _id = value;
             }
         }
@@ -376,7 +370,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _version; }
             set
             {
-                if (value == null) { _version = null; return; }
                 _version = value;
             }
         }
@@ -386,7 +379,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _name; }
             set
             {
-                if (value == null) { _name = null; return; }
                 _name = value;
             }
         }
@@ -396,7 +388,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _description; }
             set
             {
-                if (value == null) { _description = null; return; }
                 _description = value;
             }
         }
@@ -406,7 +397,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _enums; }
             set
             {
-                if (value == null) { _enums = null; return; }
                 _enums = value;
             }
         }
@@ -423,7 +413,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _name; }
             set
             {
-                if (value == null) { _name = null; return; }
                 _name = value;
             }
         }
@@ -432,7 +421,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _description; }
             set
             {
-                if (value == null) { _description = null; return; }
                 _description = value;
             }
         }
@@ -441,7 +429,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _values; }
             set
             {
-                if (value == null) { _values = null; return; }
                 _values = value;
             }
         }
@@ -454,7 +441,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _name; }
             set
             {
-                if (value == null) { _name = null; return; }
                 _name = value;
             }
         }
@@ -480,7 +466,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _properties; }
             set
             {
-                if (value == null) { _properties = null; return; }
                 _properties = value;
             }
         }
@@ -500,7 +485,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _description; }
             set
             {
-                if (value == null) { _description = null; return; }
                 _description = value;
             }
         }
@@ -514,7 +498,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _name; }
             set
             {
-                if (value == null) { _name = null; return; }
                 _name = value;
             }
         }
@@ -524,7 +507,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _description; }
             set
             {
-                if (value == null) { _description = null; return; }
                 _description = value;
             }
         }
@@ -543,7 +525,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _enumType; }
             set
             {
-                if (value == null) { _enumType = null; return; }
                 _enumType = value;
             }
         }
@@ -553,7 +534,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _componentType; }
             set
             {
-                if (value == null) { _componentType = null; return; }
                 _componentType = value;
             }
         }
@@ -563,8 +543,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _required; }
             set
             {
-
-                if (value == null) { _required = null; return; }
                 _required = value;
             }
         }
@@ -574,7 +552,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _normalized; }
             set
             {
-                if (value == null) { _normalized = null; return; }
                 _normalized = value;
             }
         }
@@ -584,7 +561,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _array; }
             set
             {
-                if (value == null) { _array = null; return; }
                 _array = value;
             }
 
@@ -595,7 +571,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _count; }
             set
             {
-                if (value == null) { _count = null; return; }
                 _count = value;
             }
         }
@@ -619,7 +594,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _name; }
             set
             {
-                if (value == null) { _name = null; return; }
                 _name = value;
             }
         }
@@ -629,7 +603,6 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             get { return _class; }
             set
             {
-                if (value == null) { _class = null; return; }
                 _class = value;
             }
         }
@@ -646,9 +619,10 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public Dictionary<string, PropertyTableProperty> Properties
         {
             get { return _properties; }
-            set {
-                if (value == null) { _properties = null; return; }
-                _properties = value; }
+            set
+            {
+                _properties = value;
+            }
         }
     }
 
@@ -663,19 +637,19 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public int? ArrayOffsets
         {
             get { return _arrayOffsets; }
-            set {
-
-                if (value == null) { _arrayOffsets= null; return; }
-                _arrayOffsets = value; }
+            set
+            {
+                _arrayOffsets = value;
+            }
         }
 
         public int? StringOffsets
         {
             get { return _stringOffsets; }
-            set {
-
-                if (value == null) { _stringOffsets = null; return; }
-                _stringOffsets = value; }
+            set
+            {
+                _stringOffsets = value;
+            }
         }
     }
 }
