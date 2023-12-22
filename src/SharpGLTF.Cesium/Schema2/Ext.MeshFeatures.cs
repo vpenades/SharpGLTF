@@ -176,6 +176,5 @@ namespace SharpGLTF.Schema2
             var ext = primitive.UseExtension<MeshExtMeshFeatures>();
             ext.FeatureIds = featureIds;
         }
-
     }
 }

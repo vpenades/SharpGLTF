@@ -1,6 +1,5 @@
 ﻿using SharpGLTF.Validation;
 using System.Collections.Generic;
-using System.Linq;
 namespace SharpGLTF.Schema2
 {
     public partial class MeshExtInstanceFeatures
@@ -33,6 +32,25 @@ namespace SharpGLTF.Schema2
             var extMeshGpInstancing = _node.GetExtension<MeshGpuInstancing>();
             validate.NotNull(nameof(extMeshGpInstancing), extMeshGpInstancing);
 
+            foreach (var instanceFeatureId in FeatureIds)
+            {
+                if (instanceFeatureId.Attribute.HasValue)
+                {
+                    var expectedVertexAttribute = $"_FEATURE_ID_{instanceFeatureId.Attribute}";
+                    var gpuInstancing = _node.GetGpuInstancing();
+                    var featureIdAccessors = gpuInstancing.GetAccessor(expectedVertexAttribute);
+                    Guard.NotNull(featureIdAccessors, expectedVertexAttribute);
+
+                    if (instanceFeatureId.PropertyTable.HasValue)
+                    {
+                        var metadataExtension = _node.LogicalParent.GetExtension<EXTStructuralMetadataRoot>();
+                        Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Metadata extension is not found.");
+                        Guard.NotNull(metadataExtension.PropertyTables[instanceFeatureId.PropertyTable.Value], nameof(instanceFeatureId.PropertyTable), $"Property table index {instanceFeatureId.PropertyTable.Value} does not exist");
+
+                    }
+                }
+            }
+
             base.OnValidateReferences(validate);
         }
 
@@ -41,6 +59,31 @@ namespace SharpGLTF.Schema2
             var extInstanceFeatures = _node.GetExtension<MeshExtInstanceFeatures>();
             validate.NotNull(nameof(FeatureIds), extInstanceFeatures.FeatureIds);
             validate.IsTrue(nameof(FeatureIds), extInstanceFeatures.FeatureIds.Count > 0, "Instance FeatureIds has items");
+
+
+            foreach (var instanceFeatureId in FeatureIds)
+            {
+                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.FeatureCount, 1, nameof(instanceFeatureId.FeatureCount));
+
+                if (instanceFeatureId.NullFeatureId.HasValue)
+                {
+                    Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.NullFeatureId, 0, nameof(instanceFeatureId.NullFeatureId));
+                }
+                if (instanceFeatureId.Label != null)
+                {
+                    var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+                    Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(instanceFeatureId.Label, regex), nameof(instanceFeatureId.Label));
+                }
+
+                if (instanceFeatureId.Attribute.HasValue)
+                {
+                    Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.Attribute, 0, nameof(instanceFeatureId.Attribute));
+                }
+                if (instanceFeatureId.PropertyTable.HasValue)
+                {
+                    Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.PropertyTable, 0, nameof(instanceFeatureId.PropertyTable));
+                }
+            }
 
             base.OnValidateContent(validate);
         }
@@ -100,45 +143,11 @@ namespace SharpGLTF.Schema2
 
             Guard.NotNullOrEmpty(instanceFeatureIds, nameof(instanceFeatureIds));
 
-            var extMeshGpInstancing = node.Extensions.Where(item => item is MeshGpuInstancing).FirstOrDefault();
+            var extMeshGpInstancing = node.GetExtension<MeshGpuInstancing>();
             Guard.NotNull(extMeshGpInstancing, nameof(extMeshGpInstancing));
-
-            // todo move validate in the validation function
-
-            foreach (var instanceFeatureId in instanceFeatureIds)
-            {
-                ValidateInstanceFeatureId(node, instanceFeatureId);
-            };
 
             var ext = node.UseExtension<MeshExtInstanceFeatures>();
             ext.FeatureIds = instanceFeatureIds;
-        }
-
-        private static void ValidateInstanceFeatureId(Node node, MeshExtInstanceFeatureID instanceFeatureId)
-        {
-            Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.FeatureCount, 1, nameof(instanceFeatureId.FeatureCount));
-
-            if (instanceFeatureId.NullFeatureId.HasValue)
-            {
-                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.NullFeatureId, 0, nameof(instanceFeatureId.NullFeatureId));
-            }
-            if (instanceFeatureId.Label != null)
-            {
-                var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
-                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(instanceFeatureId.Label, regex), nameof(instanceFeatureId.Label));
-            }
-            if (instanceFeatureId.Attribute.HasValue)
-            {
-                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.Attribute, 0, nameof(instanceFeatureId.Attribute));
-                var expectedVertexAttribute = $"_FEATURE_ID_{instanceFeatureId.Attribute}";
-                var gpuInstancing = node.GetGpuInstancing();
-                var featureIdAccessors = gpuInstancing.GetAccessor(expectedVertexAttribute);
-                Guard.NotNull(featureIdAccessors, expectedVertexAttribute);
-            }
-            if (instanceFeatureId.PropertyTable.HasValue)
-            {
-                Guard.MustBeGreaterThanOrEqualTo((int)instanceFeatureId.PropertyTable, 0, nameof(instanceFeatureId.PropertyTable));
-            }
         }
     }
 }

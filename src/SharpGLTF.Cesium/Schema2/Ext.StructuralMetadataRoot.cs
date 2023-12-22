@@ -181,7 +181,7 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         {
             foreach (var propertyTexture in PropertyTextures)
             {
-                foreach(var propertyTextureProperty in propertyTexture.Properties)
+                foreach (var propertyTextureProperty in propertyTexture.Properties)
                 {
                     var textureId = propertyTextureProperty.Value._LogicalTextureIndex;
                     validate.IsNullOrIndex(nameof(propertyTexture), textureId, modelRoot.LogicalTextures);
@@ -213,7 +213,7 @@ OneOf<StructuralMetadataSchema, Uri> schema)
                 }
             }
 
-            if(Schema!= null)
+            if (Schema != null)
             {
                 foreach (var @class in Schema.Classes)
                 {
@@ -233,7 +233,7 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         protected override void OnValidateContent(ValidationContext result)
         {
             // check schema id is defined and valid
-            if (Schema!=null && !String.IsNullOrEmpty(Schema.Id))
+            if (Schema != null && !String.IsNullOrEmpty(Schema.Id))
             {
                 var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
                 Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
@@ -258,7 +258,7 @@ OneOf<StructuralMetadataSchema, Uri> schema)
                 Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
                 Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
             }
-            
+
             // Check one of schema or schemaUri is defined, but not both
             Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
             Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
@@ -310,13 +310,21 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Class
         {
             get { return _class; }
-            set { _class = value; }
+            set
+            {
+                if (value == null) { _class = null; return; }
+                _class = value;
+            }
         }
 
         public Dictionary<string, PropertyAttributeProperty> Properties
         {
             get { return _properties; }
-            set { _properties = value; }
+            set
+            {
+                if (value == null) { _properties = null; return; }
+                _properties = value;
+            }
         }
 
     }
@@ -326,7 +334,12 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Attribute
         {
             get { return _attribute; }
-            set { _attribute = value; }
+            set
+            {
+
+                if (value == null) { _attribute = null; return; }
+                _attribute = value;
+            }
         }
     }
 
@@ -341,37 +354,61 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public Dictionary<string, StructuralMetadataClass> Classes
         {
             get { return _classes; }
-            set { _classes = value; }
+            set
+            {
+                if (value == null) { _classes = null; return; }
+                _classes = value;
+            }
         }
 
         public string Id
         {
             get { return _id; }
-            set { _id = value; }
+            set
+            {
+                if (value == null) { _id = null; return; }
+                _id = value;
+            }
         }
 
         public string Version
         {
             get { return _version; }
-            set { _version = value; }
+            set
+            {
+                if (value == null) { _version = null; return; }
+                _version = value;
+            }
         }
 
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
 
         public string Description
         {
             get { return _description; }
-            set { _description = value; }
+            set
+            {
+                if (value == null) { _description = null; return; }
+                _description = value;
+            }
         }
 
         public Dictionary<string, StructuralMetadataEnum> Enums
         {
             get { return _enums; }
-            set { _enums = value; }
+            set
+            {
+                if (value == null) { _enums = null; return; }
+                _enums = value;
+            }
         }
     }
 
@@ -384,17 +421,29 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
         public string Description
         {
             get { return _description; }
-            set { _description = value; }
+            set
+            {
+                if (value == null) { _description = null; return; }
+                _description = value;
+            }
         }
         public List<EnumValue> Values
         {
             get { return _values; }
-            set { _values = value; }
+            set
+            {
+                if (value == null) { _values = null; return; }
+                _values = value;
+            }
         }
     }
 
@@ -403,12 +452,19 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
         public int Value
         {
             get { return _value; }
-            set { _value = value; }
+            set
+            {
+                _value = value;
+            }
         }
     }
 
@@ -422,19 +478,31 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public Dictionary<string, ClassProperty> Properties
         {
             get { return _properties; }
-            set { _properties = value; }
+            set
+            {
+                if (value == null) { _properties = null; return; }
+                _properties = value;
+            }
         }
 
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
 
         public string Description
         {
             get { return _description; }
-            set { _description = value; }
+            set
+            {
+                if (value == null) { _description = null; return; }
+                _description = value;
+            }
         }
 
     }
@@ -444,56 +512,92 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
 
         public string Description
         {
             get { return _description; }
-            set { _description = value; }
+            set
+            {
+                if (value == null) { _description = null; return; }
+                _description = value;
+            }
         }
 
         public ElementType Type
         {
             get { return _type; }
-            set { _type = value; }
+            set
+            {
+                _type = value;
+            }
         }
 
         public string EnumType
         {
             get { return _enumType; }
-            set { _enumType = value; }
+            set
+            {
+                if (value == null) { _enumType = null; return; }
+                _enumType = value;
+            }
         }
 
         public DataType? ComponentType
         {
             get { return _componentType; }
-            set { _componentType = value; }
+            set
+            {
+                if (value == null) { _componentType = null; return; }
+                _componentType = value;
+            }
         }
 
         public bool? Required
         {
             get { return _required; }
-            set { _required = value; }
+            set
+            {
+
+                if (value == null) { _required = null; return; }
+                _required = value;
+            }
         }
 
         public bool? Normalized
         {
             get { return _normalized; }
-            set { _normalized = value; }
+            set
+            {
+                if (value == null) { _normalized = null; return; }
+                _normalized = value;
+            }
         }
 
         public bool? Array
         {
             get { return _array; }
-            set { _array = value; }
+            set
+            {
+                if (value == null) { _array = null; return; }
+                _array = value;
+            }
 
         }
 
         public int? Count
         {
             get { return _count; }
-            set { _count = value; }
+            set
+            {
+                if (value == null) { _count = null; return; }
+                _count = value;
+            }
         }
     }
 
@@ -513,25 +617,38 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public string Name
         {
             get { return _name; }
-            set { _name = value; }
+            set
+            {
+                if (value == null) { _name = null; return; }
+                _name = value;
+            }
         }
 
         public string Class
         {
             get { return _class; }
-            set { _class = value; }
+            set
+            {
+                if (value == null) { _class = null; return; }
+                _class = value;
+            }
         }
 
         public int Count
         {
             get { return _count; }
-            set { _count = value; }
+            set
+            {
+                _count = value;
+            }
         }
 
         public Dictionary<string, PropertyTableProperty> Properties
         {
             get { return _properties; }
-            set { _properties = value; }
+            set {
+                if (value == null) { _properties = null; return; }
+                _properties = value; }
         }
     }
 
@@ -546,13 +663,19 @@ OneOf<StructuralMetadataSchema, Uri> schema)
         public int? ArrayOffsets
         {
             get { return _arrayOffsets; }
-            set { _arrayOffsets = value; }
+            set {
+
+                if (value == null) { _arrayOffsets= null; return; }
+                _arrayOffsets = value; }
         }
 
         public int? StringOffsets
         {
             get { return _stringOffsets; }
-            set { _stringOffsets = value; }
+            set {
+
+                if (value == null) { _stringOffsets = null; return; }
+                _stringOffsets = value; }
         }
     }
 }
