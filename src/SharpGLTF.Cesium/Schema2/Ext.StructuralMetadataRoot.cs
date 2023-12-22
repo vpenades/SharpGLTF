@@ -237,6 +237,20 @@ OneOf<StructuralMetadataSchema, Uri> schema)
             {
                 var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
                 Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
+
+
+                foreach(var _class in Schema.Classes)
+                {
+                    Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(_class.Key, regex), nameof(_class.Key));
+
+                    foreach(var property in _class.Value.Properties)
+                    {
+                        if (property.Value.Count.HasValue)
+                        {
+                            Guard.MustBeGreaterThanOrEqualTo(property.Value.Count.Value, 2, nameof(property.Value.Count));
+                        }
+                    }
+                }
             }
 
             foreach (var propertyTexture in PropertyTextures)
