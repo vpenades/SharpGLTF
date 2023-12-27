@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace SharpGLTF
+namespace SharpGLTF.Memory
 {
     public class BinaryTableTests
     {
@@ -66,9 +66,9 @@ namespace SharpGLTF
         public void TestGetArrayOffset()
         {
             // arrange
-            var list0 = new List<string>(){ "hello", "world!"};
-            var list1 = new List<string>(){"test", "testtest"};
-            var arrays = new List<List<string>>() { list0, list1 }; 
+            var list0 = new List<string>() { "hello", "world!" };
+            var list1 = new List<string>() { "test", "testtest" };
+            var arrays = new List<List<string>>() { list0, list1 };
 
             // act
             var arrayOffsets = BinaryTable.GetArrayOffsets(arrays);
@@ -81,7 +81,7 @@ namespace SharpGLTF
             var l1 = list1.Count;
 
             Assert.That(arrayOffsets[1], Is.EqualTo(l0));
-            Assert.That(arrayOffsets[2], Is.EqualTo(l0+l1));
+            Assert.That(arrayOffsets[2], Is.EqualTo(l0 + l1));
 
             Assert.That(stringOffsets.Count, Is.EqualTo(list0.Count + list1.Count + 1));
             Assert.That(stringOffsets[0], Is.EqualTo(0));
@@ -99,13 +99,13 @@ namespace SharpGLTF
 
             bytes = BinaryTable.GetBytes(GetTestArray<int>());
             Assert.That(bytes.Length, Is.EqualTo(BinaryTable.GetSize<int>() * 2));
-            
+
             bytes = BinaryTable.GetBytes(new List<string>() { "a", "b" });
             Assert.That(bytes.Length, Is.EqualTo(2));
 
-            bytes  = BinaryTable.GetBytes(new List<bool>() { true, false });
+            bytes = BinaryTable.GetBytes(new List<bool>() { true, false });
             Assert.That(bytes.Length, Is.EqualTo(1));
-            
+
             var bits = new System.Collections.BitArray(bytes);
             Assert.That(bits[0] == true);
             Assert.That(bits[1] == false);
@@ -119,7 +119,7 @@ namespace SharpGLTF
         private static List<T> GetTestArray<T>()
         {
             var l = new List<T>();
-            l.Add((T)Convert.ChangeType(0, typeof(T),CultureInfo.InvariantCulture));
+            l.Add((T)Convert.ChangeType(0, typeof(T), CultureInfo.InvariantCulture));
             l.Add((T)Convert.ChangeType(1, typeof(T), CultureInfo.InvariantCulture));
             return l;
         }

@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace SharpGLTF
+namespace SharpGLTF.Memory
 {
     /// <summary>
     /// Function for converting data into binary buffers
@@ -54,7 +54,7 @@ namespace SharpGLTF
             {
                 return Vector4ToBytes(values);
             }
-            else if(typeof(T) == typeof(Matrix4x4))
+            else if (typeof(T) == typeof(Matrix4x4))
             {
                 return Matrix4x4ToBytes(values);
             }
@@ -166,14 +166,14 @@ namespace SharpGLTF
 
         public static List<int> GetStringOffsets(List<List<string>> values)
         {
-            var offsets = new List<int>() {};
+            var offsets = new List<int>() { };
             foreach (var arr in values)
             {
                 var arrOffsets = GetStringOffsets(arr);
                 var last = offsets.LastOrDefault();
                 foreach (var offset in arrOffsets)
                 {
-                    if(!offsets.Contains(last + offset))
+                    if (!offsets.Contains(last + offset))
                     {
                         offsets.Add(last + offset);
                     }
@@ -197,12 +197,12 @@ namespace SharpGLTF
 
         public static int GetSize<T>()
         {
-            #if NETSTANDARD2_0
+#if NETSTANDARD2_0
                 var isValueType = typeof(T).IsValueType;
-            #else
-                var isValueType = !System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>();
-            #endif
-            
+#else
+            var isValueType = !System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+#endif
+
             Guard.IsTrue(isValueType, nameof(T), "T must be a value type");
 
             var type = typeof(T);

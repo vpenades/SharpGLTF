@@ -1,4 +1,5 @@
 ﻿using OneOf;
+using SharpGLTF.Memory;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
