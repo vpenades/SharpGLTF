@@ -201,7 +201,7 @@ namespace SharpGLTF
             Guard.IsTrue(isValueType, nameof(T), "T must be a value type");
 
             var type = typeof(T);
-            int size = Marshal.SizeOf(Activator.CreateInstance(type));
+            var size = Marshal.SizeOf<T>();
             return size;
         }
     }
