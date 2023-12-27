@@ -13,33 +13,6 @@
 
   <ItemGroup>
     <Folder Include="Schemas\" />
+	<None Update="Schemas\**\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Schemas\EXT_mesh_features\schema\featureId.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Schemas\EXT_mesh_features\schema\featureIdAttribute.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Schemas\EXT_mesh_features\schema\featureIdTexture.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Schemas\EXT_mesh_features\schema\mesh.primitive.EXT_mesh_features.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Schemas\EXT_instance_features\schema\featureId.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Schemas\EXT_instance_features\schema\featureIdAttribute.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Schemas\EXT_instance_features\schema\node.EXT_instance_features.schema.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

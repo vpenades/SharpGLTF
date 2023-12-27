@@ -4,7 +4,6 @@ using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
 using System.Text.Json.Nodes;
 
@@ -39,8 +38,8 @@ namespace SharpGLTF.Cesium
                     WithExtras(JsonNode.Parse("{\"_FEATURE_ID_0\":1}"));
 
 
-            var featureId0 = new MeshExtInstanceFeatureID(2, 0, 0, "Forests", 2);
-            var featureId1 = new MeshExtInstanceFeatureID(9, propertyTable: 1, label: "Trees");
+            var featureId0 = new MeshExtInstanceFeatureID(2, 0, label: "Forests");
+            var featureId1 = new MeshExtInstanceFeatureID(9, label: "Trees");
 
             var featureIds = new List<MeshExtInstanceFeatureID>() { featureId0, featureId1 };
 

@@ -24,6 +24,7 @@ namespace SharpGLTF
 
             var settings = new NJsonSchema.CodeGeneration.CSharp.CSharpGeneratorSettings
             {
+
                 Namespace = "glTf.POCO",
                 ClassStyle = NJsonSchema.CodeGeneration.CSharp.CSharpClassStyle.Poco
             };

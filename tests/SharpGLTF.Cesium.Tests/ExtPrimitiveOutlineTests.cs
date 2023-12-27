@@ -1,10 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Numerics;
-using System.Collections.Generic;
-
 using NUnit.Framework;
-
 using SharpGLTF.Schema2;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
@@ -16,7 +12,7 @@ namespace SharpGLTF
 {
 
     [Category("Cesium")]
-    public partial class CesiumTests
+    public partial class ExtPrimitiveOutlineTests
     {
         [SetUp]
         public void SetUp()

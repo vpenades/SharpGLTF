@@ -14,7 +14,6 @@ namespace SharpGLTF.Cesium
 {
     using VBTexture1 = VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>;
 
-
     [Category("Toolkit.Scenes")]
     public class ExtMeshFeaturesTests
     {
@@ -37,9 +36,9 @@ namespace SharpGLTF.Cesium
             var prim = mesh.UsePrimitive(material);
 
             // All the vertices in the triangle have the same feature ID
-            var vt0 = GetVertexBuilderWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), featureId);
-            var vt1 = GetVertexBuilderWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), featureId);
-            var vt2 = GetVertexBuilderWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), featureId);
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), featureId);
 
             prim.AddTriangle(vt0, vt1, vt2);
             var scene = new SceneBuilder();
@@ -135,11 +134,5 @@ namespace SharpGLTF.Cesium
             scene.AttachToCurrentTest("cesium_ext_mesh_features_feature_id_texture.plotly");
         }
 
-        private static VertexBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty> GetVertexBuilderWithFeatureId(Vector3 position, Vector3 normal, int featureid)
-        {
-            var vp0 = new VertexPositionNormal(position, normal);
-            var vb0 = new VertexBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>(vp0, featureid);
-            return vb0;
-        }
     }
 }

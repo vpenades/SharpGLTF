@@ -8,27 +8,27 @@ using SharpGLTF.Schema2;
 
 namespace SharpGLTF
 {
-
     #if NET6_0_OR_GREATER
         [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
     #endif
+
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
-    public struct VertexWithFeatureId : IVertexCustom
+    public struct VertexWithFeatureIds : IVertexCustom
     {
-        public static implicit operator VertexWithFeatureId(float batchId)
+        public VertexWithFeatureIds(float featureId0, float featureId1)
         {
-            return new VertexWithFeatureId(batchId);
+            FeatureId0 = featureId0;
+            FeatureId1 = featureId1;
         }
 
-        public VertexWithFeatureId(float batchId)
-        {
-            BatchId = batchId;
-        }
+        public const string FEATUREID0ATTRIBUTENAME = "_FEATURE_ID_0";
+        public const string FEATUREID1ATTRIBUTENAME = "_FEATURE_ID_1";
 
-        public const string CUSTOMATTRIBUTENAME = "_FEATURE_ID_0";
+        [VertexAttribute(FEATUREID0ATTRIBUTENAME, EncodingType.FLOAT, false)]
+        public float FeatureId0;
 
-        [VertexAttribute(CUSTOMATTRIBUTENAME, EncodingType.FLOAT, false)]
-        public float BatchId;
+        [VertexAttribute(FEATUREID1ATTRIBUTENAME, EncodingType.FLOAT, false)]
+        public float FeatureId1;
 
         public int MaxColors => 0;
 
@@ -48,13 +48,24 @@ namespace SharpGLTF
 
         public object GetCustomAttribute(string attributeName)
         {
-            return attributeName == CUSTOMATTRIBUTENAME ? (Object)BatchId : null;
+            throw new NotImplementedException();
         }
 
-        public bool TryGetCustomAttribute(string attributeName, out object value)
+        public bool TryGetCustomAttribute(string attribute, out object value)
         {
-            if (attributeName != CUSTOMATTRIBUTENAME) { value = null; return false; }
-            value = BatchId; return true;
+            if (attribute == FEATUREID0ATTRIBUTENAME)
+            {
+                value = FeatureId0; return true;
+            }
+            else if (attribute == FEATUREID1ATTRIBUTENAME)
+            {
+                value = FeatureId1; return true;
+            }
+            else
+            {
+                value = null; return false;
+            }
+
         }
 
         public void SetCustomAttribute(string attributeName, object value)
