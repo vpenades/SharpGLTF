@@ -197,7 +197,11 @@ namespace SharpGLTF
 
         public static int GetSize<T>()
         {
-            var isValueType = typeof(T).IsValueType;
+            #if NETSTANDARD2_1_OR_GREATER
+                var isValueType = !System.Runtime.CompilerServices.RuntimeHelpers.IsReferenceOrContainsReferences<T>();
+            #else
+                var isValueType = typeof(T).IsValueType;
+            #endif
             Guard.IsTrue(isValueType, nameof(T), "T must be a value type");
 
             var type = typeof(T);
