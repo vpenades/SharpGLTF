@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <Authors>Vicente Penades</Authors>    
-    <Copyright>Copyright (c) 2023 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) $([System.DateTime]::Now.ToString(`yyyy`)) Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
   </PropertyGroup>  
 
