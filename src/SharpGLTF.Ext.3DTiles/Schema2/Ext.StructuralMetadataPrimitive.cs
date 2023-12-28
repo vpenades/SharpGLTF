@@ -61,7 +61,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    partial class CesiumExtensions
+    partial class ThreeDTilesExtensions
     {
         public static void SetPropertyTextures(this MeshPrimitive primitive, List<int> propertyTextures)
         {

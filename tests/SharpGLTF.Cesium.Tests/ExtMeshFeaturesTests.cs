@@ -20,7 +20,7 @@ namespace SharpGLTF.Cesium
         [SetUp]
         public void SetUp()
         {
-            CesiumExtensions.RegisterExtensions();
+            ThreeDTilesExtensions.RegisterExtensions();
         }
 
         [Test(Description = "Test for settting the FeatureIds with vertex attributes. See sample https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_mesh_features/FeatureIdAttribute")]

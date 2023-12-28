@@ -1,20 +1,20 @@
 ﻿namespace SharpGLTF.Schema2
 {
     /// <summary>
-    /// Extension methods for Cesium glTF Extensions
+    /// Extension methods for 3DTiles glTF Extensions
     /// </summary>
-    public static partial class CesiumExtensions
+    public static partial class ThreeDTilesExtensions
     {
-        private static bool _CesiumRegistered;
+        private static bool _3DTilesRegistered;
 
         /// <summary>
         /// This method most be called once at application's startup to register the extensions.
         /// </summary>
         public static void RegisterExtensions()
         {
-            if (_CesiumRegistered) return;
+            if (_3DTilesRegistered) return;
 
-            _CesiumRegistered = true;
+            _3DTilesRegistered = true;
 
             ExtensionsFactory.RegisterExtension<MeshPrimitive, CesiumPrimitiveOutline>("CESIUM_primitive_outline");
             ExtensionsFactory.RegisterExtension<Node, MeshExtInstanceFeatures>("EXT_instance_features");

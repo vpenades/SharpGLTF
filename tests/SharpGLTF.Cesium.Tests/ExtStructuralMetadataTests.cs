@@ -19,7 +19,7 @@ namespace SharpGLTF.Cesium
         [SetUp]
         public void SetUp()
         {
-            CesiumExtensions.RegisterExtensions();
+            ThreeDTilesExtensions.RegisterExtensions();
         }
 
         [Test(Description = "ext_structural_metadata with FeatureId Texture and Property Table")]

@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    partial class CesiumExtensions
+    partial class ThreeDTilesExtensions
     {
         /// <summary>
         /// Sets Cesium outline vertex indices

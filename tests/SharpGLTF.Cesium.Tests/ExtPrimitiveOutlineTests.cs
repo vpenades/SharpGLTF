@@ -17,7 +17,7 @@ namespace SharpGLTF
         [SetUp]
         public void SetUp()
         {
-            CesiumExtensions.RegisterExtensions();
+            ThreeDTilesExtensions.RegisterExtensions();
         }
 
         [Test(Description = "Creates a simple triangle with Cesium outlining")]

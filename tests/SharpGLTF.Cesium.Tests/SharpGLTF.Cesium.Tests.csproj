@@ -8,7 +8,7 @@
   </PropertyGroup>  
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\SharpGLTF.Cesium\SharpGLTF.Cesium.csproj" />
+    <ProjectReference Include="..\..\src\SharpGLTF.Ext.3DTiles\SharpGLTF.Ext.3DTiles.csproj" />
     <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
   </ItemGroup>
 

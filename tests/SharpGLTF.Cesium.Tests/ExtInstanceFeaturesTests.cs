@@ -15,7 +15,7 @@ namespace SharpGLTF.Cesium
         [SetUp]
         public void SetUp()
         {
-            CesiumExtensions.RegisterExtensions();
+            ThreeDTilesExtensions.RegisterExtensions();
         }
 
         [Test(Description = "Creates a gpu_instancing glTF from a tree with Cesium EXT_Instance_Features")]
