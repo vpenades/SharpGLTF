@@ -31,7 +31,7 @@ namespace SharpGLTF.Collections
 
         #region API        
 
-        public void SetProperty<T>(ref T target, T value)
+        public void SetListProperty<T>(ref T target, T value)
             where T : class, IChildOfList<TParent>
         {
             if (value == target) return;

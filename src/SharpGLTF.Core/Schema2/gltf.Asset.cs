@@ -100,7 +100,7 @@ namespace SharpGLTF.Schema2
         public Asset Asset
         {
             get => _asset;
-            set => GetChildSetter(this).SetProperty(ref _asset, value);
+            set => GetChildSetter(this).SetListProperty(ref _asset, value);
         }
     }
 }

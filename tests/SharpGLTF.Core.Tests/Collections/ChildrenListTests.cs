@@ -26,11 +26,9 @@ namespace SharpGLTF.Collections
         [Test]
         public void TestChildCollectionList1()
         {
-            if (System.Diagnostics.Debugger.IsAttached) return;
-
             var list = new ChildrenList<TestChild, ChildrenListTests>(this);
             
-            Assert.Throws<ArgumentNullException>(() => list.Add(null));
+            Assert.That(() => list.Add(null), Throws.ArgumentNullException);
 
             var item1 = new TestChild();
             Assert.That(item1.LogicalParent, Is.Null);
@@ -44,7 +42,7 @@ namespace SharpGLTF.Collections
             Assert.That(item1.LogicalParent, Is.SameAs(this));
             Assert.That(item1.LogicalIndex, Is.EqualTo(0));
 
-            Assert.Throws<ArgumentException>(() => list.Add(item1));
+            Assert.That(() => list.Add(item1), Throws.ArgumentException);
 
             list.Remove(item1);
             Assert.That(item1.LogicalParent, Is.Null);
