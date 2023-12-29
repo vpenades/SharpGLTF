@@ -7,7 +7,7 @@ dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Core\SharpGLT
 dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Runtime\SharpGLTF.Runtime.csproj
 dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj
 
-dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Agi\SharpGLTF.Agi.csproj
-dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Cesium\SharpGLTF.Cesium.csproj
+dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Ext.Agi\SharpGLTF.Ext.Agi.csproj
+dotnet build -c:Release --version-suffix %VERSIONSUFFIX% SharpGLTF.Ext.3DTiles\SharpGLTF.Ext.3DTiles.csproj
 
 pause

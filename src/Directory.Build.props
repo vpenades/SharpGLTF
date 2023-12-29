@@ -5,7 +5,7 @@
 
   <PropertyGroup>
     <Authors>Vicente Penades</Authors>    
-    <Copyright>Copyright (c) 2023 Vicente Penades</Copyright>
+    <Copyright>Copyright (c) $([System.DateTime]::Now.ToString(`yyyy`)) Vicente Penades</Copyright>
     <Description>SharpGLTF is a C# library for reading and writing glTF2 3D models</Description>    
   </PropertyGroup>  
 
@@ -16,11 +16,14 @@
     <IsPackable>true</IsPackable>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <IsTrimmable>true</IsTrimmable>
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <!-- Testing & Analysers =================================================================================== -->
 
   <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
