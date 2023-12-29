@@ -47,9 +47,9 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Set the FeatureIds for a MeshPrimitive
+        /// Adds the FeatureIds to a MeshPrimitive
         /// </summary>        
-        public static MeshExtInstanceFeatureID[] SetInstanceFeatureIds(this Node node, params IMeshFeatureIDInfo[] featureIds)
+        public static MeshExtInstanceFeatureID[] AddInstanceFeatureIds(this Node node, params IMeshFeatureIDInfo[] featureIds)
         {
             if (featureIds == null || featureIds.Length == 0) { node.RemoveExtensions<MeshExtInstanceFeatures>(); return Array.Empty<MeshExtInstanceFeatureID>(); }
 
@@ -66,9 +66,9 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Set the FeatureIds for a MeshPrimitive
+        /// Adds the FeatureIds to a MeshPrimitive
         /// </summary>        
-        public static MeshExtMeshFeatureID[] SetMeshFeatureIds(this MeshPrimitive primitive, params (IMeshFeatureIDInfo fid, Texture tex, IReadOnlyList<int> channels)[] featureIds)
+        public static MeshExtMeshFeatureID[] AddMeshFeatureIds(this MeshPrimitive primitive, params (IMeshFeatureIDInfo fid, Texture tex, IReadOnlyList<int> channels)[] featureIds)
         {
             if (featureIds == null || featureIds.Length == 0) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return Array.Empty<MeshExtMeshFeatureID>(); }
 
@@ -90,7 +90,7 @@ namespace SharpGLTF.Schema2
     namespace Tiles3D
     {
         /// <remarks>
-        /// This extension is attached to a <see cref="Schema2.Node"/> using <see cref="ExtraProperties.UseExtension{T}"/>
+        /// This extension is attached to a <see cref="Schema2.Node"/> using <see cref="Tiles3DExtensions.AddInstanceFeatureIds(Node, IMeshFeatureIDInfo[])"/>
         /// </remarks>
         public partial class MeshExtInstanceFeatures
         {
@@ -191,7 +191,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <remarks>
-        /// This extension is attached to a <see cref="Schema2.MeshPrimitive"/>
+        /// This extension is attached to a <see cref="Schema2.MeshPrimitive"/> using <see cref="Tiles3DExtensions.AddMeshFeatureIds(MeshPrimitive, ValueTuple{IMeshFeatureIDInfo, Texture, IReadOnlyList{int}}[])"/>
         /// </remarks>    
         public partial class MeshExtMeshFeatures
         {
