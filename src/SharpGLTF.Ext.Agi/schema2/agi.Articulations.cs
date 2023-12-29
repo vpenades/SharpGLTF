@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Linq;
 using SharpGLTF.Collections;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.AGI
 {    
     public sealed partial class AgiRootArticulations
     {

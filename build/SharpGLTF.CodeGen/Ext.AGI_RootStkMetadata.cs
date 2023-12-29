@@ -36,9 +36,9 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CodeGen.CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("AGI_stk_metadata glTF extension", "AgiRootStkMetadata");
-            newEmitter.SetRuntimeName("AGI_stk_metadata glTF Node extension", "AgiNodeStkMetadata");
-            newEmitter.SetRuntimeName("Solar Panel Group", "AgiStkSolarPanelGroup");
+            newEmitter.SetRuntimeName("AGI_stk_metadata glTF extension", "AgiRootStkMetadata", Constants.AgiNameSpace);
+            newEmitter.SetRuntimeName("AGI_stk_metadata glTF Node extension", "AgiNodeStkMetadata", Constants.AgiNameSpace);
+            newEmitter.SetRuntimeName("Solar Panel Group", "AgiStkSolarPanelGroup", Constants.AgiNameSpace);
         }        
     }
 }

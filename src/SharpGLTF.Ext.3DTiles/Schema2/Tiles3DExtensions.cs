@@ -1,5 +1,7 @@
-﻿namespace SharpGLTF.Schema2.Tiles3D
+﻿namespace SharpGLTF.Schema2
 {
+    using Tiles3D;
+
     /// <summary>
     /// Extension methods for 3DTiles glTF Extensions
     /// </summary>

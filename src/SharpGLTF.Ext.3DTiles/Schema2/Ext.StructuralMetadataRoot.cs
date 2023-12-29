@@ -6,13 +6,14 @@ using System.Reflection;
 
 using OneOf;
 
-namespace SharpGLTF.Schema2.Tiles3D
+namespace SharpGLTF.Schema2
 {
     using Collections;
     using Memory;
     using Validation;
+    using Tiles3D;
 
-    using METADATAORURI = OneOf<StructuralMetadataSchema, Uri>;
+    using METADATAORURI = OneOf<Tiles3D.StructuralMetadataSchema, Uri>;
 
     partial class Tiles3DExtensions
     {
@@ -138,686 +139,689 @@ METADATAORURI schema)
         }
     }
 
-    public partial class EXTStructuralMetadataRoot
+    namespace Tiles3D
     {
-        #region lifecycle
-
-        internal EXTStructuralMetadataRoot(ModelRoot modelRoot)
+        public partial class EXTStructuralMetadataRoot
         {
-            this.modelRoot = modelRoot;
-            _propertyTables = new ChildrenList<PropertyTable, EXTStructuralMetadataRoot>(this);
-            _propertyAttributes = new ChildrenList<PropertyAttribute, EXTStructuralMetadataRoot>(this);
-            _propertyTextures = new ChildrenList<PropertyTexture, EXTStructuralMetadataRoot>(this);
-        }
+            #region lifecycle
 
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            var items = base.GetLogicalChildren()
-                .Concat(_propertyTables)
-                .Concat(_propertyAttributes)
-                .Concat(_propertyTextures);
-
-            if (Schema != null) items = items.Append(Schema);
-
-            return items;
-        }
-
-        #endregion
-
-        #region data
-
-        private ModelRoot modelRoot;
-
-        #endregion
-
-        #region properties
-
-        internal string SchemaUri
-        {
-            get => _schemaUri;
-            set { _schemaUri = value; }
-        }
-
-        internal StructuralMetadataSchema Schema
-        {
-            get => _schema;
-            set { GetChildSetter(this).SetListProperty(ref _schema, value); }
-        }
-
-        internal IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
-        internal IReadOnlyList<PropertyAttribute> PropertyAttributes => _propertyAttributes;
-        internal IReadOnlyList<PropertyTexture> PropertyTextures => _propertyTextures;
-
-        #endregion
-
-        #region API
-
-        internal void AddSchema(METADATAORURI schema)
-        {
-            schema.Switch(
-                StructuralMetadataSchema => _schema = StructuralMetadataSchema,
-                Uri => this.SchemaUri = Uri.ToString()
-                );
-        }
-
-        #endregion
-
-        #region validation
-
-        protected override void OnValidateReferences(ValidationContext validate)
-        {
-            foreach (var propertyTexture in PropertyTextures)
+            internal EXTStructuralMetadataRoot(ModelRoot modelRoot)
             {
-                foreach (var propertyTextureProperty in propertyTexture.Properties)
-                {
-                    var textureId = propertyTextureProperty.Value.LogicalTextureIndex;
-                    validate.IsNullOrIndex(nameof(propertyTexture), textureId, modelRoot.LogicalTextures);
-                }
+                this.modelRoot = modelRoot;
+                _propertyTables = new ChildrenList<PropertyTable, EXTStructuralMetadataRoot>(this);
+                _propertyAttributes = new ChildrenList<PropertyAttribute, EXTStructuralMetadataRoot>(this);
+                _propertyTextures = new ChildrenList<PropertyTexture, EXTStructuralMetadataRoot>(this);
             }
 
-            foreach (var propertyTable in PropertyTables)
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
             {
-                Guard.NotNull(Schema.Classes[propertyTable.Class], nameof(propertyTable.Class), $"Schema must have class {propertyTable.Class}");
+                var items = base.GetLogicalChildren()
+                    .Concat(_propertyTables)
+                    .Concat(_propertyAttributes)
+                    .Concat(_propertyTextures);
 
-                foreach (var property in propertyTable.Properties)
-                {
-                    Guard.NotNull(Schema.Classes[propertyTable.Class].Properties[property.Key], nameof(property.Key), $"Schema must have property {property.Key}");
+                if (Schema != null) items = items.Append(Schema);
 
-                    var values = property.Value.Values;
-                    validate.IsNullOrIndex(nameof(propertyTable), values, modelRoot.LogicalBufferViews);
-
-                    if (property.Value.ArrayOffsets.HasValue)
-                    {
-                        var arrayOffsets = property.Value.ArrayOffsets.Value;
-                        validate.IsNullOrIndex(nameof(propertyTable), arrayOffsets, modelRoot.LogicalBufferViews);
-                    }
-
-                    if (property.Value.StringOffsets.HasValue)
-                    {
-                        var stringOffsets = property.Value.StringOffsets.Value;
-                        validate.IsNullOrIndex(nameof(propertyTable), stringOffsets, modelRoot.LogicalBufferViews);
-                    }
-                }
+                return items;
             }
 
-            if (Schema != null)
+            #endregion
+
+            #region data
+
+            private ModelRoot modelRoot;
+
+            #endregion
+
+            #region properties
+
+            internal string SchemaUri
             {
-                foreach (var @class in Schema.Classes)
+                get => _schemaUri;
+                set { _schemaUri = value; }
+            }
+
+            internal StructuralMetadataSchema Schema
+            {
+                get => _schema;
+                set { GetChildSetter(this).SetListProperty(ref _schema, value); }
+            }
+
+            internal IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
+            internal IReadOnlyList<PropertyAttribute> PropertyAttributes => _propertyAttributes;
+            internal IReadOnlyList<PropertyTexture> PropertyTextures => _propertyTextures;
+
+            #endregion
+
+            #region API
+
+            internal void AddSchema(METADATAORURI schema)
+            {
+                schema.Switch(
+                    StructuralMetadataSchema => _schema = StructuralMetadataSchema,
+                    Uri => this.SchemaUri = Uri.ToString()
+                    );
+            }
+
+            #endregion
+
+            #region validation
+
+            protected override void OnValidateReferences(ValidationContext validate)
+            {
+                foreach (var propertyTexture in PropertyTextures)
                 {
-                    foreach (var property in @class.Value.Properties)
+                    foreach (var propertyTextureProperty in propertyTexture.Properties)
                     {
-                        if (property.Value.Type == ElementType.ENUM)
+                        var textureId = propertyTextureProperty.Value.LogicalTextureIndex;
+                        validate.IsNullOrIndex(nameof(propertyTexture), textureId, modelRoot.LogicalTextures);
+                    }
+                }
+
+                foreach (var propertyTable in PropertyTables)
+                {
+                    Guard.NotNull(Schema.Classes[propertyTable.Class], nameof(propertyTable.Class), $"Schema must have class {propertyTable.Class}");
+
+                    foreach (var property in propertyTable.Properties)
+                    {
+                        Guard.NotNull(Schema.Classes[propertyTable.Class].Properties[property.Key], nameof(property.Key), $"Schema must have property {property.Key}");
+
+                        var values = property.Value.Values;
+                        validate.IsNullOrIndex(nameof(propertyTable), values, modelRoot.LogicalBufferViews);
+
+                        if (property.Value.ArrayOffsets.HasValue)
                         {
-                            Guard.IsTrue(Schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
+                            var arrayOffsets = property.Value.ArrayOffsets.Value;
+                            validate.IsNullOrIndex(nameof(propertyTable), arrayOffsets, modelRoot.LogicalBufferViews);
+                        }
+
+                        if (property.Value.StringOffsets.HasValue)
+                        {
+                            var stringOffsets = property.Value.StringOffsets.Value;
+                            validate.IsNullOrIndex(nameof(propertyTable), stringOffsets, modelRoot.LogicalBufferViews);
                         }
                     }
                 }
-            }
 
-            base.OnValidateReferences(validate);
-        }
-
-        protected override void OnValidateContent(ValidationContext result)
-        {
-            // check schema id is defined and valid
-            if (Schema != null && !String.IsNullOrEmpty(Schema.Id))
-            {
-                var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
-                Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
-
-
-                foreach(var _class in Schema.Classes)
+                if (Schema != null)
                 {
-                    Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(_class.Key, regex), nameof(_class.Key));
-
-                    foreach(var property in _class.Value.Properties)
+                    foreach (var @class in Schema.Classes)
                     {
-                        if (property.Value.Count.HasValue)
+                        foreach (var property in @class.Value.Properties)
                         {
-                            Guard.MustBeGreaterThanOrEqualTo(property.Value.Count.Value, 2, nameof(property.Value.Count));
+                            if (property.Value.Type == ElementType.ENUM)
+                            {
+                                Guard.IsTrue(Schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
+                            }
                         }
                     }
                 }
+
+                base.OnValidateReferences(validate);
             }
 
-            foreach (var propertyTexture in PropertyTextures)
+            protected override void OnValidateContent(ValidationContext result)
             {
-                foreach (var propertyTextureProperty in propertyTexture.Properties)
+                // check schema id is defined and valid
+                if (Schema != null && !String.IsNullOrEmpty(Schema.Id))
                 {
-                    var texCoord = propertyTextureProperty.Value.TextureCoordinate;
-                    var channels = propertyTextureProperty.Value.Channels;
-                    var index = propertyTextureProperty.Value.LogicalTextureIndex;
-                    Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
-                    Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
-                    Guard.IsTrue(index >= 0, nameof(index), "Index must be defined");
+                    var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
+                    Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
+
+
+                    foreach (var _class in Schema.Classes)
+                    {
+                        Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(_class.Key, regex), nameof(_class.Key));
+
+                        foreach (var property in _class.Value.Properties)
+                        {
+                            if (property.Value.Count.HasValue)
+                            {
+                                Guard.MustBeGreaterThanOrEqualTo(property.Value.Count.Value, 2, nameof(property.Value.Count));
+                            }
+                        }
+                    }
                 }
+
+                foreach (var propertyTexture in PropertyTextures)
+                {
+                    foreach (var propertyTextureProperty in propertyTexture.Properties)
+                    {
+                        var texCoord = propertyTextureProperty.Value.TextureCoordinate;
+                        var channels = propertyTextureProperty.Value.Channels;
+                        var index = propertyTextureProperty.Value.LogicalTextureIndex;
+                        Guard.MustBeGreaterThanOrEqualTo(texCoord, 0, nameof(texCoord));
+                        Guard.IsTrue(channels.Count > 0, nameof(channels), "Channels must be defined");
+                        Guard.IsTrue(index >= 0, nameof(index), "Index must be defined");
+                    }
+                }
+
+                foreach (var propertyTable in PropertyTables)
+                {
+                    Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
+                    Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
+                    Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
+                }
+
+                // Check one of schema or schemaUri is defined, but not both
+                Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
+                Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
+
+                base.OnValidateContent(result);
             }
 
-            foreach (var propertyTable in PropertyTables)
+            #endregion
+        }
+
+        public partial class PropertyTexture : IChildOfList<EXTStructuralMetadataRoot>
+        {
+            #region lifecycle
+            public PropertyTexture()
             {
-                Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
-                Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
-                Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
+                _properties = new ChildrenDictionary<PropertyTextureProperty, PropertyTexture>(this);
             }
 
-            // Check one of schema or schemaUri is defined, but not both
-            Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
-            Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_properties.Values);
+            }
 
-            base.OnValidateContent(result);
+            #endregion
+
+            #region child properties
+
+            public int LogicalIndex { get; private set; } = -1;
+
+            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
+
+            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties
+
+            public string ClassName
+            {
+                get => _class;
+                set => _class = value;
+            }
+
+            public IReadOnlyDictionary<string, PropertyTextureProperty> Properties => _properties;
+
+            #endregion
         }
 
-        #endregion
-    }
-
-    public partial class PropertyTexture : IChildOfList<EXTStructuralMetadataRoot>
-    {
-        #region lifecycle
-        public PropertyTexture()
+        public partial class PropertyTextureProperty : IChildOfDictionary<PropertyTexture>
         {
-            _properties = new ChildrenDictionary<PropertyTextureProperty, PropertyTexture>(this);
+            #region lifecycle
+            public PropertyTextureProperty()
+            {
+                _channels = new List<int>();
+            }
+
+            #endregion
+
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public PropertyTexture LogicalParent { get; private set; }
+
+            void IChildOfDictionary<PropertyTexture>.SetLogicalParent(PropertyTexture parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region data
+
+            public List<int> Channels => _channels;
+
+            #endregion
         }
 
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        public partial class PropertyAttribute : IChildOfList<EXTStructuralMetadataRoot>
         {
-            return base.GetLogicalChildren()
-                .Concat(_properties.Values);
+            #region lifecycle
+            public PropertyAttribute()
+            {
+                _properties = new ChildrenDictionary<PropertyAttributeProperty, PropertyAttribute>(this);
+            }
+
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_properties.Values);
+            }
+
+            #endregion
+
+            #region child properties
+
+            /// <summary>
+            /// Gets the zero-based index of this <see cref="MeshExtInstanceFeatureID"/> at <see cref="MeshExtInstanceFeatures.FeatureIds"/>.
+            /// </summary>
+            public int LogicalIndex { get; private set; } = -1;
+
+            /// <summary>
+            /// Gets the <see cref="MeshExtInstanceFeatures"/> instance that owns this <see cref="MeshExtInstanceFeatureID"/> instance.
+            /// </summary>
+            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
+
+            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties
+            public string Class
+            {
+                get => _class;
+                set => _class = value;
+            }
+
+            public IReadOnlyDictionary<string, PropertyAttributeProperty> Properties => _properties;
+
+            #endregion
+
         }
 
-        #endregion
-
-        #region child properties
-
-        public int LogicalIndex { get; private set; } = -1;
-        
-        public EXTStructuralMetadataRoot LogicalParent { get; private set; }
-
-        void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+        public partial class PropertyAttributeProperty : IChildOfDictionary<PropertyAttribute>
         {
-            LogicalParent = parent;
-            LogicalIndex = index;
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public PropertyAttribute LogicalParent { get; private set; }
+
+            void IChildOfDictionary<PropertyAttribute>.SetLogicalParent(PropertyAttribute parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+
+            public string Attribute
+            {
+                get => _attribute;
+                set => _attribute = value;
+            }
+
+            #endregion
         }
 
-        #endregion
-
-        #region properties
-
-        public string ClassName
+        public partial class StructuralMetadataSchema : IChildOfList<EXTStructuralMetadataRoot>
         {
-            get => _class;
-            set => _class = value;
+            #region lifecycle
+            public StructuralMetadataSchema()
+            {
+                _classes = new ChildrenDictionary<StructuralMetadataClass, StructuralMetadataSchema>(this);
+                _enums = new ChildrenDictionary<StructuralMetadataEnum, StructuralMetadataSchema>(this);
+            }
+
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_classes.Values)
+                    .Concat(_enums.Values);
+            }
+
+            #endregion
+
+            #region child properties
+
+            public int LogicalIndex { get; private set; } = -1;
+
+            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
+
+            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties        
+
+            public IReadOnlyDictionary<string, StructuralMetadataClass> Classes => _classes;
+            public IReadOnlyDictionary<string, StructuralMetadataEnum> Enums => _enums;
+
+            public string Id
+            {
+                get => _id;
+                set => _id = value;
+            }
+
+            public string Version
+            {
+                get => _version;
+                set => _version = value;
+            }
+
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+
+            public string Description
+            {
+                get => _description;
+                set => _description = value;
+            }
+
+            #endregion
         }
 
-        public IReadOnlyDictionary<string, PropertyTextureProperty> Properties => _properties;
-
-        #endregion
-    }
-
-    public partial class PropertyTextureProperty : IChildOfDictionary<PropertyTexture>
-    {
-        #region lifecycle
-        public PropertyTextureProperty()
+        public partial class StructuralMetadataEnum : IChildOfDictionary<StructuralMetadataSchema>
         {
-            _channels = new List<int>();
+            #region lifecycle
+            public StructuralMetadataEnum()
+            {
+                _values = new List<EnumValue>();
+            }
+
+            #endregion
+
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public StructuralMetadataSchema LogicalParent { get; private set; }
+
+            void IChildOfDictionary<StructuralMetadataSchema>.SetLogicalParent(StructuralMetadataSchema parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+            public string Description
+            {
+                get => _description;
+                set => _description = value;
+            }
+            public List<EnumValue> Values
+            {
+                get => _values;
+                set => _values = value;
+            }
+
+            #endregion
         }
 
-        #endregion
-
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public PropertyTexture LogicalParent { get; private set; }
-
-        void IChildOfDictionary<PropertyTexture>.SetLogicalParent(PropertyTexture parent, string key)
+        public partial class EnumValue
         {
-            LogicalParent = parent;
-            LogicalKey = key;
+            public string Description
+            {
+                get => _description;
+                set => _description = value;
+            }
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+            public int Value
+            {
+                get => _value;
+                set => _value = value;
+            }
         }
 
-        #endregion
-
-        #region data
-
-        public List<int> Channels => _channels;
-
-        #endregion
-    }
-
-    public partial class PropertyAttribute : IChildOfList<EXTStructuralMetadataRoot>
-    {
-        #region lifecycle
-        public PropertyAttribute()
+        public partial class StructuralMetadataClass : IChildOfDictionary<StructuralMetadataSchema>
         {
-            _properties = new ChildrenDictionary<PropertyAttributeProperty, PropertyAttribute>(this);
+            #region lifecycle
+
+            public StructuralMetadataClass()
+            {
+                _properties = new ChildrenDictionary<ClassProperty, StructuralMetadataClass>(this);
+            }
+
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_properties.Values);
+            }
+
+            #endregion
+
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public StructuralMetadataSchema LogicalParent { get; private set; }
+
+            void IChildOfDictionary<StructuralMetadataSchema>.SetLogicalParent(StructuralMetadataSchema parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+
+            public IReadOnlyDictionary<string, ClassProperty> Properties => _properties;
+
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+
+            public string Description
+            {
+                get => _description;
+                set => _description = value;
+            }
+
+            #endregion
+
         }
 
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        public partial class ClassProperty : IChildOfDictionary<StructuralMetadataClass>
         {
-            return base.GetLogicalChildren()
-                .Concat(_properties.Values);
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public StructuralMetadataClass LogicalParent { get; private set; }
+
+            void IChildOfDictionary<StructuralMetadataClass>.SetLogicalParent(StructuralMetadataClass parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+
+            public string Description
+            {
+                get => _description;
+                set => _description = value;
+            }
+
+            public ElementType Type
+            {
+                get => _type;
+                set => _type = value;
+            }
+
+            public string EnumType
+            {
+                get => _enumType;
+                set => _enumType = value;
+            }
+
+            public DataType? ComponentType
+            {
+                get => _componentType;
+                set => _componentType = value;
+            }
+
+            public bool? Required
+            {
+                get => _required;
+                set => _required = value;
+            }
+
+            public bool? Normalized
+            {
+                get => _normalized;
+                set => _normalized = value;
+            }
+
+            public bool? Array
+            {
+                get => _array;
+                set => _array = value;
+            }
+
+            public int? Count
+            {
+                get => _count;
+                set => _count = value;
+            }
+
+            #endregion
         }
 
-        #endregion
-
-        #region child properties
-
-        /// <summary>
-        /// Gets the zero-based index of this <see cref="MeshExtInstanceFeatureID"/> at <see cref="MeshExtInstanceFeatures.FeatureIds"/>.
-        /// </summary>
-        public int LogicalIndex { get; private set; } = -1;
-
-        /// <summary>
-        /// Gets the <see cref="MeshExtInstanceFeatures"/> instance that owns this <see cref="MeshExtInstanceFeatureID"/> instance.
-        /// </summary>
-        public EXTStructuralMetadataRoot LogicalParent { get; private set; }
-
-        void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+        /// <remarks>
+        /// Represents a Propery table of <see cref="EXTStructuralMetadataRoot"/>
+        /// </remarks> 
+        public partial class PropertyTable : IChildOfList<EXTStructuralMetadataRoot>
         {
-            LogicalParent = parent;
-            LogicalIndex = index;
+            #region lifecycle
+            public PropertyTable()
+            {
+                _properties = new ChildrenDictionary<PropertyTableProperty, PropertyTable>(this);
+            }
+            public PropertyTable(string Class, int Count, string Name = "") : this()
+            {
+                _class = Class;
+                _count = Count;
+                _name = Name;
+            }
+
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_properties.Values);
+            }
+
+            #endregion
+
+            #region child properties
+
+            public int LogicalIndex { get; private set; } = -1;
+            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
+
+            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties
+
+            public IReadOnlyDictionary<string, PropertyTableProperty> Properties => _properties;
+
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }
+
+            public string Class
+            {
+                get => _class;
+                set => _class = value;
+            }
+
+            public int Count
+            {
+                get => _count;
+                set => _count = value;
+            }
+
+            #endregion
         }
 
-        #endregion
-
-        #region properties
-        public string Class
+        /// <remarks>
+        /// Represents a Property of <see cref="PropertyTable"/>
+        /// </remarks>    
+        public partial class PropertyTableProperty : IChildOfDictionary<PropertyTable>
         {
-            get => _class;
-            set => _class = value;
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public PropertyTable LogicalParent { get; private set; }
+
+            void IChildOfDictionary<PropertyTable>.SetLogicalParent(PropertyTable parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+            /// <summary>
+            /// this is an index to a BufferView
+            /// </summary>
+            public int Values
+            {
+                get => _values;
+                set => _values = value;
+            }
+
+            public int? ArrayOffsets
+            {
+                get => _arrayOffsets;
+                set => _arrayOffsets = value;
+            }
+
+            public int? StringOffsets
+            {
+                get => _stringOffsets;
+                set => _stringOffsets = value;
+            }
+
+            #endregion
         }
-
-        public IReadOnlyDictionary<string, PropertyAttributeProperty> Properties => _properties;
-
-        #endregion
-
-    }
-
-    public partial class PropertyAttributeProperty : IChildOfDictionary<PropertyAttribute>
-    {
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public PropertyAttribute LogicalParent { get; private set; }
-
-        void IChildOfDictionary<PropertyAttribute>.SetLogicalParent(PropertyAttribute parent, string key)
-        {
-            LogicalParent = parent;
-            LogicalKey = key;
-        }
-
-        #endregion
-
-        #region properties
-
-        public string Attribute
-        {
-            get => _attribute;
-            set => _attribute = value;
-        }
-
-        #endregion
-    }
-
-    public partial class StructuralMetadataSchema : IChildOfList<EXTStructuralMetadataRoot>
-    {
-        #region lifecycle
-        public StructuralMetadataSchema()
-        {
-            _classes = new ChildrenDictionary<StructuralMetadataClass, StructuralMetadataSchema>(this);
-            _enums = new ChildrenDictionary<StructuralMetadataEnum, StructuralMetadataSchema>(this);
-        }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren()
-                .Concat(_classes.Values)
-                .Concat(_enums.Values);
-        }
-
-        #endregion
-
-        #region child properties
-
-        public int LogicalIndex { get; private set; } = -1;
-
-        public EXTStructuralMetadataRoot LogicalParent { get; private set; }
-
-        void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
-        {
-            LogicalParent = parent;
-            LogicalIndex = index;
-        }
-
-        #endregion
-
-        #region properties        
-
-        public IReadOnlyDictionary<string, StructuralMetadataClass> Classes => _classes;
-        public IReadOnlyDictionary<string, StructuralMetadataEnum> Enums => _enums;
-
-        public string Id
-        {
-            get => _id;
-            set => _id = value;
-        }
-
-        public string Version
-        {
-            get => _version;
-            set => _version = value;
-        }
-
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => _description = value;
-        }        
-
-        #endregion
-    }
-
-    public partial class StructuralMetadataEnum : IChildOfDictionary<StructuralMetadataSchema>
-    {
-        #region lifecycle
-        public StructuralMetadataEnum()
-        {
-            _values = new List<EnumValue>();
-        }
-
-        #endregion
-
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public StructuralMetadataSchema LogicalParent { get; private set; }
-
-        void IChildOfDictionary<StructuralMetadataSchema>.SetLogicalParent(StructuralMetadataSchema parent, string key)
-        {
-            LogicalParent = parent;
-            LogicalKey = key;
-        }
-
-        #endregion
-
-        #region properties
-
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-        public string Description
-        {
-            get => _description;
-            set => _description = value;
-        }
-        public List<EnumValue> Values
-        {
-            get => _values;
-            set => _values = value;
-        }
-
-        #endregion
-    }
-
-    public partial class EnumValue
-    {
-        public string Description
-        {
-            get => _description;
-            set => _description = value;
-        }
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-        public int Value
-        {
-            get => _value;
-            set => _value = value;
-        }
-    }
-
-    public partial class StructuralMetadataClass : IChildOfDictionary<StructuralMetadataSchema>
-    {
-        #region lifecycle
-
-        public StructuralMetadataClass()
-        {
-            _properties = new ChildrenDictionary<ClassProperty, StructuralMetadataClass>(this);
-        }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren()
-                .Concat(_properties.Values);
-        }
-
-        #endregion
-
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public StructuralMetadataSchema LogicalParent { get; private set; }
-
-        void IChildOfDictionary<StructuralMetadataSchema>.SetLogicalParent(StructuralMetadataSchema parent, string key)
-        {
-            LogicalParent = parent;
-            LogicalKey = key;
-        }
-
-        #endregion
-
-        #region properties
-
-        public IReadOnlyDictionary<string, ClassProperty> Properties => _properties;
-
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => _description = value;
-        }
-
-        #endregion
-
-    }
-
-    public partial class ClassProperty : IChildOfDictionary<StructuralMetadataClass>
-    {
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public StructuralMetadataClass LogicalParent { get; private set; }
-
-        void IChildOfDictionary<StructuralMetadataClass>.SetLogicalParent(StructuralMetadataClass parent, string key)
-        {
-            LogicalParent = parent;
-            LogicalKey = key;
-        }
-
-        #endregion
-
-        #region properties
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-
-        public string Description
-        {
-            get => _description;
-            set => _description = value;
-        }
-
-        public ElementType Type
-        {
-            get => _type;
-            set => _type = value;
-        }
-
-        public string EnumType
-        {
-            get => _enumType;
-            set => _enumType = value;
-        }
-
-        public DataType? ComponentType
-        {
-            get => _componentType;
-            set => _componentType = value;
-        }
-
-        public bool? Required
-        {
-            get => _required;
-            set => _required = value;
-        }
-
-        public bool? Normalized
-        {
-            get => _normalized;
-            set => _normalized = value;
-        }
-
-        public bool? Array
-        {
-            get => _array;
-            set => _array = value;
-        }
-
-        public int? Count
-        {
-            get => _count;
-            set => _count = value;
-        }
-
-        #endregion
-    }
-
-    /// <remarks>
-    /// Represents a Propery table of <see cref="EXTStructuralMetadataRoot"/>
-    /// </remarks> 
-    public partial class PropertyTable : IChildOfList<EXTStructuralMetadataRoot>
-    {
-        #region lifecycle
-        public PropertyTable()
-        {
-            _properties = new ChildrenDictionary<PropertyTableProperty, PropertyTable>(this);
-        }
-        public PropertyTable(string Class, int Count, string Name = "") : this()
-        {
-            _class = Class;
-            _count = Count;
-            _name = Name;
-        }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren()
-                .Concat(_properties.Values);
-        }
-
-        #endregion
-
-        #region child properties
-
-        public int LogicalIndex { get; private set; } = -1;        
-        public EXTStructuralMetadataRoot LogicalParent { get; private set; }
-
-        void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
-        {
-            LogicalParent = parent;
-            LogicalIndex = index;
-        }
-
-        #endregion
-
-        #region properties
-
-        public IReadOnlyDictionary<string, PropertyTableProperty> Properties => _properties;
-
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
-
-        public string Class
-        {
-            get => _class;
-            set => _class = value;
-        }
-
-        public int Count
-        {
-            get => _count;
-            set => _count = value;
-        }        
-
-        #endregion
-    }
-
-    /// <remarks>
-    /// Represents a Property of <see cref="PropertyTable"/>
-    /// </remarks>    
-    public partial class PropertyTableProperty : IChildOfDictionary<PropertyTable>
-    {
-        #region child properties
-
-        public string LogicalKey { get; private set; }
-
-        public PropertyTable LogicalParent { get; private set; }
-
-        void IChildOfDictionary<PropertyTable>.SetLogicalParent(PropertyTable parent, string key)
-        {
-            LogicalParent = parent;
-            LogicalKey = key;
-        }
-
-        #endregion
-
-        #region properties
-        /// <summary>
-        /// this is an index to a BufferView
-        /// </summary>
-        public int Values
-        {
-            get => _values;
-            set => _values = value;
-        }
-
-        public int? ArrayOffsets
-        {
-            get => _arrayOffsets;
-            set => _arrayOffsets = value;
-        }
-
-        public int? StringOffsets
-        {
-            get => _stringOffsets;
-            set => _stringOffsets = value;
-        }
-
-        #endregion
     }
 }
 

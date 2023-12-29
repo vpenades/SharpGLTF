@@ -4,6 +4,8 @@ using System.Text;
 
 namespace SharpGLTF.Schema2
 {
+    using AGI;
+
     /// <summary>
     /// Extension methods for AGI glTF Extensions
     /// </summary>

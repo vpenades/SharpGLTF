@@ -81,6 +81,8 @@ namespace SharpGLTF
 
         public static string CesiumNameSpace => "SharpGLTF.Schema2.Tiles3D";
 
+        public static string AgiNameSpace => "SharpGLTF.Schema2.AGI";
+
         #endregion
     }
 }
