@@ -31,6 +31,20 @@ namespace SharpGLTF.Collections
 
         #region API        
 
+        public void SetProperty<T>(ref T target, T value)
+            where T : class, IChildOf<TParent>
+        {
+            if (value == target) return;
+
+            // orphan the current child
+            target?.SetLogicalParent(null);
+            target = null;
+
+            // adopt the new child
+            target = value;
+            target?.SetLogicalParent(_Parent);
+        }
+
         public void SetListProperty<T>(ref T target, T value)
             where T : class, IChildOfList<TParent>
         {
