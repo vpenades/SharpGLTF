@@ -8,7 +8,7 @@ using SharpGLTF.Materials;
 using SharpGLTF.Validation;
 using SharpGLTF.Scenes;
 
-namespace SharpGLTF
+namespace SharpGLTF.Schema2.Tiles3D
 {
 
     [Category("Cesium")]
@@ -17,7 +17,7 @@ namespace SharpGLTF
         [SetUp]
         public void SetUp()
         {
-            ThreeDTilesExtensions.RegisterExtensions();
+            Tiles3DExtensions.RegisterExtensions();
         }
 
         [Test(Description = "Creates a simple triangle with Cesium outlining")]

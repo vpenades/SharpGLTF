@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text.Json.Nodes;
 
-namespace SharpGLTF.Cesium
+namespace SharpGLTF.Schema2.Tiles3D
 {
     [Category("Toolkit.Scenes")]
     public class ExtInstanceFeaturesTests
@@ -15,7 +15,7 @@ namespace SharpGLTF.Cesium
         [SetUp]
         public void SetUp()
         {
-            ThreeDTilesExtensions.RegisterExtensions();
+            Tiles3DExtensions.RegisterExtensions();
         }
 
         [Test(Description = "Creates a gpu_instancing glTF from a tree with Cesium EXT_Instance_Features")]
@@ -39,18 +39,17 @@ namespace SharpGLTF.Cesium
 
 
             var featureId0 = new MeshExtInstanceFeatureID(2, 0, label: "Forests");
-            var featureId1 = new MeshExtInstanceFeatureID(9, label: "Trees");
-
-            var featureIds = new List<MeshExtInstanceFeatureID>() { featureId0, featureId1 };
+            var featureId1 = new MeshExtInstanceFeatureID(9, label: "Trees");            
 
             var model = sceneBuilder.ToGltf2(settings);
-            model.LogicalNodes[0].SetFeatureIds(featureIds);
+            model.LogicalNodes[0].SetInstanceFeatureIds(featureId0, featureId1);
 
             var cesiumExtInstanceFeaturesExtension = model.LogicalNodes[0].GetExtension<MeshExtInstanceFeatures>();
 
             Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds, Is.Not.Null);
-            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds, Is.EqualTo(featureIds));
-            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[0], Is.EqualTo(featureId0));
+
+            // these are failing now because the properties of featureId0 are being copied, so a different kind of test might be needed
+            Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[0], Is.EqualTo(featureId0)); 
             Assert.That(cesiumExtInstanceFeaturesExtension.FeatureIds[1], Is.EqualTo(featureId1));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);

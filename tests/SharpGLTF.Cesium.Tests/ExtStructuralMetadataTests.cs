@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 
-namespace SharpGLTF.Cesium
+namespace SharpGLTF.Schema2.Tiles3D
 {
     using VBTexture1 = VertexBuilder<VertexPosition, VertexTexture1, VertexEmpty>;
 
@@ -19,7 +19,7 @@ namespace SharpGLTF.Cesium
         [SetUp]
         public void SetUp()
         {
-            ThreeDTilesExtensions.RegisterExtensions();
+            Tiles3DExtensions.RegisterExtensions();
         }
 
         [Test(Description = "ext_structural_metadata with FeatureId Texture and Property Table")]
@@ -168,7 +168,7 @@ namespace SharpGLTF.Cesium
             schema.Classes.Add("buildingComponents", exampleMetadataClass);
 
             var buildingPropertyTexture = new PropertyTexture();
-            buildingPropertyTexture.Class = "buildingComponents";
+            buildingPropertyTexture.ClassName = "buildingComponents";
 
             var insideTemperatureTextureProperty = new PropertyTextureProperty();
             insideTemperatureTextureProperty._LogicalTextureIndex = 1;

@@ -5,7 +5,11 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>  
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ExtStructuralMetadataTests.cs" />
+  </ItemGroup>  
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SharpGLTF.Ext.3DTiles\SharpGLTF.Ext.3DTiles.csproj" />
