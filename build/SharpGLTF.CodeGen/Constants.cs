@@ -70,16 +70,16 @@ namespace SharpGLTF
         /// directory within the solution where the generated code is emitted
         /// </summary>
         public static string TargetProjectDirectory => "src\\SharpGLTF.Core\\Schema2\\Generated";
-
-        public static string CesiumProjectDirectory => "src\\SharpGLTF.Cesium\\Schema2\\Generated";
-
-        public static string AgiProjectDirectory => "src\\SharpGLTF.Agi\\Schema2\\Generated";
+        public static string CesiumProjectDirectory => "src\\SharpGLTF.Ext.3DTiles\\Schema2\\Generated";
+        public static string AgiProjectDirectory => "src\\SharpGLTF.Ext.Agi\\Schema2\\Generated";
 
 
         /// <summary>
         /// namespace of the emitted generated code
         /// </summary>
         public static string OutputNamespace => "SharpGLTF.Schema2";
+
+        public static string CesiumNameSpace => "SharpGLTF.Schema2.Tiles3D";
 
         #endregion
     }

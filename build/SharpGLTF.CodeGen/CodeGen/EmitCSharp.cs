@@ -26,6 +26,8 @@ namespace SharpGLTF.CodeGen
 
             private readonly SchemaType _PersistentType;
 
+            public string RuntimeNamespace { get; set; }
+
             public string RuntimeName { get; set; }
 
             private readonly Dictionary<string, _RuntimeField> _Fields = new Dictionary<string, _RuntimeField>();
@@ -83,7 +85,7 @@ namespace SharpGLTF.CodeGen
             // deserialization sections
             // validation sections
             // clone sections
-        }
+        }        
 
         private readonly Dictionary<string, _RuntimeType> _Types = new Dictionary<string, _RuntimeType>();
 
@@ -91,7 +93,7 @@ namespace SharpGLTF.CodeGen
 
         #endregion
 
-        #region setup & declaration
+        #region setup & declaration        
 
         private static string _SanitizeName(string name)
         {
@@ -116,16 +118,31 @@ namespace SharpGLTF.CodeGen
 
         private _RuntimeField _UseField(FieldInfo finfo) { return _UseType(finfo.DeclaringClass).UseField(finfo); }
 
-        public void SetRuntimeName(SchemaType stype, string newName) { _UseType(stype).RuntimeName = newName; }
+        public void SetRuntimeName(SchemaType stype, string newName, string runtimeNamespace = null)
+        {
+            var t = _UseType(stype);
 
-        public void SetRuntimeName(string persistentName, string runtimeName)
+            t.RuntimeNamespace = runtimeNamespace;
+            t.RuntimeName = newName;
+        }
+
+        public void SetRuntimeName(string persistentName, string runtimeName, string runtimeNamespace = null)
         {
             if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
 
+            t.RuntimeNamespace = runtimeNamespace;
             t.RuntimeName = runtimeName;
         }
 
+        public string GetRuntimeName(string persistentName)
+        {
+            return _Types[persistentName].RuntimeName;
+        }
 
+        public string GetRuntimeNamespace(string persistentName)
+        {
+            return _Types[persistentName].RuntimeNamespace ?? Constants.OutputNamespace;
+        }
 
         public void SetFieldName(FieldInfo finfo, string name) { _UseField(finfo).PrivateField = name; }
 
@@ -141,7 +158,23 @@ namespace SharpGLTF.CodeGen
 
         public void SetCollectionContainer(FieldInfo finfo, string container) { _UseField(finfo).CollectionContainer = container; }        
 
+        public void SetFieldToChildrenList(SchemaType.Context ctx, string persistentName, string fieldName)
+        {
+            var classType = ctx.FindClass(persistentName);
+            if (classType == null) return;
+            var field = classType.UseField(fieldName);
+            var runtimeName = this.GetRuntimeName(persistentName);
+            this.SetCollectionContainer(field, $"ChildrenList<TItem,{runtimeName}>");
+        }
 
+        public void SetFieldToChildrenDictionary(SchemaType.Context ctx, string persistentName, string fieldName)
+        {
+            var classType = ctx.FindClass(persistentName);
+            if (classType == null) return;
+            var field = classType.UseField(fieldName);
+            var runtimeName = this.GetRuntimeName(persistentName);
+            this.SetCollectionContainer(field, $"ChildrenDictionary<TItem,{runtimeName}>");
+        }
 
         public void DeclareClass(ClassType type)
         {
@@ -186,6 +219,8 @@ namespace SharpGLTF.CodeGen
         {
             switch (type)
             {
+                case null: throw new ArgumentNullException(nameof(type));
+
                 case ObjectType anyType: return anyType.PersistentName;
 
                 case StringType strType: return strType.PersistentName;
@@ -210,6 +245,13 @@ namespace SharpGLTF.CodeGen
                         var key = _GetRuntimeName(dictType.KeyType);
                         var val = _GetRuntimeName(dictType.ValueType);
 
+                        var container = extra?.CollectionContainer ?? string.Empty;
+
+                        if (container.StartsWith("ChildrenDictionary<"))
+                        {
+                            if (key == "String") return container.Replace("TItem", val, StringComparison.Ordinal);
+                        }
+
                         return $"Dictionary<{key},{val}>";
                     }
 
@@ -217,7 +259,7 @@ namespace SharpGLTF.CodeGen
 
                 case ClassType classType: return _UseType(classType).RuntimeName;
 
-                default: throw new NotImplementedException();
+                default: throw new NotImplementedException(type.PersistentName);
             }
         }
 
@@ -331,22 +373,30 @@ namespace SharpGLTF.CodeGen
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Text;");
             sb.AppendLine("using System.Numerics;");
+            sb.AppendLine("using System.Text.Json;");            
 
-            #if USENEWTONSOFT
-            sb.AppendLine("using Newtonsoft.Json;");
-            #else
-            sb.AppendLine("using System.Text.Json;");
-            #endif
-            sb.AppendLine();
+            string currentNamespace = null;
 
-            sb.AppendLine($"namespace {Constants.OutputNamespace}");
-            sb.AppendLine("{");
+            void _setCurrentNamespace(string ns)
+            {
+                if (currentNamespace == ns) return;
+                if (currentNamespace != null) sb.AppendLine("}");
+                currentNamespace = ns;
+                if (currentNamespace != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"namespace {currentNamespace}");
+                    sb.AppendLine("{");
 
-            sb.AppendLine("using Collections;".Indent(1));
-            sb.AppendLine();
+                    sb.AppendLine("using Collections;".Indent(1));
+                    sb.AppendLine();
+                }
+            }            
 
             foreach (var etype in context.Enumerations)
             {
+                _setCurrentNamespace(GetRuntimeNamespace(etype.PersistentName));
+
                 var cout = EmitEnum(etype);
 
                 sb.AppendLine(cout);
@@ -357,13 +407,15 @@ namespace SharpGLTF.CodeGen
             {
                 if (ctype.IgnoredByEmitter) continue;
 
+                _setCurrentNamespace(GetRuntimeNamespace(ctype.PersistentName));
+
                 var cout = EmitClass(ctype);
 
                 sb.AppendLine(cout);
                 sb.AppendLine();
             }
 
-            sb.AppendLine("}");
+            _setCurrentNamespace(null);
 
             return sb.ToString();
         }
@@ -490,7 +542,7 @@ namespace SharpGLTF.CodeGen
             yield return string.Empty;
         }            
 
-#endregion
+        #endregion
     }
 
     /// <summary>

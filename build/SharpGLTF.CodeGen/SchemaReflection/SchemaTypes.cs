@@ -54,7 +54,7 @@ namespace SharpGLTF.SchemaReflection
     /// <summary>
     /// Represents a <see cref="String"/> type.
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("StringType {PersistentName}")]
     public sealed class StringType : SchemaType
     {
         #region constructor
@@ -76,7 +76,7 @@ namespace SharpGLTF.SchemaReflection
     /// <remarks>
     /// undefined objects are serialized/deserialized as <see cref="System.Text.Json.Nodes.JsonNode"/>
     /// </remarks>
-    [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("ObjectType {PersistentName}")]
     public sealed class ObjectType : SchemaType
     {
         #region constructor
@@ -98,7 +98,7 @@ namespace SharpGLTF.SchemaReflection
     /// <remarks>
     /// This type can optionally be set as nullable.
     /// </remarks>
-    [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("BlittableType {PersistentName}")]
     public sealed class BlittableType : SchemaType
     {
         #region constructor        
@@ -133,7 +133,7 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }    
 
-    [System.Diagnostics.DebuggerDisplay("enum {PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("EnumType {PersistentName}")]
     public sealed class EnumType : SchemaType
     {
         #region constructor
@@ -178,7 +178,7 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("ArrayType {PersistentName}")]
     public sealed class ArrayType : SchemaType
     {
         #region constructor
@@ -205,7 +205,7 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }    
 
-    [System.Diagnostics.DebuggerDisplay("{PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("DictionaryType {PersistentName}")]
     public sealed class DictionaryType : SchemaType
     {
         #region lifecycle
@@ -239,7 +239,7 @@ namespace SharpGLTF.SchemaReflection
     /// <summary>
     /// Represents a field property within a <see cref="ClassType"/>
     /// </summary>
-    [System.Diagnostics.DebuggerDisplay("{FieldType.PersistentName} {PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("FieldInfo {_FieldType} {FieldType.PersistentName} {PersistentName}")]
     public sealed class FieldInfo
     {
         #region lifecycle
@@ -347,7 +347,7 @@ namespace SharpGLTF.SchemaReflection
         #endregion
     }
 
-    [System.Diagnostics.DebuggerDisplay("class {PersistentName} : {BaseClass.PersistentName}")]
+    [System.Diagnostics.DebuggerDisplay("ClassType {PersistentName} : {BaseClass.PersistentName}")]
     public sealed class ClassType : SchemaType
     {
         #region constructor
