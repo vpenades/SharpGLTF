@@ -158,7 +158,7 @@ namespace SharpGLTF.Schema2
             var texInfo = _TextureInfo?.Invoke(false);
             if (texInfo == null) return null;
 
-            return _Material.LogicalParent.LogicalTextures[texInfo._LogicalTextureIndex];
+            return _Material.LogicalParent.LogicalTextures[texInfo.LogicalTextureIndex];
         }
 
         public Texture SetTexture(
@@ -194,7 +194,7 @@ namespace SharpGLTF.Schema2
             var texInfo = _TextureInfo(true);
 
             texInfo.TextureCoordinate = texSet;
-            texInfo._LogicalTextureIndex = tex.LogicalIndex;
+            texInfo.LogicalTextureIndex = tex.LogicalIndex;
         }
 
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation = 0, int? texCoordOverride = null)

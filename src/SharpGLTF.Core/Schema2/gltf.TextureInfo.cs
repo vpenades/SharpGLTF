@@ -39,10 +39,23 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
+        /// <summary>
+        /// Index into <see cref="ModelRoot.LogicalTextures"/>
+        /// </summary>
+        public int LogicalTextureIndex
+        {
+            get => _index;
+            internal protected set => _index = value;
+        }
+
+        /// <summary>
+        /// Index into <see cref="ModelRoot.LogicalTextures"/>
+        /// </summary>
+        [Obsolete("Use LogicalTextureIndex instead", true)]
         public int _LogicalTextureIndex
         {
             get => _index;
-            set => _index = value;
+            internal protected set => _index = value;
         }
 
         /// <summary>
