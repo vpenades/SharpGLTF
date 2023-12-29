@@ -1,7 +1,8 @@
-﻿using SharpGLTF.Validation;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace SharpGLTF.Schema2
+using SharpGLTF.Validation;
+
+namespace SharpGLTF.Schema2.Tiles3D
 {
     partial class ExtStructuralMetadataMeshPrimitive
     {
@@ -16,26 +17,14 @@ namespace SharpGLTF.Schema2
 
         public List<int> PropertyTextures
         {
-            get
-            {
-                return _propertyTextures;
-            }
-            set
-            {
-                _propertyTextures = value;
-            }
+            get => _propertyTextures;
+            set => _propertyTextures = value;
         }
 
         public List<int> PropertyAttributes
         {
-            get
-            {
-                return _propertyAttributes;
-            }
-            set
-            {
-                _propertyAttributes = value;
-            }
+            get => _propertyAttributes;
+            set => _propertyAttributes = value;
         }
 
         protected override void OnValidateReferences(ValidationContext validate)
@@ -61,7 +50,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    partial class ThreeDTilesExtensions
+    partial class Tiles3DExtensions
     {
         public static void SetPropertyTextures(this MeshPrimitive primitive, List<int> propertyTextures)
         {

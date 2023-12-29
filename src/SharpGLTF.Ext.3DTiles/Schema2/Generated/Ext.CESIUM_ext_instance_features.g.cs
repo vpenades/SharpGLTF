@@ -23,7 +23,7 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
 
@@ -87,7 +87,7 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _featureIdsMinItems = 1;
-		private List<MeshExtInstanceFeatureID> _featureIds;
+		private ChildrenList<MeshExtInstanceFeatureID,MeshExtInstanceFeatures> _featureIds;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)

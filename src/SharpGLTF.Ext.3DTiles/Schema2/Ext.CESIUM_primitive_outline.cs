@@ -4,14 +4,23 @@ using System.Linq;
 
 using SharpGLTF.Validation;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.Tiles3D
 {
+    /// <remarks>
+    /// This extension is attached to a <see cref="Schema2.MeshPrimitive"/> using <see cref="Tiles3DExtensions.SetCesiumOutline"/>
+    /// </remarks>    
     partial class CesiumPrimitiveOutline
     {
+        #region lifecycle
+
         internal CesiumPrimitiveOutline(MeshPrimitive meshPrimitive)
         {
             this.meshPrimitive = meshPrimitive;
         }
+
+        #endregion
+
+        #region properties
 
         private MeshPrimitive meshPrimitive;
 
@@ -32,6 +41,8 @@ namespace SharpGLTF.Schema2
                 _indices = value.LogicalIndex;
             }
         }
+
+        #endregion
 
         #region validation
 
@@ -89,7 +100,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    partial class ThreeDTilesExtensions
+    partial class Tiles3DExtensions
     {
         /// <summary>
         /// Sets Cesium outline vertex indices

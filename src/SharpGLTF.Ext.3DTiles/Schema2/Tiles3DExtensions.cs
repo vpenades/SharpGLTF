@@ -1,9 +1,9 @@
-﻿namespace SharpGLTF.Schema2
+﻿namespace SharpGLTF.Schema2.Tiles3D
 {
     /// <summary>
     /// Extension methods for 3DTiles glTF Extensions
     /// </summary>
-    public static partial class ThreeDTilesExtensions
+    public static partial class Tiles3DExtensions
     {
         private static bool _3DTilesRegistered;
 

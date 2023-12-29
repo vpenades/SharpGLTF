@@ -23,7 +23,7 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
 

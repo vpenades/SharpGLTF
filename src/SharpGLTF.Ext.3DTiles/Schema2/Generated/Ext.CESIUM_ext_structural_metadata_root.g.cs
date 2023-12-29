@@ -23,7 +23,7 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
-namespace SharpGLTF.Schema2
+namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
 
@@ -199,7 +199,7 @@ namespace SharpGLTF.Schema2
 		
 		private String _name;
 		
-		private Dictionary<String,ClassProperty> _properties;
+		private ChildrenDictionary<ClassProperty,StructuralMetadataClass> _properties;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -315,11 +315,11 @@ namespace SharpGLTF.Schema2
 	partial class StructuralMetadataSchema : ExtraProperties
 	{
 	
-		private Dictionary<String,StructuralMetadataClass> _classes;
+		private ChildrenDictionary<StructuralMetadataClass,StructuralMetadataSchema> _classes;
 		
 		private String _description;
 		
-		private Dictionary<String,StructuralMetadataEnum> _enums;
+		private ChildrenDictionary<StructuralMetadataEnum,StructuralMetadataSchema> _enums;
 		
 		private String _id;
 		
@@ -436,7 +436,7 @@ namespace SharpGLTF.Schema2
 		
 		private String _name;
 		
-		private Dictionary<String,PropertyTableProperty> _properties;
+		private ChildrenDictionary<PropertyTableProperty,PropertyTable> _properties;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -523,7 +523,7 @@ namespace SharpGLTF.Schema2
 		
 		private String _name;
 		
-		private Dictionary<String,PropertyTextureProperty> _properties;
+		private ChildrenDictionary<PropertyTextureProperty,PropertyTexture> _properties;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -607,7 +607,7 @@ namespace SharpGLTF.Schema2
 		
 		private String _name;
 		
-		private Dictionary<String,PropertyAttributeProperty> _properties;
+		private ChildrenDictionary<PropertyAttributeProperty,PropertyAttribute> _properties;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -642,13 +642,13 @@ namespace SharpGLTF.Schema2
 	{
 	
 		private const int _propertyAttributesMinItems = 1;
-		private List<PropertyAttribute> _propertyAttributes;
+		private ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
 		
 		private const int _propertyTablesMinItems = 1;
-		private List<PropertyTable> _propertyTables;
+		private ChildrenList<PropertyTable,EXTStructuralMetadataRoot> _propertyTables;
 		
 		private const int _propertyTexturesMinItems = 1;
-		private List<PropertyTexture> _propertyTextures;
+		private ChildrenList<PropertyTexture,EXTStructuralMetadataRoot> _propertyTextures;
 		
 		private StructuralMetadataSchema _schema;
 		
