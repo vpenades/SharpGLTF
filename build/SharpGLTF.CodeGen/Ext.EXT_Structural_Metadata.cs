@@ -15,23 +15,39 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("EXT_structural_metadata glTF Mesh Primitive extension", "ExtStructuralMetadataMeshPrimitive");
-            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetadataRoot");
-            newEmitter.SetRuntimeName("Property Table in EXT_structural_metadata", "PropertyTable");
-            newEmitter.SetRuntimeName("Schema in EXT_structural_metadata", "StructuralMetadataSchema");
-            newEmitter.SetRuntimeName("Property Table Property in EXT_structural_metadata", "PropertyTableProperty");
-            newEmitter.SetRuntimeName("Property Texture in EXT_structural_metadata", "PropertyTexture");
-            newEmitter.SetRuntimeName("Property Texture Property in EXT_structural_metadata", "PropertyTextureProperty");
-            newEmitter.SetRuntimeName("Property Attribute Property in EXT_structural_metadata", "PropertyAttributeProperty");
-            newEmitter.SetRuntimeName("Class Property in EXT_structural_metadata", "ClassProperty");
-            newEmitter.SetRuntimeName("Class in EXT_structural_metadata", "StructuralMetadataClass");
-            newEmitter.SetRuntimeName("Enum Value in EXT_structural_metadata", "EnumValue");
-            newEmitter.SetRuntimeName("Enum in EXT_structural_metadata", "StructuralMetadataEnum");
-            newEmitter.SetRuntimeName("Property Attribute in EXT_structural_metadata", "PropertyAttribute");
-            newEmitter.SetRuntimeName("BOOLEAN-ENUM-MAT2-MAT3-MAT4-SCALAR-STRING-VEC2-VEC3-VEC4", "ElementType");
-            newEmitter.SetRuntimeName("FLOAT32-FLOAT64-INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "DataType");
-            newEmitter.SetRuntimeName("INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "IntegerType");
-            newEmitter.SetRuntimeName("UINT16-UINT32-UINT64-UINT8", "ArrayOffsetType");
+            newEmitter.SetRuntimeName("EXT_structural_metadata glTF Mesh Primitive extension", "ExtStructuralMetadataMeshPrimitive", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("EXT_structural_metadata glTF extension", "EXTStructuralMetadataRoot", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Table in EXT_structural_metadata", "PropertyTable", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Schema in EXT_structural_metadata", "StructuralMetadataSchema", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Table Property in EXT_structural_metadata", "PropertyTableProperty", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Texture in EXT_structural_metadata", "PropertyTexture", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Texture Property in EXT_structural_metadata", "PropertyTextureProperty", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Attribute Property in EXT_structural_metadata", "PropertyAttributeProperty", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Class Property in EXT_structural_metadata", "ClassProperty", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Class in EXT_structural_metadata", "StructuralMetadataClass", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Enum Value in EXT_structural_metadata", "EnumValue", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Enum in EXT_structural_metadata", "StructuralMetadataEnum", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Property Attribute in EXT_structural_metadata", "PropertyAttribute", Constants.CesiumNameSpace);
+
+            newEmitter.SetRuntimeName("BOOLEAN-ENUM-MAT2-MAT3-MAT4-SCALAR-STRING-VEC2-VEC3-VEC4", "ElementType", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("FLOAT32-FLOAT64-INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "DataType", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("INT16-INT32-INT64-INT8-UINT16-UINT32-UINT64-UINT8", "IntegerType", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("UINT16-UINT32-UINT64-UINT8", "ArrayOffsetType", Constants.CesiumNameSpace);
+
+            newEmitter.SetFieldToChildrenList(ctx, "EXT_structural_metadata glTF extension", "propertyTables");
+            newEmitter.SetFieldToChildrenList(ctx, "EXT_structural_metadata glTF extension", "propertyAttributes");
+            newEmitter.SetFieldToChildrenList(ctx, "EXT_structural_metadata glTF extension", "propertyTextures");
+
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Property Texture in EXT_structural_metadata", "properties");
+
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Class in EXT_structural_metadata", "properties");
+
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Property Table in EXT_structural_metadata", "properties");
+
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Property Attribute in EXT_structural_metadata", "properties");
+
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Schema in EXT_structural_metadata", "classes");
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Schema in EXT_structural_metadata", "enums");
         }
 
         public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()

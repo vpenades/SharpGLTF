@@ -15,9 +15,11 @@ namespace SharpGLTF
     
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetRuntimeName("EXT_mesh_features glTF Mesh Primitive extension", "MeshExtMeshFeatures");
-            newEmitter.SetRuntimeName("Feature ID in EXT_mesh_features", "MeshExtMeshFeatureID");
-            newEmitter.SetRuntimeName(ExtensionFeatureIdTextureName, "MeshExtMeshFeatureIDTexture");            
+            newEmitter.SetRuntimeName("EXT_mesh_features glTF Mesh Primitive extension", "MeshExtMeshFeatures", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Feature ID in EXT_mesh_features", "MeshExtMeshFeatureID", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName(ExtensionFeatureIdTextureName, "MeshExtMeshFeatureIDTexture", Constants.CesiumNameSpace);
+
+            newEmitter.SetFieldToChildrenList(ctx, "EXT_mesh_features glTF Mesh Primitive extension", "featureIds");
         }
     
         public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()

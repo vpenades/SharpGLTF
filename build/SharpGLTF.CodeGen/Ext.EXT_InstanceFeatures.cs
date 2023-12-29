@@ -11,9 +11,11 @@ namespace SharpGLTF
         private static string NodeSchemaUri => Constants.CustomExtensionsPath("EXT_instance_features", "node.EXT_instance_features.schema.json");
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
-        {
-            newEmitter.SetRuntimeName("EXT_instance_features glTF Node extension", "MeshExtInstanceFeatures");
-            newEmitter.SetRuntimeName("Feature ID in EXT_instance_features", "MeshExtInstanceFeatureID");
+        {            
+            newEmitter.SetRuntimeName("EXT_instance_features glTF Node extension", "MeshExtInstanceFeatures", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Feature ID in EXT_instance_features", "MeshExtInstanceFeatureID", Constants.CesiumNameSpace);         
+
+            newEmitter.SetFieldToChildrenList(ctx, "EXT_instance_features glTF Node extension", "featureIds");
         }
 
         public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
