@@ -17,7 +17,7 @@
   <ItemGroup>
     <Compile Include="..\Shared\Guard.cs" Link="Diagnostics\Guard.cs" />
     <Compile Include="..\Shared\_Extensions.cs" Link="_Extensions.cs" />
-    <Compile Include="..\SharpGLTF.Core\Schema2\_Extensions.cs" Link="Schema2\_Extensions.cs" />
+    <Compile Include="..\SharpGLTF.Core\Schema2\_Extensions.Nullables.cs" Link="Schema2\_Extensions.Nullables.cs" />
   </ItemGroup>
 
   <ItemGroup>
