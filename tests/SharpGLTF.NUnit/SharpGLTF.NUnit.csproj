@@ -11,7 +11,7 @@
     <PackageReference Include="nunit" Version="4.0.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="GltfValidator" Version="2.0.0-dev.3.8.202311262112" />    
-    <PackageReference Include="TestAttachments.NUnit" Version="4.0.0-Preview-20231128-1207" />    
+    <PackageReference Include="TestAttachments.NUnit" Version="4.0.0-Preview-20240102-0955" />    
   </ItemGroup>
 
   <ItemGroup>    
