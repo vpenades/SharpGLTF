@@ -7,6 +7,12 @@ namespace SharpGLTF.Schema2.Tiles3D
 {
     using Collections;
 
+    /// <summary>
+    /// Mesh Feature Ids
+    /// </summary>
+    /// <remarks>
+    /// Implemented by <see cref="MeshExtInstanceFeatureID"/> and <see cref="MeshExtMeshFeatureID"/>
+    /// </remarks>
     public interface IMeshFeatureIDInfo
     {
         /// <summary>
@@ -34,7 +40,54 @@ namespace SharpGLTF.Schema2.Tiles3D
         /// <summary>
         /// The index of the property table containing per-feature property values. Only applicable when using the `EXT_structural_metadata` extension.
         /// </summary>
-        public int? PropertyTable { get; set; }
+        public int? PropertyTableIndex { get; set; }        
+    }
+
+    public sealed class FeatureIDBuilder : IMeshFeatureIDInfo , IEquatable<IMeshFeatureIDInfo>
+    {
+        public FeatureIDBuilder(int featureCount, string label = null)
+        {
+            FeatureCount = featureCount;
+            Label = label;
+        }
+
+        public FeatureIDBuilder(int featureCount, int attribute, string label = null)
+        {
+            FeatureCount = featureCount;
+            Attribute = attribute;            
+
+            Label = label;
+        }
+
+        public FeatureIDBuilder(PropertyTable table, int? attribute = null, string label = null)
+        {
+            FeatureCount = table.Count;
+            Attribute = attribute;
+            _root = table.LogicalParent;
+            PropertyTableIndex = table.LogicalIndex;
+
+            Label = label;
+        }
+
+        private readonly EXTStructuralMetadataRoot _root;
+
+        public int FeatureCount { get; set; }
+        public int? NullFeatureId { get; set; }
+        public int? Attribute { get; set; }
+        public string Label { get; set; }
+        public int? PropertyTableIndex { get; set; }
+
+        public bool Equals(IMeshFeatureIDInfo other)
+        {
+            if (other == null) return false;
+            if (this.FeatureCount != other.FeatureCount) return false;
+            if (this.NullFeatureId != other.NullFeatureId) return false;
+            if (this.Attribute != other.Attribute) return false;
+            if (this.Label != other.Label) return false;
+            if (this.PropertyTableIndex != other.PropertyTableIndex) return false;
+
+            return true;
+        }
     }
 
     /// <remarks>
@@ -44,14 +97,15 @@ namespace SharpGLTF.Schema2.Tiles3D
     {
         #region lifecycle
 
+        /*
         public MeshExtInstanceFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null, int? nullFeatureId = null)
         {
             FeatureCount = featureCount;
             Attribute = attribute;
             Label = label;
-            PropertyTable = propertyTable;
+            PropertyTableIndex = propertyTable;
             NullFeatureId = nullFeatureId;
-        }
+        }*/
 
 
         internal MeshExtInstanceFeatureID() { }
@@ -78,7 +132,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         #endregion
 
-        #region properties        
+        #region IMeshFeatureIDInfo properties        
         public int FeatureCount
         {
             get => _featureCount;
@@ -111,7 +165,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 _label = value;
             }
         }        
-        public int? PropertyTable
+        public int? PropertyTableIndex
         {
             get => _propertyTable;
             set
@@ -158,7 +212,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         #endregion
 
-        #region properties        
+        #region IMeshFeatureIDInfo properties        
         public int FeatureCount
         {
             get => _featureCount;
@@ -191,7 +245,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 _label = value;
             }
         }                
-        public int? PropertyTable
+        public int? PropertyTableIndex
         {
             get => _propertyTable;
             set
@@ -204,6 +258,9 @@ namespace SharpGLTF.Schema2.Tiles3D
         #endregion
 
         #region API
+
+        // question: is _texture required to always exist? if that would be the case, then it should be created
+        // in the constructor an exposed as a read only property.
 
         /// <summary>
         /// Gets a texture containing feature IDs.
@@ -276,6 +333,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         public void SetChannels(IReadOnlyList<int> channels)
         {
             Guard.NotNullOrEmpty(channels, nameof(channels));
+            Guard.MustBeGreaterThanOrEqualTo(channels.Count, _channelsMinItems, nameof(channels));
 
             _channels.Clear();
             _channels.AddRange(channels);

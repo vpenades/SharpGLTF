@@ -98,7 +98,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class ClassProperty : ExtraProperties
+	partial class StructuralMetadataClassProperty : ExtraProperties
 	{
 	
 		private static readonly Boolean _arrayDefault = false;
@@ -199,7 +199,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private String _name;
 		
-		private ChildrenDictionary<ClassProperty,StructuralMetadataClass> _properties;
+		private ChildrenDictionary<StructuralMetadataClassProperty,StructuralMetadataClass> _properties;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -216,7 +216,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			{
 				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
 				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "properties": DeserializePropertyDictionary<ClassProperty>(ref reader, _properties); break;
+				case "properties": DeserializePropertyDictionary<StructuralMetadataClassProperty>(ref reader, _properties); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -230,7 +230,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class EnumValue : ExtraProperties
+	partial class StructuralMetadataEnumValue : ExtraProperties
 	{
 	
 		private String _description;
@@ -279,7 +279,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		private IntegerType? _valueType = _valueTypeDefault;
 		
 		private const int _valuesMinItems = 1;
-		private List<EnumValue> _values;
+		private ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -298,7 +298,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
 				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
 				case "valueType": _valueType = DeserializePropertyValue<IntegerType>(ref reader); break;
-				case "values": DeserializePropertyList<EnumValue>(ref reader, _values); break;
+				case "values": DeserializePropertyList<StructuralMetadataEnumValue>(ref reader, _values); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

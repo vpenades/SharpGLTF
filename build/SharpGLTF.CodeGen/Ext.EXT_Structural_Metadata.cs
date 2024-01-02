@@ -23,9 +23,9 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("Property Texture in EXT_structural_metadata", "PropertyTexture", Constants.CesiumNameSpace);
             newEmitter.SetRuntimeName("Property Texture Property in EXT_structural_metadata", "PropertyTextureProperty", Constants.CesiumNameSpace);
             newEmitter.SetRuntimeName("Property Attribute Property in EXT_structural_metadata", "PropertyAttributeProperty", Constants.CesiumNameSpace);
-            newEmitter.SetRuntimeName("Class Property in EXT_structural_metadata", "ClassProperty", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Class Property in EXT_structural_metadata", "StructuralMetadataClassProperty", Constants.CesiumNameSpace);
             newEmitter.SetRuntimeName("Class in EXT_structural_metadata", "StructuralMetadataClass", Constants.CesiumNameSpace);
-            newEmitter.SetRuntimeName("Enum Value in EXT_structural_metadata", "EnumValue", Constants.CesiumNameSpace);
+            newEmitter.SetRuntimeName("Enum Value in EXT_structural_metadata", "StructuralMetadataEnumValue", Constants.CesiumNameSpace);
             newEmitter.SetRuntimeName("Enum in EXT_structural_metadata", "StructuralMetadataEnum", Constants.CesiumNameSpace);
             newEmitter.SetRuntimeName("Property Attribute in EXT_structural_metadata", "PropertyAttribute", Constants.CesiumNameSpace);
 
@@ -38,15 +38,15 @@ namespace SharpGLTF
             newEmitter.SetFieldToChildrenList(ctx, "EXT_structural_metadata glTF extension", "propertyAttributes");
             newEmitter.SetFieldToChildrenList(ctx, "EXT_structural_metadata glTF extension", "propertyTextures");
 
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Property Attribute in EXT_structural_metadata", "properties");
             newEmitter.SetFieldToChildrenDictionary(ctx, "Property Texture in EXT_structural_metadata", "properties");
-
-            newEmitter.SetFieldToChildrenDictionary(ctx, "Class in EXT_structural_metadata", "properties");
-
             newEmitter.SetFieldToChildrenDictionary(ctx, "Property Table in EXT_structural_metadata", "properties");
 
-            newEmitter.SetFieldToChildrenDictionary(ctx, "Property Attribute in EXT_structural_metadata", "properties");
 
+            newEmitter.SetFieldToChildrenDictionary(ctx, "Class in EXT_structural_metadata", "properties");
             newEmitter.SetFieldToChildrenDictionary(ctx, "Schema in EXT_structural_metadata", "classes");
+
+            newEmitter.SetFieldToChildrenList(ctx, "Enum in EXT_structural_metadata", "values");
             newEmitter.SetFieldToChildrenDictionary(ctx, "Schema in EXT_structural_metadata", "enums");
         }
 

@@ -151,7 +151,7 @@ namespace SharpGLTF.Memory
             return result;
         }
 
-        public static List<int> GetStringOffsets(List<string> values)
+        public static List<int> GetStringOffsets(IReadOnlyList<string> values)
         {
             var offsets = new List<int>() { 0 };
             foreach (var value in values)

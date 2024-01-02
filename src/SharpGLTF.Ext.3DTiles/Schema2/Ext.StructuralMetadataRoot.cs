@@ -2,152 +2,37 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
-using OneOf;
+using DATATYPE = SharpGLTF.Schema2.Tiles3D.DataType;
+using ELEMENTTYPE = SharpGLTF.Schema2.Tiles3D.ElementType;
 
 namespace SharpGLTF.Schema2
 {
     using Collections;
     using Memory;
     using Validation;
-    using Tiles3D;
-
-    using METADATAORURI = OneOf<Tiles3D.StructuralMetadataSchema, Uri>;
+    using Tiles3D;    
 
     partial class Tiles3DExtensions
     {
-        public static void SetPropertyAttribute(
-            this ModelRoot modelRoot,
-            PropertyAttribute propertyAttribute,
-            METADATAORURI schema)
+        public static EXTStructuralMetadataRoot UseStructuralMetadata(this ModelRoot modelRoot)
         {
-            SetPropertyAttributes(modelRoot, new List<PropertyAttribute>() { propertyAttribute }, schema);
-        }
-
-        public static void SetPropertyAttributes(
-this ModelRoot modelRoot,
-List<PropertyAttribute> propertyAttributes,
-METADATAORURI schema)
-        {
-            if (propertyAttributes == null || propertyAttributes.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
-
-            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
-            // ext.PropertyAttributes = propertyAttributes;
-            throw new NotImplementedException();
-            ext.AddSchema(schema);
-        }
-
-
-        public static void SetPropertyTexture(
-    this ModelRoot modelRoot,
-    PropertyTexture propertyTexture,
-    METADATAORURI schema)
-        {
-            SetPropertyTextures(modelRoot, new List<PropertyTexture>() { propertyTexture }, schema);
-        }
-
-
-        public static void SetPropertyTextures(
-    this ModelRoot modelRoot,
-    List<PropertyTexture> propertyTextures,
-    METADATAORURI schema)
-        {
-            if (propertyTextures == null || propertyTextures.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
-
-            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
-            // ext.PropertyTextures = propertyTextures;
-            throw new NotImplementedException();
-            ext.AddSchema(schema);
-        }
-
-        public static void SetPropertyTable(
-            this ModelRoot modelRoot,
-            PropertyTable propertyTable,
-            METADATAORURI schema)
-        {
-            SetPropertyTables(modelRoot, new List<PropertyTable>() { propertyTable }, schema);
-        }
-
-        public static void SetPropertyTables(
-            this ModelRoot modelRoot,
-            List<PropertyTable> propertyTables,
-            METADATAORURI schema)
-        {
-            if (propertyTables == null || propertyTables.Count == 0) { modelRoot.RemoveExtensions<EXTStructuralMetadataRoot>(); return; }
-
-            var ext = modelRoot.UseExtension<EXTStructuralMetadataRoot>();
-            // ext.PropertyTables = propertyTables;
-            throw new NotImplementedException();
-            ext.AddSchema(schema);
-        }
-
-        public static PropertyTableProperty GetArrayPropertyTableProperty<T>(this ModelRoot model, List<List<T>> values, bool CreateArrayOffsets = true)
-        {
-            var propertyTableProperty = new PropertyTableProperty();
-            int logicalIndex = GetBufferView(model, values);
-            propertyTableProperty.Values = logicalIndex;
-
-            if (CreateArrayOffsets)
-            {
-                var arrayOffsets = BinaryTable.GetArrayOffsets(values);
-                int logicalIndexOffsets = GetBufferView(model, arrayOffsets);
-                propertyTableProperty.ArrayOffsets = logicalIndexOffsets;
-
-                if (typeof(T) == typeof(string))
-                {
-                    var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string), CultureInfo.InvariantCulture)));
-                    var stringOffsets = BinaryTable.GetStringOffsets(stringValues);
-                    int offsets = GetBufferView(model, stringOffsets);
-                    propertyTableProperty.StringOffsets = offsets;
-                }
-            }
-            return propertyTableProperty;
-        }
-
-        public static PropertyTableProperty GetPropertyTableProperty<T>(this ModelRoot model, List<T> values)
-        {
-            var propertyTableProperty = new PropertyTableProperty();
-            int logicalIndex = GetBufferView(model, values);
-            propertyTableProperty.Values = logicalIndex;
-
-            if (typeof(T) == typeof(string))
-            {
-                var stringvalues = values.ConvertAll(x => (string)Convert.ChangeType(x, typeof(string), CultureInfo.InvariantCulture));
-                var stringOffsets = BinaryTable.GetStringOffsets(stringvalues);
-                int offsets = GetBufferView(model, stringOffsets);
-                propertyTableProperty.StringOffsets = offsets;
-            }
-
-            return propertyTableProperty;
-        }
-
-        private static int GetBufferView<T>(this ModelRoot model, List<T> values)
-        {
-            var bytes = BinaryTable.GetBytes(values);
-            var bufferView = model.UseBufferView(bytes);
-            int logicalIndex = bufferView.LogicalIndex;
-            return logicalIndex;
-        }
-
-        private static int GetBufferView<T>(this ModelRoot model, List<List<T>> values)
-        {
-            List<byte> bytes = BinaryTable.GetBytesForArray(values);
-            var bufferView = model.UseBufferView(bytes.ToArray());
-            int logicalIndex = bufferView.LogicalIndex;
-            return logicalIndex;
-        }
+            return modelRoot.UseExtension<EXTStructuralMetadataRoot>();
+        }        
     }
 
     namespace Tiles3D
     {
+        /// <remarks>
+        /// Use <see cref="Tiles3DExtensions.UseStructuralMetadata(ModelRoot)"/> to create an instance of this class.
+        /// </remarks>        
         public partial class EXTStructuralMetadataRoot
         {
             #region lifecycle
 
             internal EXTStructuralMetadataRoot(ModelRoot modelRoot)
             {
-                this.modelRoot = modelRoot;
+                this.LogicalParent = modelRoot;
                 _propertyTables = new ChildrenList<PropertyTable, EXTStructuralMetadataRoot>(this);
                 _propertyAttributes = new ChildrenList<PropertyAttribute, EXTStructuralMetadataRoot>(this);
                 _propertyTextures = new ChildrenList<PropertyTexture, EXTStructuralMetadataRoot>(this);
@@ -169,7 +54,7 @@ METADATAORURI schema)
 
             #region data
 
-            private ModelRoot modelRoot;
+            public ModelRoot LogicalParent { get; }
 
             #endregion
 
@@ -184,7 +69,7 @@ METADATAORURI schema)
             internal StructuralMetadataSchema Schema
             {
                 get => _schema;
-                set { GetChildSetter(this).SetListProperty(ref _schema, value); }
+                set { GetChildSetter(this).SetProperty(ref _schema, value); }
             }
 
             internal IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
@@ -195,13 +80,73 @@ METADATAORURI schema)
 
             #region API
 
-            internal void AddSchema(METADATAORURI schema)
+            public bool TryGetEmbeddedSchema(out StructuralMetadataSchema schema)
             {
-                schema.Switch(
-                    StructuralMetadataSchema => _schema = StructuralMetadataSchema,
-                    Uri => this.SchemaUri = Uri.ToString()
-                    );
+                if (_schema != null) { schema = _schema; return true; }
+
+                schema = null;
+                return false;
             }
+
+            public StructuralMetadataSchema UseEmbeddedSchema(string id)
+            {
+                var schema = UseEmbeddedSchema();
+                schema.Id = id;
+                return schema;
+            }
+
+            public StructuralMetadataSchema UseEmbeddedSchema()
+            {
+                this.SchemaUri = null;
+
+                if (_schema == null) GetChildSetter(this).SetProperty(ref _schema, new StructuralMetadataSchema());
+
+                return _schema;
+            }            
+
+            public PropertyAttribute AddPropertyAttribute(StructuralMetadataClass schemaClass)
+            {
+                var prop = AddPropertyAttribute();
+                prop.ClassInstance = schemaClass;
+                return prop;
+            }
+
+            public PropertyAttribute AddPropertyAttribute()
+            {
+                var prop = new PropertyAttribute();
+                _propertyAttributes.Add(prop);
+                return prop;
+            }            
+
+            public PropertyTable AddPropertyTable(StructuralMetadataClass schemaClass, int? featureCount = null, string name = null)
+            {
+                var table = AddPropertyTable();
+                table.ClassInstance = schemaClass;
+                if (featureCount != null) table.Count = featureCount.Value;
+                table.Name = name;
+                return table;
+            }
+
+            public PropertyTable AddPropertyTable()
+            {
+                var prop = new PropertyTable();
+                _propertyTables.Add(prop);
+                return prop;
+            }
+
+            public PropertyTexture AddPropertyTexture(StructuralMetadataClass schemaClass)
+            {
+                var prop = AddPropertyTexture();
+                prop.ClassInstance = schemaClass;                
+                return prop;
+            }
+
+            public PropertyTexture AddPropertyTexture()
+            {
+                var prop = new PropertyTexture();
+                _propertyTextures.Add(prop);
+                return prop;
+            }            
 
             #endregion
 
@@ -214,31 +159,31 @@ METADATAORURI schema)
                     foreach (var propertyTextureProperty in propertyTexture.Properties)
                     {
                         var textureId = propertyTextureProperty.Value.LogicalTextureIndex;
-                        validate.IsNullOrIndex(nameof(propertyTexture), textureId, modelRoot.LogicalTextures);
+                        validate.IsNullOrIndex(nameof(propertyTexture), textureId, LogicalParent.LogicalTextures);
                     }
                 }
 
                 foreach (var propertyTable in PropertyTables)
                 {
-                    Guard.NotNull(Schema.Classes[propertyTable.Class], nameof(propertyTable.Class), $"Schema must have class {propertyTable.Class}");
+                    Guard.NotNull(Schema.Classes[propertyTable.ClassName], nameof(propertyTable.ClassName), $"Schema must have class {propertyTable.ClassName}");
 
                     foreach (var property in propertyTable.Properties)
                     {
-                        Guard.NotNull(Schema.Classes[propertyTable.Class].Properties[property.Key], nameof(property.Key), $"Schema must have property {property.Key}");
+                        Guard.NotNull(Schema.Classes[propertyTable.ClassName].Properties[property.Key], nameof(property.Key), $"Schema must have property {property.Key}");
 
                         var values = property.Value.Values;
-                        validate.IsNullOrIndex(nameof(propertyTable), values, modelRoot.LogicalBufferViews);
+                        validate.IsNullOrIndex(nameof(propertyTable), values, LogicalParent.LogicalBufferViews);
 
                         if (property.Value.ArrayOffsets.HasValue)
                         {
                             var arrayOffsets = property.Value.ArrayOffsets.Value;
-                            validate.IsNullOrIndex(nameof(propertyTable), arrayOffsets, modelRoot.LogicalBufferViews);
+                            validate.IsNullOrIndex(nameof(propertyTable), arrayOffsets, LogicalParent.LogicalBufferViews);
                         }
 
                         if (property.Value.StringOffsets.HasValue)
                         {
                             var stringOffsets = property.Value.StringOffsets.Value;
-                            validate.IsNullOrIndex(nameof(propertyTable), stringOffsets, modelRoot.LogicalBufferViews);
+                            validate.IsNullOrIndex(nameof(propertyTable), stringOffsets, LogicalParent.LogicalBufferViews);
                         }
                     }
                 }
@@ -249,7 +194,7 @@ METADATAORURI schema)
                     {
                         foreach (var property in @class.Value.Properties)
                         {
-                            if (property.Value.Type == ElementType.ENUM)
+                            if (property.Value.Type == ELEMENTTYPE.ENUM)
                             {
                                 Guard.IsTrue(Schema.Enums.ContainsKey(property.Value.EnumType), nameof(property.Value.EnumType), $"Enum {property.Value.EnumType} must be defined in schema");
                             }
@@ -298,7 +243,7 @@ METADATAORURI schema)
 
                 foreach (var propertyTable in PropertyTables)
                 {
-                    Guard.IsTrue(propertyTable.Class != null, nameof(propertyTable.Class), "Class must be defined");
+                    Guard.IsTrue(propertyTable.ClassName != null, nameof(propertyTable.ClassName), "Class must be defined");
                     Guard.IsTrue(propertyTable.Count > 0, nameof(propertyTable.Count), "Count must be greater than 0");
                     Guard.IsTrue(propertyTable.Properties.Count > 0, nameof(propertyTable.Properties), "Properties must be defined");
                 }
@@ -313,6 +258,11 @@ METADATAORURI schema)
             #endregion
         }
 
+        #region structural properties
+
+        /// <remarks>
+        /// Use <see cref="EXTStructuralMetadataRoot.AddPropertyTexture"/> to create an instance of this class.
+        /// </remarks> 
         public partial class PropertyTexture : IChildOfList<EXTStructuralMetadataRoot>
         {
             #region lifecycle
@@ -351,11 +301,56 @@ METADATAORURI schema)
                 set => _class = value;
             }
 
+            public StructuralMetadataClass ClassInstance
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(ClassName)) return null;
+                    var root = _GetModelRoot()?.GetExtension<EXTStructuralMetadataRoot>();
+                    if (root == null) return null;
+
+                    if (root.TryGetEmbeddedSchema(out var schema))
+                    {
+                        return schema.Classes[ClassName];
+                    }
+                    else return null;                    
+                }
+                set
+                {
+                    // Todo: check value is part of this DOM
+                    ClassName = value?.LogicalKey;
+                }
+            }
+
             public IReadOnlyDictionary<string, PropertyTextureProperty> Properties => _properties;
+
+            #endregion
+
+            #region API
+
+            private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent;
+
+            public PropertyTextureProperty CreateProperty(string key, Texture texture, IReadOnlyList<int> channels = null)
+            {
+                var property = CreateProperty(key);
+                property.Texture = texture;
+                if (channels != null) property.Channels = channels;
+                return property;
+            }
+
+            public PropertyTextureProperty CreateProperty(string key)
+            {
+                var property = new PropertyTextureProperty();
+                _properties[key] = property;
+                return property;
+            }
 
             #endregion
         }
 
+        /// <remarks>
+        /// Use <see cref="PropertyTexture.CreateProperty(string)"/> to create an instance of this class.
+        /// </remarks> 
         public partial class PropertyTextureProperty : IChildOfDictionary<PropertyTexture>
         {
             #region lifecycle
@@ -382,11 +377,36 @@ METADATAORURI schema)
 
             #region data
 
-            public List<int> Channels => _channels;
+            private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent.LogicalParent;
 
-            #endregion
+            public IReadOnlyList<int> Channels
+            {
+                get => _channels;
+                set
+                {
+                    _channels.Clear();
+                    _channels.AddRange(value);
+                }
+            }            
+
+            public Schema2.Texture Texture
+            {
+                get => _GetModelRoot().LogicalTextures[LogicalTextureIndex];
+                set
+                {
+                    Guard.NotNull(value, nameof(value));
+                    Guard.MustShareLogicalParent(_GetModelRoot(), nameof(MeshExtMeshFeatureIDTexture), value, nameof(value));
+
+                    LogicalTextureIndex = value.LogicalIndex;
+                }
+            }
+
+            #endregion            
         }
 
+        /// <remarks>
+        /// Use <see cref="EXTStructuralMetadataRoot.AddPropertyAttribute"/> to create an instance of this class.
+        /// </remarks> 
         public partial class PropertyAttribute : IChildOfList<EXTStructuralMetadataRoot>
         {
             #region lifecycle
@@ -424,18 +444,55 @@ METADATAORURI schema)
             #endregion
 
             #region properties
-            public string Class
+            public string ClassName
             {
                 get => _class;
                 set => _class = value;
+            }
+
+            public StructuralMetadataClass ClassInstance
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(ClassName)) return null;
+                    var root = _GetModelRoot()?.GetExtension<EXTStructuralMetadataRoot>();
+                    if (root == null) return null;
+
+                    if (root.TryGetEmbeddedSchema(out var schema))
+                    {
+                        return schema.Classes[ClassName];
+                    }
+                    else return null;
+                }
+                set
+                {
+                    // Todo: check value is part of this DOM
+                    ClassName = value?.LogicalKey;
+                }
             }
 
             public IReadOnlyDictionary<string, PropertyAttributeProperty> Properties => _properties;
 
             #endregion
 
+            #region API
+
+            private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent;
+
+            public PropertyAttributeProperty CreateProperty(string key)
+            {
+                var property = new PropertyAttributeProperty();
+                _properties[key] = property;
+                return property;
+            }
+
+            #endregion
+
         }
 
+        /// <remarks>
+        /// Use <see cref="PropertyAttribute.CreateProperty(string)"/> to create an instance of this class.
+        /// </remarks> 
         public partial class PropertyAttributeProperty : IChildOfDictionary<PropertyAttribute>
         {
             #region child properties
@@ -463,7 +520,227 @@ METADATAORURI schema)
             #endregion
         }
 
-        public partial class StructuralMetadataSchema : IChildOfList<EXTStructuralMetadataRoot>
+        /// <remarks>
+        /// Use <see cref="EXTStructuralMetadataRoot.AddPropertyTable"/> to create an instance of this class.
+        /// </remarks> 
+        public partial class PropertyTable : IChildOfList<EXTStructuralMetadataRoot>
+        {
+            #region lifecycle
+            internal PropertyTable()
+            {
+                _properties = new ChildrenDictionary<PropertyTableProperty, PropertyTable>(this);
+
+                _count = _countMinimum;
+            }           
+
+            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            {
+                return base.GetLogicalChildren()
+                    .Concat(_properties.Values);
+            }
+
+            #endregion
+
+            #region child properties
+
+            public int LogicalIndex { get; private set; } = -1;
+            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
+
+            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties
+
+            public IReadOnlyDictionary<string, PropertyTableProperty> Properties => _properties;
+
+            public string ClassName
+            {
+                get => _class;
+                set => _class = value;
+            }
+
+            public StructuralMetadataClass ClassInstance
+            {
+                get
+                {
+                    if (string.IsNullOrEmpty(ClassName)) return null;
+                    var root = _GetModelRoot()?.GetExtension<EXTStructuralMetadataRoot>();
+                    if (root == null) return null;
+
+                    if (root.TryGetEmbeddedSchema(out var schema))
+                    {
+                        return schema.Classes[ClassName];
+                    }
+                    else return null;
+                }
+                set
+                {
+                    // Todo: check value is part of this DOM
+                    ClassName = value?.LogicalKey;
+                }
+            }
+
+            public string Name
+            {
+                get => _name;
+                set => _name = value;
+            }            
+
+            public int Count
+            {
+                get => _count;
+                set
+                {
+                    Guard.MustBeGreaterThanOrEqualTo(value, _countMinimum, nameof(value));
+                    _count = value;
+                }
+            }
+
+            #endregion
+
+            #region API
+
+            private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent;
+
+            public PropertyTableProperty UseProperty(StructuralMetadataClassProperty key)
+            {
+                return UseProperty(key.LogicalKey);
+            }
+
+            public PropertyTableProperty UseProperty(string key)
+            {
+                if (_properties.TryGetValue(key, out var value)) return value;
+
+                value = new PropertyTableProperty();
+                _properties[key] = value;
+                return value;
+            }            
+
+            #endregion
+        }
+
+        /// <remarks>
+        /// Use <see cref="PropertyTable.UseProperty(string)"/> to create an instance of this class.
+        /// </remarks>  
+        public partial class PropertyTableProperty : IChildOfDictionary<PropertyTable>
+        {
+            #region child properties
+
+            public string LogicalKey { get; private set; }
+
+            public PropertyTable LogicalParent { get; private set; }
+
+            void IChildOfDictionary<PropertyTable>.SetLogicalParent(PropertyTable parent, string key)
+            {
+                LogicalParent = parent;
+                LogicalKey = key;
+            }
+
+            #endregion
+
+            #region properties
+
+            /// <summary>
+            /// this is an index to a BufferView
+            /// </summary>
+            public int Values
+            {
+                get => _values;
+                set => _values = value;
+            }
+
+            public int? ArrayOffsets
+            {
+                get => _arrayOffsets;
+                set => _arrayOffsets = value;
+            }
+
+            public int? StringOffsets
+            {
+                get => _stringOffsets;
+                set => _stringOffsets = value;
+            }
+
+            #endregion
+
+            #region API
+
+            private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent.LogicalParent;
+
+            public void SetValues2D<T>(List<List<T>> values, bool CreateArrayOffsets = true)
+            {
+                var root = _GetModelRoot();
+                
+                int logicalIndex = GetBufferView(root, values);
+                this.Values = logicalIndex;
+
+                if (CreateArrayOffsets)
+                {
+                    var arrayOffsets = BinaryTable.GetArrayOffsets(values);
+                    int logicalIndexOffsets = GetBufferView(root, arrayOffsets);
+                    this.ArrayOffsets = logicalIndexOffsets;
+
+                    if (typeof(T) == typeof(string))
+                    {
+                        var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string), CultureInfo.InvariantCulture)));
+                        var stringOffsets = BinaryTable.GetStringOffsets(stringValues);
+                        int offsets = GetBufferView(root, stringOffsets);
+                        this.StringOffsets = offsets;
+                    }
+                }                
+            }
+
+            public void SetValues1D<T>(params T[] values)
+            {
+                var root = _GetModelRoot();
+                
+                int logicalIndex = GetBufferView(root, values);
+                this.Values = logicalIndex;
+
+                if (typeof(T) == typeof(string))
+                {
+                    var stringvalues = values
+                        .Select(x => (string)Convert.ChangeType(x, typeof(string), CultureInfo.InvariantCulture))
+                        .ToList();
+
+                    var stringOffsets = BinaryTable.GetStringOffsets(stringvalues);
+                    int offsets = GetBufferView(root, stringOffsets);
+                    this.StringOffsets = offsets;
+                }                
+            }
+
+            private static int GetBufferView<T>(ModelRoot model, IReadOnlyList<T> values)
+            {
+                var bytes = BinaryTable.GetBytes(values);
+                var bufferView = model.UseBufferView(bytes);
+                int logicalIndex = bufferView.LogicalIndex;
+                return logicalIndex;
+            }
+
+            private static int GetBufferView<T>(ModelRoot model, List<List<T>> values)
+            {
+                List<byte> bytes = BinaryTable.GetBytesForArray(values);
+                var bufferView = model.UseBufferView(bytes.ToArray());
+                int logicalIndex = bufferView.LogicalIndex;
+                return logicalIndex;
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region structural schema
+
+        /// <remarks>
+        /// Use <see cref="EXTStructuralMetadataRoot.UseEmbeddedSchema()"/> to create an instance of this class.
+        /// </remarks>
+        public partial class StructuralMetadataSchema : IChildOf<EXTStructuralMetadataRoot>
         {
             #region lifecycle
             public StructuralMetadataSchema()
@@ -481,16 +758,13 @@ METADATAORURI schema)
 
             #endregion
 
-            #region child properties
-
-            public int LogicalIndex { get; private set; } = -1;
+            #region child properties           
 
             public EXTStructuralMetadataRoot LogicalParent { get; private set; }
 
-            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            void IChildOf<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent)
             {
-                LogicalParent = parent;
-                LogicalIndex = index;
+                LogicalParent = parent;                
             }
 
             #endregion
@@ -525,14 +799,49 @@ METADATAORURI schema)
             }
 
             #endregion
+
+            #region API
+
+            public StructuralMetadataClass UseClassMetadata(string key)
+            {
+                if (_classes.TryGetValue(key, out var value)) return value;
+
+                value = new StructuralMetadataClass();
+                _classes[key] = value;
+                return value;
+            }
+
+            public StructuralMetadataEnum UseEnumMetadata(string key, params (string name, int value)[] enumValues)
+            {
+                var enumType = UseEnumMetadata(key);
+                foreach(var (name, value) in enumValues)
+                {
+                    enumType.AddEnum(name, value);
+                }
+                return enumType;
+            }
+
+            public StructuralMetadataEnum UseEnumMetadata(string key)
+            {
+                if (_enums.TryGetValue(key, out var value)) return value;
+
+                value = new StructuralMetadataEnum();
+                _enums[key] = value;
+                return value;
+            }
+
+            #endregion
         }
 
+        /// <remarks>
+        /// Use <see cref="StructuralMetadataSchema.UseEnumMetadata(string)"/> to create an instance of this class.
+        /// </remarks> 
         public partial class StructuralMetadataEnum : IChildOfDictionary<StructuralMetadataSchema>
         {
             #region lifecycle
             public StructuralMetadataEnum()
             {
-                _values = new List<EnumValue>();
+                _values = new ChildrenList<StructuralMetadataEnumValue, StructuralMetadataEnum>(this);
             }
 
             #endregion
@@ -553,6 +862,8 @@ METADATAORURI schema)
 
             #region properties
 
+            public IReadOnlyList<StructuralMetadataEnumValue> Values => _values;
+
             public string Name
             {
                 get => _name;
@@ -563,17 +874,50 @@ METADATAORURI schema)
                 get => _description;
                 set => _description = value;
             }
-            public List<EnumValue> Values
+
+            #endregion
+
+            #region API
+
+            public StructuralMetadataEnumValue AddEnum(string name, int value, string desc = null)
             {
-                get => _values;
-                set => _values = value;
+                var prop = AddEnum();
+                prop.Name = name;
+                prop.Value = value;
+                prop.Description = desc;
+                return prop;
+            }
+
+            public StructuralMetadataEnumValue AddEnum()
+            {
+                var prop = new StructuralMetadataEnumValue();
+                _values.Add(prop);
+                return prop;
             }
 
             #endregion
         }
 
-        public partial class EnumValue
+        /// <remarks>
+        /// Use <see cref="StructuralMetadataEnum.AddEnum()"/> to create an instance of this class.
+        /// </remarks> 
+        public partial class StructuralMetadataEnumValue : IChildOfList<StructuralMetadataEnum>
         {
+            #region child properties
+
+            public int LogicalIndex { get; private set; } = -1;
+
+            public StructuralMetadataEnum LogicalParent { get; private set; }
+
+            void IChildOfList<StructuralMetadataEnum>.SetLogicalParent(StructuralMetadataEnum parent, int index)
+            {
+                LogicalParent = parent;
+                LogicalIndex = index;
+            }
+
+            #endregion
+
+            #region properties
             public string Description
             {
                 get => _description;
@@ -589,15 +933,20 @@ METADATAORURI schema)
                 get => _value;
                 set => _value = value;
             }
+
+            #endregion
         }
 
+        /// <remarks>
+        /// Use <see cref="StructuralMetadataSchema.UseClassMetadata(string)"/> to create an instance of this class.
+        /// </remarks> 
         public partial class StructuralMetadataClass : IChildOfDictionary<StructuralMetadataSchema>
         {
             #region lifecycle
 
             public StructuralMetadataClass()
             {
-                _properties = new ChildrenDictionary<ClassProperty, StructuralMetadataClass>(this);
+                _properties = new ChildrenDictionary<StructuralMetadataClassProperty, StructuralMetadataClass>(this);
             }
 
             protected override IEnumerable<ExtraProperties> GetLogicalChildren()
@@ -624,7 +973,7 @@ METADATAORURI schema)
 
             #region properties
 
-            public IReadOnlyDictionary<string, ClassProperty> Properties => _properties;
+            public IReadOnlyDictionary<string, StructuralMetadataClassProperty> Properties => _properties;
 
             public string Name
             {
@@ -640,9 +989,46 @@ METADATAORURI schema)
 
             #endregion
 
+            #region API
+
+            public StructuralMetadataClass WithNameAndDesc(string name, string desc = null)
+            {
+                this.Name = name;
+                this.Description = desc;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty UseProperty(string key)
+            {
+                if (_properties.TryGetValue(key, out var value)) return value;
+
+                value = new StructuralMetadataClassProperty();
+                _properties[key] = value;
+                return value;
+            }
+
+            public PropertyTexture AddPropertyTexture()
+            {
+                return LogicalParent.LogicalParent.AddPropertyTexture(this);
+            }
+
+            public PropertyAttribute AddPropertyAttribute()
+            {
+                return LogicalParent.LogicalParent.AddPropertyAttribute(this);
+            }
+
+            public PropertyTable AddPropertyTable(int? featureCount = null, string name = null)
+            {
+                return LogicalParent.LogicalParent.AddPropertyTable(this, featureCount, name);
+            }
+
+            #endregion
         }
 
-        public partial class ClassProperty : IChildOfDictionary<StructuralMetadataClass>
+        /// <remarks>
+        /// Use <see cref="StructuralMetadataClass.UseProperty(string)"/> to create an instance of this class.
+        /// </remarks> 
+        public partial class StructuralMetadataClassProperty : IChildOfDictionary<StructuralMetadataClass>
         {
             #region child properties
 
@@ -671,7 +1057,7 @@ METADATAORURI schema)
                 set => _description = value;
             }
 
-            public ElementType Type
+            public ELEMENTTYPE Type
             {
                 get => _type;
                 set => _type = value;
@@ -683,28 +1069,28 @@ METADATAORURI schema)
                 set => _enumType = value;
             }
 
-            public DataType? ComponentType
+            public DATATYPE? ComponentType
             {
                 get => _componentType;
                 set => _componentType = value;
             }
 
-            public bool? Required
+            public bool Required
             {
-                get => _required;
-                set => _required = value;
+                get => _required ?? _requiredDefault;
+                set => _required = value.AsNullable(_requiredDefault);
             }
 
-            public bool? Normalized
+            public bool Normalized
             {
-                get => _normalized;
-                set => _normalized = value;
+                get => _normalized ?? _normalizedDefault;
+                set => _normalized = value.AsNullable(_normalizedDefault);
             }
 
-            public bool? Array
+            public bool Array
             {
-                get => _array;
-                set => _array = value;
+                get => _array ?? _arrayDefault;
+                set => _array = value.AsNullable(_arrayDefault);
             }
 
             public int? Count
@@ -714,114 +1100,53 @@ METADATAORURI schema)
             }
 
             #endregion
-        }
 
-        /// <remarks>
-        /// Represents a Propery table of <see cref="EXTStructuralMetadataRoot"/>
-        /// </remarks> 
-        public partial class PropertyTable : IChildOfList<EXTStructuralMetadataRoot>
-        {
-            #region lifecycle
-            public PropertyTable()
+            #region API
+
+            public StructuralMetadataClassProperty WithNameAndDesc(string name, string desc = null)
             {
-                _properties = new ChildrenDictionary<PropertyTableProperty, PropertyTable>(this);
-            }
-            public PropertyTable(string Class, int Count, string Name = "") : this()
-            {
-                _class = Class;
-                _count = Count;
-                _name = Name;
+                this.Name = name;
+                this.Description = desc;
+                return this;
             }
 
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false)
             {
-                return base.GetLogicalChildren()
-                    .Concat(_properties.Values);
+                this.Type = etype;
+                this.ComponentType = ctype;
+                this.Normalized = normalized;
+                this.Array = false;
+                return this;
             }
 
-            #endregion
-
-            #region child properties
-
-            public int LogicalIndex { get; private set; } = -1;
-            public EXTStructuralMetadataRoot LogicalParent { get; private set; }
-
-            void IChildOfList<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent, int index)
+            public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, int? count = null)
             {
-                LogicalParent = parent;
-                LogicalIndex = index;
+                this.Type = etype;
+                this.ComponentType = ctype;
+                this.Normalized = normalized;
+                this.Array = true;
+                this.Count = count;
+                return this;
             }
 
-            #endregion
-
-            #region properties
-
-            public IReadOnlyDictionary<string, PropertyTableProperty> Properties => _properties;
-
-            public string Name
+            public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumType, int? count = null)
             {
-                get => _name;
-                set => _name = value;
+                return WithEnumArrayType(enumType.LogicalKey, count);
             }
 
-            public string Class
+            public StructuralMetadataClassProperty WithEnumArrayType(string enumType, int? count = null)
             {
-                get => _class;
-                set => _class = value;
-            }
-
-            public int Count
-            {
-                get => _count;
-                set => _count = value;
+                this.Type = ELEMENTTYPE.ENUM;
+                this.EnumType = enumType;                
+                this.Array = true;
+                this.Count = count;
+                return this;
             }
 
             #endregion
         }
 
-        /// <remarks>
-        /// Represents a Property of <see cref="PropertyTable"/>
-        /// </remarks>    
-        public partial class PropertyTableProperty : IChildOfDictionary<PropertyTable>
-        {
-            #region child properties
-
-            public string LogicalKey { get; private set; }
-
-            public PropertyTable LogicalParent { get; private set; }
-
-            void IChildOfDictionary<PropertyTable>.SetLogicalParent(PropertyTable parent, string key)
-            {
-                LogicalParent = parent;
-                LogicalKey = key;
-            }
-
-            #endregion
-
-            #region properties
-            /// <summary>
-            /// this is an index to a BufferView
-            /// </summary>
-            public int Values
-            {
-                get => _values;
-                set => _values = value;
-            }
-
-            public int? ArrayOffsets
-            {
-                get => _arrayOffsets;
-                set => _arrayOffsets = value;
-            }
-
-            public int? StringOffsets
-            {
-                get => _stringOffsets;
-                set => _stringOffsets = value;
-            }
-
-            #endregion
-        }
+        #endregion
     }
 }
 

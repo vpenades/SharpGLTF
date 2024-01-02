@@ -46,8 +46,8 @@ namespace SharpGLTF.Schema2.Tiles3D
             var model = scene.ToGltf2();
 
             // Set the FeatureIds
-            var featureIdAttribute = new MeshExtInstanceFeatureID(1, 0);            
-            model.LogicalMeshes[0].Primitives[0].SetMeshFeatureIds((featureIdAttribute,null,null));
+            var featureIdAttribute = new FeatureIDBuilder(1, 0);            
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureIdAttribute,null,null));
 
             // Validate the FeatureIds
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
@@ -107,10 +107,10 @@ namespace SharpGLTF.Schema2.Tiles3D
             var model = scene.ToGltf2();
 
             // Set the FeatureIds, pointing to the red channel of the texture            
-            var featureId = new MeshExtInstanceFeatureID(4);            
+            var featureId = new FeatureIDBuilder(4);            
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
-            primitive.SetMeshFeatureIds((featureId, model.LogicalTextures[0], new int[] { 0 }));
+            primitive.AddMeshFeatureIds((featureId, model.LogicalTextures[0], new int[] { 0 }));
 
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)primitive.Extensions.FirstOrDefault();
             Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);

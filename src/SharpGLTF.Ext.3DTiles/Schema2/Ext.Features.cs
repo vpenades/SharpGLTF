@@ -14,11 +14,11 @@ namespace SharpGLTF.Schema2
     {
         internal static void ValidateFeatureIdReferences(this IMeshFeatureIDInfo featureId, ModelRoot root)
         {
-            if (featureId.PropertyTable.HasValue)
+            if (featureId.PropertyTableIndex.HasValue)
             {
                 var metadataExtension = root.GetExtension<EXTStructuralMetadataRoot>();
                 Guard.NotNull(metadataExtension, nameof(metadataExtension), "EXT_Structural_Metadata extension is not found.");
-                Guard.NotNull(metadataExtension.PropertyTables[featureId.PropertyTable.Value], nameof(featureId.PropertyTable), $"Property table index {featureId.PropertyTable.Value} does not exist");
+                Guard.NotNull(metadataExtension.PropertyTables[featureId.PropertyTableIndex.Value], nameof(featureId.PropertyTableIndex), $"Property table index {featureId.PropertyTableIndex.Value} does not exist");
             }
         }
 
@@ -40,9 +40,9 @@ namespace SharpGLTF.Schema2
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)featureId.Attribute, 0, nameof(featureId.Attribute));
             }
-            if (featureId.PropertyTable.HasValue)
+            if (featureId.PropertyTableIndex.HasValue)
             {
-                Guard.MustBeGreaterThanOrEqualTo((int)featureId.PropertyTable, 0, nameof(featureId.PropertyTable));
+                Guard.MustBeGreaterThanOrEqualTo((int)featureId.PropertyTableIndex, 0, nameof(featureId.PropertyTableIndex));
             }
         }
 
@@ -134,7 +134,7 @@ namespace SharpGLTF.Schema2
                 instance.NullFeatureId = properties.NullFeatureId;
                 instance.Label = properties.Label;
                 instance.Attribute = properties.Attribute;
-                instance.PropertyTable = properties.PropertyTable;
+                instance.PropertyTableIndex = properties.PropertyTableIndex;
 
                 return instance;
             }
@@ -234,7 +234,7 @@ namespace SharpGLTF.Schema2
                 instance.NullFeatureId = properties.NullFeatureId;
                 instance.Label = properties.Label;
                 instance.Attribute = properties.Attribute;
-                instance.PropertyTable = properties.PropertyTable;
+                instance.PropertyTableIndex = properties.PropertyTableIndex;
 
                 if (texture != null)
                 {
