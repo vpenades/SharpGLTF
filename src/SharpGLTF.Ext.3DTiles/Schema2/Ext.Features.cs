@@ -68,7 +68,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Adds the FeatureIds to a MeshPrimitive
         /// </summary>        
-        public static MeshExtMeshFeatureID[] AddMeshFeatureIds(this MeshPrimitive primitive, params IMeshFeatureIDInfo []fids)
+        public static MeshExtMeshFeatureID[] AddMeshFeatureIds(this MeshPrimitive primitive, params IMeshFeatureIDInfo[] fids)
         {
             if (fids == null || fids.Length == 0) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return Array.Empty<MeshExtMeshFeatureID>(); }
 
@@ -83,9 +83,9 @@ namespace SharpGLTF.Schema2
 
                 if (fid is FeatureIDBuilder builder && builder.Texture != null)
                 {
-                    var featureIdBuilder = (FeatureIDBuilder)fid;
-                    featureIdBuilder.Texture = builder.Texture;
-                    featureIdBuilder.Channels = builder.Channels;
+                    var texture = result[i].UseTexture();
+                    texture.Texture = builder.Texture;
+                    texture.SetChannels(builder.Channels);
                 }
             }
 
@@ -242,6 +242,7 @@ namespace SharpGLTF.Schema2
                 instance.Label = properties.Label;
                 instance.Attribute = properties.Attribute;
                 instance.PropertyTableIndex = properties.PropertyTableIndex;
+
                 return instance;
             }
 

@@ -114,11 +114,12 @@ namespace SharpGLTF.Schema2.Tiles3D
             var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)primitive.Extensions.FirstOrDefault();
             Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
 
-            // var firstFeatureId = cesiumExtMeshFeaturesExtension.FeatureIds[0];
-            // var texCoord = firstFeatureId.GetTexture().TextureCoordinate;
-            // var textureIdVertexAccessor = primitive.GetVertexAccessor($"TEXCOORD_{texCoord}");
-            // Assert.That(textureIdVertexAccessor, Is.Not.Null);
-            // Assert.That(textureIdVertexAccessor.AsVector2Array(), Has.Count.EqualTo(4));
+            var firstFeatureId = cesiumExtMeshFeaturesExtension.FeatureIds[0];
+            var texture = firstFeatureId.GetTexture();
+            var texCoord = texture.TextureCoordinate;
+            var textureIdVertexAccessor = primitive.GetVertexAccessor($"TEXCOORD_{texCoord}");
+            Assert.That(textureIdVertexAccessor, Is.Not.Null);
+            Assert.That(textureIdVertexAccessor.AsVector2Array(), Has.Count.EqualTo(4));
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
 

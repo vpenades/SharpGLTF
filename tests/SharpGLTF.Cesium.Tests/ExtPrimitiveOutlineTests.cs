@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Numerics;
 using NUnit.Framework;
-using SharpGLTF.Schema2;
 using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;

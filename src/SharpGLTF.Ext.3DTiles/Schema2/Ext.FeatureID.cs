@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace SharpGLTF.Schema2.Tiles3D
@@ -255,9 +254,6 @@ namespace SharpGLTF.Schema2.Tiles3D
         #endregion
 
         #region API
-
-        // question: is _texture required to always exist? if that would be the case, then it should be created
-        // in the constructor an exposed as a read only property.
 
         /// <summary>
         /// Gets a texture containing feature IDs.
