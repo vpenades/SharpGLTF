@@ -3,10 +3,8 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Scenes;
-using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace SharpGLTF.Schema2.Tiles3D

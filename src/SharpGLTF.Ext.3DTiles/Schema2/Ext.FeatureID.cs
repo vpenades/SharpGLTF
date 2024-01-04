@@ -45,28 +45,22 @@ namespace SharpGLTF.Schema2.Tiles3D
 
     public sealed class FeatureIDBuilder : IMeshFeatureIDInfo , IEquatable<IMeshFeatureIDInfo>
     {
-        public FeatureIDBuilder(int featureCount, string label = null)
+        public FeatureIDBuilder(int featureCount, int? attribute = null, string label = null, int? nullFeatureId = null)
         {
             FeatureCount = featureCount;
             Label = label;
+            Attribute = attribute;
+            NullFeatureId = nullFeatureId;
         }
 
-        public FeatureIDBuilder(int featureCount, int attribute, string label = null)
-        {
-            FeatureCount = featureCount;
-            Attribute = attribute;            
-
-            Label = label;
-        }
-
-        public FeatureIDBuilder(PropertyTable table, int? attribute = null, string label = null)
+        public FeatureIDBuilder(PropertyTable table, int? attribute = null, string label = null, int? nullFeatureId = null)
         {
             FeatureCount = table.Count;
             Attribute = attribute;
             _root = table.LogicalParent;
             PropertyTableIndex = table.LogicalIndex;
-
             Label = label;
+            NullFeatureId = nullFeatureId;
         }
 
         private readonly EXTStructuralMetadataRoot _root;
