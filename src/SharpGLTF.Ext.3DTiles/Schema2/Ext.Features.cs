@@ -68,18 +68,18 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Adds the FeatureIds to a MeshPrimitive
         /// </summary>        
-        public static MeshExtMeshFeatureID[] AddMeshFeatureIds(this MeshPrimitive primitive, params (IMeshFeatureIDInfo fid, Texture tex, IReadOnlyList<int> channels)[] featureIds)
+        public static MeshExtMeshFeatureID[] AddMeshFeatureIds(this MeshPrimitive primitive, params IMeshFeatureIDInfo []fids)
         {
-            if (featureIds == null || featureIds.Length == 0) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return Array.Empty<MeshExtMeshFeatureID>(); }
+            if (fids == null || fids.Length == 0) { primitive.RemoveExtensions<MeshExtMeshFeatures>(); return Array.Empty<MeshExtMeshFeatureID>(); }
 
             var ext = primitive.UseExtension<MeshExtMeshFeatures>();
 
-            var result = new MeshExtMeshFeatureID[featureIds.Length];
+            var result = new MeshExtMeshFeatureID[fids.Length];
 
             for (int i = 0; i < result.Length; ++i)
             {
-                var (fid, tex, channels) = featureIds[i];
-                result[i] = ext.CreateFeatureID(fid, tex, channels);
+                var fid = fids[i];
+                result[i] = ext.CreateFeatureID(fid);
             }
 
             return result;
@@ -226,7 +226,7 @@ namespace SharpGLTF.Schema2
 
             #region API
 
-            public MeshExtMeshFeatureID CreateFeatureID(IMeshFeatureIDInfo properties, Texture texture = null, IReadOnlyList<int> texChannels = null)
+            public MeshExtMeshFeatureID CreateFeatureID(IMeshFeatureIDInfo properties)
             {
                 var instance = CreateFeatureID();
 
@@ -235,14 +235,6 @@ namespace SharpGLTF.Schema2
                 instance.Label = properties.Label;
                 instance.Attribute = properties.Attribute;
                 instance.PropertyTableIndex = properties.PropertyTableIndex;
-
-                if (texture != null)
-                {
-                    var texInfo = instance.UseTexture();
-                    texInfo.Texture = texture;
-                    if (texChannels != null) texInfo.SetChannels(texChannels);
-                }
-
                 return instance;
             }
 

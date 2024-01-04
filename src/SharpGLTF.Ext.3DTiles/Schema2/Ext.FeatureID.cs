@@ -71,6 +71,9 @@ namespace SharpGLTF.Schema2.Tiles3D
         public string Label { get; set; }
         public int? PropertyTableIndex { get; set; }
 
+        public Texture Texture { get; set; }
+        public IReadOnlyList<int> Channels { get; set; }
+
         public bool Equals(IMeshFeatureIDInfo other)
         {
             if (other == null) return false;

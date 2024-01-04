@@ -144,7 +144,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             var featureId = new FeatureIDBuilder(propertyTable);            
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
-            primitive.AddMeshFeatureIds((featureId, model.LogicalTextures[0], new[] {0}));
+            primitive.AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
 
@@ -303,7 +303,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             var featureId0 = new FeatureIDBuilder(examplePropertyTable, 0);
             var featureId1 = new FeatureIDBuilder(examplePropertyTable, 1);
 
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds( (featureId0, null, null), (featureId1, null, null) );
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds( featureId0, featureId1 );
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
@@ -369,7 +369,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
 
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId, null, null));
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");
@@ -461,7 +461,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
 
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId, null, null));
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
@@ -535,7 +535,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             // FeatureID 1: featureCount=1, attribute=1, porpertyTable=1
             var featureId1 = new FeatureIDBuilder(secondPropertyTable, 1);
             
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId0, null,null), (featureId1,null,null));
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId0, featureId1);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
