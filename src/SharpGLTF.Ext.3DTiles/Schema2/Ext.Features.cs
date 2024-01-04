@@ -80,6 +80,13 @@ namespace SharpGLTF.Schema2
             {
                 var fid = fids[i];
                 result[i] = ext.CreateFeatureID(fid);
+
+                if (fid is FeatureIDBuilder builder && builder.Texture != null)
+                {
+                    var featureIdBuilder = (FeatureIDBuilder)fid;
+                    featureIdBuilder.Texture = builder.Texture;
+                    featureIdBuilder.Channels = builder.Channels;
+                }
             }
 
             return result;
