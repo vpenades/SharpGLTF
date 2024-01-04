@@ -85,7 +85,10 @@ namespace SharpGLTF.Schema2
                 {
                     var texture = result[i].UseTexture();
                     texture.Texture = builder.Texture;
-                    texture.SetChannels(builder.Channels);
+                    if (builder.Channels != null)
+                    {
+                        texture.SetChannels(builder.Channels);
+                    }
                 }
             }
 
