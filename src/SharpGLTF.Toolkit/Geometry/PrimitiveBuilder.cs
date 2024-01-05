@@ -111,6 +111,8 @@ namespace SharpGLTF.Geometry
         #endif
         public Type VertexType => typeof(VertexBuilder<TvG, TvM, TvS>);
 
+        public Func<IVertexBuilder> VertexFactory => () => new VertexBuilder<TvG, TvM, TvS>();
+
         /// <summary>
         /// Gets the list of vertices used by this primitive.
         /// </summary>

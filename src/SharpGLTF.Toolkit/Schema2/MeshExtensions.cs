@@ -10,6 +10,7 @@ using SharpGLTF.Geometry.VertexTypes;
 
 using MESHXFORM = SharpGLTF.Transforms.IGeometryTransform;
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SharpGLTF.Schema2
 {
@@ -483,12 +484,12 @@ namespace SharpGLTF.Schema2
             var points = prim.GetPointIndices();
 
             VertexBufferColumns vertices = null;
-            Type vtype = null;
+            Func<IVertexBuilder> vtype = null;
 
             foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
                 vertices ??= prim.GetVertexColumns();
-                vtype ??= vertices.GetCompatibleVertexType();
+                vtype ??= vertices.GetCompatibleVertexType().BuilderFactory;
 
                 var xvertices = xinst != null
                     ? vertices.WithTransform(xinst)
@@ -519,7 +520,7 @@ namespace SharpGLTF.Schema2
             if (!lines.Any()) yield break;
 
             var vertices = prim.GetVertexColumns();
-            var vtype = vertices.GetCompatibleVertexType();
+            var vtype = vertices.GetCompatibleVertexType().BuilderFactory;
 
             foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
@@ -554,7 +555,7 @@ namespace SharpGLTF.Schema2
             foreach (var xinst in Transforms.InstancingTransform.Evaluate(xform))
             {
                 var xvertices = xinst != null ? vertices.WithTransform(xinst) : vertices;
-                var vtype = vertices.GetCompatibleVertexType();
+                var vtype = vertices.GetCompatibleVertexType().BuilderFactory;
 
                 foreach (var (ta, tb, tc) in triangles)
                 {
@@ -705,6 +706,9 @@ namespace SharpGLTF.Schema2
             return srcScene.ToStaticMeshBuilder<Materials.MaterialBuilder, TvG, TvM>(convertMaterial, options, animation, time);
         }
 
+        #if NET8_0_OR_GREATER
+        [RequiresDynamicCode("Calls SharpGLTF.Geometry.MeshBuilderToolkit.GetMeshBuilderType(Type, String[])")]
+        #endif
         public static IMeshBuilder<Materials.MaterialBuilder> ToMeshBuilder(this Mesh srcMesh)
         {
             if (srcMesh == null) return null;
@@ -811,7 +815,7 @@ namespace SharpGLTF.Schema2
 
             foreach (var srcPoint in srcPrim.GetPointIndices())
             {
-                var vrt = vertices.GetVertex(dstPrim.VertexType, srcPoint);
+                var vrt = vertices.GetVertex(dstPrim.VertexFactory, srcPoint);
 
                 var idx = dstPrim.AddPoint(vrt);
 
@@ -820,8 +824,8 @@ namespace SharpGLTF.Schema2
 
             foreach (var (srcA, srcB) in srcPrim.GetLineIndices())
             {
-                var vrtA = vertices.GetVertex(dstPrim.VertexType, srcA);
-                var vrtB = vertices.GetVertex(dstPrim.VertexType, srcB);
+                var vrtA = vertices.GetVertex(dstPrim.VertexFactory, srcA);
+                var vrtB = vertices.GetVertex(dstPrim.VertexFactory, srcB);
 
                 var (idxA, idxB) = dstPrim.AddLine(vrtA, vrtB);
 
@@ -831,9 +835,9 @@ namespace SharpGLTF.Schema2
 
             foreach (var (srcA, srcB, srcC) in srcPrim.GetTriangleIndices())
             {
-                var vrtA = vertices.GetVertex(dstPrim.VertexType, srcA);
-                var vrtB = vertices.GetVertex(dstPrim.VertexType, srcB);
-                var vrtC = vertices.GetVertex(dstPrim.VertexType, srcC);
+                var vrtA = vertices.GetVertex(dstPrim.VertexFactory, srcA);
+                var vrtB = vertices.GetVertex(dstPrim.VertexFactory, srcB);
+                var vrtC = vertices.GetVertex(dstPrim.VertexFactory, srcC);
 
                 var (idxA, idxB, idxC) = dstPrim.AddTriangle(vrtA, vrtB, vrtC);
 
@@ -850,7 +854,7 @@ namespace SharpGLTF.Schema2
                 {
                     if (kvp.Value < 0) continue;
 
-                    var v = srcTarget.GetVertex(dstPrim.VertexType, kvp.Key);
+                    var v = srcTarget.GetVertex(dstPrim.VertexFactory, kvp.Key);
 
                     dstPrim.SetVertexDelta(tidx, kvp.Value,
                         new VertexGeometryDelta(v.GetGeometry()), new VertexMaterialDelta(v.GetMaterial()));

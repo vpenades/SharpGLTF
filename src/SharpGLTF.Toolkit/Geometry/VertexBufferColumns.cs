@@ -169,10 +169,12 @@ namespace SharpGLTF.Geometry
             this.Positions = _IsolateColumn(this.Positions); // Position, normal and tangent can be modified by morphing and skinning
             this.Normals = _IsolateColumn(this.Normals);
             this.Tangents = _IsolateColumn(this.Tangents);
-            this.Colors0 = _IsolateColumn(this.Colors0);     // colors0,1 and texCoords0,1 can be modified by morphing
+            this.Colors0 = _IsolateColumn(this.Colors0);     // colors0,1 and texCoords 0,1,2,3 can be modified by morphing
             this.Colors1 = _IsolateColumn(this.Colors1);
             this.TexCoords0 = _IsolateColumn(this.TexCoords0);
             this.TexCoords1 = _IsolateColumn(this.TexCoords1);
+            this.TexCoords2 = _IsolateColumn(this.TexCoords2);
+            this.TexCoords3 = _IsolateColumn(this.TexCoords3);
 
             // prepare animation data, if available
 
@@ -185,6 +187,8 @@ namespace SharpGLTF.Geometry
             Vector4[] morphColors1 = null;
             Vector2[] morphTexcrd0 = null;
             Vector2[] morphTexcrd1 = null;
+            Vector2[] morphTexcrd2 = null;
+            Vector2[] morphTexcrd3 = null;
 
             if (_MorphTargets != null)
             {
@@ -195,6 +199,8 @@ namespace SharpGLTF.Geometry
                 if (_MorphTargets.All(item => item.Colors1 != null)) morphColors1 = new Vector4[this.MorphTargets.Count];
                 if (_MorphTargets.All(item => item.TexCoords0 != null)) morphTexcrd0 = new Vector2[this.MorphTargets.Count];
                 if (_MorphTargets.All(item => item.TexCoords1 != null)) morphTexcrd1 = new Vector2[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.TexCoords2 != null)) morphTexcrd2 = new Vector2[this.MorphTargets.Count];
+                if (_MorphTargets.All(item => item.TexCoords3 != null)) morphTexcrd3 = new Vector2[this.MorphTargets.Count];
             }
 
             // loop over every vertex
@@ -251,6 +257,18 @@ namespace SharpGLTF.Geometry
                     {
                         _FillMorphData(morphTexcrd1, vc => vc.TexCoords1[i]);
                         TexCoords1[i] = morphMaterial.MorphTexCoord(TexCoords1[i], morphTexcrd1);
+                    }
+
+                    if (this.TexCoords2 != null)
+                    {
+                        _FillMorphData(morphTexcrd2, vc => vc.TexCoords2[i]);
+                        TexCoords1[2] = morphMaterial.MorphTexCoord(TexCoords2[i], morphTexcrd2);
+                    }
+
+                    if (this.TexCoords3 != null)
+                    {
+                        _FillMorphData(morphTexcrd3, vc => vc.TexCoords3[i]);
+                        TexCoords3[2] = morphMaterial.MorphTexCoord(TexCoords3[i], morphTexcrd3);
                     }
                 }
             }
@@ -318,11 +336,8 @@ namespace SharpGLTF.Geometry
         #endregion
 
         #region API - Vertex indexing
-
-        #if NET6_0_OR_GREATER
-        [return: System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public Type GetCompatibleVertexType()
+        
+        public (Type BuilderType, Func<IVertexBuilder> BuilderFactory) GetCompatibleVertexType()
         {
             var hasNormals = Normals != null;
             var hasTangents = hasNormals && Tangents != null;
@@ -394,21 +409,15 @@ namespace SharpGLTF.Geometry
             }
 
             return s;
-        }
+        }        
 
-        public IVertexBuilder GetVertex
-            (
-            #if NET6_0_OR_GREATER
-            [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-            #endif
-            Type vertexType,
-            int index)
+        public IVertexBuilder GetVertex(Func<IVertexBuilder> factory, int index)
         {
             var g = GetVertexGeometry<VertexPositionNormalTangent>(index);
             var m = GetVertexMaterial<VertexColor2Texture2>(index);
             var s = GetVertexSkinning<VertexJoints8>(index);
 
-            return new VertexBuilder(g, m, s).ConvertToType(vertexType);
+            return new VertexBuilder(g, m, s).ConvertToType(factory);
         }
 
         public VertexBuilder<TvG, TvM, VertexEmpty> GetVertex<TvG, TvM>(int index)
