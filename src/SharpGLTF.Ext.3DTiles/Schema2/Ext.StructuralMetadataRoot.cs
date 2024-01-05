@@ -991,10 +991,15 @@ namespace SharpGLTF.Schema2
 
             #region API
 
-            public StructuralMetadataClass WithNameAndDesc(string name, string desc = null)
+            public StructuralMetadataClass WithName(string name)
             {
-                this.Name = name;
-                this.Description = desc;
+                Name = name;
+                return this;
+            }
+
+            public StructuralMetadataClass WithDescription(string description)
+            {
+                Description = description;
                 return this;
             }
 
@@ -1103,10 +1108,16 @@ namespace SharpGLTF.Schema2
 
             #region API
 
-            public StructuralMetadataClassProperty WithNameAndDesc(string name, string desc = null)
+
+            public StructuralMetadataClassProperty WithName(string name)
             {
-                this.Name = name;
-                this.Description = desc;
+                Name = name;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithDescription(string description)
+            {
+                Description = description;
                 return this;
             }
 

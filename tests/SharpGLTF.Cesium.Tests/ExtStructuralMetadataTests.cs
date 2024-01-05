@@ -20,8 +20,9 @@ namespace SharpGLTF.Schema2.Tiles3D
             Tiles3DExtensions.RegisterExtensions();
         }
 
-        /*
         [Test(Description = "First test with ext_structural_metadata")]
+        // This test creates a simple triangle with ext_structural_metadata, following the
+        // structure described in https://github.com/CesiumGS/glTF/tree/proposal-EXT_structural_metadata/extensions/2.0/Vendor/EXT_structural_metadata
         public void TriangleWithMetadataTest()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -35,38 +36,53 @@ namespace SharpGLTF.Schema2.Tiles3D
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            var schema = new StructuralMetadataSchema();
-            schema.Id = "schema_001";
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
             schema.Name = "schema 001";
             schema.Description = "an example schema";
             schema.Version = "3.5.1";
-            var classes = new Dictionary<string, StructuralMetadataClass>();
-            var treeClass = new StructuralMetadataClass();
-            treeClass.Name = "Tree";
-            treeClass.Description = "Woody, perennial plant.";
-            classes["tree"] = treeClass;
-            var ageProperty = new ClassProperty();
-            ageProperty.Description = "The age of the tree, in years";
+
+            var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple",3));
+
+            var treeClass = schema
+                .UseClassMetadata("tree")
+                .WithName("Tree")
+                .WithDescription("Woody, perennial plant.");
+
+            // species property
+            var speciesProperty = treeClass
+                .UseProperty("species")
+                .WithDescription("Type of tree.");
+            speciesProperty.Type = ElementType.ENUM;
+            speciesProperty.EnumType = "speciesEnum";
+            speciesProperty.Required = true;
+               
+            // age property
+
+            var ageProperty = treeClass
+                .UseProperty("age")
+                .WithDescription("The age of the tree, in years");
+
             ageProperty.Type = ElementType.SCALAR;
             ageProperty.ComponentType = DataType.UINT32;
             ageProperty.Required = true;
 
-            treeClass.Properties.Add("age", ageProperty);
+            var propertyTable = treeClass
+                .AddPropertyTable(1, "PropertyTable");
 
-            schema.Classes = classes;
+            propertyTable
+                .UseProperty(ageProperty)
+                .SetValues1D(100);
 
-            var propertyTable = new PropertyTable("tree", 1, "PropertyTable");
-            var agePropertyTableProperty = model.GetPropertyTableProperty(new List<int>() { 100 });
-            propertyTable.Properties.Add("age", agePropertyTableProperty);
-
-            model.SetPropertyTable(propertyTable, schema);
+            // todo: add more properties
 
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.plotly");
-        }*/
+        }
+        
 
         [Test(Description = "ext_structural_metadata with FeatureId Texture and Property Table")]
         // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/FeatureIdTextureAndPropertyTable
@@ -107,8 +123,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            // --------------------------------------------------------------
-
             var rootMetadata = model.UseStructuralMetadata();
             var schema = rootMetadata.UseEmbeddedSchema("FeatureIdTextureAndPropertyTableSchema");
 
@@ -116,16 +130,17 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var buildingComponentsClass = schema
                 .UseClassMetadata("buildingComponents")
-                .WithNameAndDesc("Building components");
+                .WithName("Building components")
+                .WithDescription("The components of a building.");
 
             var componentProp = buildingComponentsClass
                 .UseProperty("component")
-                .WithNameAndDesc("Component")
+                .WithName("Component")
                 .WithValueType(ElementType.STRING);
 
             var yearProp = buildingComponentsClass
                 .UseProperty("yearBuilt")
-                .WithNameAndDesc("Year built")
+                .WithName("Year built")
                 .WithValueType(ElementType.SCALAR, DataType.INT16);            
 
             var propertyTable = buildingComponentsClass
@@ -202,21 +217,21 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("buildingComponents")
-                .WithNameAndDesc("Building properties");
+                .WithName("Building properties");
 
             exampleMetadataClass
                 .UseProperty("insideTemperature")
-                .WithNameAndDesc("Inside temperature")
+                .WithName("Inside temperature")
                 .WithValueType(ElementType.SCALAR, DataType.UINT8);
 
             exampleMetadataClass
                 .UseProperty("outsideTemperature")
-                .WithNameAndDesc("Outside temperature")
+                .WithName("Outside temperature")
                 .WithValueType(ElementType.SCALAR, DataType.UINT8);
 
             exampleMetadataClass
                 .UseProperty("insulation")
-                .WithNameAndDesc("Insulation Thickness")
+                .WithName("Insulation Thickness")
                 .WithValueType(ElementType.SCALAR, DataType.UINT8, true);
 
             // define texture property
@@ -274,16 +289,19 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class", "An example metadata class");
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class");
 
             var vec3Property = exampleMetadataClass
                 .UseProperty("example_VEC3_FLOAT32")
-                .WithNameAndDesc("Example VEC3 FLOAT32 property", "An example property, with type VEC3, with component type FLOAT32")
+                .WithName("Example VEC3 FLOAT32 property")
+                .WithDescription("An example property, with type VEC3, with component type FLOAT32")
                 .WithValueType(ElementType.VEC3, DataType.FLOAT32);
 
             var stringProperty = exampleMetadataClass
                 .UseProperty("example_STRING")
-                .WithNameAndDesc("Example STRING property", "An example property, with type STRING")
+                .WithName("Example STRING property")
+                .WithDescription("An example property, with type STRING")
                 .WithValueType(ElementType.STRING);
 
             // define table
@@ -341,16 +359,19 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class", "An example metadata class");
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class");
 
             var vector3Property = exampleMetadataClass
                 .UseProperty("example_VEC3_FLOAT32")
-                .WithNameAndDesc("Example VEC3 FLOAT32 property", "An example property, with type VEC3, with component type FLOAT32")
+                .WithName("Example VEC3 FLOAT32 property")
+                .WithDescription("An example property, with type VEC3, with component type FLOAT32")
                 .WithValueType(ElementType.VEC3, DataType.FLOAT32);
 
             var matrix4x4Property = exampleMetadataClass
                 .UseProperty("example_MAT4_FLOAT32")
-                .WithNameAndDesc("Example MAT4 FLOAT32 property", "An example property, with type MAT4, with component type FLOAT32")
+                .WithName("Example MAT4 FLOAT32 property")
+                .WithDescription("An example property, with type MAT4, with component type FLOAT32")
                 .WithValueType(ElementType.MAT4, DataType.FLOAT32);
 
             // define table
@@ -407,7 +428,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class A", "First example metadata class");
+                .WithName("Example metadata class A")
+                .WithDescription("First example metadata class");
 
             // enums
 
@@ -417,25 +439,27 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var uint8ArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_normalized_UINT8")
-                .WithNameAndDesc("Example variable-length ARRAY normalized INT8 property","An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
+                .WithName("Example variable-length ARRAY normalized INT8 property")
+                .WithDescription("An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
                 .WithArrayType(ElementType.SCALAR,DataType.UINT8,false);
 
             var fixedLengthBooleanProperty = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_BOOLEAN")
-                .WithNameAndDesc("Example fixed-length ARRAY BOOLEAN property", "An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
+                .WithName("Example fixed-length ARRAY BOOLEAN property")
+                .WithDescription("An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
                 .WithArrayType(ElementType.BOOLEAN, null, false, 4);
 
             var variableLengthStringArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_STRING")
-                .WithNameAndDesc("Example variable-length ARRAY STRING property", "An example property, with type ARRAY, with component type STRING, and variable length")
+                .WithName("Example variable-length ARRAY STRING property")
+                .WithDescription("An example property, with type ARRAY, with component type STRING, and variable length")
                 .WithArrayType(ElementType.STRING);
 
             var fixed_length_ARRAY_ENUM = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_ENUM")
-                .WithNameAndDesc("Example fixed-length ARRAY ENUM property", "An example property, with type ARRAY, with component type ENUM, and fixed length")
+                .WithName("Example fixed-length ARRAY ENUM property")
+                .WithDescription("An example property, with type ARRAY, with component type ENUM, and fixed length")
                 .WithEnumArrayType(exampleEnum, 2);
-
-            // property tables
 
             var examplePropertyTable = exampleMetadataClass.AddPropertyTable(1, "Example property table");
 
@@ -488,8 +512,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            // --------------------------------------------------------------
-
             var rootMetadata = model.UseStructuralMetadata();
             var schema = rootMetadata.UseEmbeddedSchema("MultipleClassesSchema");            
 
@@ -497,25 +519,31 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var classA = schema
                 .UseClassMetadata("exampleMetadataClassA")
-                .WithNameAndDesc("Example metadata class A","First example metadata class");
+                .WithName("Example metadata class A")
+                .WithDescription("First example metadata class");
 
             var classAp0 = classA.UseProperty("example_FLOAT32")
-                .WithNameAndDesc("Example FLOAT32 property", "An example property, with component type FLOAT32")
+                .WithName("Example FLOAT32 property")
+                .WithDescription("An example property, with component type FLOAT32")
                 .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
 
             var classAp1 = classA.UseProperty("example_INT64")
-                .WithNameAndDesc("Example INT64 property", "An example property, with component type INT64")
+                .WithName("Example INT64 property")
+                .WithDescription("An example property, with component type INT64")
                 .WithValueType(ElementType.SCALAR, DataType.INT64);
 
             var classB = schema.UseClassMetadata("exampleMetadataClassB")
-                .WithNameAndDesc("Example metadata class B", "Second example metadata class");
+                .WithName("Example metadata class B")
+                .WithDescription("Second example metadata class");
 
             var classBp0 = classB.UseProperty("example_UINT16")
-                .WithNameAndDesc("Example UINT16 property", "An example property, with component type UINT16")
+                .WithName("Example UINT16 property")
+                .WithDescription("An example property, with component type UINT16")
                 .WithValueType(ElementType.SCALAR, DataType.UINT16);
 
             var classBp1 = classB.UseProperty("example_FLOAT64")
-                .WithNameAndDesc("Example FLOAT64 property", "An example property, with component type FLOAT64")
+                .WithName("Example FLOAT64 property")
+                .WithDescription("An example property, with component type FLOAT64")
                 .WithValueType(ElementType.SCALAR, DataType.FLOAT64);
 
             // properties
