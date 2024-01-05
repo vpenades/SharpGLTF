@@ -47,6 +47,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // determine the vertex attributes from the first vertex.
             var attributes = GetVertexAttributes(vertices[0], vertices.Count, vertexEncoding);
+            if (attributes == null || attributes.Length == 0) throw new InvalidOperationException("unable to retrieve attribute information from the vertex");
 
             // create a buffer
             int byteStride = attributes[0].ByteStride;
