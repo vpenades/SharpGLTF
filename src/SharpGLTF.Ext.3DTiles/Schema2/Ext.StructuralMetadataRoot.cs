@@ -695,7 +695,7 @@ namespace SharpGLTF.Schema2
                 }                
             }
 
-            public void SetValues1D<T>(params T[] values)
+            public void SetValues<T>(params T[] values)
             {
                 var root = _GetModelRoot();
                 
@@ -863,6 +863,7 @@ namespace SharpGLTF.Schema2
             #region properties
 
             public IReadOnlyList<StructuralMetadataEnumValue> Values => _values;
+
 
             public string Name
             {
@@ -1121,12 +1122,13 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false)
+            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, bool required = false)
             {
                 this.Type = etype;
                 this.ComponentType = ctype;
                 this.Normalized = normalized;
                 this.Array = false;
+                this.Required = required;
                 return this;
             }
 

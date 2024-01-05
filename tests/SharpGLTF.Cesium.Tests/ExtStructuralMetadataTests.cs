@@ -21,21 +21,30 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         [Test(Description = "First test with ext_structural_metadata")]
-        // This test creates a simple triangle with ext_structural_metadata, following the
-        // structure described in https://github.com/CesiumGS/glTF/tree/proposal-EXT_structural_metadata/extensions/2.0/Vendor/EXT_structural_metadata
+        // This test creates a simple triangle (featureId = 0) with ext_structural_metadata (4 tree attributes like
+        // species (Enumeration), age (Scalar), height (Scalar) and diameter (Scalar) and a property table.
+        // following the structure described in https://github.com/CesiumGS/glTF/tree/proposal-EXT_structural_metadata/extensions/2.0/Vendor/EXT_structural_metadata
         public void TriangleWithMetadataTest()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
-            var mesh = new MeshBuilder<VertexPosition>("mesh");
+
+            var featureId = 0;
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
             var prim = mesh.UsePrimitive(material);
 
-            prim.AddTriangle(new VertexPosition(-10, 0, 0), new VertexPosition(10, 0, 0), new VertexPosition(0, 10, 0));
+            // All the vertices in the triangle have the same feature ID
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
 
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
-
+           
             var rootMetadata = model.UseStructuralMetadata();
             var schema = rootMetadata.UseEmbeddedSchema("schema_001");
             schema.Name = "schema 001";
@@ -43,6 +52,8 @@ namespace SharpGLTF.Schema2.Tiles3D
             schema.Version = "3.5.1";
 
             var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple",3));
+            speciesEnum.Name = "Species";
+            speciesEnum.Description = "An example enum for tree species.";
 
             var treeClass = schema
                 .UseClassMetadata("tree")
@@ -53,28 +64,49 @@ namespace SharpGLTF.Schema2.Tiles3D
             var speciesProperty = treeClass
                 .UseProperty("species")
                 .WithDescription("Type of tree.");
+            
             speciesProperty.Type = ElementType.ENUM;
             speciesProperty.EnumType = "speciesEnum";
             speciesProperty.Required = true;
                
             // age property
-
             var ageProperty = treeClass
                 .UseProperty("age")
                 .WithDescription("The age of the tree, in years");
+            ageProperty.WithValueType(ElementType.SCALAR, DataType.UINT32, required: true);
 
-            ageProperty.Type = ElementType.SCALAR;
-            ageProperty.ComponentType = DataType.UINT32;
-            ageProperty.Required = true;
+            // Height property
+            var heightProperty = treeClass
+                .UseProperty("height")
+                .WithDescription("Height of tree measured from ground level, in meters");
+            heightProperty.WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+
+            // Diameter property
+            var diameterProperty = treeClass
+                .UseProperty("diameter")
+                .WithDescription("Diameter at trunk base, in meters.");
+            diameterProperty.WithValueType(ElementType.SCALAR, DataType.FLOAT32);
 
             var propertyTable = treeClass
                 .AddPropertyTable(1, "PropertyTable");
 
             propertyTable
                 .UseProperty(ageProperty)
-                .SetValues1D(100);
+                .SetValues(100);
 
-            // todo: add more properties
+            propertyTable
+                .UseProperty(speciesProperty)
+                .SetValues(2);
+
+            propertyTable.UseProperty(heightProperty)
+                .SetValues(10.0f);
+
+            propertyTable.UseProperty(diameterProperty)
+                .SetValues(1.5f);
+
+            // Set the FeatureIds
+            var featureIdAttribute = new FeatureIDBuilder(propertyTable, 0);
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
 
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
@@ -148,11 +180,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             propertyTable
                 .UseProperty(componentProp)
-                .SetValues1D("Wall", "Door", "Roof", "Window");
+                .SetValues("Wall", "Door", "Roof", "Window");
 
             propertyTable
                 .UseProperty(yearProp)
-                .SetValues1D(1960, 1996, 1985, 2002);            
+                .SetValues(1960, 1996, 1985, 2002);            
 
             // Set the FeatureIds, pointing to the red channel of the texture
 
@@ -310,11 +342,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             examplePropertyTable
                 .UseProperty(vec3Property)
-                .SetValues1D(new Vector3(3, 3.0999999046325684f, 3.200000047683716f), new Vector3(103, 103.0999999046325684f, 103.200000047683716f));
+                .SetValues(new Vector3(3, 3.0999999046325684f, 3.200000047683716f), new Vector3(103, 103.0999999046325684f, 103.200000047683716f));
 
             examplePropertyTable
                 .UseProperty(stringProperty)
-                .SetValues1D("Rain 🌧", "Thunder ⛈");
+                .SetValues("Rain 🌧", "Thunder ⛈");
 
             // assign to primitive
 
@@ -380,11 +412,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             examplePropertyTable
                 .UseProperty(vector3Property)
-                .SetValues1D(new Vector3(3, 3.0999999046325684f, 3.200000047683716f));
+                .SetValues(new Vector3(3, 3.0999999046325684f, 3.200000047683716f));
 
             examplePropertyTable
                 .UseProperty(matrix4x4Property)
-                .SetValues1D(Matrix4x4.Identity);
+                .SetValues(Matrix4x4.Identity);
 
             // assign to primitive
 
@@ -467,19 +499,19 @@ namespace SharpGLTF.Schema2.Tiles3D
             
             examplePropertyTable
                 .UseProperty(uint8ArrayProperty)
-                .SetValues1D<byte>(0, 1, 2, 3, 4, 5, 6, 7);
+                .SetValues<byte>(0, 1, 2, 3, 4, 5, 6, 7);
 
             examplePropertyTable
                 .UseProperty(fixedLengthBooleanProperty)
-                .SetValues1D<Boolean>(true, false, true, false);
+                .SetValues<Boolean>(true, false, true, false);
 
             examplePropertyTable
                 .UseProperty(variableLengthStringArrayProperty)
-                .SetValues1D("Example string 1", "Example string 2", "Example string 3");
+                .SetValues("Example string 1", "Example string 2", "Example string 3");
 
             examplePropertyTable
                 .UseProperty(fixed_length_ARRAY_ENUM)
-                .SetValues1D<int>(0, 1);
+                .SetValues<int>(0, 1);
 
             // add to primitive            
 
@@ -549,12 +581,12 @@ namespace SharpGLTF.Schema2.Tiles3D
             // properties
 
             var firstPropertyTable = classA.AddPropertyTable(1, "First example property table");
-            firstPropertyTable.UseProperty(classAp0).SetValues1D<float>(100);
-            firstPropertyTable.UseProperty(classAp1).SetValues1D<long>(101);
+            firstPropertyTable.UseProperty(classAp0).SetValues<float>(100);
+            firstPropertyTable.UseProperty(classAp1).SetValues<long>(101);
 
             var secondPropertyTable = classB.AddPropertyTable(1, "Second example property table");
-            secondPropertyTable.UseProperty(classBp0).SetValues1D<ushort>(102);
-            secondPropertyTable.UseProperty(classBp1).SetValues1D<double>(103);
+            secondPropertyTable.UseProperty(classBp0).SetValues<ushort>(102);
+            secondPropertyTable.UseProperty(classBp1).SetValues<double>(103);
 
             // features
 

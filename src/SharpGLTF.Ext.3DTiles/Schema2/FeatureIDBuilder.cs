@@ -26,6 +26,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         public int? NullFeatureId { get; set; }
         public int? Attribute { get; set; }
         public string Label { get; set; }
+
         public int? PropertyTableIndex { get; set; }
 
         public Texture Texture { get; set; }
