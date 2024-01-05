@@ -74,7 +74,7 @@ namespace SharpGLTF.Geometry
         void Validate();
     }
 
-    static class MeshBuilderToolkit
+    static partial class MeshBuilderToolkit
     {
         public static VertexBuilder<VertexGeometryDelta, VertexMaterialDelta, VertexEmpty>[] GetMorphTargetVertices(this IPrimitiveMorphTargetReader morphTarget, int vertexCount)
         {
@@ -115,6 +115,7 @@ namespace SharpGLTF.Geometry
 
             return maxIndex < 256 ? Schema2.EncodingType.UNSIGNED_BYTE : Schema2.EncodingType.UNSIGNED_SHORT;
         }
+
         
         public static IMeshBuilder<TMaterial> CreateMeshBuilderFromVertexAttributes
             <
@@ -123,31 +124,12 @@ namespace SharpGLTF.Geometry
             #endif
             TMaterial>(params string[] vertexAttributes)
         {
-            Type meshType = GetMeshBuilderType(typeof(TMaterial), vertexAttributes);
-
-            var mesh = Activator.CreateInstance(meshType, string.Empty);
-
-            return mesh as IMeshBuilder<TMaterial>;
-        }
-        
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetMeshBuilderType
-            (
-            #if NET6_0_OR_GREATER
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-            #endif
-            Type materialType, string[] vertexAttributes)
-        {
-            var tvg = VertexUtils.GetVertexGeometryType(vertexAttributes);
-            var tvm = VertexUtils.GetVertexMaterialType(vertexAttributes);
-            var tvs = VertexUtils.GetVertexSkinningType(vertexAttributes);
-
-            var meshType = typeof(MeshBuilder<,,,>);
-
-            return meshType.MakeGenericType(materialType, tvg, tvm, tvs);
-        }
+            return VertexUtils
+                .GetVertexBuilderType(vertexAttributes) // get a vertex factory from attributes
+                .BuilderFactory                         
+                .Invoke()                               // create a single vertex
+                .CreateCompatibleMesh<TMaterial>();     // create a mesh with the given vertex format.
+        }        
 
         public static IReadOnlyDictionary<Vector3, Vector3> CalculateSmoothNormals<TMaterial>(this IMeshBuilder<TMaterial> srcMesh)
         {

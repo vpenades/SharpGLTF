@@ -79,6 +79,7 @@ namespace SharpGLTF.Geometry
         [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
         #endif
         Type VertexType { get; }
+        Func<IVertexBuilder> VertexFactory { get; }
 
         void SetVertexDelta(int morphTargetIndex, int vertexIndex, VertexGeometryDelta geometryDelta, VertexMaterialDelta materialDelta);
 

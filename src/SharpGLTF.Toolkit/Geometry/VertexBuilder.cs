@@ -33,6 +33,9 @@ namespace SharpGLTF.Geometry
         /// </summary>
         /// <param name="skinning">A <see cref="IVertexSkinning"/> set.</param>
         void SetSkinning(IVertexSkinning skinning);
+
+
+        IMeshBuilder<TMaterial> CreateCompatibleMesh<TMaterial>(string name = null);
     }
 
     /// <summary>
@@ -331,6 +334,11 @@ namespace SharpGLTF.Geometry
             return new MeshBuilder<TvG, TvM, TvS>(name);
         }
 
+        IMeshBuilder<TMaterial> IVertexBuilder.CreateCompatibleMesh<TMaterial>(string name)
+        {
+            return new MeshBuilder<TMaterial, TvG, TvM, TvS>(name);
+        }
+
         #pragma warning restore CA1000 // Do not declare static members on generic types
 
         readonly IVertexGeometry IVertexBuilder.GetGeometry() { return this.Geometry; }
@@ -449,7 +457,7 @@ namespace SharpGLTF.Geometry
             v.Skinning.SetBindings(sparse);
 
             return v;
-        }
+        }        
 
         #endregion
     }
@@ -496,23 +504,22 @@ namespace SharpGLTF.Geometry
 
         public void SetMaterial(IVertexMaterial material) { this.Material = material; }
 
-        public void SetSkinning(IVertexSkinning skinning) { this.Skinning = skinning; }
+        public void SetSkinning(IVertexSkinning skinning) { this.Skinning = skinning; }        
 
-        public readonly IVertexBuilder ConvertToType
-            (
-            #if NET6_0_OR_GREATER
-            [System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
-            #endif
-            Type vertexType
-            )
+        public readonly IVertexBuilder ConvertToType(Func<IVertexBuilder> factory)
         {
-            var v = (IVertexBuilder)Activator.CreateInstance(vertexType);
+            var v = factory.Invoke();
 
             v.SetGeometry(Geometry);
             v.SetMaterial(Material);
             v.SetSkinning(Skinning);
 
             return v;
+        }
+
+        IMeshBuilder<TMaterial> IVertexBuilder.CreateCompatibleMesh<TMaterial>(string name)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion
