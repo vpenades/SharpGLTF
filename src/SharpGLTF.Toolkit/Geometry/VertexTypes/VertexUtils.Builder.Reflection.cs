@@ -43,6 +43,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture2,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexTexture2,VertexEmpty>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture2,VertexEmpty>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexEmpty>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture3,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexTexture3,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture3,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexEmpty>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture4,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexTexture4,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture4,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexEmpty>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 1:
@@ -60,6 +68,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture2,VertexEmpty>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexEmpty>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexEmpty>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture3,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexEmpty>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture4,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexEmpty>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 2:
@@ -77,6 +93,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture2,VertexEmpty>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexEmpty>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexEmpty>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture3,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexEmpty>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture4,VertexEmpty>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexEmpty>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexEmpty>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexEmpty>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     default: throw new ArgumentOutOfRangeException(nameof(numCols));
@@ -99,6 +123,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture2,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexTexture2,VertexJoints4>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture2,VertexJoints4>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexJoints4>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture3,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexTexture3,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture3,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexJoints4>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture4,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexTexture4,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture4,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexJoints4>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 1:
@@ -116,6 +148,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture2,VertexJoints4>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexJoints4>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexJoints4>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture3,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexJoints4>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture4,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexJoints4>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 2:
@@ -133,6 +173,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture2,VertexJoints4>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexJoints4>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexJoints4>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture3,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexJoints4>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture4,VertexJoints4>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexJoints4>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexJoints4>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexJoints4>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     default: throw new ArgumentOutOfRangeException(nameof(numCols));
@@ -155,6 +203,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture2,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexTexture2,VertexJoints8>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture2,VertexJoints8>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture2,VertexJoints8>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture3,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexTexture3,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture3,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture3,VertexJoints8>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexTexture4,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexTexture4,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexTexture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexTexture4,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexTexture4,VertexJoints8>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 1:
@@ -172,6 +228,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture2,VertexJoints8>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture2,VertexJoints8>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture2,VertexJoints8>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture3,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture3,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture3,VertexJoints8>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor1Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor1Texture4,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor1Texture4,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor1Texture4,VertexJoints8>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     case 2:
@@ -189,6 +253,14 @@ namespace SharpGLTF.Geometry.VertexTypes
                             if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture2,VertexJoints8>() );
                             if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture2,VertexJoints8>() );
                             return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture2,VertexJoints8>() );
+                        case 3:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture3,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture3,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture3,VertexJoints8>() );
+                        case 4:
+                            if (!hasNormals) return (typeof(VertexBuilder<VertexPosition,VertexColor2Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPosition,VertexColor2Texture4,VertexJoints8>() );
+                            if (!hasTangents) return (typeof(VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormal,VertexColor2Texture4,VertexJoints8>() );
+                            return (typeof(VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexJoints8>), ()=> new VertexBuilder<VertexPositionNormalTangent,VertexColor2Texture4,VertexJoints8>() );
                         default: throw new ArgumentOutOfRangeException(nameof(numUV));
                     }
                     default: throw new ArgumentOutOfRangeException(nameof(numCols));

@@ -37,4 +37,19 @@
     </Compile>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Geometry\VertexTypes\VertexMaterial.Permutations.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>VertexMaterial.Permutations.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Geometry\VertexTypes\VertexMaterial.Permutations.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VertexMaterial.Permutations.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
 </Project>

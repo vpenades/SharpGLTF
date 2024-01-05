@@ -43,7 +43,7 @@ void WriteAllVertexTypePermutations(string baseTemplate)
             WriteLine("switch(numUV)");
             WriteLine("{"); PushIndent("    ");
 
-            for(int __tex = 0; __tex <= 2; ++__tex)
+            for(int __tex = 0; __tex <= 4; ++__tex)
             {
                 WriteLine("case " + __tex + ":");
 
