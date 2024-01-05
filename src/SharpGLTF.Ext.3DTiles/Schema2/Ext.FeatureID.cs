@@ -1,90 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpGLTF.Schema2.Tiles3D
 {
     using Collections;
-
-    /// <summary>
-    /// Mesh Feature Ids
-    /// </summary>
-    /// <remarks>
-    /// Implemented by <see cref="MeshExtInstanceFeatureID"/> and <see cref="MeshExtMeshFeatureID"/>
-    /// </remarks>
-    public interface IMeshFeatureIDInfo
-    {
-        /// <summary>
-        /// The number of unique features in the attribute or texture.
-        /// </summary>
-        public int FeatureCount { get; set; }
-
-        /// <summary>
-        /// A value that indicates that no feature is associated with this vertex or texel.
-        /// </summary>
-        public int? NullFeatureId { get; set; }
-
-        /// <summary>
-        /// An attribute containing feature IDs. When `attribute` and `texture` are omitted the 
-        /// feature IDs are assigned to vertices by their index.
-        /// </summary>
-        public int? Attribute { get; set; }
-
-        /// <summary>
-        /// A label assigned to this feature ID set. Labels must be alphanumeric identifiers 
-        /// matching the regular expression `^[a-zA-Z_][a-zA-Z0-9_]*$`.
-        /// </summary>
-        public string Label { get; set; }
-
-        /// <summary>
-        /// The index of the property table containing per-feature property values. Only applicable when using the `EXT_structural_metadata` extension.
-        /// </summary>
-        public int? PropertyTableIndex { get; set; }        
-    }
-
-    public sealed class FeatureIDBuilder : IMeshFeatureIDInfo , IEquatable<IMeshFeatureIDInfo>
-    {
-        public FeatureIDBuilder(int featureCount, int? attribute = null, string label = null, int? nullFeatureId = null)
-        {
-            FeatureCount = featureCount;
-            Label = label;
-            Attribute = attribute;
-            NullFeatureId = nullFeatureId;
-        }
-
-        public FeatureIDBuilder(PropertyTable table, int? attribute = null, string label = null, int? nullFeatureId = null)
-        {
-            FeatureCount = table.Count;
-            Attribute = attribute;
-            _root = table.LogicalParent;
-            PropertyTableIndex = table.LogicalIndex;
-            Label = label;
-            NullFeatureId = nullFeatureId;
-        }
-
-        private readonly EXTStructuralMetadataRoot _root;
-
-        public int FeatureCount { get; set; }
-        public int? NullFeatureId { get; set; }
-        public int? Attribute { get; set; }
-        public string Label { get; set; }
-        public int? PropertyTableIndex { get; set; }
-
-        public Texture Texture { get; set; }
-        public IReadOnlyList<int> Channels { get; set; }
-
-        public bool Equals(IMeshFeatureIDInfo other)
-        {
-            if (other == null) return false;
-            if (this.FeatureCount != other.FeatureCount) return false;
-            if (this.NullFeatureId != other.NullFeatureId) return false;
-            if (this.Attribute != other.Attribute) return false;
-            if (this.Label != other.Label) return false;
-            if (this.PropertyTableIndex != other.PropertyTableIndex) return false;
-
-            return true;
-        }
-    }
 
     /// <remarks>
     /// Use <see cref="MeshExtInstanceFeatures.CreateFeatureId"/> to create an instance of this class.
@@ -92,17 +11,6 @@ namespace SharpGLTF.Schema2.Tiles3D
     public partial class MeshExtInstanceFeatureID : IChildOfList<MeshExtInstanceFeatures> , IMeshFeatureIDInfo
     {
         #region lifecycle
-
-        /*
-        public MeshExtInstanceFeatureID(int featureCount, int? attribute = null, int? propertyTable = null, string label = null, int? nullFeatureId = null)
-        {
-            FeatureCount = featureCount;
-            Attribute = attribute;
-            Label = label;
-            PropertyTableIndex = propertyTable;
-            NullFeatureId = nullFeatureId;
-        }*/
-
 
         internal MeshExtInstanceFeatureID() { }
 

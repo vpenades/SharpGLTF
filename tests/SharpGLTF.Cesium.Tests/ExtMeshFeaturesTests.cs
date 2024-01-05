@@ -23,12 +23,13 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         [Test(Description = "Test for settting the FeatureIds with vertex attributes. See sample https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_mesh_features/FeatureIdAttribute")]
+        // In the sample html code, there is a shader that uses the feature ID to color the triangle
         public void FeaturesIdAttributeTest()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // Create a triangle with feature ID custom vertex attribute
-            var featureId = 1;
+            var featureId = 2;
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
 
             var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
@@ -70,6 +71,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         [Test(Description = "Test for settting the FeatureIds with a texture. See sample https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_mesh_features/FeatureIdTexture")]
+        // In the sample html code, there is a shader that uses the feature'ID from the texture to color the 2 triangles
         public void FeaturesIdTextureTest()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();

@@ -17,6 +17,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         [Test(Description = "Creates a gpu_instancing glTF from a tree with Cesium EXT_Instance_Features")]
+        // Sample model structure is from https://github.com/CesiumGS/glTF/tree/3d-tiles-next/extensions/2.0/Vendor/EXT_instance_features
         public void AddExtGpuInstanceFeatures()
         {
             var settings = SceneBuilderSchema2Settings.WithGpuInstancing;
