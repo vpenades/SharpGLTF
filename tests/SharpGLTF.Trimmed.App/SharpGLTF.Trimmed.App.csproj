@@ -2,13 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>    
-  </PropertyGroup>  
-
-  <PropertyGroup>
-    <PublishTrimmed>true</PublishTrimmed>
-    <!-- Prevent warnings from unused code in dependencies -->
-    <TrimmerDefaultAction>link</TrimmerDefaultAction>
+    <TargetFramework>net8.0</TargetFramework>
+    <PublishAot>true</PublishAot>
     <RootNamespace>SharpGLTF</RootNamespace>
   </PropertyGroup>
 
