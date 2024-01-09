@@ -11,6 +11,10 @@ namespace SharpGLTF.Diagnostics
     {
         internal static string GetAttributeShortName(string attributeName)
         {
+            var suffix = string.Empty;
+
+            if (attributeName.EndsWith("DELTA")) { attributeName = attributeName.Substring(0, attributeName.Length - 5); suffix = "Δ"; }
+
             if (attributeName == "POSITION") return "𝐏";
             if (attributeName == "NORMAL") return "𝚴";
             if (attributeName == "TANGENT") return "𝚻";
@@ -18,13 +22,19 @@ namespace SharpGLTF.Diagnostics
             if (attributeName == "COLOR_1") return "𝐂₁";
             if (attributeName == "TEXCOORD_0") return "𝐔𝐕₀";
             if (attributeName == "TEXCOORD_1") return "𝐔𝐕₁";
+            if (attributeName == "TEXCOORD_2") return "𝐔𝐕₂";
+            if (attributeName == "TEXCOORD_3") return "𝐔𝐕₃";
+            if (attributeName == "TEXCOORD_4") return "𝐔𝐕₄";
+            if (attributeName == "TEXCOORD_5") return "𝐔𝐕₅";
+            if (attributeName == "TEXCOORD_6") return "𝐔𝐕₆";
+            if (attributeName == "TEXCOORD_7") return "𝐔𝐕₇";
 
             if (attributeName == "JOINTS_0") return "𝐉₀";
             if (attributeName == "JOINTS_1") return "𝐉₁";
 
             if (attributeName == "WEIGHTS_0") return "𝐖₀";
             if (attributeName == "WEIGHTS_1") return "𝐖₁";
-            return attributeName;
+            return attributeName + suffix;
         }
 
         public static String ToReport(this Memory.MemoryAccessInfo minfo)
