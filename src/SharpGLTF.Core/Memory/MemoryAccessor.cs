@@ -205,6 +205,15 @@ namespace SharpGLTF.Memory
             return Math.Max(ByteStride, _GetItemByteLength());
         }
 
+        /// <summary>
+        /// Assuming that <paramref name="attributes"/> are sequential and adyacent,
+        /// it modifies the <see cref="ByteOffset"/> of each item of <paramref name="attributes"/> to ensure
+        /// the offsets are sequential.
+        /// </summary>
+        /// <param name="attributes">A list of attributes to fix.</param>
+        /// <param name="byteOffset">The initial byteoffset.</param>
+        /// <param name="itemsCount">the default items count.</param>
+        /// <returns>The byte stride.</returns>
         public static int SetInterleavedInfo(MemoryAccessInfo[] attributes, int byteOffset, int itemsCount)
         {
             Guard.NotNull(attributes, nameof(attributes));
