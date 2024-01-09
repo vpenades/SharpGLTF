@@ -145,12 +145,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             var array = attributes.ToArray();
 
-            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
-
-            /*
-            var legacyArray = _GetVertexAttributesLegacy(firstVertex, vertexCount, vertexEncoding);
-            if (!array.SequenceEqual(legacyArray)) throw new InvalidOperationException();
-            */
+            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);            
 
             return array;
         }        
@@ -213,92 +208,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
 
             return dst;
-        }
-
-        // legacy
-
-        /*
-        private static MemoryAccessInfo[] _GetVertexAttributesLegacy(this IVertexBuilder firstVertex, int vertexCount, PackedEncoding vertexEncoding)
-        {
-            var tvg = firstVertex.GetGeometry().GetType();
-            var tvm = firstVertex.GetMaterial().GetType();
-            var tvs = firstVertex.GetSkinning().GetType();
-
-            Guard.HasDynamicallyAccessedMembers(tvg, false, false, false, true, nameof(firstVertex));
-            Guard.HasDynamicallyAccessedMembers(tvm, false, false, false, true, nameof(firstVertex));
-            Guard.HasDynamicallyAccessedMembers(tvs, false, false, false, true, nameof(firstVertex));
-
-            var attributes = new List<MemoryAccessInfo>();
-
-            foreach (var finfo in tvg.GetFields())
-            {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue) attributes.Add(attribute.Value);
-            }
-
-            foreach (var finfo in tvm.GetFields())
-            {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue)
-                {
-                    var a = attribute.Value;
-                    if (a.Name.StartsWith("COLOR_", StringComparison.OrdinalIgnoreCase))
-                    {
-                        if (vertexEncoding.ColorEncoding.HasValue)
-                        {
-                            a.Encoding = vertexEncoding.ColorEncoding.Value;
-                            a.Normalized = a.Encoding != ENCODING.FLOAT;
-                        }
-                    }
-
-                    attributes.Add(a);
-                }
-            }
-
-            foreach (var finfo in tvs.GetFields())
-            {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue)
-                {
-                    var a = attribute.Value;
-                    if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
-                    if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
-                    {
-                        a.Encoding = vertexEncoding.WeightsEncoding.Value;
-                        if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
-                    }
-
-                    attributes.Add(a);
-                }
-            }
-
-            var array = attributes.ToArray();
-
-            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
-
-            return array;
-        }
-
-        private static MemoryAccessInfo? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
-        {
-            var attribute = finfo.GetCustomAttributes(true)
-                    .OfType<VertexAttributeAttribute>()
-                    .FirstOrDefault();
-
-            if (attribute == null) return null;
-
-            var dimensions = (DIMENSIONS?)null;
-
-            if (finfo.FieldType == typeof(Single)) dimensions = DIMENSIONS.SCALAR;
-            if (finfo.FieldType == typeof(Vector2)) dimensions = DIMENSIONS.VEC2;
-            if (finfo.FieldType == typeof(Vector3)) dimensions = DIMENSIONS.VEC3;
-            if (finfo.FieldType == typeof(Vector4)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Quaternion)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = DIMENSIONS.MAT4;
-
-            if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
-
-            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
-        }*/
+        }        
     }
 }

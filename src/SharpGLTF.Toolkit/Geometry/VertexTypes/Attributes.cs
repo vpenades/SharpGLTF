@@ -6,6 +6,7 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    [Obsolete("The usage of this attribute has been removed because it's not AOT friendly. Implement IVertexReflection.GetEncodingAttributes() instead.", true)]
     [AttributeUsageAttribute(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class VertexAttributeAttribute : Attribute
     {

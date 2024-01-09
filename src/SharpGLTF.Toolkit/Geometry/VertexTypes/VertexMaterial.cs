@@ -249,18 +249,11 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region data
 
         public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero);
-
-        [VertexAttribute("COLOR_0DELTA", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color0Delta;
-
-        [VertexAttribute("COLOR_1DELTA", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color1Delta;
-
-        [VertexAttribute("TEXCOORD_0DELTA")]
-        public Vector2 TexCoord0Delta;
-
-        [VertexAttribute("TEXCOORD_1DELTA")]
-        public Vector2 TexCoord1Delta;
+                
+        public Vector4 Color0Delta;        
+        public Vector4 Color1Delta;        
+        public Vector2 TexCoord0Delta;        
+        public Vector2 TexCoord1Delta;        
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
         {
@@ -268,7 +261,7 @@ namespace SharpGLTF.Geometry.VertexTypes
             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
 
             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
-            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));            
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
         }
 
         /// <inheritdoc/>

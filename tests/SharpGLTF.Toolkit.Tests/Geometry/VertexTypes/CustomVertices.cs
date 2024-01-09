@@ -51,14 +51,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region data
 
         public const string CUSTOMATTRIBUTENAME = "_CUSTOM_0";
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME, Schema2.EncodingType.FLOAT, false)]
-        public Single CustomId;
-
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute("TEXCOORD_0")]
+        
+        public Single CustomId;        
+        public Vector4 Color;        
         public Vector2 TexCoord;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -177,11 +172,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public const string CUSTOMATTRIBUTENAME0 = "_CUSTOM_0";
         public const string CUSTOMATTRIBUTENAME1 = "_CUSTOM_1";
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME0, Schema2.EncodingType.FLOAT, false)]
-        public Single CustomId0;
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME1, Schema2.EncodingType.UNSIGNED_BYTE, true)]
+        
+        public Single CustomId0;        
         public Vector4 CustomId1;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()

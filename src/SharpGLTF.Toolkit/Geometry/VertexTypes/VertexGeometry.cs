@@ -127,8 +127,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
+        
         public Vector3 Position;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -236,11 +235,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
+        
         public Vector3 Position;
-
-        [VertexAttribute("NORMAL")]
         public Vector3 Normal;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -347,14 +343,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
-        public Vector3 Position;
-
-        [VertexAttribute("NORMAL")]
+        
+        public Vector3 Position;        
         public Vector3 Normal;
-
-        [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -509,14 +500,9 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITIONDELTA")]
+        
         public Vector3 PositionDelta;
-
-        [VertexAttribute("NORMALDELTA")]
         public Vector3 NormalDelta;
-
-        [VertexAttribute("TANGENTDELTA")]
         public Vector3 TangentDelta;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()

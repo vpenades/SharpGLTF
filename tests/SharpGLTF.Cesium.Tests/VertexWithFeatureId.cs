@@ -27,8 +27,7 @@ namespace SharpGLTF
         }
 
         public const string CUSTOMATTRIBUTENAME = "_FEATURE_ID_0";
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME, EncodingType.FLOAT, false)]
+        
         public float BatchId;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()

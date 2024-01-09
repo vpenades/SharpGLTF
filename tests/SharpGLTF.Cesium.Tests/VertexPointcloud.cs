@@ -26,13 +26,9 @@ namespace SharpGLTF
         public const string INTENSITYATTRIBUTENAME = "_INTENSITY";
         public const string CLASSIFICATIONATTRIBUTENAME = "_CLASSIFICATION";
 
-        [VertexAttribute("COLOR_0", EncodingType.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute(INTENSITYATTRIBUTENAME, EncodingType.FLOAT, false)]
-        public float Intensity;
         
-        [VertexAttribute(CLASSIFICATIONATTRIBUTENAME, EncodingType.FLOAT, false)]
+        public Vector4 Color;
+        public float Intensity;
         public float Classification;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()

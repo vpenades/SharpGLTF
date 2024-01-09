@@ -130,8 +130,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like<see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints;
 
         /// <summary>
@@ -140,8 +139,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_0")]
+        /// </remarks>        
         public Vector4 Weights;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -275,8 +273,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints0;
 
         /// <summary>
@@ -285,8 +282,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_1", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints1;
 
         /// <summary>
@@ -295,8 +291,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_0")]
+        /// </remarks>        
         public Vector4 Weights0;
 
         /// <summary>
@@ -305,8 +300,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_1")]
+        /// </remarks>        
         public Vector4 Weights1;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()

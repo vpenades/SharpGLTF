@@ -93,19 +93,21 @@ void WriteVertexMaterialPermutation(int colorCount, int textureCount)
 
     for(int i=0; i < colorCount; ++i)
     {
-        WriteLine($"[VertexAttribute(\"COLOR_{i}\", ENCODING.UNSIGNED_BYTE, true)]");
+        // WriteLine($"[VertexAttribute(\"COLOR_{i}\", ENCODING.UNSIGNED_BYTE, true)]");
         WriteLine($"public Vector4 {colorsSet[i]};");
-        WriteLine("");
+        // WriteLine("");
     }
 
     for(int i=0; i < textureCount; ++i)
     {
-        WriteLine($"[VertexAttribute(\"TEXCOORD_{i}\")]");
+        // WriteLine($"[VertexAttribute(\"TEXCOORD_{i}\")]");
         WriteLine($"public Vector2 {texcrdSet[i]};");
-        WriteLine("");
+        // WriteLine("");
     }
 
-    WriteLine("IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetAttributes()");
+    WriteLine("");
+
+    WriteLine("IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()");
     WriteLine("{"); PushIndent("    ");
     for (int i=0; i < colorCount; ++i)   { var name = "COLOR_" + i; WriteLine($"yield return new KeyValuePair<string, AttributeFormat>(\"{name}\", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));"); }
     for (int i=0; i < textureCount; ++i) { var name = "TEXCOORD_" + i; WriteLine($"yield return new KeyValuePair<string, AttributeFormat>(\"{name}\", new AttributeFormat(Schema2.DimensionType.VEC2));"); }

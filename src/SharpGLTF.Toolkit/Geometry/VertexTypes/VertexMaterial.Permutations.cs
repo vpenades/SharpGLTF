@@ -53,7 +53,6 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -159,10 +158,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -275,13 +271,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -400,16 +391,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
-
-         [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -527,7 +511,6 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -633,10 +616,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -749,13 +729,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -875,16 +850,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1010,19 +978,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
-
-         [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1147,10 +1106,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color0;
-
-         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1263,13 +1219,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color0;
-
-         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1389,16 +1340,9 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color0;
-
-         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1525,19 +1469,10 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color0;
-
-         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
@@ -1670,22 +1605,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
          #region data
 
-         [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color0;
-
-         [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
-
-         [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord0;
-
-         [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
-
-         [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
-
-         [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
          IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
