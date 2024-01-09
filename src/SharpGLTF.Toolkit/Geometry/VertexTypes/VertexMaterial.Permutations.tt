@@ -51,9 +51,9 @@ void WriteVertexMaterialPermutation(int colorCount, int textureCount)
     WriteLine("/// <summary>");
     WriteLine("/// Defines a Vertex attribute with a material Color.");
     WriteLine("/// </summary>");
-    WriteLine("#if NET6_0_OR_GREATER");
-    WriteLine("[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]");
-    WriteLine("#endif");
+    // WriteLine("#if NET6_0_OR_GREATER");
+    // WriteLine("[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]");
+    // WriteLine("#endif");
     WriteLine("[System.CodeDom.Compiler.GeneratedCodeAttribute(\"Microsoft.VisualStudio.TextTemplating\", \"17.0.0.0\")]");
     WriteLine("[System.Diagnostics.DebuggerDisplay(\"{_GetDebuggerDisplay(),nq}\")]");
     WriteLine("[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]");

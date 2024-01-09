@@ -88,10 +88,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPosition : IVertexGeometry, IEquatable<VertexPosition>
     {
@@ -192,10 +189,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position and a Normal.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormal : IVertexGeometry, IEquatable<VertexPositionNormal>
     {
@@ -304,10 +298,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormalTangent : IVertexGeometry, IEquatable<VertexPositionNormalTangent>
     {
@@ -419,10 +410,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexGeometryDelta : IVertexGeometry, IEquatable<VertexGeometryDelta>
     {

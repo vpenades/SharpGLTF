@@ -25,9 +25,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -128,9 +125,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -239,9 +233,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -357,9 +348,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -483,9 +471,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -586,9 +571,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -697,9 +679,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -816,9 +795,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -942,9 +918,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1076,9 +1049,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1187,9 +1157,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1306,9 +1273,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1433,9 +1397,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -1567,9 +1528,6 @@ namespace SharpGLTF.Geometry.VertexTypes
          /// <summary>
      /// Defines a Vertex attribute with a material Color.
      /// </summary>
-     #if NET6_0_OR_GREATER
-     [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-     #endif
      [System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
      [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
      [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]

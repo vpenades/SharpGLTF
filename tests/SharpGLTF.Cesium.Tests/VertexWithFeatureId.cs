@@ -9,10 +9,6 @@ using SharpGLTF.Schema2;
 
 namespace SharpGLTF
 {
-
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexWithFeatureId : IVertexCustom
     {
