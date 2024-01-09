@@ -168,10 +168,6 @@ void WriteVertexMaterialPermutation(int colorCount, int textureCount)
         var src = $"{attr.Param}Delta";
         if (src == "ColorDelta") src= "Color0Delta";
         if (src == "TexCoordDelta") src= "TexCoord0Delta";
-
-        if (src.EndsWith("2Delta")) continue;
-        if (src.EndsWith("3Delta")) continue;
-
         WriteLine($"this.{attr.Param} += delta.{src};");
     }    
     PopIndent(); WriteLine("}");
@@ -224,9 +220,9 @@ void WriteVertexSubtractPermutation(int colorCount, int textureCount)
     WriteLine($"internal VertexMaterialDelta(in {vertexTypeName} rootVal, in {vertexTypeName} morphVal)");
     WriteLine("{"); PushIndent("    ");
 
-    // we don't support all the channels yet
+    
     colorCount = Math.Min(2,colorCount);
-    textureCount = Math.Min(2,textureCount);
+    textureCount = Math.Min(4,textureCount);
 
     WriteLine($"MaxColors = {colorCount};");
     WriteLine($"MaxTextCoords = {textureCount};");
@@ -239,7 +235,7 @@ void WriteVertexSubtractPermutation(int colorCount, int textureCount)
         else WriteLine($"Color{i}Delta = Vector4.Zero;");    
     }
 
-    for(int i=0; i< 2; ++i)
+    for(int i=0; i < 4; ++i)
     {
         var name = textureCount == 1 ? "TexCoord" : $"TexCoord{i}";
 

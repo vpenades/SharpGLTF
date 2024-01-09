@@ -158,10 +158,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct VertexMaterialDelta : IVertexMaterial, IEquatable<VertexMaterialDelta>
@@ -176,7 +173,12 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static implicit operator VertexMaterialDelta(in (Vector4 Color0Delta, Vector4 Color1Delta, Vector2 TextCoord0Delta, Vector2 TextCoord1Delta) tuple)
         {
-            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta);
+            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta, Vector2.Zero, Vector2.Zero);
+        }
+
+        public static implicit operator VertexMaterialDelta(in (Vector4 Color0Delta, Vector4 Color1Delta, Vector2 TextCoord0Delta, Vector2 TextCoord1Delta, Vector2 TextCoord2Delta, Vector2 TextCoord3Delta) tuple)
+        {
+            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta, tuple.TextCoord2Delta, tuple.TextCoord3Delta);
         }
 
         public VertexMaterialDelta(IVertexMaterial src)
@@ -184,50 +186,41 @@ namespace SharpGLTF.Geometry.VertexTypes
             Guard.NotNull(src, nameof(src));
 
             MaxColors = Math.Min(2, src.MaxColors);
-            MaxTextCoords = Math.Min(2,src.MaxTextCoords);
+            MaxTextCoords = Math.Min(4,src.MaxTextCoords);
 
-            if (src.MaxColors == 0)
-            {
-                Color0Delta = Vector4.Zero;
-                Color1Delta = Vector4.Zero;
-            }
-            else if (src.MaxColors == 1)
-            {
-                Color0Delta = src.GetColor(0);
-                Color1Delta = Vector4.Zero;
-            }
-            else
-            {
-                Color0Delta = src.GetColor(0);
-                Color1Delta = src.GetColor(1);
-            }
+            Color0Delta = src.MaxColors < 1 ? Vector4.Zero : src.GetColor(0);
+            Color1Delta = src.MaxColors < 2 ? Vector4.Zero : src.GetColor(1);
 
-            if (src.MaxTextCoords == 0)
-            {
-                TexCoord0Delta = Vector2.Zero;
-                TexCoord1Delta = Vector2.Zero;
-            }
-            else if (src.MaxTextCoords == 1)
-            {
-                TexCoord0Delta = src.GetTexCoord(0);
-                TexCoord1Delta = Vector2.Zero;
-            }
-            else
-            {
-                TexCoord0Delta = src.GetTexCoord(0);
-                TexCoord1Delta = src.GetTexCoord(1);
-            }
+            TexCoord0Delta = src.MaxTextCoords < 1 ? Vector2.Zero : src.GetTexCoord(0);
+            TexCoord1Delta = src.MaxTextCoords < 2 ? Vector2.Zero : src.GetTexCoord(1);
+            TexCoord2Delta = src.MaxTextCoords < 3 ? Vector2.Zero : src.GetTexCoord(2);
+            TexCoord3Delta = src.MaxTextCoords < 4 ? Vector2.Zero : src.GetTexCoord(3);
         }
-
+        
         public VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta)
         {
             MaxColors = 2;
-            MaxTextCoords = 2;
+            MaxTextCoords = 4;
 
             Color0Delta = color0Delta;
             Color1Delta = color1Delta;
             TexCoord0Delta = texCoord0Delta;
             TexCoord1Delta = texCoord1Delta;
+            TexCoord2Delta = Vector2.Zero;
+            TexCoord3Delta = Vector2.Zero;
+        }
+
+        public VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta, in Vector2 texCoord2Delta, in Vector2 texCoord3Delta)
+        {
+            MaxColors = 2;
+            MaxTextCoords = 4;
+
+            Color0Delta = color0Delta;
+            Color1Delta = color1Delta;
+            TexCoord0Delta = texCoord0Delta;
+            TexCoord1Delta = texCoord1Delta;
+            TexCoord2Delta = texCoord2Delta;
+            TexCoord3Delta = texCoord3Delta;
         }
         
         internal VertexMaterialDelta(in VertexMaterialDelta rootVal, in VertexMaterialDelta morphVal)
@@ -242,18 +235,22 @@ namespace SharpGLTF.Geometry.VertexTypes
             Color1Delta = morphVal.Color1Delta - rootVal.Color1Delta;
             TexCoord0Delta = morphVal.TexCoord0Delta - rootVal.TexCoord0Delta;
             TexCoord1Delta = morphVal.TexCoord1Delta - rootVal.TexCoord1Delta;
+            TexCoord2Delta = morphVal.TexCoord2Delta - rootVal.TexCoord2Delta;
+            TexCoord3Delta = morphVal.TexCoord3Delta - rootVal.TexCoord3Delta;
         }
 
         #endregion
 
         #region data
 
-        public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero);
+        public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero);
                 
         public Vector4 Color0Delta;        
         public Vector4 Color1Delta;        
-        public Vector2 TexCoord0Delta;        
-        public Vector2 TexCoord1Delta;        
+        public Vector2 TexCoord0Delta;
+        public Vector2 TexCoord1Delta;
+        public Vector2 TexCoord2Delta;
+        public Vector2 TexCoord3Delta;
 
         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
         {
@@ -262,6 +259,8 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_3DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
         }
 
         /// <inheritdoc/>
@@ -271,7 +270,15 @@ namespace SharpGLTF.Geometry.VertexTypes
         public int MaxTextCoords { get; }
 
         /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color0Delta.GetHashCode() ^ Color1Delta.GetHashCode() ^ TexCoord0Delta.GetHashCode() ^ TexCoord1Delta.GetHashCode(); }
+        public readonly override int GetHashCode()
+        {
+            return Color0Delta.GetHashCode()
+                ^ Color1Delta.GetHashCode()
+                ^ TexCoord0Delta.GetHashCode()
+                ^ TexCoord1Delta.GetHashCode()
+                ^ TexCoord2Delta.GetHashCode()
+                ^ TexCoord3Delta.GetHashCode();
+        }
 
         /// <inheritdoc/>
         public readonly override bool Equals(object obj) { return obj is VertexMaterialDelta other && AreEqual(this, other); }
@@ -282,7 +289,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static bool operator !=(in VertexMaterialDelta a, in VertexMaterialDelta b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexMaterialDelta a, in VertexMaterialDelta b)
         {
-            return a.Color0Delta == b.Color0Delta && a.Color1Delta == b.Color1Delta && a.TexCoord0Delta == b.TexCoord0Delta && a.TexCoord1Delta == b.TexCoord1Delta;
+            return a.Color0Delta == b.Color0Delta
+                && a.Color1Delta == b.Color1Delta
+                && a.TexCoord0Delta == b.TexCoord0Delta
+                && a.TexCoord1Delta == b.TexCoord1Delta
+                && a.TexCoord2Delta == b.TexCoord2Delta
+                && a.TexCoord3Delta == b.TexCoord3Delta;
         }        
 
         #endregion
@@ -302,6 +314,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Color1Delta += delta.Color1Delta;
             this.TexCoord0Delta += delta.TexCoord0Delta;
             this.TexCoord1Delta += delta.TexCoord1Delta;
+            this.TexCoord2Delta += delta.TexCoord2Delta;
+            this.TexCoord3Delta += delta.TexCoord3Delta;
         }
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color)
@@ -324,6 +338,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (setIndex == 0) this.TexCoord0Delta = coord;
             if (setIndex == 1) this.TexCoord1Delta = coord;
+            if (setIndex == 2) this.TexCoord2Delta = coord;
+            if (setIndex == 3) this.TexCoord3Delta = coord;
         }
 
         /// <inheritdoc/>
@@ -344,6 +360,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 case 0: return this.TexCoord0Delta;
                 case 1: return this.TexCoord1Delta;
+                case 2: return this.TexCoord2Delta;
+                case 3: return this.TexCoord3Delta;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }

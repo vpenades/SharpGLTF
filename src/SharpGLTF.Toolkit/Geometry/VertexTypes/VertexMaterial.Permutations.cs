@@ -313,6 +313,7 @@ namespace SharpGLTF.Geometry.VertexTypes
          {
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -433,6 +434,8 @@ namespace SharpGLTF.Geometry.VertexTypes
          {
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
+             this.TexCoord3 += delta.TexCoord3Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -881,6 +884,7 @@ namespace SharpGLTF.Geometry.VertexTypes
              this.Color += delta.Color0Delta;
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -1009,6 +1013,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              this.Color += delta.Color0Delta;
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
+             this.TexCoord3 += delta.TexCoord3Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -1489,6 +1495,7 @@ namespace SharpGLTF.Geometry.VertexTypes
              this.Color1 += delta.Color1Delta;
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -1625,6 +1632,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              this.Color1 += delta.Color1Delta;
              this.TexCoord0 += delta.TexCoord0Delta;
              this.TexCoord1 += delta.TexCoord1Delta;
+             this.TexCoord2 += delta.TexCoord2Delta;
+             this.TexCoord3 += delta.TexCoord3Delta;
          }
          void IVertexMaterial.SetColor(int index, Vector4 color)
          {
@@ -1677,6 +1686,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
              TexCoord1Delta = Vector2.Zero;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexTexture2 rootVal, in VertexTexture2 morphVal)
          {
@@ -1686,24 +1697,30 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexTexture3 rootVal, in VertexTexture3 morphVal)
          {
              MaxColors = 0;
-             MaxTextCoords = 2;
+             MaxTextCoords = 3;
              Color0Delta = Vector4.Zero;
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexTexture4 rootVal, in VertexTexture4 morphVal)
          {
              MaxColors = 0;
-             MaxTextCoords = 2;
+             MaxTextCoords = 4;
              Color0Delta = Vector4.Zero;
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = morphVal.TexCoord3 - rootVal.TexCoord3;
          }
          
          internal VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
@@ -1714,6 +1731,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = Vector2.Zero;
              TexCoord1Delta = Vector2.Zero;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor1Texture1 rootVal, in VertexColor1Texture1 morphVal)
          {
@@ -1723,6 +1742,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
              TexCoord1Delta = Vector2.Zero;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor1Texture2 rootVal, in VertexColor1Texture2 morphVal)
          {
@@ -1732,24 +1753,30 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor1Texture3 rootVal, in VertexColor1Texture3 morphVal)
          {
              MaxColors = 1;
-             MaxTextCoords = 2;
+             MaxTextCoords = 3;
              Color0Delta = morphVal.Color - rootVal.Color;
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor1Texture4 rootVal, in VertexColor1Texture4 morphVal)
          {
              MaxColors = 1;
-             MaxTextCoords = 2;
+             MaxTextCoords = 4;
              Color0Delta = morphVal.Color - rootVal.Color;
              Color1Delta = Vector4.Zero;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = morphVal.TexCoord3 - rootVal.TexCoord3;
          }
          
          internal VertexMaterialDelta(in VertexColor2 rootVal, in VertexColor2 morphVal)
@@ -1760,6 +1787,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = morphVal.Color1 - rootVal.Color1;
              TexCoord0Delta = Vector2.Zero;
              TexCoord1Delta = Vector2.Zero;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor2Texture1 rootVal, in VertexColor2Texture1 morphVal)
          {
@@ -1769,6 +1798,8 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = morphVal.Color1 - rootVal.Color1;
              TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
              TexCoord1Delta = Vector2.Zero;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor2Texture2 rootVal, in VertexColor2Texture2 morphVal)
          {
@@ -1778,24 +1809,30 @@ namespace SharpGLTF.Geometry.VertexTypes
              Color1Delta = morphVal.Color1 - rootVal.Color1;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = Vector2.Zero;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor2Texture3 rootVal, in VertexColor2Texture3 morphVal)
          {
              MaxColors = 2;
-             MaxTextCoords = 2;
+             MaxTextCoords = 3;
              Color0Delta = morphVal.Color0 - rootVal.Color0;
              Color1Delta = morphVal.Color1 - rootVal.Color1;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = Vector2.Zero;
          }
          internal VertexMaterialDelta(in VertexColor2Texture4 rootVal, in VertexColor2Texture4 morphVal)
          {
              MaxColors = 2;
-             MaxTextCoords = 2;
+             MaxTextCoords = 4;
              Color0Delta = morphVal.Color0 - rootVal.Color0;
              Color1Delta = morphVal.Color1 - rootVal.Color1;
              TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
              TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
+             TexCoord2Delta = morphVal.TexCoord2 - rootVal.TexCoord2;
+             TexCoord3Delta = morphVal.TexCoord3 - rootVal.TexCoord3;
          }
          
 
