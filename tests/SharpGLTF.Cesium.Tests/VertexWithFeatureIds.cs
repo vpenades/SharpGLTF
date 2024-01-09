@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 
 namespace SharpGLTF
@@ -29,6 +30,12 @@ namespace SharpGLTF
 
         [VertexAttribute(FEATUREID1ATTRIBUTENAME, EncodingType.FLOAT, false)]
         public float FeatureId1;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>(FEATUREID0ATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));
+            yield return new KeyValuePair<string, AttributeFormat>(FEATUREID1ATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));
+        }
 
         public int MaxColors => 0;
 
@@ -82,5 +89,7 @@ namespace SharpGLTF
         {
             throw new NotImplementedException();
         }
+
+        
     }
 }

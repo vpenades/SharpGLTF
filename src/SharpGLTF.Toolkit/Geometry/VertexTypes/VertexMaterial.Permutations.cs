@@ -13,6 +13,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
 
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
@@ -55,6 +56,10 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 0;
 
          public readonly int MaxTextCoords => 1;
@@ -160,6 +165,11 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 0;
 
          public readonly int MaxTextCoords => 2;
@@ -274,6 +284,12 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 0;
 
          public readonly int MaxTextCoords => 3;
@@ -396,6 +412,13 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_3", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 0;
 
          public readonly int MaxTextCoords => 4;
@@ -507,6 +530,10 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+         }
          public readonly int MaxColors => 1;
 
          public readonly int MaxTextCoords => 0;
@@ -612,6 +639,11 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 1;
 
          public readonly int MaxTextCoords => 1;
@@ -726,6 +758,12 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 1;
 
          public readonly int MaxTextCoords => 2;
@@ -849,6 +887,13 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 1;
 
          public readonly int MaxTextCoords => 3;
@@ -980,6 +1025,14 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_3", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 1;
 
          public readonly int MaxTextCoords => 4;
@@ -1100,6 +1153,11 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
          public Vector4 Color1;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+         }
          public readonly int MaxColors => 2;
 
          public readonly int MaxTextCoords => 0;
@@ -1214,6 +1272,12 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_0")]
          public Vector2 TexCoord;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 2;
 
          public readonly int MaxTextCoords => 1;
@@ -1337,6 +1401,13 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_1")]
          public Vector2 TexCoord1;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 2;
 
          public readonly int MaxTextCoords => 2;
@@ -1469,6 +1540,14 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_2")]
          public Vector2 TexCoord2;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 2;
 
          public readonly int MaxTextCoords => 3;
@@ -1609,6 +1688,15 @@ namespace SharpGLTF.Geometry.VertexTypes
          [VertexAttribute("TEXCOORD_3")]
          public Vector2 TexCoord3;
 
+         IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+         {
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("COLOR_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2", new AttributeFormat(Schema2.DimensionType.VEC2));
+             yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_3", new AttributeFormat(Schema2.DimensionType.VEC2));
+         }
          public readonly int MaxColors => 2;
 
          public readonly int MaxTextCoords => 4;

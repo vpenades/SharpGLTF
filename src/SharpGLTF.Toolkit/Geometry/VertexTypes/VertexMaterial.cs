@@ -4,6 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
+
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
@@ -26,7 +28,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <item>And also by other custom vertex material fragment types.</item>
     /// </list>
     /// </remarks>
-    public interface IVertexMaterial
+    public interface IVertexMaterial : IVertexReflection
     {
         /// <summary>
         /// Gets the number of color attributes available in this vertex
@@ -181,8 +183,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             Guard.NotNull(src, nameof(src));
 
-            MaxColors = src.MaxColors;
-            MaxTextCoords = src.MaxTextCoords;
+            MaxColors = Math.Min(2, src.MaxColors);
+            MaxTextCoords = Math.Min(2,src.MaxTextCoords);
 
             if (src.MaxColors == 0)
             {
@@ -259,6 +261,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         [VertexAttribute("TEXCOORD_1DELTA")]
         public Vector2 TexCoord1Delta;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));            
+        }
 
         /// <inheritdoc/>
         public int MaxColors { get; }

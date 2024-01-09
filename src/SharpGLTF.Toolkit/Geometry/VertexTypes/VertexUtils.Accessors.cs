@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 using SharpGLTF.Memory;
 
@@ -100,6 +101,125 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, PackedEncoding vertexEncoding)
         {
+            var tvg = firstVertex.GetGeometry().GetEncodingAttributes();
+            var tvm = firstVertex.GetMaterial().GetEncodingAttributes();
+            var tvs = firstVertex.GetSkinning().GetEncodingAttributes();
+
+            var attributes = new List<MemoryAccessInfo>();            
+
+            foreach (var finfo in tvg)
+            {                
+                attributes.Add(new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value));
+            }
+
+            foreach (var finfo in tvm)
+            {
+                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);
+                
+                if (a.Name.StartsWith("COLOR_", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (vertexEncoding.ColorEncoding.HasValue)
+                    {
+                        a.Encoding = vertexEncoding.ColorEncoding.Value;
+                        a.Normalized = a.Encoding != ENCODING.FLOAT;
+                    }
+                }
+
+                attributes.Add(a);
+            }
+
+            foreach (var finfo in tvs)
+            {
+                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);                
+                
+                if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
+                if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
+                {
+                    a.Encoding = vertexEncoding.WeightsEncoding.Value;
+                    if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
+                }
+
+                attributes.Add(a);
+                
+            }
+
+            var array = attributes.ToArray();
+
+            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
+
+            /*
+            var legacyArray = _GetVertexAttributesLegacy(firstVertex, vertexCount, vertexEncoding);
+            if (!array.SequenceEqual(legacyArray)) throw new InvalidOperationException();
+            */
+
+            return array;
+        }        
+
+        private static Converter<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
+        {
+            if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
+            if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
+            if (attributeName == "TANGENT") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? t : Vector4.Zero; };
+
+            if (attributeName == "POSITIONDELTA") return v => v.GetGeometry().GetPosition();
+            if (attributeName == "NORMALDELTA") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
+            if (attributeName == "TANGENTDELTA") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? new Vector3(t.X, t.Y, t.Z) : Vector3.Zero; };
+
+            if (attributeName == "COLOR_0") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.One : m.GetColor(0); };
+            if (attributeName == "COLOR_1") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.One : m.GetColor(1); };
+            if (attributeName == "COLOR_2") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.One : m.GetColor(2); };
+            if (attributeName == "COLOR_3") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.One : m.GetColor(3); };
+
+            if (attributeName == "COLOR_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.Zero : m.GetColor(0); };
+            if (attributeName == "COLOR_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.Zero : m.GetColor(1); };
+            if (attributeName == "COLOR_2DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.Zero : m.GetColor(2); };
+            if (attributeName == "COLOR_3DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.Zero : m.GetColor(3); };
+
+            if (attributeName == "TEXCOORD_0") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
+            if (attributeName == "TEXCOORD_1") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
+            if (attributeName == "TEXCOORD_2") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
+            if (attributeName == "TEXCOORD_3") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
+
+            if (attributeName == "TEXCOORD_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
+            if (attributeName == "TEXCOORD_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
+            if (attributeName == "TEXCOORD_2DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
+            if (attributeName == "TEXCOORD_3DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
+
+            if (attributeName == "JOINTS_0") return v => v.GetSkinning().JointsLow;
+            if (attributeName == "JOINTS_1") return v => v.GetSkinning().JointsHigh;
+
+            if (attributeName == "WEIGHTS_0") return v => v.GetSkinning().WeightsLow;
+            if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().WeightsHigh;
+
+            return v => _GetVertexBuilderCustomAttributeFunc(v.GetMaterial(), attributeName);
+        }
+
+        private static object _GetVertexBuilderCustomAttributeFunc(IVertexMaterial vertex, string attributeName)
+        {
+            if (!(vertex is IVertexCustom customVertex)) return null;
+            return customVertex.TryGetCustomAttribute(attributeName, out Object value) ? value : null;
+        }
+
+        private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Converter<IVertexBuilder, Object> func)
+            where TVertex : IVertexBuilder
+        {
+            var dst = new TColumn[vertices.Count];
+
+            for (int i = 0; i < dst.Length; ++i)
+            {
+                var v = func(vertices[i]);
+
+                dst[i] = v == null ? default : (TColumn)v;
+            }
+
+            return dst;
+        }
+
+        // legacy
+
+        /*
+        private static MemoryAccessInfo[] _GetVertexAttributesLegacy(this IVertexBuilder firstVertex, int vertexCount, PackedEncoding vertexEncoding)
+        {
             var tvg = firstVertex.GetGeometry().GetType();
             var tvm = firstVertex.GetMaterial().GetType();
             var tvs = firstVertex.GetSkinning().GetType();
@@ -179,66 +299,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
 
             return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
-        }
-
-        private static Converter<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
-        {
-            if (attributeName == "POSITION") return v => v.GetGeometry().GetPosition();
-            if (attributeName == "NORMAL") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
-            if (attributeName == "TANGENT") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? t : Vector4.Zero; };
-
-            if (attributeName == "POSITIONDELTA") return v => v.GetGeometry().GetPosition();
-            if (attributeName == "NORMALDELTA") return v => { return v.GetGeometry().TryGetNormal(out Vector3 n) ? n : Vector3.Zero; };
-            if (attributeName == "TANGENTDELTA") return v => { return v.GetGeometry().TryGetTangent(out Vector4 t) ? new Vector3(t.X, t.Y, t.Z) : Vector3.Zero; };
-
-            if (attributeName == "COLOR_0") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.One : m.GetColor(0); };
-            if (attributeName == "COLOR_1") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.One : m.GetColor(1); };
-            if (attributeName == "COLOR_2") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.One : m.GetColor(2); };
-            if (attributeName == "COLOR_3") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.One : m.GetColor(3); };
-
-            if (attributeName == "COLOR_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 0 ? Vector4.Zero : m.GetColor(0); };
-            if (attributeName == "COLOR_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 1 ? Vector4.Zero : m.GetColor(1); };
-            if (attributeName == "COLOR_2DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 2 ? Vector4.Zero : m.GetColor(2); };
-            if (attributeName == "COLOR_3DELTA") return v => { var m = v.GetMaterial(); return m.MaxColors <= 3 ? Vector4.Zero : m.GetColor(3); };
-
-            if (attributeName == "TEXCOORD_0") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
-            if (attributeName == "TEXCOORD_1") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
-            if (attributeName == "TEXCOORD_2") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
-            if (attributeName == "TEXCOORD_3") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
-
-            if (attributeName == "TEXCOORD_0DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 0 ? Vector2.Zero : m.GetTexCoord(0); };
-            if (attributeName == "TEXCOORD_1DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 1 ? Vector2.Zero : m.GetTexCoord(1); };
-            if (attributeName == "TEXCOORD_2DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 2 ? Vector2.Zero : m.GetTexCoord(2); };
-            if (attributeName == "TEXCOORD_3DELTA") return v => { var m = v.GetMaterial(); return m.MaxTextCoords <= 3 ? Vector2.Zero : m.GetTexCoord(3); };
-
-            if (attributeName == "JOINTS_0") return v => v.GetSkinning().JointsLow;
-            if (attributeName == "JOINTS_1") return v => v.GetSkinning().JointsHigh;
-
-            if (attributeName == "WEIGHTS_0") return v => v.GetSkinning().WeightsLow;
-            if (attributeName == "WEIGHTS_1") return v => v.GetSkinning().WeightsHigh;
-
-            return v => _GetVertexBuilderCustomAttributeFunc(v.GetMaterial(), attributeName);
-        }
-
-        private static object _GetVertexBuilderCustomAttributeFunc(IVertexMaterial vertex, string attributeName)
-        {
-            if (!(vertex is IVertexCustom customVertex)) return null;
-            return customVertex.TryGetCustomAttribute(attributeName, out Object value) ? value : null;
-        }
-
-        private static TColumn[] _GetColumn<TVertex, TColumn>(this IReadOnlyList<TVertex> vertices, Converter<IVertexBuilder, Object> func)
-            where TVertex : IVertexBuilder
-        {
-            var dst = new TColumn[vertices.Count];
-
-            for (int i = 0; i < dst.Length; ++i)
-            {
-                var v = func(vertices[i]);
-
-                dst[i] = v == null ? default : (TColumn)v;
-            }
-
-            return dst;
-        }
+        }*/
     }
 }

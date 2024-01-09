@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
+
+using SharpGLTF.Memory;
 using SharpGLTF.Transforms;
 
 using ENCODING = SharpGLTF.Schema2.EncodingType;
@@ -20,7 +22,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <item><see cref="VertexJoints8"/></item>
     /// </list>
     /// </remarks>
-    public interface IVertexSkinning
+    public interface IVertexSkinning : IVertexReflection
     {
         /// <summary>
         /// Gets the Number of valid joints supported.<br/>Typical values are 0, 4 or 8.
@@ -141,6 +143,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </remarks>
         [VertexAttribute("WEIGHTS_0")]
         public Vector4 Weights;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_0", new AttributeFormat(Schema2.DimensionType.VEC4));
+        }
 
         /// <inheritdoc/>
         public readonly int MaxBindings => 4;
@@ -300,6 +308,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// </remarks>
         [VertexAttribute("WEIGHTS_1")]
         public Vector4 Weights1;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_0", new AttributeFormat(Schema2.DimensionType.VEC4));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_1", new AttributeFormat(Schema2.DimensionType.VEC4));
+        }
 
         /// <inheritdoc/>
         public readonly int MaxBindings => 8;

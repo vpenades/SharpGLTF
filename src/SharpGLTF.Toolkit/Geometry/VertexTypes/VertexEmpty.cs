@@ -26,6 +26,11 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #region data
 
+        IEnumerable<KeyValuePair<string, Memory.AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield break;
+        }
+
         public override int GetHashCode() { return 0; }
         public override bool Equals(object obj) { return obj is VertexEmpty; }
         public bool Equals(VertexEmpty other) { return true; }

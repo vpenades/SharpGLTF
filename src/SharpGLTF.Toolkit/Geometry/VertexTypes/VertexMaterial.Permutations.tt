@@ -19,6 +19,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
 
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
@@ -74,14 +75,14 @@ void WriteVertexMaterialPermutation(int colorCount, int textureCount)
 
     WriteLine($"public {vertexTypeName}({attributeArgs})");      
     WriteLine("{"); PushIndent("    ");
-    foreach(var item in currentSet) { WriteLine($"{item.Param} = {item.Arg};"); }
+    foreach (var item in currentSet) { WriteLine($"{item.Param} = {item.Arg};"); }
     PopIndent(); WriteLine("}");    
 
     WriteLine($"public {vertexTypeName}(IVertexMaterial src)");   
     WriteLine("{"); PushIndent("    ");
     WriteLine("Guard.NotNull(src, nameof(src));");
-    for(int i=0; i < colorCount; ++i)   { WriteLine($"this.{colorsSet[i]} = {i} < src.MaxColors  ? src.GetColor({i}) : Vector4.One;"); }
-    for(int i=0; i < textureCount; ++i) { WriteLine($"this.{texcrdSet[i]} = {i} < src.MaxTextCoords ? src.GetTexCoord({i}) : Vector2.Zero;"); }
+    for (int i=0; i < colorCount; ++i)   { WriteLine($"this.{colorsSet[i]} = {i} < src.MaxColors  ? src.GetColor({i}) : Vector4.One;"); }
+    for (int i=0; i < textureCount; ++i) { WriteLine($"this.{texcrdSet[i]} = {i} < src.MaxTextCoords ? src.GetTexCoord({i}) : Vector2.Zero;"); }
     PopIndent(); WriteLine("}");
 
     WriteLine("#endregion"); WriteLine("");
@@ -103,6 +104,12 @@ void WriteVertexMaterialPermutation(int colorCount, int textureCount)
         WriteLine($"public Vector2 {texcrdSet[i]};");
         WriteLine("");
     }
+
+    WriteLine("IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetAttributes()");
+    WriteLine("{"); PushIndent("    ");
+    for (int i=0; i < colorCount; ++i)   { var name = "COLOR_" + i; WriteLine($"yield return new KeyValuePair<string, AttributeFormat>(\"{name}\", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));"); }
+    for (int i=0; i < textureCount; ++i) { var name = "TEXCOORD_" + i; WriteLine($"yield return new KeyValuePair<string, AttributeFormat>(\"{name}\", new AttributeFormat(Schema2.DimensionType.VEC2));"); }
+    PopIndent(); WriteLine("}");
 
     WriteLine($"public readonly int MaxColors => {colorCount};");
     WriteLine("");
