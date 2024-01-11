@@ -5,6 +5,11 @@ using System.Linq;
 
 using SharpGLTF.IO;
 
+#if NET6_0_OR_GREATER
+using DYNAMICMEMBERS = System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute;
+using DYNAMICTYPES = System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes;
+#endif
+
 namespace SharpGLTF.Schema2
 {
     /// <summary>
@@ -16,6 +21,10 @@ namespace SharpGLTF.Schema2
     /// </remarks>
     public static class ExtensionsFactory
     {
+        #if NET6_0_OR_GREATER
+        private const DYNAMICTYPES DYNAMICCONSTRUCTORS = DYNAMICTYPES.NonPublicConstructors | DYNAMICTYPES.PublicConstructors;
+        #endif
+
         // extensions design inconsistencies:
         // https://github.com/KhronosGroup/glTF/issues/1491
 
@@ -23,37 +32,37 @@ namespace SharpGLTF.Schema2
 
         static ExtensionsFactory()
         {
-            RegisterExtension<ModelRoot, _ModelPunctualLights>("KHR_lights_punctual");
-            RegisterExtension<Node, _NodePunctualLight>("KHR_lights_punctual");
+            RegisterExtension<ModelRoot, _ModelPunctualLights>("KHR_lights_punctual", p=> new _ModelPunctualLights(p));
+            RegisterExtension<Node, _NodePunctualLight>("KHR_lights_punctual", p=> new _NodePunctualLight(p));
 
-            RegisterExtension<Node, MeshGpuInstancing>("EXT_mesh_gpu_instancing");
+            RegisterExtension<Node, MeshGpuInstancing>("EXT_mesh_gpu_instancing", p=> new MeshGpuInstancing(p));
 
-            RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit");
-            RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen");
-            RegisterExtension<Material, MaterialIOR>("KHR_materials_ior");
-            RegisterExtension<Material, MaterialSpecular>("KHR_materials_specular");
-            RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat");
-            RegisterExtension<Material, MaterialTransmission>("KHR_materials_transmission");
-            RegisterExtension<Material, MaterialVolume>("KHR_materials_volume");
-            RegisterExtension<Material, MaterialEmissiveStrength>("KHR_materials_emissive_strength");
-            RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness");
-            RegisterExtension<Material, MaterialIridescence>("KHR_materials_iridescence");
+            RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit", p => new MaterialUnlit(p));
+            RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen", p => new MaterialSheen(p));
+            RegisterExtension<Material, MaterialIOR>("KHR_materials_ior", p => new MaterialIOR(p));
+            RegisterExtension<Material, MaterialSpecular>("KHR_materials_specular", p => new MaterialSpecular(p));
+            RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat", p => new MaterialClearCoat(p));
+            RegisterExtension<Material, MaterialTransmission>("KHR_materials_transmission", p => new MaterialTransmission(p));
+            RegisterExtension<Material, MaterialVolume>("KHR_materials_volume", p => new MaterialVolume(p));
+            RegisterExtension<Material, MaterialEmissiveStrength>("KHR_materials_emissive_strength", p => new MaterialEmissiveStrength(p));
+            RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness", p => new MaterialPBRSpecularGlossiness(p));
+            RegisterExtension<Material, MaterialIridescence>("KHR_materials_iridescence", p => new MaterialIridescence(p));
 
-            RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform");
+            RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform", p => new TextureTransform(p));
 
-            RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds");
-            RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp");
-            RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu");
+            RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds", p => new TextureDDS(p));
+            RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp", p => new TextureWEBP(p));
+            RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu", p => new TextureKTX2(p));
 
-            RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld");
-            RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld");                        
+            RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld", p => new XmpPackets(p));
+            RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld", p => new XmpPacketReference(p));                        
         }
 
         #endregion
 
         #region data
 
-        private static readonly List<(string Name, Type ParentType, Type ExtType)> _Extensions = new List<(string, Type, Type)>();
+        private static readonly List<ExtensionEntry> _Extensions = new List<ExtensionEntry>();
 
         #endregion
 
@@ -73,7 +82,14 @@ namespace SharpGLTF.Schema2
         /// The <paramref name="persistentName"/> is the value used for serialization<br/>
         /// and it must meet <see href="https://github.com/KhronosGroup/glTF/blob/master/extensions/Prefixes.md">extension naming constraints</see>.
         /// </remarks>
-        public static void RegisterExtension<TParent, TExtension>(string persistentName)
+        [Obsolete("Use RegisterExtension(name, factory) instead.")]
+        public static void RegisterExtension
+            <TParent,
+                #if NET6_0_OR_GREATER
+                [DYNAMICMEMBERS(DYNAMICCONSTRUCTORS)]
+                #endif
+            TExtension>
+            (string persistentName)
             where TParent : JsonSerializable
             where TExtension : JsonSerializable
         {
@@ -82,7 +98,34 @@ namespace SharpGLTF.Schema2
 
             // TODO: check that persistentName has a valid extension name.
 
-            _Extensions.Add( (persistentName, typeof(TParent), typeof(TExtension)) );
+            var ext = ExtensionEntry.Create<TParent,TExtension>(persistentName);
+
+            _Extensions.Add(ext);
+        }
+
+        /// <summary>
+        /// Registers a new extensions to be used globally.
+        /// </summary>
+        /// <typeparam name="TParent">The parent type to which this extension is attached.</typeparam>
+        /// <typeparam name="TExtension">The extension type.</typeparam>
+        /// <param name="persistentName">The extension name.</param>
+        /// <param name="factory">callback used to create instances of type <typeparamref name="TExtension"/>.</param>
+        /// <remarks>
+        /// The <paramref name="persistentName"/> is the value used for serialization<br/>
+        /// and it must meet <see href="https://github.com/KhronosGroup/glTF/blob/master/extensions/Prefixes.md">extension naming constraints</see>.
+        /// </remarks>
+        public static void RegisterExtension<TParent,TExtension>(string persistentName, Func<TParent, JsonSerializable> factory)
+            where TParent : JsonSerializable
+            where TExtension : JsonSerializable
+        {
+            Guard.NotNullOrEmpty(persistentName, nameof(persistentName));
+            Guard.MustBeNull(Identify(typeof(TParent), typeof(TExtension)), $"{nameof(TExtension)} already registered for {nameof(TParent)}");
+
+            // TODO: check that persistentName has a valid extension name.
+
+            var ext = new ExtensionEntry(persistentName, typeof(TParent), typeof(TExtension), p => factory.Invoke((TParent)p));
+
+            _Extensions.Add(ext);
         }
 
         #endregion
@@ -99,22 +142,13 @@ namespace SharpGLTF.Schema2
         {
             var ptype = parent.GetType();
 
-            var (name, parentType, extType) = _Extensions.FirstOrDefault(item => item.Name == extensionName && item.ParentType.IsAssignableFrom(ptype));
+            var extension = _Extensions.FirstOrDefault(item => item.IsMatch(ptype, extensionName));
 
-            if (name == null) return null;                        
+            if (extension.Name == null) return null;
 
-            Guard.HasDynamicallyAccessedMembers(extType, true, false, false, false, nameof(extensionName));
+            var instance = extension.Factory.Invoke(parent);
 
-            var instance = Activator.CreateInstance
-                (
-                extType,
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
-                null,
-                new Object[] { parent },
-                null
-                );
-
-            return instance as JsonSerializable;
+            return instance ?? throw new InvalidOperationException($"Could not create an instance of {extensionName}");
         }
 
         /// <summary>
@@ -124,16 +158,71 @@ namespace SharpGLTF.Schema2
         /// <param name="extensionType">The type of the extension object.</param>
         /// <returns>An extension identifier code, like "KHR_texture_transform".</returns>
         /// <remarks>
-        /// Extensions must be registered in advanced using <see cref="RegisterExtension{TParent, TExtension}(string)"/>.
+        /// Extensions must be registered in advanced using <see cref="RegisterExtension{TParent, TExtension}(string, Func{TParent, JsonSerializable})"/>.
         /// </remarks>
         internal static string Identify(Type parentType, Type extensionType)
         {
-            foreach (var (name, baseType, extType) in _Extensions)
+            foreach (var ext in _Extensions)
             {
-                if (baseType.IsAssignableFrom(parentType) && extType == extensionType) return name;
+                if (ext.IsMatch(parentType,extensionType)) return ext.Name;
             }
 
             return null;
+        }
+
+        internal readonly struct ExtensionEntry
+        {
+            public static ExtensionEntry Create
+                <
+                TParent,
+                #if NET6_0_OR_GREATER
+                [DYNAMICMEMBERS(DYNAMICCONSTRUCTORS)]
+                #endif
+                TExtension
+                >(string persistentName)
+
+            where TParent : JsonSerializable
+            where TExtension : JsonSerializable
+            {
+                var extType = typeof(TExtension);
+
+                JsonSerializable factory(JsonSerializable parent)
+                {
+                    return Activator.CreateInstance
+                    (
+                        extType,
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance,
+                        null,
+                        new Object[] { parent },
+                        null
+                    ) as JsonSerializable;
+                }
+
+                return new ExtensionEntry(persistentName, typeof(TParent), extType, factory);
+            }
+
+            public ExtensionEntry(string n, Type p, Type e, Func<JsonSerializable, JsonSerializable> f)
+            {
+                Name= n;
+                ParentType = p;
+                ExtType = e;
+                Factory = f;
+            }
+
+            public readonly string Name;
+            public readonly Type ParentType;
+            public readonly Type ExtType;
+            public readonly Func<JsonSerializable, JsonSerializable> Factory;
+
+            public readonly bool IsMatch(Type parentType, string extensionName)
+            {
+                return this.ParentType.IsAssignableFrom(parentType) && this.Name == extensionName;
+            }
+
+            public readonly bool IsMatch(Type parentType, Type extensionType)
+            {
+                return this.ParentType.IsAssignableFrom(parentType) && this.ExtType == extensionType;
+            }
         }
 
         #endregion

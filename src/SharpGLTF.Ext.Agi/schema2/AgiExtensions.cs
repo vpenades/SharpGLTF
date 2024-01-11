@@ -22,10 +22,10 @@ namespace SharpGLTF.Schema2
 
             _AgiRegistered = true;
 
-            ExtensionsFactory.RegisterExtension<ModelRoot, AgiRootArticulations>("AGI_articulations");
-            ExtensionsFactory.RegisterExtension<ModelRoot, AgiRootStkMetadata>("AGI_stk_metadata");
-            ExtensionsFactory.RegisterExtension<Node, AgiNodeArticulations>("AGI_articulations");
-            ExtensionsFactory.RegisterExtension<Node, AgiNodeStkMetadata>("AGI_stk_metadata");
+            ExtensionsFactory.RegisterExtension<ModelRoot, AgiRootArticulations>("AGI_articulations", p => new AgiRootArticulations(p));
+            ExtensionsFactory.RegisterExtension<ModelRoot, AgiRootStkMetadata>("AGI_stk_metadata", p => new AgiRootStkMetadata(p));
+            ExtensionsFactory.RegisterExtension<Node, AgiNodeArticulations>("AGI_articulations", p => new AgiNodeArticulations(p));
+            ExtensionsFactory.RegisterExtension<Node, AgiNodeStkMetadata>("AGI_stk_metadata", p => new AgiNodeStkMetadata(p));
         }
     }
 }

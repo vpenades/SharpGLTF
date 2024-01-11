@@ -4,14 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 
 namespace SharpGLTF
 {
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexPointcloud : IVertexCustom
     {
@@ -25,14 +22,17 @@ namespace SharpGLTF
         public const string INTENSITYATTRIBUTENAME = "_INTENSITY";
         public const string CLASSIFICATIONATTRIBUTENAME = "_CLASSIFICATION";
 
-        [VertexAttribute("COLOR_0", EncodingType.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute(INTENSITYATTRIBUTENAME, EncodingType.FLOAT, false)]
-        public float Intensity;
         
-        [VertexAttribute(CLASSIFICATIONATTRIBUTENAME, EncodingType.FLOAT, false)]
+        public Vector4 Color;
+        public float Intensity;
         public float Classification;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(DimensionType.VEC4, EncodingType.UNSIGNED_BYTE, true));
+            yield return new KeyValuePair<string, AttributeFormat>(INTENSITYATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));
+            yield return new KeyValuePair<string, AttributeFormat>(CLASSIFICATIONATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));
+        }
 
         public int MaxColors => 1;
 

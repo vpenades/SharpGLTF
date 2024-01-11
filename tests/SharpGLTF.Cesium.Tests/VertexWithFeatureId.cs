@@ -4,14 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 using SharpGLTF.Geometry.VertexTypes;
+using SharpGLTF.Memory;
 using SharpGLTF.Schema2;
 
 namespace SharpGLTF
 {
-
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord}")]
     public struct VertexWithFeatureId : IVertexCustom
     {
@@ -26,9 +23,13 @@ namespace SharpGLTF
         }
 
         public const string CUSTOMATTRIBUTENAME = "_FEATURE_ID_0";
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME, EncodingType.FLOAT, false)]
+        
         public float BatchId;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>(CUSTOMATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));            
+        }
 
         public int MaxColors => 0;
 

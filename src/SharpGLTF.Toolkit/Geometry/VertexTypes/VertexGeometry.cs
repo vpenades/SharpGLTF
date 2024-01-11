@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Runtime.Serialization;
 using System.Text;
 
+using SharpGLTF.Memory;
+
 namespace SharpGLTF.Geometry.VertexTypes
 {
     /// <summary>
@@ -19,7 +21,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <item><see cref="VertexGeometryDelta"/></item>
     /// </list>
     /// </remarks>
-    public interface IVertexGeometry
+    public interface IVertexGeometry : IVertexReflection
     {
         /// <summary>
         /// Gets the position of the vertex.
@@ -86,10 +88,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPosition : IVertexGeometry, IEquatable<VertexPosition>
     {
@@ -125,9 +124,13 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
+        
         public Vector3 Position;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("POSITION", new AttributeFormat(Schema2.DimensionType.VEC3));
+        }
 
         /// <inheritdoc/>
         public readonly override int GetHashCode() { return Position.GetHashCode(); }
@@ -179,17 +182,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         public void ApplyTransform(in Matrix4x4 xform)
         {
             Position = Vector3.Transform(Position, xform);
-        }
+        }        
 
         #endregion
     }
 
     /// <summary>
     /// Defines a Vertex attribute with a Position and a Normal.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormal : IVertexGeometry, IEquatable<VertexPositionNormal>
     {
@@ -229,12 +229,15 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
+        
         public Vector3 Position;
-
-        [VertexAttribute("NORMAL")]
         public Vector3 Normal;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("POSITION", new AttributeFormat(Schema2.DimensionType.VEC3));
+            yield return new KeyValuePair<string, AttributeFormat>("NORMAL", new AttributeFormat(Schema2.DimensionType.VEC3));
+        }
 
         /// <inheritdoc/>
         public readonly override int GetHashCode() { return Position.GetHashCode(); }
@@ -295,10 +298,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexPositionNormalTangent : IVertexGeometry, IEquatable<VertexPositionNormalTangent>
     {
@@ -334,15 +334,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITION")]
-        public Vector3 Position;
-
-        [VertexAttribute("NORMAL")]
+        
+        public Vector3 Position;        
         public Vector3 Normal;
-
-        [VertexAttribute("TANGENT")]
         public Vector4 Tangent;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("POSITION", new AttributeFormat(Schema2.DimensionType.VEC3));
+            yield return new KeyValuePair<string, AttributeFormat>("NORMAL", new AttributeFormat(Schema2.DimensionType.VEC3));
+            yield return new KeyValuePair<string, AttributeFormat>("TANGENT", new AttributeFormat(Schema2.DimensionType.VEC4));
+        }
 
         /// <inheritdoc/>
         public readonly override int GetHashCode() { return Position.GetHashCode(); }
@@ -408,10 +410,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with a Position, a Normal and a Tangent.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexGeometryDelta : IVertexGeometry, IEquatable<VertexGeometryDelta>
     {
@@ -489,15 +488,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         #endregion
 
         #region data
-
-        [VertexAttribute("POSITIONDELTA")]
+        
         public Vector3 PositionDelta;
-
-        [VertexAttribute("NORMALDELTA")]
         public Vector3 NormalDelta;
-
-        [VertexAttribute("TANGENTDELTA")]
         public Vector3 TangentDelta;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("POSITIONDELTA", new AttributeFormat(Schema2.DimensionType.VEC3));
+            yield return new KeyValuePair<string, AttributeFormat>("NORMALDELTA", new AttributeFormat(Schema2.DimensionType.VEC3));
+            yield return new KeyValuePair<string, AttributeFormat>("TANGENTDELTA", new AttributeFormat(Schema2.DimensionType.VEC3));
+        }
 
         /// <inheritdoc/>
         public readonly override int GetHashCode() { return PositionDelta.GetHashCode(); }

@@ -144,13 +144,12 @@ namespace SharpGLTF
         {
             var skip = new string[]
             {
-                "empty_object.gltf", // need to look further
-                "custom_property.gltf",
+                "empty_object.gltf", // need to look further                
                 "integer_written_as_float.gltf",
                 "unknown_type.gltf",
                 "valid.gltf", // valid just because objects are unused
                 "get_elements_sparse.gltf", // valid just because objects are unused
-                "invalid_elements_float.gltf", // sure, it has invalid floats, but then the accessor is not used.
+                "invalid_elements_float.gltf", // sure, it has invalid floats, but then the accessor is not used by the current scene. But what if the accessor is used externally, or by an unhalded extension?
                 "not_found.gltf", // it fails at a tricky time
                 "non_relative_uri.gltf", // absolute path pointing to a http which is not supported.
                 "unrecognized_format.gltf", // might require to dig into the image

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 
@@ -7,111 +6,38 @@ namespace SharpGLTF.Geometry.VertexTypes
 {
     static partial class VertexUtils
     {
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexGeometryType(params string[] vertexAttributes)
+        public static (Type BuilderType, Func<IVertexBuilder> BuilderFactory) GetVertexBuilderType(params string[] vertexAttributes)
         {
-            var t = typeof(VertexPosition);
-            if (vertexAttributes.Contains("NORMAL")) t = typeof(VertexPositionNormal);
-            if (vertexAttributes.Contains("TANGENT")) t = typeof(VertexPositionNormalTangent);
-            return t;
-        }
+            var hasNormals = vertexAttributes.Contains("NORMAL");
+            var hasTangents = vertexAttributes.Contains("TANGENT");
 
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexMaterialType(params string[] vertexAttributes)
-        {
-            var colors = vertexAttributes.Contains("COLOR_0") ? 1 : 0;
-            colors = vertexAttributes.Contains("COLOR_1") ? 2 : colors;
-            colors = vertexAttributes.Contains("COLOR_2") ? 3 : colors;
-            colors = vertexAttributes.Contains("COLOR_3") ? 4 : colors;
+            var colors = 0;
+            if (vertexAttributes.Contains("COLOR_0")) colors = Math.Max(colors, 1);
+            if (vertexAttributes.Contains("COLOR_1")) colors = Math.Max(colors, 2);
+            if (vertexAttributes.Contains("COLOR_2")) colors = Math.Max(colors, 3);
+            if (vertexAttributes.Contains("COLOR_3")) colors = Math.Max(colors, 4);
+            if (vertexAttributes.Contains("COLOR_4")) colors = Math.Max(colors, 5);
+            if (vertexAttributes.Contains("COLOR_5")) colors = Math.Max(colors, 6);
+            if (vertexAttributes.Contains("COLOR_6")) colors = Math.Max(colors, 7);
+            if (vertexAttributes.Contains("COLOR_7")) colors = Math.Max(colors, 8);
 
-            var uvcoords = vertexAttributes.Contains("TEXCOORD_0") ? 1 : 0;
-            uvcoords = vertexAttributes.Contains("TEXCOORD_1") ? 2 : uvcoords;
-            uvcoords = vertexAttributes.Contains("TEXCOORD_2") ? 3 : uvcoords;
-            uvcoords = vertexAttributes.Contains("TEXCOORD_3") ? 4 : uvcoords;
+            var uvcoords = 0;
+            if (vertexAttributes.Contains("TEXCOORD_0")) uvcoords = Math.Max(uvcoords, 1);
+            if (vertexAttributes.Contains("TEXCOORD_1")) uvcoords = Math.Max(uvcoords, 2);
+            if (vertexAttributes.Contains("TEXCOORD_2")) uvcoords = Math.Max(uvcoords, 3);
+            if (vertexAttributes.Contains("TEXCOORD_3")) uvcoords = Math.Max(uvcoords, 4);
+            if (vertexAttributes.Contains("TEXCOORD_4")) uvcoords = Math.Max(uvcoords, 5);
+            if (vertexAttributes.Contains("TEXCOORD_5")) uvcoords = Math.Max(uvcoords, 6);
+            if (vertexAttributes.Contains("TEXCOORD_6")) uvcoords = Math.Max(uvcoords, 7);
+            if (vertexAttributes.Contains("TEXCOORD_7")) uvcoords = Math.Max(uvcoords, 8);
 
-            return GetVertexMaterialType(colors, uvcoords);
-        }
-
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexMaterialType(int colors, int uvcoords)
-        {
-            if (colors == 0)
-            {
-                if (uvcoords == 0) return typeof(VertexEmpty);
-                if (uvcoords == 1) return typeof(VertexTexture1);
-                if (uvcoords >= 2) return typeof(VertexTexture2);
-            }
-
-            if (colors == 1)
-            {
-                if (uvcoords == 0) return typeof(VertexColor1);
-                if (uvcoords == 1) return typeof(VertexColor1Texture1);
-                if (uvcoords >= 2) return typeof(VertexColor1Texture2);
-            }
-
-            if (colors >= 2)
-            {
-                if (uvcoords == 0) return typeof(VertexColor2);
-                if (uvcoords == 1) return typeof(VertexColor2Texture1);
-                if (uvcoords >= 2) return typeof(VertexColor2Texture2);
-            }
-
-            return typeof(VertexEmpty);
-        }
-
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexSkinningType(params string[] vertexAttributes)
-        {
             var joints = vertexAttributes.Contains("JOINTS_0") && vertexAttributes.Contains("WEIGHTS_0") ? 4 : 0;
             joints = vertexAttributes.Contains("JOINTS_1") && vertexAttributes.Contains("WEIGHTS_1") ? 8 : joints;
 
-            if (joints == 4) return typeof(VertexJoints4);
-            if (joints == 8) return typeof(VertexJoints8);
+            // WARNING: not all Color x Texture higher values have been defined yet.
 
-            return typeof(VertexEmpty);
-        }
-
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexBuilderType(params string[] vertexAttributes)
-        {
-            var tvg = GetVertexGeometryType(vertexAttributes);
-            var tvm = GetVertexMaterialType(vertexAttributes);
-            var tvs = GetVertexSkinningType(vertexAttributes);
-
-            var vtype = typeof(VertexBuilder<,,>);
-
-            return vtype.MakeGenericType(tvg, tvm, tvs);
-        }
-
-        #if NET6_0_OR_GREATER
-        [return: DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-        #endif
-        public static Type GetVertexBuilderType(bool hasNormals, bool hasTangents, int numCols, int numUV, int numJoints)
-        {
-            var tvg = typeof(VertexPosition);
-            if (hasNormals) tvg = typeof(VertexPositionNormal);
-            if (hasTangents) tvg = typeof(VertexPositionNormalTangent);
-
-            var tvm = GetVertexMaterialType(numCols, numUV);
-
-            var tvs = typeof(VertexEmpty);
-            if (numJoints == 4) tvs = typeof(VertexJoints4);
-            if (numJoints >= 8) tvs = typeof(VertexJoints8);
-
-            var vtype = typeof(VertexBuilder<,,>);
-
-            return vtype.MakeGenericType(tvg, tvm, tvs);
-        }
+            return GetVertexBuilderType(hasNormals, hasTangents, colors, uvcoords, joints);
+        }        
 
         public static TvP ConvertToGeometry<TvP>(this IVertexGeometry src)
             where TvP : struct, IVertexGeometry

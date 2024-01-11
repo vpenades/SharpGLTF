@@ -4,6 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
+
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
 namespace SharpGLTF.Geometry.VertexTypes
@@ -26,7 +28,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <item>And also by other custom vertex material fragment types.</item>
     /// </list>
     /// </remarks>
-    public interface IVertexMaterial
+    public interface IVertexMaterial : IVertexReflection
     {
         /// <summary>
         /// Gets the number of color attributes available in this vertex
@@ -83,908 +85,83 @@ namespace SharpGLTF.Geometry.VertexTypes
         void Add(in VertexMaterialDelta delta);
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with a material Color.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor1 : IVertexMaterial, IEquatable<VertexColor1>
+
+    public partial struct VertexColor1
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor1(Vector4 color)
-        {
-            Color = color;
-        }
-
-        public VertexColor1(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-        }
-
         public static implicit operator VertexColor1(Vector4 color)
         {
             return new VertexColor1(color);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 1;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 0;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor1 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor1 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor1 a, in VertexColor1 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor1 a, in VertexColor1 b) { return !AreEqual(a, b); }
-
-        public static bool AreEqual(in VertexColor1 a, in VertexColor1 b)
-        {
-            return a.Color == b.Color;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor1)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color += delta.Color0Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
-
-        readonly void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
-            return Color;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            throw new NotSupportedException();
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with a two material Colors.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor2 : IVertexMaterial, IEquatable<VertexColor2>
+    public partial struct VertexColor2
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor2(Vector4 color0, Vector4 color1)
-        {
-            Color0 = color0;
-            Color1 = color1;
-        }
-
-        public VertexColor2(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
-        }
-
         public static implicit operator VertexColor2((Vector4 Color0, Vector4 Color1) tuple)
         {
             return new VertexColor2(tuple.Color0, tuple.Color1);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color0;
-
-        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color1;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 2;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 0;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor2 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor2 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor2 a, in VertexColor2 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor2 a, in VertexColor2 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexColor2 a, in VertexColor2 b)
-        {
-            return a.Color0 == b.Color0 && a.Color1 == b.Color1;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor2)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color0 += delta.Color0Delta;
-            this.Color1 += delta.Color1Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color)
-        {
-            if (setIndex == 0) this.Color0 = color;
-            if (setIndex == 1) this.Color1 = color;
-        }
-
-        readonly void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            if (index == 0) return Color0;
-            if (index == 1) return Color1;
-            throw new ArgumentOutOfRangeException(nameof(index));
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index) { throw new NotSupportedException(); }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with a Texture Coordinate.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexTexture1 : IVertexMaterial, IEquatable<VertexTexture1>
+    
+    public partial struct VertexTexture1
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexTexture1(Vector2 uv)
-        {
-            TexCoord = uv;
-        }
-
-        public VertexTexture1(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-        }
-
         public static implicit operator VertexTexture1(Vector2 uv)
         {
             return new VertexTexture1(uv);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 0;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 1;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return TexCoord.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexTexture1 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexTexture1 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexTexture1 a, in VertexTexture1 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexTexture1 a, in VertexTexture1 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexTexture1 a, in VertexTexture1 b)
-        {
-            return a.TexCoord == b.TexCoord;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexTexture1)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.TexCoord += delta.TexCoord0Delta;
-        }
-
-        readonly void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
-            return TexCoord;
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexTexture2 : IVertexMaterial, IEquatable<VertexTexture2>
+    
+    public partial struct VertexTexture2
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexTexture2(Vector2 uv0, Vector2 uv1)
-        {
-            TexCoord0 = uv0;
-            TexCoord1 = uv1;
-        }
-
-        public VertexTexture2(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-            this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
-        }
-
         public static implicit operator VertexTexture2((Vector2 Tex0, Vector2 Tex1) tuple)
         {
             return new VertexTexture2(tuple.Tex0, tuple.Tex1);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord0;
-
-        [VertexAttribute("TEXCOORD_1")]
-        public Vector2 TexCoord1;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 0;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 2;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexTexture2 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexTexture2 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexTexture2 a, in VertexTexture2 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexTexture2 a, in VertexTexture2 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexTexture2 a, in VertexTexture2 b)
-        {
-            return a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexTexture2)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.TexCoord0 += delta.TexCoord0Delta;
-            this.TexCoord1 += delta.TexCoord1Delta;
-        }
-
-        readonly void IVertexMaterial.SetColor(int setIndex, Vector4 color) { }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
-        {
-            if (setIndex == 0) this.TexCoord0 = coord;
-            if (setIndex == 1) this.TexCoord1 = coord;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            if (index == 0) return TexCoord0;
-            if (index == 1) return TexCoord1;
-            throw new ArgumentOutOfRangeException(nameof(index));
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with a Color material and a Texture Coordinate.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor1Texture1 : IVertexMaterial, IEquatable<VertexColor1Texture1>
+    
+    public partial struct VertexColor1Texture1
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor1Texture1(Vector4 color, Vector2 tex)
-        {
-            Color = color;
-            TexCoord = tex;
-        }
-
-        public VertexColor1Texture1(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-        }
-
         public static implicit operator VertexColor1Texture1((Vector4 Color, Vector2 Tex) tuple)
         {
             return new VertexColor1Texture1(tuple.Color, tuple.Tex);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 1;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 1;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return TexCoord.GetHashCode() ^ Color.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor1Texture1 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor1Texture1 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor1Texture1 a, in VertexColor1Texture1 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexColor1Texture1 a, in VertexColor1Texture1 b)
-        {
-            return a.TexCoord == b.TexCoord && a.Color == b.Color;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor1Texture1)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color += delta.Color0Delta;
-            this.TexCoord += delta.TexCoord0Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord) { if (setIndex == 0) this.TexCoord = coord; }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
-            return Color;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
-            return TexCoord;
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with a material Colors and two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor1Texture2 : IVertexMaterial, IEquatable<VertexColor1Texture2>
+    
+    public partial struct VertexColor1Texture2
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor1Texture2(Vector4 color, Vector2 tex0, Vector2 tex1)
-        {
-            Color = color;
-            TexCoord0 = tex0;
-            TexCoord1 = tex1;
-        }
-
-        public VertexColor1Texture2(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-            this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
-        }
-
         public static implicit operator VertexColor1Texture2((Vector4 Color, Vector2 Tex0, Vector2 Tex1) tuple)
         {
             return new VertexColor1Texture2(tuple.Color, tuple.Tex0, tuple.Tex1);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord0;
-
-        [VertexAttribute("TEXCOORD_1")]
-        public Vector2 TexCoord1;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 1;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 2;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor1Texture2 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor1Texture2 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor1Texture2 a, in VertexColor1Texture2 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexColor1Texture2 a, in VertexColor1Texture2 b)
-        {
-            return a.Color == b.Color && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor1Texture2)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color += delta.Color0Delta;
-            this.TexCoord0 += delta.TexCoord0Delta;
-            this.TexCoord1 += delta.TexCoord1Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color) { if (setIndex == 0) this.Color = color; }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
-        {
-            if (setIndex == 0) this.TexCoord0 = coord;
-            if (setIndex == 1) this.TexCoord1 = coord;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            if (index != 0) throw new ArgumentOutOfRangeException(nameof(index));
-            return Color;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            switch (index)
-            {
-                case 0: return this.TexCoord0;
-                case 1: return this.TexCoord1;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor2Texture1 : IVertexMaterial, IEquatable<VertexColor2Texture1>
+    
+    public partial struct VertexColor2Texture1
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor2Texture1(Vector4 color0, Vector4 color1, Vector2 tex)
-        {
-            Color0 = color0;
-            Color1 = color1;
-            TexCoord = tex;
-        }
-
-        public VertexColor2Texture1(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
-            this.TexCoord = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-        }
-
         public static implicit operator VertexColor2Texture1((Vector4 Color0, Vector4 Color1, Vector2 Tex) tuple)
         {
             return new VertexColor2Texture1(tuple.Color0, tuple.Color1, tuple.Tex);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color0;
-
-        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color1;
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 2;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 1;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor2Texture1 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor2Texture1 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor2Texture1 a, in VertexColor2Texture1 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexColor2Texture1 a, in VertexColor2Texture1 b)
-        {
-            return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord == b.TexCoord;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor2Texture1)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color0 += delta.Color0Delta;
-            this.Color1 += delta.Color1Delta;
-            this.TexCoord += delta.TexCoord0Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color)
-        {
-            if (setIndex == 0) this.Color0 = color;
-            if (setIndex == 1) this.Color1 = color;
-        }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
-        {
-            if (setIndex == 0) this.TexCoord = coord;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            switch (index)
-            {
-                case 0: return this.Color0;
-                case 1: return this.Color1;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            switch (index)
-            {
-                case 0: return this.TexCoord;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        #endregion
     }
 
-    /// <summary>
-    /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
-    [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexColor2Texture2 : IVertexMaterial, IEquatable<VertexColor2Texture2>
+    
+    public partial struct VertexColor2Texture2
     {
-        #region debug
-
-        private readonly string _GetDebuggerDisplay() => VertexUtils._GetDebuggerDisplay(this);
-
-        #endregion
-
-        #region constructors
-
-        public VertexColor2Texture2(Vector4 color0, Vector4 color1, Vector2 tex0, Vector2 tex1)
-        {
-            Color0 = color0;
-            Color1 = color1;
-            TexCoord0 = tex0;
-            TexCoord1 = tex1;
-        }
-
-        public VertexColor2Texture2(IVertexMaterial src)
-        {
-            Guard.NotNull(src, nameof(src));
-
-            this.Color0 = src.MaxColors > 0 ? src.GetColor(0) : Vector4.One;
-            this.Color1 = src.MaxColors > 1 ? src.GetColor(1) : Vector4.One;
-            this.TexCoord0 = src.MaxTextCoords > 0 ? src.GetTexCoord(0) : Vector2.Zero;
-            this.TexCoord1 = src.MaxTextCoords > 1 ? src.GetTexCoord(1) : Vector2.Zero;
-        }
-
         public static implicit operator VertexColor2Texture2((Vector4 Color0, Vector4 Color1, Vector2 Tex0, Vector2 Tex1) tuple)
         {
             return new VertexColor2Texture2(tuple.Color0, tuple.Color1, tuple.Tex0, tuple.Tex1);
         }
-
-        #endregion
-
-        #region data
-
-        [VertexAttribute("COLOR_0", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color0;
-
-        [VertexAttribute("COLOR_1", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color1;
-
-        [VertexAttribute("TEXCOORD_0")]
-        public Vector2 TexCoord0;
-
-        [VertexAttribute("TEXCOORD_1")]
-        public Vector2 TexCoord1;
-
-        /// <inheritdoc/>
-        public readonly int MaxColors => 2;
-
-        /// <inheritdoc/>
-        public readonly int MaxTextCoords => 2;
-
-        /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color0.GetHashCode() ^ Color1.GetHashCode() ^ TexCoord0.GetHashCode() ^ TexCoord1.GetHashCode(); }
-
-        /// <inheritdoc/>
-        public readonly override bool Equals(object obj) { return obj is VertexColor2Texture2 other && AreEqual(this, other); }
-
-        /// <inheritdoc/>
-        public readonly bool Equals(VertexColor2Texture2 other) { return AreEqual(this, other); }
-        public static bool operator ==(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return AreEqual(a, b); }
-        public static bool operator !=(in VertexColor2Texture2 a, in VertexColor2Texture2 b) { return !AreEqual(a, b); }
-        public static bool AreEqual(in VertexColor2Texture2 a, in VertexColor2Texture2 b)
-        {
-            return a.Color0 == b.Color0 && a.Color1 == b.Color1 && a.TexCoord0 == b.TexCoord0 && a.TexCoord1 == b.TexCoord1;
-        }        
-
-        #endregion
-
-        #region API
-
-        /// <inheritdoc/>
-        public readonly VertexMaterialDelta Subtract(IVertexMaterial baseValue)
-        {
-            return new VertexMaterialDelta((VertexColor2Texture2)baseValue, this);
-        }
-
-        /// <inheritdoc/>
-        public void Add(in VertexMaterialDelta delta)
-        {
-            this.Color0 += delta.Color0Delta;
-            this.Color1 += delta.Color1Delta;
-            this.TexCoord0 += delta.TexCoord0Delta;
-            this.TexCoord1 += delta.TexCoord1Delta;
-        }
-
-        void IVertexMaterial.SetColor(int setIndex, Vector4 color)
-        {
-            if (setIndex == 0) this.Color0 = color;
-            if (setIndex == 1) this.Color1 = color;
-        }
-
-        void IVertexMaterial.SetTexCoord(int setIndex, Vector2 coord)
-        {
-            if (setIndex == 0) this.TexCoord0 = coord;
-            if (setIndex == 1) this.TexCoord1 = coord;
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector4 GetColor(int index)
-        {
-            switch (index)
-            {
-                case 0: return this.Color0;
-                case 1: return this.Color1;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        /// <inheritdoc/>
-        public readonly Vector2 GetTexCoord(int index)
-        {
-            switch (index)
-            {
-                case 0: return this.TexCoord0;
-                case 1: return this.TexCoord1;
-                default: throw new ArgumentOutOfRangeException(nameof(index));
-            }
-        }
-
-        #endregion
     }
 
     /// <summary>
     /// Defines a Vertex attribute with two material Colors and two Texture Coordinates.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
-    public struct VertexMaterialDelta : IVertexMaterial, IEquatable<VertexMaterialDelta>
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    public partial struct VertexMaterialDelta : IVertexMaterial, IEquatable<VertexMaterialDelta>
     {
         #region debug
 
@@ -996,154 +173,60 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static implicit operator VertexMaterialDelta(in (Vector4 Color0Delta, Vector4 Color1Delta, Vector2 TextCoord0Delta, Vector2 TextCoord1Delta) tuple)
         {
-            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta);
+            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta, Vector2.Zero, Vector2.Zero);
+        }
+
+        public static implicit operator VertexMaterialDelta(in (Vector4 Color0Delta, Vector4 Color1Delta, Vector2 TextCoord0Delta, Vector2 TextCoord1Delta, Vector2 TextCoord2Delta, Vector2 TextCoord3Delta) tuple)
+        {
+            return new VertexMaterialDelta(tuple.Color0Delta, tuple.Color1Delta, tuple.TextCoord0Delta, tuple.TextCoord1Delta, tuple.TextCoord2Delta, tuple.TextCoord3Delta);
         }
 
         public VertexMaterialDelta(IVertexMaterial src)
         {
             Guard.NotNull(src, nameof(src));
 
-            MaxColors = src.MaxColors;
-            MaxTextCoords = src.MaxTextCoords;
+            MaxColors = Math.Min(2, src.MaxColors);
+            MaxTextCoords = Math.Min(4,src.MaxTextCoords);
 
-            if (src.MaxColors == 0)
-            {
-                Color0Delta = Vector4.Zero;
-                Color1Delta = Vector4.Zero;
-            }
-            else if (src.MaxColors == 1)
-            {
-                Color0Delta = src.GetColor(0);
-                Color1Delta = Vector4.Zero;
-            }
-            else
-            {
-                Color0Delta = src.GetColor(0);
-                Color1Delta = src.GetColor(1);
-            }
+            Color0Delta = src.MaxColors < 1 ? Vector4.Zero : src.GetColor(0);
+            Color1Delta = src.MaxColors < 2 ? Vector4.Zero : src.GetColor(1);
 
-            if (src.MaxTextCoords == 0)
-            {
-                TexCoord0Delta = Vector2.Zero;
-                TexCoord1Delta = Vector2.Zero;
-            }
-            else if (src.MaxTextCoords == 1)
-            {
-                TexCoord0Delta = src.GetTexCoord(0);
-                TexCoord1Delta = Vector2.Zero;
-            }
-            else
-            {
-                TexCoord0Delta = src.GetTexCoord(0);
-                TexCoord1Delta = src.GetTexCoord(1);
-            }
+            TexCoord0Delta = src.MaxTextCoords < 1 ? Vector2.Zero : src.GetTexCoord(0);
+            TexCoord1Delta = src.MaxTextCoords < 2 ? Vector2.Zero : src.GetTexCoord(1);
+            TexCoord2Delta = src.MaxTextCoords < 3 ? Vector2.Zero : src.GetTexCoord(2);
+            TexCoord3Delta = src.MaxTextCoords < 4 ? Vector2.Zero : src.GetTexCoord(3);
         }
-
+        
         public VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta)
         {
             MaxColors = 2;
-            MaxTextCoords = 2;
+            MaxTextCoords = 4;
 
             Color0Delta = color0Delta;
             Color1Delta = color1Delta;
             TexCoord0Delta = texCoord0Delta;
             TexCoord1Delta = texCoord1Delta;
+            TexCoord2Delta = Vector2.Zero;
+            TexCoord3Delta = Vector2.Zero;
         }
 
-        internal VertexMaterialDelta(in VertexColor1 rootVal, in VertexColor1 morphVal)
-        {
-            MaxColors = 1;
-            MaxTextCoords = 0;
-
-            Color0Delta = morphVal.Color - rootVal.Color;
-            Color1Delta = Vector4.Zero;
-            TexCoord0Delta = Vector2.Zero;
-            TexCoord1Delta = Vector2.Zero;
-        }
-
-        internal VertexMaterialDelta(in VertexColor2 rootVal, in VertexColor2 morphVal)
+        public VertexMaterialDelta(in Vector4 color0Delta, in Vector4 color1Delta, in Vector2 texCoord0Delta, in Vector2 texCoord1Delta, in Vector2 texCoord2Delta, in Vector2 texCoord3Delta)
         {
             MaxColors = 2;
-            MaxTextCoords = 0;
+            MaxTextCoords = 4;
 
-            Color0Delta = morphVal.Color0 - rootVal.Color0;
-            Color1Delta = morphVal.Color1 - rootVal.Color1;
-            TexCoord0Delta = Vector2.Zero;
-            TexCoord1Delta = Vector2.Zero;
+            Color0Delta = color0Delta;
+            Color1Delta = color1Delta;
+            TexCoord0Delta = texCoord0Delta;
+            TexCoord1Delta = texCoord1Delta;
+            TexCoord2Delta = texCoord2Delta;
+            TexCoord3Delta = texCoord3Delta;
         }
-
-        internal VertexMaterialDelta(in VertexTexture1 rootVal, in VertexTexture1 morphVal)
-        {
-            MaxColors = 0;
-            MaxTextCoords = 1;
-
-            Color0Delta = Vector4.Zero;
-            Color1Delta = Vector4.Zero;
-            TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
-            TexCoord1Delta = Vector2.Zero;
-        }
-
-        internal VertexMaterialDelta(in VertexTexture2 rootVal, in VertexTexture2 morphVal)
-        {
-            MaxColors = 0;
-            MaxTextCoords = 2;
-
-            Color0Delta = Vector4.Zero;
-            Color1Delta = Vector4.Zero;
-            TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
-            TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
-        }
-
-        internal VertexMaterialDelta(in VertexColor1Texture1 rootVal, in VertexColor1Texture1 morphVal)
-        {
-            MaxColors = 1;
-            MaxTextCoords = 1;
-
-            Color0Delta = morphVal.Color - rootVal.Color;
-            Color1Delta = Vector4.Zero;
-            TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
-            TexCoord1Delta = Vector2.Zero;
-        }
-
-        internal VertexMaterialDelta(in VertexColor2Texture1 rootVal, in VertexColor2Texture1 morphVal)
-        {
-            MaxColors = 2;
-            MaxTextCoords = 1;
-
-            Color0Delta = morphVal.Color0 - rootVal.Color0;
-            Color1Delta = morphVal.Color1 - rootVal.Color1;
-            TexCoord0Delta = morphVal.TexCoord - rootVal.TexCoord;
-            TexCoord1Delta = Vector2.Zero;
-        }
-
-        internal VertexMaterialDelta(in VertexColor1Texture2 rootVal, in VertexColor1Texture2 morphVal)
-        {
-            MaxColors = 1;
-            MaxTextCoords = 2;
-
-            Color0Delta = morphVal.Color - rootVal.Color;
-            Color1Delta = Vector4.Zero;
-            TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
-            TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
-        }
-
-        internal VertexMaterialDelta(in VertexColor2Texture2 rootVal, in VertexColor2Texture2 morphVal)
-        {
-            MaxColors = 2;
-            MaxTextCoords = 2;
-
-            Color0Delta = morphVal.Color0 - rootVal.Color0;
-            Color1Delta = morphVal.Color1 - rootVal.Color1;
-            TexCoord0Delta = morphVal.TexCoord0 - rootVal.TexCoord0;
-            TexCoord1Delta = morphVal.TexCoord1 - rootVal.TexCoord1;
-        }
-
+        
         internal VertexMaterialDelta(in VertexMaterialDelta rootVal, in VertexMaterialDelta morphVal)
         {
-            if (rootVal.MaxColors != morphVal.MaxColors)
-                throw new ArgumentException("MaxColors do not match!");
-            if (rootVal.MaxTextCoords != morphVal.MaxTextCoords)
-                throw new ArgumentException("MaxTextCoords do not match!");
+            if (rootVal.MaxColors != morphVal.MaxColors) throw new ArgumentException("MaxColors do not match!");
+            if (rootVal.MaxTextCoords != morphVal.MaxTextCoords) throw new ArgumentException("MaxTextCoords do not match!");
 
             MaxColors = rootVal.MaxColors;
             MaxTextCoords = rootVal.MaxTextCoords;
@@ -1152,25 +235,33 @@ namespace SharpGLTF.Geometry.VertexTypes
             Color1Delta = morphVal.Color1Delta - rootVal.Color1Delta;
             TexCoord0Delta = morphVal.TexCoord0Delta - rootVal.TexCoord0Delta;
             TexCoord1Delta = morphVal.TexCoord1Delta - rootVal.TexCoord1Delta;
+            TexCoord2Delta = morphVal.TexCoord2Delta - rootVal.TexCoord2Delta;
+            TexCoord3Delta = morphVal.TexCoord3Delta - rootVal.TexCoord3Delta;
         }
 
         #endregion
 
         #region data
 
-        public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero);
-
-        [VertexAttribute("COLOR_0DELTA", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color0Delta;
-
-        [VertexAttribute("COLOR_1DELTA", ENCODING.UNSIGNED_BYTE, true)]
-        public Vector4 Color1Delta;
-
-        [VertexAttribute("TEXCOORD_0DELTA")]
+        public static VertexMaterialDelta Zero => new VertexMaterialDelta(Vector4.Zero, Vector4.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero, Vector2.Zero);
+                
+        public Vector4 Color0Delta;        
+        public Vector4 Color1Delta;        
         public Vector2 TexCoord0Delta;
-
-        [VertexAttribute("TEXCOORD_1DELTA")]
         public Vector2 TexCoord1Delta;
+        public Vector2 TexCoord2Delta;
+        public Vector2 TexCoord3Delta;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_BYTE, true));
+
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_1DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_2DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_3DELTA", new AttributeFormat(Schema2.DimensionType.VEC2));
+        }
 
         /// <inheritdoc/>
         public int MaxColors { get; }
@@ -1179,7 +270,15 @@ namespace SharpGLTF.Geometry.VertexTypes
         public int MaxTextCoords { get; }
 
         /// <inheritdoc/>
-        public readonly override int GetHashCode() { return Color0Delta.GetHashCode() ^ Color1Delta.GetHashCode() ^ TexCoord0Delta.GetHashCode() ^ TexCoord1Delta.GetHashCode(); }
+        public readonly override int GetHashCode()
+        {
+            return Color0Delta.GetHashCode()
+                ^ Color1Delta.GetHashCode()
+                ^ TexCoord0Delta.GetHashCode()
+                ^ TexCoord1Delta.GetHashCode()
+                ^ TexCoord2Delta.GetHashCode()
+                ^ TexCoord3Delta.GetHashCode();
+        }
 
         /// <inheritdoc/>
         public readonly override bool Equals(object obj) { return obj is VertexMaterialDelta other && AreEqual(this, other); }
@@ -1190,7 +289,12 @@ namespace SharpGLTF.Geometry.VertexTypes
         public static bool operator !=(in VertexMaterialDelta a, in VertexMaterialDelta b) { return !AreEqual(a, b); }
         public static bool AreEqual(in VertexMaterialDelta a, in VertexMaterialDelta b)
         {
-            return a.Color0Delta == b.Color0Delta && a.Color1Delta == b.Color1Delta && a.TexCoord0Delta == b.TexCoord0Delta && a.TexCoord1Delta == b.TexCoord1Delta;
+            return a.Color0Delta == b.Color0Delta
+                && a.Color1Delta == b.Color1Delta
+                && a.TexCoord0Delta == b.TexCoord0Delta
+                && a.TexCoord1Delta == b.TexCoord1Delta
+                && a.TexCoord2Delta == b.TexCoord2Delta
+                && a.TexCoord3Delta == b.TexCoord3Delta;
         }        
 
         #endregion
@@ -1210,6 +314,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             this.Color1Delta += delta.Color1Delta;
             this.TexCoord0Delta += delta.TexCoord0Delta;
             this.TexCoord1Delta += delta.TexCoord1Delta;
+            this.TexCoord2Delta += delta.TexCoord2Delta;
+            this.TexCoord3Delta += delta.TexCoord3Delta;
         }
 
         void IVertexMaterial.SetColor(int setIndex, Vector4 color)
@@ -1232,6 +338,8 @@ namespace SharpGLTF.Geometry.VertexTypes
         {
             if (setIndex == 0) this.TexCoord0Delta = coord;
             if (setIndex == 1) this.TexCoord1Delta = coord;
+            if (setIndex == 2) this.TexCoord2Delta = coord;
+            if (setIndex == 3) this.TexCoord3Delta = coord;
         }
 
         /// <inheritdoc/>
@@ -1252,6 +360,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 case 0: return this.TexCoord0Delta;
                 case 1: return this.TexCoord1Delta;
+                case 2: return this.TexCoord2Delta;
+                case 3: return this.TexCoord3Delta;
                 default: throw new ArgumentOutOfRangeException(nameof(index));
             }
         }

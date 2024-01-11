@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
+
+using SharpGLTF.Memory;
 using SharpGLTF.Transforms;
 
 using ENCODING = SharpGLTF.Schema2.EncodingType;
@@ -20,7 +22,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <item><see cref="VertexJoints8"/></item>
     /// </list>
     /// </remarks>
-    public interface IVertexSkinning
+    public interface IVertexSkinning : IVertexReflection
     {
         /// <summary>
         /// Gets the Number of valid joints supported.<br/>Typical values are 0, 4 or 8.
@@ -77,10 +79,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 4 weights.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexJoints4 : IVertexSkinning, IEquatable<VertexJoints4>
     {
@@ -128,8 +127,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like<see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints;
 
         /// <summary>
@@ -138,9 +136,14 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_0")]
+        /// </remarks>        
         public Vector4 Weights;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_0", new AttributeFormat(Schema2.DimensionType.VEC4));
+        }
 
         /// <inheritdoc/>
         public readonly int MaxBindings => 4;
@@ -208,10 +211,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
     /// <summary>
     /// Defines a Vertex attribute with up to 65535 bone joints and 8 weights.
-    /// </summary>
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct VertexJoints8 : IVertexSkinning, IEquatable<VertexJoints8>
     {
@@ -267,8 +267,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_0", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints0;
 
         /// <summary>
@@ -277,8 +276,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THIS VALUE DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("JOINTS_1", ENCODING.UNSIGNED_SHORT, false)]
+        /// </remarks>        
         public Vector4 Joints1;
 
         /// <summary>
@@ -287,8 +285,7 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_0")]
+        /// </remarks>        
         public Vector4 Weights0;
 
         /// <summary>
@@ -297,9 +294,16 @@ namespace SharpGLTF.Geometry.VertexTypes
         /// <remarks>
         /// <para><b>⚠️ AVOID SETTING THESE VALUES DIRECTLY ⚠️</b></para>
         /// Consider using the constructor, or setter methods like <see cref="SetBindings(in SparseWeight8)"/> instead of setting this value directly.
-        /// </remarks>
-        [VertexAttribute("WEIGHTS_1")]
+        /// </remarks>        
         public Vector4 Weights1;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_0", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("JOINTS_1", new AttributeFormat(Schema2.DimensionType.VEC4, ENCODING.UNSIGNED_SHORT, false));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_0", new AttributeFormat(Schema2.DimensionType.VEC4));
+            yield return new KeyValuePair<string, AttributeFormat>("WEIGHTS_1", new AttributeFormat(Schema2.DimensionType.VEC4));
+        }
 
         /// <inheritdoc/>
         public readonly int MaxBindings => 8;

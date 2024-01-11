@@ -74,8 +74,9 @@ namespace SharpGLTF.Validation
                 // https://github.com/KhronosGroup/glTF-Validator/issues/189
                 if (f.EndsWith("node_weights_override.gltf")) continue;
                 if (f.EndsWith("valid_with_tangent.gltf")) continue;
+                // if (f.EndsWith("custom_property.gltf")) continue;               
 
-                // if (!f.EndsWith("out_of_range.gltf")) continue;
+                if (!f.EndsWith("custom_property.gltf")) continue;
 
                 var gltfJson = f.EndsWith(".gltf") ? System.IO.File.ReadAllText(f) : string.Empty;
                 

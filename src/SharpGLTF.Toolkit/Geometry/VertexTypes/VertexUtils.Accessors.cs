@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 using SharpGLTF.Memory;
 
@@ -47,6 +48,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             // determine the vertex attributes from the first vertex.
             var attributes = GetVertexAttributes(vertices[0], vertices.Count, vertexEncoding);
+            if (attributes == null || attributes.Length == 0) throw new InvalidOperationException("unable to retrieve attribute information from the vertex");
 
             // create a buffer
             int byteStride = attributes[0].ByteStride;
@@ -99,86 +101,54 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public static MemoryAccessInfo[] GetVertexAttributes(this IVertexBuilder firstVertex, int vertexCount, PackedEncoding vertexEncoding)
         {
-            var tvg = firstVertex.GetGeometry().GetType();
-            var tvm = firstVertex.GetMaterial().GetType();
-            var tvs = firstVertex.GetSkinning().GetType();
+            var tvg = firstVertex.GetGeometry().GetEncodingAttributes();
+            var tvm = firstVertex.GetMaterial().GetEncodingAttributes();
+            var tvs = firstVertex.GetSkinning().GetEncodingAttributes();
 
-            Guard.HasDynamicallyAccessedMembers(tvg, false, false, false, true, nameof(firstVertex));
-            Guard.HasDynamicallyAccessedMembers(tvm, false, false, false, true, nameof(firstVertex));
-            Guard.HasDynamicallyAccessedMembers(tvs, false, false, false, true, nameof(firstVertex));
+            var attributes = new List<MemoryAccessInfo>();            
 
-            var attributes = new List<MemoryAccessInfo>();
-
-            foreach (var finfo in tvg.GetFields())
-            {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue) attributes.Add(attribute.Value);
+            foreach (var finfo in tvg)
+            {                
+                attributes.Add(new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value));
             }
 
-            foreach (var finfo in tvm.GetFields())
+            foreach (var finfo in tvm)
             {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue)
+                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);
+                
+                if (a.Name.StartsWith("COLOR_", StringComparison.OrdinalIgnoreCase))
                 {
-                    var a = attribute.Value;
-                    if (a.Name.StartsWith("COLOR_", StringComparison.OrdinalIgnoreCase))
+                    if (vertexEncoding.ColorEncoding.HasValue)
                     {
-                        if (vertexEncoding.ColorEncoding.HasValue)
-                        {
-                            a.Encoding = vertexEncoding.ColorEncoding.Value;
-                            a.Normalized = a.Encoding != ENCODING.FLOAT;
-                        }
+                        a.Encoding = vertexEncoding.ColorEncoding.Value;
+                        a.Normalized = a.Encoding != ENCODING.FLOAT;
                     }
-
-                    attributes.Add(a);
                 }
+
+                attributes.Add(a);
             }
 
-            foreach (var finfo in tvs.GetFields())
+            foreach (var finfo in tvs)
             {
-                var attribute = _GetMemoryAccessInfo(finfo);
-                if (attribute.HasValue)
+                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);                
+                
+                if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
+                if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
                 {
-                    var a = attribute.Value;
-                    if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
-                    if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
-                    {
-                        a.Encoding = vertexEncoding.WeightsEncoding.Value;
-                        if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
-                    }
-
-                    attributes.Add(a);
+                    a.Encoding = vertexEncoding.WeightsEncoding.Value;
+                    if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
                 }
+
+                attributes.Add(a);
+                
             }
 
             var array = attributes.ToArray();
 
-            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);
+            MemoryAccessInfo.SetInterleavedInfo(array, 0, vertexCount);            
 
             return array;
-        }
-
-        private static MemoryAccessInfo? _GetMemoryAccessInfo(System.Reflection.FieldInfo finfo)
-        {
-            var attribute = finfo.GetCustomAttributes(true)
-                    .OfType<VertexAttributeAttribute>()
-                    .FirstOrDefault();
-
-            if (attribute == null) return null;
-
-            var dimensions = (DIMENSIONS?)null;
-
-            if (finfo.FieldType == typeof(Single)) dimensions = DIMENSIONS.SCALAR;
-            if (finfo.FieldType == typeof(Vector2)) dimensions = DIMENSIONS.VEC2;
-            if (finfo.FieldType == typeof(Vector3)) dimensions = DIMENSIONS.VEC3;
-            if (finfo.FieldType == typeof(Vector4)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Quaternion)) dimensions = DIMENSIONS.VEC4;
-            if (finfo.FieldType == typeof(Matrix4x4)) dimensions = DIMENSIONS.MAT4;
-
-            if (dimensions == null) throw new ArgumentException($"invalid type {finfo.FieldType}");
-
-            return new MemoryAccessInfo(attribute.Name, 0, 0, 0, dimensions.Value, attribute.Encoding, attribute.Normalized);
-        }
+        }        
 
         private static Converter<IVertexBuilder, Object> _GetVertexBuilderAttributeFunc(string attributeName)
         {
@@ -238,6 +208,6 @@ namespace SharpGLTF.Geometry.VertexTypes
             }
 
             return dst;
-        }
+        }        
     }
 }

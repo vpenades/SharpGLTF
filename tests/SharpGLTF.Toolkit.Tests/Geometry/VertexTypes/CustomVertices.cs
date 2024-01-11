@@ -4,11 +4,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Memory;
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Geometry.VertexTypes
-{
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+{    
     [System.Diagnostics.DebuggerDisplay("𝐂:{Color} 𝐔𝐕:{TexCoord} {CustomId}")]
     public struct VertexColor1Texture1Custom1 : IVertexCustom
     {
@@ -48,15 +48,17 @@ namespace SharpGLTF.Geometry.VertexTypes
         #region data
 
         public const string CUSTOMATTRIBUTENAME = "_CUSTOM_0";
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME, Schema2.EncodingType.FLOAT, false)]
-        public Single CustomId;
-
-        [VertexAttribute("COLOR_0", Schema2.EncodingType.UNSIGNED_BYTE, true)]
-        public Vector4 Color;
-
-        [VertexAttribute("TEXCOORD_0")]
+        
+        public Single CustomId;        
+        public Vector4 Color;        
         public Vector2 TexCoord;
+
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {            
+            yield return new KeyValuePair<string, AttributeFormat>("COLOR_0", new AttributeFormat(DimensionType.VEC4, EncodingType.UNSIGNED_BYTE, true));
+            yield return new KeyValuePair<string, AttributeFormat>("TEXCOORD_0", new AttributeFormat(DimensionType.VEC2));
+            yield return new KeyValuePair<string, AttributeFormat>(CUSTOMATTRIBUTENAME, new AttributeFormat(DimensionType.SCALAR));
+        }
 
         public int MaxColors => 1;
 
@@ -124,10 +126,7 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         #endregion
     }
-
-    #if NET6_0_OR_GREATER
-    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
-    #endif
+    
     [System.Diagnostics.DebuggerDisplay("{CustomId0} {CustomId1}")]
     public struct VertexCustom2 : IVertexCustom
     {
@@ -167,12 +166,15 @@ namespace SharpGLTF.Geometry.VertexTypes
 
         public const string CUSTOMATTRIBUTENAME0 = "_CUSTOM_0";
         public const string CUSTOMATTRIBUTENAME1 = "_CUSTOM_1";
+        
+        public Single CustomId0;        
+        public Vector4 CustomId1;
 
-        [VertexAttribute(CUSTOMATTRIBUTENAME0, Schema2.EncodingType.FLOAT, false)]
-        public Single CustomId0;
-
-        [VertexAttribute(CUSTOMATTRIBUTENAME1, Schema2.EncodingType.UNSIGNED_BYTE, true)]
-        public Vector4 CustomId1;        
+        IEnumerable<KeyValuePair<string, AttributeFormat>> IVertexReflection.GetEncodingAttributes()
+        {            
+            yield return new KeyValuePair<string, AttributeFormat>(CUSTOMATTRIBUTENAME0, new AttributeFormat(DimensionType.SCALAR, EncodingType.FLOAT, false));
+            yield return new KeyValuePair<string, AttributeFormat>(CUSTOMATTRIBUTENAME1, new AttributeFormat(DimensionType.VEC4, EncodingType.UNSIGNED_BYTE, true));
+        }
 
         public int MaxColors => 0;
 

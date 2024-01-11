@@ -16,6 +16,40 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SharpGLTF.Runtime\SharpGLTF.Runtime.csproj" />
-  </ItemGroup> 
+  </ItemGroup>    
+
+  <ItemGroup>
+    <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Geometry\VertexTypes\VertexUtils.Builder.Reflection.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>VertexUtils.Builder.Reflection.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Geometry\VertexTypes\VertexUtils.Builder.Reflection.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VertexUtils.Builder.Reflection.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Geometry\VertexTypes\VertexMaterial.Permutations.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>VertexMaterial.Permutations.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Geometry\VertexTypes\VertexMaterial.Permutations.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>VertexMaterial.Permutations.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
 
 </Project>
