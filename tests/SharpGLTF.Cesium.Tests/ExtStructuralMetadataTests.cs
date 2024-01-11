@@ -5,6 +5,7 @@ using SharpGLTF.Materials;
 using SharpGLTF.Scenes;
 using SharpGLTF.Validation;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace SharpGLTF.Schema2.Tiles3D
@@ -467,13 +468,13 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleEnum = schema.UseEnumMetadata("exampleEnumType", ("ExampleEnumValueA", 0), ("ExampleEnumValueB", 1), ("ExampleEnumValueC", 2));
 
-            // class properties
+            //// class properties
 
             var uint8ArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_normalized_UINT8")
                 .WithName("Example variable-length ARRAY normalized INT8 property")
                 .WithDescription("An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
-                .WithArrayType(ElementType.SCALAR,DataType.UINT8,false);
+                .WithArrayType(ElementType.SCALAR, DataType.UINT8, false);
 
             var fixedLengthBooleanProperty = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_BOOLEAN")
@@ -495,26 +496,32 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var examplePropertyTable = exampleMetadataClass.AddPropertyTable(1, "Example property table");
 
-            // Question: The table declares a feature count of 1, but then, these properties define different number of items
-            
+            var bytes = new List<List<byte>>();
+            bytes.Add(new List<byte>() { 0, 1, 2, 3, 4, 5, 6, 7 });
             examplePropertyTable
                 .UseProperty(uint8ArrayProperty)
-                .SetValues<byte>(0, 1, 2, 3, 4, 5, 6, 7);
+                .SetValues2D(bytes);
 
+            var bools = new List<List<bool>>();
+            bools.Add(new List<bool>() { true, false, true, false });
             examplePropertyTable
                 .UseProperty(fixedLengthBooleanProperty)
-                .SetValues<Boolean>(true, false, true, false);
+                .SetValues2D(bools, false);
 
+            var strings = new List<List<string>>();
+            strings.Add(new List<string>() { "Example string 1", "Example string 2", "Example string 3" });
             examplePropertyTable
                 .UseProperty(variableLengthStringArrayProperty)
-                .SetValues("Example string 1", "Example string 2", "Example string 3");
+                .SetValues2D(strings);
 
+            // Fill property table with enum values
+            var ints = new List<List<int>>();
+            ints.Add(new List<int>() { 0, 1 });
             examplePropertyTable
                 .UseProperty(fixed_length_ARRAY_ENUM)
-                .SetValues<int>(0, 1);
+                .SetValues2D(ints, false);
 
             // add to primitive            
-
             var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
 
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);

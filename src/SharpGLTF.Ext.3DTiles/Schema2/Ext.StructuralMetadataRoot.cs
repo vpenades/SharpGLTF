@@ -679,25 +679,26 @@ namespace SharpGLTF.Schema2
 
             private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent.LogicalParent;
 
-            public void SetValues2D<T>(List<List<T>> values, bool CreateArrayOffsets = true)
+            public void SetValues2D<T>(List<List<T>> values, bool HasVariableLength = true)
             {
                 var root = _GetModelRoot();
                 
                 int logicalIndex = GetBufferView(root, values);
-                this.Values = logicalIndex;
+                Values = logicalIndex;
 
-                if (CreateArrayOffsets)
+                if (HasVariableLength)
                 {
+                    // if the array has items of variable length, create arraysOffsets bufferview
                     var arrayOffsets = BinaryTable.GetArrayOffsets(values);
                     int logicalIndexOffsets = GetBufferView(root, arrayOffsets);
-                    this.ArrayOffsets = logicalIndexOffsets;
+                    ArrayOffsets = logicalIndexOffsets;
 
                     if (typeof(T) == typeof(string))
                     {
                         var stringValues = values.ConvertAll(x => x.ConvertAll(y => (string)Convert.ChangeType(y, typeof(string), CultureInfo.InvariantCulture)));
                         var stringOffsets = BinaryTable.GetStringOffsets(stringValues);
                         int offsets = GetBufferView(root, stringOffsets);
-                        this.StringOffsets = offsets;
+                        StringOffsets = offsets;
                     }
                 }                
             }
