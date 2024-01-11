@@ -277,7 +277,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             // assign to primitive
 
             var primitive = model.LogicalMeshes[0].Primitives[0];            
-            primitive.AddPropertyTexture(buildingPropertyTexture);            
+            primitive.AddPropertyTexture(buildingPropertyTexture);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.glb");
@@ -590,13 +590,12 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // features
 
-            // FeatureID 0: featureCount=1, attribute=0, porpertyTable=0 
+            // FeatureID 0: featureCount=1, attribute=0, propertyTable=0 
             var featureId0 = new FeatureIDBuilder(firstPropertyTable, 0);
-            // FeatureID 1: featureCount=1, attribute=1, porpertyTable=1
+            // FeatureID 1: featureCount=1, attribute=1, prorpertyTable=1
             var featureId1 = new FeatureIDBuilder(secondPropertyTable, 1);
             
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId0, featureId1);
-
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
@@ -637,17 +636,8 @@ namespace SharpGLTF.Schema2.Tiles3D
             // --------------------------------------------------------------
 
             var rootMetadata = model.UseStructuralMetadata();
-
-            // external references are problematic because the idea behind SharpGLTF is that all files are loaded into memory, so you don't
-            // need to track resources in disk while working with models. The whole mechanism is too complex to be worth the pain of implementing it.
-            // so my idea is that the UseExternalSchema returns a ISchemaProxy interface or something like that, that has pretty much the same methods
-            // of an actual schema, so the API usage remains the same for both an embedded and an external schema.
-
-            // var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);            
-            // var schemaProxy = rootMetadata.UseExternalSchema(schemaUri);
-
-            var schema = rootMetadata.UseEmbeddedSchema("externalSchema");
-
+            var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);            
+            var schema = rootMetadata.UseExternalSchema(schemaUri);
             var externalClass = schema.UseClassMetadata("exampleMetadataClass");
 
             var propertyAttribute = rootMetadata.AddPropertyAttribute(externalClass);
@@ -659,6 +649,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             classificationProperty.Attribute = "_CLASSIFICATION";
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");

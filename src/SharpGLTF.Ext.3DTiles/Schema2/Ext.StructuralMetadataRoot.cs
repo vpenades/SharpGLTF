@@ -95,9 +95,16 @@ namespace SharpGLTF.Schema2
                 return schema;
             }
 
+            // Sets the schema to use an external schema, returns an empty schema to used for adding schema properties
+            public StructuralMetadataSchema UseExternalSchema(Uri uri)
+            {
+                SchemaUri = uri.ToString();
+                return new StructuralMetadataSchema();
+            }
+
             public StructuralMetadataSchema UseEmbeddedSchema()
             {
-                this.SchemaUri = null;
+                SchemaUri = null;
 
                 if (_schema == null) GetChildSetter(this).SetProperty(ref _schema, new StructuralMetadataSchema());
 
@@ -764,7 +771,7 @@ namespace SharpGLTF.Schema2
 
             void IChildOf<EXTStructuralMetadataRoot>.SetLogicalParent(EXTStructuralMetadataRoot parent)
             {
-                LogicalParent = parent;                
+                LogicalParent = parent;
             }
 
             #endregion
@@ -814,7 +821,7 @@ namespace SharpGLTF.Schema2
             public StructuralMetadataEnum UseEnumMetadata(string key, params (string name, int value)[] enumValues)
             {
                 var enumType = UseEnumMetadata(key);
-                foreach(var (name, value) in enumValues)
+                foreach (var (name, value) in enumValues)
                 {
                     enumType.AddEnum(name, value);
                 }
