@@ -30,17 +30,22 @@ namespace SharpGLTF.Schema2.Tiles3D
             TestContext.CurrentContext.AttachGltfValidatorLinks();
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
 
-            var featureId = 0;
-
             var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
             var prim = mesh.UsePrimitive(material);
 
-            // All the vertices in the triangle have the same feature ID
-            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(-10, 0, 0), new Vector3(0, 0, 1), featureId);
-            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(10, 0, 0), new Vector3(0, 0, 1), featureId);
-            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 10, 0), new Vector3(0, 0, 1), featureId);
+            var features = new List<int>() { 0, 1 };
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), features[0]);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), features[0]);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), features[0]);
 
             prim.AddTriangle(vt0, vt1, vt2);
+
+            var vt3 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 0, 0), new Vector3(0, 0, 1), features[1]);
+            var vt4 = VertexBuilder.GetVertexWithFeatureId(new Vector3(3, 0, 0), new Vector3(0, 0, 1), features[1]);
+            var vt5 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 1, 0), new Vector3(0, 0, 1), features[1]);
+
+            prim.AddTriangle(vt3, vt4, vt5);
 
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
@@ -89,28 +94,30 @@ namespace SharpGLTF.Schema2.Tiles3D
             diameterProperty.WithValueType(ElementType.SCALAR, DataType.FLOAT32);
 
             var propertyTable = treeClass
-                .AddPropertyTable(1, "PropertyTable");
+                .AddPropertyTable(features.Count, "PropertyTable");
 
             propertyTable
                 .UseProperty(ageProperty)
-                .SetValues(100);
+                .SetValues((uint)100, (uint)101);
 
             propertyTable
                 .UseProperty(speciesProperty)
-                .SetValues(2);
+                .SetValues((short)0, (short)3);
 
             propertyTable.UseProperty(heightProperty)
-                .SetValues(10.0f);
+                .SetValues(10.0f, 11f);
 
             propertyTable.UseProperty(diameterProperty)
-                .SetValues(1.5f);
+                .SetValues(1.5f, 2f);
 
             // Set the FeatureIds
+            var cnt = propertyTable.Count;
             var featureIdAttribute = new FeatureIDBuilder(propertyTable, 0);
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
 
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.plotly");
@@ -185,7 +192,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             propertyTable
                 .UseProperty(yearProp)
-                .SetValues(1960, 1996, 1985, 2002);            
+                .SetValues((short)1960, (short)1996, (short)1985, (short)2002);            
 
             // Set the FeatureIds, pointing to the red channel of the texture
 
@@ -195,7 +202,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             primitive.AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.plotly");

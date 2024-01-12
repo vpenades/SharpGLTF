@@ -705,10 +705,18 @@ namespace SharpGLTF.Schema2
 
             public void SetValues<T>(params T[] values)
             {
+                var className = LogicalParent.ClassName;
+                var metadataClass = LogicalParent.LogicalParent.Schema.Classes[className];
+                Guard.IsTrue(metadataClass != null, nameof(className), $"Schema class {className} must be defined");
+                metadataClass.Properties.TryGetValue(LogicalKey, out var metadataProperty);
+                Guard.IsTrue(metadataProperty != null, nameof(LogicalKey), $"Property {LogicalKey} in {className} must be defined");
+
+                CheckElementTypes<T>(metadataProperty);
+
                 var root = _GetModelRoot();
-                
+
                 int logicalIndex = GetBufferView(root, values);
-                this.Values = logicalIndex;
+                Values = logicalIndex;
 
                 if (typeof(T) == typeof(string))
                 {
@@ -718,8 +726,68 @@ namespace SharpGLTF.Schema2
 
                     var stringOffsets = BinaryTable.GetStringOffsets(stringvalues);
                     int offsets = GetBufferView(root, stringOffsets);
-                    this.StringOffsets = offsets;
-                }                
+                    StringOffsets = offsets;
+                }
+            }
+
+            private void CheckElementTypes<T>(StructuralMetadataClassProperty metadataProperty)
+            {
+                var elementType = metadataProperty.Type;
+
+                if (elementType == ELEMENTTYPE.ENUM)
+                {
+                    // guard the type of t is an short in case of enum
+                    Guard.IsTrue(typeof(T) == typeof(short), nameof(T), $"Enum value type of {LogicalKey} must be short");
+                }
+                else if (elementType == ELEMENTTYPE.SCALAR)
+                {
+                    var componentType = metadataProperty.ComponentType;
+                    CheckScalarTypes<T>(componentType);
+                }
+            }
+
+            private void CheckScalarTypes<T>(DATATYPE? componentType)
+            {
+                if (componentType == DATATYPE.INT8)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(sbyte), nameof(T), $"Scalar value type of property {LogicalKey} must be sbyte");
+                }
+                else if (componentType == DATATYPE.UINT8)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(byte), nameof(T), $"Scalar value type of property {LogicalKey} must be byte");
+                }
+                else if (componentType == DATATYPE.INT16)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(short), nameof(T), $"Scalar value type of property {LogicalKey} must be short");
+                }
+                else if (componentType == DATATYPE.UINT16)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(ushort), nameof(T), $"Scalar value type of property {LogicalKey} must be ushort");
+                }
+                else if (componentType == DATATYPE.INT32)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(int), nameof(T), $"Scalar value type of property {LogicalKey} must be int");
+                }
+                else if (componentType == DATATYPE.UINT32)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(uint), nameof(T), $"Scalar value type of property {LogicalKey} must be uint");
+                }
+                else if (componentType == DATATYPE.INT64)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(long), nameof(T), $"Scalar value type of property {LogicalKey} must be long");
+                }
+                else if (componentType == DATATYPE.UINT64)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(ulong), nameof(T), $"Scalar value type of property {LogicalKey} must be ulong");
+                }
+                else if (componentType == DATATYPE.FLOAT32)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(Single), nameof(T), $"Scalar value type of property {LogicalKey} must be float");
+                }
+                else if (componentType == DATATYPE.FLOAT64)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(double), nameof(T), $"Scalar value type of property {LogicalKey} must be double");
+                }
             }
 
             private static int GetBufferView<T>(ModelRoot model, IReadOnlyList<T> values)
