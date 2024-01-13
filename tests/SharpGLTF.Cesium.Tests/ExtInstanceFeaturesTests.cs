@@ -38,7 +38,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
 
             var featureId0 = new FeatureIDBuilder(2, 0, label: "Forests");
-            var featureId1 = new FeatureIDBuilder(9, 0, label: "Trees");            
+            var featureId1 = new FeatureIDBuilder(9, label: "Trees");            
 
             var model = sceneBuilder.ToGltf2(settings);
             model.LogicalNodes[0].AddInstanceFeatureIds(featureId0, featureId1);

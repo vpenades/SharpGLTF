@@ -6,8 +6,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 {
     public sealed class FeatureIDBuilder : IMeshFeatureIDInfo, IEquatable<IMeshFeatureIDInfo>
     {
-
-        public FeatureIDBuilder(int featureCount, OneOf<int, Texture>? attributeOrTexture, PropertyTable propertyTable = null, string label = null, int? nullFeatureId = null)
+        public FeatureIDBuilder(int featureCount, OneOf<int, Texture>? attributeOrTexture = null, PropertyTable propertyTable = null, IReadOnlyList<int> channels = null, string label = null, int? nullFeatureId = null)
         {
             Guard.MustBeGreaterThanOrEqualTo(featureCount, 1, nameof(featureCount));
             FeatureCount = featureCount;
@@ -19,7 +18,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                     texture =>
                     {
                         Texture = texture;
-                        Channels = new[] { 0 };
+                        Channels = channels ?? new[] { 0 };
                     }
                 );
             }
@@ -40,7 +39,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         public int? PropertyTableIndex { get; set; }
 
-        public Texture Texture { get; set; }
+        public Texture Texture { get; set;  }
         public IReadOnlyList<int> Channels { get; set; }
 
         public bool Equals(IMeshFeatureIDInfo other)
