@@ -11,7 +11,8 @@ namespace SharpGLTF.Schema2
     using Collections;
     using Memory;
     using Validation;
-    using Tiles3D;    
+    using Tiles3D;
+    using System.Numerics;
 
     partial class Tiles3DExtensions
     {
@@ -744,6 +745,31 @@ namespace SharpGLTF.Schema2
                     var componentType = metadataProperty.ComponentType;
                     CheckScalarTypes<T>(componentType);
                 }
+                else if(elementType == ELEMENTTYPE.STRING)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(string), nameof(T), $"String type of property {LogicalKey} must be string");
+                }
+                else if (elementType == ELEMENTTYPE.BOOLEAN)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(bool), nameof(T), $"Boolean type of property {LogicalKey} must beboolean");
+                }
+                else if (elementType == ELEMENTTYPE.VEC2)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(Vector2), nameof(T), $"Vector2 type of property {LogicalKey} must be Vector2");
+                }
+                else if (elementType == ELEMENTTYPE.VEC3)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(Vector3), nameof(T), $"Vector3 type of property {LogicalKey} must be Vector3");
+                }
+                else if (elementType == ELEMENTTYPE.VEC3)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(Vector4), nameof(T), $"Vector4 type of property {LogicalKey} must be Vector4");
+                }
+                // todo: add MAT2, MAT3
+                else if (elementType == ELEMENTTYPE.MAT4)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(Matrix4x4), nameof(T), $"Matrix4x4 type of property {LogicalKey} must be Matrix4x4");
+                }
             }
 
             private void CheckScalarTypes<T>(DATATYPE? componentType)
@@ -1200,21 +1226,21 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, bool required = false)
             {
-                this.Type = etype;
-                this.ComponentType = ctype;
-                this.Normalized = normalized;
-                this.Array = false;
-                this.Required = required;
+                Type = etype;
+                ComponentType = ctype;
+                Normalized = normalized;
+                Array = false;
+                Required = required;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, int? count = null)
             {
-                this.Type = etype;
-                this.ComponentType = ctype;
-                this.Normalized = normalized;
-                this.Array = true;
-                this.Count = count;
+                Type = etype;
+                ComponentType = ctype;
+                Normalized = normalized;
+                Array = true;
+                Count = count;
                 return this;
             }
 
@@ -1225,10 +1251,10 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithEnumArrayType(string enumType, int? count = null)
             {
-                this.Type = ELEMENTTYPE.ENUM;
-                this.EnumType = enumType;                
-                this.Array = true;
-                this.Count = count;
+                Type = ELEMENTTYPE.ENUM;
+                EnumType = enumType;                
+                Array = true;
+                Count = count;
                 return this;
             }
 

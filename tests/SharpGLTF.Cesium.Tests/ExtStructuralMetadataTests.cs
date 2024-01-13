@@ -85,7 +85,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             propertyTable
                 .UseProperty(nameProperty)
-                    .SetValues("this is featureId0", "this is featureId1", "this is featureId2");
+                .SetValues("this is featureId0", "this is featureId1", "this is featureId2");
 
             foreach (var primitive in model.LogicalMeshes[0].Primitives)
             {
