@@ -5,22 +5,20 @@ namespace SharpGLTF.Schema2.Tiles3D
 {
     public sealed class FeatureIDBuilder : IMeshFeatureIDInfo , IEquatable<IMeshFeatureIDInfo>
     {
-        public FeatureIDBuilder(int featureCount, int? attribute = null, string label = null, int? nullFeatureId = null)
+        public FeatureIDBuilder(int featureCount, int? attribute = null, PropertyTable propertyTable = null, string label = null, int? nullFeatureId = null)
         {
+            Guard.MustBeGreaterThanOrEqualTo(featureCount, 1, nameof(featureCount));
             FeatureCount = featureCount;
-            Label = label;
+
+            if (propertyTable != null)
+            {
+                PropertyTableIndex = propertyTable.LogicalIndex;
+            }
+
             Attribute = attribute;
+            Label = label;
             NullFeatureId = nullFeatureId;
         }
-
-        public FeatureIDBuilder(PropertyTable table, int? attribute = null, string label = null, int? nullFeatureId = null):
-            this(table.Count, attribute, label, nullFeatureId)
-        {
-            _root = table.LogicalParent;
-            PropertyTableIndex = table.LogicalIndex;
-        }
-
-        private readonly EXTStructuralMetadataRoot _root;
 
         public int FeatureCount { get; set; }
         public int? NullFeatureId { get; set; }

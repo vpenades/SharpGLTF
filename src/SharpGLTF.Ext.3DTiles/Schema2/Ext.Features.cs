@@ -267,7 +267,7 @@ namespace SharpGLTF.Schema2
                     if (featureId.Attribute.HasValue)
                     {
                         var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
-                        Guard.NotNull(_meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute);
+                        Guard.NotNull(_meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
                     }
 
                     featureId.ValidateFeatureIdReferences(_meshPrimitive.LogicalParent.LogicalParent);
@@ -277,7 +277,7 @@ namespace SharpGLTF.Schema2
                     if (texture != null)
                     {
                         var expectedTexCoordAttribute = $"TEXCOORD_{texture.TextureCoordinate}";
-                        Guard.NotNull(_meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute), expectedTexCoordAttribute);
+                        Guard.NotNull(_meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute), expectedTexCoordAttribute, $"The primitive should have texture {expectedTexCoordAttribute}.");
 
                         var modelRoot = _meshPrimitive.LogicalParent.LogicalParent;
                         validate.IsNullOrIndex(nameof(texture), texture.TextureCoordinate, modelRoot.LogicalTextures);

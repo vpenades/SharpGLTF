@@ -6,6 +6,7 @@ using SharpGLTF.Scenes;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace SharpGLTF.Schema2.Tiles3D
@@ -20,6 +21,86 @@ namespace SharpGLTF.Schema2.Tiles3D
         {
             Tiles3DExtensions.RegisterExtensions();
         }
+
+        [Test(Description = "TestWith2PrimitivesAndMetadata")]
+        public void MultiplePrimitivesAndMetadata()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            int featureId = 0;
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+
+            // featureId = 1 and 2 (other material)
+
+            var material2 = new MaterialBuilder()
+                .WithDoubleSide(true)
+                .WithMetallicRoughnessShader()
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
+
+            var prim2 = mesh.UsePrimitive(material2);
+
+            featureId = 1;
+            var vt3 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt4 = VertexBuilder.GetVertexWithFeatureId(new Vector3(3, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt5 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim2.AddTriangle(vt3, vt4, vt5);
+
+            featureId = 2;
+            var vt6 = VertexBuilder.GetVertexWithFeatureId(new Vector3(4, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt7 = VertexBuilder.GetVertexWithFeatureId(new Vector3(5, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt8 = VertexBuilder.GetVertexWithFeatureId(new Vector3(4, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim2.AddTriangle(vt6, vt7, vt8);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
+            schema.Name = "schema 001";
+            schema.Description = "an example schema";
+            schema.Version = "3.5.1";
+
+            var trianglesClass = schema
+                .UseClassMetadata("triangles")
+                .WithName("Triangle");
+
+            var nameProperty = trianglesClass
+                .UseProperty("name")
+                .WithValueType(ElementType.STRING);
+
+            var propertyTable = trianglesClass
+                .AddPropertyTable(3, "PropertyTable");
+
+            propertyTable
+                .UseProperty(nameProperty)
+                    .SetValues("this is featureId0", "this is featureId1", "this is featureId2");
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                var triangles = primitive.EvaluateTriangles().Count();
+                var featureIdAttribute = new FeatureIDBuilder(triangles, 0, propertyTable);
+                primitive.AddMeshFeatureIds(featureIdAttribute);
+            }
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.plotly");
+        }
+
 
         [Test(Description = "First test with ext_structural_metadata")]
         // This test creates a simple triangle (featureId = 0) with ext_structural_metadata (4 tree attributes like
@@ -112,7 +193,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // Set the FeatureIds
             var cnt = propertyTable.Count;
-            var featureIdAttribute = new FeatureIDBuilder(propertyTable, 0);
+            var featureIdAttribute = new FeatureIDBuilder(1, 0, propertyTable);
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
 
             // create files
@@ -196,7 +277,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // Set the FeatureIds, pointing to the red channel of the texture
 
-            var featureId = new FeatureIDBuilder(propertyTable);            
+            var featureId = new FeatureIDBuilder(4, null, propertyTable);            
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
             primitive.AddMeshFeatureIds(featureId);
@@ -357,8 +438,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // assign to primitive
 
-            var featureId0 = new FeatureIDBuilder(examplePropertyTable, 0);
-            var featureId1 = new FeatureIDBuilder(examplePropertyTable, 1);
+            var featureId0 = new FeatureIDBuilder(2, 0, examplePropertyTable);
+            var featureId1 = new FeatureIDBuilder(2, 1, examplePropertyTable);
 
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds( featureId0, featureId1 );
 
@@ -427,7 +508,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // assign to primitive
 
-            var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
+            var featureId = new FeatureIDBuilder(1, 0, examplePropertyTable);
 
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
@@ -528,7 +609,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .SetValues2D(ints, false);
 
             // add to primitive            
-            var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
+            var featureId = new FeatureIDBuilder(1, 0, examplePropertyTable);
 
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
@@ -604,9 +685,9 @@ namespace SharpGLTF.Schema2.Tiles3D
             // features
 
             // FeatureID 0: featureCount=1, attribute=0, propertyTable=0 
-            var featureId0 = new FeatureIDBuilder(firstPropertyTable, 0);
+            var featureId0 = new FeatureIDBuilder(1, 0, firstPropertyTable);
             // FeatureID 1: featureCount=1, attribute=1, prorpertyTable=1
-            var featureId1 = new FeatureIDBuilder(secondPropertyTable, 1);
+            var featureId1 = new FeatureIDBuilder(1, 1, secondPropertyTable);
             
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId0, featureId1);
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
