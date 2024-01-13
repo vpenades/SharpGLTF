@@ -106,9 +106,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             var model = scene.ToGltf2();
 
             // Set the FeatureIds, pointing to the red channel of the texture            
-            var featureId = new FeatureIDBuilder(4);
-            featureId.Channels = new int[] { 0 };
-            featureId.Texture = model.LogicalTextures[0];
+            var featureId = new FeatureIDBuilder(4, model.LogicalTextures[0]);
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
             primitive.AddMeshFeatureIds(featureId);

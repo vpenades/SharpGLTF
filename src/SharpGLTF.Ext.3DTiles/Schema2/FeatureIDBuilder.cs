@@ -1,21 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using OneOf;
 
 namespace SharpGLTF.Schema2.Tiles3D
 {
-    public sealed class FeatureIDBuilder : IMeshFeatureIDInfo , IEquatable<IMeshFeatureIDInfo>
+    public sealed class FeatureIDBuilder : IMeshFeatureIDInfo, IEquatable<IMeshFeatureIDInfo>
     {
-        public FeatureIDBuilder(int featureCount, int? attribute = null, PropertyTable propertyTable = null, string label = null, int? nullFeatureId = null)
+
+        public FeatureIDBuilder(int featureCount, OneOf<int, Texture>? attributeOrTexture, PropertyTable propertyTable = null, string label = null, int? nullFeatureId = null)
         {
             Guard.MustBeGreaterThanOrEqualTo(featureCount, 1, nameof(featureCount));
             FeatureCount = featureCount;
+
+            if (attributeOrTexture != null)
+            {
+                attributeOrTexture.Value.Switch(
+                    attribute => Attribute = attribute,
+                    texture =>
+                    {
+                        Texture = texture;
+                        Channels = new[] { 0 };
+                    }
+                );
+            }
 
             if (propertyTable != null)
             {
                 PropertyTableIndex = propertyTable.LogicalIndex;
             }
 
-            Attribute = attribute;
             Label = label;
             NullFeatureId = nullFeatureId;
         }
@@ -39,7 +52,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             if (Label != other.Label) return false;
             if (PropertyTableIndex != other.PropertyTableIndex) return false;
 
-            if(other is FeatureIDBuilder featureIdBuilder)
+            if (other is FeatureIDBuilder featureIdBuilder)
             {
                 if (Texture != featureIdBuilder.Texture) return false;
                 if (Channels != featureIdBuilder.Channels) return false;
