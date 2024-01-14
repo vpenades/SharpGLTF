@@ -117,6 +117,15 @@ namespace SharpGLTF.Schema2
                 {
                     var propertyAttributes = rootMetadata.PropertyAttributes;
                     validate.IsNullOrIndex(nameof(propertyAttribute), propertyAttribute, propertyAttributes);
+
+                    foreach(var attribute in propertyAttributes)
+                    {
+                        foreach(var property in attribute.Properties)
+                        {
+                            var expectedVertexAttribute = property.Value.Attribute;
+                            Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
+                        }
+                    }
                 }
 
                 base.OnValidateReferences(validate);
