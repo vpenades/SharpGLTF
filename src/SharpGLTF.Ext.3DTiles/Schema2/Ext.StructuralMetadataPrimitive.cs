@@ -10,12 +10,6 @@ namespace SharpGLTF.Schema2
 
     partial class Tiles3DExtensions
     {
-        // TODO: PropertyTexture is taken from a Schema, but it is possible the schema is an external file,
-        // in which case we could not have a PopertyTexture, just a blind ID
-
-        // Solution1: enforce loading the schema as part of the memory document
-        // Solution2: allow the API to be OneOf<int,PropertyTexture>
-
         public static void AddPropertyTexture(this MeshPrimitive primitive, PropertyTexture texture)
         {
             var ext = primitive.UseExtension<ExtStructuralMetadataMeshPrimitive>();

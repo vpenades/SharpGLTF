@@ -698,6 +698,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/
+        // Note in the sample an external json file (MetadataSchema.json) is used to define the schema, which is not supported
+        // in this library yet.
+        // This test uses the same schema but defines it in code instead.
         [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
         public void CreatePointCloudWithCustomAttributesTest()
         {
@@ -750,9 +753,19 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .WithDescription("An example property for the classification, with the classificationEnumType")
                 .WithEnumeration(speciesEnum);
 
-            // todo: add propertyAttributes
+
+            var propertyAttribute = rootMetadata.AddPropertyAttribute(classA);
+            var intensityAttribute = propertyAttribute.CreateProperty("intensity");
+            intensityAttribute.Attribute = "_INTENSITY";
+            var classificationAttribute = propertyAttribute.CreateProperty("classification");
+            classificationAttribute.Attribute = "_CLASSIFICATION";
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                primitive.AddPropertyAttribute(propertyAttribute);
+            }
 
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
