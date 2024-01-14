@@ -61,11 +61,13 @@ namespace SharpGLTF.Schema2
 
             #region properties
 
+            /**
             internal string SchemaUri
             {
                 get => _schemaUri;
                 set { _schemaUri = value; }
             }
+            */
 
             internal StructuralMetadataSchema Schema
             {
@@ -96,16 +98,18 @@ namespace SharpGLTF.Schema2
                 return schema;
             }
 
+            /**
             // Sets the schema to use an external schema, returns an empty schema to used for adding schema properties
             public StructuralMetadataSchema UseExternalSchema(Uri uri)
             {
                 SchemaUri = uri.ToString();
                 return new StructuralMetadataSchema();
             }
+            */
 
             public StructuralMetadataSchema UseEmbeddedSchema()
             {
-                SchemaUri = null;
+                // SchemaUri = null;
 
                 if (_schema == null) GetChildSetter(this).SetProperty(ref _schema, new StructuralMetadataSchema());
 
@@ -257,8 +261,8 @@ namespace SharpGLTF.Schema2
                 }
 
                 // Check one of schema or schemaUri is defined, but not both
-                Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
-                Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
+                // Guard.IsFalse(Schema != null && SchemaUri != null, "Schema/SchemaUri", "Schema and SchemaUri cannot both be defined");
+                // Guard.IsFalse(Schema == null && SchemaUri == null, "Schema/SchemaUri", "One of Schema and SchemaUri must be defined");
 
                 base.OnValidateContent(result);
             }

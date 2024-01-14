@@ -730,17 +730,29 @@ namespace SharpGLTF.Schema2.Tiles3D
             // --------------------------------------------------------------
 
             var rootMetadata = model.UseStructuralMetadata();
-            var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);            
-            var schema = rootMetadata.UseExternalSchema(schemaUri);
-            var externalClass = schema.UseClassMetadata("exampleMetadataClass");
+            var schema = rootMetadata.UseEmbeddedSchema();
 
-            var propertyAttribute = rootMetadata.AddPropertyAttribute(externalClass);
+            var classA = schema
+                .UseClassMetadata("exampleMetadataClass")
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class for property attributes");
 
-            var intensityProperty = propertyAttribute.CreateProperty("intensity");             
-            intensityProperty.Attribute = "_INTENSITY";
+            var intensityProperty = classA.UseProperty("intensity")
+                .WithName("Example intensity property")
+                .WithDescription("An example property for the intensity, with component type FLOAT32")
+                .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
 
-            var classificationProperty = propertyAttribute.CreateProperty("classification");
-            classificationProperty.Attribute = "_CLASSIFICATION";
+            var classificationProperty = classA
+                .UseProperty("classification")
+                .WithName("Example classification property")
+                .WithDescription("An example property for the classification, with the classificationEnumType");
+
+            classificationProperty.Type = ElementType.ENUM;
+            classificationProperty.EnumType = "classificationEnumType";
+
+            var speciesEnum = schema.UseEnumMetadata("classificationEnumType", ("MediumVegetation", 0), ("Buildings", 1));
+
+            // todo: add propertyAttributes
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
 
