@@ -1207,7 +1207,7 @@ namespace SharpGLTF.Schema2
             public string EnumType
             {
                 get => _enumType;
-                set => _enumType = value;
+                // set => _enumType = value;
             }
 
             public DATATYPE? ComponentType
@@ -1277,17 +1277,25 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumType, int? count = null)
-            {
-                return WithEnumArrayType(enumType.LogicalKey, count);
-            }
-
-            public StructuralMetadataClassProperty WithEnumArrayType(string enumType, int? count = null)
+            public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumeration, int? count = null)
             {
                 Type = ELEMENTTYPE.ENUM;
-                EnumType = enumType;                
+                _enumType = enumeration.LogicalKey;
                 Array = true;
                 Count = count;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithEnumeration(StructuralMetadataEnum enumeration)
+            {
+                Type = ELEMENTTYPE.ENUM;
+                _enumType = enumeration.LogicalKey;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithRequired(bool required)
+            {
+                Required = required;
                 return this;
             }
 

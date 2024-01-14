@@ -150,10 +150,10 @@ namespace SharpGLTF.Schema2.Tiles3D
             // species property
             var speciesProperty = treeClass
                 .UseProperty("species")
-                .WithDescription("Type of tree.");
+                .WithDescription("Type of tree.")
+                .WithEnumeration(speciesEnum)
+                .WithRequired(true);
             
-            speciesProperty.Type = ElementType.ENUM;
-            speciesProperty.EnumType = "speciesEnum";
             speciesProperty.Required = true;
                
             // age property
@@ -596,14 +596,14 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .SetArrayValues(bools);
 
             var strings = new List<List<string>>();
-            strings.Add(new List<string>() { "Example string 1", "Example string 2", "Example string 3" });
+            strings.Add(["Example string 1", "Example string 2", "Example string 3"]);
             examplePropertyTable
                 .UseProperty(variableLengthStringArrayProperty)
                 .SetArrayValues(strings);
 
             // Fill property table with enum values
             var shorts = new List<List<short>>();
-            shorts.Add(new List<short>() { 0, 1 });
+            shorts.Add([0, 1]);
             examplePropertyTable
                 .UseProperty(fixed_length_ARRAY_ENUM)
                 .SetArrayValues(shorts);
@@ -737,20 +737,18 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .WithName("Example metadata class")
                 .WithDescription("An example metadata class for property attributes");
 
-            var intensityProperty = classA.UseProperty("intensity")
+            classA.UseProperty("intensity")
                 .WithName("Example intensity property")
                 .WithDescription("An example property for the intensity, with component type FLOAT32")
                 .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
 
-            var classificationProperty = classA
+            var speciesEnum = schema.UseEnumMetadata("classificationEnumType", ("MediumVegetation", 0), ("Buildings", 1));
+
+            classA
                 .UseProperty("classification")
                 .WithName("Example classification property")
-                .WithDescription("An example property for the classification, with the classificationEnumType");
-
-            classificationProperty.Type = ElementType.ENUM;
-            classificationProperty.EnumType = "classificationEnumType";
-
-            var speciesEnum = schema.UseEnumMetadata("classificationEnumType", ("MediumVegetation", 0), ("Buildings", 1));
+                .WithDescription("An example property for the classification, with the classificationEnumType")
+                .WithEnumeration(speciesEnum);
 
             // todo: add propertyAttributes
 
