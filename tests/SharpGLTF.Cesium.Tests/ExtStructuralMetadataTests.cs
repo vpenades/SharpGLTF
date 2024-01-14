@@ -587,26 +587,26 @@ namespace SharpGLTF.Schema2.Tiles3D
             bytes.Add(new List<byte>() { 0, 1, 2, 3, 4, 5, 6, 7 });
             examplePropertyTable
                 .UseProperty(uint8ArrayProperty)
-                .SetValues2D(bytes);
+                .SetArrayValues(bytes);
 
             var bools = new List<List<bool>>();
             bools.Add(new List<bool>() { true, false, true, false });
             examplePropertyTable
                 .UseProperty(fixedLengthBooleanProperty)
-                .SetValues2D(bools, false);
+                .SetArrayValues(bools);
 
             var strings = new List<List<string>>();
             strings.Add(new List<string>() { "Example string 1", "Example string 2", "Example string 3" });
             examplePropertyTable
                 .UseProperty(variableLengthStringArrayProperty)
-                .SetValues2D(strings);
+                .SetArrayValues(strings);
 
             // Fill property table with enum values
-            var ints = new List<List<int>>();
-            ints.Add(new List<int>() { 0, 1 });
+            var shorts = new List<List<short>>();
+            shorts.Add(new List<short>() { 0, 1 });
             examplePropertyTable
                 .UseProperty(fixed_length_ARRAY_ENUM)
-                .SetValues2D(ints, false);
+                .SetArrayValues(shorts);
 
             // add to primitive            
             var featureId = new FeatureIDBuilder(1, 0, examplePropertyTable);

@@ -680,14 +680,21 @@ namespace SharpGLTF.Schema2
 
             private ModelRoot _GetModelRoot() => LogicalParent.LogicalParent.LogicalParent;
 
-            public void SetValues2D<T>(List<List<T>> values, bool HasVariableLength = true)
+            public void SetArrayValues<T>(List<List<T>> values)
             {
+                var className = LogicalParent.ClassName;
+                var metadataProperty = GetProperty<T>(className, LogicalKey);
+
+                metadataProperty.Array = true;
+
                 var root = _GetModelRoot();
-                
+
                 int logicalIndex = GetBufferView(root, values);
                 Values = logicalIndex;
 
-                if (HasVariableLength)
+                var hasVariableLength = HasVariableLength<T>(values);
+
+                if (HasVariableLength<T>(values) || typeof(T) == typeof(string))
                 {
                     // if the array has items of variable length, create arraysOffsets bufferview
                     var arrayOffsets = BinaryTable.GetArrayOffsets(values);
@@ -701,18 +708,17 @@ namespace SharpGLTF.Schema2
                         int offsets = GetBufferView(root, stringOffsets);
                         StringOffsets = offsets;
                     }
-                }                
+                }
+                else
+                {
+                    metadataProperty.Count = values[0].Count;
+                }
             }
 
             public void SetValues<T>(params T[] values)
             {
                 var className = LogicalParent.ClassName;
-                var metadataClass = LogicalParent.LogicalParent.Schema.Classes[className];
-                Guard.IsTrue(metadataClass != null, nameof(className), $"Schema class {className} must be defined");
-                metadataClass.Properties.TryGetValue(LogicalKey, out var metadataProperty);
-                Guard.IsTrue(metadataProperty != null, nameof(LogicalKey), $"Property {LogicalKey} in {className} must be defined");
-
-                CheckElementTypes<T>(metadataProperty);
+                GetProperty<T>(className, LogicalKey);
 
                 var root = _GetModelRoot();
 
@@ -730,6 +736,29 @@ namespace SharpGLTF.Schema2
                     StringOffsets = offsets;
                 }
             }
+
+            private StructuralMetadataClassProperty GetProperty<T>(string className, string key)
+            {
+                var metadataClass = LogicalParent.LogicalParent.Schema.Classes[className];
+                Guard.IsTrue(metadataClass != null, nameof(className), $"Schema class {className} must be defined");
+                metadataClass.Properties.TryGetValue(key, out var metadataProperty);
+                Guard.IsTrue(metadataProperty != null, nameof(key), $"Property {key} in {className} must be defined");
+
+                CheckElementTypes<T>(metadataProperty);
+
+                return metadataProperty;
+            }
+
+            private bool HasVariableLength<T>(List<List<T>> values)
+            {
+                int length = values[0].Count;
+                for (int i = 1; i < values.Count; i++)
+                {
+                    if (values[i].Count != length) return true;
+                }
+                return false;
+            }
+
 
             private void CheckElementTypes<T>(StructuralMetadataClassProperty metadataProperty)
             {
