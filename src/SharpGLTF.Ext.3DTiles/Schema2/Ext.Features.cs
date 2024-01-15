@@ -334,7 +334,8 @@ namespace SharpGLTF.Schema2
                         }
 
                         var count = distinctFeatureIds.Count();
-                        Guard.IsTrue(featureId.FeatureCount == count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
+                        // FeatureCount must be greater or equal to the number of distinct feature ids
+                        Guard.IsTrue(featureId.FeatureCount >= count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
                     }
                     var texture = featureId.GetTexture();
                     if (texture != null)

@@ -35,9 +35,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="testfixtures\meshFeatures\ValidFeatureIdAttributeWithLargerFeatureCount.gltf">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
     <None Update="tree.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
