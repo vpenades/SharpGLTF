@@ -43,7 +43,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 {
                     var model = ModelRoot.Load(file);
                     var cesiumExtMeshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
-                    if(cesiumExtMeshFeaturesExtension != null)
+                    if (cesiumExtMeshFeaturesExtension != null)
                     {
                         Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
                         Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
