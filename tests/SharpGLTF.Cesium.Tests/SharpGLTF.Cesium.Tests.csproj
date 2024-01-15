@@ -27,6 +27,17 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Folder Include="testfixtures\meshFeatures\" />
+	<Folder Include="testfixtures\instanceFeatures\" />
+    <Folder Include="testfixtures\structuralMetadata\" />
+	<None Update="testfixtures\meshFeatures\**\*" CopyToOutputDirectory="PreserveNewest" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="testfixtures\meshFeatures\ValidFeatureIdAttributeWithLargerFeatureCount.gltf">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </None>
     <None Update="tree.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

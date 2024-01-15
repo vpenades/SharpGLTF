@@ -193,7 +193,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             // Set the FeatureIds
             var cnt = propertyTable.Count;
-            var featureIdAttribute = new FeatureIDBuilder(1, 0, propertyTable);
+            var featureIdAttribute = new FeatureIDBuilder(2, 0, propertyTable);
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
 
             // create files

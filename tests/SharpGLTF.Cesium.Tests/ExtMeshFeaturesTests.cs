@@ -6,6 +6,7 @@ using SharpGLTF.Scenes;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -20,6 +21,37 @@ namespace SharpGLTF.Schema2.Tiles3D
         public void SetUp()
         {
             Tiles3DExtensions.RegisterExtensions();
+        }
+
+        [Test(Description = "Reads glTF's with Cesium EXT_Mesh_Features")]
+        public void ReadExtMeshFeatures()
+        {
+            var gltffiles = Directory.GetFiles("./testfixtures/meshFeatures", "*.gltf", SearchOption.AllDirectories);
+            var glbfiles = Directory.GetFiles("./testfixtures/meshFeatures", "*.glb", SearchOption.AllDirectories);
+            var testfiles = gltffiles.Concat(glbfiles);
+
+            foreach (var file in testfiles)
+            {
+                var fileName = Path.GetFileName(file);
+
+                if (fileName.StartsWith("FeatureId")) 
+                {
+                    // we can expect an error loading this file
+                    Assert.That(() => ModelRoot.Load(file), Throws.Exception);
+                }
+                else
+                {
+                    var model = ModelRoot.Load(file);
+                    var cesiumExtMeshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
+                    if(cesiumExtMeshFeaturesExtension != null)
+                    {
+                        Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
+                        Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
+                        var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                        model.ValidateContent(ctx.GetContext());
+                    }
+                }
+            }
         }
 
         [Test(Description = "Test for settting the FeatureIds with vertex attributes. See sample https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_mesh_features/FeatureIdAttribute")]

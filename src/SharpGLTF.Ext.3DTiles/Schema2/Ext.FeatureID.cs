@@ -231,6 +231,8 @@ namespace SharpGLTF.Schema2.Tiles3D
             return LogicalParent?.LogicalParent?.LogicalParent?.LogicalParent?.LogicalParent;
         }
 
+        public IReadOnlyList<int> GetChannels() => _channels;
+
         public void SetChannels(IReadOnlyList<int> channels)
         {
             Guard.NotNullOrEmpty(channels, nameof(channels));

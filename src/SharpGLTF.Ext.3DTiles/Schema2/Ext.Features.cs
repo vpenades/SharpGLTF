@@ -267,7 +267,9 @@ namespace SharpGLTF.Schema2
                     if (featureId.Attribute.HasValue)
                     {
                         var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
-                        Guard.NotNull(_meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
+                        var featureIdVertex = _meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
+                        Guard.NotNull(featureIdVertex, expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
+                        Guard.IsTrue(!featureIdVertex.Normalized, expectedVertexAttribute, $"The custom vertex attribute {expectedVertexAttribute} should not be normalized.");
                     }
 
                     featureId.ValidateFeatureIdReferences(_meshPrimitive.LogicalParent.LogicalParent);
@@ -281,6 +283,28 @@ namespace SharpGLTF.Schema2
 
                         var modelRoot = _meshPrimitive.LogicalParent.LogicalParent;
                         validate.IsNullOrIndex(nameof(texture), texture.TextureCoordinate, modelRoot.LogicalTextures);
+
+                        var samplers = modelRoot.LogicalTextureSamplers;
+                        foreach(var sampler in samplers)
+                        {
+                            Guard.IsTrue(sampler.MagFilter == TextureInterpolationFilter.NEAREST, $"Texture magnification filter must be 9728 (NEAREST) but is set to {sampler.MagFilter}");
+                            Guard.IsTrue(sampler.MinFilter == TextureMipMapFilter.NEAREST, $"Texture minification filtering must be 9728 (NEAREST) but is set to {sampler.MinFilter}");
+                        }
+
+                        // check on channels as workaround
+                        // better solution: read the channels of the used texture
+                        // var logicalTexture = modelRoot.LogicalTextures[texture.TextureCoordinate];
+                        // var image = logicalTexture.PrimaryImage;
+                        var channels = texture.GetChannels();
+
+                        // chack that the length of channels list is maximum 4
+                        Guard.IsTrue(channels.Count <= 4, $"The number of channels must be maximum 4 but is {channels.Count}");
+
+                        // check that value in channels is minimum 0 and maximum 3
+                        foreach (var channel in channels)
+                        {
+                            Guard.IsTrue(channel >= 0 && channel <= 3, $"Channel value must be between 0 and 3 but has channel {channel}");
+                        }
                     }
                 }
 
@@ -297,6 +321,32 @@ namespace SharpGLTF.Schema2
                 foreach (var featureId in _featureIds)
                 {
                     featureId.ValidateFeatureIdContent();
+
+                    if (featureId.Attribute != null)
+                    {
+                        var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
+                        var vertex = _meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
+                        var distinctFeatureIds = vertex.AsScalarArray().Distinct().ToList();
+
+                        if (featureId.NullFeatureId.HasValue)
+                        {
+                            distinctFeatureIds.Remove(featureId.NullFeatureId.Value);
+                        }
+
+                        var count = distinctFeatureIds.Count();
+                        Guard.IsTrue(featureId.FeatureCount == count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
+                    }
+                    var texture = featureId.GetTexture();
+                    if (texture != null)
+                    {
+                        var expectedTexCoordAttribute = $"TEXCOORD_{texture.TextureCoordinate}";
+                        var vertex = _meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute);
+                        var distinctFeatureIds = vertex.AsVector2Array().Count();
+
+                        Guard.IsTrue(featureId.FeatureCount == distinctFeatureIds, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Texture ({distinctFeatureIds})");
+                    }
+
+
                 }
 
                 base.OnValidateContent(validate);
@@ -305,5 +355,5 @@ namespace SharpGLTF.Schema2
             #endregion
         }
 
-    }    
+    }
 }
