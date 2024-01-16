@@ -1257,21 +1257,123 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, bool required = false)
+            public StructuralMetadataClassProperty WithStringType()
             {
-                Type = etype;
-                ComponentType = ctype;
-                Normalized = normalized;
-                Array = false;
-                Required = required;
+                Type = ElementType.STRING;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, bool normalized = false, int? count = null)
+            public StructuralMetadataClassProperty WithBooleanType()
+            {
+                Type = ElementType.BOOLEAN;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithUInt8Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.UINT8;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithInt8Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.INT8;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithUInt16Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.UINT16;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithInt16Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.INT16;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithUInt32Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.UINT32;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithInt32Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.INT32;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithUInt64Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.UINT64;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithInt64Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.INT64;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithFloat32Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.FLOAT32;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithFloat64Type()
+            {
+                Type = ELEMENTTYPE.SCALAR;
+                ComponentType = DATATYPE.FLOAT64;
+                return this;
+            }
+
+
+            public StructuralMetadataClassProperty WithVector3Type()
+            {
+                Type = ElementType.VEC3;
+                ComponentType = DataType.FLOAT32;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithMatrix4x4Type()
+            {
+                Type = ElementType.MAT4;
+                ComponentType = DataType.FLOAT32;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithCount()
+            {
+                Type = ElementType.MAT4;
+                ComponentType = DataType.FLOAT32;
+                return this;
+            }
+
+
+            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null)
             {
                 Type = etype;
                 ComponentType = ctype;
-                Normalized = normalized;
+                Array = false;
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
+            {
+                Type = etype;
+                ComponentType = ctype;
                 Array = true;
                 Count = count;
                 return this;
@@ -1298,6 +1400,13 @@ namespace SharpGLTF.Schema2
                 Required = required;
                 return this;
             }
+
+            public StructuralMetadataClassProperty WithNormalized(bool normalized)
+            {
+                Normalized = normalized;
+                return this;
+            }
+
 
             #endregion
         }

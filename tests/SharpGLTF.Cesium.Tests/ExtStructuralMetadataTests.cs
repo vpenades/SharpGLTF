@@ -78,7 +78,12 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var nameProperty = trianglesClass
                 .UseProperty("name")
-                .WithValueType(ElementType.STRING);
+                .WithStringType();
+
+
+            var isTriangle = trianglesClass
+                .UseProperty("IsTriangle")
+                .WithBooleanType();
 
             var propertyTable = trianglesClass
                 .AddPropertyTable(3, "PropertyTable");
@@ -86,6 +91,11 @@ namespace SharpGLTF.Schema2.Tiles3D
             propertyTable
                 .UseProperty(nameProperty)
                 .SetValues("this is featureId0", "this is featureId1", "this is featureId2");
+
+            propertyTable
+                .UseProperty(isTriangle)
+                .SetValues(false, true, false);
+
 
             foreach (var primitive in model.LogicalMeshes[0].Primitives)
             {
@@ -153,26 +163,25 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .WithDescription("Type of tree.")
                 .WithEnumeration(speciesEnum)
                 .WithRequired(true);
-            
-            speciesProperty.Required = true;
-               
+
             // age property
             var ageProperty = treeClass
                 .UseProperty("age")
-                .WithDescription("The age of the tree, in years");
-            ageProperty.WithValueType(ElementType.SCALAR, DataType.UINT32, required: true);
+                .WithDescription("The age of the tree, in years")
+                .WithUInt32Type()
+                .WithRequired(true);
 
             // Height property
             var heightProperty = treeClass
                 .UseProperty("height")
                 .WithDescription("Height of tree measured from ground level, in meters");
-            heightProperty.WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+            heightProperty.WithFloat32Type();
 
             // Diameter property
             var diameterProperty = treeClass
                 .UseProperty("diameter")
                 .WithDescription("Diameter at trunk base, in meters.");
-            diameterProperty.WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+            diameterProperty.WithFloat32Type();
 
             var propertyTable = treeClass
                 .AddPropertyTable(features.Count, "PropertyTable");
@@ -257,12 +266,12 @@ namespace SharpGLTF.Schema2.Tiles3D
             var componentProp = buildingComponentsClass
                 .UseProperty("component")
                 .WithName("Component")
-                .WithValueType(ElementType.STRING);
+                .WithStringType();
 
             var yearProp = buildingComponentsClass
                 .UseProperty("yearBuilt")
                 .WithName("Year built")
-                .WithValueType(ElementType.SCALAR, DataType.INT16);            
+                .WithInt16Type();            
 
             var propertyTable = buildingComponentsClass
                 .AddPropertyTable(4, "Example property table");
@@ -342,17 +351,18 @@ namespace SharpGLTF.Schema2.Tiles3D
             exampleMetadataClass
                 .UseProperty("insideTemperature")
                 .WithName("Inside temperature")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8);
+                .WithUInt8Type();
 
             exampleMetadataClass
                 .UseProperty("outsideTemperature")
                 .WithName("Outside temperature")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8);
+                .WithUInt8Type();
 
             exampleMetadataClass
                 .UseProperty("insulation")
                 .WithName("Insulation Thickness")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8, true);
+                .WithUInt8Type()
+                .WithNormalized(true);
 
             // define texture property
 
@@ -416,13 +426,13 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("example_VEC3_FLOAT32")
                 .WithName("Example VEC3 FLOAT32 property")
                 .WithDescription("An example property, with type VEC3, with component type FLOAT32")
-                .WithValueType(ElementType.VEC3, DataType.FLOAT32);
+                .WithVector3Type();
 
             var stringProperty = exampleMetadataClass
                 .UseProperty("example_STRING")
                 .WithName("Example STRING property")
                 .WithDescription("An example property, with type STRING")
-                .WithValueType(ElementType.STRING);
+                .WithStringType();
 
             // define table
 
@@ -486,13 +496,13 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("example_VEC3_FLOAT32")
                 .WithName("Example VEC3 FLOAT32 property")
                 .WithDescription("An example property, with type VEC3, with component type FLOAT32")
-                .WithValueType(ElementType.VEC3, DataType.FLOAT32);
+                .WithVector3Type();
 
             var matrix4x4Property = exampleMetadataClass
                 .UseProperty("example_MAT4_FLOAT32")
                 .WithName("Example MAT4 FLOAT32 property")
                 .WithDescription("An example property, with type MAT4, with component type FLOAT32")
-                .WithValueType(ElementType.MAT4, DataType.FLOAT32);
+                .WithMatrix4x4Type();
 
             // define table
 
@@ -561,13 +571,15 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("example_variable_length_ARRAY_normalized_UINT8")
                 .WithName("Example variable-length ARRAY normalized INT8 property")
                 .WithDescription("An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
-                .WithArrayType(ElementType.SCALAR, DataType.UINT8, false);
+                .WithArrayType(ElementType.SCALAR, DataType.UINT8)
+                .WithNormalized(false);
 
             var fixedLengthBooleanProperty = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_BOOLEAN")
                 .WithName("Example fixed-length ARRAY BOOLEAN property")
                 .WithDescription("An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
-                .WithArrayType(ElementType.BOOLEAN, null, false, 4);
+                .WithArrayType(ElementType.BOOLEAN, null, 4)
+                .WithNormalized(false);
 
             var variableLengthStringArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_STRING")
@@ -651,12 +663,12 @@ namespace SharpGLTF.Schema2.Tiles3D
             var classAp0 = classA.UseProperty("example_FLOAT32")
                 .WithName("Example FLOAT32 property")
                 .WithDescription("An example property, with component type FLOAT32")
-                .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+                .WithFloat32Type();
 
             var classAp1 = classA.UseProperty("example_INT64")
                 .WithName("Example INT64 property")
                 .WithDescription("An example property, with component type INT64")
-                .WithValueType(ElementType.SCALAR, DataType.INT64);
+                .WithInt64Type();
 
             var classB = schema.UseClassMetadata("exampleMetadataClassB")
                 .WithName("Example metadata class B")
@@ -665,12 +677,12 @@ namespace SharpGLTF.Schema2.Tiles3D
             var classBp0 = classB.UseProperty("example_UINT16")
                 .WithName("Example UINT16 property")
                 .WithDescription("An example property, with component type UINT16")
-                .WithValueType(ElementType.SCALAR, DataType.UINT16);
+                .WithUInt16Type();
 
             var classBp1 = classB.UseProperty("example_FLOAT64")
                 .WithName("Example FLOAT64 property")
                 .WithDescription("An example property, with component type FLOAT64")
-                .WithValueType(ElementType.SCALAR, DataType.FLOAT64);
+                .WithFloat64Type();
 
             // properties
 
@@ -743,7 +755,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             classA.UseProperty("intensity")
                 .WithName("Example intensity property")
                 .WithDescription("An example property for the intensity, with component type FLOAT32")
-                .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+                .WithFloat32Type();
 
             var speciesEnum = schema.UseEnumMetadata("classificationEnumType", ("MediumVegetation", 0), ("Buildings", 1));
 
