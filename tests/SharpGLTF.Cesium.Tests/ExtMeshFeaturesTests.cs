@@ -23,6 +23,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             Tiles3DExtensions.RegisterExtensions();
         }
 
+        // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/meshFeatures
         [Test(Description = "Reads glTF's with Cesium EXT_Mesh_Features")]
         public void ReadExtMeshFeatures()
         {
@@ -42,14 +43,11 @@ namespace SharpGLTF.Schema2.Tiles3D
                 else
                 {
                     var model = ModelRoot.Load(file);
-                    var cesiumExtMeshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
-                    if (cesiumExtMeshFeaturesExtension != null)
-                    {
-                        Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
-                        Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
-                        var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-                        model.ValidateContent(ctx.GetContext());
-                    }
+                    var meshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
+                    Assert.That(meshFeaturesExtension.FeatureIds, Is.Not.Null);
+                    Assert.That(meshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
+                    var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                    model.ValidateContent(ctx.GetContext());
                 }
             }
         }
@@ -82,11 +80,11 @@ namespace SharpGLTF.Schema2.Tiles3D
             model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
 
             // Validate the FeatureIds
-            var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
-            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
+            var meshFeaturesExtension = (MeshExtMeshFeatures)model.LogicalMeshes[0].Primitives[0].Extensions.FirstOrDefault();
+            Assert.That(meshFeaturesExtension.FeatureIds, Is.Not.Null);
 
             // Check there should be a custom vertex attribute with name _FEATURE_ID_{attribute}
-            var attribute = cesiumExtMeshFeaturesExtension.FeatureIds[0].Attribute;
+            var attribute = meshFeaturesExtension.FeatureIds[0].Attribute;
             Assert.That(attribute == 0);
             var primitive = model.LogicalMeshes[0].Primitives[0];
             var featureIdVertexAccessor = primitive.GetVertexAccessor($"_FEATURE_ID_{attribute}");
@@ -143,10 +141,10 @@ namespace SharpGLTF.Schema2.Tiles3D
             var primitive = model.LogicalMeshes[0].Primitives[0];
             primitive.AddMeshFeatureIds(featureId);
 
-            var cesiumExtMeshFeaturesExtension = (MeshExtMeshFeatures)primitive.Extensions.FirstOrDefault();
-            Assert.That(cesiumExtMeshFeaturesExtension.FeatureIds, Is.Not.Null);
+            var meshFeaturesExtension = (MeshExtMeshFeatures)primitive.Extensions.FirstOrDefault();
+            Assert.That(meshFeaturesExtension.FeatureIds, Is.Not.Null);
 
-            var firstFeatureId = cesiumExtMeshFeaturesExtension.FeatureIds[0];
+            var firstFeatureId = meshFeaturesExtension.FeatureIds[0];
             var texture = firstFeatureId.GetTexture();
             var texCoord = texture.TextureCoordinate;
             var textureIdVertexAccessor = primitive.GetVertexAccessor($"TEXCOORD_{texCoord}");

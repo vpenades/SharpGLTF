@@ -30,7 +30,7 @@
 	<Folder Include="testfixtures\meshFeatures\" />
 	<Folder Include="testfixtures\instanceFeatures\" />
     <Folder Include="testfixtures\structuralMetadata\" />
-	<None Update="testfixtures\meshFeatures\**\*" CopyToOutputDirectory="PreserveNewest" />
+	<None Update="testfixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
 
   </ItemGroup>
 

@@ -1,0 +1,179 @@
+{
+  "extensions" : {
+    "EXT_structural_metadata" : {
+      "schema" : {
+        "id": "GpuInstancesMetadataSchema",
+        "classes" : {
+          "exampleMetadataClass" : {
+            "name" : "Example metadata class",
+            "description" : "An example metadata class",
+            "properties" : {
+              "example_STRING" : {
+                "name" : "Example STRING property",
+                "description" : "An example property, with component type STRING",
+                "type" : "STRING"
+              }
+            }
+          }
+        }
+      },
+      "propertyTables" : [ {
+        "name" : "Example property table",
+        "class" : "exampleMetadataClass",
+        "count" : 10,
+        "properties" : {
+          "example_STRING" : {
+            "values" : 7,
+            "stringOffsets" : 8
+          }
+        }
+      } ]
+    }
+  },
+  "extensionsUsed" : [ "EXT_structural_metadata", "EXT_mesh_gpu_instancing", "EXT_instance_features" ],
+  "accessors" : [ {
+    "bufferView" : 0,
+    "byteOffset" : 0,
+    "componentType" : 5125,
+    "count" : 36,
+    "type" : "SCALAR",
+    "max" : [ 23 ],
+    "min" : [ 0 ]
+  }, {
+    "bufferView" : 1,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 24,
+    "type" : "VEC3",
+    "max" : [ 1.0, 1.0, 1.0 ],
+    "min" : [ 0.0, 0.0, 0.0 ]
+  }, {
+    "bufferView" : 2,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 24,
+    "type" : "VEC3",
+    "max" : [ 1.0, 1.0, 1.0 ],
+    "min" : [ -1.0, -1.0, -1.0 ]
+  }, {
+    "bufferView" : 3,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 10,
+    "type" : "VEC3",
+    "max" : [ 10.0, 10.0, 10.0 ],
+    "min" : [ 0.0, 0.0, 0.0 ]
+  }, {
+    "bufferView" : 4,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 10,
+    "type" : "VEC4",
+    "max" : [ 0.733, 0.462, 0.191, 1.0 ],
+    "min" : [ 0.0, 0.0, 0.0, 0.462 ]
+  }, {
+    "bufferView" : 5,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 10,
+    "type" : "VEC3",
+    "max" : [ 2.0, 2.0, 2.0 ],
+    "min" : [ 1.0, 1.0, 1.0 ]
+  }, {
+    "bufferView" : 6,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 10,
+    "type" : "SCALAR",
+    "max" : [ 9 ],
+    "min" : [ 0 ]
+  } ],
+  "asset" : {
+    "generator" : "JglTF from https://github.com/javagl/JglTF",
+    "version" : "2.0"
+  },
+  "buffers" : [ {
+    "uri" : "data:application/gltf-buffer;base64,AAAAAAIAAAABAAAAAAAAAAMAAAACAAAABAAAAAYAAAAFAAAABAAAAAcAAAAGAAAACAAAAAoAAAAJAAAACAAAAAsAAAAKAAAADAAAAA4AAAANAAAADAAAAA8AAAAOAAAAEAAAABIAAAARAAAAEAAAABMAAAASAAAAFAAAABYAAAAVAAAAFAAAABcAAAAWAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAgD8AAAAAAAAAAAAAgD8AAAAAAACAPwAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAgD8AAIA/AACAPwAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAgD8AAIA/AACAPwAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAIA/AAAAAAAAgD8AAAAAAACAPwAAgD8AAAAAAACAPwAAgD8AAIA/AAAAAAAAgD8AAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIC/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAACAvwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAAAAAAAAAAgL8AAAAA",
+    "byteLength" : 720
+  }, {
+    "uri" : "data:application/gltf-buffer;base64,AAAAAAAAAAAAAAAA5DiOP+Q4jj/kOI4/5DgOQOQ4DkDkOA5AVlVVQFZVVUBWVVVA5DiOQOQ4jkDkOI5AHcexQB3HsUAdx7FAVlXVQFZV1UBWVdVAjuP4QI7j+ECO4/hA5DgOQeQ4DkHkOA5BAAAgQQAAIEEAACBBAAAAAAAAAAAAAAAAAACAP92ZzD0Q9YA9B0HVPHcffj/QGUs+AAMAPrywUz3rhHg/HXaWPuWqPT4f05w9Y0VvP3UqxT6+ing+IIHNPZiDYj+d+vA+w+KXPqEr+z1ub1I/DaEMP/RFsT6bkxI+REU/P9m0Hj+hD8g+H2slPgpNKT/WdC4/P+rbPqHVNT462RA/46U7P0SL7D6BlUM+RIvsPgAAgD8AAIA/AACAP+Q4jj/kOI4/5DiOP8dxnD/HcZw/x3GcP6uqqj+rqqo/q6qqP47juD+O47g/juO4P3Icxz9yHMc/chzHP1ZV1T9WVdU/VlXVPzmO4z85juM/OY7jPxzH8T8cx/E/HMfxPwAAAEAAAABAAAAAQAkACAAHAAYABQAEAAMAAgABAAAA",
+    "byteLength" : 420
+  }, {
+    "uri" : "data:application/gltf-buffer;base64,emVyb29uZXR3b3RocmVlZm91cmZpdmVzaXhzZXZlbmVpZ2h0bmluZQAAAAAEAAAABwAAAAoAAAAPAAAAEwAAABcAAAAaAAAAHwAAACQAAAAoAAAA",
+    "byteLength" : 84
+  } ],
+  "bufferViews" : [ {
+    "buffer" : 0,
+    "byteOffset" : 0,
+    "byteLength" : 144,
+    "target" : 34963
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 144,
+    "byteLength" : 288,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 432,
+    "byteLength" : 288,
+    "target" : 34962
+  }, {
+    "buffer" : 1,
+    "byteOffset" : 0,
+    "byteLength" : 120
+  }, {
+    "buffer" : 1,
+    "byteOffset" : 120,
+    "byteLength" : 160
+  }, {
+    "buffer" : 1,
+    "byteOffset" : 280,
+    "byteLength" : 120
+  }, {
+    "buffer" : 1,
+    "byteOffset" : 400,
+    "byteLength" : 20
+  }, {
+    "buffer" : 2,
+    "byteOffset" : 0,
+    "byteLength" : 40
+  }, {
+    "buffer" : 2,
+    "byteOffset" : 40,
+    "byteLength" : 44
+  } ],
+  "meshes" : [ {
+    "primitives" : [ {
+      "attributes" : {
+        "POSITION" : 1,
+        "NORMAL" : 2
+      },
+      "indices" : 0,
+      "mode" : 4
+    } ]
+  } ],
+  "nodes" : [ {
+    "extensions" : {
+      "EXT_mesh_gpu_instancing" : {
+        "attributes" : {
+          "TRANSLATION" : 3,
+          "ROTATION" : 4,
+          "SCALE" : 5,
+          "_FEATURE_ID_0" : 6
+        }
+      },
+      "EXT_instance_features" : {
+        "featureIds" : [ {
+          "featureCount" : 10,
+          "attribute" : 0,
+          "propertyTable" : 0
+        } ]
+      }
+    },
+    "mesh" : 0
+  } ],
+  "scene" : 0,
+  "scenes" : [ {
+    "nodes" : [ 0 ]
+  } ]
+}
