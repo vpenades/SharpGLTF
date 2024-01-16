@@ -13,13 +13,14 @@ namespace SharpGLTF.Schema2
     using Validation;
     using Tiles3D;
     using System.Numerics;
+    using System.Text.Json.Nodes;
 
     partial class Tiles3DExtensions
     {
         public static EXTStructuralMetadataRoot UseStructuralMetadata(this ModelRoot modelRoot)
         {
             return modelRoot.UseExtension<EXTStructuralMetadataRoot>();
-        }        
+        }
     }
 
     namespace Tiles3D
@@ -114,7 +115,7 @@ namespace SharpGLTF.Schema2
                 if (_schema == null) GetChildSetter(this).SetProperty(ref _schema, new StructuralMetadataSchema());
 
                 return _schema;
-            }            
+            }
 
             public PropertyAttribute AddPropertyAttribute(StructuralMetadataClass schemaClass)
             {
@@ -128,7 +129,7 @@ namespace SharpGLTF.Schema2
                 var prop = new PropertyAttribute();
                 _propertyAttributes.Add(prop);
                 return prop;
-            }            
+            }
 
             public PropertyTable AddPropertyTable(StructuralMetadataClass schemaClass, int? featureCount = null, string name = null)
             {
@@ -149,7 +150,7 @@ namespace SharpGLTF.Schema2
             public PropertyTexture AddPropertyTexture(StructuralMetadataClass schemaClass)
             {
                 var prop = AddPropertyTexture();
-                prop.ClassInstance = schemaClass;                
+                prop.ClassInstance = schemaClass;
                 return prop;
             }
 
@@ -158,7 +159,7 @@ namespace SharpGLTF.Schema2
                 var prop = new PropertyTexture();
                 _propertyTextures.Add(prop);
                 return prop;
-            }            
+            }
 
             #endregion
 
@@ -166,6 +167,13 @@ namespace SharpGLTF.Schema2
 
             protected override void OnValidateReferences(ValidationContext validate)
             {
+                var root = LogicalParent.GetExtension<EXTStructuralMetadataRoot>();
+                Guard.MustBeNull(root._schemaUri, nameof(root._schemaUri),  
+                    "SchemaUri must be null, use embedded achema to set the schema");
+
+                // Guard schema is null
+                Guard.NotNull(Schema, nameof(Schema), "Schema must be defined");
+
                 foreach (var propertyTexture in PropertyTextures)
                 {
                     foreach (var propertyTextureProperty in propertyTexture.Properties)
@@ -325,7 +333,7 @@ namespace SharpGLTF.Schema2
                     {
                         return schema.Classes[ClassName];
                     }
-                    else return null;                    
+                    else return null;
                 }
                 set
                 {
@@ -399,7 +407,7 @@ namespace SharpGLTF.Schema2
                     _channels.Clear();
                     _channels.AddRange(value);
                 }
-            }            
+            }
 
             public Schema2.Texture Texture
             {
@@ -529,6 +537,17 @@ namespace SharpGLTF.Schema2
                 set => _attribute = value;
             }
 
+            public JsonNode Min
+            {
+                get => _min;
+            }
+
+            public JsonNode Max
+            {
+                get => _max;
+            }
+
+
             #endregion
         }
 
@@ -543,7 +562,7 @@ namespace SharpGLTF.Schema2
                 _properties = new ChildrenDictionary<PropertyTableProperty, PropertyTable>(this);
 
                 _count = _countMinimum;
-            }           
+            }
 
             protected override IEnumerable<ExtraProperties> GetLogicalChildren()
             {
@@ -601,7 +620,7 @@ namespace SharpGLTF.Schema2
             {
                 get => _name;
                 set => _name = value;
-            }            
+            }
 
             public int Count
             {
@@ -631,7 +650,7 @@ namespace SharpGLTF.Schema2
                 value = new PropertyTableProperty();
                 _properties[key] = value;
                 return value;
-            }            
+            }
 
             #endregion
         }
@@ -778,7 +797,7 @@ namespace SharpGLTF.Schema2
                     var componentType = metadataProperty.ComponentType;
                     CheckScalarTypes<T>(componentType);
                 }
-                else if(elementType == ELEMENTTYPE.STRING)
+                else if (elementType == ELEMENTTYPE.STRING)
                 {
                     Guard.IsTrue(typeof(T) == typeof(string), nameof(T), $"String type of property {LogicalKey} must be string");
                 }
@@ -1009,6 +1028,11 @@ namespace SharpGLTF.Schema2
             {
                 get => _description;
                 set => _description = value;
+            }
+
+            public IntegerType? ValueType
+            {
+                get => _valueType;
             }
 
             #endregion

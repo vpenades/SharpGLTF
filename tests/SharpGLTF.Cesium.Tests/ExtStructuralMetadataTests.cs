@@ -6,6 +6,7 @@ using SharpGLTF.Scenes;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -21,6 +22,66 @@ namespace SharpGLTF.Schema2.Tiles3D
         {
             Tiles3DExtensions.RegisterExtensions();
         }
+
+        // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/structuralMetadata
+
+        [Test(Description = "Reads glTF's with EXT_Structural_Metadata")]
+        public void ReadExtStructuralMetadata()
+        {
+            var gltffiles = Directory.GetFiles("./testfixtures/structuralMetadata", "*.gltf");
+
+            var excludedFilesWithStats = new List<string>()
+            {
+                "PropertyAttributesClassPropertyMaxNotInRange.gltf",
+                "PropertyAttributesClassPropertyMinNotInRange.gltf",
+                "PropertyAttributesPropertyAttributePropertyMaxMismatch.gltf",
+                "PropertyAttributesPropertyAttributePropertyMaxNotInRange.gltf",
+                "PropertyAttributesPropertyAttributePropertyMinMismatch.gltf",
+                "PropertyAttributesPropertyAttributePropertyMinNotInRange.gltf",
+            };
+
+            var excludedFilesWithTextureInspection = new List<string>()
+            {
+                "PropertyTextureClassPropertyMaxNotInRange.gltf",
+                "PropertyTextureClassPropertyMinNotInRange.gltf",
+                "PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf",
+                "PropertyTextureEnumsInvalidEnumValue.gltf",
+                "PropertyTexturePropertyTexturePropertyMaxMismatch.gltf",
+                "PropertyTexturePropertyTexturePropertyMaxNotInRange.gltf",
+                "PropertyTexturePropertyTexturePropertyMinMismatch.gltf",
+                "PropertyTexturePropertyTexturePropertyMinNotInRange.gltf",
+            };
+
+            // combine both lists excludedFilesWithStats and excludedFilesWithTextureInspection into a new list
+
+            var excludedFiles = excludedFilesWithStats.Concat(excludedFilesWithTextureInspection);
+
+
+
+            // var excludedTests = excludedFilesWithStats.AddRange(excludedFilesWithTextureInspection);
+
+            foreach (var file in gltffiles)
+            {
+                var fileName = Path.GetFileName(file);
+
+                if (!excludedFiles.Contains(fileName) )
+                {
+
+                    if (!fileName.StartsWith("Valid"))
+                    {
+                        Assert.That(() => ModelRoot.Load(file), Throws.Exception);
+                    }
+                    else
+                    {
+                        var model = ModelRoot.Load(file);
+                        var structuralMetadataExtension = model.GetExtension<EXTStructuralMetadataRoot>();
+                        var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                        model.ValidateContent(ctx.GetContext());
+                    }
+                }
+            }
+        }
+
 
         [Test(Description = "TestWith2PrimitivesAndMetadata")]
         public void MultiplePrimitivesAndMetadata()

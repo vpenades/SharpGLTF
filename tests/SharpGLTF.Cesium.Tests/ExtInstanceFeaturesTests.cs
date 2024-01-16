@@ -19,7 +19,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/instanceFeatures
 
-        [Test(Description = "Reads glTF's with Cesium EXT_Instance_Features")]
+        [Test(Description = "Reads glTF's with EXT_Instance_Features")]
         public void ReadExtInstanceFeatures()
         {
             var gltffiles = Directory.GetFiles("./testfixtures/instanceFeatures", "*.gltf");

@@ -1,0 +1,326 @@
+{
+  "extensions" : {
+    "EXT_structural_metadata" : {
+      "schema" : {
+        "id": "SimplePropertyAttributeSchema",
+        "classes" : {
+          "exampleMetadataClass" : {
+            "name" : "Example metadata class",
+            "description" : "An example metadata class for property attributes",
+            "properties" : {
+              "intensity" : {
+                "name" : "Example intensity property",
+                "description" : "An example property for the intensity, with component type FLOAT32",
+                "type" : "STRING"
+              },
+              "classification" : {
+                "name" : "Example classification property",
+                "description" : "An example property for the classification, with the classificationEnumType",
+                "type" : "ENUM",
+                "enumType" : "classificationEnumType"
+              }
+            }
+          }
+        },
+        "enums" : {
+          "classificationEnumType" : {
+            "values" : [ {
+              "name" : "ExampleClassificationA",
+              "value" : 0
+            }, {
+              "name" : "ExampleClassificationB",
+              "value" : 1
+            }, {
+              "name" : "ExampleClassificationC",
+              "value" : 2
+            } ]
+          }
+        }
+      },
+      "propertyAttributes" : [ {
+        "class" : "exampleMetadataClass",
+        "properties" : {
+          "intensity" : {
+            "attribute" : "_INTENSITY"
+          },
+          "classification" : {
+            "attribute" : "_CLASSIFICATION"
+          }
+        }
+      } ]
+    }
+  },
+  "extensionsUsed" : [ "EXT_structural_metadata" ],
+  "accessors" : [ {
+    "bufferView" : 0,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 6,
+    "type" : "SCALAR",
+    "max" : [ 3 ],
+    "min" : [ 0 ]
+  }, {
+    "bufferView" : 1,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 0.0, 1.0, 0.0 ],
+    "min" : [ -1.0, 0.0, 0.0 ]
+  }, {
+    "bufferView" : 2,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 0.0, 0.0, 1.0 ],
+    "min" : [ 0.0, 0.0, 1.0 ]
+  }, {
+    "bufferView" : 3,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 0.25 ],
+    "min" : [ 0.25 ]
+  }, {
+    "bufferView" : 4,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 0 ],
+    "min" : [ 0 ]
+  }, {
+    "bufferView" : 5,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 6,
+    "type" : "SCALAR",
+    "max" : [ 3 ],
+    "min" : [ 0 ]
+  }, {
+    "bufferView" : 6,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 1.0, 1.0, 0.0 ],
+    "min" : [ 0.0, 0.0, 0.0 ]
+  }, {
+    "bufferView" : 7,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 0.0, 0.0, 1.0 ],
+    "min" : [ 0.0, 0.0, 1.0 ]
+  }, {
+    "bufferView" : 8,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 0.5 ],
+    "min" : [ 0.5 ]
+  }, {
+    "bufferView" : 9,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 1 ],
+    "min" : [ 1 ]
+  }, {
+    "bufferView" : 10,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 6,
+    "type" : "SCALAR",
+    "max" : [ 3 ],
+    "min" : [ 0 ]
+  }, {
+    "bufferView" : 11,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 2.0, 1.0, 0.0 ],
+    "min" : [ 1.0, 0.0, 0.0 ]
+  }, {
+    "bufferView" : 12,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "VEC3",
+    "max" : [ 0.0, 0.0, 1.0 ],
+    "min" : [ 0.0, 0.0, 1.0 ]
+  }, {
+    "bufferView" : 13,
+    "byteOffset" : 0,
+    "componentType" : 5126,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 0.75 ],
+    "min" : [ 0.75 ]
+  }, {
+    "bufferView" : 14,
+    "byteOffset" : 0,
+    "componentType" : 5123,
+    "count" : 4,
+    "type" : "SCALAR",
+    "max" : [ 2 ],
+    "min" : [ 2 ]
+  } ],
+  "asset" : {
+    "generator" : "JglTF from https://github.com/javagl/JglTF",
+    "version" : "2.0"
+  },
+  "buffers" : [ {
+    "uri" : "data:application/gltf-buffer;base64,AAABAAIAAQADAAIAAACAvwAAAAAAAAAAAAAAAAAAAAAAAAAAAACAvwAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AACAPgAAgD4AAIA+AACAPgAAAAAAAAAAAAAAAAAAAAAAAAEAAgABAAMAAgAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAAAAAAAAAAAgD8AAAA/AAAAPwAAAD8AAAA/AQAAAAEAAAABAAAAAQAAAAAAAQACAAEAAwACAAAAgD8AAAAAAAAAAAAAAEAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAEAAAIA/AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAAAAAAAAAAACAPwAAQD8AAEA/AABAPwAAQD8CAAAAAgAAAAIAAAACAAAA",
+    "byteLength" : 420
+  } ],
+  "bufferViews" : [ {
+    "buffer" : 0,
+    "byteOffset" : 0,
+    "byteLength" : 12,
+    "target" : 34963
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 12,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 60,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 108,
+    "byteLength" : 16,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 124,
+    "byteLength" : 16,
+    "byteStride" : 4,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 140,
+    "byteLength" : 12,
+    "target" : 34963
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 152,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 200,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 248,
+    "byteLength" : 16,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 264,
+    "byteLength" : 16,
+    "byteStride" : 4,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 280,
+    "byteLength" : 12,
+    "target" : 34963
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 292,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 340,
+    "byteLength" : 48,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 388,
+    "byteLength" : 16,
+    "target" : 34962
+  }, {
+    "buffer" : 0,
+    "byteOffset" : 404,
+    "byteLength" : 16,
+    "byteStride" : 4,
+    "target" : 34962
+  } ],
+  "materials" : [ {
+    "pbrMetallicRoughness" : {
+      "baseColorFactor" : [ 1.0, 1.0, 1.0, 1.0 ],
+      "metallicFactor" : 0.0,
+      "roughnessFactor" : 1.0
+    },
+    "alphaMode" : "OPAQUE",
+    "doubleSided" : true
+  } ],
+  "meshes" : [ {
+    "primitives" : [ {
+      "extensions" : {
+        "EXT_structural_metadata" : {
+          "propertyAttributes" : [ 0 ]
+        }
+      },
+      "attributes" : {
+        "POSITION" : 1,
+        "NORMAL" : 2,
+        "_INTENSITY" : 3,
+        "_CLASSIFICATION" : 4
+      },
+      "indices" : 0,
+      "material" : 0,
+      "mode" : 4
+    }, {
+      "extensions" : {
+        "EXT_structural_metadata" : {
+          "propertyAttributes" : [ 0 ]
+        }
+      },
+      "attributes" : {
+        "POSITION" : 6,
+        "NORMAL" : 7,
+        "_INTENSITY" : 8,
+        "_CLASSIFICATION" : 9
+      },
+      "indices" : 5,
+      "material" : 0,
+      "mode" : 4
+    }, {
+      "extensions" : {
+        "EXT_structural_metadata" : {
+          "propertyAttributes" : [ 0 ]
+        }
+      },
+      "attributes" : {
+        "POSITION" : 11,
+        "NORMAL" : 12,
+        "_INTENSITY" : 13,
+        "_CLASSIFICATION" : 14
+      },
+      "indices" : 10,
+      "material" : 0,
+      "mode" : 4
+    } ]
+  } ],
+  "nodes" : [ {
+    "mesh" : 0
+  } ],
+  "scene" : 0,
+  "scenes" : [ {
+    "nodes" : [ 0 ]
+  } ]
+}
