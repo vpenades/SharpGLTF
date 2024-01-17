@@ -350,7 +350,7 @@ namespace SharpGLTF.Schema2
                         }
 
                         // check on channels as workaround
-                        // better solution: read the channels of the used texture
+                        // better solution: read the channels of the used texture using image library
                         var logicalTexture = modelRoot.LogicalTextures[texture.TextureCoordinate];
                         // var image = logicalTexture.PrimaryImage;
                         var channels = texture.GetChannels();

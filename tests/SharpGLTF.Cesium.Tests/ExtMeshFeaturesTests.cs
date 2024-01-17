@@ -25,30 +25,55 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/meshFeatures
         [Test(Description = "Reads glTF's with EXT_Mesh_Features")]
-        public void ReadExtMeshFeatures()
+        [TestCase(@"ValidFeatureIdAttributeDefault/ValidFeatureIdAttributeDefault.gltf", null)]
+        [TestCase("FeatureIdAttributeAccessorNormalized.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeAccessorNotScalar.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeAttributeInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdAttributeAttributeInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeFeatureCountInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdAttributeFeatureCountInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeFeatureCountMismatch.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeFeatureCountMismatchForNullFeatureId.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeFeatureCountMissing.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeLabelInvalidType.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeLabelInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdAttributeNullFeatureIdInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdAttributeNullFeatureIdInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureFeatureCountMismatch.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureSamplerInvalidFilterMode.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureTextureChannelsInvalidElementType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdTextureTextureChannelsInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("FeatureIdTextureTextureChannelsTooManyChannels.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureTextureChannelsTooManyElements.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureTextureImageDataInvalid.gltf", typeof(ModelException))]
+        [TestCase("FeatureIdTextureTextureIndexInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdTextureTextureIndexInvalidValue.gltf", typeof(LinkException))]
+        [TestCase("FeatureIdTextureTextureInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("FeatureIdTextureTextureTexCoordInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("FeatureIdTextureTextureTexCoordInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("ValidFeatureIdAttribute.gltf", null)]
+        [TestCase("ValidFeatureIdAttributeWithByteStride.glb", null)]
+        [TestCase("ValidFeatureIdAttributeWithLargerFeatureCount.gltf", null)]
+        [TestCase("ValidFeatureIdAttributeWithNullFeatureId.gltf", null)]
+        [TestCase("ValidFeatureIdTexture.glb", null)]
+        [TestCase("ValidFeatureIdTexture.gltf", null)]
+        [TestCase("ValidFeatureIdTextureUsingDefaultChannels.gltf", null)]
+        public void ReadExtMeshFeaturesFiles(string file, Type exception = null)
         {
-            var gltffiles = Directory.GetFiles("./testfixtures/meshFeatures", "*.gltf", SearchOption.AllDirectories);
-            var glbfiles = Directory.GetFiles("./testfixtures/meshFeatures", "*.glb", SearchOption.AllDirectories);
-            var testfiles = gltffiles.Concat(glbfiles);
+            var fileName = $"./testfixtures/meshFeatures/{file}";
 
-            foreach (var file in testfiles)
+            if (exception != null)
             {
-                var fileName = Path.GetFileName(file);
-
-                if (fileName.StartsWith("FeatureId")) 
-                {
-                    // we can expect an error loading this file
-                    Assert.That(() => ModelRoot.Load(file), Throws.Exception);
-                }
-                else
-                {
-                    var model = ModelRoot.Load(file);
-                    var meshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
-                    Assert.That(meshFeaturesExtension.FeatureIds, Is.Not.Null);
-                    Assert.That(meshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
-                    var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-                    model.ValidateContent(ctx.GetContext());
-                }
+                Assert.Throws(exception, delegate { ModelRoot.Load(fileName); });
+            }
+            else
+            {
+                var model = ModelRoot.Load(fileName);
+                var meshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
+                Assert.That(meshFeaturesExtension.FeatureIds, Is.Not.Null);
+                Assert.That(meshFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
+                var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                model.ValidateContent(ctx.GetContext());
             }
         }
 
