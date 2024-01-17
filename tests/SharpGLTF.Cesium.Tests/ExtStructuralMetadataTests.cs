@@ -52,13 +52,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 "PropertyTexturePropertyTexturePropertyMinNotInRange.gltf",
             };
 
-            // combine both lists excludedFilesWithStats and excludedFilesWithTextureInspection into a new list
-
             var excludedFiles = excludedFilesWithStats.Concat(excludedFilesWithTextureInspection);
-
-
-
-            // var excludedTests = excludedFilesWithStats.AddRange(excludedFilesWithTextureInspection);
 
             foreach (var file in gltffiles)
             {
@@ -69,7 +63,10 @@ namespace SharpGLTF.Schema2.Tiles3D
 
                     if (!fileName.StartsWith("Valid"))
                     {
-                        Assert.That(() => ModelRoot.Load(file), Throws.Exception);
+                        //if(fileName == "PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf")
+                        //{
+                            Assert.That(() => ModelRoot.Load(file), Throws.Exception);
+                        //}
                     }
                     else
                     {

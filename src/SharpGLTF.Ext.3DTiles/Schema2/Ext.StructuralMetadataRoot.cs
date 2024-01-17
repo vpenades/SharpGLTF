@@ -540,14 +540,26 @@ namespace SharpGLTF.Schema2
             public JsonNode Min
             {
                 get => _min;
+                set => _min = value;
             }
 
             public JsonNode Max
             {
                 get => _max;
+                set => _max = value;
             }
 
+            public JsonNode Scale
+            {
+                get => _scale;
+                set => _scale = value;
+            }
 
+            public JsonNode Offset
+            {
+                get => _offset;
+                set => _offset = value;
+            }
             #endregion
         }
 
@@ -1263,6 +1275,31 @@ namespace SharpGLTF.Schema2
                 get => _count;
                 set => _count = value;
             }
+
+            public JsonNode Min
+            {
+                get => _min;
+                set => _min = value;
+            }
+
+            public JsonNode Max
+            {
+                get => _max;
+                set => _max = value;
+            }
+
+            public JsonNode Scale
+            {
+                get => _scale;
+                set => _scale = value;
+            }
+
+            public JsonNode Offset
+            {
+                get => _offset;
+                set => _offset = value;
+            }
+
 
             #endregion
 

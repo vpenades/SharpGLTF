@@ -123,7 +123,6 @@ namespace SharpGLTF.Schema2
                         var expectedVertexAttribute = "TEXCOORD_" + textureCoordinate;
                         Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), nameof(textureCoordinate), $"The primitive should have texture coordinate attribute {textureCoordinate}.");
 
-
                         var texture = property.Value.Texture;
                         Guard.NotNull(texture, nameof(texture), $"The primitive should have texture {texture}.");
 
@@ -137,6 +136,11 @@ namespace SharpGLTF.Schema2
                                  $"The property '{property.Key}'  is a variable-length array, which is not supported for property textures");
                         }
 
+                        // todo: check used values in texture against min, max (using scale and offset)
+                        // var min = schemaProperty.Min;
+                        // var max = schemaProperty.Max;
+                        // var scale = schemaProperty.Scale;
+                        // var offset = schemaProperty.Offset;
 
                         var channels = property.Value.Channels;
                         var elementCount = ComponentCount.ElementCountForType(schemaProperty.Type);
@@ -173,9 +177,12 @@ namespace SharpGLTF.Schema2
                         var expectedVertexAttribute = property.Value.Attribute;
                         Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
 
-                        // var min = property.Value.Min?.AsValue();
-                        //var max = property.Value.Max?.AsValue();
-                        // todo check against min and max of accessor
+                        // todo: check used values in attribute against min, max (using scale and offset)
+                        var min = property.Value.Min;
+                        var max = property.Value.Max;
+                        var scale = property.Value.Scale;
+                        var offset = property.Value.Offset;
+                        // todo read values from accessor, get min, max
                         // var acc = property.Value.Attribute;
                         // var vertexAccessor = meshPrimitive.GetVertexAccessor(acc);
                         // var a = vertexAccessor.AsScalarArray();
