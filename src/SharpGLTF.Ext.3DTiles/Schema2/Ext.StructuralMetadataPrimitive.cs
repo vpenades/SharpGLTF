@@ -125,10 +125,71 @@ namespace SharpGLTF.Schema2
 
                         var texture = property.Value.Texture;
                         Guard.NotNull(texture, nameof(texture), $"The primitive should have texture {texture}.");
+                    }
+                }
+
+                // scan attributes
+                foreach (var propertyAttribute in _propertyAttributes)
+                {
+                    var propertyAttributes = rootMetadata.PropertyAttributes;
+                    validate.IsNullOrIndex(nameof(propertyAttribute), propertyAttribute, propertyAttributes);
+
+                    var schema = rootMetadata.Schema;
+                    var schemaAttribute = propertyAttributes[propertyAttribute];
+
+                    var className = schemaAttribute.ClassName;
+                    Guard.NotNull(schema, nameof(schema), "EXT_Structural_Metadata extension missing schema");
+                    schema.Classes.TryGetValue(className, out var classDefinition);
+                    Guard.NotNull(classDefinition, nameof(classDefinition), $"EXT_Structural_Metadata extension missing class definition for {className}");
+
+                    foreach (var property in schemaAttribute.Properties)
+                    {
+                        var expectedVertexAttribute = property.Value.Attribute;
+                        Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
+
+                        var key = property.Key;
+
+                        classDefinition.Properties.TryGetValue(key, out var propertyDefinition);
+                        Guard.NotNull(propertyDefinition, nameof(propertyDefinition), $"EXT_Structural_Metadata extension missing property definition for {key}");
+
+                        Guard.IsTrue(propertyDefinition.Array == false, nameof(propertyDefinition.Array), $"The property '{property.Key}' is an array, which is not supported for property attributes");
+
+                        if (propertyDefinition.Type == ElementType.ENUM)
+                        {
+                            var enumType = propertyDefinition.EnumType;
+                            // Get the enum from the schema
+                            var enumDefinition = schema.Enums[enumType];
+                            Guard.NotNull(enumDefinition, nameof(enumDefinition), $"EXT_Structural_Metadata extension missing enum definition for {enumType}");
+                        }
+                    }
+                }
+
+                base.OnValidateReferences(validate);
+            }
+
+            protected override void OnValidateContent(ValidationContext validate)
+            {
+                var rootMetadata = _GetModelRoot().GetExtension<EXTStructuralMetadataRoot>();
+                var propertyTextures = rootMetadata.PropertyTextures;
+
+                // Scan textures
+                foreach (var propertyTexture in _propertyTextures)
+                {
+                    var schemaTexture = propertyTextures[propertyTexture];
+                    var className = schemaTexture.ClassName;
+                    foreach (var property in schemaTexture.Properties)
+                    {
+                        var textureCoordinate = property.Value.TextureCoordinate;
+                        var expectedVertexAttribute = "TEXCOORD_" + textureCoordinate;
+                        var vertex = meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
+
+                        var texture = property.Value.Texture;
 
                         var schemaProperty = rootMetadata.Schema.Classes[className].Properties[property.Key];
+
                         Guard.IsTrue(schemaProperty.Type != ElementType.STRING, nameof(schemaProperty.Type),
                             $"The property '{property.Key}' has the type 'STRING', which is not supported for property textures");
+
 
                         if (schemaProperty.Array)
                         {
@@ -152,30 +213,22 @@ namespace SharpGLTF.Schema2
                             Guard.IsTrue(totalByteSize == channels.Count, nameof(totalByteSize),
                                 $"The property '{property.Key}' has the component type {schemaProperty.ComponentType}, with a size of {componentByteSize} bytes, and the type {schemaProperty.Type} with {channels.Count} components, resulting in {totalByteSize} bytes per element, but the number of channels in the property texture property was {channels.Count}");
                         }
-
                     }
-
-
                 }
 
                 // scan attributes
                 foreach (var propertyAttribute in _propertyAttributes)
                 {
                     var propertyAttributes = rootMetadata.PropertyAttributes;
-                    validate.IsNullOrIndex(nameof(propertyAttribute), propertyAttribute, propertyAttributes);
-
                     var schema = rootMetadata.Schema;
                     var schemaAttribute = propertyAttributes[propertyAttribute];
 
                     var className = schemaAttribute.ClassName;
-                    Guard.NotNull(schema, nameof(schema), "EXT_Structural_Metadata extension missing schema");
                     schema.Classes.TryGetValue(className, out var classDefinition);
-                    Guard.NotNull(classDefinition, nameof(classDefinition), $"EXT_Structural_Metadata extension missing class definition for {className}");
 
                     foreach (var property in schemaAttribute.Properties)
                     {
                         var expectedVertexAttribute = property.Value.Attribute;
-                        Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
 
                         // todo: check used values in attribute against min, max (using scale and offset)
                         var min = property.Value.Min;
@@ -190,12 +243,11 @@ namespace SharpGLTF.Schema2
                         var key = property.Key;
 
                         classDefinition.Properties.TryGetValue(key, out var propertyDefinition);
-                        Guard.NotNull(propertyDefinition, nameof(propertyDefinition), $"EXT_Structural_Metadata extension missing property definition for {key}");
 
                         Guard.IsTrue(propertyDefinition.Array == false, nameof(propertyDefinition.Array), $"The property '{property.Key}' is an array, which is not supported for property attributes");
 
                         Guard.IsTrue(propertyDefinition.Type != ElementType.STRING, nameof(propertyDefinition.Type),
-                                                       $"The property '{property.Key}' has the type 'STRING', which is not supported for property attributes"); 
+                                                       $"The property '{property.Key}' has the type 'STRING', which is not supported for property attributes");
                         if (propertyDefinition.Type == ElementType.SCALAR)
                         {
                             var allowedComponentTypes = new List<DataType?>()
@@ -211,7 +263,6 @@ namespace SharpGLTF.Schema2
                             var enumType = propertyDefinition.EnumType;
                             // Get the enum from the schema
                             var enumDefinition = schema.Enums[enumType];
-                            Guard.NotNull(enumDefinition, nameof(enumDefinition), $"EXT_Structural_Metadata extension missing enum definition for {enumType}");
                             var valueType = enumDefinition.ValueType;
                             var allowedIntegerTypes = new List<IntegerType?>()
                             {
@@ -223,10 +274,11 @@ namespace SharpGLTF.Schema2
                     }
                 }
 
-                base.OnValidateReferences(validate);
+                base.OnValidateContent(validate);
             }
 
             #endregion
         }
+
     }
 }
