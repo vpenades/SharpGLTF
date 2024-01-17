@@ -186,7 +186,7 @@ namespace SharpGLTF.Schema2
                 filePath = finfo.Name;
             }
 
-            var name = Path.GetFileNameWithoutExtension(filePath);
+            var name = Path.GetFileName(filePath);
 
             context.WithBinarySettings();
 
@@ -216,7 +216,7 @@ namespace SharpGLTF.Schema2
                 filePath = finfo.Name;
             }
 
-            var name = Path.GetFileNameWithoutExtension(filePath);
+            var name = Path.GetFileName(filePath);
 
             context.WithTextSettings();
             

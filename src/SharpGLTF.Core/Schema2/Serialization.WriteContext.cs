@@ -187,22 +187,25 @@ namespace SharpGLTF.Schema2
             return callback(this, assetName, image);
         }
 
-        /// <summary>
-        /// Writes <paramref name="model"/> to this context using the glTF json container.
-        /// </summary>
-        /// <param name="baseName">The base name to use for asset files, without extension.</param>
-        /// <param name="model">The <see cref="MODEL"/> to write.</param>
-        /// <remarks>
-        /// If the model has associated resources like binary assets and textures,<br/>
-        /// these additional resources will be also written as associated files using the pattern:<br/>
-        /// <br/>
-        /// "<paramref name="baseName"/>.{Number}.bin|png|jpg|dds"
-        /// </remarks>
-        public void WriteTextSchema2(string baseName, MODEL model)
+		/// <summary>
+		/// Writes <paramref name="model"/> to this context using the glTF json container.
+		/// </summary>
+		/// <param name="name">The name to use for asset files. It is possible to specify a custom extension for the main file</param>
+		/// <param name="model">The <see cref="MODEL"/> to write.</param>
+		/// <remarks>
+		/// The main file extension will be .gltf if none is provided.<br/>
+		/// <br/>
+		/// If the model has associated resources like binary assets and textures,<br/>
+		/// these additional resources will be also written as associated files using the pattern:<br/>
+		/// <br/>
+		/// "<paramref name="name"/>.{Number}.bin|png|jpg|dds"<br/>
+		/// where <paramref name="name"/> is used without extension.
+		/// </remarks>
+		public void WriteTextSchema2(string name, MODEL model)
         {
-            Guard.NotNullOrEmpty(baseName, nameof(baseName));
-            Guard.FilePathMustBeValid(baseName, nameof(baseName));
-            if (System.IO.Path.IsPathRooted(baseName)) throw new ArgumentException("path must be relative", nameof(baseName));
+            Guard.NotNullOrEmpty(name, nameof(name));
+            Guard.FilePathMustBeValid(name, nameof(name));
+            if (System.IO.Path.IsPathRooted(name)) throw new ArgumentException("path must be relative", nameof(name));
 
             Guard.NotNull(model, nameof(model));
 
@@ -211,6 +214,8 @@ namespace SharpGLTF.Schema2
 
             model = this._PreprocessSchema2(model, mergeImages, this.MergeBuffers, this.BuffersMaxSize);
             Guard.NotNull(model, nameof(model));
+
+            var baseName = Path.GetFileNameWithoutExtension(name);
 
             model._PrepareBuffersForSatelliteWriting(this, baseName);
 
@@ -222,22 +227,27 @@ namespace SharpGLTF.Schema2
             {
                 model._WriteJSON(m, this.JsonOptions, this.JsonPostprocessor);
 
-                WriteAllBytesToEnd($"{baseName}.gltf", m.ToArraySegment());
+                string finalName = Path.HasExtension(name) ? name : $"{name}.gltf";
+
+                WriteAllBytesToEnd(finalName, m.ToArraySegment());
             }
 
             model._AfterWriting();
         }
 
-        /// <summary>
-        /// Writes <paramref name="model"/> to this context using the GLB binary container.
-        /// </summary>
-        /// <param name="baseName">The base name to use for asset files, without extension.</param>
-        /// <param name="model">The <see cref="MODEL"/> to write.</param>
-        public void WriteBinarySchema2(string baseName, MODEL model)
+		/// <summary>
+		/// Writes <paramref name="model"/> to this context using the GLB binary container.
+		/// </summary>
+		/// <param name="name">The name to use for asset files. It is possible to specify a custom extension for the main file</param>
+		/// <param name="model">The <see cref="MODEL"/> to write.</param>
+		/// <remarks>
+		/// The file extension will be .glb if none is provided.
+		/// </remarks>
+		public void WriteBinarySchema2(string name, MODEL model)
         {
-            Guard.NotNullOrEmpty(baseName, nameof(baseName));
-            Guard.FilePathMustBeValid(baseName, nameof(baseName));
-            if (System.IO.Path.IsPathRooted(baseName)) throw new ArgumentException("path must be relative", nameof(baseName));
+            Guard.NotNullOrEmpty(name, nameof(name));
+            Guard.FilePathMustBeValid(name, nameof(name));
+            if (System.IO.Path.IsPathRooted(name)) throw new ArgumentException("path must be relative", nameof(name));
 
             Guard.NotNull(model, nameof(model));
 
@@ -254,6 +264,8 @@ namespace SharpGLTF.Schema2
 
             model._PrepareBuffersForInternalWriting();
 
+            var baseName = Path.GetFileNameWithoutExtension(name);
+
             model._PrepareImagesForWriting(this, baseName, true, ResourceWriteMode.BufferView);
 
             _ValidateBeforeWriting(model);
@@ -265,7 +277,9 @@ namespace SharpGLTF.Schema2
                     _BinarySerialization.WriteBinaryModel(w, model);
                 }
 
-                WriteAllBytesToEnd($"{baseName}.glb", m.ToArraySegment());
+                string finalName = Path.HasExtension(name) ? name : $"{name}.glb";
+
+                WriteAllBytesToEnd(finalName, m.ToArraySegment());
             }
 
             model._AfterWriting();
