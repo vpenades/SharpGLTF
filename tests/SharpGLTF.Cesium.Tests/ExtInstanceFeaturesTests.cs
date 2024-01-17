@@ -2,6 +2,7 @@
 using SharpGLTF.Scenes;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
+using System;
 using System.IO;
 using System.Numerics;
 using System.Text.Json.Nodes;
@@ -20,28 +21,25 @@ namespace SharpGLTF.Schema2.Tiles3D
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/instanceFeatures
 
         [Test(Description = "Reads glTF's with EXT_Instance_Features")]
-        public void ReadExtInstanceFeatures()
+        [TestCase(@"InstanceFeaturesFeatureIdAttributeInvalidValue.gltf", typeof(ModelException))]
+        [TestCase(@"InstanceFeaturesWithoutMeshGpuInstancing.gltf", typeof(SchemaException))]
+        [TestCase(@"ValidInstanceFeatures.gltf", null)]
+        public void ReadExtInstanceFeatures(string file, Type exception = null)
         {
-            var gltffiles = Directory.GetFiles("./testfixtures/instanceFeatures", "*.gltf");
+            var fileName = $"./testfixtures/instanceFeatures/{file}";
 
-            foreach (var file in gltffiles)
+            if (exception != null)
             {
-                var fileName = Path.GetFileName(file);
-
-                if (fileName.StartsWith("InstanceFeatures"))
-                {
-                    // we can expect an error loading this file
-                    Assert.That(() => ModelRoot.Load(file), Throws.Exception);
-                }
-                else
-                {
-                    var model = ModelRoot.Load(file);
-                    var instanceFeaturesExtension = model.LogicalNodes[0].GetExtension<MeshExtInstanceFeatures>();
-                    Assert.That(instanceFeaturesExtension.FeatureIds, Is.Not.Null);
-                    Assert.That(instanceFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
-                    var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-                    model.ValidateContent(ctx.GetContext());
-                }
+                Assert.Throws(exception, delegate { ModelRoot.Load(fileName); });
+            }
+            else
+            {
+                var model = ModelRoot.Load(fileName);
+                var instanceFeaturesExtension = model.LogicalNodes[0].GetExtension<MeshExtInstanceFeatures>();
+                Assert.That(instanceFeaturesExtension.FeatureIds, Is.Not.Null);
+                Assert.That(instanceFeaturesExtension.FeatureIds, Has.Count.GreaterThanOrEqualTo(1));
+                var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                model.ValidateContent(ctx.GetContext());
             }
         }
 
