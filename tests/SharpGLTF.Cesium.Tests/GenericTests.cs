@@ -21,7 +21,7 @@ namespace SharpGLTF
 
         [Test(Description = "Reads generic 3D Tiles glTF's")]
         // todo: [TestCase("FeatureIdAttributeAndPropertyTableFeatureIdNotInRange.gltf, typeof(ModelException)")]
-        [TestCase("FeatureIdAttributePropertyTableInvalidValue.gltf", typeof(ModelException)]
+        [TestCase("FeatureIdAttributePropertyTableInvalidValue.gltf", typeof(ModelException))]
         [TestCase("FeatureIdAttributePropertyTableWithoutPropertyTables.gltf", typeof(ModelException))]
         [TestCase("FeatureIdAttributePropertyTableWithoutStructuralMetadata.gltf", typeof(ModelException))]
         [TestCase("FeatureIdTextureAndPropertyTableFeatureIdNotInRange.gltf", typeof(ModelException))]
