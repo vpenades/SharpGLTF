@@ -24,7 +24,7 @@ namespace SharpGLTF.Schema2
 
         internal static void ValidateFeatureIdContent(this IMeshFeatureIDInfo featureId)
         {
-            Guard.MustBeGreaterThanOrEqualTo((int)featureId.FeatureCount, 1, nameof(featureId.FeatureCount));
+            Guard.MustBeGreaterThanOrEqualTo(featureId.FeatureCount, 1, nameof(featureId.FeatureCount));
 
             if (featureId.NullFeatureId.HasValue)
             {
@@ -35,7 +35,6 @@ namespace SharpGLTF.Schema2
                 var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
                 Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(featureId.Label, regex), nameof(featureId.Label));
             }
-
             if (featureId.Attribute.HasValue)
             {
                 Guard.MustBeGreaterThanOrEqualTo((int)featureId.Attribute, 0, nameof(featureId.Attribute));
@@ -269,7 +268,6 @@ namespace SharpGLTF.Schema2
                         var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
                         var featureIdVertex = _meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
                         Guard.NotNull(featureIdVertex, expectedVertexAttribute, $"The primitive should have custom vertex attribute {expectedVertexAttribute}.");
-                        Guard.IsTrue(!featureIdVertex.Normalized, expectedVertexAttribute, $"The custom vertex attribute {expectedVertexAttribute} should not be normalized.");
                     }
 
                     featureId.ValidateFeatureIdReferences(_meshPrimitive.LogicalParent.LogicalParent);
@@ -283,9 +281,69 @@ namespace SharpGLTF.Schema2
 
                         var modelRoot = _meshPrimitive.LogicalParent.LogicalParent;
                         validate.IsNullOrIndex(nameof(texture), texture.TextureCoordinate, modelRoot.LogicalTextures);
+                    }
+                }
+
+                base.OnValidateReferences(validate);
+            }
+
+            protected override void OnValidateContent(ValidationContext validate)
+            {
+                validate.NotNull(nameof(FeatureIds), _featureIds);
+                validate.IsTrue(nameof(FeatureIds), _featureIds.Count > 0, "FeatureIds has items");
+
+                foreach (var featureId in _featureIds)
+                {
+                    featureId.ValidateFeatureIdContent();
+
+                    if (featureId.Attribute != null)
+                    {
+                        var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
+                        var vertex = _meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
+                        Guard.IsTrue(!vertex.Normalized, expectedVertexAttribute, $"The custom vertex attribute {expectedVertexAttribute} should not be normalized.");
+
+                        var distinctFeatureIds = vertex.AsScalarArray().Distinct().ToList();
+
+                        if (featureId.NullFeatureId.HasValue)
+                        {
+                            distinctFeatureIds.Remove(featureId.NullFeatureId.Value);
+                        }
+
+                        if (distinctFeatureIds.Min() < 0)
+                        {
+                            Guard.IsTrue(distinctFeatureIds.Min() >= 0, nameof(distinctFeatureIds), $"FeatureIds must be equal or larger than 0, but contains {distinctFeatureIds.Min()}");
+                        }
+
+                        var count = distinctFeatureIds.Count();
+
+                        // FeatureCount must be greater or equal to the number of distinct feature ids
+                        Guard.IsTrue(featureId.FeatureCount >= count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
+
+                        if (featureId.PropertyTableIndex.HasValue)
+                        {
+                            var root = _meshPrimitive.LogicalParent.LogicalParent;
+                            var metadataExtension = root.GetExtension<EXTStructuralMetadataRoot>();
+                            var propertyTable = metadataExtension.PropertyTables[featureId.PropertyTableIndex.Value];
+                            var propertyCount = propertyTable.Count;
+                            Guard.IsTrue(distinctFeatureIds.Max() <= propertyCount - 1, nameof(propertyCount),
+                                $"The feature ID refers to a property table with {propertyCount} rows, so the feature IDs must be in the range [0,{propertyCount-1}], but the feature ID attribute contains values [{distinctFeatureIds.Min()},{distinctFeatureIds.Max()}]");
+                        }
+
+
+                    }
+                    var texture = featureId.GetTexture();
+                    if (texture != null)
+                    {
+                        var expectedTexCoordAttribute = $"TEXCOORD_{texture.TextureCoordinate}";
+                        var vertex = _meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute);
+                        var distinctFeatureIds = vertex.AsVector2Array().Count();
+
+                        Guard.IsTrue(featureId.FeatureCount == distinctFeatureIds, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Texture ({distinctFeatureIds})");
+
+                        var modelRoot = _meshPrimitive.LogicalParent.LogicalParent;
 
                         var samplers = modelRoot.LogicalTextureSamplers;
-                        foreach(var sampler in samplers)
+                        foreach (var sampler in samplers)
                         {
                             Guard.IsTrue(sampler.MagFilter == TextureInterpolationFilter.NEAREST, $"Texture magnification filter must be 9728 (NEAREST) but is set to {sampler.MagFilter}");
                             Guard.IsTrue(sampler.MinFilter == TextureMipMapFilter.NEAREST, $"Texture minification filtering must be 9728 (NEAREST) but is set to {sampler.MinFilter}");
@@ -293,7 +351,7 @@ namespace SharpGLTF.Schema2
 
                         // check on channels as workaround
                         // better solution: read the channels of the used texture
-                        // var logicalTexture = modelRoot.LogicalTextures[texture.TextureCoordinate];
+                        var logicalTexture = modelRoot.LogicalTextures[texture.TextureCoordinate];
                         // var image = logicalTexture.PrimaryImage;
                         var channels = texture.GetChannels();
 
@@ -306,48 +364,6 @@ namespace SharpGLTF.Schema2
                             Guard.IsTrue(channel >= 0 && channel <= 3, $"Channel value must be between 0 and 3 but has channel {channel}");
                         }
                     }
-                }
-
-                base.OnValidateReferences(validate);
-            }
-
-            protected override void OnValidateContent(ValidationContext validate)
-            {
-                var extMeshFeatures = _meshPrimitive.Extensions.Where(item => item is MeshExtMeshFeatures).FirstOrDefault();
-                validate.NotNull(nameof(extMeshFeatures), extMeshFeatures);
-                validate.NotNull(nameof(FeatureIds), _featureIds);
-                validate.IsTrue(nameof(FeatureIds), _featureIds.Count > 0, "FeatureIds has items");
-
-                foreach (var featureId in _featureIds)
-                {
-                    featureId.ValidateFeatureIdContent();
-
-                    if (featureId.Attribute != null)
-                    {
-                        var expectedVertexAttribute = $"_FEATURE_ID_{featureId.Attribute}";
-                        var vertex = _meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
-                        var distinctFeatureIds = vertex.AsScalarArray().Distinct().ToList();
-
-                        if (featureId.NullFeatureId.HasValue)
-                        {
-                            distinctFeatureIds.Remove(featureId.NullFeatureId.Value);
-                        }
-
-                        var count = distinctFeatureIds.Count();
-                        // FeatureCount must be greater or equal to the number of distinct feature ids
-                        Guard.IsTrue(featureId.FeatureCount >= count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
-                    }
-                    var texture = featureId.GetTexture();
-                    if (texture != null)
-                    {
-                        var expectedTexCoordAttribute = $"TEXCOORD_{texture.TextureCoordinate}";
-                        var vertex = _meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute);
-                        var distinctFeatureIds = vertex.AsVector2Array().Count();
-
-                        Guard.IsTrue(featureId.FeatureCount == distinctFeatureIds, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Texture ({distinctFeatureIds})");
-                    }
-
-
                 }
 
                 base.OnValidateContent(validate);

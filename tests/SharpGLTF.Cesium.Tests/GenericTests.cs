@@ -1,9 +1,7 @@
 ﻿using NUnit.Framework;
 using SharpGLTF.Schema2;
-using SharpGLTF.Schema2.Tiles3D;
 using SharpGLTF.Validation;
 using System;
-using System.IO;
 
 namespace SharpGLTF
 {
@@ -20,7 +18,7 @@ namespace SharpGLTF
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/
 
         [Test(Description = "Reads generic 3D Tiles glTF's")]
-        // todo: [TestCase("FeatureIdAttributeAndPropertyTableFeatureIdNotInRange.gltf, typeof(ModelException)")]
+        [TestCase("FeatureIdAttributeAndPropertyTableFeatureIdNotInRange.gltf", typeof(ModelException))]
         [TestCase("FeatureIdAttributePropertyTableInvalidValue.gltf", typeof(ModelException))]
         [TestCase("FeatureIdAttributePropertyTableWithoutPropertyTables.gltf", typeof(ModelException))]
         [TestCase("FeatureIdAttributePropertyTableWithoutStructuralMetadata.gltf", typeof(ModelException))]
