@@ -239,12 +239,12 @@ namespace SharpGLTF.Schema2
 
                         if (property.Value.Max != null)
                         {
-                            var areSmaller = AreSmallerThan(propertyValues, (float)property.Value.Max);
+                           var areSmaller = AreSmallerThan(propertyValues, ToFLoat(property.Value.Max));
                             Guard.IsTrue(areSmaller, nameof(property.Value.Max), $"The property '{property.Key}' has a maximum value of {property.Value.Max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
                         }
                         if (property.Value.Min != null)
                         {
-                            var areLarger = AreLargerThan(propertyValues, (float)property.Value.Min);
+                            var areLarger = AreLargerThan(propertyValues, ToFLoat(property.Value.Min));
                             Guard.IsTrue(areLarger, nameof(property.Value.Min), $"The property '{property.Key}' has a minimum value of {property.Value.Min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
                         }
 
@@ -257,12 +257,12 @@ namespace SharpGLTF.Schema2
 
                         if (max != null)
                         {
-                            var areSmaller = AreSmallerThan(propertyValues, (float)max);
+                            var areSmaller = AreSmallerThan(propertyValues, ToFLoat(max));
                             Guard.IsTrue(areSmaller, nameof(max), $"The property '{property.Key}' has a maximum value of {max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
                         }
                         if (min != null)
                         {
-                            var areLarger = AreLargerThan(propertyValues, (float)min);
+                            var areLarger = AreLargerThan(propertyValues, ToFLoat(min));
                             Guard.IsTrue(areLarger, nameof(min), $"The property '{property.Key}' has a minimum value of {min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
                         }
 
@@ -297,6 +297,11 @@ namespace SharpGLTF.Schema2
                 }
 
                 base.OnValidateContent(validate);
+            }
+
+            private static float ToFLoat(JsonNode node)
+            {
+                return Convert.ToSingle(node.ToJsonString());
             }
 
             private static bool AreLargerThan(IList<float> items, float min)
