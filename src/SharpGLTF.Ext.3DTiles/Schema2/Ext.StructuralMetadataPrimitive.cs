@@ -6,6 +6,7 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2
 {
+    using System.Text.Json.Nodes;
     using Tiles3D;
 
     partial class Tiles3DExtensions
@@ -230,19 +231,40 @@ namespace SharpGLTF.Schema2
                     {
                         var expectedVertexAttribute = property.Value.Attribute;
 
-                        // todo: check used values in attribute against min, max (using scale and offset)
-                        var min = property.Value.Min;
-                        var max = property.Value.Max;
-                        var scale = property.Value.Scale;
-                        var offset = property.Value.Offset;
-                        // todo read values from accessor, get min, max
-                        // var acc = property.Value.Attribute;
-                        // var vertexAccessor = meshPrimitive.GetVertexAccessor(acc);
-                        // var a = vertexAccessor.AsScalarArray();
-
                         var key = property.Key;
 
+                        var acc = property.Value.Attribute;
+                        var vertexAccessor = meshPrimitive.GetVertexAccessor(acc);
+                        var propertyValues = vertexAccessor.AsScalarArray();
+
+                        if (property.Value.Max != null)
+                        {
+                            var areSmaller = AreSmallerThan(propertyValues, (float)property.Value.Max);
+                            Guard.IsTrue(areSmaller, nameof(property.Value.Max), $"The property '{property.Key}' has a maximum value of {property.Value.Max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
+                        }
+                        if (property.Value.Min != null)
+                        {
+                            var areLarger = AreLargerThan(propertyValues, (float)property.Value.Min);
+                            Guard.IsTrue(areLarger, nameof(property.Value.Min), $"The property '{property.Key}' has a minimum value of {property.Value.Min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
+                        }
+
                         classDefinition.Properties.TryGetValue(key, out var propertyDefinition);
+
+                        var min = propertyDefinition.Min;
+                        var max = propertyDefinition.Max;
+                        var scale = propertyDefinition.Scale;
+                        var offset = propertyDefinition.Offset;
+
+                        if (max != null)
+                        {
+                            var areSmaller = AreSmallerThan(propertyValues, (float)max);
+                            Guard.IsTrue(areSmaller, nameof(max), $"The property '{property.Key}' has a maximum value of {max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
+                        }
+                        if (min != null)
+                        {
+                            var areLarger = AreLargerThan(propertyValues, (float)min);
+                            Guard.IsTrue(areLarger, nameof(min), $"The property '{property.Key}' has a minimum value of {min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
+                        }
 
                         Guard.IsTrue(propertyDefinition.Array == false, nameof(propertyDefinition.Array), $"The property '{property.Key}' is an array, which is not supported for property attributes");
 
@@ -277,8 +299,19 @@ namespace SharpGLTF.Schema2
                 base.OnValidateContent(validate);
             }
 
+            private static bool AreLargerThan(IList<float> items, float min)
+            {
+                return items.All(item => item > min);
+            }
+
+            private static bool AreSmallerThan(IList<float> items, float max)
+            {
+                return items.All(item => item < max);
+            }
+
             #endregion
         }
+
 
     }
 }
