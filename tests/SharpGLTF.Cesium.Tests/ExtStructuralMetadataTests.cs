@@ -6,7 +6,6 @@ using SharpGLTF.Scenes;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -26,59 +25,63 @@ namespace SharpGLTF.Schema2.Tiles3D
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/structuralMetadata
 
         [Test(Description = "Reads glTF's with EXT_Structural_Metadata")]
-        public void ReadExtStructuralMetadata()
+        [TestCase("ExtensionInMeshPrimitiveWithoutTopLevelObject.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyArray.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyInvalidComponentType.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyInvalidEnumValueType.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesClassPropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesClassPropertyMinNotInRange.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyString.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidElementType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidElementValue.gltf", typeof(LinkException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidLength.gltf", typeof(SchemaException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("PropertyAttributesPropertyAttributePropertyInvalidAttribute.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesPropertyAttributePropertyMaxMismatch.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesPropertyAttributePropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesPropertyAttributePropertyMinMismatch.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyAttributesPropertyAttributePropertyMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTextureClassPropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTextureClassPropertyMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTextureEnumsInvalidEnumValue.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureInvalidPropertyTypeA.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureInvalidPropertyTypeB.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidElementType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidElementValue.gltf", typeof(LinkException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidLength.gltf", typeof(SchemaException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTextureTexCoordInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("PropertyTexturePropertyChannelsSizeMismatch.gltf", typeof(ModelException))]
+        [TestCase("PropertyTexturePropertyIndexInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyTexturePropertyIndexInvalidValue.gltf", typeof(LinkException))]
+        // todo minmax [TestCase("PropertyTexturePropertyTexturePropertyMaxMismatch.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTexturePropertyTexturePropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTexturePropertyTexturePropertyMinMismatch.gltf", typeof(ModelException))]
+        // todo minmax [TestCase("PropertyTexturePropertyTexturePropertyMinNotInRange.gltf", typeof(ModelException))]
+        [TestCase("StructuralMetadataMissingSchema.gltf", typeof(ModelException))]
+        [TestCase("StructuralMetadataSchemaAndSchemaUri.gltf", typeof(ModelException))]
+        [TestCase("ValidMultipleClasses.gltf", null)]
+        [TestCase("ValidPropertyAttributes.gltf", null)]
+        [TestCase("ValidPropertyTexture.gltf", null)]
+        [TestCase("ValidPropertyTextureEnums.gltf", null)]
+
+        public void ReadExtStructuralMetadata(string file, Type exception = null)
         {
-            var gltffiles = Directory.GetFiles("./testfixtures/structuralMetadata", "*.gltf");
+            var fileName = $"./testfixtures/structuralMetadata/{file}";
 
-            var excludedFilesWithStats = new List<string>()
+            if (exception != null)
             {
-                "PropertyAttributesClassPropertyMaxNotInRange.gltf",
-                "PropertyAttributesClassPropertyMinNotInRange.gltf",
-                "PropertyAttributesPropertyAttributePropertyMaxMismatch.gltf",
-                "PropertyAttributesPropertyAttributePropertyMaxNotInRange.gltf",
-                "PropertyAttributesPropertyAttributePropertyMinMismatch.gltf",
-                "PropertyAttributesPropertyAttributePropertyMinNotInRange.gltf",
-            };
-
-            var excludedFilesWithTextureInspection = new List<string>()
+                Assert.Throws(exception, delegate { ModelRoot.Load(fileName); });
+            }
+            else
             {
-                "PropertyTextureClassPropertyMaxNotInRange.gltf",
-                "PropertyTextureClassPropertyMinNotInRange.gltf",
-                "PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf",
-                "PropertyTextureEnumsInvalidEnumValue.gltf",
-                "PropertyTexturePropertyTexturePropertyMaxMismatch.gltf",
-                "PropertyTexturePropertyTexturePropertyMaxNotInRange.gltf",
-                "PropertyTexturePropertyTexturePropertyMinMismatch.gltf",
-                "PropertyTexturePropertyTexturePropertyMinNotInRange.gltf",
-            };
-
-            var excludedFiles = excludedFilesWithStats.Concat(excludedFilesWithTextureInspection);
-
-            foreach (var file in gltffiles)
-            {
-                var fileName = Path.GetFileName(file);
-
-                if (!excludedFiles.Contains(fileName) )
-                {
-
-                    if (!fileName.StartsWith("Valid"))
-                    {
-                        //if(fileName == "PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf")
-                        //{
-                            Assert.That(() => ModelRoot.Load(file), Throws.Exception);
-                        //}
-                    }
-                    else
-                    {
-                        var model = ModelRoot.Load(file);
-                        var structuralMetadataExtension = model.GetExtension<EXTStructuralMetadataRoot>();
-                        var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-                        model.ValidateContent(ctx.GetContext());
-                    }
-                }
+                var model = ModelRoot.Load(fileName);
+                var structuralMetadataExtension = model.GetExtension<EXTStructuralMetadataRoot>();
+                var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                model.ValidateContent(ctx.GetContext());
             }
         }
-
 
         [Test(Description = "TestWith2PrimitivesAndMetadata")]
         public void MultiplePrimitivesAndMetadata()
