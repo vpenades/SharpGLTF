@@ -537,6 +537,7 @@ namespace SharpGLTF.Schema2
                 set => _attribute = value;
             }
 
+            /** Commented out for now, as it is not supported
             public JsonNode Min
             {
                 get => _min;
@@ -560,6 +561,7 @@ namespace SharpGLTF.Schema2
                 get => _offset;
                 set => _offset = value;
             }
+            */
             #endregion
         }
 
@@ -1276,6 +1278,7 @@ namespace SharpGLTF.Schema2
                 set => _count = value;
             }
 
+            /** Commented out for now, as it is not supported
             public JsonNode Min
             {
                 get => _min;
@@ -1299,6 +1302,7 @@ namespace SharpGLTF.Schema2
                 get => _offset;
                 set => _offset = value;
             }
+            */
 
 
             #endregion

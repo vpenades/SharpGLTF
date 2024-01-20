@@ -237,34 +237,11 @@ namespace SharpGLTF.Schema2
                         var vertexAccessor = meshPrimitive.GetVertexAccessor(acc);
                         var propertyValues = vertexAccessor.AsScalarArray();
 
-                        if (property.Value.Max != null)
-                        {
-                           var areSmaller = AreSmallerThan(propertyValues, ToFLoat(property.Value.Max));
-                            Guard.IsTrue(areSmaller, nameof(property.Value.Max), $"The property '{property.Key}' has a maximum value of {property.Value.Max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
-                        }
-                        if (property.Value.Min != null)
-                        {
-                            var areLarger = AreLargerThan(propertyValues, ToFLoat(property.Value.Min));
-                            Guard.IsTrue(areLarger, nameof(property.Value.Min), $"The property '{property.Key}' has a minimum value of {property.Value.Min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
-                        }
+                        // Todo: check min, max, scale, offset of propertyAttributeProperty
 
                         classDefinition.Properties.TryGetValue(key, out var propertyDefinition);
 
-                        var min = propertyDefinition.Min;
-                        var max = propertyDefinition.Max;
-                        var scale = propertyDefinition.Scale;
-                        var offset = propertyDefinition.Offset;
-
-                        if (max != null)
-                        {
-                            var areSmaller = AreSmallerThan(propertyValues, ToFLoat(max));
-                            Guard.IsTrue(areSmaller, nameof(max), $"The property '{property.Key}' has a maximum value of {max}, but the maximum value in the vertex attribute {acc} is {propertyValues.Max()}");
-                        }
-                        if (min != null)
-                        {
-                            var areLarger = AreLargerThan(propertyValues, ToFLoat(min));
-                            Guard.IsTrue(areLarger, nameof(min), $"The property '{property.Key}' has a minimum value of {min}, but the maximum value in the vertex attribute {acc} is {propertyValues.Min()}");
-                        }
+                        //  Todo: check min, max, scale, offset of StructuralMetadaClassProperty
 
                         Guard.IsTrue(propertyDefinition.Array == false, nameof(propertyDefinition.Array), $"The property '{property.Key}' is an array, which is not supported for property attributes");
 
