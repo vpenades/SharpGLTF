@@ -4,6 +4,11 @@ This project contains the implementation of 3D Tiles support for SharpGLTF.
 
 The following extensions are supported:
 
+- CESIUM_primitive_outline
+
+Specs: https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Vendor/CESIUM_primitive_outline/README.md
+
+Samples: https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/CESIUM_primitive_outline/BoxPrimitiveOutline
 
 - EXT_Mesh_Features
 
