@@ -131,16 +131,16 @@ namespace SharpGLTF.Schema2
                 return prop;
             }
 
-            public PropertyTable AddPropertyTable(StructuralMetadataClass schemaClass, int? featureCount = null, string name = null)
+            public PropertyTable AddPropertyTable(StructuralMetadataClass schemaClass, int featureCount, string name = null)
             {
                 var table = AddPropertyTable();
                 table.ClassInstance = schemaClass;
-                if (featureCount != null) table.Count = featureCount.Value;
+                table.Count = featureCount;
                 table.Name = name;
                 return table;
             }
 
-            public PropertyTable AddPropertyTable()
+            private PropertyTable AddPropertyTable()
             {
                 var prop = new PropertyTable();
                 _propertyTables.Add(prop);
@@ -719,6 +719,8 @@ namespace SharpGLTF.Schema2
 
             public void SetArrayValues<T>(List<List<T>> values)
             {
+                Guard.IsTrue(values.Count == LogicalParent.Count, nameof(values), $"Values must have length {LogicalParent.Count}");
+
                 var className = LogicalParent.ClassName;
                 var metadataProperty = GetProperty<T>(className, LogicalKey);
 
@@ -754,6 +756,7 @@ namespace SharpGLTF.Schema2
 
             public void SetValues<T>(params T[] values)
             {
+                Guard.IsTrue(values.Length == LogicalParent.Count, nameof(values), $"Values must have length {LogicalParent.Count}");
                 var className = LogicalParent.ClassName;
                 GetProperty<T>(className, LogicalKey);
 
@@ -1196,7 +1199,7 @@ namespace SharpGLTF.Schema2
                 return LogicalParent.LogicalParent.AddPropertyAttribute(this);
             }
 
-            public PropertyTable AddPropertyTable(int? featureCount = null, string name = null)
+            public PropertyTable AddPropertyTable(int featureCount, string name = null)
             {
                 return LogicalParent.LogicalParent.AddPropertyTable(this, featureCount, name);
             }
@@ -1236,7 +1239,7 @@ namespace SharpGLTF.Schema2
                 set => _description = value;
             }
 
-            public ELEMENTTYPE Type
+            internal ELEMENTTYPE Type
             {
                 get => _type;
                 set => _type = value;
@@ -1427,13 +1430,13 @@ namespace SharpGLTF.Schema2
             }
 
 
-            public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null)
-            {
-                Type = etype;
-                ComponentType = ctype;
-                Array = false;
-                return this;
-            }
+            //public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null)
+            //{
+            //    Type = etype;
+            //    ComponentType = ctype;
+            //    Array = false;
+            //    return this;
+            //}
 
             public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
             {

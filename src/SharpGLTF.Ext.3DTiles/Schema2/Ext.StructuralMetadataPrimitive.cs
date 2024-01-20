@@ -6,7 +6,6 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2
 {
-    using System.Text.Json.Nodes;
     using Tiles3D;
 
     partial class Tiles3DExtensions
@@ -108,28 +107,28 @@ namespace SharpGLTF.Schema2
             {
                 var rootMetadata = _GetModelRoot().GetExtension<EXTStructuralMetadataRoot>();
                 Guard.NotNull(rootMetadata, nameof(rootMetadata), "EXT_Structural_Metadata extension missing in root");
+
+                ValidatePropertyTexturesReferences(validate, rootMetadata);
+
+                ValidatePropertyAttributesReferences(validate, rootMetadata);
+
+                base.OnValidateReferences(validate);
+            }
+
+            protected override void OnValidateContent(ValidationContext validate)
+            {
+                var rootMetadata = _GetModelRoot().GetExtension<EXTStructuralMetadataRoot>();
                 var propertyTextures = rootMetadata.PropertyTextures;
 
-                // Scan textures
-                foreach (var propertyTexture in _propertyTextures)
-                {
-                    validate.IsNullOrIndex(nameof(propertyTexture), propertyTexture, propertyTextures);
+                ValidatePropertyTexturesContent(rootMetadata, propertyTextures);
 
-                    var schemaTexture = propertyTextures[propertyTexture];
-                    var className = schemaTexture.ClassName;
-                    foreach (var property in schemaTexture.Properties)
-                    {
-                        var textureCoordinate = property.Value.TextureCoordinate;
-                        // Guard the meshprimitive has the texture coordinate attribute
-                        var expectedVertexAttribute = "TEXCOORD_" + textureCoordinate;
-                        Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), nameof(textureCoordinate), $"The primitive should have texture coordinate attribute {textureCoordinate}.");
+                ValidatePropertyAttributesContent(rootMetadata);
 
-                        var texture = property.Value.Texture;
-                        Guard.NotNull(texture, nameof(texture), $"The primitive should have texture {texture}.");
-                    }
-                }
+                base.OnValidateContent(validate);
+            }
 
-                // scan attributes
+            private void ValidatePropertyAttributesReferences(ValidationContext validate, EXTStructuralMetadataRoot rootMetadata)
+            {
                 foreach (var propertyAttribute in _propertyAttributes)
                 {
                     var propertyAttributes = rootMetadata.PropertyAttributes;
@@ -164,60 +163,34 @@ namespace SharpGLTF.Schema2
                         }
                     }
                 }
-
-                base.OnValidateReferences(validate);
             }
 
-            protected override void OnValidateContent(ValidationContext validate)
+            private void ValidatePropertyTexturesReferences(ValidationContext validate, EXTStructuralMetadataRoot rootMetadata)
             {
-                var rootMetadata = _GetModelRoot().GetExtension<EXTStructuralMetadataRoot>();
                 var propertyTextures = rootMetadata.PropertyTextures;
 
                 // Scan textures
                 foreach (var propertyTexture in _propertyTextures)
                 {
+                    validate.IsNullOrIndex(nameof(propertyTexture), propertyTexture, propertyTextures);
+
                     var schemaTexture = propertyTextures[propertyTexture];
                     var className = schemaTexture.ClassName;
                     foreach (var property in schemaTexture.Properties)
                     {
                         var textureCoordinate = property.Value.TextureCoordinate;
+                        // Guard the meshprimitive has the texture coordinate attribute
                         var expectedVertexAttribute = "TEXCOORD_" + textureCoordinate;
-                        var vertex = meshPrimitive.GetVertexAccessor(expectedVertexAttribute);
+                        Guard.NotNull(meshPrimitive.GetVertexAccessor(expectedVertexAttribute), nameof(textureCoordinate), $"The primitive should have texture coordinate attribute {textureCoordinate}.");
 
                         var texture = property.Value.Texture;
-
-                        var schemaProperty = rootMetadata.Schema.Classes[className].Properties[property.Key];
-
-                        Guard.IsTrue(schemaProperty.Type != ElementType.STRING, nameof(schemaProperty.Type),
-                            $"The property '{property.Key}' has the type 'STRING', which is not supported for property textures");
-
-
-                        if (schemaProperty.Array)
-                        {
-                            Guard.IsTrue(schemaProperty.Count != null, nameof(schemaProperty.Array),
-                                 $"The property '{property.Key}'  is a variable-length array, which is not supported for property textures");
-                        }
-
-                        // todo: check used values in texture against min, max (using scale and offset)
-                        // var min = schemaProperty.Min;
-                        // var max = schemaProperty.Max;
-                        // var scale = schemaProperty.Scale;
-                        // var offset = schemaProperty.Offset;
-
-                        var channels = property.Value.Channels;
-                        var elementCount = ComponentCount.ElementCountForType(schemaProperty.Type);
-                        if (schemaProperty.ComponentType != null)
-                        {
-                            var componentByteSize = ComponentCount.ByteSizeForComponentType(schemaProperty.ComponentType);
-                            var elementByteSize = elementCount * componentByteSize;
-                            var totalByteSize = channels.Count * elementByteSize;
-                            Guard.IsTrue(totalByteSize == channels.Count, nameof(totalByteSize),
-                                $"The property '{property.Key}' has the component type {schemaProperty.ComponentType}, with a size of {componentByteSize} bytes, and the type {schemaProperty.Type} with {channels.Count} components, resulting in {totalByteSize} bytes per element, but the number of channels in the property texture property was {channels.Count}");
-                        }
+                        Guard.NotNull(texture, nameof(texture), $"The primitive should have texture {texture}.");
                     }
                 }
+            }
 
-                // scan attributes
+            private void ValidatePropertyAttributesContent(EXTStructuralMetadataRoot rootMetadata)
+            {
                 foreach (var propertyAttribute in _propertyAttributes)
                 {
                     var propertyAttributes = rootMetadata.PropertyAttributes;
@@ -229,13 +202,10 @@ namespace SharpGLTF.Schema2
 
                     foreach (var property in schemaAttribute.Properties)
                     {
-                        var expectedVertexAttribute = property.Value.Attribute;
-
                         var key = property.Key;
 
                         var acc = property.Value.Attribute;
                         var vertexAccessor = meshPrimitive.GetVertexAccessor(acc);
-                        var propertyValues = vertexAccessor.AsScalarArray();
 
                         // Todo: check min, max, scale, offset of propertyAttributeProperty
 
@@ -260,8 +230,7 @@ namespace SharpGLTF.Schema2
                         else if (propertyDefinition.Type == ElementType.ENUM)
                         {
                             var enumType = propertyDefinition.EnumType;
-                            // Get the enum from the schema
-                            var enumDefinition = schema.Enums[enumType];
+                            schema.Enums.TryGetValue(enumType, out var enumDefinition);
                             var valueType = enumDefinition.ValueType;
                             var allowedIntegerTypes = new List<IntegerType?>()
                             {
@@ -272,28 +241,53 @@ namespace SharpGLTF.Schema2
                         }
                     }
                 }
-
-                base.OnValidateContent(validate);
             }
 
-            private static float ToFLoat(JsonNode node)
+            private void ValidatePropertyTexturesContent(EXTStructuralMetadataRoot rootMetadata, IReadOnlyList<PropertyTexture> propertyTextures)
             {
-                return Convert.ToSingle(node.ToJsonString());
-            }
+                foreach (var propertyTexture in _propertyTextures)
+                {
+                    var schemaTexture = propertyTextures[propertyTexture];
 
-            private static bool AreLargerThan(IList<float> items, float min)
-            {
-                return items.All(item => item > min);
-            }
+                    var className = schemaTexture.ClassName;
+                    foreach (var property in schemaTexture.Properties)
+                    {
+                        // use for validation of texture
+                        // var textureCoordinate = property.Value.TextureCoordinate;
+                        // var expectedVertexAttribute = "TEXCOORD_" + textureCoordinate;
 
-            private static bool AreSmallerThan(IList<float> items, float max)
-            {
-                return items.All(item => item < max);
-            }
+                        var schemaProperty = rootMetadata.Schema.Classes[className].Properties[property.Key];
 
+                        Guard.IsTrue(schemaProperty.Type != ElementType.STRING, nameof(schemaProperty.Type),
+                            $"The property '{property.Key}' has the type 'STRING', which is not supported for property textures");
+
+                        if (schemaProperty.Array)
+                        {
+                            Guard.IsTrue(schemaProperty.Count != null, nameof(schemaProperty.Array),
+                                 $"The property '{property.Key}'  is a variable-length array, which is not supported for property textures");
+                        }
+
+                        // todo: check used values in texture against min, max (using scale and offset)
+                        // var min = schemaProperty.Min;
+                        // var max = schemaProperty.Max;
+                        // var scale = schemaProperty.Scale;
+                        // var offset = schemaProperty.Offset;
+
+                        var channels = property.Value.Channels;
+                        var elementCount = ComponentCount.ElementCountForType(schemaProperty.Type);
+                        if (schemaProperty.ComponentType != null)
+                        {
+                            var componentByteSize = ComponentCount.ByteSizeForComponentType(schemaProperty.ComponentType);
+                            var elementByteSize = elementCount * componentByteSize;
+                            var totalByteSize = channels.Count * elementByteSize;
+                            Guard.IsTrue(totalByteSize == channels.Count, nameof(totalByteSize),
+                                $"The property '{property.Key}' has the component type {schemaProperty.ComponentType}, with a size of {componentByteSize} bytes, and the type {schemaProperty.Type} with {channels.Count} components, resulting in {totalByteSize} bytes per element, but the number of channels in the property texture property was {channels.Count}");
+                        }
+                    }
+
+                }
+            }
             #endregion
         }
-
-
     }
 }

@@ -23,7 +23,6 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/structuralMetadata
-
         [Test(Description = "Reads glTF's with EXT_Structural_Metadata")]
         [TestCase("ExtensionInMeshPrimitiveWithoutTopLevelObject.gltf", typeof(ModelException))]
         [TestCase("PropertyAttributesClassPropertyArray.gltf", typeof(ModelException))]
@@ -82,6 +81,56 @@ namespace SharpGLTF.Schema2.Tiles3D
                 model.ValidateContent(ctx.GetContext());
             }
         }
+
+
+        [Test(Description = "MinimalMetadataSample")]
+        public void MinimalMetadataSample()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            int featureId = 0;
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
+
+            var schemaClass = schema.UseClassMetadata("triangles");
+
+            var nameProperty = schemaClass
+                .UseProperty("name")
+                .WithStringType();
+
+            var propertyTable = schemaClass.AddPropertyTable(1);
+
+            propertyTable
+                .UseProperty(nameProperty)
+                .SetValues("this is featureId0");
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                var featureIdAttribute = new FeatureIDBuilder(1, 0, propertyTable);
+                primitive.AddMeshFeatureIds(featureIdAttribute);
+            }
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.plotly");
+        }
+
 
         [Test(Description = "TestWith2PrimitivesAndMetadata")]
         public void MultiplePrimitivesAndMetadata()
