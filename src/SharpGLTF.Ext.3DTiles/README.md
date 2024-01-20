@@ -167,5 +167,5 @@ a name column. The name column is set to "this is featureId0". The triangle is a
   Sample loaded in Cesium:
 
 
-  ![alt text](cesium_Sample.png)
+  ![alt text](cesium_sample.png)
 
