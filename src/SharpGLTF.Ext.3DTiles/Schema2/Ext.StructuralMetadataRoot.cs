@@ -358,7 +358,7 @@ namespace SharpGLTF.Schema2
                 return property;
             }
 
-            public PropertyTextureProperty CreateProperty(string key)
+            private PropertyTextureProperty CreateProperty(string key)
             {
                 var property = new PropertyTextureProperty();
                 _properties[key] = property;
