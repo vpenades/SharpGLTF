@@ -83,8 +83,8 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
 
-        [Test(Description = "MinimalMetadataSample")]
-        public void MinimalMetadataSample()
+        [Test(Description = "MinimalMetadataAttributeSample")]
+        public void MinimalMetadataAttributeSample()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
