@@ -19,9 +19,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadXmpModel()
         {
-            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\XmpJsonLd.gltf");
-
-            var model = ModelRoot.Load(path);
+            var model = ModelRoot.Load(ResourceInfo.From("XmpJsonLd.gltf"));
             Assert.That(model, Is.Not.Null);
 
             var packets = model.GetExtension<XmpPackets>();

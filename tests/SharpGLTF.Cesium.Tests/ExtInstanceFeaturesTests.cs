@@ -26,7 +26,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         [TestCase(@"ValidInstanceFeatures.gltf", null)]
         public void ReadExtInstanceFeatures(string file, Type exception = null)
         {
-            var fileName = $"./testfixtures/instanceFeatures/{file}";
+            var fileName = ResourceInfo.From($"instanceFeatures/{file}");
 
             if (exception != null)
             {

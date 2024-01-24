@@ -4,12 +4,8 @@
     <TargetFrameworks>net471;net6.0;net8.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="..\Assets\**" LinkBase="Assets" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+    <LangVersion>latest</LangVersion>    
+  </PropertyGroup>  
 
   <ItemGroup>    
     <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />

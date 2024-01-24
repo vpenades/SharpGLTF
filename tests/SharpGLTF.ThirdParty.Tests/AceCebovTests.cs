@@ -14,10 +14,8 @@ namespace SharpGLTF.ThirdParty
 {
     using VBColor1 = VertexBuilder<VertexPosition,VertexColor1,VertexEmpty>;
     using VBColor1Texture1 = VertexBuilder<VertexPosition,VertexColor1Texture1,VertexEmpty>;
-    using VBTexture1 = VertexBuilder<VertexPosition,VertexTexture1,VertexEmpty>;
-
-    [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?", true)]
+    using VBTexture1 = VertexBuilder<VertexPosition,VertexTexture1,VertexEmpty>;    
+    
     internal class AceCebovTests
     {
         [Test]

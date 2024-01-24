@@ -29,9 +29,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadEscapedUriModel()
         {
-            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\white space.gltf");
-
-            var model = ModelRoot.Load(path);
+            var model = ModelRoot.Load(ResourceInfo.From("white space.gltf"));
             Assert.That(model, Is.Not.Null);
 
             model.AttachToCurrentTest("white space.glb");
@@ -124,9 +122,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         // [Test]
         public void LoadShrekshaoModel()
         {
-            var path = "Assets\\SpecialCases\\shrekshao.glb";
-
-            var model = ModelRoot.Load(path);
+            var model = ModelRoot.Load(ResourceInfo.From("SpecialCases\\shrekshao.glb"));
             Assert.That(model, Is.Not.Null);
         }
 
@@ -135,10 +131,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {
             // this model has several nodes with curve animations containing a single animation key,
             // which is causing some problems to the interpolator.            
-            
-            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\mouse.glb");
 
-            var model = ModelRoot.Load(path);
+            var model = ModelRoot.Load(ResourceInfo.From("SpecialCases\\mouse.glb"));
 
             var boundingSphere = Runtime.MeshDecoder.EvaluateBoundingSphere(model.DefaultScene);
 
@@ -161,11 +155,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
         public void LoadSketchfabModels(string path)
         {
             // this model has several nodes with curve animations containing a single animation key,
-            // which is causing some problems to the interpolator.            
+            // which is causing some problems to the interpolator.
 
-            path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, $"Assets\\SpecialCases\\{path}");
-
-            var model = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
+            var model = ModelRoot.Load(ResourceInfo.From($"SpecialCases\\{path}"), Validation.ValidationMode.TryFix);
 
             model.AttachToCurrentTest("output.glb");            
         }
@@ -220,18 +212,18 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [Test]
         public void LoadInvalidModelWithJsonFix()
         {
-            // try to load an invalid gltf with an empty array
+            // try to load an invalid gltf with an empty array            
 
-            var path = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets\\SpecialCases\\Invalid_EmptyArray.gltf");
+            var xpath = ResourceInfo.From("SpecialCases\\Invalid_EmptyArray.gltf");
 
-            Assert.Throws<Validation.SchemaException>(() => ModelRoot.Load(path));
+            Assert.Throws<Validation.SchemaException>(() => ModelRoot.Load(xpath));
 
             // try to load an invalid gltf with an empty array, using a hook to fix the json before running the parser.
 
             var rsettings = new ReadSettings();
             rsettings.JsonPreprocessor = _RemoveEmptyArrayJsonProcessor;
 
-            var model = ModelRoot.Load(path, rsettings);
+            var model = ModelRoot.Load(xpath, rsettings);
             Assert.That(model, Is.Not.Null);
 
             // save the model, using a hook to modify the json before writing it to the file.
@@ -242,7 +234,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 json = json.Replace("glTF 2.0 Validator test suite", "postprocessed json"); return json;
             };
 
-            path = model.AttachToCurrentTest("modified.gltf", wsettings);
+            var path = model.AttachToCurrentTest("modified.gltf", wsettings);
 
             model = ModelRoot.Load(path);
 

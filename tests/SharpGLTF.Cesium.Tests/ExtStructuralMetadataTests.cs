@@ -67,7 +67,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         public void ReadExtStructuralMetadata(string file, Type exception = null)
         {
-            var fileName = $"./testfixtures/structuralMetadata/{file}";
+            var fileName = ResourceInfo.From($"structuralMetadata/{file}");
 
             if (exception != null)
             {

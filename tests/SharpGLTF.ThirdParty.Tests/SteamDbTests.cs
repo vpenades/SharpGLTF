@@ -12,9 +12,7 @@ using SharpGLTF.Geometry.Parametric;
 using SharpGLTF.Geometry;
 
 namespace SharpGLTF.ThirdParty
-{
-    [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?")]
+{    
     internal class SteamDbTests
     {
         [Test]

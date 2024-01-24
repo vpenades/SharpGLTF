@@ -204,19 +204,13 @@ namespace SharpGLTF.Schema2.Authoring
         [TestCase("FlightHelmet_baseColor_basis.ktx2")]
         public void CreateSceneWithTextureImageExtension(string textureFileName)
         {            
-            TestContext.CurrentContext.AttachGltfValidatorLinks();
-
-            var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
+            TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             // first, create a default material
             var material = new Materials.MaterialBuilder("material1")
                 .WithDoubleSide(true)
                 .WithMetallicRoughnessShader()
-                .WithChannelImage
-                (
-                    Materials.KnownChannel.BaseColor,
-                    System.IO.Path.Combine(basePath, textureFileName)
-                );                
+                .WithChannelImage(Materials.KnownChannel.BaseColor, ResourceInfo.From(textureFileName).FilePath);                
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
 
@@ -245,15 +239,13 @@ namespace SharpGLTF.Schema2.Authoring
         [Test]
         public void CrateSceneWithTextureTransformExtension()
         {            
-            TestContext.CurrentContext.AttachGltfValidatorLinks();
-
-            var basePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets");
+            TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
             // first, create a default material
             var material = new Materials.MaterialBuilder("material1")
                 .WithDoubleSide(true)
                 .WithMetallicRoughnessShader()
-                .WithChannelImage(Materials.KnownChannel.BaseColor, System.IO.Path.Combine(basePath, "shannon.jpg"));
+                .WithChannelImage(Materials.KnownChannel.BaseColor, ResourceInfo.From("shannon.jpg").FilePath);
 
             material.GetChannel(Materials.KnownChannel.BaseColor).UseTexture().WithTransform(0.40f,0.25f, 0.5f,0.5f);
 

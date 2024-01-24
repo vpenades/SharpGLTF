@@ -11,10 +11,8 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.ThirdParty
 {
-    using VBColor1 = VertexBuilder<VertexPosition,VertexColor1,VertexEmpty>;
+    using VBColor1 = VertexBuilder<VertexPosition,VertexColor1,VertexEmpty>;    
     
-    [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?", true)]
     public class PetarTasevTests
     {
         [Test]

@@ -11,8 +11,7 @@ namespace SharpGLTF.ThirdParty
 {
     public class CesiumTests
     {
-        [Test]
-        [ResourcePathFormat("*\\Assets")]
+        [Test]        
         public void WriteInstancedGlbWithFeatureIds()
         {
             var modelRoot = ModelRoot.Load(ResourceInfo.From("tree.glb"));

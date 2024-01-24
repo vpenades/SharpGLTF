@@ -102,8 +102,7 @@ namespace SharpGLTF.Materials
 
         private static MaterialBuilder _CreateUnlitMaterial()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Unlit Material")
                 .WithDoubleSide(true) // notice that DoubleSide enables double face rendering. This is an example, but it's usually NOT NECCESARY.
@@ -117,8 +116,7 @@ namespace SharpGLTF.Materials
 
         private static MaterialBuilder _CreateMetallicRoughnessMaterial()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Metallic Roughness Material")
                 .WithAlpha(AlphaMode.MASK, 0.6f)
@@ -142,8 +140,7 @@ namespace SharpGLTF.Materials
 
         private static MaterialBuilder _CreateVolumeMaterial()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Volume Material")
                 .WithAlpha(AlphaMode.MASK, 0.6f);
@@ -160,8 +157,7 @@ namespace SharpGLTF.Materials
 
         private static MaterialBuilder _CreateIridescenceMaterial()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Volume Material")
                 .WithAlpha(AlphaMode.OPAQUE);
@@ -178,9 +174,8 @@ namespace SharpGLTF.Materials
         }
 
         private static MaterialBuilder _CreateClearCoatMaterial()
-        {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+        {            
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Clear Coat Material")
                 .WithAlpha(AlphaMode.MASK, 0.6f)
@@ -202,9 +197,9 @@ namespace SharpGLTF.Materials
         [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         private static MaterialBuilder _CreateSpecularGlossinessMaterialWithFallback()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.webp");
-            var tex2 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            
+            var tex1 = ResourceInfo.From("shannon.webp").FilePath;
+            var tex2 = ResourceInfo.From("shannon.png").FilePath;
 
             var primary = new MaterialBuilder("primary")
 
@@ -237,8 +232,8 @@ namespace SharpGLTF.Materials
         [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         private static MaterialBuilder _CreateSpecularGlossinessMaterial()
         {
-            var assetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
-            var tex1 = System.IO.Path.Combine(assetsPath, "shannon.png");
+            
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder()
                 .WithAlpha(AlphaMode.MASK, 0.6f)

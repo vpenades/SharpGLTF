@@ -17,9 +17,7 @@ using SharpGLTF.Validation;
 namespace SharpGLTF.ThirdParty
 {
     using VBColor1 = VertexBuilder<VertexPosition, VertexColor1, VertexEmpty>;
-
-    [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?", true)]
+    
     internal class SandboxTests
     {
         [Test]

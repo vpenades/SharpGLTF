@@ -245,7 +245,7 @@ namespace SharpGLTF.Geometry
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
             // texture path
-            var imagePath = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", "Texture1.jpg");
+            var imagePath = ResourceInfo.From("Texture1.jpg");
 
             // fancy height function; can be easily replaced with a bitmap sampler.
             float heightFunction(int xx, int yy)

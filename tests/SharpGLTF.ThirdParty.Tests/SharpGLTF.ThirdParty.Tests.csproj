@@ -5,11 +5,7 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF.ThirdParty</RootNamespace>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Content Include="..\Assets\**" LinkBase="Assets" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+  </PropertyGroup>  
 
   <ItemGroup>
     <Compile Include="..\SharpGLTF.Toolkit.Tests\Geometry\Parametric\SolidMeshUtils.cs" Link="Geometry\Parametric\SolidMeshUtils.cs" />

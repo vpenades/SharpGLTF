@@ -696,13 +696,15 @@ namespace SharpGLTF.Scenes
 
             var schema = sb.ToGltf2();
 
-            Assert.That(schema.LogicalMeshes.Count, Is.EqualTo(0), "SceneBuilder should detect empty meshes and remove them.");
+            Assert.That(schema.LogicalMeshes, Is.Empty, "SceneBuilder should detect empty meshes and remove them.");
 
             schema.CreateMesh("Empty2");
 
-            var fileName = AttachmentInfo.From("empty.glb").File.FullName;
+            var file = AttachmentInfo.From("empty.glb").File;
 
-            Assert.Throws<SharpGLTF.Validation.SchemaException>(() => schema.SaveGLB(fileName));
+            file.Directory.Create();
+
+            Assert.Throws<SharpGLTF.Validation.SchemaException>(() => schema.SaveGLB(file.FullName));
         }
 
         [Test]

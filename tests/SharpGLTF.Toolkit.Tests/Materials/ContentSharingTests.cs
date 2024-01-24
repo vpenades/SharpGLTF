@@ -18,12 +18,12 @@ namespace SharpGLTF.Materials
     [Category("Toolkit.Materials")]
     public class ContentSharingTests
     {
-        private static string AssetsPath = System.IO.Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets");
+        
 
         [Test]
         public void TestMaterialBuilderEquality()
         {
-            var tex1Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "shannon.png"));
+            var tex1Bytes = System.IO.File.ReadAllBytes(ResourceInfo.From("shannon.png"));
 
             // create a material using our shared texture
             var material1 = new MaterialBuilder()
@@ -62,8 +62,8 @@ namespace SharpGLTF.Materials
         {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
-            var tex1Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "shannon.png"));
-            var tex2Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(AssetsPath, "Texture1.jpg"));
+            var tex1Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(ResourceInfo.From("shannon.png")));
+            var tex2Bytes = System.IO.File.ReadAllBytes(System.IO.Path.Combine(ResourceInfo.From("Texture1.jpg")));
 
             var tex1 = AttachmentInfo
                 .From("shared-shannon.png")

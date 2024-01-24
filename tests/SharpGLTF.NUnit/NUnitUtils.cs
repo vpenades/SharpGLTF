@@ -9,16 +9,14 @@ namespace SharpGLTF
 {
     public static class NUnitUtils
     {
-        public static string ToShortDisplayPath(this string path)
+        public static string ToShortDisplayPath(this string path, int maxDirLength = 12)
         {
             var dir = System.IO.Path.GetDirectoryName(path);
-            var fxt = System.IO.Path.GetFileName(path);
+            var fxt = System.IO.Path.GetFileName(path);            
 
-            const int maxdir = 12;
-
-            if (dir.Length > maxdir)
+            if (dir.Length > maxDirLength)
             {
-                dir = "..." + dir.Substring(dir.Length - maxdir);
+                dir = "..." + dir.Substring(dir.Length - maxDirLength);
             }
 
             return System.IO.Path.Combine(dir, fxt);

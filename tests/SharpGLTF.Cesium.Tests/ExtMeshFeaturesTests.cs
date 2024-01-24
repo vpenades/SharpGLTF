@@ -60,7 +60,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         [TestCase("ValidFeatureIdTextureUsingDefaultChannels.gltf", null)]
         public void ReadExtMeshFeaturesFiles(string file, Type exception = null)
         {
-            var fileName = $"./testfixtures/meshFeatures/{file}";
+            var fileName = ResourceInfo.From($"meshFeatures/{file}");
 
             if (exception != null)
             {

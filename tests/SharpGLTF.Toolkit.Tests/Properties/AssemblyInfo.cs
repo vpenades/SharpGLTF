@@ -4,9 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SharpGLTF.Properties
-{
-    internal class AssemblyInfo
-    {
-    }
-}
+using NUnit.Framework;
+
+[assembly: ResourcePathFormat("{SolutionDirectory}/tests/Assets")]
+[assembly: AttachmentPathFormat("*/TestResults/?", true)]

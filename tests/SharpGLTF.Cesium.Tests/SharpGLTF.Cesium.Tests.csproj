@@ -5,13 +5,7 @@
     <IsPackable>false</IsPackable>
     <RootNamespace>SharpGLTF</RootNamespace>
     <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <!--
-  <ItemGroup>
-    <Compile Remove="ExtStructuralMetadataTests.cs" />
-  </ItemGroup>  
-  -->
+  </PropertyGroup>  
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SharpGLTF.Ext.3DTiles\SharpGLTF.Ext.3DTiles.csproj" />
@@ -25,19 +19,5 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
   </ItemGroup>
-
-  <ItemGroup>
-	<Folder Include="testfixtures\meshFeatures\" />
-	<Folder Include="testfixtures\instanceFeatures\" />
-    <Folder Include="testfixtures\structuralMetadata\" />
-	<None Update="testfixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
-
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="tree.glb">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
+  
 </Project>

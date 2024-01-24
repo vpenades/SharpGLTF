@@ -15,9 +15,7 @@ using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 
 namespace SharpGLTF.ThirdParty
-{
-    [ResourcePathFormat("*\\Assets")]
-    [AttachmentPathFormat("*\\?", true)]
+{    
     internal class MeltyPlayerTests
     {
         /// <summary>

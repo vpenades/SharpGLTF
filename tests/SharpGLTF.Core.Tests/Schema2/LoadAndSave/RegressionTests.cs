@@ -10,8 +10,7 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2.LoadAndSave
 {
-    [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]
-    [ResourcePathFormat("*/Assets/SpecialCases")]
+    [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]    
     internal class RegressionTests
     {
         [Test]
@@ -21,7 +20,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var cdir = Environment.CurrentDirectory;
 
-            var modelPath = ResourceInfo.From("RelativePaths.gltf");
+            var modelPath = ResourceInfo.From("SpecialCases/RelativePaths.gltf");
 
             // absolute path            
 

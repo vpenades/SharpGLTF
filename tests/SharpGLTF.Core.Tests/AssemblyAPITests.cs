@@ -99,7 +99,7 @@ namespace SharpGLTF
 
         private static void _CheckBackwardsCompatibility(string referenceAPIFile, string[] newLines)
         {
-            referenceAPIFile = System.IO.Path.Combine(TestContext.CurrentContext.WorkDirectory, "Assets", referenceAPIFile);
+            referenceAPIFile = ResourceInfo.From(referenceAPIFile).FilePath;
 
             var refLines = System.IO.File.ReadAllLines(referenceAPIFile);
 
