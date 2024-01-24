@@ -22,4 +22,4 @@ jobs:
       - name: Build
         run: dotnet build
       - name: Test
-        run: dotnet test ./tests/SharpGLTF.Cesium.Tests/SharpGLTF.Cesium.Tests.csproj
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj
