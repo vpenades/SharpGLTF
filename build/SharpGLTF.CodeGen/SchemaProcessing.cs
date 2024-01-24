@@ -50,7 +50,7 @@ namespace SharpGLTF
 
         static NJsonSchema.JsonReferenceResolver _Resolver(JSONSCHEMA schema, string basePath)
         {
-            var generator = new NJsonSchema.Generation.JsonSchemaGeneratorSettings();
+            var generator = new NJsonSchema.NewtonsoftJson.Generation.NewtonsoftJsonSchemaGeneratorSettings();
 
             var solver = new NJsonSchema.JsonSchemaAppender(schema, generator.TypeNameGenerator);
 
