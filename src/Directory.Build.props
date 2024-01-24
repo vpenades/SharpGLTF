@@ -29,7 +29,7 @@
   <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
     <InternalsVisibleTo Include="SharpGLTF.Core.Tests"/>
     <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests"/>
-    <InternalsVisibleTo Include="SharpGLTF.Cesium.Tests"/>
+    <InternalsVisibleTo Include="SharpGLTF.Ext.3DTiles.Tests"/>
   </ItemGroup>
 
   <PropertyGroup>
