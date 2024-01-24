@@ -593,7 +593,7 @@ namespace SharpGLTF.Schema2
         public float ThicknessFactor
         {
             get => (float)_thicknessFactor.AsValue(_thicknessFactorDefault);
-            set => _thicknessFactor = ((double)value).AsNullable(_thicknessFactorDefault);
+            set => _thicknessFactor = ((double)value).AsNullable(_thicknessFactorDefault, _thicknessFactorMinimum, double.PositiveInfinity);
         }
 
         public Vector3 AttenuationColor
@@ -604,8 +604,8 @@ namespace SharpGLTF.Schema2
 
         public float AttenuationDistance
         {
-            get => (float)_attenuationDistance.AsValue(0);
-            set => _attenuationDistance = value > _attenuationDistanceExclusiveMinimum ? value : throw new ArgumentOutOfRangeException(nameof(value));
+            get => (float)_attenuationDistance.AsValue(float.PositiveInfinity);
+            set => _attenuationDistance = ((double)value).AsNullable(double.PositiveInfinity, _attenuationDistanceExclusiveMinimum, double.PositiveInfinity);
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)

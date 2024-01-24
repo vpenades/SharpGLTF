@@ -189,7 +189,7 @@ namespace SharpGLTF.Materials
                 case KnownChannel.VolumeThickness: yield return new _Property(KnownProperty.ThicknessFactor, 0f); break;
                 case KnownChannel.VolumeAttenuation:
                     yield return new _Property(KnownProperty.RGB, Vector3.One);
-                    yield return new _Property(KnownProperty.AttenuationDistance, 0f);
+                    yield return new _Property(KnownProperty.AttenuationDistance, float.PositiveInfinity);
                     break;
 
                 default: throw new NotImplementedException();
