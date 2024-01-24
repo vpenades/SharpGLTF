@@ -3,10 +3,10 @@ using SharpGLTF.Geometry;
 using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Scenes;
-using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace SharpGLTF.Schema2.Tiles3D
@@ -22,53 +22,307 @@ namespace SharpGLTF.Schema2.Tiles3D
             Tiles3DExtensions.RegisterExtensions();
         }
 
-        /*
-        [Test(Description = "First test with ext_structural_metadata")]
-        public void TriangleWithMetadataTest()
+        // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/structuralMetadata
+        [Test(Description = "Reads glTF's with EXT_Structural_Metadata")]
+        [TestCase("ExtensionInMeshPrimitiveWithoutTopLevelObject.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyArray.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyInvalidComponentType.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyInvalidEnumValueType.gltf", typeof(ModelException))]
+        // Todo: Minmax [TestCase("PropertyAttributesClassPropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // Todo: Minmax [TestCase("PropertyAttributesClassPropertyMinNotInRange.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesClassPropertyString.gltf", typeof(ModelException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidElementType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidElementValue.gltf", typeof(LinkException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidLength.gltf", typeof(SchemaException))]
+        [TestCase("PropertyAttributesMeshPrimitivePropertyAttributesInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("PropertyAttributesPropertyAttributePropertyInvalidAttribute.gltf", typeof(ModelException))]
+        // Todo: Minmax [TestCase("PropertyAttributesPropertyAttributePropertyMaxMismatch.gltf", typeof(ModelException))] 
+        // Todo: Minmax [TestCase("PropertyAttributesPropertyAttributePropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // Todo: Minmax [TestCase("PropertyAttributesPropertyAttributePropertyMinMismatch.gltf", typeof(ModelException))]
+        // Todo: Minmax [TestCase("PropertyAttributesPropertyAttributePropertyMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTextureClassPropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTextureClassPropertyMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTextureClassPropertyWithOffsetScaleMinNotInRange.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTextureEnumsInvalidEnumValue.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureInvalidPropertyTypeA.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureInvalidPropertyTypeB.gltf", typeof(ModelException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidElementType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidElementValue.gltf", typeof(LinkException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidLength.gltf", typeof(SchemaException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTexturesInvalidType.gltf", typeof(SchemaException))]
+        [TestCase("PropertyTextureMeshPrimitivePropertyTextureTexCoordInvalidValue.gltf", typeof(ModelException))]
+        [TestCase("PropertyTexturePropertyChannelsSizeMismatch.gltf", typeof(ModelException))]
+        [TestCase("PropertyTexturePropertyIndexInvalidType.gltf", typeof(InvalidOperationException))]
+        [TestCase("PropertyTexturePropertyIndexInvalidValue.gltf", typeof(LinkException))]
+        // todo minmax with texture [TestCase("PropertyTexturePropertyTexturePropertyMaxMismatch.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTexturePropertyTexturePropertyMaxNotInRange.gltf", typeof(ModelException))]
+        // todo minmax with texture [TestCase("PropertyTexturePropertyTexturePropertyMinMismatch.gltf", typeof(ModelException))]
+        // todo minmax with texture[TestCase("PropertyTexturePropertyTexturePropertyMinNotInRange.gltf", typeof(ModelException))]
+        [TestCase("StructuralMetadataMissingSchema.gltf", typeof(ModelException))]
+        [TestCase("StructuralMetadataSchemaAndSchemaUri.gltf", typeof(ModelException))]
+        [TestCase("ValidMultipleClasses.gltf", null)]
+        [TestCase("ValidPropertyAttributes.gltf", null)]
+        [TestCase("ValidPropertyTexture.gltf", null)]
+        [TestCase("ValidPropertyTextureEnums.gltf", null)]
+
+        public void ReadExtStructuralMetadata(string file, Type exception = null)
+        {
+            var fileName = $"./testfixtures/structuralMetadata/{file}";
+
+            if (exception != null)
+            {
+                Assert.Throws(exception, delegate { ModelRoot.Load(fileName); });
+            }
+            else
+            {
+                var model = ModelRoot.Load(fileName);
+                var structuralMetadataExtension = model.GetExtension<EXTStructuralMetadataRoot>();
+                var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+                model.ValidateContent(ctx.GetContext());
+            }
+        }
+
+
+        [Test(Description = "MinimalMetadataAttributeSample")]
+        public void MinimalMetadataAttributeSample()
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            int featureId = 0;
             var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
-            var mesh = new MeshBuilder<VertexPosition>("mesh");
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
             var prim = mesh.UsePrimitive(material);
 
-            prim.AddTriangle(new VertexPosition(-10, 0, 0), new VertexPosition(10, 0, 0), new VertexPosition(0, 10, 0));
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
+
+            var schemaClass = schema.UseClassMetadata("triangles");
+
+            var nameProperty = schemaClass
+                .UseProperty("name")
+                .WithStringType();
+
+            var propertyTable = schemaClass.AddPropertyTable(1);
+
+            propertyTable
+                .UseProperty(nameProperty)
+                .SetValues("this is featureId0");
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                var featureIdAttribute = new FeatureIDBuilder(1, 0, propertyTable);
+                primitive.AddMeshFeatureIds(featureIdAttribute);
+            }
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.plotly");
+        }
+
+
+        [Test(Description = "TestWith2PrimitivesAndMetadata")]
+        public void MultiplePrimitivesAndMetadata()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            int featureId = 0;
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+
+            // featureId = 1 and 2 (other material)
+
+            var material2 = new MaterialBuilder()
+                .WithDoubleSide(true)
+                .WithMetallicRoughnessShader()
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
+
+            var prim2 = mesh.UsePrimitive(material2);
+
+            featureId = 1;
+            var vt3 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt4 = VertexBuilder.GetVertexWithFeatureId(new Vector3(3, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt5 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim2.AddTriangle(vt3, vt4, vt5);
+
+            featureId = 2;
+            var vt6 = VertexBuilder.GetVertexWithFeatureId(new Vector3(4, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt7 = VertexBuilder.GetVertexWithFeatureId(new Vector3(5, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt8 = VertexBuilder.GetVertexWithFeatureId(new Vector3(4, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim2.AddTriangle(vt6, vt7, vt8);
 
             var scene = new SceneBuilder();
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            var schema = new StructuralMetadataSchema();
-            schema.Id = "schema_001";
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
             schema.Name = "schema 001";
             schema.Description = "an example schema";
             schema.Version = "3.5.1";
-            var classes = new Dictionary<string, StructuralMetadataClass>();
-            var treeClass = new StructuralMetadataClass();
-            treeClass.Name = "Tree";
-            treeClass.Description = "Woody, perennial plant.";
-            classes["tree"] = treeClass;
-            var ageProperty = new ClassProperty();
-            ageProperty.Description = "The age of the tree, in years";
-            ageProperty.Type = ElementType.SCALAR;
-            ageProperty.ComponentType = DataType.UINT32;
-            ageProperty.Required = true;
 
-            treeClass.Properties.Add("age", ageProperty);
+            var trianglesClass = schema
+                .UseClassMetadata("triangles")
+                .WithName("Triangle");
 
-            schema.Classes = classes;
+            var nameProperty = trianglesClass
+                .UseProperty("name")
+                .WithStringType();
 
-            var propertyTable = new PropertyTable("tree", 1, "PropertyTable");
-            var agePropertyTableProperty = model.GetPropertyTableProperty(new List<int>() { 100 });
-            propertyTable.Properties.Add("age", agePropertyTableProperty);
 
-            model.SetPropertyTable(propertyTable, schema);
+            var isTriangle = trianglesClass
+                .UseProperty("IsTriangle")
+                .WithBooleanType();
+
+            var propertyTable = trianglesClass
+                .AddPropertyTable(3, "PropertyTable");
+
+            propertyTable
+                .UseProperty(nameProperty)
+                .SetValues("this is featureId0", "this is featureId1", "this is featureId2");
+
+            propertyTable
+                .UseProperty(isTriangle)
+                .SetValues(false, true, false);
+
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                var triangles = primitive.EvaluateTriangles().Count();
+                var featureIdAttribute = new FeatureIDBuilder(triangles, 0, propertyTable);
+                primitive.AddMeshFeatureIds(featureIdAttribute);
+            }
 
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_primitives.plotly");
+        }
+
+
+        [Test(Description = "First test with ext_structural_metadata")]
+        // This test creates a simple triangle (featureId = 0) with ext_structural_metadata (4 tree attributes like
+        // species (Enumeration), age (Scalar), height (Scalar) and diameter (Scalar) and a property table.
+        // following the structure described in https://github.com/CesiumGS/glTF/tree/proposal-EXT_structural_metadata/extensions/2.0/Vendor/EXT_structural_metadata
+        public void TriangleWithMetadataTest()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            var features = new List<int>() { 0, 1 };
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), features[0]);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), features[0]);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), features[0]);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+
+            var vt3 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 0, 0), new Vector3(0, 0, 1), features[1]);
+            var vt4 = VertexBuilder.GetVertexWithFeatureId(new Vector3(3, 0, 0), new Vector3(0, 0, 1), features[1]);
+            var vt5 = VertexBuilder.GetVertexWithFeatureId(new Vector3(2, 1, 0), new Vector3(0, 0, 1), features[1]);
+
+            prim.AddTriangle(vt3, vt4, vt5);
+
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+           
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
+            schema.Name = "schema 001";
+            schema.Description = "an example schema";
+            schema.Version = "3.5.1";
+
+            var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple",3));
+            speciesEnum.Name = "Species";
+            speciesEnum.Description = "An example enum for tree species.";
+
+            var treeClass = schema
+                .UseClassMetadata("tree")
+                .WithName("Tree")
+                .WithDescription("Woody, perennial plant.");
+
+            // species property
+            var speciesProperty = treeClass
+                .UseProperty("species")
+                .WithDescription("Type of tree.")
+                .WithEnumeration(speciesEnum)
+                .WithRequired(true);
+
+            // age property
+            var ageProperty = treeClass
+                .UseProperty("age")
+                .WithDescription("The age of the tree, in years")
+                .WithUInt32Type()
+                .WithRequired(true);
+
+            // Height property
+            var heightProperty = treeClass
+                .UseProperty("height")
+                .WithDescription("Height of tree measured from ground level, in meters");
+            heightProperty.WithFloat32Type();
+
+            // Diameter property
+            var diameterProperty = treeClass
+                .UseProperty("diameter")
+                .WithDescription("Diameter at trunk base, in meters.");
+            diameterProperty.WithFloat32Type();
+
+            var propertyTable = treeClass
+                .AddPropertyTable(features.Count, "PropertyTable");
+
+            propertyTable
+                .UseProperty(ageProperty)
+                .SetValues((uint)100, (uint)101);
+
+            propertyTable
+                .UseProperty(speciesProperty)
+                .SetValues((short)0, (short)3);
+
+            propertyTable.UseProperty(heightProperty)
+                .SetValues(10.0f, 11f);
+
+            propertyTable.UseProperty(diameterProperty)
+                .SetValues(1.5f, 2f);
+
+            // Set the FeatureIds
+            var cnt = propertyTable.Count;
+            var featureIdAttribute = new FeatureIDBuilder(2, 0, propertyTable);
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureIdAttribute);
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_basic_triangle.plotly");
-        }*/
+        }
+        
 
         [Test(Description = "ext_structural_metadata with FeatureId Texture and Property Table")]
         // sample see https://github.com/CesiumGS/3d-tiles-samples/tree/main/glTF/EXT_structural_metadata/FeatureIdTextureAndPropertyTable
@@ -109,8 +363,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            // --------------------------------------------------------------
-
             var rootMetadata = model.UseStructuralMetadata();
             var schema = rootMetadata.UseEmbeddedSchema("FeatureIdTextureAndPropertyTableSchema");
 
@@ -118,38 +370,38 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var buildingComponentsClass = schema
                 .UseClassMetadata("buildingComponents")
-                .WithNameAndDesc("Building components");
+                .WithName("Building components")
+                .WithDescription("The components of a building.");
 
             var componentProp = buildingComponentsClass
                 .UseProperty("component")
-                .WithNameAndDesc("Component")
-                .WithValueType(ElementType.STRING);
+                .WithName("Component")
+                .WithStringType();
 
             var yearProp = buildingComponentsClass
                 .UseProperty("yearBuilt")
-                .WithNameAndDesc("Year built")
-                .WithValueType(ElementType.SCALAR, DataType.INT16);            
+                .WithName("Year built")
+                .WithInt16Type();            
 
             var propertyTable = buildingComponentsClass
                 .AddPropertyTable(4, "Example property table");
 
             propertyTable
                 .UseProperty(componentProp)
-                .SetValues1D("Wall", "Door", "Roof", "Window");
+                .SetValues("Wall", "Door", "Roof", "Window");
 
             propertyTable
                 .UseProperty(yearProp)
-                .SetValues1D(1960, 1996, 1985, 2002);            
+                .SetValues((short)1960, (short)1996, (short)1985, (short)2002);            
 
             // Set the FeatureIds, pointing to the red channel of the texture
 
-            var featureId = new FeatureIDBuilder(propertyTable);            
+            var featureId = new FeatureIDBuilder(4, null, propertyTable);            
 
             var primitive = model.LogicalMeshes[0].Primitives[0];
-            primitive.AddMeshFeatureIds((featureId, model.LogicalTextures[0], new[] {0}));
+            primitive.AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
-
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_texture_and_property_table.plotly");
@@ -204,22 +456,23 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("buildingComponents")
-                .WithNameAndDesc("Building properties");
+                .WithName("Building properties");
 
             exampleMetadataClass
                 .UseProperty("insideTemperature")
-                .WithNameAndDesc("Inside temperature")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8);
+                .WithName("Inside temperature")
+                .WithUInt8Type();
 
             exampleMetadataClass
                 .UseProperty("outsideTemperature")
-                .WithNameAndDesc("Outside temperature")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8);
+                .WithName("Outside temperature")
+                .WithUInt8Type();
 
             exampleMetadataClass
                 .UseProperty("insulation")
-                .WithNameAndDesc("Insulation Thickness")
-                .WithValueType(ElementType.SCALAR, DataType.UINT8, true);
+                .WithName("Insulation Thickness")
+                .WithUInt8Type()
+                .WithNormalized(true);
 
             // define texture property
 
@@ -232,7 +485,7 @@ namespace SharpGLTF.Schema2.Tiles3D
             // assign to primitive
 
             var primitive = model.LogicalMeshes[0].Primitives[0];            
-            primitive.AddPropertyTexture(buildingPropertyTexture);            
+            primitive.AddPropertyTexture(buildingPropertyTexture);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_simple_property_texture.glb");
@@ -276,17 +529,20 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class", "An example metadata class");
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class");
 
             var vec3Property = exampleMetadataClass
                 .UseProperty("example_VEC3_FLOAT32")
-                .WithNameAndDesc("Example VEC3 FLOAT32 property", "An example property, with type VEC3, with component type FLOAT32")
-                .WithValueType(ElementType.VEC3, DataType.FLOAT32);
+                .WithName("Example VEC3 FLOAT32 property")
+                .WithDescription("An example property, with type VEC3, with component type FLOAT32")
+                .WithVector3Type();
 
             var stringProperty = exampleMetadataClass
                 .UseProperty("example_STRING")
-                .WithNameAndDesc("Example STRING property", "An example property, with type STRING")
-                .WithValueType(ElementType.STRING);
+                .WithName("Example STRING property")
+                .WithDescription("An example property, with type STRING")
+                .WithStringType();
 
             // define table
 
@@ -294,18 +550,18 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             examplePropertyTable
                 .UseProperty(vec3Property)
-                .SetValues1D(new Vector3(3, 3.0999999046325684f, 3.200000047683716f), new Vector3(103, 103.0999999046325684f, 103.200000047683716f));
+                .SetValues(new Vector3(3, 3.0999999046325684f, 3.200000047683716f), new Vector3(103, 103.0999999046325684f, 103.200000047683716f));
 
             examplePropertyTable
                 .UseProperty(stringProperty)
-                .SetValues1D("Rain 🌧", "Thunder ⛈");
+                .SetValues("Rain 🌧", "Thunder ⛈");
 
             // assign to primitive
 
-            var featureId0 = new FeatureIDBuilder(examplePropertyTable, 0);
-            var featureId1 = new FeatureIDBuilder(examplePropertyTable, 1);
+            var featureId0 = new FeatureIDBuilder(2, 0, examplePropertyTable);
+            var featureId1 = new FeatureIDBuilder(2, 1, examplePropertyTable);
 
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds( (featureId0, null, null), (featureId1, null, null) );
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds( featureId0, featureId1 );
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_featureid_attribute_and_property_table.glb");
@@ -343,17 +599,20 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class", "An example metadata class");
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class");
 
             var vector3Property = exampleMetadataClass
                 .UseProperty("example_VEC3_FLOAT32")
-                .WithNameAndDesc("Example VEC3 FLOAT32 property", "An example property, with type VEC3, with component type FLOAT32")
-                .WithValueType(ElementType.VEC3, DataType.FLOAT32);
+                .WithName("Example VEC3 FLOAT32 property")
+                .WithDescription("An example property, with type VEC3, with component type FLOAT32")
+                .WithVector3Type();
 
             var matrix4x4Property = exampleMetadataClass
                 .UseProperty("example_MAT4_FLOAT32")
-                .WithNameAndDesc("Example MAT4 FLOAT32 property", "An example property, with type MAT4, with component type FLOAT32")
-                .WithValueType(ElementType.MAT4, DataType.FLOAT32);
+                .WithName("Example MAT4 FLOAT32 property")
+                .WithDescription("An example property, with type MAT4, with component type FLOAT32")
+                .WithMatrix4x4Type();
 
             // define table
 
@@ -361,17 +620,17 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             examplePropertyTable
                 .UseProperty(vector3Property)
-                .SetValues1D(new Vector3(3, 3.0999999046325684f, 3.200000047683716f));
+                .SetValues(new Vector3(3, 3.0999999046325684f, 3.200000047683716f));
 
             examplePropertyTable
                 .UseProperty(matrix4x4Property)
-                .SetValues1D(Matrix4x4.Identity);
+                .SetValues(Matrix4x4.Identity);
 
             // assign to primitive
 
-            var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
+            var featureId = new FeatureIDBuilder(1, 0, examplePropertyTable);
 
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId, null, null));
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_featureids_and_properties.glb");
@@ -409,61 +668,72 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var exampleMetadataClass = schema
                 .UseClassMetadata("exampleMetadataClass")
-                .WithNameAndDesc("Example metadata class A", "First example metadata class");
+                .WithName("Example metadata class A")
+                .WithDescription("First example metadata class");
 
             // enums
 
             var exampleEnum = schema.UseEnumMetadata("exampleEnumType", ("ExampleEnumValueA", 0), ("ExampleEnumValueB", 1), ("ExampleEnumValueC", 2));
 
-            // class properties
+            //// class properties
 
             var uint8ArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_normalized_UINT8")
-                .WithNameAndDesc("Example variable-length ARRAY normalized INT8 property","An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
-                .WithArrayType(ElementType.SCALAR,DataType.UINT8,false);
+                .WithName("Example variable-length ARRAY normalized INT8 property")
+                .WithDescription("An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
+                .WithArrayType(ElementType.SCALAR, DataType.UINT8)
+                .WithNormalized(false);
 
             var fixedLengthBooleanProperty = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_BOOLEAN")
-                .WithNameAndDesc("Example fixed-length ARRAY BOOLEAN property", "An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
-                .WithArrayType(ElementType.BOOLEAN, null, false, 4);
+                .WithName("Example fixed-length ARRAY BOOLEAN property")
+                .WithDescription("An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
+                .WithArrayType(ElementType.BOOLEAN, null, 4)
+                .WithNormalized(false);
 
             var variableLengthStringArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_STRING")
-                .WithNameAndDesc("Example variable-length ARRAY STRING property", "An example property, with type ARRAY, with component type STRING, and variable length")
+                .WithName("Example variable-length ARRAY STRING property")
+                .WithDescription("An example property, with type ARRAY, with component type STRING, and variable length")
                 .WithArrayType(ElementType.STRING);
 
             var fixed_length_ARRAY_ENUM = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_ENUM")
-                .WithNameAndDesc("Example fixed-length ARRAY ENUM property", "An example property, with type ARRAY, with component type ENUM, and fixed length")
+                .WithName("Example fixed-length ARRAY ENUM property")
+                .WithDescription("An example property, with type ARRAY, with component type ENUM, and fixed length")
                 .WithEnumArrayType(exampleEnum, 2);
-
-            // property tables
 
             var examplePropertyTable = exampleMetadataClass.AddPropertyTable(1, "Example property table");
 
-            // Question: The table declares a feature count of 1, but then, these properties define different number of items
-            
+            var bytes = new List<List<byte>>();
+            bytes.Add(new List<byte>() { 0, 1, 2, 3, 4, 5, 6, 7 });
             examplePropertyTable
                 .UseProperty(uint8ArrayProperty)
-                .SetValues1D<byte>(0, 1, 2, 3, 4, 5, 6, 7);
+                .SetArrayValues(bytes);
 
+            var bools = new List<List<bool>>();
+            bools.Add(new List<bool>() { true, false, true, false });
             examplePropertyTable
                 .UseProperty(fixedLengthBooleanProperty)
-                .SetValues1D<Boolean>(true, false, true, false);
+                .SetArrayValues(bools);
 
+            var strings = new List<List<string>>();
+            strings.Add(["Example string 1", "Example string 2", "Example string 3"]);
             examplePropertyTable
                 .UseProperty(variableLengthStringArrayProperty)
-                .SetValues1D("Example string 1", "Example string 2", "Example string 3");
+                .SetArrayValues(strings);
 
+            // Fill property table with enum values
+            var shorts = new List<List<short>>();
+            shorts.Add([0, 1]);
             examplePropertyTable
                 .UseProperty(fixed_length_ARRAY_ENUM)
-                .SetValues1D<int>(0, 1);
+                .SetArrayValues(shorts);
 
             // add to primitive            
+            var featureId = new FeatureIDBuilder(1, 0, examplePropertyTable);
 
-            var featureId = new FeatureIDBuilder(examplePropertyTable, 0);
-
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId, null, null));
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId);
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_complex_types.glb");
@@ -490,8 +760,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             scene.AddRigidMesh(mesh, Matrix4x4.Identity);
             var model = scene.ToGltf2();
 
-            // --------------------------------------------------------------
-
             var rootMetadata = model.UseStructuralMetadata();
             var schema = rootMetadata.UseEmbeddedSchema("MultipleClassesSchema");            
 
@@ -499,46 +767,51 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var classA = schema
                 .UseClassMetadata("exampleMetadataClassA")
-                .WithNameAndDesc("Example metadata class A","First example metadata class");
+                .WithName("Example metadata class A")
+                .WithDescription("First example metadata class");
 
             var classAp0 = classA.UseProperty("example_FLOAT32")
-                .WithNameAndDesc("Example FLOAT32 property", "An example property, with component type FLOAT32")
-                .WithValueType(ElementType.SCALAR, DataType.FLOAT32);
+                .WithName("Example FLOAT32 property")
+                .WithDescription("An example property, with component type FLOAT32")
+                .WithFloat32Type();
 
             var classAp1 = classA.UseProperty("example_INT64")
-                .WithNameAndDesc("Example INT64 property", "An example property, with component type INT64")
-                .WithValueType(ElementType.SCALAR, DataType.INT64);
+                .WithName("Example INT64 property")
+                .WithDescription("An example property, with component type INT64")
+                .WithInt64Type();
 
             var classB = schema.UseClassMetadata("exampleMetadataClassB")
-                .WithNameAndDesc("Example metadata class B", "Second example metadata class");
+                .WithName("Example metadata class B")
+                .WithDescription("Second example metadata class");
 
             var classBp0 = classB.UseProperty("example_UINT16")
-                .WithNameAndDesc("Example UINT16 property", "An example property, with component type UINT16")
-                .WithValueType(ElementType.SCALAR, DataType.UINT16);
+                .WithName("Example UINT16 property")
+                .WithDescription("An example property, with component type UINT16")
+                .WithUInt16Type();
 
             var classBp1 = classB.UseProperty("example_FLOAT64")
-                .WithNameAndDesc("Example FLOAT64 property", "An example property, with component type FLOAT64")
-                .WithValueType(ElementType.SCALAR, DataType.FLOAT64);
+                .WithName("Example FLOAT64 property")
+                .WithDescription("An example property, with component type FLOAT64")
+                .WithFloat64Type();
 
             // properties
 
             var firstPropertyTable = classA.AddPropertyTable(1, "First example property table");
-            firstPropertyTable.UseProperty(classAp0).SetValues1D<float>(100);
-            firstPropertyTable.UseProperty(classAp1).SetValues1D<long>(101);
+            firstPropertyTable.UseProperty(classAp0).SetValues<float>(100);
+            firstPropertyTable.UseProperty(classAp1).SetValues<long>(101);
 
             var secondPropertyTable = classB.AddPropertyTable(1, "Second example property table");
-            secondPropertyTable.UseProperty(classBp0).SetValues1D<ushort>(102);
-            secondPropertyTable.UseProperty(classBp1).SetValues1D<double>(103);
+            secondPropertyTable.UseProperty(classBp0).SetValues<ushort>(102);
+            secondPropertyTable.UseProperty(classBp1).SetValues<double>(103);
 
             // features
 
-            // FeatureID 0: featureCount=1, attribute=0, porpertyTable=0 
-            var featureId0 = new FeatureIDBuilder(firstPropertyTable, 0);
-            // FeatureID 1: featureCount=1, attribute=1, porpertyTable=1
-            var featureId1 = new FeatureIDBuilder(secondPropertyTable, 1);
+            // FeatureID 0: featureCount=1, attribute=0, propertyTable=0 
+            var featureId0 = new FeatureIDBuilder(1, 0, firstPropertyTable);
+            // FeatureID 1: featureCount=1, attribute=1, prorpertyTable=1
+            var featureId1 = new FeatureIDBuilder(1, 1, secondPropertyTable);
             
-            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds((featureId0, null,null), (featureId1,null,null));
-
+            model.LogicalMeshes[0].Primitives[0].AddMeshFeatureIds(featureId0, featureId1);
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_multiple_classes.gltf");
@@ -547,6 +820,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 
         
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/PropertyAttributesPointCloud/
+        // Note in the sample an external json file (MetadataSchema.json) is used to define the schema, which is not supported
+        // in this library yet.
+        // This test uses the same schema but defines it in code instead.
         [Test(Description = "ext_structural_metadata with pointcloud and custom attributes")]
         public void CreatePointCloudWithCustomAttributesTest()
         {
@@ -579,28 +855,40 @@ namespace SharpGLTF.Schema2.Tiles3D
             // --------------------------------------------------------------
 
             var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema();
 
-            // external references are problematic because the idea behind SharpGLTF is that all files are loaded into memory, so you don't
-            // need to track resources in disk while working with models. The whole mechanism is too complex to be worth the pain of implementing it.
-            // so my idea is that the UseExternalSchema returns a ISchemaProxy interface or something like that, that has pretty much the same methods
-            // of an actual schema, so the API usage remains the same for both an embedded and an external schema.
+            var classA = schema
+                .UseClassMetadata("exampleMetadataClass")
+                .WithName("Example metadata class")
+                .WithDescription("An example metadata class for property attributes");
 
-            // var schemaUri = new Uri("MetadataSchema.json", UriKind.Relative);            
-            // var schemaProxy = rootMetadata.UseExternalSchema(schemaUri);
+            classA.UseProperty("intensity")
+                .WithName("Example intensity property")
+                .WithDescription("An example property for the intensity, with component type FLOAT32")
+                .WithFloat32Type();
 
-            var schema = rootMetadata.UseEmbeddedSchema("externalSchema");
+            var speciesEnum = schema.UseEnumMetadata("classificationEnumType", ("MediumVegetation", 0), ("Buildings", 1));
 
-            var externalClass = schema.UseClassMetadata("exampleMetadataClass");
+            classA
+                .UseProperty("classification")
+                .WithName("Example classification property")
+                .WithDescription("An example property for the classification, with the classificationEnumType")
+                .WithEnumeration(speciesEnum);
 
-            var propertyAttribute = rootMetadata.AddPropertyAttribute(externalClass);
 
-            var intensityProperty = propertyAttribute.CreateProperty("intensity");             
-            intensityProperty.Attribute = "_INTENSITY";
-
-            var classificationProperty = propertyAttribute.CreateProperty("classification");
-            classificationProperty.Attribute = "_CLASSIFICATION";
+            var propertyAttribute = rootMetadata.AddPropertyAttribute(classA);
+            var intensityAttribute = propertyAttribute.CreateProperty("intensity");
+            intensityAttribute.Attribute = "_INTENSITY";
+            var classificationAttribute = propertyAttribute.CreateProperty("classification");
+            classificationAttribute.Attribute = "_CLASSIFICATION";
 
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                primitive.AddPropertyAttribute(propertyAttribute);
+            }
+
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.glb");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_metadata_with_pointcloud_attributes.plotly");

@@ -27,6 +27,14 @@
   </ItemGroup>
 
   <ItemGroup>
+	<Folder Include="testfixtures\meshFeatures\" />
+	<Folder Include="testfixtures\instanceFeatures\" />
+    <Folder Include="testfixtures\structuralMetadata\" />
+	<None Update="testfixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
+
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="tree.glb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
