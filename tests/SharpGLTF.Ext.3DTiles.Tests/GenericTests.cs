@@ -13,6 +13,14 @@ namespace SharpGLTF
         public void SetUp()
         {
             Tiles3DExtensions.RegisterExtensions();
+
+            var fileName = ResourceInfo.From("_");
+
+            foreach(var f in fileName.File.Directory.EnumerateFiles())
+            {
+                TestContext.WriteLine($"{f.FullName}");
+            }
+
         }
 
         // Test files are from https://github.com/CesiumGS/3d-tiles-validator/tree/main/specs/data/gltfExtensions/
