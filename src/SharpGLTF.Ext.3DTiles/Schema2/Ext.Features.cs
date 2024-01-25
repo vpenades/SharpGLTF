@@ -314,7 +314,7 @@ namespace SharpGLTF.Schema2
                             Guard.IsTrue(distinctFeatureIds.Min() >= 0, nameof(distinctFeatureIds), $"FeatureIds must be equal or larger than 0, but contains {distinctFeatureIds.Min()}");
                         }
 
-                        var count = distinctFeatureIds.Count();
+                        var count = distinctFeatureIds.Count;
 
                         // FeatureCount must be greater or equal to the number of distinct feature ids
                         Guard.IsTrue(featureId.FeatureCount >= count, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Attribute ({count})");
