@@ -43,11 +43,7 @@ namespace SharpGLTF
         [TestCase("ValidFeatureIdTextureAndPropertyTable.gltf", null)]
         public void ReadGenericFiles(string file, Type exception = null)
         {
-            var fileName = ResourceInfo.From(file);
-
-            var exists = fileName.File.Exists;
-            var text = fileName.ReadAllText();
-            TestContext.WriteLine($"{exists} {text.Length}");
+            var fileName = ResourceInfo.From(file);            
 
             if (exception != null)
             {

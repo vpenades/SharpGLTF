@@ -10,11 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SharpGLTF.Ext.3DTiles\SharpGLTF.Ext.3DTiles.csproj" />
     <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="TestFixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
+  </ItemGroup>  
 
   <ItemGroup>
     <PackageReference Include="NUnit3TestAdapter" Version="4.5.0">
