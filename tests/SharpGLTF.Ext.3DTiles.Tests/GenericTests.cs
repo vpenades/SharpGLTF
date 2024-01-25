@@ -2,6 +2,7 @@
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 using System;
+using System.IO;
 
 namespace SharpGLTF
 {
@@ -16,7 +17,14 @@ namespace SharpGLTF
 
             var fileName = ResourceInfo.From("_");
 
+            TestContext.WriteLine("Dumping current Resource context:");
+
             foreach(var f in fileName.File.Directory.EnumerateDirectories("*",System.IO.SearchOption.AllDirectories))
+            {
+                TestContext.WriteLine($"{f.Exists} {f.FullName}");
+            }
+
+            foreach (var f in fileName.File.Directory.EnumerateFiles("*", System.IO.SearchOption.AllDirectories))
             {
                 TestContext.WriteLine($"{f.Exists} {f.FullName}");
             }
@@ -36,6 +44,10 @@ namespace SharpGLTF
         public void ReadGenericFiles(string file, Type exception = null)
         {
             var fileName = ResourceInfo.From(file);
+
+            var exists = fileName.File.Exists;
+            var text = fileName.ReadAllText();
+            TestContext.WriteLine($"{exists} {text.Length}");
 
             if (exception != null)
             {
