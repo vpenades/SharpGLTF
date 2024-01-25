@@ -16,7 +16,7 @@ namespace SharpGLTF
 
             var fileName = ResourceInfo.From("_");
 
-            foreach(var f in fileName.File.Directory.EnumerateFiles("*",System.IO.SearchOption.AllDirectories))
+            foreach(var f in fileName.File.Directory.EnumerateDirectories("*",System.IO.SearchOption.AllDirectories))
             {
                 TestContext.WriteLine($"{f.Exists} {f.FullName}");
             }
