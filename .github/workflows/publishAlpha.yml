@@ -1,0 +1,25 @@
+name: Build a preview and release it to Nuget
+
+on: workflow_dispatch
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    timeout-minutes: 5
+    steps:
+    - name: define version suffix      
+      run: echo "VERSIONSUFFIX=alpha-${{ env.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v3    
+    - name: Install dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build -c Release --version-suffix ${{ env.VERSIONSUFFIX }}
+#    - name: Test
+#      run: dotnet test -c Release --no-build
+    - name: Pack nugets
+      run: dotnet pack -c Release --no-build --output .
+#    - name: Push to NuGet
+#      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToNuget}} --source https://api.nuget.org/v3/index.json
