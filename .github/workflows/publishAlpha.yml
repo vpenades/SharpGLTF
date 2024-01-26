@@ -8,7 +8,7 @@ jobs:
     timeout-minutes: 5
     steps:
     - name: define version suffix      
-      run: echo "VERSIONSUFFIX=alpha-${{ env.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
+      run: echo "VERSIONSUFFIX=alpha-$SharpGLTF_AlphaVersion" >> $GITHUB_ENV
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup .NET SDK
