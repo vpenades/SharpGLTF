@@ -14,7 +14,14 @@
   <PropertyGroup>
     <LangVersion>8.0</LangVersion>
     <IsPackable>false</IsPackable>
-  </PropertyGroup>  
+  </PropertyGroup>
+
+  <!-- strong name signing -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DelaySign>false</DelaySign>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\src\Shared\SharpGLTF.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   
   <!-- Testing & Analysers =================================================================================== -->  
 

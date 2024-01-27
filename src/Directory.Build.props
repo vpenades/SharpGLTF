@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
 
+  <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props"/>
+
   <!-- Legal =================================================================================== -->
 
   <PropertyGroup>
@@ -29,9 +31,9 @@
   <!-- Condition=" '$(Configuration)' == 'Debug' " -->
   
   <ItemGroup>
-    <InternalsVisibleTo Include="SharpGLTF.Core.Tests"/>
-    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests"/>
-    <InternalsVisibleTo Include="SharpGLTF.Ext.3DTiles.Tests"/>
+    <InternalsVisibleTo Include="SharpGLTF.Core.Tests" Key="$(StrongName_PublicKey)"/>
+    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests" Key="$(StrongName_PublicKey)"/>
+    <InternalsVisibleTo Include="SharpGLTF.Ext.3DTiles.Tests" Key="$(StrongName_PublicKey)"/>
   </ItemGroup>
 
   <PropertyGroup>
