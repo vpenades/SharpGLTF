@@ -8,7 +8,7 @@ jobs:
     timeout-minutes: 5
     steps:
     - name: define version suffix      
-      run: echo "VERSIONSUFFIX=alpha-${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
+      run: echo "VERSIONSUFFIX=alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup .NET SDK
@@ -21,5 +21,6 @@ jobs:
 #      run: dotnet test -c Release --no-build
     - name: Pack nugets
       run: dotnet pack -c Release --no-build --output .
+
 #    - name: Push to NuGet
 #      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToNuget}} --source https://api.nuget.org/v3/index.json
