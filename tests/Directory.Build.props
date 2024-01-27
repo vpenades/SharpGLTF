@@ -16,12 +16,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <!-- strong name signing -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DelaySign>false</DelaySign>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)..\src\Shared\SharpGLTF.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  <Import Project="$(MsBuildThisFileDirectory)..\src\Shared\SharpGLTF.PublicKey.props"/>
   
   <!-- Testing & Analysers =================================================================================== -->  
 

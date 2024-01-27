@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project>
+<Project>  
 
-  <PropertyGroup>
+  <!-- strong name signing -->
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    
+    <DelaySign>false</DelaySign>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)SharpGLTF.snk</AssemblyOriginatorKeyFile>
 
     <StrongName_Token>6f8b67557d279fe6</StrongName_Token>
-
     <StrongName_PublicKey>0024000004800000940000000602000000240000525341310004000001000100318e6698f4f41b26736d5881759c6afde44d17c06b63d2e383c915ca1fed6ec1b6eb2e1c38013feb2320224ace549b7701e22e6e0f7770e0d72b5c199f9e969bf2c2668c0ebeb035e539fb534d9ef24053aa9997d2d72534a6c1da8ab58e353ed6eb62ad9eb1f4a044893d7a50a226e4701d4e472a7dc1918caee6794d9c4cae</StrongName_PublicKey>
-
+    
   </PropertyGroup>
 
 </Project>

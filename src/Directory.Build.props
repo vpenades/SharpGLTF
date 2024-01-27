@@ -1,7 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project>
-
-  <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props"/>
+<Project>  
 
   <!-- Legal =================================================================================== -->
 
@@ -25,6 +23,8 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
+
+  <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props"/>
 
   <!-- Testing & Analysers =================================================================================== -->
 
@@ -111,14 +111,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>    
     <GenerateDocumentationFile>true</GenerateDocumentationFile>    
-  </PropertyGroup>
-
-  <!-- strong name signing -->
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DelaySign>false</DelaySign>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)Shared\SharpGLTF.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  </PropertyGroup>  
 
   <!-- Source Control =================================================================================== -->
 
