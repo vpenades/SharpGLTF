@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+		.github\workflows\publishAlpha.yml = .github\workflows\publishAlpha.yml
 		README.md = README.md
 		SharpGLTF.ruleset = SharpGLTF.ruleset
 	EndProjectSection
@@ -35,6 +36,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Example1", "examples\Example1\Example1.csproj", "{68662AA0-8523-4B9E-9230-DE79F2B07EAB}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}"
+	ProjectSection(SolutionItems) = preProject
+		examples\Directory.Build.props = examples\Directory.Build.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointCloudGalaxy", "examples\PointCloudGalaxy\PointCloudGalaxy.csproj", "{53B7933A-DD1B-4E75-90EC-94E46101C6CC}"
 EndProject
