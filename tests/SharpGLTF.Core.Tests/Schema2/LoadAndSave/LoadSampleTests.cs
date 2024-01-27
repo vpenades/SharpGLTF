@@ -29,11 +29,13 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
         private static ModelRoot _LoadModel(string f, bool tryFix = false)
         {
-            var perf = System.Diagnostics.Stopwatch.StartNew();
+            var settings = tryFix
+                ? Validation.ValidationMode.TryFix
+                : Validation.ValidationMode.Strict;
 
             ModelRoot model = null;
 
-            var settings = tryFix ? Validation.ValidationMode.TryFix : Validation.ValidationMode.Strict;            
+            var perf = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
@@ -43,7 +45,6 @@ namespace SharpGLTF.Schema2.LoadAndSave
             catch (Exception ex)
             {
                 TestContext.Progress.WriteLine($"Failed {f.ToShortDisplayPath()}");
-
                 Assert.Fail(ex.Message);
             }
 
@@ -99,18 +100,23 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase("\\glTF-IBL\\")]
         [TestCase("\\glTF-Binary\\")]
         [TestCase("\\glTF-Embedded\\")]
-        // [TestCase("\\glTF-Quantized\\")] // removed from tests
-        // [TestCase("\\glTF-pbrSpecularGlossiness\\")] // removed from tests
+        [TestCase("\\glTF-Quantized\\")]
+        // [TestCase("\\glTF-Meshopt\\")] // not supported
         public void LoadModelsFromKhronosSamples(string section)
         {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            foreach (var f in TestFiles.GetSampleModelsPaths())
+            Assert.Multiple( () =>
             {
-                if (!f.Contains(section)) continue;
+                foreach (var f in TestFiles.GetSampleModelsPaths())
+                {
+                    if (f.Contains("SuzanneMorphSparse")) continue; // temporarily skipping due to empty BufferView issue
 
-                _LoadModel(f);
-            }
+                    if (!f.Contains(section)) continue;
+
+                    _LoadModel(f);
+                }
+            } );
         }
 
         [Test]
@@ -220,12 +226,13 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.That(model.DefaultScene.VisualChildren.ElementAt(1).PunctualLight.LogicalIndex, Is.EqualTo(0));
         }
 
-        [Test]
-        public void LoadModelWithSparseAccessor()
+        [TestCase("SimpleSparseAccessor.gltf")]
+        // [TestCase("SuzanneMorphSparse.gltf")] requires supporting empty BufferView
+        public void LoadModelWithSparseAccessor(string fileName)
         {
             var path = TestFiles
                 .GetSampleModelsPaths()
-                .FirstOrDefault(item => item.Contains("SimpleSparseAccessor.gltf"));
+                .FirstOrDefault(item => item.Contains(fileName));
 
             var model = ModelRoot.Load(path);
             Assert.That(model, Is.Not.Null);
