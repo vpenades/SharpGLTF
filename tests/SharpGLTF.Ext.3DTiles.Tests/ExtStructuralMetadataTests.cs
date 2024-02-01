@@ -120,9 +120,11 @@ namespace SharpGLTF.Schema2.Tiles3D
                     .UseProperty("description")
                     .WithStringType();
 
+            // for this property, the default value (byte.MaxValue) should be shown in the client when the actual value is 
+            // equal to the noData value (byte.MinValue)
             var uint8Property = schemaClass
                 .UseProperty("uint8")
-                .WithUInt8Type(byte.MinValue);
+                .WithUInt8Type(byte.MinValue, byte.MaxValue);
 
             var int8Property = schemaClass
                 .UseProperty("int8")
@@ -164,7 +166,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var stringProperty = schemaClass
                 .UseProperty("string")
-                .WithStringType("noData");
+                .WithStringType("noData", "-");
 
             var speciesProperty = schemaClass
                 .UseProperty("species")
@@ -251,6 +253,7 @@ namespace SharpGLTF.Schema2.Tiles3D
                 primitive.AddMeshFeatureIds(featureIdAttribute);
             }
 
+            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_issues\vector3_float32_nodata\vector3_float32_nodata.gltf");
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.glb");

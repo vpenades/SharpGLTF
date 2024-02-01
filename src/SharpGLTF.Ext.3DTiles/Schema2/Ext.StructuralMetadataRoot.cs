@@ -14,6 +14,7 @@ namespace SharpGLTF.Schema2
     using Tiles3D;
     using System.Numerics;
     using System.Text.Json.Nodes;
+    using System.ComponentModel;
 
     partial class Tiles3DExtensions
     {
@@ -1341,10 +1342,11 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithStringType(string noData = null)
+            public StructuralMetadataClassProperty WithStringType(string noData = null, string defaultValue = null)
             {
                 Type = ElementType.STRING;
                 if (noData != null) _noData = noData;
+                if(defaultValue != null) _default = defaultValue;
                 return this;
             }
 
@@ -1354,88 +1356,98 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt8Type(byte? noData = null)
+            public StructuralMetadataClassProperty WithUInt8Type(byte? noData = null, byte? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.UINT8;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt8Type(sbyte? noData = null)
+            public StructuralMetadataClassProperty WithInt8Type(sbyte? noData = null, sbyte? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.INT8;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt16Type(ushort? noData = null)
+            public StructuralMetadataClassProperty WithUInt16Type(ushort? noData = null, ushort? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.UINT16;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt16Type(short? noData = null)
+            public StructuralMetadataClassProperty WithInt16Type(short? noData = null, short? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.INT16;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt32Type(uint? noData = null)
+            public StructuralMetadataClassProperty WithUInt32Type(uint? noData = null, uint? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.UINT32;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt32Type(int? noData = null)
+            public StructuralMetadataClassProperty WithInt32Type(int? noData = null, int? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.INT32;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt64Type(ulong? noData = null)
+            public StructuralMetadataClassProperty WithUInt64Type(ulong? noData = null, ulong? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.UINT64;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt64Type(long? noData = null)
+            public StructuralMetadataClassProperty WithInt64Type(long? noData = null, long? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.INT64;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithFloat32Type(float? noData = null)
+            public StructuralMetadataClassProperty WithFloat32Type(float? noData = null, float? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.FLOAT32;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithFloat64Type(double? noData = null)
+            public StructuralMetadataClassProperty WithFloat64Type(double? noData = null, double? defaultValue = null)
             {
                 Type = ELEMENTTYPE.SCALAR;
                 ComponentType = DATATYPE.FLOAT64;
                 if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
 
-            public StructuralMetadataClassProperty WithVector3Type(Vector3? noData = null)
+            public StructuralMetadataClassProperty WithVector3Type(Vector3? noData = null, Vector3? defaultValue = null)
             {
                 Type = ElementType.VEC3;
                 ComponentType = DataType.FLOAT32;
@@ -1444,10 +1456,15 @@ namespace SharpGLTF.Schema2
                 {
                     _noData = new JsonArray(noData.Value.X, noData.Value.Y, noData.Value.Z);
                 }
+                if (defaultValue != null)
+                {
+                    _default = new JsonArray(defaultValue.Value.X, defaultValue.Value.Y, defaultValue.Value.Z);
+                }
+
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithMatrix4x4Type(Matrix4x4? noData = null)
+            public StructuralMetadataClassProperty WithMatrix4x4Type(Matrix4x4? noData = null, Matrix4x4? defaultValue = null)
             {
                 Type = ElementType.MAT4;
                 ComponentType = DataType.FLOAT32;
@@ -1456,6 +1473,16 @@ namespace SharpGLTF.Schema2
                 {
                     var m4 = noData.Value;
                     _noData = new JsonArray(
+                        m4.M11, m4.M12, m4.M13, m4.M14,
+                        m4.M21, m4.M22, m4.M23, m4.M24,
+                        m4.M31, m4.M32, m4.M33, m4.M34,
+                        m4.M41, m4.M42, m4.M43, m4.M44);
+                }
+
+                if (defaultValue != null)
+                {
+                    var m4 = defaultValue.Value;
+                    _default = new JsonArray(
                         m4.M11, m4.M12, m4.M13, m4.M14,
                         m4.M21, m4.M22, m4.M23, m4.M24,
                         m4.M31, m4.M32, m4.M33, m4.M34,
@@ -1598,37 +1625,6 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            /**
-            private static JsonArray ToJsonArray(Vector3 vector3)
-            {
-                var floats = new float[] { vector3.X, vector3.Y, vector3.Z };
-                var  jsonNode = ToJsonArray(floats);
-                return jsonNode;
-            }
-
-            private static JsonArray ToJsonArray(Matrix4x4 matrix4x4)
-            {
-                var floats = new float[] {
-                    matrix4x4.M11, matrix4x4.M12, matrix4x4.M13, matrix4x4.M14,
-                    matrix4x4.M21, matrix4x4.M22, matrix4x4.M23, matrix4x4.M24,
-                    matrix4x4.M31, matrix4x4.M32, matrix4x4.M33, matrix4x4.M34,
-                    matrix4x4.M41, matrix4x4.M42, matrix4x4.M43, matrix4x4.M44
-                };
-
-                var jsonNode = ToJsonArray(floats);
-                return jsonNode;
-            }
-
-            private static JsonArray ToJsonArray(float[] floats)
-            {
-                var jsonNode = new JsonArray();
-                foreach (var f in floats)
-                {
-                    jsonNode.Add(f);
-                }
-
-                return jsonNode;
-            }*/
 
             #endregion
         }
