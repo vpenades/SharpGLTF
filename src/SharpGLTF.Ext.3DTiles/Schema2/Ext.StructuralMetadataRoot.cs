@@ -1579,26 +1579,9 @@ namespace SharpGLTF.Schema2
                 return WithArrayType(ELEMENTTYPE.MAT4, DATATYPE.FLOAT32, count);
             }
 
-            public StructuralMetadataClassProperty WithStringArrayType(int? count = null, List<string> noData = null, List<string> defaultValue = null)
+            public StructuralMetadataClassProperty WithStringArrayType(int? count = null)
             {
-                var property = WithArrayType(ELEMENTTYPE.STRING, null, count);
-                if (noData != null)
-                {
-                    var arr = noData.ToArray();
-                    var jsonNodes = new List<JsonNode>();
-                    foreach(var item in arr)
-                    {
-                        jsonNodes.Add(item);
-                    }
-                    var jsonArray = new JsonArray(jsonNodes.ToArray());
-
-                    property._noData = jsonArray;
-                }
-                if (noData != null)
-                {
-                    property._default = new JsonArray(defaultValue[0]);
-                }
-                return property;
+                return WithArrayType(ELEMENTTYPE.STRING, null, count);
             }
 
             private StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)

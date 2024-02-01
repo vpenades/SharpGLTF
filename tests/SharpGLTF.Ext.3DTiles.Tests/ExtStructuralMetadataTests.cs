@@ -182,12 +182,6 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("matrix4x4")
                 .WithMatrix4x4Type(Matrix4x4.Identity * -10);
 
-            var stringArrayProperty = schemaClass
-                .UseProperty("stringArray")
-                .WithStringArrayType(noData: ["test0", "test1"], defaultValue: ["nothing"]);
-
-            // todo add array types
-
             var propertyTable = schemaClass.AddPropertyTable(1);
 
             propertyTable
@@ -250,13 +244,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             propertyTable
                 .UseProperty(matrix4x4Property)
                 .SetValues(m4);
-
-            var strings = new List<List<string>>();
-            strings.Add(["test0", "test1"]);
-
-            propertyTable
-                .UseProperty(stringArrayProperty)
-                .SetArrayValues(strings);
 
             foreach (var primitive in model.LogicalMeshes[0].Primitives)
             {
