@@ -253,7 +253,6 @@ namespace SharpGLTF.Schema2.Tiles3D
                 primitive.AddMeshFeatureIds(featureIdAttribute);
             }
 
-            model.SaveGLTF(@"D:\dev\github.com\bertt\cesium_issues\vector3_float32_nodata\vector3_float32_nodata.gltf");
             // create files
             var ctx = new ValidationResult(model, ValidationMode.Strict, true);
             model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.glb");
