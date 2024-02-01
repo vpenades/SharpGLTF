@@ -1442,9 +1442,7 @@ namespace SharpGLTF.Schema2
 
                 if (noData != null)
                 {
-                    var jsonNode = ToJsonArray(noData.Value);
-                    _noData = jsonNode;
-
+                    _noData = new JsonArray(noData.Value.X, noData.Value.Y, noData.Value.Z);
                 }
                 return this;
             }
@@ -1456,8 +1454,12 @@ namespace SharpGLTF.Schema2
 
                 if (noData != null)
                 {
-                    var jsonNode = ToJsonArray(noData.Value);
-                    _noData = jsonNode;
+                    var m4 = noData.Value;
+                    _noData = new JsonArray(
+                        m4.M11, m4.M12, m4.M13, m4.M14,
+                        m4.M21, m4.M22, m4.M23, m4.M24,
+                        m4.M31, m4.M32, m4.M33, m4.M34,
+                        m4.M41, m4.M42, m4.M43, m4.M44);
                 }
 
                 return this;
@@ -1596,7 +1598,7 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-
+            /**
             private static JsonArray ToJsonArray(Vector3 vector3)
             {
                 var floats = new float[] { vector3.X, vector3.Y, vector3.Z };
@@ -1626,7 +1628,7 @@ namespace SharpGLTF.Schema2
                 }
 
                 return jsonNode;
-            }
+            }*/
 
             #endregion
         }
