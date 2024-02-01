@@ -1254,7 +1254,7 @@ namespace SharpGLTF.Schema2
             internal ELEMENTTYPE Type
             {
                 get => _type;
-                set => _type = value;
+                // set => _type = value;
             }
 
             public string EnumType
@@ -1266,7 +1266,7 @@ namespace SharpGLTF.Schema2
             public DATATYPE? ComponentType
             {
                 get => _componentType;
-                set => _componentType = value;
+                // set => _componentType = value;
             }
 
             public bool Required
@@ -1344,7 +1344,7 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithStringType(string noData = null, string defaultValue = null)
             {
-                Type = ElementType.STRING;
+                _type = ElementType.STRING;
                 if (noData != null) _noData = noData;
                 if(defaultValue != null) _default = defaultValue;
                 return this;
@@ -1352,14 +1352,14 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithBooleanType()
             {
-                Type = ElementType.BOOLEAN;
+                _type = ElementType.BOOLEAN;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithUInt8Type(byte? noData = null, byte? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT8;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT8;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1367,8 +1367,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithInt8Type(sbyte? noData = null, sbyte? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT8;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT8;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1376,8 +1376,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithUInt16Type(ushort? noData = null, ushort? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT16;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT16;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1385,8 +1385,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithInt16Type(short? noData = null, short? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT16;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT16;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1394,8 +1394,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithUInt32Type(uint? noData = null, uint? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT32;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1403,8 +1403,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithInt32Type(int? noData = null, int? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT32;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1412,8 +1412,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithUInt64Type(ulong? noData = null, ulong? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT64;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT64;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1421,8 +1421,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithInt64Type(long? noData = null, long? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT64;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT64;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1430,8 +1430,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithFloat32Type(float? noData = null, float? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.FLOAT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.FLOAT32;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1439,8 +1439,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithFloat64Type(double? noData = null, double? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.FLOAT64;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.FLOAT64;
                 if (noData != null) _noData = noData;
                 if (defaultValue != null) _default = defaultValue;
                 return this;
@@ -1449,8 +1449,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithVector3Type(Vector3? noData = null, Vector3? defaultValue = null)
             {
-                Type = ElementType.VEC3;
-                ComponentType = DataType.FLOAT32;
+                _type = ElementType.VEC3;
+                _componentType = DataType.FLOAT32;
 
                 if (noData != null)
                 {
@@ -1466,8 +1466,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithMatrix4x4Type(Matrix4x4? noData = null, Matrix4x4? defaultValue = null)
             {
-                Type = ElementType.MAT4;
-                ComponentType = DataType.FLOAT32;
+                _type = ElementType.MAT4;
+                _componentType = DataType.FLOAT32;
 
                 if (noData != null)
                 {
@@ -1494,8 +1494,8 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithCount()
             {
-                Type = ElementType.MAT4;
-                ComponentType = DataType.FLOAT32;
+                _type = ElementType.MAT4;
+                _componentType = DataType.FLOAT32;
                 return this;
             }
 
@@ -1586,8 +1586,8 @@ namespace SharpGLTF.Schema2
 
             private StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
             {
-                Type = etype;
-                ComponentType = ctype;
+                _type = etype;
+                _componentType = ctype;
                 Array = true;
                 Count = count;
                 return this;
@@ -1595,7 +1595,7 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumeration, int? count = null, string noData = null)
             {
-                Type = ELEMENTTYPE.ENUM;
+                _type = ELEMENTTYPE.ENUM;
                 _enumType = enumeration.LogicalKey;
                 Array = true;
                 Count = count;
@@ -1605,7 +1605,7 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithEnumeration(StructuralMetadataEnum enumeration, string noData = null)
             {
-                Type = ELEMENTTYPE.ENUM;
+                _type = ELEMENTTYPE.ENUM;
                 _enumType = enumeration.LogicalKey;
                 if (noData != null) _noData = noData;
                 return this;
