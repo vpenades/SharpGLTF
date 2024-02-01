@@ -112,7 +112,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 
             var schemaClass = schema.UseClassMetadata("triangles");
 
-            var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple",3));
+            var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple", 3));
             speciesEnum.Name = "Species";
             speciesEnum.Description = "An example enum for tree species.";
 
@@ -162,10 +162,6 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("float64")
                 .WithFloat64Type(double.MinValue);
 
-            var vector3Property = schemaClass
-                .UseProperty("vector3")
-                .WithVector3Type();
-
             var stringProperty = schemaClass
                 .UseProperty("string")
                 .WithStringType("noData");
@@ -175,6 +171,14 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .WithDescription("Type of tree.")
                 .WithEnumeration(speciesEnum, "Unspecified")
                 .WithRequired(false);
+
+            var vector3Property = schemaClass
+                .UseProperty("vector3")
+                .WithVector3Type(new Vector3(-10.0f, -10.0f, -10.0f));
+
+            var matrix4x4Property = schemaClass
+                .UseProperty("matrix4x4")
+                .WithMatrix4x4Type(Matrix4x4.Identity * -10);
 
             // todo add array types
 
@@ -224,11 +228,6 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty(float64Property)
                 .SetValues(double.MinValue);
 
-            // todo: how to set a vector3 to null?
-            propertyTable
-                .UseProperty(vector3Property)
-                .SetValues(new Vector3(0,0,0));
-
             propertyTable
                 .UseProperty(stringProperty)
                 .SetValues("noData");
@@ -236,6 +235,15 @@ namespace SharpGLTF.Schema2.Tiles3D
             propertyTable
                 .UseProperty(speciesProperty)
                 .SetValues((short)0);
+
+            propertyTable
+                .UseProperty(vector3Property)
+                .SetValues(new Vector3(10.0f,10.0f,10.0f));
+
+            var m4 = Matrix4x4.Identity;
+            propertyTable
+                .UseProperty(matrix4x4Property)
+                .SetValues(m4);
 
             foreach (var primitive in model.LogicalMeshes[0].Primitives)
             {
@@ -249,9 +257,6 @@ namespace SharpGLTF.Schema2.Tiles3D
             model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.gltf");
             model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.plotly");
         }
-
-
-
 
         [Test(Description = "MinimalMetadataAttributeSample")]
         public void MinimalMetadataAttributeSample()

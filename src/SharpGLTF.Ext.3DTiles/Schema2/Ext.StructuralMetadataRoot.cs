@@ -1435,17 +1435,31 @@ namespace SharpGLTF.Schema2
             }
 
 
-            public StructuralMetadataClassProperty WithVector3Type()
+            public StructuralMetadataClassProperty WithVector3Type(Vector3? noData = null)
             {
                 Type = ElementType.VEC3;
                 ComponentType = DataType.FLOAT32;
+
+                if (noData != null)
+                {
+                    var jsonNode = ToJsonArray(noData.Value);
+                    _noData = jsonNode;
+
+                }
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithMatrix4x4Type()
+            public StructuralMetadataClassProperty WithMatrix4x4Type(Matrix4x4? noData = null)
             {
                 Type = ElementType.MAT4;
                 ComponentType = DataType.FLOAT32;
+
+                if (noData != null)
+                {
+                    var jsonNode = ToJsonArray(noData.Value);
+                    _noData = jsonNode;
+                }
+
                 return this;
             }
 
@@ -1529,7 +1543,6 @@ namespace SharpGLTF.Schema2
             public StructuralMetadataClassProperty WithVector3ArrayType(int? count = null, Vector3? noData = null)
             {
                 var property = WithArrayType(ELEMENTTYPE.VEC3, DATATYPE.FLOAT32, count);
-                // todo: how to set noData for vector3?
                 return property;
             }
             public StructuralMetadataClassProperty WithMatrix4x4ArrayType(int? count = null)
@@ -1583,6 +1596,37 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
+
+            private static JsonArray ToJsonArray(Vector3 vector3)
+            {
+                var floats = new float[] { vector3.X, vector3.Y, vector3.Z };
+                var  jsonNode = ToJsonArray(floats);
+                return jsonNode;
+            }
+
+            private static JsonArray ToJsonArray(Matrix4x4 matrix4x4)
+            {
+                var floats = new float[] {
+                    matrix4x4.M11, matrix4x4.M12, matrix4x4.M13, matrix4x4.M14,
+                    matrix4x4.M21, matrix4x4.M22, matrix4x4.M23, matrix4x4.M24,
+                    matrix4x4.M31, matrix4x4.M32, matrix4x4.M33, matrix4x4.M34,
+                    matrix4x4.M41, matrix4x4.M42, matrix4x4.M43, matrix4x4.M44
+                };
+
+                var jsonNode = ToJsonArray(floats);
+                return jsonNode;
+            }
+
+            private static JsonArray ToJsonArray(float[] floats)
+            {
+                var jsonNode = new JsonArray();
+                foreach (var f in floats)
+                {
+                    jsonNode.Add(f);
+                }
+
+                return jsonNode;
+            }
 
             #endregion
         }
