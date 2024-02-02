@@ -82,6 +82,181 @@ namespace SharpGLTF.Schema2.Tiles3D
             }
         }
 
+        /// <summary>
+        /// In this test a single triangle is defined, it has attributes defined for all types with a noData value, 
+        /// but the values are set to the noData value. In CesiumJS the triangle is rendered but the 
+        /// attritutes are not shown (because noData).
+        /// </summary>
+        [Test(Description = "MetadataAndNullValuesAttributeSample")]
+        public void MetadataNullValuesAttributeSample()
+        {
+            TestContext.CurrentContext.AttachGltfValidatorLinks();
+
+            int featureId = 0;
+            var material = MaterialBuilder.CreateDefault().WithDoubleSide(true);
+
+            var mesh = new MeshBuilder<VertexPositionNormal, VertexWithFeatureId, VertexEmpty>("mesh");
+            var prim = mesh.UsePrimitive(material);
+
+            var vt0 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt1 = VertexBuilder.GetVertexWithFeatureId(new Vector3(1, 0, 0), new Vector3(0, 0, 1), featureId);
+            var vt2 = VertexBuilder.GetVertexWithFeatureId(new Vector3(0, 1, 0), new Vector3(0, 0, 1), featureId);
+
+            prim.AddTriangle(vt0, vt1, vt2);
+            var scene = new SceneBuilder();
+            scene.AddRigidMesh(mesh, Matrix4x4.Identity);
+            var model = scene.ToGltf2();
+
+            var rootMetadata = model.UseStructuralMetadata();
+            var schema = rootMetadata.UseEmbeddedSchema("schema_001");
+
+            var schemaClass = schema.UseClassMetadata("triangles");
+
+            var speciesEnum = schema.UseEnumMetadata("speciesEnum", ("Unspecified", 0), ("Oak", 1), ("Pine", 2), ("Maple", 3));
+            speciesEnum.Name = "Species";
+            speciesEnum.Description = "An example enum for tree species.";
+
+            var descriptionProperty = schemaClass
+                    .UseProperty("description")
+                    .WithStringType();
+
+            // for this property, the default value (byte.MaxValue) should be shown in the client when the actual value is 
+            // equal to the noData value (byte.MinValue)
+            var uint8Property = schemaClass
+                .UseProperty("uint8")
+                .WithUInt8Type(byte.MinValue, byte.MaxValue);
+
+            var int8Property = schemaClass
+                .UseProperty("int8")
+                .WithInt8Type(sbyte.MinValue);
+
+            var int16Property = schemaClass
+                .UseProperty("int16")
+                .WithInt16Type(short.MinValue);
+
+            var uint16Property = schemaClass
+                .UseProperty("uint16")
+                .WithUInt16Type(ushort.MinValue);
+
+            var int32Property = schemaClass
+                .UseProperty("int32")
+                .WithInt32Type(int.MinValue);
+
+            var uint32Property = schemaClass
+                .UseProperty("uint32")
+                .WithUInt32Type(uint.MinValue);
+
+            var int64Property = schemaClass
+                .UseProperty("int64")
+                .WithInt64Type(long.MinValue);
+
+            var uint64Property = schemaClass
+                .UseProperty("uint64")
+                .WithUInt64Type(ulong.MinValue);
+
+            // when using float.MinValue there is an error in the validator: ""The value has type FLOAT32 and must be in [-3.4028234663852886e+38,3.4028234663852886e+38], but is -3.4028235e+38"
+            // And the noData value is shown in CesiumJS. Therefore we use -10.0f here.
+            var float32Property = schemaClass
+                .UseProperty("float32")
+                .WithFloat32Type(-10.0f);
+
+            var float64Property = schemaClass
+                .UseProperty("float64")
+                .WithFloat64Type(double.MinValue);
+
+            var stringProperty = schemaClass
+                .UseProperty("string")
+                .WithStringType("noData", "-");
+
+            var speciesProperty = schemaClass
+                .UseProperty("species")
+                .WithDescription("Type of tree.")
+                .WithEnumeration(speciesEnum, "Unspecified")
+                .WithRequired(false);
+
+            var vector3Property = schemaClass
+                .UseProperty("vector3")
+                .WithVector3Type(new Vector3(-10.0f, -10.0f, -10.0f));
+
+            var matrix4x4Property = schemaClass
+                .UseProperty("matrix4x4")
+                .WithMatrix4x4Type(Matrix4x4.Identity * -10);
+
+            var propertyTable = schemaClass.AddPropertyTable(1);
+
+            propertyTable
+                .UseProperty(descriptionProperty)
+                .SetValues("Description of the triangle");
+
+            propertyTable
+                .UseProperty(uint8Property)
+                .SetValues(byte.MinValue);
+
+            propertyTable
+                .UseProperty(int8Property)
+                .SetValues(sbyte.MinValue);
+
+            propertyTable
+                .UseProperty(int16Property)
+                .SetValues(short.MinValue);
+
+            propertyTable
+                .UseProperty(uint16Property)
+                .SetValues(ushort.MinValue);
+
+            propertyTable
+                .UseProperty(int32Property)
+                .SetValues(int.MinValue);
+
+            propertyTable
+                .UseProperty(uint32Property)
+                .SetValues(uint.MinValue);
+
+            propertyTable
+                .UseProperty(int64Property)
+                .SetValues(long.MinValue);
+
+            propertyTable
+                .UseProperty(uint64Property)
+                .SetValues(ulong.MinValue);
+
+            propertyTable
+                .UseProperty(float32Property)
+                .SetValues(-10f);
+
+            propertyTable
+                .UseProperty(float64Property)
+                .SetValues(double.MinValue);
+
+            propertyTable
+                .UseProperty(stringProperty)
+                .SetValues("noData");
+
+            propertyTable
+                .UseProperty(speciesProperty)
+                .SetValues((short)0);
+
+            propertyTable
+                .UseProperty(vector3Property)
+                .SetValues(new Vector3(10.0f,10.0f,10.0f));
+
+            var m4 = Matrix4x4.Identity;
+            propertyTable
+                .UseProperty(matrix4x4Property)
+                .SetValues(m4);
+
+            foreach (var primitive in model.LogicalMeshes[0].Primitives)
+            {
+                var featureIdAttribute = new FeatureIDBuilder(1, 0, propertyTable);
+                primitive.AddMeshFeatureIds(featureIdAttribute);
+            }
+
+            // create files
+            var ctx = new ValidationResult(model, ValidationMode.Strict, true);
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.glb");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.gltf");
+            model.AttachToCurrentTest("cesium_ext_structural_minimal_metadata_sample.plotly");
+        }
 
         [Test(Description = "MinimalMetadataAttributeSample")]
         public void MinimalMetadataAttributeSample()
@@ -681,21 +856,21 @@ namespace SharpGLTF.Schema2.Tiles3D
                 .UseProperty("example_variable_length_ARRAY_normalized_UINT8")
                 .WithName("Example variable-length ARRAY normalized INT8 property")
                 .WithDescription("An example property, with type ARRAY, with component type UINT8, normalized, and variable length")
-                .WithArrayType(ElementType.SCALAR, DataType.UINT8)
+                .WithUInt8ArrayType()
                 .WithNormalized(false);
 
             var fixedLengthBooleanProperty = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_BOOLEAN")
                 .WithName("Example fixed-length ARRAY BOOLEAN property")
                 .WithDescription("An example property, with type ARRAY, with component type BOOLEAN, and fixed length ")
-                .WithArrayType(ElementType.BOOLEAN, null, 4)
+                .WithBooleanArrayType(4)
                 .WithNormalized(false);
 
             var variableLengthStringArrayProperty = exampleMetadataClass
                 .UseProperty("example_variable_length_ARRAY_STRING")
                 .WithName("Example variable-length ARRAY STRING property")
                 .WithDescription("An example property, with type ARRAY, with component type STRING, and variable length")
-                .WithArrayType(ElementType.STRING);
+                .WithStringArrayType();
 
             var fixed_length_ARRAY_ENUM = exampleMetadataClass
                 .UseProperty("example_fixed_length_ARRAY_ENUM")

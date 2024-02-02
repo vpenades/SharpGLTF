@@ -336,7 +336,7 @@ namespace SharpGLTF.Schema2
                     {
                         var expectedTexCoordAttribute = $"TEXCOORD_{texture.TextureCoordinate}";
                         var vertex = _meshPrimitive.GetVertexAccessor(expectedTexCoordAttribute);
-                        var distinctFeatureIds = vertex.AsVector2Array().Count();
+                        var distinctFeatureIds = vertex.AsVector2Array().Count;
 
                         Guard.IsTrue(featureId.FeatureCount == distinctFeatureIds, $"Mismatch between FeatureCount ({featureId.FeatureCount}) and Feature Texture ({distinctFeatureIds})");
 
