@@ -14,7 +14,6 @@ namespace SharpGLTF.Schema2
     using Tiles3D;
     using System.Numerics;
     using System.Text.Json.Nodes;
-    using System.ComponentModel;
 
     partial class Tiles3DExtensions
     {
@@ -817,7 +816,6 @@ namespace SharpGLTF.Schema2
 
                 if (elementType == ELEMENTTYPE.ENUM)
                 {
-                    // guard the type of t is an short in case of enum
                     Guard.IsTrue(typeof(T) == typeof(short), nameof(T), $"Enum value type of {LogicalKey} must be short");
                 }
                 else if (elementType == ELEMENTTYPE.SCALAR)
@@ -854,13 +852,13 @@ namespace SharpGLTF.Schema2
 
             private void CheckScalarTypes<T>(DATATYPE? componentType)
             {
-                if (componentType == DATATYPE.UINT8)
-                {
-                    Guard.IsTrue(typeof(T) == typeof(byte), nameof(T), $"Scalar value type of property {LogicalKey} must be byte");
-                }
-                else if (componentType == DATATYPE.INT8)
+                if (componentType == DATATYPE.INT8)
                 {
                     Guard.IsTrue(typeof(T) == typeof(sbyte), nameof(T), $"Scalar value type of property {LogicalKey} must be sbyte");
+                }
+                else if (componentType == DATATYPE.UINT8)
+                {
+                    Guard.IsTrue(typeof(T) == typeof(byte), nameof(T), $"Scalar value type of property {LogicalKey} must be byte");
                 }
                 else if (componentType == DATATYPE.INT16)
                 {
@@ -1242,37 +1240,31 @@ namespace SharpGLTF.Schema2
             public string Name
             {
                 get => _name;
-                set => _name = value;
             }
 
             public string Description
             {
                 get => _description;
-                set => _description = value;
             }
 
             internal ELEMENTTYPE Type
             {
                 get => _type;
-                // set => _type = value;
             }
 
             public string EnumType
             {
                 get => _enumType;
-                // set => _enumType = value;
             }
 
             public DATATYPE? ComponentType
             {
                 get => _componentType;
-                // set => _componentType = value;
             }
 
             public bool Required
             {
                 get => _required ?? _requiredDefault;
-                set => _required = value.AsNullable(_requiredDefault);
             }
 
             public JsonNode NoData
@@ -1283,44 +1275,39 @@ namespace SharpGLTF.Schema2
             public bool Normalized
             {
                 get => _normalized ?? _normalizedDefault;
-                set => _normalized = value.AsNullable(_normalizedDefault);
             }
 
             public bool Array
             {
                 get => _array ?? _arrayDefault;
-                set => _array = value.AsNullable(_arrayDefault);
+                internal set => _array = value.AsNullable(_arrayDefault);
             }
 
             public int? Count
             {
                 get => _count;
-                set => _count = value;
+                internal set => _count = value;
             }
 
             /** Commented out for now, as it is not supported
             public JsonNode Min
             {
                 get => _min;
-                set => _min = value;
             }
 
             public JsonNode Max
             {
                 get => _max;
-                set => _max = value;
             }
 
             public JsonNode Scale
             {
                 get => _scale;
-                set => _scale = value;
             }
 
             public JsonNode Offset
             {
                 get => _offset;
-                set => _offset = value;
             }
             */
 
@@ -1332,13 +1319,13 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithName(string name)
             {
-                Name = name;
+                _name = name;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithDescription(string description)
             {
-                Description = description;
+                _description = description;
                 return this;
             }
 
@@ -1471,22 +1458,12 @@ namespace SharpGLTF.Schema2
 
                 if (noData != null)
                 {
-                    var m4 = noData.Value;
-                    _noData = new JsonArray(
-                        m4.M11, m4.M12, m4.M13, m4.M14,
-                        m4.M21, m4.M22, m4.M23, m4.M24,
-                        m4.M31, m4.M32, m4.M33, m4.M34,
-                        m4.M41, m4.M42, m4.M43, m4.M44);
+                    _noData = ToJsonArray(noData.Value);
                 }
 
                 if (defaultValue != null)
                 {
-                    var m4 = defaultValue.Value;
-                    _default = new JsonArray(
-                        m4.M11, m4.M12, m4.M13, m4.M14,
-                        m4.M21, m4.M22, m4.M23, m4.M24,
-                        m4.M31, m4.M32, m4.M33, m4.M34,
-                        m4.M41, m4.M42, m4.M43, m4.M44);
+                    _default = ToJsonArray(defaultValue.Value);
                 }
 
                 return this;
@@ -1584,21 +1561,12 @@ namespace SharpGLTF.Schema2
                 return WithArrayType(ELEMENTTYPE.STRING, null, count);
             }
 
-            private StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
-            {
-                _type = etype;
-                _componentType = ctype;
-                Array = true;
-                Count = count;
-                return this;
-            }
-
             public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumeration, int? count = null, string noData = null)
             {
                 _type = ELEMENTTYPE.ENUM;
                 _enumType = enumeration.LogicalKey;
-                Array = true;
-                Count = count;
+                _array = true;
+                _count = count;
                 if (noData != null) _noData = noData;
                 return this;
             }
@@ -1613,17 +1581,33 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithRequired(bool required)
             {
-                Required = required;
+                _required = required;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithNormalized(bool normalized)
             {
-                Normalized = normalized;
+                _normalized = normalized;
                 return this;
             }
 
+            private StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
+            {
+                _type = etype;
+                _componentType = ctype;
+                _array = true;
+                _count = count;
+                return this;
+            }
 
+            private static JsonArray ToJsonArray(Matrix4x4 m4)
+            {
+                return new JsonArray(
+                    m4.M11, m4.M12, m4.M13, m4.M14,
+                    m4.M21, m4.M22, m4.M23, m4.M24,
+                    m4.M31, m4.M32, m4.M33, m4.M34,
+                    m4.M41, m4.M42, m4.M43, m4.M44);
+            }
             #endregion
         }
 
