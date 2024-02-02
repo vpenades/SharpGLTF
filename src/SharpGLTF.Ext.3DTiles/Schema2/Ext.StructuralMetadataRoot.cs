@@ -1469,13 +1469,6 @@ namespace SharpGLTF.Schema2
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithCount()
-            {
-                _type = ElementType.MAT4;
-                _componentType = DataType.FLOAT32;
-                return this;
-            }
-
             public StructuralMetadataClassProperty WithBooleanArrayType(int? count = null)
             {
                 var property = WithArrayType(ELEMENTTYPE.BOOLEAN, null, count);
