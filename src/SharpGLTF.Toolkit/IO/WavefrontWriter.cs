@@ -163,6 +163,7 @@ namespace SharpGLTF.IO
 
                     sw.WriteLine();
                 }
+                sw.Close();
             };
 
             return mmap;
