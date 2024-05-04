@@ -33,34 +33,24 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public static WriteContext Create(FileWriterCallback fileCallback)
+        public static WriteContext Create(FileWriterCallback fileCallback, Func<string, System.IO.Stream> streamWriteCallback = null)
         {
             Guard.NotNull(fileCallback, nameof(fileCallback));
 
-            var context = new WriteContext(fileCallback)
+            var context = new WriteContext(fileCallback, streamWriteCallback)
             {
                 _UpdateSupportedExtensions = true
             };
 
             return context;
-        }
-
-        [Obsolete("Use CreateFromDirectory", true)]
-        public static WriteContext CreateFromFile(string filePath)
-        {
-            Guard.FilePathMustBeValid(filePath, nameof(filePath));
-
-            var finfo = new System.IO.FileInfo(filePath);
-
-            return CreateFromDirectory(finfo.Directory);
-        }
+        }        
 
         public static WriteContext CreateFromDirectory(DirectoryInfo dinfo)
         {
             Guard.NotNull(dinfo, nameof(dinfo));
             Guard.MustExist(dinfo, nameof(dinfo));            
 
-            void _saveFile(string rawUri, BYTES data)
+            void _writeBytes(string rawUri, BYTES data)
             {
                 var path = Uri.UnescapeDataString(rawUri);
                 path = Path.Combine(dinfo.FullName, path);
@@ -68,10 +58,19 @@ namespace SharpGLTF.Schema2
                 File.WriteAllBytes(path, data.ToUnderlayingArray());
             }
 
-            var context = Create(_saveFile);
+            System.IO.Stream _OpenStream(string rawUri)
+            {
+                var path = Uri.UnescapeDataString(rawUri);
+                path = Path.Combine(dinfo.FullName, path);
+
+                return System.IO.File.Create(path);
+            }
+
+            var context = Create(_writeBytes, _OpenStream);
             context.ImageWriting = ResourceWriteMode.Default;
             context.JsonIndented = true;
-            context.CurrentDirectory = dinfo;
+            context.CurrentDirectory = dinfo;            
+            
             return context;
         }
 
@@ -143,16 +142,28 @@ namespace SharpGLTF.Schema2
             return this;
         }
 
-        private WriteContext(FileWriterCallback fileCallback)
+        private WriteContext(FileWriterCallback byteWriteCallback, Func<string, System.IO.Stream> streamWriteCallback)
         {
-            _FileWriter = fileCallback;
+            _ByteWriter = byteWriteCallback;
+            _StreamWriter = streamWriteCallback;
         }
 
         #endregion
 
         #region data
 
-        private readonly FileWriterCallback _FileWriter;
+        /// <summary>
+        /// callback used to write named binary blogs to the current context
+        /// </summary>
+        private readonly FileWriterCallback _ByteWriter;
+
+        /// <summary>
+        /// alternate callback used to write directly to a file.
+        /// </summary>
+        /// <remarks>
+        /// If this callback is null, <see cref="_ByteWriter"/> must be used as fallback.
+        /// </remarks>
+        private readonly Func<string, System.IO.Stream> _StreamWriter;        
 
         #endregion
 
@@ -172,11 +183,11 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
+        #region API        
 
         public void WriteAllBytesToEnd(string fileName, BYTES data)
         {
-            this._FileWriter(fileName, data);
+            this._ByteWriter(fileName, data);
         }
 
         public string WriteImage(string assetName, MemoryImage image)
@@ -223,13 +234,22 @@ namespace SharpGLTF.Schema2
 
             _ValidateBeforeWriting(model);
 
-            using (var m = new MemoryStream())
+            string finalName = Path.HasExtension(name) ? name : $"{name}.gltf";
+
+            if (_StreamWriter != null) // write directly to a stream
+            {                
+                using (var f = _StreamWriter.Invoke(finalName))
+                {
+                    model._WriteJSON(f, this.JsonOptions, this.JsonPostprocessor);
+                }
+            }
+            else // write to bytes
             {
-                model._WriteJSON(m, this.JsonOptions, this.JsonPostprocessor);
-
-                string finalName = Path.HasExtension(name) ? name : $"{name}.gltf";
-
-                WriteAllBytesToEnd(finalName, m.ToArraySegment());
+                using (var m = new MemoryStream())
+                {
+                    model._WriteJSON(m, this.JsonOptions, this.JsonPostprocessor);
+                    WriteAllBytesToEnd(finalName, m.ToArraySegment());
+                }
             }
 
             model._AfterWriting();
@@ -249,9 +269,7 @@ namespace SharpGLTF.Schema2
             Guard.FilePathMustBeValid(name, nameof(name));
             if (System.IO.Path.IsPathRooted(name)) throw new ArgumentException("path must be relative", nameof(name));
 
-            Guard.NotNull(model, nameof(model));
-
-            
+            Guard.NotNull(model, nameof(model));            
 
             // merge images for all cases except for satellite files
             var mergeImages = this.ImageWriting != ResourceWriteMode.SatelliteFile;
@@ -270,16 +288,29 @@ namespace SharpGLTF.Schema2
 
             _ValidateBeforeWriting(model);
 
-            using (var m = new MemoryStream())
+            string finalName = Path.HasExtension(name) ? name : $"{name}.glb";
+
+            if (_StreamWriter != null) // write to stream
             {
-                using (var w = new BinaryWriter(m))
+                using(var s = _StreamWriter.Invoke(finalName))
                 {
-                    _BinarySerialization.WriteBinaryModel(w, model);
+                    using (var w = new BinaryWriter(s))
+                    {
+                        _BinarySerialization.WriteBinaryModel(w, model);
+                    }
                 }
+            }
+            else // write to bytes
+            {
+                using (var m = new MemoryStream())
+                {
+                    using (var w = new BinaryWriter(m))
+                    {
+                        _BinarySerialization.WriteBinaryModel(w, model);
+                    }                    
 
-                string finalName = Path.HasExtension(name) ? name : $"{name}.glb";
-
-                WriteAllBytesToEnd(finalName, m.ToArraySegment());
+                    WriteAllBytesToEnd(finalName, m.ToArraySegment());
+                }
             }
 
             model._AfterWriting();
