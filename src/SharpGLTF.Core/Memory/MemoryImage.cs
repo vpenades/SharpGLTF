@@ -307,6 +307,23 @@ namespace SharpGLTF.Memory
                 throw new InvalidOperationException("Image format not recognized.");
             }
         }
+        
+        /// <summary>
+        /// If the given path ends with an image extension, it removes the extension.
+        /// </summary>
+        /// <param name="path">A file path</param>
+        /// <returns>a trimmed path if it had an image extension, or the original path.</returns>
+        public static string TrimImageExtension(string path)
+        {
+            if (path == null) return null;
+
+            foreach (var ext in new string[] { ".jpg",".jpeg",".png",".dds",".webp",".ktx2" })
+            {
+                if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase)) return path.Substring(0, path.Length - ext.Length);
+            }
+
+            return path;
+        }
 
         #endregion
 

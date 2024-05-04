@@ -218,10 +218,13 @@ namespace SharpGLTF.Schema2
             Memory.MemoryImage._Verify(imimg, nameof(imimg));
 
             if (string.IsNullOrWhiteSpace(AlternateWriteFileName))
-            {
-                satelliteUri = System.IO.Path.ChangeExtension(satelliteUri, imimg.FileExtension);
+            {            
+                // at this point satelliteUri should not have an image extension,
+                // but it's better to ensure the path is sanitized.
+                satelliteUri = Memory.MemoryImage.TrimImageExtension(satelliteUri);
+                satelliteUri += "." + imimg.FileExtension;
             }
-            else
+            else // using a custom user-provided alternate file path
             {
                 satelliteUri = AlternateWriteFileName;
                 if (satelliteUri.EndsWith(".*"))

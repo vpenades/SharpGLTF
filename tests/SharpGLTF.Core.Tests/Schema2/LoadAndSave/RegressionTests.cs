@@ -112,5 +112,22 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var gltf = ModelRoot.Load(ResourceInfo.From("cube-integer-min-max-bounds.gltf"));
             Assert.That(gltf, Is.Not.Null);
         }
+
+        [Test]
+        public void SaveToPathWithExtraDots()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/217
+
+            var path1 = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith("BoxTextured.gltf"));
+
+            var model = ModelRoot.Load(path1);                       
+            
+
+            var attachmentPath = AttachmentInfo.From("BoxTextured.xyz.gltf").WriteObject(f => model.Save(f));
+
+            var texturePath = attachmentPath.Directory.GetFiles("BoxTextured.xyz.png").FirstOrDefault();
+
+            Assert.That(texturePath.Name, Is.EqualTo("BoxTextured.xyz.png"));
+        }
     }
 }
