@@ -23,7 +23,8 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build --configuration Debug --no-restore
+        # https://github.com/dotnet/core/issues/7840  failed to build with 0 errors
+        run: dotnet build --configuration Debug --no-restore --disable-build-servers
 
       - name: Test
         run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --no-build --verbosity diagnostic
