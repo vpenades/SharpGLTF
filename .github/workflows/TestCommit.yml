@@ -26,4 +26,4 @@ jobs:
         run: dotnet build --configuration Debug --no-restore
 
       - name: Test
-        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --no-build --verbosity normal
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --no-build --verbosity diagnostic
