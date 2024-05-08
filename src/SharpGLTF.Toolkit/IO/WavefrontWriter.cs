@@ -231,6 +231,8 @@ namespace SharpGLTF.IO
 
                 baseVertexIndex += p.Vertices.Count;
             }
+
+            sw.Close();
         }
 
         #endregion
