@@ -233,7 +233,6 @@ namespace SharpGLTF.Schema2
                     var regex = "^[a-zA-Z_][a-zA-Z0-9_]*$";
                     Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(Schema.Id, regex), nameof(Schema.Id));
 
-
                     foreach (var _class in Schema.Classes)
                     {
                         Guard.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(_class.Key, regex), nameof(_class.Key));
@@ -243,6 +242,17 @@ namespace SharpGLTF.Schema2
                             if (property.Value.Count.HasValue)
                             {
                                 Guard.MustBeGreaterThanOrEqualTo(property.Value.Count.Value, 2, nameof(property.Value.Count));
+                            }
+
+                            if (property.Value.Required)
+                            {
+                                Guard.IsTrue(property.Value.NoData == null, nameof(property.Value.NoData), $"The property '{property.Key}' defines a 'noData' value, but is 'required'");
+                            }
+
+                            if(property.Value.Type == ELEMENTTYPE.SCALAR)
+                            {
+                                // check The 'componentType' must be defined for a property with type 'SCALAR'
+                                Guard.IsTrue(property.Value.ComponentType.HasValue, nameof(property.Value.ComponentType), $"The 'componentType' must be defined for a property '{property.Key}' with type 'SCALAR'");
                             }
                         }
                     }
@@ -806,7 +816,6 @@ namespace SharpGLTF.Schema2
 
                 if (elementType == ELEMENTTYPE.ENUM)
                 {
-                    // guard the type of t is an short in case of enum
                     Guard.IsTrue(typeof(T) == typeof(short), nameof(T), $"Enum value type of {LogicalKey} must be short");
                 }
                 else if (elementType == ELEMENTTYPE.SCALAR)
@@ -1227,83 +1236,78 @@ namespace SharpGLTF.Schema2
             #endregion
 
             #region properties
+
             public string Name
             {
                 get => _name;
-                set => _name = value;
             }
 
             public string Description
             {
                 get => _description;
-                set => _description = value;
             }
 
             internal ELEMENTTYPE Type
             {
                 get => _type;
-                set => _type = value;
             }
 
             public string EnumType
             {
                 get => _enumType;
-                // set => _enumType = value;
             }
 
             public DATATYPE? ComponentType
             {
                 get => _componentType;
-                set => _componentType = value;
             }
 
             public bool Required
             {
                 get => _required ?? _requiredDefault;
-                set => _required = value.AsNullable(_requiredDefault);
+            }
+
+            public JsonNode NoData
+            {
+                get => _noData;
             }
 
             public bool Normalized
             {
                 get => _normalized ?? _normalizedDefault;
-                set => _normalized = value.AsNullable(_normalizedDefault);
             }
 
             public bool Array
             {
                 get => _array ?? _arrayDefault;
-                set => _array = value.AsNullable(_arrayDefault);
+                internal set => _array = value.AsNullable(_arrayDefault);
             }
 
             public int? Count
             {
                 get => _count;
-                set => _count = value;
+                internal set => _count = value;
             }
 
             /** Commented out for now, as it is not supported
             public JsonNode Min
             {
                 get => _min;
-                set => _min = value;
             }
 
             public JsonNode Max
             {
                 get => _max;
-                set => _max = value;
             }
 
             public JsonNode Scale
             {
                 get => _scale;
-                set => _scale = value;
             }
 
             public JsonNode Offset
             {
                 get => _offset;
-                set => _offset = value;
             }
             */
 
@@ -1315,167 +1319,288 @@ namespace SharpGLTF.Schema2
 
             public StructuralMetadataClassProperty WithName(string name)
             {
-                Name = name;
+                _name = name;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithDescription(string description)
             {
-                Description = description;
+                _description = description;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithStringType()
+            public StructuralMetadataClassProperty WithStringType(string noData = null, string defaultValue = null)
             {
-                Type = ElementType.STRING;
+                _type = ElementType.STRING;
+                if (noData != null) _noData = noData;
+                if(defaultValue != null) _default = defaultValue;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithBooleanType()
             {
-                Type = ElementType.BOOLEAN;
+                _type = ElementType.BOOLEAN;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt8Type()
+            public StructuralMetadataClassProperty WithUInt8Type(byte? noData = null, byte? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT8;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT8;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt8Type()
+            public StructuralMetadataClassProperty WithInt8Type(sbyte? noData = null, sbyte? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT8;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT8;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt16Type()
+            public StructuralMetadataClassProperty WithUInt16Type(ushort? noData = null, ushort? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT16;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT16;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt16Type()
+            public StructuralMetadataClassProperty WithInt16Type(short? noData = null, short? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT16;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT16;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt32Type()
+            public StructuralMetadataClassProperty WithUInt32Type(uint? noData = null, uint? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT32;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt32Type()
+            public StructuralMetadataClassProperty WithInt32Type(int? noData = null, int? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT32;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithUInt64Type()
+            public StructuralMetadataClassProperty WithUInt64Type(ulong? noData = null, ulong? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.UINT64;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.UINT64;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithInt64Type()
+            public StructuralMetadataClassProperty WithInt64Type(long? noData = null, long? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.INT64;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.INT64;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithFloat32Type()
+            public StructuralMetadataClassProperty WithFloat32Type(float? noData = null, float? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.FLOAT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.FLOAT32;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithFloat64Type()
+            public StructuralMetadataClassProperty WithFloat64Type(double? noData = null, double? defaultValue = null)
             {
-                Type = ELEMENTTYPE.SCALAR;
-                ComponentType = DATATYPE.FLOAT64;
-                return this;
-            }
-
-
-            public StructuralMetadataClassProperty WithVector3Type()
-            {
-                Type = ElementType.VEC3;
-                ComponentType = DataType.FLOAT32;
-                return this;
-            }
-
-            public StructuralMetadataClassProperty WithMatrix4x4Type()
-            {
-                Type = ElementType.MAT4;
-                ComponentType = DataType.FLOAT32;
-                return this;
-            }
-
-            public StructuralMetadataClassProperty WithCount()
-            {
-                Type = ElementType.MAT4;
-                ComponentType = DataType.FLOAT32;
+                _type = ELEMENTTYPE.SCALAR;
+                _componentType = DATATYPE.FLOAT64;
+                if (noData != null) _noData = noData;
+                if (defaultValue != null) _default = defaultValue;
                 return this;
             }
 
 
-            //public StructuralMetadataClassProperty WithValueType(ELEMENTTYPE etype, DATATYPE? ctype = null)
-            //{
-            //    Type = etype;
-            //    ComponentType = ctype;
-            //    Array = false;
-            //    return this;
-            //}
-
-            public StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
+            public StructuralMetadataClassProperty WithVector3Type(Vector3? noData = null, Vector3? defaultValue = null)
             {
-                Type = etype;
-                ComponentType = ctype;
-                Array = true;
-                Count = count;
+                _type = ElementType.VEC3;
+                _componentType = DataType.FLOAT32;
+
+                if (noData != null)
+                {
+                    _noData = new JsonArray(noData.Value.X, noData.Value.Y, noData.Value.Z);
+                }
+                if (defaultValue != null)
+                {
+                    _default = new JsonArray(defaultValue.Value.X, defaultValue.Value.Y, defaultValue.Value.Z);
+                }
+
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumeration, int? count = null)
+            public StructuralMetadataClassProperty WithMatrix4x4Type(Matrix4x4? noData = null, Matrix4x4? defaultValue = null)
             {
-                Type = ELEMENTTYPE.ENUM;
+                _type = ElementType.MAT4;
+                _componentType = DataType.FLOAT32;
+
+                if (noData != null)
+                {
+                    _noData = ToJsonArray(noData.Value);
+                }
+
+                if (defaultValue != null)
+                {
+                    _default = ToJsonArray(defaultValue.Value);
+                }
+
+                return this;
+            }
+
+            public StructuralMetadataClassProperty WithBooleanArrayType(int? count = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.BOOLEAN, null, count);
+                return property;
+            }
+
+            public StructuralMetadataClassProperty WithUInt8ArrayType(int? count = null, byte? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.UINT8, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+
+            public StructuralMetadataClassProperty WithInt8ArrayType(int? count = null, sbyte? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.INT8, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+
+            public StructuralMetadataClassProperty WithInt16ArrayType(int? count = null, short? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.INT16, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+
+            public StructuralMetadataClassProperty WithUInt16ArrayType(int? count = null, ushort? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.UINT16, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithInt32ArrayType(int? count = null, int? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.INT32, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithUInt32ArrayType(int? count = null, uint? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.UINT32, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithInt64ArrayType(int? count = null, long? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.INT64, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithUInt64ArrayType(int? count = null, ulong? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.UINT64, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithFloat32ArrayType(int? count = null, float? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.FLOAT32, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+            public StructuralMetadataClassProperty WithFloat64ArrayType(int? count = null, double? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.SCALAR, DATATYPE.FLOAT64, count);
+                if (noData != null) property._noData = noData;
+                return property;
+            }
+
+            public StructuralMetadataClassProperty WithVector3ArrayType(int? count = null, Vector3? noData = null)
+            {
+                var property = WithArrayType(ELEMENTTYPE.VEC3, DATATYPE.FLOAT32, count);
+                return property;
+            }
+            public StructuralMetadataClassProperty WithMatrix4x4ArrayType(int? count = null)
+            {
+                return WithArrayType(ELEMENTTYPE.MAT4, DATATYPE.FLOAT32, count);
+            }
+
+            public StructuralMetadataClassProperty WithStringArrayType(int? count = null)
+            {
+                return WithArrayType(ELEMENTTYPE.STRING, null, count);
+            }
+
+            public StructuralMetadataClassProperty WithEnumArrayType(StructuralMetadataEnum enumeration, int? count = null, string noData = null)
+            {
+                _type = ELEMENTTYPE.ENUM;
                 _enumType = enumeration.LogicalKey;
-                Array = true;
-                Count = count;
+                _array = true;
+                _count = count;
+                if (noData != null) _noData = noData;
                 return this;
             }
 
-            public StructuralMetadataClassProperty WithEnumeration(StructuralMetadataEnum enumeration)
+            public StructuralMetadataClassProperty WithEnumeration(StructuralMetadataEnum enumeration, string noData = null)
             {
-                Type = ELEMENTTYPE.ENUM;
+                _type = ELEMENTTYPE.ENUM;
                 _enumType = enumeration.LogicalKey;
+                if (noData != null) _noData = noData;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithRequired(bool required)
             {
-                Required = required;
+                _required = required;
                 return this;
             }
 
             public StructuralMetadataClassProperty WithNormalized(bool normalized)
             {
-                Normalized = normalized;
+                _normalized = normalized;
                 return this;
             }
 
+            private StructuralMetadataClassProperty WithArrayType(ELEMENTTYPE etype, DATATYPE? ctype = null, int? count = null)
+            {
+                _type = etype;
+                _componentType = ctype;
+                _array = true;
+                _count = count;
+                return this;
+            }
 
+            private static JsonArray ToJsonArray(Matrix4x4 m4)
+            {
+                return new JsonArray(
+                    m4.M11, m4.M12, m4.M13, m4.M14,
+                    m4.M21, m4.M22, m4.M23, m4.M24,
+                    m4.M31, m4.M32, m4.M33, m4.M34,
+                    m4.M41, m4.M42, m4.M43, m4.M44);
+            }
             #endregion
         }
 

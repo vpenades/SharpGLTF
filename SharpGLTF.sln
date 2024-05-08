@@ -6,10 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29566B60-311D-42A0-9E8D-C48DECDD587F}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
-		.github\workflows\publishAlpha.yml = .github\workflows\publishAlpha.yml
+		.github\workflows\PublishToNuget.yml = .github\workflows\PublishToNuget.yml
 		README.md = README.md
 		SharpGLTF.ruleset = SharpGLTF.ruleset
+		.github\workflows\TestCommit.yml = .github\workflows\TestCommit.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{072B725F-773F-4751-9616-E9778897C1D2}"
@@ -58,7 +58,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Plotly", "example
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.ThirdParty.Tests", "tests\SharpGLTF.ThirdParty.Tests\SharpGLTF.ThirdParty.Tests.csproj", "{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Trimmed.App", "tests\SharpGLTF.Trimmed.App\SharpGLTF.Trimmed.App.csproj", "{A09437F7-403C-44A2-B1FE-15CC535B64CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Trimmed.App", "examples\SharpGLTF.Trimmed.App\SharpGLTF.Trimmed.App.csproj", "{A09437F7-403C-44A2-B1FE-15CC535B64CA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpGLTF.Runtime", "src\SharpGLTF.Runtime\SharpGLTF.Runtime.csproj", "{E06015B0-8DBC-4DC9-81A2-605DAFE36821}"
 EndProject
@@ -170,7 +170,7 @@ Global
 		{7FEFC259-51D6-4409-8724-8DE0EA8D5CD9} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 		{A63C2A2D-950F-4C76-9299-2B2D325A8653} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{38B27C0B-DB22-4CB7-A6DA-4A6C2A8385A8} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
-		{A09437F7-403C-44A2-B1FE-15CC535B64CA} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
+		{A09437F7-403C-44A2-B1FE-15CC535B64CA} = {83E7E49D-8A28-45E8-9DBD-1F3AEDEF3E42}
 		{E06015B0-8DBC-4DC9-81A2-605DAFE36821} = {072B725F-773F-4751-9616-E9778897C1D2}
 		{3925E45C-E7AA-4396-9567-4D8B1D1EF1C6} = {0CBF510D-D836-40BA-95EC-E93FDBB90632}
 		{F98E7E4B-EF27-48A0-BA56-730F14CEEEE1} = {072B725F-773F-4751-9616-E9778897C1D2}

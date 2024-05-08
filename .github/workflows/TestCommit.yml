@@ -13,13 +13,18 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+  
       - name: Setup dotnet ${{ matrix.dotnet-version }}
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
+
       - name: Install dependencies
         run: dotnet restore
+
       - name: Build
-        run: dotnet build
+        # https://github.com/dotnet/core/issues/7840  failed to build with 0 errors
+        run: dotnet build --configuration Debug --no-restore --disable-build-servers
+
       - name: Test
-        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --no-build --verbosity diagnostic

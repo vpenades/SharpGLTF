@@ -10,7 +10,7 @@ using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2.LoadAndSave
 {
-    [AttachmentPathFormat("*/TestResults/LoadAndSave/?", true)]    
+    [AttachmentPathFormat("*/TestResults/Regressions/?", true)]    
     internal class RegressionTests
     {
         [Test]
@@ -101,6 +101,33 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 var model = ModelRoot.ReadGLB(ls);
                 Assert.That(model, Is.Not.Null);
             }
+        }
+
+        [Test]
+        public void LoadMinMaxBoundsOnByteAccessor()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/231
+            // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_max
+
+            var gltf = ModelRoot.Load(ResourceInfo.From("cube-integer-min-max-bounds.gltf"));
+            Assert.That(gltf, Is.Not.Null);
+        }
+
+        [Test]
+        public void SaveToPathWithExtraDots()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/217
+
+            var path1 = TestFiles.GetSampleModelsPaths().First(item => item.EndsWith("BoxTextured.gltf"));
+
+            var model = ModelRoot.Load(path1);                       
+            
+
+            var attachmentPath = AttachmentInfo.From("BoxTextured.xyz.gltf").WriteObject(f => model.Save(f));
+
+            var texturePath = attachmentPath.Directory.GetFiles("BoxTextured.xyz.png").FirstOrDefault();
+
+            Assert.That(texturePath.Name, Is.EqualTo("BoxTextured.xyz.png"));
         }
     }
 }

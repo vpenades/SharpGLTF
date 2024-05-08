@@ -1,0 +1,142 @@
+{
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 12,
+      "max": [
+        -29.78723471088616,
+        12.917932088251836,
+        40.0
+      ],
+      "min": [
+        -96.04862708143158,
+        -33.586632227100864,
+        -40.0
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5121,
+      "count": 60,
+      "type": "SCALAR"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5121,
+      "count": 12,
+      "max": [
+        255,
+        0,
+        255,
+        255
+      ],
+      "min": [
+        0,
+        0,
+        0,
+        255
+      ],
+      "normalized": true,
+      "type": "VEC4"
+    }
+  ],
+  "asset": {
+    "generator": "",
+    "version": "2.0"
+  },
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 144,
+      "byteStride": 12,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 60,
+      "byteOffset": 144,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 48,
+      "byteOffset": 204,
+      "byteStride": 4,
+      "target": 34962
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 252,
+      "uri": "data:application/octet-stream;base64,5hjAwtqvTkEAACBC5hjAwrZYBsIAAAAA5hjAwtqvTkEAAAAA5hjAwrZYBsIAACBCQkzuwdqvTkEAACBC5hjAwtqvTkEAACDCQkzuwbZYBsIAAAAA5hjAwrZYBsIAACDCQkzuwdqvTkEAAAAAQkzuwdqvTkEAACDCQkzuwbZYBsIAACBCQkzuwbZYBsIAACDCAAQDBAoDBwkFBwsJCQsICAsGCAYKCwcGBAgKCgYDAgkIBQkCAggEBgcBBwUBBgEDAQUCAAIEAwEAAQIAAAD//wAA//8AAP//AAD///8AAP8AAP///wAA/wAA////AAD//wAA//8AAP//AAD/"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "pbrMetallicRoughness": {
+        "baseColorFactor": [
+          0.5,
+          0.5,
+          0.0,
+          1.0
+        ]
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "primitives": [
+        {
+          "attributes": {
+            "COLOR_0": 2,
+            "POSITION": 0
+          },
+          "indices": 1,
+          "material": 0,
+          "mode": 4
+        }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "entity_1"
+    },
+    {
+      "children": [
+        0
+      ],
+      "matrix": [
+        -1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "name": "0"
+    }
+  ],
+  "scene": 0,
+  "scenes": [
+    {
+      "nodes": [
+        1
+      ]
+    }
+  ]
+}

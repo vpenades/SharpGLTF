@@ -286,7 +286,13 @@ namespace SharpGLTF.Memory
             xinfo.Dimensions = DIMENSIONS.SCALAR;
             memory = new MemoryAccessor(memory.Data, xinfo);
 
-            var array = new MultiArray(memory.Data, memory.Attribute.ByteOffset, memory.Attribute.ItemsCount, memory.Attribute.ByteStride, dimensions, memory.Attribute.Encoding, memory.Attribute.Normalized);
+            var array = new MultiArray(
+                memory.Data,
+                memory.Attribute.ByteOffset,
+                memory.Attribute.ItemsCount,
+                memory.Attribute.ByteStride,
+                dimensions, memory.Attribute.Encoding,
+                false); // bounds checks are done without normalization; https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#_accessor_max
 
             var current = new float[dimensions];
 
