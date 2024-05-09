@@ -1,6 +1,6 @@
-name: Test project on commit and pull requests
+name: Test project on a all platforms
 
-on: [push, pull_request]
+on: workflow_dispatch
 
 jobs:
   build:
@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        dotnet-version: [ '8.0.x' ]        
-        os: [windows-latest, ubuntu-latest]
+        dotnet-version: [ '6.0.x', '8.0.x' ]        
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@v4
