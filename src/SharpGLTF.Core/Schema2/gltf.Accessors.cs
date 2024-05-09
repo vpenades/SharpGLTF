@@ -89,6 +89,26 @@ namespace SharpGLTF.Schema2
 
         public AttributeFormat Format => new AttributeFormat(this.Dimensions, _componentType, this._normalized.AsValue(false));
 
+        /// <summary>
+        /// Gets the bounds of this accessor.
+        /// </summary>
+        /// <remarks>
+        /// Bounds may not be available or up to date, call <see cref="UpdateBounds"/> for update.
+        /// </remarks>
+        public (IReadOnlyList<double> Min, IReadOnlyList<double> Max) Bounds
+        {
+            get
+            {
+                IReadOnlyList<double> min = _min;
+                min ??= Array.Empty<double>();
+
+                IReadOnlyList<double> max = _max;
+                max ??= Array.Empty<double>();
+
+                return (min, max);
+            }
+        }
+
         #endregion
 
         #region API
