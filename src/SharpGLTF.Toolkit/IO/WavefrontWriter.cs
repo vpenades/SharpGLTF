@@ -32,6 +32,11 @@ namespace SharpGLTF.IO
     {
         #region data
 
+        /// <summary>
+        /// As per <see href="https://en.wikipedia.org/wiki/Wavefront_.obj_file">Wikipedia</see> , the content of the file should be ASCII
+        /// </summary>
+        private static readonly System.Text.Encoding FILEENCODING = System.Text.Encoding.ASCII;
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY> _Mesh = new Geometry.MeshBuilder<Material, VGEOMETRY, VMATERIAL, VEMPTY>();
 
@@ -101,14 +106,14 @@ namespace SharpGLTF.IO
 
             var fileGenerators = new Dictionary<String, Action<Stream>>();
 
-            var materials = _GetMaterialFileGenerator(fileGenerators, baseName, _Mesh.Primitives.Select(item => item.Material));
+            var materials = _GetMaterialsFileGenerator(fileGenerators, baseName, _Mesh.Primitives.Select(item => item.Material));            
 
-            fileGenerators[baseName + ".obj"] = fs => _GetGeometryContent(new StreamWriter(fs), materials, baseName + ".mtl");
+            fileGenerators[baseName + ".obj"] = fs => _WriteGeometryFile(fs, materials, baseName + ".mtl");
 
             return fileGenerators;
         }
 
-        private static Dictionary<Material, string> _GetMaterialFileGenerator(IDictionary<String, Action<Stream>> fileGenerators, string baseName, IEnumerable<Material> materials)
+        private static Dictionary<Material, string> _GetMaterialsFileGenerator(IDictionary<String, Action<Stream>> fileGenerators, string baseName, IEnumerable<Material> materials)
         {
             if (!(materials is List<Material>)) materials = materials.ToList();
 
@@ -139,37 +144,55 @@ namespace SharpGLTF.IO
             // write materials
 
             var mmap = new Dictionary<Material, string>();
+
             foreach (var m in materials) 
             {
                 mmap[m] = $"Material_{mmap.Count}";
             }
 
-            // write material library
-            fileGenerators[baseName + ".mtl"] = fs =>
-            {
-                var sw = new StreamWriter(fs);
-                foreach (var m in materials) 
-                {
-                    sw.WriteLine($"newmtl {mmap[m]}");
-                    sw.WriteLine("illum 2");
-                    sw.WriteLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
-                    sw.WriteLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
-                    sw.WriteLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
-
-                    if (m.DiffuseTexture.IsValid) {
-                        var imgName = imageNameByImage[m.DiffuseTexture];
-                        sw.WriteLine($"map_Kd {imgName}");
-                    }
-
-                    sw.WriteLine();
-                }
-                sw.Close();
-            };
+            // store material library writer for later use
+            fileGenerators[baseName + ".mtl"] = fs => _WriteMaterialsFile(fs, materials, mmap, imageNameByImage);
 
             return mmap;
         }
 
-        private void _GetGeometryContent(StreamWriter sw, IReadOnlyDictionary<Material, string> materials, string mtlLib)
+        private static void _WriteMaterialsFile(Stream fs, IEnumerable<Material> materials, Dictionary<Material, string> mmap, Dictionary<MemoryImage, string> imageNameByImage)
+        {
+            using (var sw = new StreamWriter(fs, FILEENCODING))
+            {
+                _WriteMaterialsFile(sw, materials, mmap, imageNameByImage);
+            }
+        }
+
+        private static void _WriteMaterialsFile(StreamWriter sw, IEnumerable<Material> materials, Dictionary<Material, string> mmap, Dictionary<MemoryImage, string> imageNameByImage)
+        {
+            foreach (var m in materials)
+            {
+                sw.WriteLine($"newmtl {mmap[m]}");
+                sw.WriteLine("illum 2");
+                sw.WriteLine(Invariant($"Ka {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
+                sw.WriteLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
+                sw.WriteLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
+
+                if (m.DiffuseTexture.IsValid)
+                {
+                    var imgName = imageNameByImage[m.DiffuseTexture];
+                    sw.WriteLine($"map_Kd {imgName}");
+                }
+
+                sw.WriteLine();
+            }
+        }
+
+        private void _WriteGeometryFile(Stream s, IReadOnlyDictionary<Material, string> materials, string mtlLib)
+        {
+            using (var sw = new StreamWriter(s, FILEENCODING))
+            {
+                _WriteGeometryFile(sw, materials, mtlLib);
+            }
+        }
+
+        private void _WriteGeometryFile(StreamWriter sw, IReadOnlyDictionary<Material, string> materials, string mtlLib)
         {
             sw.WriteLine($"mtllib {mtlLib}");
 
