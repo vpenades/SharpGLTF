@@ -16,7 +16,7 @@ on:
         type: string
         description: 'semver version suffix'
         required: true
-        default: ''
+        default: 'Test-DATE-TIME'
     
 jobs:
   build_job:
@@ -28,17 +28,24 @@ jobs:
 
     # ---------------------------------------------  variables
 
-    - name: Replace word in variable
-      run: |
-          # Read the input into a variable
-          SEMVERSUFFIX="${{ inputs.version-suffix }}"
+    - name: Define SemVer suffix
+      run: |          
+          SEMVERSUFFIX="${{ inputs.version-suffix }}"          
+
+          # replace DATE
           DATE_SHORT=$(date +'%Y%m%d')
-          TIME_SHORT=$(date +'%H%M%S')
-          echo ${SEMVERSUFFIX}
+          if [[ "SEMVERSUFFIX" == *"$DATE"* ]]; then
           SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$DATE_SHORT}"
+          fi
+
+          # replace TIME
+          TIME_SHORT=$(date +'%H%M%S')          
+          if [[ "SEMVERSUFFIX" == *"$TIME"* ]]; then
           SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$TIME_SHORT}"
-          echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV
-          echo ${SEMVERSUFFIX}
+          fi
+
+          # emit env variable
+          echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV          
           echo ${{ env.SEMVERSUFFIX }}
 
       # ---------------------------------------------  DotNet SDK

@@ -7,7 +7,7 @@ jobs:
   build_job:
     uses: ./.github/workflows/BuildPackages.yml
     with:
-      version-suffix: Preview-$(date +'%Y%m%d-%H%M%S')"
+      version-suffix: Preview-DATE
 
   publish_job:
     needs: build_job
