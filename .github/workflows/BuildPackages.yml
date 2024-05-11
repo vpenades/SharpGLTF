@@ -55,7 +55,7 @@ jobs:
           fi
 
           # emit env variable
-          echo "NUGETSEMVER=NUGETSEMVER" >> $GITHUB_ENV          
+          echo "NUGETSEMVER=$NUGETSEMVER" >> $GITHUB_ENV          
           echo ${{ env.NUGETSEMVER }}
 
       # ---------------------------------------------  build
