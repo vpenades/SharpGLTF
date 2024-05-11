@@ -26,6 +26,17 @@ jobs:
 
     steps:   
 
+    # ---------------------------------------------  variables
+
+    - name: Replace word in variable
+      run: |
+          # Read the input into a variable
+          SEMVERSUFFIX="${{ inputs.version-suffix }}"
+          echo ${SEMVERSUFFIX}
+          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$(date +'%Y%m%d')}"
+          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$(date +'%H%M%S')}"
+          echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV
+
       # ---------------------------------------------  DotNet SDK
 
     - name: Setup .NET SDK
@@ -34,16 +45,7 @@ jobs:
       # ---------------------------------------------  checkout repo
 
     - name: Checkout
-      uses: actions/checkout@v4
-      
-      # ---------------------------------------------  variables
-
-    - name: Replace word in variable
-      run: |
-          # Read the input into a variable
-          SEMVERSUFFIX="${{ inputs.version-suffix }}"
-          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$(date +'%Y%m%d')}"
-          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$(date +'%H%M%S')}"                    
+      uses: actions/checkout@v4      
 
       # ---------------------------------------------  build
 
