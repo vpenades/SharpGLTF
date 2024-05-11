@@ -28,9 +28,10 @@ jobs:
 
     - name: define version suffix
       run: |
-          if [[ -z "${{ env.VERSIONSUFFIX }}" ]]; then
+          if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
           echo "VERSIONSUFFIX=alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
           echo "VERSIONSUFFIX is set to ${{ env.VERSIONSUFFIX }}"
+          fi
 
       # ---------------------------------------------  build
 
