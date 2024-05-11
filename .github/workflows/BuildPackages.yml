@@ -55,8 +55,8 @@ jobs:
           fi
 
           # emit env variable
-          echo "NUGETSEMVER=$NUGETSEMVER" >> $GITHUB_ENV          
-          echo ${{ env.NUGETSEMVER }}
+          echo "DOTNET_NUGETSEMVER=${{NUGETSEMVER}}" >> $GITHUB_ENV          
+          echo ${{ env.DOTNET_NUGETSEMVER }}
 
       # ---------------------------------------------  build
 
@@ -67,7 +67,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release /p:Version=${{ env.NUGETSEMVER }}
+      run: dotnet build -c Release /p:Version=${{ env.DOTNET_NUGETSEMVER }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
