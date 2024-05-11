@@ -32,10 +32,14 @@ jobs:
       run: |
           # Read the input into a variable
           SEMVERSUFFIX="${{ inputs.version-suffix }}"
+          DATE_SHORT=$(date +'%Y%m%d')
+          TIME_SHORT=$(date +'%H%M%S')
           echo ${SEMVERSUFFIX}
-          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$(date +'%Y%m%d')}"
-          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$(date +'%H%M%S')}"
+          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$DATE_SHORT}"
+          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$TIME_SHORT}"
           echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV
+          echo ${SEMVERSUFFIX}
+          echo ${{ env.SEMVERSUFFIX }}
 
       # ---------------------------------------------  DotNet SDK
 
