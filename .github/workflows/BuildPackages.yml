@@ -4,19 +4,19 @@ on:
 
   workflow_dispatch:
     inputs:
-      version-suffix:
+      package-version:
         type: string
-        description: 'semver version suffix'
+        description: 'package version'
         required: false
-        default: 'Test-DATE-TIME'
+        default: '1.0.0-Test-DATE-TIME'
 
   workflow_call:
     inputs:
-      version-suffix:
+      package-version:
         type: string
-        description: 'semver version suffix'
+        description: 'package version'
         required: true
-        default: 'Test-DATE-TIME'
+        default: '1.0.0-Test-DATE-TIME'
     
 jobs:
   build_job:
@@ -40,23 +40,23 @@ jobs:
 
     - name: Define SemVer suffix
       run: |          
-          SEMVERSUFFIX="${{ inputs.version-suffix }}"          
+          PACKAGEVERSION="${{ inputs.package-version }}"          
 
           # replace DATE
           DATE_SHORT=$(date +'%Y%m%d')
-          if [[ "SEMVERSUFFIX" == *"$DATE"* ]]; then
-          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$DATE_SHORT}"
+          if [[ "PACKAGEVERSION" == *"$DATE"* ]]; then
+          PACKAGEVERSION="${PACKAGEVERSION/DATE/$DATE_SHORT}"
           fi
 
           # replace TIME
           TIME_SHORT=$(date +'%H%M%S')          
-          if [[ "SEMVERSUFFIX" == *"$TIME"* ]]; then
-          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$TIME_SHORT}"
+          if [[ "PACKAGEVERSION" == *"$TIME"* ]]; then
+          PACKAGEVERSION="${PACKAGEVERSION/TIME/$TIME_SHORT}"
           fi
 
           # emit env variable
-          echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV          
-          echo ${{ env.SEMVERSUFFIX }}
+          echo "PACKAGEVERSION=PACKAGEVERSION" >> $GITHUB_ENV          
+          echo ${{ env.PACKAGEVERSION }}
 
       # ---------------------------------------------  build
 
@@ -67,7 +67,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release --version-suffix ${{ env.SEMVERSUFFIX }}
+      run: dotnet build -c Release /p:Version=1.0.0-${{ env.PACKAGEVERSION }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
