@@ -1,0 +1,51 @@
+name: Build packages and store artifacts
+
+on: [workflow_dispatch, workflow_call]
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest    
+    timeout-minutes: 5
+    steps:   
+
+      # ---------------------------------------------  DotNet SDK
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+
+      # ---------------------------------------------  checkout repo
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+      # ---------------------------------------------  install dependencies
+
+    - name: Install dependencies
+      run: dotnet tool restore
+
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: define version suffix
+      run: |
+          if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
+          echo "VERSIONSUFFIX=alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV          
+
+      # ---------------------------------------------  build
+
+    - name: Build
+      run: dotnet build -c Release --version-suffix ${{ env.VERSIONSUFFIX }}
+    
+    - name: Pack nugets
+      run: dotnet pack -c Release --no-build --output .
+
+      # ---------------------------------------------  publish    
+
+    - name: Archive nuget packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        retention-days: 1
+        path: |
+            *.nupkg
+            *.snupkg
