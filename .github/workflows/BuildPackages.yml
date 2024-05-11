@@ -3,9 +3,11 @@ name: Build packages and store artifacts
 on: [workflow_dispatch, workflow_call]
     
 jobs:
-  build:
+  build_job:
+
     runs-on: ubuntu-latest    
     timeout-minutes: 5
+
     steps:   
 
       # ---------------------------------------------  DotNet SDK
@@ -17,14 +19,8 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
-
-      # ---------------------------------------------  install dependencies
-
-    - name: Install dependencies
-      run: dotnet tool restore
-
-    - name: Install dependencies
-      run: dotnet restore
+      
+      # ---------------------------------------------  variables
 
     - name: define version suffix
       run: |
@@ -34,15 +30,22 @@ jobs:
           if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
           echo "VERSIONSUFFIX=Test-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV          
           fi
-          echo "VERSIONSUFFIX is set to ${{ env.VERSIONSUFFIX }}"
 
       # ---------------------------------------------  build
+
+    - name: Install tools
+      run: dotnet tool restore
+
+    - name: Install dependencies
+      run: dotnet restore
 
     - name: Build
       run: dotnet build -c Release --version-suffix ${{ env.VERSIONSUFFIX }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
+
+      # ---------------------------------------------  publish
 
     - name: Archive
       uses: actions/upload-artifact@v4
