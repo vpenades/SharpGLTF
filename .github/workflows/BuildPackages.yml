@@ -64,13 +64,10 @@ jobs:
       run: dotnet tool restore
 
     - name: Install dependencies
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build -c Release --version-suffix ${{ env.SEMVERSUFFIX }}
+      run: dotnet restore    
     
     - name: Pack
-      run: dotnet pack -c Release --no-build --output "."
+      run: dotnet pack -c Release --output "." --version-suffix ${{ env.SEMVERSUFFIX }}
 
       # ---------------------------------------------  publish
 
