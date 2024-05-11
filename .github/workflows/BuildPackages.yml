@@ -4,7 +4,7 @@ on:
 
   workflow_dispatch:
     inputs:
-      package-version:
+      nuget-semver:
         type: string
         description: 'package version'
         required: false
@@ -12,7 +12,7 @@ on:
 
   workflow_call:
     inputs:
-      package-version:
+      nuget-semver:
         type: string
         description: 'package version'
         required: true
@@ -40,23 +40,23 @@ jobs:
 
     - name: Define SemVer suffix
       run: |          
-          PACKAGEVERSION="${{ inputs.package-version }}"          
+          NUGETSEMVER="${{ inputs.nuget-semver }}"          
 
           # replace DATE
           DATE_SHORT=$(date +'%Y%m%d')
-          if [[ "PACKAGEVERSION" == *"$DATE"* ]]; then
-          PACKAGEVERSION="${PACKAGEVERSION/DATE/$DATE_SHORT}"
+          if [[ "NUGETSEMVER" == *"$DATE"* ]]; then
+          NUGETSEMVER="${NUGETSEMVER/DATE/$DATE_SHORT}"
           fi
 
           # replace TIME
           TIME_SHORT=$(date +'%H%M%S')          
-          if [[ "PACKAGEVERSION" == *"$TIME"* ]]; then
-          PACKAGEVERSION="${PACKAGEVERSION/TIME/$TIME_SHORT}"
+          if [[ "NUGETSEMVER" == *"$TIME"* ]]; then
+          NUGETSEMVER="${NUGETSEMVER/TIME/$TIME_SHORT}"
           fi
 
           # emit env variable
-          echo "PACKAGEVERSION=PACKAGEVERSION" >> $GITHUB_ENV          
-          echo ${{ env.PACKAGEVERSION }}
+          echo "NUGETSEMVER=NUGETSEMVER" >> $GITHUB_ENV          
+          echo ${{ env.NUGETSEMVER }}
 
       # ---------------------------------------------  build
 
@@ -67,7 +67,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release /p:Version=1.0.0-${{ env.PACKAGEVERSION }}
+      run: dotnet build -c Release /p:Version=1.0.0-${{ env.NUGETSEMVER }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."

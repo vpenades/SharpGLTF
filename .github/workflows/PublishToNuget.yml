@@ -7,7 +7,7 @@ jobs:
   build_job:
     uses: ./.github/workflows/BuildPackages.yml
     with:
-      package-version: 1.0.0-alpha${{ vars.SharpGLTF_AlphaVersion }}
+      nuget-semver: 1.0.0-alpha${{ vars.SharpGLTF_AlphaVersion }}
 
   publish_job:
     needs: build_job
