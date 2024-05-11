@@ -1,4 +1,4 @@
-name: Publish artifacts to Nuget
+name: Publish artifacts to Github
 
 on: workflow_dispatch
     
@@ -7,7 +7,7 @@ jobs:
   build_job:
     uses: ./.github/workflows/BuildPackages.yml
     with:
-      version-suffix: alpha${{ vars.SharpGLTF_AlphaVersion }}
+      version-suffix: Preview-$(date +'%Y%m%d-%H%M%S')"
 
   publish_job:
     needs: build_job
@@ -21,4 +21,4 @@ jobs:
         name: nuget-packages
 
     - name: Push to NuGet
-      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToNuget}} --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToGithub}} --source https://nuget.pkg.github.com/${{github.repository_owner}}

@@ -29,21 +29,22 @@ jobs:
     - name: define version suffix
       run: |
           if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
-          echo "VERSIONSUFFIX=alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
-          echo "VERSIONSUFFIX is set to ${{ env.VERSIONSUFFIX }}"
+          echo "VERSIONSUFFIX=${{ inputs.version-suffix }}" >> $GITHUB_ENV
           fi
+          if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
+          echo "VERSIONSUFFIX=Test-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV          
+          fi
+          echo "VERSIONSUFFIX is set to ${{ env.VERSIONSUFFIX }}"
 
       # ---------------------------------------------  build
 
     - name: Build
       run: dotnet build -c Release --version-suffix ${{ env.VERSIONSUFFIX }}
     
-    - name: Pack nugets
-      run: dotnet pack -c Release --no-build --output .
+    - name: Pack
+      run: dotnet pack -c Release --no-build --output "."
 
-      # ---------------------------------------------  publish    
-
-    - name: Archive nuget packages
+    - name: Archive
       uses: actions/upload-artifact@v4
       with:
         name: nuget-packages
