@@ -8,7 +8,7 @@ on:
         type: string
         description: 'semver version suffix'
         required: false
-        default: ''
+        default: 'Test-DATE-TIME'
 
   workflow_call:
     inputs:
@@ -38,13 +38,16 @@ jobs:
       
       # ---------------------------------------------  variables
 
-    - name: define version suffix 1
-      if: ${{ inputs.version-suffix == '' }}
-      run: echo "VERSIONSUFFIX=${{ inputs.version-suffix }}" >> $GITHUB_ENV
-
-    - name: define version suffix 2
-      if: ${{inputs.version-suffix != '' }}
-      run: echo "VERSIONSUFFIX=Test-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+    - name: Replace word in variable
+      run: |
+          # Read the input into a variable
+          SEMVERSUFFIX="${{ inputs.version-suffix }}"          
+          echo "Original value: SEMVERSUFFIX"
+          SEMVERSUFFIX="${SEMVERSUFFIX/DATE/$(date +'%Y%m%d')}"
+          SEMVERSUFFIX="${SEMVERSUFFIX/TIME/$(date +'%H%M%S')}"
+          echo "Modified value: SEMVERSUFFIX"
+          env:
+          SEMVERSUFFIX: "semver in use"
 
       # ---------------------------------------------  build
 
@@ -55,7 +58,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release --version-suffix ${{ env.VERSIONSUFFIX }}
+      run: dotnet build -c Release --version-suffix ${{ env.SEMVERSUFFIX }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
