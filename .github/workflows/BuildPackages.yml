@@ -43,6 +43,9 @@ jobs:
           if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
           echo "VERSIONSUFFIX=${{ inputs.version-suffix }}" >> $GITHUB_ENV
           fi
+
+    - name: define version suffix fallback
+      run: |          
           if [ -z "${{ env.VERSIONSUFFIX }}" ]; then
           echo "VERSIONSUFFIX=Test-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV          
           fi
