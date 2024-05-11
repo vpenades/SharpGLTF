@@ -24,9 +24,19 @@ jobs:
     runs-on: ubuntu-latest    
     timeout-minutes: 5
 
-    steps:   
+    steps:
 
-    # ---------------------------------------------  variables
+      # ---------------------------------------------  DotNet SDK
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+
+      # ---------------------------------------------  checkout repo
+
+    - name: Checkout
+      uses: actions/checkout@v4      
+
+      # ---------------------------------------------  variables
 
     - name: Define SemVer suffix
       run: |          
@@ -48,16 +58,6 @@ jobs:
           echo "SEMVERSUFFIX=$SEMVERSUFFIX" >> $GITHUB_ENV          
           echo ${{ env.SEMVERSUFFIX }}
 
-      # ---------------------------------------------  DotNet SDK
-
-    - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v4
-
-      # ---------------------------------------------  checkout repo
-
-    - name: Checkout
-      uses: actions/checkout@v4      
-
       # ---------------------------------------------  build
 
     - name: Install tools
@@ -67,7 +67,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release --version-suffix ${{ env.SEMVERSUFFIX }} --verbosity diagnostic
+      run: dotnet build -c Release --version-suffix ${{ env.SEMVERSUFFIX }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
