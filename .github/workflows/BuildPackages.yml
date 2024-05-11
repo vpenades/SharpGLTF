@@ -67,7 +67,7 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release /p:Version=1.0.0-${{ env.NUGETSEMVER }}
+      run: dotnet build -c Release /p:Version=${{ env.NUGETSEMVER }}
     
     - name: Pack
       run: dotnet pack -c Release --no-build --output "."
