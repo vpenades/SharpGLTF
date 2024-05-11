@@ -1,6 +1,22 @@
 name: Build packages and store artifacts
 
-on: [workflow_dispatch, workflow_call]
+on:
+
+  workflow_dispatch:
+    inputs:
+      version-suffix:
+        type: string
+        description: 'semver version suffix'
+        required: false
+        default: ''
+
+  workflow_call:
+    inputs:
+      version-suffix:
+        type: string
+        description: 'semver version suffix'
+        required: true
+        default: ''
     
 jobs:
   build_job:
