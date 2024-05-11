@@ -39,11 +39,11 @@ jobs:
       # ---------------------------------------------  variables
 
     - name: define version suffix 1
-      if: ${{ env.VERSIONSUFFIX == '' }}
+      if: ${{ inputs.version-suffix == '' }}
       run: echo "VERSIONSUFFIX=${{ inputs.version-suffix }}" >> $GITHUB_ENV
 
     - name: define version suffix 2
-      if: ${{ env.VERSIONSUFFIX == '' }}
+      if: ${{inputs.version-suffix != '' }}
       run: echo "VERSIONSUFFIX=Test-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
 
       # ---------------------------------------------  build
