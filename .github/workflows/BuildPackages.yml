@@ -40,8 +40,8 @@ jobs:
 
     - name: Build
       run: |
-        chmod +x build.sh
-        build.sh $nuget-semver
+        chmod +x ./build.sh
+        ./build.sh $nuget-semver
 
       # ---------------------------------------------  publish
 
