@@ -1,3 +1,4 @@
+# this script can be run directly or from the github actions.
 
 # set input or default
 

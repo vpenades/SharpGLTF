@@ -7,7 +7,7 @@ jobs:
   build_job:
     uses: ./.github/workflows/BuildPackages.yml
     with:
-      nuget-semver: 1.0.0-Preview-DATE
+      nuget-semver: ${{ vars.SharpGLTF_Version }}-Preview-DATE
 
   publish_job:
     needs: build_job
