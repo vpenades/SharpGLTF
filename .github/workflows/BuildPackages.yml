@@ -40,8 +40,8 @@ jobs:
 
     - name: Build
       run: |
-        chmod +x ./SharpGLTF.build.sh
-        ./SharpGLTF.build.sh ${{inputs.nuget-semver}}
+        chmod +x ./SharpGLTF.Build.sh
+        ./SharpGLTF.Build.sh ${{inputs.nuget-semver}}
 
       # ---------------------------------------------  publish
 
