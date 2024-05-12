@@ -95,11 +95,6 @@
     <PackageProjectUrl>https://github.com/vpenades/SharpGLTF</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>    
   </PropertyGroup>  
-  
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <VersionPrefix>1.0.0</VersionPrefix>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-  </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <Deterministic>true</Deterministic>

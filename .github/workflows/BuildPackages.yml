@@ -36,41 +36,12 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4      
 
-      # ---------------------------------------------  variables
-
-    - name: Define SemVer suffix
-      run: |          
-          NUGETSEMVER="${{ inputs.nuget-semver }}"          
-
-          # replace DATE
-          DATE_SHORT=$(date +'%Y%m%d')
-          if [[ "NUGETSEMVER" == *"$DATE"* ]]; then
-          NUGETSEMVER="${NUGETSEMVER/DATE/$DATE_SHORT}"
-          fi
-
-          # replace TIME
-          TIME_SHORT=$(date +'%H%M%S')          
-          if [[ "NUGETSEMVER" == *"$TIME"* ]]; then
-          NUGETSEMVER="${NUGETSEMVER/TIME/$TIME_SHORT}"
-          fi
-
-          # emit env variable
-          echo "DOTNET_NUGETSEMVER=$NUGETSEMVER" >> $GITHUB_ENV          
-          echo ${{ env.DOTNET_NUGETSEMVER }}
-
       # ---------------------------------------------  build
 
-    - name: Install tools
-      run: dotnet tool restore
-
-    - name: Install dependencies
-      run: dotnet restore
-
     - name: Build
-      run: dotnet build -c Release /p:Version=${{ env.DOTNET_NUGETSEMVER }}
-    
-    - name: Pack
-      run: dotnet pack -c Release --no-build --output "."
+      run: |
+        chmod +x build.sh
+        build.sh $nuget-semver
 
       # ---------------------------------------------  publish
 
