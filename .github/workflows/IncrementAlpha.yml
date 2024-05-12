@@ -1,0 +1,24 @@
+name: Increment Alpha version
+
+on: [ workflow_dispatch, workflow_call ]
+    
+jobs:
+  job_increment:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Increment variable      
+      uses: action-pack/increment@v2
+      with:
+        name: 'SharpGLTF_AlphaVersion'
+        token: ${{ secrets.VARIABLES_ACCESS }}
+
+    - name: Use the incremented value
+      run: |
+        echo "New version code is ${{ steps.increment.outputs.new_value }}"
+
+  
