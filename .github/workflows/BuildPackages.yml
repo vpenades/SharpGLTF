@@ -41,7 +41,7 @@ jobs:
     - name: Build
       run: |
         chmod +x ./build.sh
-        ./build.sh ${{nuget-semver}}
+        ./build.sh ${{inputs.nuget-semver}}
 
       # ---------------------------------------------  publish
 
