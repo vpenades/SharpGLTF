@@ -4,12 +4,25 @@ on: workflow_dispatch
     
 jobs:
 
-  build_job:
+  prepare_job: #---------------------------------------------------------------------------------------
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Define Version at GHENV_PACKAGEVERSION
+      run: |
+        chmod +x ./.github/workflows/FormatSemver.sh
+        ./.github/workflows/FormatSemver.sh "${{ vars.SharpGLTF_Version }}-Preview-DATE-TIME" >> $GITHUB_ENV
+
+    outputs:
+      semver: "${{env.GHENV_PACKAGEVERSION}}" 
+
+  build_job: #---------------------------------------------------------------------------------------
+    needs: prepare_job
     uses: ./.github/workflows/BuildPackages.yml
     with:
-      nuget-semver: ${{ vars.SharpGLTF_Version }}-Preview-DATE-TIME
+      nuget-semver: "${{needs.prepare_job.outputs.semver}}"
 
-  publish_job:
+  publish_job: #---------------------------------------------------------------------------------------
     needs: build_job
     runs-on: ubuntu-latest
 
@@ -22,3 +35,12 @@ jobs:
 
     - name: Push to NuGet
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToGithub}} --source https://nuget.pkg.github.com/${{github.repository_owner}}
+
+  tag_job: #---------------------------------------------------------------------------------------
+    needs: [ prepare_job, build_job ]
+    permissions:
+      contents: write # required for pushing the tag    
+    uses: ./.github/workflows/PushGithubTag.yml
+    with:
+      tag-name: "${{needs.prepare_job.outputs.semver}}"
+      message: "Tag for ${{needs.prepare_job.outputs.semver}}"

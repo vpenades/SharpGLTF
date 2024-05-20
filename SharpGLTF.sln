@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\IncrementVersion.yml = .github\workflows\IncrementVersion.yml
 		.github\workflows\PublishToGithub.yml = .github\workflows\PublishToGithub.yml
 		.github\workflows\PublishToNuget.yml = .github\workflows\PublishToNuget.yml
+		.github\workflows\PushGithubTag.yml = .github\workflows\PushGithubTag.yml
 		README.md = README.md
 		SharpGLTF.Build.sh = SharpGLTF.Build.sh
 		SharpGLTF.ruleset = SharpGLTF.ruleset
