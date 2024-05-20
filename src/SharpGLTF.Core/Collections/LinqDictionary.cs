@@ -123,7 +123,7 @@ namespace SharpGLTF.Collections
 
         public int Count => _Source.Count;
 
-        public bool IsReadOnly => throw new NotImplementedException();
+        public bool IsReadOnly => throw new InvalidOperationException();
 
         public bool ContainsKey(TKey key) { return _Source.ContainsKey(key); }
 
