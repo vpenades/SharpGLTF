@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 using SharpGLTF.Collections;
@@ -15,8 +16,14 @@ namespace SharpGLTF.Schema2
             _packets = new List<XMPJSONLD>();
         }
 
+        
         public IReadOnlyList<XMPJSONLD> JsonPackets => _packets;
 
+        #if NET6_0_OR_GREATER
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+        #endif
         public int AddPacket(XMPJSONLD packet)
         {
             if (_packets.Contains(packet)) throw new ArgumentException("Already exists", nameof(packet));

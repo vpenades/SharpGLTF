@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 using System.Text.Json;
@@ -30,6 +31,11 @@ namespace SharpGLTF.IO
 
         private readonly string _Name;
 
+        #if NET6_0_OR_GREATER
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+        #endif
         private readonly Dictionary<String, JSONCONTENT> _Properties = new Dictionary<String, JSONCONTENT>();
 
         #endregion
@@ -44,6 +50,11 @@ namespace SharpGLTF.IO
 
         #region API
 
+        #if NET6_0_OR_GREATER
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+        [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+        #endif
         protected override void DeserializeProperty(string property, ref Utf8JsonReader reader)
         {
             reader.Read();

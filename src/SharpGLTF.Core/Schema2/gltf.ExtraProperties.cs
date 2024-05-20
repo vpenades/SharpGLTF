@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 using System.Text.Json;
@@ -10,12 +11,13 @@ using JsonToken = System.Text.Json.JsonTokenType;
 
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
+
 namespace SharpGLTF.Schema2
 {
     public interface IExtraProperties
     {
         IReadOnlyCollection<JsonSerializable> Extensions { get; }
-
+        
         JSONEXTRAS Extras { get; set; }
     }
 
@@ -45,10 +47,21 @@ namespace SharpGLTF.Schema2
 
         /// <summary>
         /// Gets or sets the extras content of this instance.
-        /// </summary>
+        /// </summary>        
         public JSONEXTRAS Extras
         {
+            #if NET6_0_OR_GREATER
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+            #endif
             get => _extras;
+
+            #if NET6_0_OR_GREATER
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
+            [DynamicDependency(DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
+            #endif
             set => _extras = value?.DeepClone();
         }
 
