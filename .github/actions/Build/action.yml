@@ -1,0 +1,31 @@
+name: 'Build packages and store artifacts'
+description: 'Build packages and store artifacts'
+
+inputs:
+  nuget-semver:  
+    description: 'package version'
+    required: false
+    default: '1.0.0-Test-DATE-TIME'
+    
+runs:
+  using: 'composite'  
+
+  steps:        
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+
+    - name: Build
+      run: |
+        chmod +x ./SharpGLTF.Build.sh
+        ./SharpGLTF.Build.sh ${{inputs.nuget-semver}}
+      shell: bash      
+
+    - name: Archive
+      uses: actions/upload-artifact@v4
+      with:
+        name: nuget-packages
+        retention-days: 1
+        path: |
+            *.nupkg
+            *.snupkg

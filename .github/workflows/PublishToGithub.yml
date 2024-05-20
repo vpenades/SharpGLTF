@@ -40,11 +40,8 @@ jobs:
     - name: Push to NuGet
       run: dotnet nuget push "*.nupkg" --api-key ${{secrets.SharpGLTF_PublishToGithub}} --source https://nuget.pkg.github.com/${{github.repository_owner}}
 
-  tag_job: #---------------------------------------------------------------------------------------
-    needs: [ prepare_job, build_job ]
-    permissions:
-      contents: write # required for pushing the tag    
-    uses: ./.github/workflows/PushGithubTag.yml
-    with:
-      tag-name: "${{needs.prepare_job.outputs.semver}}"
-      message: "Tag for ${{needs.prepare_job.outputs.semver}}"
+    - name: create tag
+      uses: ./.github/actions/PushGithubTag
+      with:
+        tag-name: "${{env.GHENV_PACKAGEVERSION}}"
+        message: "new tag for ${{env.GHENV_PACKAGEVERSION}}"
