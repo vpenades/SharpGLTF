@@ -89,10 +89,22 @@ namespace SharpGLTF.Schema2
 
         #region properties        
 
+        /// <summary>
+        /// List of extensions used by the current model.
+        /// </summary>
         public IEnumerable<String> ExtensionsUsed               => _extensionsUsed;
 
+        /// <summary>
+        /// List of extensions required by the current model.
+        /// </summary>
         public IEnumerable<String> ExtensionsRequired           => _extensionsRequired;
 
+        /// <summary>
+        /// List of extensions not supported by the library.
+        /// </summary>
+        /// <remarks>
+        /// Usually, this collection should be empty. Otherwise it signals this model is unusable.
+        /// </remarks>
         public IEnumerable<String> IncompatibleExtensions       => _extensionsRequired.Except(ExtensionsFactory.SupportedExtensions).ToList();
 
         ModelRoot IConvertibleToGltf2.ToGltf2() { return this; }

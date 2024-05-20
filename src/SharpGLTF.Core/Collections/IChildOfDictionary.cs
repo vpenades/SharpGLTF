@@ -8,6 +8,7 @@ namespace SharpGLTF.Collections
     /// Implemented by children of <see cref="ChildrenDictionary{T, TParent}"/>
     /// </summary>
     /// <typeparam name="TParent">The type of the parent class containing the collection.</typeparam>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Naming", "CA1711:Identifiers should not have incorrect suffix", Justification = "no better option")]
     public interface IChildOfDictionary<TParent>
         where TParent : class
     {
