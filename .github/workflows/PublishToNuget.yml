@@ -1,11 +1,13 @@
-name: Publish artifacts to Nuget
+name: Publish artifacts to Github
 
 on: workflow_dispatch
     
 jobs:
 
-  prepare_job: #---------------------------------------------------------------------------------------
+  main_job:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # required for pushing the tag    
     
     steps:
 
@@ -17,20 +19,10 @@ jobs:
         chmod +x ./.github/workflows/FormatSemver.sh
         ./.github/workflows/FormatSemver.sh "${{ vars.SharpGLTF_Version }}-Alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
 
-    outputs:
-      semver: "${{env.GHENV_PACKAGEVERSION}}" 
-
-  build_job: #---------------------------------------------------------------------------------------
-    needs: prepare_job
-    uses: ./.github/workflows/BuildPackages.yml
-    with:
-      nuget-semver: "${{needs.prepare_job.outputs.semver}}"
-
-  publish_job: #---------------------------------------------------------------------------------------
-    needs: build_job
-    runs-on: ubuntu-latest
-
-    steps:
+    - name: build
+      uses: ./.github/actions/Build
+      with:
+        nuget-semver: "${{env.GHENV_PACKAGEVERSION}}"
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
