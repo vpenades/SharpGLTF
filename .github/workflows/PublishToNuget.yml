@@ -1,4 +1,4 @@
-name: Publish artifacts to Github
+name: Publish artifacts to NUGET
 
 on: workflow_dispatch
     
