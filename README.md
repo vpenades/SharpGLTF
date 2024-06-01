@@ -14,7 +14,7 @@ __SharpGLTF__ is a 100% .NET Standard library designed to support [Khronos Group
 The library is divided into these main packages:
 
 |Library|Nuget|Function|
-|-|-|
+|-|-|-|
 |[__SharpGLTF.Core__](src/SharpGLTF.Core/README.md)|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Core)](https://www.nuget.org/packages/SharpGLTF.Core)|Read/Write file support, and low level access to the glTF models.|
 |[__SharpGLTF.Runtime__](src/SharpGLTF.Runtime/README.md)|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Runtime)](https://www.nuget.org/packages/SharpGLTF.Runtime)|Helper classes to simplify gltf model rendering.|
 |[__SharpGLTF.Toolkit__](src/SharpGLTF.Toolkit/README.md)|[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Toolkit)](https://www.nuget.org/packages/SharpGLTF.Toolkit)|Convenience utilities to help create, manipulate and evaluate glTF models.|
