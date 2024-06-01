@@ -12,9 +12,10 @@
 __SharpGLTF__ is a 100% .NET Standard library designed to support
 [Khronos Group glTF 2.0](https://github.com/KhronosGroup/glTF) file format.
 
-The library is divided into two main packages:
+The library is divided into three main packages:
 
 - [__SharpGLTF.Core__](src/SharpGLTF.Core/README.md) provides read/write file support, and low level access to the glTF models.
+- [__SharpGLTF.Runtime__](src/SharpGLTF.Runtime/README.md) helper classes to simplify gltf model rendering.
 - [__SharpGLTF.Toolkit__](src/SharpGLTF.Toolkit/README.md) provides convenient utilities to help create, manipulate and evaluate glTF models.
 
 #### Nuget Packages
@@ -22,12 +23,8 @@ The library is divided into two main packages:
 |Package|Version|
 |-|-|
 |[__SharpGLTF.Core__](https://www.nuget.org/packages/SharpGLTF.Core)|![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Core)|
+|[__SharpGLTF.Runtime__](https://www.nuget.org/packages/SharpGLTF.Runtime)|![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Runtime)|
 |[__SharpGLTF.Toolkit__](https://www.nuget.org/packages/SharpGLTF.Toolkit)|![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/SharpGLTF.Toolkit)|
-
-The library is still in preview status because the APIs are still subject to change from version to version,
-but most of the features are already completed and heavily tested, so I believe the code is mature enough
-to be used in production.
-
 
 #### Quickstart
 
