@@ -18,6 +18,12 @@ The library is divided into three main packages:
 - [__SharpGLTF.Runtime__](src/SharpGLTF.Runtime/README.md) helper classes to simplify gltf model rendering.
 - [__SharpGLTF.Toolkit__](src/SharpGLTF.Toolkit/README.md) provides convenient utilities to help create, manipulate and evaluate glTF models.
 
+Additionally, there's some optional extension libraries available:
+
+- __SharpGLTF.Ext.Agi__
+- [__SharpGLTF.Ext.3DTiles__](src/SharpGLTF.Ext.3DTiles/README.md)
+
+
 #### Nuget Packages
 
 |Package|Version|
