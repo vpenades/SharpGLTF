@@ -142,7 +142,7 @@ namespace SharpGLTF.Schema2
             // inverse bind matrices accessor
 
             var data = new Byte[joints.Length * 16 * 4];
-            var matrices = new Memory.Matrix4x4Array(data.Slice(0), 0, EncodingType.FLOAT, false);
+            var matrices = new Memory.Matrix4x4Array(data, 0, EncodingType.FLOAT, false);
             matrices.Fill(joints.Select(item => item.InverseBindMatrix));
 
             var accessor = LogicalParent.CreateAccessor("Bind Matrices");

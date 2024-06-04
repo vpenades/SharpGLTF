@@ -69,7 +69,7 @@ namespace SharpGLTF.Schema2
 
             if (primaryImage.Content.IsExtendedFormat)
             {
-                var fallback = LogicalParent.UseImage(Memory.MemoryImage.DefaultPngImage.Slice(0));
+                var fallback = LogicalParent.UseImage(Memory.MemoryImage.DefaultPngImage);
                 SetImages(primaryImage, fallback);
             }
             else
