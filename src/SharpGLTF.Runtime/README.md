@@ -13,10 +13,11 @@ Now, lets say you have an __AwesomeEngine__ which defines an __AwesomeMesh__ tha
 is the equivalent of a __glTF Mesh__, so for each _logical_ glTF Mesh we find in Model.LogicalMeshes,
 we create the equivalent AwesomeMesh:
 ```c#
-var gpuMeshes = new AwesomeMesh[model.LogicalMeshes.Count];
+var awesomeMeshes = new AwesomeMesh[model.LogicalMeshes.Count];
+
 for(int i=0; i < model.LogicalMeshes.Count; ++i)
 {
-    gpuMeshes[i] = new AwesomeMesh(model.LogicalMeshes[i]);
+    awesomeMeshes[i] = new AwesomeMesh(model.LogicalMeshes[i]);
 }
 ```
 
@@ -42,34 +43,47 @@ var inst2 = modelTemplate.CreateInstance();
     
 var inst3 = modelTemplate.CreateInstance();
     inst3.SetAnimationFrame("Running", 1.32f);
-    inst3.SetWorldMatrix("Head", Matrix.LookAt(...) ); // example of manually setting a single node matrix
+    inst3.SetWorldMatrix("Head", Matrix.LookAt(...) ); // example of manually setting a single node matrix    
     
-    RenderInstance(inst1, Matrix4x4.CreateTranslation(-10,0,0));
-    RenderInstance(inst2, Matrix4x4.CreateTranslation(  0,0,0));
-    RenderInstance(inst3, Matrix4x4.CreateTranslation( 10,0,0));
 ```
 
 Finally, we render the instances like this:
 ```c#
+
+RenderInstance(inst1, Matrix4x4.CreateTranslation(-10,0,0));
+RenderInstance(inst2, Matrix4x4.CreateTranslation(  0,0,0));
+RenderInstance(inst3, Matrix4x4.CreateTranslation( 10,0,0));
+
 void RenderInstance(SharpGLTF.Runtime.SceneInstance modelInstance, Matrix4x4 modelMatrix)
 {
     foreach(var drawable in modelInstance.DrawableInstances)
     {
-        var gpuMesh = gpuMeshes[drawable.Template.LogicalMeshIndex];
+        var awesomeMesh = awesomeMeshes[drawable.Template.LogicalMeshIndex];
 
-        if (drawable.Transform is SharpGLTF.Transforms.RigidTransform statXform)
+        switch(drawable.Transform) // choosing the appropiate transform mode for each mesh drawing
         {
-            AwesomeEngine.DrawRigidMesh(gpuMesh, modelMatrix, statXform.WorldMatrix);
-        }
+            case SharpGLTF.Transforms.RigidTransform rigidXform:
+                AwesomeEngine.DrawRigidMesh(awesomeMesh, modelMatrix, rigidXform.WorldMatrix);
+                break;
 
-        if (drawable.Transform is SharpGLTF.Transforms.SkinnedLogicalMeshIndexTransform skinXform)
-        {
-            AwesomeEngine.DrawSkinnedMesh(gpuMesh, modelMatrix, skinXform.SkinMatrices);
+            case SharpGLTF.Transforms.SkinnedTransform skinXform:
+                AwesomeEngine.DrawSkinnedMesh(awesomeMesh, modelMatrix, skinXform.SkinMatrices);
+                break;
+
+            case SharpGLTF.Transforms.InstancingTransform InstancingXform:                
+                AwesomeEngine.DrawInstancedMeshes(awesomeMesh, modelMatrix, InstancingXform.WorldTransforms);
+                break;
         }
     }
 }
 
 ```
+
+## Showcase
+
+- [MonoScene](https://github.com/vpenades/MonoScene) integration with MonoGame (outdated)
+- [Celeste64](https://github.com/ExOK/Celeste64) integration with a custom engine.
+
 
 
 

@@ -16,6 +16,7 @@ namespace SharpGLTF.Geometry.VertexTypes
     /// <remarks>
     /// Implemented by:
     /// <list type="table">
+    /// <item><see cref="IVertexCustom"/></item>
     /// <item><see cref="VertexEmpty"/></item>
     /// <item><see cref="VertexColor1"/></item>
     /// <item><see cref="VertexColor2"/></item>

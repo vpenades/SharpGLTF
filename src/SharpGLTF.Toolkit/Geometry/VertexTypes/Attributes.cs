@@ -6,8 +6,10 @@ using System.Text;
 
 namespace SharpGLTF.Geometry.VertexTypes
 {
+    // keep this definition around for a while, to help late migrations get the right error.
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
     [Obsolete("The usage of this attribute has been removed because it's not AOT friendly. Implement IVertexReflection.GetEncodingAttributes() instead.", true)]
-    [AttributeUsageAttribute(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Field, Inherited = true, AllowMultiple = false)]
     public sealed class VertexAttributeAttribute : Attribute
     {
         #region constructors
