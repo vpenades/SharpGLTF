@@ -404,13 +404,13 @@ namespace SharpGLTF.Geometry
         public IReadOnlyCollection<Vector3> Positions => _Positions.Keys;
 
         /// <inheritdoc/>
-        IReadOnlyCollection<IVertexGeometry> IMorphTargetBuilder.Vertices => (IReadOnlyList<IVertexGeometry>)(IReadOnlyCollection<TvG>)_Vertices.Keys;
+        IReadOnlyCollection<IVertexGeometry> IMorphTargetBuilder.Vertices => _Vertices.Keys.SelectCollection(item => (IVertexGeometry)item);
 
         /// <inheritdoc/>
         IReadOnlyList<IVertexGeometry> IMorphTargetBuilder.GetVertices(Vector3 position)
         {
             return _Positions.TryGetValue(position, out List<TvG> geos)
-                ? (IReadOnlyList<IVertexGeometry>)geos
+                ? geos.SelectList(item => (IVertexGeometry)item)
                 : Array.Empty<IVertexGeometry>();
         }
 

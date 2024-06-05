@@ -293,6 +293,7 @@ namespace SharpGLTF
             return new ArraySegment<T>(array, offset, array.Length - offset);
         }
 
+        #if NETSTANDARD2_0
         internal static ArraySegment<T> Slice<T>(this ArraySegment<T> array, int offset)
         {
             return new ArraySegment<T>(array.Array, array.Offset + offset, array.Count - offset);
@@ -302,6 +303,7 @@ namespace SharpGLTF
         {
             return new ArraySegment<T>(array.Array, array.Offset + offset, count);
         }
+        #endif
 
         internal static T[] CloneArray<T>(this T[] srcArray)
         {
@@ -435,6 +437,70 @@ namespace SharpGLTF
             for (int i = 0; i < tangents.Count; ++i)
             {
                 if (!tangents[i].IsValidTangent()) tangents[i] = tangents[i].SanitizeTangent();
+            }
+        }
+
+        public static IReadOnlyList<TResult> SelectList<TSource,TResult>(this IReadOnlyList<TSource> collection, Func<TSource,TResult> selector)
+        {
+            return new _ListSelect<TSource,TResult>(collection, selector);
+        }
+
+        public static IReadOnlyCollection<TResult> SelectCollection<TSource, TResult>(this IReadOnlyCollection<TSource> collection, Func<TSource, TResult> selector)
+        {
+            return new _CollectionSelect<TSource, TResult>(collection, selector);
+        }
+
+        private readonly struct _ListSelect<TSource,TResult> : IReadOnlyList<TResult>
+        {
+            public _ListSelect(IReadOnlyList<TSource> list, Func<TSource,TResult> selector)
+            {
+                _List = list;
+                _Selector = selector;
+            }
+
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            private readonly IReadOnlyList<TSource> _List;
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            private readonly Func<TSource, TResult> _Selector;
+
+            public TResult this[int index] => _Selector(_List[index]);
+
+            public int Count => _List.Count;
+
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                foreach (var item in _List) yield return _Selector(item);
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                foreach (var item in _List) yield return _Selector(item);
+            }
+        }
+
+        private readonly struct _CollectionSelect<TSource, TResult> : IReadOnlyCollection<TResult>
+        {
+            public _CollectionSelect(IReadOnlyCollection<TSource> list, Func<TSource, TResult> selector)
+            {
+                _List = list;
+                _Selector = selector;
+            }
+
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
+            private readonly IReadOnlyCollection<TSource> _List;
+            [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+            private readonly Func<TSource, TResult> _Selector;            
+
+            public int Count => _List.Count;
+
+            public IEnumerator<TResult> GetEnumerator()
+            {
+                foreach (var item in _List) yield return _Selector(item);
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                foreach (var item in _List) yield return _Selector(item);
             }
         }
 
@@ -777,12 +843,12 @@ namespace SharpGLTF
         public static string _EscapeStringInternal(this string uri)
         {
             // https://stackoverflow.com/questions/4396598/whats-the-difference-between-escapeuristring-and-escapedatastring
-            #pragma warning disable SYSLIB0013 // Type or member is obsolete
+#pragma warning disable SYSLIB0013 // Type or member is obsolete
             return Uri.EscapeUriString(uri);
-            #pragma warning restore SYSLIB0013 // Type or member is obsolete
+#pragma warning restore SYSLIB0013 // Type or member is obsolete
         }
 
-        #if NET6_0
+#if NET6_0
 
         /// <summary>
         /// Creates a new instance of the <see cref="JsonNode"/>.
@@ -794,11 +860,11 @@ namespace SharpGLTF
         /// </remarks>
         /// <param name="node">The node to clone.</param>
         /// <returns>A clone of <paramref name="node"/>.</returns>        
-        #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
-        #endif
+#endif
         public static System.Text.Json.Nodes.JsonNode DeepClone(this System.Text.Json.Nodes.JsonNode node)
         {
             // issue tracking both DeepClone and DeepEquals: https://github.com/dotnet/runtime/issues/56592            
@@ -807,14 +873,14 @@ namespace SharpGLTF
 
             System.Text.Json.Nodes.JsonNode clone = null;            
 
-            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             switch(node)
             {
                 case System.Text.Json.Nodes.JsonValue asValue: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonValue>(asValue); break;
                 case System.Text.Json.Nodes.JsonArray asArray: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonArray>(asArray); break;
                 case System.Text.Json.Nodes.JsonObject asObject: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonObject>(asObject); break;
             }            
-            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
             if (clone == null) throw new NotImplementedException();
 
@@ -823,15 +889,15 @@ namespace SharpGLTF
             return clone;
         }
 
-        #endif        
+#endif
 
         public static bool DeepEquals(this System.Text.Json.Nodes.JsonNode x, System.Text.Json.Nodes.JsonNode y, double precission)
         {
-            #if !NET6_0
+#if !NET6_0
 
             return System.Text.Json.Nodes.JsonNode.DeepEquals(x, y);
 
-            #else
+#else
 
             if (x == y) return true;
             if (x == null) return false;
@@ -888,7 +954,7 @@ namespace SharpGLTF
 
             return false;
 
-            #endif
+#endif
         }
 
         #endregion
