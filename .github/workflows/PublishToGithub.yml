@@ -1,4 +1,4 @@
-name: Publish artifacts to GITHUB
+name: Publish PREVIEW artifacts to GITHUB
 
 on: workflow_dispatch
     

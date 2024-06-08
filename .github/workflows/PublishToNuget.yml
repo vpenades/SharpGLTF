@@ -17,7 +17,7 @@ jobs:
     - name: Define Version at GHENV_PACKAGEVERSION
       run: |
         chmod +x ./.github/workflows/FormatSemver.sh
-        ./.github/workflows/FormatSemver.sh "${{ vars.SharpGLTF_Version }}-Alpha${{ vars.SharpGLTF_AlphaVersion }}" >> $GITHUB_ENV
+        ./.github/workflows/FormatSemver.sh "${{ vars.SharpGLTF_Version }}-Preview-DATE-TIME" >> $GITHUB_ENV
 
     - name: build
       uses: ./.github/actions/Build
