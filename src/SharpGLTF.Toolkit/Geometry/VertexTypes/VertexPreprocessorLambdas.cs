@@ -156,12 +156,16 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             if (vertex.TryGetNormal(out Vector3 n))
             {
-                if (!n._IsFinite()) n = p;
-                if (n == Vector3.Zero) n = p;
+                bool dirty = false;
+
+                if (!n._IsFinite()) { n = p; dirty = true; }
+                if (n == Vector3.Zero) { n = p; dirty = true; }
                 if (n == Vector3.Zero) return null;
 
                 var l = n.Length();
-                if (Math.Abs(l-1) > 0.01f) vertex.SetNormal(Vector3.Normalize(n));
+                if (Math.Abs(l - 1) > 0.01f) dirty = true;
+
+                if (dirty) vertex.SetNormal(Vector3.Normalize(n));
             }
 
             if (vertex.TryGetTangent(out Vector4 tw))
@@ -171,13 +175,19 @@ namespace SharpGLTF.Geometry.VertexTypes
                 var t = new Vector3(tw.X, tw.Y, tw.Z);
                 if (t == Vector3.Zero) return null;
 
-                if (tw.W > 0) tw.W = 1;
-                if (tw.W < 0) tw.W = -1;
+                bool dirty = false;
+
+                if (tw.W > 0) { tw.W = 1; dirty = true; }
+                if (tw.W < 0) { tw.W = -1; dirty = true; }
 
                 var l = t.Length();
-                if (Math.Abs(l - 1) > 0.01f) t = Vector3.Normalize(t);
+                if (Math.Abs(l - 1) > 0.01f)
+                {
+                    t = Vector3.Normalize(t);
+                    dirty = true;
+                }
 
-                vertex.SetTangent(new Vector4(t, tw.W));
+                if (dirty) vertex.SetTangent(new Vector4(t, tw.W));
             }
 
             return vertex;
