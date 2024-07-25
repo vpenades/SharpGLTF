@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="LibGit2Sharp" Version="0.30.0" />    
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.1" />
-    <PackageReference Include="NJsonSchema.NewtonsoftJson" Version="11.0.1" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" Version="11.0.2" />
+    <PackageReference Include="NJsonSchema.NewtonsoftJson" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
