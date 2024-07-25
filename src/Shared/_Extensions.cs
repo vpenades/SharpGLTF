@@ -325,10 +325,7 @@ namespace SharpGLTF
 
         internal static void Fill<T>(this T[] array, T value)
         {
-            for (int i = 0; i < array.Length; ++i)
-            {
-                array[i] = value;
-            }
+            array.AsSpan().Fill(value);
         }
         
         internal static IReadOnlyList<T> EnsureList<T>(this IEnumerable<T> collection)
