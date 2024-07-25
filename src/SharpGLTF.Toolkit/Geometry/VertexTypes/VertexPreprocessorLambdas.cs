@@ -161,7 +161,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (n == Vector3.Zero) return null;
 
                 var l = n.Length();
-                if (l < 0.99f || l > 0.01f) vertex.SetNormal(Vector3.Normalize(n));
+                if (Math.Abs(l-1) > 0.01f) vertex.SetNormal(Vector3.Normalize(n));
             }
 
             if (vertex.TryGetTangent(out Vector4 tw))
@@ -175,7 +175,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (tw.W < 0) tw.W = -1;
 
                 var l = t.Length();
-                if (l < 0.99f || l > 0.01f) t = Vector3.Normalize(t);
+                if (Math.Abs(l - 1) > 0.01f) t = Vector3.Normalize(t);
 
                 vertex.SetTangent(new Vector4(t, tw.W));
             }
