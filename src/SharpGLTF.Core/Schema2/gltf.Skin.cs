@@ -8,6 +8,8 @@ namespace SharpGLTF.Schema2
     [System.Diagnostics.DebuggerDisplay("Skin[{LogicalIndex}] {Name}")]
     public sealed partial class Skin
     {
+        // https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#skins
+
         // https://github.com/KhronosGroup/glTF/issues/461
         // https://github.com/KhronosGroup/glTF/issues/100
         // https://github.com/KhronosGroup/glTF/issues/403
@@ -33,20 +35,64 @@ namespace SharpGLTF.Schema2
         public IEnumerable<Node> VisualParents => Node.FindNodesUsingSkin(this);
 
         /// <summary>
-        /// Gets the number of joints
+        /// Gets the number of joints.
         /// </summary>
         public int JointsCount => _joints.Count;
 
         /// <summary>
-        /// Gets or sets the Skeleton <see cref="Node"/>, which represents the root of a joints hierarchy.
+        /// Gets the list of joints.
         /// </summary>
+        /// <remarks>
+        /// Each joint is correlated to its respective IBM in <see cref="InverseBindMatrices"/>.
+        /// </remarks>
+        public IReadOnlyList<Node> Joints => _joints.SelectList(idx => this.LogicalParent.LogicalNodes[idx]);
+
+        /// <summary>
+        /// Gets the list of Inverse Bind Matrices.
+        /// </summary>
+        /// <remarks>
+        /// Each IBM is correlated to its respective Joint in <see cref="Joints"/>.
+        /// </remarks>
+        public IReadOnlyList<Matrix4x4> InverseBindMatrices
+        {
+            get
+            {
+                var matrices = GetInverseBindMatricesAccessor();
+                if (matrices == null) return Array.Empty<Matrix4x4>();
+
+                System.Diagnostics.Debug.Assert(matrices.Count == _joints.Count, "IBM and Joints count mismatch");
+
+                return matrices.AsMatrix4x4ReadOnlyList();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the Skeleton <see cref="Node"/>, which represents the root of a joints hierarchy AKA the Armature Root.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// As per <see href="https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#skins-overview">glTF specification</see>,
+        /// this value is optional. So don't expect all glTF models to have this property set.
+        /// </para>
+        /// <para>
+        /// Although the skeleton property is not needed for computing skinning transforms, it may be used to provide a specific “pivot point” for the skinned geometry.
+        /// </para>
+        /// </remarks>
         public Node Skeleton
         {
-            get => this._skeleton.HasValue ? this.LogicalParent.LogicalNodes[this._skeleton.Value] : null;
+            get
+            {
+                return this._skeleton.HasValue
+                    ? this.LogicalParent.LogicalNodes[this._skeleton.Value]
+                    : null;
+            }
+
             set
             {
                 if (value != null) Guard.MustShareLogicalParent(this.LogicalParent, nameof(this.LogicalParent), value, nameof(value));
-                this._skeleton = value == null ? (int?)null : value.LogicalIndex;
+                this._skeleton = value == null
+                    ? (int?)null
+                    : value.LogicalIndex;
             }
         }
 
@@ -54,11 +100,23 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        public Accessor UseInverseBindMatricesAccessor()
+        {
+            var accessor = GetInverseBindMatricesAccessor();
+            if (accessor == null)
+            {
+                accessor = LogicalParent.CreateAccessor("Bind Matrices");
+                this._inverseBindMatrices = accessor.LogicalIndex;
+            }
+
+            return accessor;
+        }
+
         public Accessor GetInverseBindMatricesAccessor()
         {
-            if (!this._inverseBindMatrices.HasValue) return null;
-
-            return this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value];
+            return _inverseBindMatrices.HasValue
+                ? this.LogicalParent.LogicalAccessors[this._inverseBindMatrices.Value]
+                : null;
         }
 
         public (Node Joint, Matrix4x4 InverseBindMatrix) GetJoint(int idx)
@@ -69,7 +127,9 @@ namespace SharpGLTF.Schema2
 
             var matrices = GetInverseBindMatricesAccessor();
 
-            var matrix = matrices == null ? Matrix4x4.Identity : matrices.AsMatrix4x4Array()[idx];
+            var matrix = matrices == null
+                ? Matrix4x4.Identity
+                : matrices.AsMatrix4x4Array()[idx];
 
             return (node, matrix);
         }
@@ -82,7 +142,7 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Binds a bone armature of <see cref="Node"/> to the associated skinned mesh.
+        /// Binds the armature <see cref="Node"/>s to the associated skinned mesh.
         /// </summary>
         /// <param name="meshBindTransform">The world transform matrix of the mesh at the time of binding.</param>
         /// <param name="joints">A collection of <see cref="Node"/> joints.</param>
@@ -114,47 +174,47 @@ namespace SharpGLTF.Schema2
         /// A collection of <see cref="Node"/> joints,
         /// where each joint has an Inverse Bind Matrix.
         /// </param>
-        public void BindJoints((Node Joint, Matrix4x4 InverseBindMatrix)[] joints)
+        public void BindJoints(IReadOnlyList<(Node Joint, Matrix4x4 InverseBindMatrix)> joints)
         {
             Guard.NotNull(joints, nameof(joints));
 
             _FindCommonAncestor(joints.Select(item => item.Joint));
+            
+            // sanitize IBMs
 
-            // Acording to gltf schema
-            // "The fourth row of each matrix MUST be set to [0.0, 0.0, 0.0, 1.0]."
-            // https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins-overview
-            for (int i = 0; i < joints.Length; ++i)
+            Matrix4x4 _SanitizedIBM(Matrix4x4 ibm, int idx)
             {
-                var ibm = joints[i].InverseBindMatrix;
+                Transforms.Matrix4x4Factory.GuardMatrix($"{nameof(joints)}[{idx}]", ibm, Transforms.Matrix4x4Factory.MatrixCheck.InverseBindMatrix, 0.01f);
 
-                Transforms.Matrix4x4Factory.GuardMatrix($"{nameof(joints)}[{i}]", ibm, Transforms.Matrix4x4Factory.MatrixCheck.InverseBindMatrix, 0.01f);                
+                // Acording to gltf specs https://www.khronos.org/registry/glTF/specs/2.0/glTF-2.0.html#skins-overview
+                // "The fourth row of each matrix MUST be set to [0.0, 0.0, 0.0, 1.0]."                
 
-                // fourth column (row in schema) is within tolerance
-                // so we can enforce exact values,
+                // fourth column (row in schema) has passed the guard and it is within tolerance so we can enforce exact values,
                 ibm.M14 = 0;
                 ibm.M24 = 0;
                 ibm.M34 = 0;
                 ibm.M44 = 1;
 
-                joints[i] = (joints[i].Joint, ibm);
+                return ibm;
             }
+
+            var ibms = joints.Select((item, idx) => _SanitizedIBM(item.InverseBindMatrix, idx));
 
             // inverse bind matrices accessor
 
-            var data = new Byte[joints.Length * 16 * 4];
+            var data = new Byte[joints.Count * 16 * 4];
             var matrices = new Memory.Matrix4x4Array(data, 0, EncodingType.FLOAT, false);
-            matrices.Fill(joints.Select(item => item.InverseBindMatrix));
+            matrices.Fill(ibms);
 
-            var accessor = LogicalParent.CreateAccessor("Bind Matrices");
-            accessor.SetData( LogicalParent.UseBufferView(data), 0, joints.Length, DimensionType.MAT4, EncodingType.FLOAT, false);
+            var ibmsView = LogicalParent.UseBufferView(data);
 
-            this._inverseBindMatrices = accessor.LogicalIndex;
+            UseInverseBindMatricesAccessor().SetData(ibmsView, 0, joints.Count, DimensionType.MAT4, EncodingType.FLOAT, false);            
 
             // joints
 
             _joints.Clear();
             _joints.AddRange(joints.Select(item => item.Joint.LogicalIndex));
-        }
+        }        
 
         #endregion
 

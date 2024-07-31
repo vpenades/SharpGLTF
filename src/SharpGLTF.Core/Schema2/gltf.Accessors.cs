@@ -244,6 +244,11 @@ namespace SharpGLTF.Schema2
             return _GetMemoryAccessor().AsMatrix4x4Array();
         }
 
+        internal IReadOnlyList<Matrix4x4> AsMatrix4x4ReadOnlyList()
+        {
+            return _GetMemoryAccessor().AsMatrix4x4Array();
+        }
+
         #endregion
 
         #region Index Buffer API
