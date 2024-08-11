@@ -315,7 +315,7 @@ namespace SharpGLTF.Schema2
 
             // we must do a basic validation before resolving external dependencies
 
-            if (true)
+            if (this.Validation != VALIDATIONMODE.Skip) // disable validation at your own risk
             {
                 root.ValidateReferences(vcontext.GetContext());
                 var ex = vcontext.Errors.FirstOrDefault();
@@ -326,10 +326,10 @@ namespace SharpGLTF.Schema2
 
             root._ResolveSatelliteDependencies(this);
 
-            // full validation
+            // content validation
 
-            if (this.Validation != VALIDATIONMODE.Skip)
-            {
+            if (this.Validation != VALIDATIONMODE.Skip) // disable validation at your own risk
+                {
                 root.ValidateContent(vcontext.GetContext());
                 var ex = vcontext.Errors.FirstOrDefault();
                 if (ex != null) return (null, vcontext);
