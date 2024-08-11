@@ -7,17 +7,26 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        dotnet-version: [ '6.0.x', '8.0.x' ]        
+      matrix:        
         os: [windows-latest, ubuntu-latest, macos-latest]
 
-    steps:
-      - uses: actions/checkout@v4
+    steps:      
   
-      - name: Setup dotnet ${{ matrix.dotnet-version }}
+      - name: net48 on windows
+        if: runner.os == 'Windows'
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: '4.x'
+  
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.x'
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'      
+
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: dotnet restore
@@ -26,5 +35,12 @@ jobs:
         # https://github.com/dotnet/core/issues/7840  failed to build with 0 errors
         run: dotnet build --configuration Debug --no-restore --disable-build-servers
 
-      - name: Test
-        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --no-build --verbosity diagnostic
+      - name: Test net48
+        if: runner.os == 'Windows'
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --framework net48 --no-build
+
+      - name: Test net6
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --framework net6 --no-build
+
+      - name: Test net8
+        run: dotnet test ./tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj --framework net8 --no-build
