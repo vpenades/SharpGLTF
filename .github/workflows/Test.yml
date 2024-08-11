@@ -14,7 +14,7 @@ jobs:
   
       - name: net48 on windows
         if: runner.os == 'Windows'
-        run: choco install dotnet4.8 --ignore-checksums
+        run: choco install netfx-4.8 --ignore-checksums
   
       - uses: actions/setup-dotnet@v4
         with:
