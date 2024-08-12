@@ -572,13 +572,11 @@ namespace SharpGLTF.Scenes
         }
         
 
-        [TestCase("AnimatedMorphCube.glb")]
-        [TestCase("AnimatedMorphSphere.glb")]
+        [TestCase("AnimatedMorphCube.glb")]        
         [TestCase("Avocado.glb")]
         [TestCase("BoxAnimated.glb")]
         [TestCase("BrainStem.glb")]
-        [TestCase("CesiumMan.glb")]
-        [TestCase("GearboxAssy.glb")]        
+        [TestCase("CesiumMan.glb")]        
         [TestCase("OrientationTest.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
@@ -651,7 +649,7 @@ namespace SharpGLTF.Scenes
         }
 
         
-        [TestCase("GearboxAssy.glb")]        
+        [TestCase("Avocado.glb")]        
         public void ExportMeshes(string path)
         {
             TestContext.CurrentContext.AttachGltfValidatorLinks();
@@ -664,7 +662,7 @@ namespace SharpGLTF.Scenes
             var srcModel = ModelRoot.Load(path, Validation.ValidationMode.TryFix);
             Assert.That(srcModel, Is.Not.Null);
 
-            srcModel.AttachToCurrentTest("GearBoxAssy.plotly");
+            srcModel.AttachToCurrentTest("Avocado.plotly");
 
             // convert it to a SceneBuilder so we can manipulate it:
             var srcScene = srcModel.DefaultScene.ToSceneBuilder();

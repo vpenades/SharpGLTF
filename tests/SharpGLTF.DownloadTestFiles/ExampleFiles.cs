@@ -18,7 +18,7 @@ namespace SharpGLTF
 
             _KhronosSchemaDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Schema");
             _KhronosValidatorDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Validator");
-            _KhronosSampleModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Sample-Models");
+            _KhronosSampleModelsDir = System.IO.Path.Combine(_WorkingDirectory, "glTF-Sample-Assets");
 
             _BabylonJsMeshesDir = System.IO.Path.Combine(_WorkingDirectory, "BabylonJS-Assets");
             _BabylonJsPlaygroundDir = System.IO.Path.Combine(_WorkingDirectory, "BabylonJS-PlaygroundScenes");
@@ -41,7 +41,7 @@ namespace SharpGLTF
 
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF.git", _KhronosSchemaDir);
             DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Validator.git", _KhronosValidatorDir);
-            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Models.git", _KhronosSampleModelsDir);
+            DownloadUtils.SyncronizeGitRepository("https://github.com/KhronosGroup/glTF-Sample-Assets.git", _KhronosSampleModelsDir);
 
             DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/Assets.git", _BabylonJsMeshesDir);
             // DownloadUtils.SyncronizeGitRepository("https://github.com/BabylonJS/MeshesLibrary.git", _BabylonJsMeshesDir);

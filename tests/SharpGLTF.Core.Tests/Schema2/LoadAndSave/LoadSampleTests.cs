@@ -267,8 +267,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         [TestCase("BoxAnimated.glb")]
-        [TestCase("AnimatedMorphCube.glb")]
-        [TestCase("AnimatedMorphSphere.glb")]
+        [TestCase("AnimatedMorphCube.glb")]        
         [TestCase("CesiumMan.glb")]
         //[TestCase("Monster.glb")] // temporarily removed from khronos repo
         [TestCase("BrainStem.glb")]

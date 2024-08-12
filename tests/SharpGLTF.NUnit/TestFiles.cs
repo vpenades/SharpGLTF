@@ -14,100 +14,119 @@ namespace SharpGLTF
     {
         #region lifecycle
 
-        private static void _EnsureInitialized()
+        private static System.IO.DirectoryInfo _DefDir(this System.IO.DirectoryInfo defDir, params string[] path)
         {
-            if (_TestFilesDir != null) return;
+            var finalPath = System.IO.Path.Combine(defDir.FullName, System.IO.Path.Combine(path));
+            return new System.IO.DirectoryInfo(finalPath);
+        }
 
-            var wdir = TestContext.CurrentContext.WorkDirectory;
+        private static System.IO.FileInfo _DefFile(this System.IO.DirectoryInfo defDir, params string[] path)
+        {
+            var finalPath = System.IO.Path.Combine(defDir.FullName, System.IO.Path.Combine(path));
+            return new System.IO.FileInfo(finalPath);
+        }
 
+        private static System.IO.DirectoryInfo _FindRepositoryRootDirectory()
+        {
             var examplesFound = false;
 
-            while (wdir.Length > 3)
+            var wdir = new System.IO.DirectoryInfo(TestContext.CurrentContext.TestDirectory);
+
+            while (wdir.FullName.Length > 3)
             {
-                _TestFilesDir = System.IO.Path.Combine(wdir, "TestFiles");
+                if (wdir._DefDir(".git").Exists) return wdir;
 
-                if (wdir.ToUpperInvariant().EndsWith("TESTS") && System.IO.Directory.Exists(_TestFilesDir))
-                {
-                    examplesFound = true;
-                    break;
-                }
-
-                wdir = System.IO.Path.GetDirectoryName(wdir);
+                wdir = wdir.Parent;
             }
 
-            Assert.That(examplesFound, "TestFiles directory not found; please, run '1_DownloadTestFiles.cmd' before running the tests.");            
+            Assert.That(examplesFound, "repository root directory not found.");
 
-            _AssetFilesDir = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_TestFilesDir), "Assets");
+            return wdir;
         }
 
-        private static string _UsingExternalFiles(params string[] subPath)
+        private static System.IO.DirectoryInfo _UsingExternalFiles(params string[] subPath)
         {
-            _EnsureInitialized();           
+            var r = _TestFilesDir1._DefDir(subPath);
+            if (r.Exists) return r;
+            r = _TestFilesDir2._DefDir(subPath);
+            if (r.Exists) return r;
 
-            return System.IO.Path.Combine(new string[] { _TestFilesDir }.Concat(subPath).ToArray());
+            throw new System.IO.DirectoryNotFoundException(string.Join("/", subPath));
         }
 
-        private static string _UsingInternalFiles(params string[] subPath)
+        private static System.IO.DirectoryInfo _UsingInternalFiles(params string[] subPath)
         {
-            _EnsureInitialized();
-
-            return System.IO.Path.Combine(new string[] { _AssetFilesDir }.Concat(subPath).ToArray());
+            return _AssetFilesDir._DefDir(subPath);
         }
 
         #endregion
 
         #region data
 
+        private static Lazy<System.IO.DirectoryInfo> _RepoRootDir = new Lazy<System.IO.DirectoryInfo>(_FindRepositoryRootDirectory);
+
         /// <summary>
         /// Path to Tests/Assets/
         /// </summary>
-        private static string _AssetFilesDir;
+        private static System.IO.DirectoryInfo _AssetFilesDir => _RepoRootDir.Value._DefDir("tests", "Assets");
 
         /// <summary>
         /// Path to Tests/TestFiles/
         /// </summary>
-        private static string _TestFilesDir;
+        private static System.IO.DirectoryInfo _TestFilesDir1 => _RepoRootDir.Value._DefDir("tests", "TestFiles");
 
-        private static readonly string _SchemaDir = _UsingExternalFiles("glTF-Schema");
-        private static readonly string _ValidationDir = _UsingExternalFiles("glTF-Validator");
-        internal static readonly string _SampleModelsDir = _UsingExternalFiles("glTF-Sample-Models");
+        /// <summary>
+        /// Path to ..\..\SharpGLTF-TestFiles/
+        /// </summary>
+        private static System.IO.DirectoryInfo _TestFilesDir2 => _RepoRootDir.Value._DefDir("..", "SharpGLTF-TestFiles");
+
+
+        private static readonly System.IO.DirectoryInfo _SchemaDir = _UsingExternalFiles("glTF-Schema");
+        private static readonly System.IO.DirectoryInfo _ValidationDir = _UsingExternalFiles("glTF-Validator");
+
+        internal static readonly System.IO.DirectoryInfo _KhronosSampleAssetsDir = _UsingExternalFiles("glTF-Sample-Assets");
         
-        private static readonly string _BabylonJsMeshesDir = _UsingExternalFiles("BabylonJS-Assets");
-        private static readonly string _GeneratedModelsDir = _UsingExternalFiles("GeneratedReferenceModels", "v_0_6_1");
+        private static readonly System.IO.DirectoryInfo _BabylonJsMeshesDir = _UsingExternalFiles("BabylonJS-Assets");
+        private static readonly System.IO.DirectoryInfo _GeneratedModelsDir = _UsingExternalFiles("GeneratedReferenceModels", "v_0_6_1");
 
         #endregion
 
         #region properties        
 
-        public static string KhronosSampleModelsDirectory => _SampleModelsDir;
+        internal static System.IO.DirectoryInfo KhronosSampleModelsDirectory => _KhronosSampleAssetsDir;
 
         #endregion
 
         #region API
 
-        
+        public static string GetKhronosAssetDir(params string[] path)
+        {
+            return _KhronosSampleAssetsDir._DefDir("Models")._DefDir(path).FullName;
+        }
 
         public static IReadOnlyList<string> GetSchemaExtensionsModelsPaths()
         {
-            return GetModelPathsInDirectory(_SchemaDir, "extensions", "2.0");         
+            return _FindModelInDirectory(_SchemaDir._DefDir("extensions", "2.0"));         
         }
 
         public static IEnumerable<string> GetReferenceModelPaths(bool useNegative = false)
         {
             var dirPath = _GeneratedModelsDir;
-            if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length - 4);
+            if (dirPath.FullName.EndsWith(".zip"))
+            {
+                var p= dirPath.FullName.Substring(0, dirPath.FullName.Length - 4);
+                dirPath = new System.IO.DirectoryInfo(p);
+            }
 
-            var manifestsPath = System.IO.Path.Combine(dirPath, useNegative? "Negative" : "Positive");
+            var manifestsPath = dirPath._DefDir(useNegative? "Negative" : "Positive");
 
-            var manifests = System.IO.Directory.GetFiles(manifestsPath, "Manifest.json", System.IO.SearchOption.AllDirectories)
+            var manifests = manifestsPath.GetFiles("Manifest.json", System.IO.SearchOption.AllDirectories)
                 .Skip(1)
                 .ToArray();
 
             foreach (var m in manifests)
             {
-                var d = System.IO.Path.GetDirectoryName(m);
-
-                var content = System.IO.File.ReadAllText(m);
+                var content = System.IO.File.ReadAllText(m.FullName);
                 var doc = Newtonsoft.Json.Linq.JObject.Parse(content);
 
                 var models = doc.SelectToken("models");
@@ -118,11 +137,9 @@ namespace SharpGLTF
 
                     var loadable = !useNegative;
 
-                    if (loadable) loadable = (Boolean)model.SelectToken("loadable");
+                    if (loadable) loadable = (Boolean)model.SelectToken("loadable");                    
 
-                    mdlPath = System.IO.Path.Combine(d, mdlPath);
-
-                    yield return mdlPath;
+                    yield return m.Directory._DefFile(mdlPath).FullName;
                 }
             }
 
@@ -131,10 +148,10 @@ namespace SharpGLTF
 
         public static IReadOnlyList<string> GetSampleModelsPaths()
         {
-            var entries = KhronosSampleModel.Load();
+            var entries = KhronosSampleModel.Load(_KhronosSampleAssetsDir._DefFile("Models", "model-index.json"));
 
             var files = entries
-                .SelectMany(item => item.GetPaths(_SampleModelsDir, "2.0"))
+                .SelectMany(item => item.GetPaths())
                 .ToList();
 
             return files;            
@@ -175,7 +192,7 @@ namespace SharpGLTF
                 "invalid_image_mime_type.gltf", // actual images cannot be validated
             };
 
-            var files = GetModelPathsInDirectory(_ValidationDir, "test")
+            var files = _FindModelInDirectory(_ValidationDir._DefDir("test"))
                 .Where(item => skip.All(f=>!item.EndsWith(f)));
             
             return files
@@ -197,7 +214,7 @@ namespace SharpGLTF
                 "\\meshes\\Tests\\BadDraco\\Box-draco.glb", // uses KHR_Draco compression  
             };            
 
-            var files = GetModelPathsInDirectory(_BabylonJsMeshesDir);
+            var files = _FindModelInDirectory(_BabylonJsMeshesDir);
 
             return files
                 .Where(item => !item.ToUpperInvariant().Contains("GLTF-DRACO"))
@@ -209,12 +226,12 @@ namespace SharpGLTF
 
         public static string GetPollyFileModelPath()
         {
-            return _UsingExternalFiles("glTF-Blender-Exporter", "polly", "project_polly.glb");
+            return _UsingExternalFiles("glTF-Blender-Exporter", "polly")._DefFile("project_polly.glb").FullName;
         }
 
         public static string GetUniVRMModelPath()
         {
-            return _UsingExternalFiles("UniVRM", "AliciaSolid_vrm-0.51.vrm");
+            return _UsingExternalFiles("UniVRM")._DefFile("AliciaSolid_vrm-0.51.vrm").FullName;
         }
 
         public static IEnumerable<string> GetMeshIntancingModelPaths()
@@ -224,14 +241,16 @@ namespace SharpGLTF
 
             var meshInstPath = _UsingInternalFiles("gltf-GpuMeshInstancing");
 
-            var fromLocal = System.IO.Directory.GetFiles(meshInstPath, "*.glb", System.IO.SearchOption.AllDirectories);
+            var fromLocal = meshInstPath
+                .GetFiles("*.glb", System.IO.SearchOption.AllDirectories)
+                .Select(item => item.FullName);
 
             return fromBabylon.Concat(fromLocal);
         }
 
-        private static IReadOnlyList<string> GetModelPathsInDirectory(params string[] paths)
+        private static IReadOnlyList<string> _FindModelInDirectory(System.IO.DirectoryInfo dinfo)
         {
-            var dirPath = System.IO.Path.Combine(paths);
+            var dirPath = dinfo.FullName;
 
             if (dirPath.EndsWith(".zip")) dirPath = dirPath.Substring(0, dirPath.Length-4);
 
@@ -252,11 +271,14 @@ namespace SharpGLTF
     {
         #region loaders
 
-        public static KhronosSampleModel[] Load()
-        {
-            var path = System.IO.Path.Combine(TestFiles._SampleModelsDir, "2.0", "model-index.json");
-            var text = System.IO.File.ReadAllText(path);
-            return Read(text);
+        public static KhronosSampleModel[] Load(System.IO.FileInfo finfo)
+        {            
+            var text = System.IO.File.ReadAllText(finfo.FullName);
+            var result = Read(text);
+
+            foreach (var item in result) { item._BaseDirectory = finfo.Directory; }
+
+            return result;
         }
 
         public static KhronosSampleModel[] Read(string json)
@@ -274,6 +296,8 @@ namespace SharpGLTF
 
         #region data
 
+        private System.IO.DirectoryInfo _BaseDirectory;
+
         public string Name { get; set; }
         public string Screenshot { get; set; }
         public Dictionary<string, string> Variants { get; set; } = new Dictionary<string, string>();
@@ -282,9 +306,9 @@ namespace SharpGLTF
 
         #region API
 
-        public IEnumerable<string> GetPaths(params string[] basePath)
+        public IEnumerable<string> GetPaths()
         {
-            var rootPath = System.IO.Path.Combine(basePath);
+            var rootPath = _BaseDirectory.FullName;
 
             foreach(var variant in Variants)
             {
