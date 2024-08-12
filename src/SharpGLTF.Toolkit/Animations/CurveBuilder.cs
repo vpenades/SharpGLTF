@@ -10,6 +10,17 @@ namespace SharpGLTF.Animations
     /// Represents an editable curve of <typeparamref name="T"/> elements.
     /// </summary>
     /// <typeparam name="T">An element of the curve.</typeparam>
+    /// <remarks>
+    /// <para>
+    /// <see cref="CurveBuilder{T}"/> instances are created using <see cref="CurveFactory.CreateCurveBuilder{T}()"/> with T being <see cref="Vector3"/>, <see cref="Quaternion"/> types and so on.
+    /// </para>
+    /// <para>
+    /// But <see cref="CurveFactory"/> is internal, the actual way of creating animation curves is using:<br/>
+    /// <see cref="Scenes.NodeBuilder.UseScale(string)"/><br/>
+    /// <see cref="Scenes.NodeBuilder.UseRotation(string)"/><br/>
+    /// <see cref="Scenes.NodeBuilder.UseTranslation()(string)"/><br/>
+    /// </para>
+    /// </remarks>
     public abstract class CurveBuilder<T> :
         ICurveSampler<T>,
         IConvertibleCurve<T>
