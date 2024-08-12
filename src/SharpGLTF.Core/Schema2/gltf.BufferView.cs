@@ -245,16 +245,17 @@ namespace SharpGLTF.Schema2
             if (this._target.HasValue) validate.EnumsAreEqual(nameof(_target), _target.Value, usingMode);
         }
 
-        internal void ValidateBufferUsagePlainData(Validation.ValidationContext validate)
-        {
-            /*
-            if (this._byteStride.HasValue)
+        internal void ValidateBufferUsagePlainData(Validation.ValidationContext validate, bool supportsStride = true)
+        {            
+            if (this._byteStride.HasValue && !supportsStride)
             {
-                if (result.TryFixLinkOrError("BufferView", "Unexpected ByteStride found. Expected null"))
+                if (validate.TryFix)
                 {
                     this._byteStride = null;
                 }
-            }*/
+
+                validate.IsUndefined(nameof(_byteStride), this._byteStride);                
+            }
 
             validate = validate.GetContext(this);
 

@@ -576,14 +576,14 @@ namespace SharpGLTF.Schema2
 
         internal void ValidateAnimationInput(VALIDATIONCTX validate)
         {
-            SourceBufferView.ValidateBufferUsagePlainData(validate);
+            SourceBufferView.ValidateBufferUsagePlainData(validate, false); // as per glTF specification, animation accessors must not have ByteStride
 
             validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR);
         }
 
         internal void ValidateAnimationOutput(VALIDATIONCTX validate)
         {
-            SourceBufferView.ValidateBufferUsagePlainData(validate);
+            SourceBufferView.ValidateBufferUsagePlainData(validate, false); // as per glTF specification, animation accessors must not have ByteStride
 
             validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
         }
