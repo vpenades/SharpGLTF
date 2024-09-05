@@ -6,6 +6,7 @@ using System.Text;
 
 using NUnit.Framework;
 
+using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Validation;
 
@@ -23,8 +24,8 @@ namespace SharpGLTF.Materials
             // ... And we could use it for general equality checks, but then, since
             // MaterialBuilder is NOT inmutable, it can mean that two materials can be equal
             // at a given time, and non equal at another. Furthermore, it would imply having
-            // a hash code that changes over time. As a consequence, it could be impossible
-            // to use MaterialBuilder as a dictionary Key.
+            // a hash code that changes over time. As a consequence, using MaterialBuilder as
+            // a dictionary key is possible, but dangerous if not carefully handled.
 
             var srcMaterial = _CreateUnlitMaterial();
 
@@ -98,6 +99,18 @@ namespace SharpGLTF.Materials
             // check
             Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);
             Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
+        }
+
+        [Test]
+        public void CreateIORWithFallback()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/246
+
+            var material = new MaterialBuilder("MaterialWithIOR");
+            material.IndexOfRefraction = 7;
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);            
         }
 
         private static MaterialBuilder _CreateUnlitMaterial()
@@ -192,7 +205,7 @@ namespace SharpGLTF.Materials
                 .WithClearCoatRoughness(tex1, 1);
 
             return material;
-        }
+        }        
 
         [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         private static MaterialBuilder _CreateSpecularGlossinessMaterialWithFallback()

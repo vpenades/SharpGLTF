@@ -390,7 +390,7 @@ namespace SharpGLTF.Schema2
             dstMaterial.Alpha = srcMaterial.AlphaMode.ToSchema2();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
-            dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
+            
 
             var hasClearCoat
                 = srcMaterial.GetChannel("ClearCoat") != null
@@ -442,6 +442,10 @@ namespace SharpGLTF.Schema2
                 defMaterial = srcMaterial.CompatibilityFallback;
             }
 
+            // IOR must be set after dst material initialization,
+            // otherwise it's erased since it's stored in an extension
+            dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
+
             if (defMaterial != null)
             {
                 if (defMaterial.ShaderStyle != "PBRMetallicRoughness") throw new ArgumentException(nameof(srcMaterial.CompatibilityFallback.ShaderStyle));
@@ -452,6 +456,10 @@ namespace SharpGLTF.Schema2
                 defMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
                 defMaterial.CopyChannelsTo(dstMaterial, "VolumeThickness", "VolumeAttenuation");
             }
+
+            // final validation
+
+            System.Diagnostics.Debug.Assert(dstMaterial.IndexOfRefraction == srcMaterial.IndexOfRefraction, "set IOR after dst material initialization");            
         }
 
         public static void CopyChannelsTo(this MaterialBuilder srcMaterial, Material dstMaterial, params string[] channelKeys)
