@@ -43,7 +43,7 @@ namespace SharpGLTF.IO
                 try { return Enum.Parse(enumType, jsonVal, true); }
                 catch (System.ArgumentException ex)
                 {
-                    throw new System.Text.Json.JsonException($"Value {jsonVal} not found int {enumType}", ex);
+                    throw new System.Text.Json.JsonException($"Value '{jsonVal}' not found in '{enumType}'", ex);
                 }
             }
 
@@ -102,58 +102,54 @@ namespace SharpGLTF.IO
 
         public static bool TryWriteProperty(this Utf8JsonWriter writer, string property, Object value)
         {
-            if (value is String vstr) { writer.WriteString(property, vstr); return true; }
-            if (value is Boolean vbol) { writer.WriteBoolean(property, vbol); return true; }
-
-            if (value is Byte vu8) { writer.WriteNumber(property, vu8); return true; }
-            if (value is UInt16 vu16) { writer.WriteNumber(property, vu16); return true; }
-            if (value is UInt32 vu32) { writer.WriteNumber(property, vu32); return true; }
-            if (value is UInt64 vu64) { writer.WriteNumber(property, vu64); return true; }
-
-            if (value is SByte vs8) { writer.WriteNumber(property, vs8); return true; }
-            if (value is Int16 vs16) { writer.WriteNumber(property, vs16); return true; }
-            if (value is Int32 vs32) { writer.WriteNumber(property, vs32); return true; }
-            if (value is Int64 vs64) { writer.WriteNumber(property, vs64); return true; }
-
-            if (value is Single vf32) { writer.WriteNumber(property, vf32); return true; }
-            if (value is Double vf64) { writer.WriteNumber(property, vf64); return true; }
-            if (value is Decimal vfxx) { writer.WriteNumber(property, vfxx); return true; }
-
-            if (value is Vector2 vvv2) { writer.WritePropertyName(property); writer.WriteVector2(vvv2); return true; }
-            if (value is Vector3 vvv3) { writer.WritePropertyName(property); writer.WriteVector3(vvv3); return true; }
-            if (value is Vector4 vvv4) { writer.WritePropertyName(property); writer.WriteVector4(vvv4); return true; }
-            if (value is Quaternion qqq4) { writer.WritePropertyName(property); writer.WriteQuaternion(qqq4); return true; }
-            if (value is Matrix4x4 mm44) { writer.WritePropertyName(property); writer.WriteMatrix4x4(mm44); return true; }
-
-            return false;
+            switch (value)
+            {
+                case string vstr: writer.WriteString(property, vstr); return true;
+                case bool vbol: writer.WriteBoolean(property, vbol); return true;
+                case byte vu8: writer.WriteNumber(property, vu8); return true;
+                case ushort vu16: writer.WriteNumber(property, vu16); return true;
+                case uint vu32: writer.WriteNumber(property, vu32); return true;
+                case ulong vu64: writer.WriteNumber(property, vu64); return true;
+                case sbyte vs8: writer.WriteNumber(property, vs8); return true;
+                case short vs16: writer.WriteNumber(property, vs16); return true;
+                case int vs32: writer.WriteNumber(property, vs32); return true;
+                case long vs64: writer.WriteNumber(property, vs64); return true;
+                case float vf32: writer.WriteNumber(property, vf32); return true;
+                case double vf64: writer.WriteNumber(property, vf64); return true;
+                case decimal vfxx: writer.WriteNumber(property, vfxx); return true;
+                case Vector2 vvv2: writer.WritePropertyName(property); writer.WriteVector2(vvv2); return true;
+                case Vector3 vvv3: writer.WritePropertyName(property); writer.WriteVector3(vvv3); return true;
+                case Vector4 vvv4: writer.WritePropertyName(property); writer.WriteVector4(vvv4); return true;
+                case Quaternion qqq4: writer.WritePropertyName(property); writer.WriteQuaternion(qqq4); return true;
+                case Matrix4x4 mm44: writer.WritePropertyName(property); writer.WriteMatrix4x4(mm44); return true;
+                default: return false;
+            }
         }
 
         public static bool TryWriteValue(this Utf8JsonWriter writer, Object value)
         {
-            if (value is String vstr) { writer.WriteStringValue(vstr); return true; }
-            if (value is Boolean vbol) { writer.WriteBooleanValue(vbol); return true; }
-
-            if (value is Byte vu8) { writer.WriteNumberValue(vu8); return true; }
-            if (value is UInt16 vu16) { writer.WriteNumberValue(vu16); return true; }
-            if (value is UInt32 vu32) { writer.WriteNumberValue(vu32); return true; }
-            if (value is UInt64 vu64) { writer.WriteNumberValue(vu64); return true; }
-
-            if (value is SByte vs8) { writer.WriteNumberValue(vs8); return true; }
-            if (value is Int16 vs16) { writer.WriteNumberValue(vs16); return true; }
-            if (value is Int32 vs32) { writer.WriteNumberValue(vs32); return true; }
-            if (value is Int64 vs64) { writer.WriteNumberValue(vs64); return true; }
-
-            if (value is Single vf32) { writer.WriteNumberValue(vf32); return true; }
-            if (value is Double vf64) { writer.WriteNumberValue(vf64); return true; }
-            if (value is Decimal vfxx) { writer.WriteNumberValue(vfxx); return true; }
-
-            if (value is Vector2 vvv2) { writer.WriteVector2(vvv2); return true; }
-            if (value is Vector3 vvv3) { writer.WriteVector3(vvv3); return true; }
-            if (value is Vector4 vvv4) { writer.WriteVector4(vvv4); return true; }
-            if (value is Quaternion qqq4) { writer.WriteQuaternion(qqq4); return true; }
-            if (value is Matrix4x4 mm44) { writer.WriteMatrix4x4(mm44); return true; }
-
-            return false;
+            switch (value)
+            {
+                case string vstr: writer.WriteStringValue(vstr); return true;
+                case bool vbol: writer.WriteBooleanValue(vbol); return true;
+                case byte vu8: writer.WriteNumberValue(vu8); return true;
+                case ushort vu16: writer.WriteNumberValue(vu16); return true;
+                case uint vu32: writer.WriteNumberValue(vu32); return true;
+                case ulong vu64: writer.WriteNumberValue(vu64); return true;
+                case sbyte vs8: writer.WriteNumberValue(vs8); return true;
+                case short vs16: writer.WriteNumberValue(vs16); return true;
+                case int vs32: writer.WriteNumberValue(vs32); return true;
+                case long vs64: writer.WriteNumberValue(vs64); return true;
+                case float vf32: writer.WriteNumberValue(vf32); return true;
+                case double vf64: writer.WriteNumberValue(vf64); return true;
+                case decimal vfxx: writer.WriteNumberValue(vfxx); return true;
+                case Vector2 vvv2: writer.WriteVector2(vvv2); return true;
+                case Vector3 vvv3: writer.WriteVector3(vvv3); return true;
+                case Vector4 vvv4: writer.WriteVector4(vvv4); return true;
+                case Quaternion qqq4: writer.WriteQuaternion(qqq4); return true;
+                case Matrix4x4 mm44: writer.WriteMatrix4x4(mm44); return true;
+                default: return false;
+            }
         }
 
         public static void WriteVector2(this Utf8JsonWriter writer, Vector2 v)

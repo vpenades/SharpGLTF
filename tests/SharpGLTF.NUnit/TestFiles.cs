@@ -204,6 +204,8 @@ namespace SharpGLTF
         {
             var skipAlways = new string[]
             {
+                "ClearCoatTest.gltf", // validator reports errors.
+                "ClearCoatTest.glb", // validator reports errors.
                 "\\Elf\\Elf.gltf", // validator reports invalid inverse bind matrices.
                 "\\meshes\\Tests\\AssetGenerator", // already covered separately.
                 "\\meshes\\KHR_materials_volume_testing.glb", // draco compression-

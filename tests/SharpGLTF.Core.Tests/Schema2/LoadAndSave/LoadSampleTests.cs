@@ -111,6 +111,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 foreach (var f in TestFiles.GetSampleModelsPaths())
                 {
                     if (f.Contains("SuzanneMorphSparse")) continue; // temporarily skipping due to empty BufferView issue
+                    if (f.Contains("AnimatedColorsCube")) continue; // KHR_Animation_Pointer not supported yet
 
                     if (!f.Contains(section)) continue;
 
