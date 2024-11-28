@@ -77,6 +77,7 @@ namespace SharpGLTF.Schema2
 		rotation,
 		scale,
 		weights,
+		pointer,
 	}
 
 
