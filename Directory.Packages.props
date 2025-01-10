@@ -1,40 +1,46 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  
- <PropertyGroup>
-     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-     <EnablePackageVersionOverride>true</EnablePackageVersionOverride>
- </PropertyGroup>
-  
- <ItemGroup>
-   <PackageVersion Include="System.Text.Json" Version="9.0.0" />
-   <PackageVersion Include="System.Drawing.Common" Version="9.0.0" />
-   <PackageVersion Include="OneOf" Version="3.0.271" />   
-   <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-   <PackageVersion Include="NJsonSchema.CodeGeneration.CSharp" Version="11.1.0" />
-   <PackageVersion Include="NJsonSchema.NewtonsoftJson" Version="11.1.0" />   
- </ItemGroup>
 
- <ItemGroup>
-   <PackageVersion Include="Plotly.Sharp" Version="0.0.8196" />
-   <PackageVersion Include="LibGit2Sharp" Version="0.31.0" />
-   <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105" />
-   <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
-   <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
-   <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-   <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-   <PackageVersion Include="NUnit" Version="4.3.2" />
-   <PackageVersion Include="NUnit.Analyzers" Version="4.6.0" />
-   <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
-   <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20241018-1255" />
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <EnablePackageVersionOverride>true</EnablePackageVersionOverride>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="System.Text.Json" Version="9.0.0" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="OneOf" Version="3.0.271" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="NJsonSchema.CodeGeneration.CSharp" Version="11.1.0" />
+    <PackageVersion Include="NJsonSchema.NewtonsoftJson" Version="11.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Plotly.Sharp" Version="0.0.8196" />
+    <PackageVersion Include="LibGit2Sharp" Version="0.31.0" />
+    <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.2.1105" />
+    <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
+    <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="NUnit" Version="4.3.2" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.6.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="4.6.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20241018-1255" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net6.0'))">
     <PackageVersion Update="LibGit2Sharp" Version="0.30.0" />
     <PackageVersion Update="System.Text.Json" Version="8.0.5" />
     <PackageVersion Update="System.Drawing.Common" Version="8.0.11" />
-    <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    <PackageVersion Update="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
   </ItemGroup>
-    
-  
+
+
 </Project>
