@@ -24,16 +24,16 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props"/>
+  <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props" />
 
   <!-- Testing & Analysers =================================================================================== -->
 
   <!-- Condition=" '$(Configuration)' == 'Debug' " -->
   
   <ItemGroup>
-    <InternalsVisibleTo Include="SharpGLTF.Core.Tests" Key="$(StrongName_PublicKey)"/>
-    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests" Key="$(StrongName_PublicKey)"/>
-    <InternalsVisibleTo Include="SharpGLTF.Ext.3DTiles.Tests" Key="$(StrongName_PublicKey)"/>
+    <InternalsVisibleTo Include="SharpGLTF.Core.Tests" Key="$(StrongName_PublicKey)" />
+    <InternalsVisibleTo Include="SharpGLTF.Toolkit.Tests" Key="$(StrongName_PublicKey)" />
+    <InternalsVisibleTo Include="SharpGLTF.Ext.3DTiles.Tests" Key="$(StrongName_PublicKey)" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -54,7 +54,7 @@
     
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
     
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
@@ -66,7 +66,7 @@
     <!-- Optimization analysis only makes sense on platforms that will be actually ran -->
 
     <!-- https://devblogs.microsoft.com/premier-developer/avoiding-struct-and-readonly-reference-performance-pitfalls-with-errorprone-net/ -->
-    <PackageReference Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1">
+    <PackageReference Include="ErrorProne.NET.Structs">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

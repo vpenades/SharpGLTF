@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Plotly.Sharp" Version="0.0.8196" />
+    <PackageReference Include="Plotly.Sharp" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,7 +16,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
-  <Import Project="$(MsBuildThisFileDirectory)..\src\Shared\SharpGLTF.PublicKey.props"/>
+  <Import Project="$(MsBuildThisFileDirectory)..\src\Shared\SharpGLTF.PublicKey.props" />
   
   <!-- Testing & Analysers =================================================================================== -->  
 
@@ -38,12 +38,12 @@
     
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
     
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="NUnit.Analyzers" Version="4.4.0">
+    <PackageReference Include="NUnit.Analyzers">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

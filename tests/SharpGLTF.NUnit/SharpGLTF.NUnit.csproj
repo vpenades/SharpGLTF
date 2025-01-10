@@ -8,10 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NUnit" Version="4.2.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />    
-    <PackageReference Include="TestAttachments.NUnit" Version="4.0.0-Preview-20240102-0955" />    
+    <PackageReference Include="NUnit" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="GltfValidator" />    
+    <PackageReference Include="TestAttachments.NUnit" />    
   </ItemGroup>
 
   <ItemGroup>    
