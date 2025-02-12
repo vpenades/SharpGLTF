@@ -39,14 +39,17 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             try
             {
-                model = ModelRoot.Load(f, settings);
-                Assert.That(model, Is.Not.Null);
+                model = ModelRoot.Load(f, settings);                
             }
             catch (Exception ex)
             {
                 TestContext.Progress.WriteLine($"Failed {f.ToShortDisplayPath()}");
                 Assert.Fail(ex.Message);
             }
+
+            Assert.That(model, Is.Not.Null);
+
+            if (model == null) return null;
 
             var perf_load = perf.ElapsedMilliseconds;
 
@@ -106,18 +109,23 @@ namespace SharpGLTF.Schema2.LoadAndSave
         {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();
 
-            Assert.Multiple( () =>
-            {
+            #if !DEBUG
+            Assert.Multiple( () => {
+            #endif
+
                 foreach (var f in TestFiles.GetSampleModelsPaths())
                 {
-                    if (f.Contains("SuzanneMorphSparse")) continue; // temporarily skipping due to empty BufferView issue
-                    if (f.Contains("AnimatedColorsCube")) continue; // KHR_Animation_Pointer not supported yet
+                    if (f.Contains("SuzanneMorphSparse")) continue; // temporarily skipping due to empty BufferView issue                    
+                    if (f.Contains("SunglassesKhronos")) continue; // KHR_materials_specular is declared but not used
 
-                    if (!f.Contains(section)) continue;
+                if (!f.Contains(section)) continue;
 
                     _LoadModel(f);
                 }
+
+            #if !DEBUG
             } );
+            #endif
         }
 
         [Test]
@@ -171,6 +179,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             roundtripInstanced.AttachToCurrentTest($"{ff}.roundtrip.instancing.glb");            
         }
 
+        [TestCase("AnimationPointerUVs.gltf")]
         [TestCase("IridescenceMetallicSpheres.gltf")]
         [TestCase("SpecGlossVsMetalRough.gltf")]
         [TestCase(@"TextureTransformTest.gltf")]

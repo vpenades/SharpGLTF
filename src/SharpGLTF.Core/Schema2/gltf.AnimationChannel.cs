@@ -7,54 +7,31 @@ using System.Numerics;
 using SharpGLTF.Collections;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
+using System.Xml.Linq;
+using System.IO;
+using System.Reflection;
 
 namespace SharpGLTF.Schema2
 {
-    sealed partial class AnimationChannelTarget
-    {
-        #region lifecycle
-
-        internal AnimationChannelTarget() { }
-
-        internal AnimationChannelTarget(Node targetNode, PropertyPath targetPath)
-        {
-            _node = targetNode.LogicalIndex;
-            _path = targetPath;
-        }
-
-        #endregion
-
-        #region data
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal int? _NodeId => this._node;
-
-        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        internal PropertyPath _NodePath => this._path;
-
-        #endregion
-
-        #region Validation
-
-        protected override void OnValidateReferences(ValidationContext validate)
-        {
-            base.OnValidateReferences(validate);
-
-            validate.IsNullOrIndex("Node", _node, validate.Root.LogicalNodes);
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("AnimChannel LogicalNode[{TargetNode.LogicalIndex}].{TargetNodePath}")]
+    [System.Diagnostics.DebuggerDisplay("AnimChannel {TargetPointerPath}")]
     public sealed partial class AnimationChannel : IChildOfList<Animation>
     {
         #region lifecycle
         internal AnimationChannel() { }
 
+        /// <summary>
+        /// Sets the target property of this animation channel
+        /// </summary>
+        /// <param name="pointerPath">The path, as defined by AnimationChannel, as in '/nodes/0/rotation'</param>
+        internal AnimationChannel(string pointerPath)
+        {
+            _SetChannelTarget(new AnimationChannelTarget(pointerPath));            
+            _sampler = -1;
+        }
+
         internal AnimationChannel(Node targetNode, PropertyPath targetPath)
         {
-            _target = new AnimationChannelTarget(targetNode, targetPath);
+            _SetChannelTarget(new AnimationChannelTarget(targetNode, targetPath));            
             _sampler = -1;
         }
 
@@ -70,6 +47,15 @@ namespace SharpGLTF.Schema2
         {
             LogicalParent = parent;
             LogicalIndex = index;
+        }
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            var children = base.GetLogicalChildren();
+
+            if (_target != null) children = children.Append(_target);
+
+            return children;
         }
 
         #endregion
@@ -88,13 +74,29 @@ namespace SharpGLTF.Schema2
         public Animation LogicalParent { get; private set; }
 
         /// <summary>
+        /// Gets the path to the property being animated by this channel.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The format is defined by <see href="https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_animation_pointer">KHR_animation_pointer</see>
+        /// </para>
+        /// <para>
+        /// examples:<br/>
+        /// "/nodes/0/rotation"<br/>
+        /// "/materials/0/pbrMetallicRoughness/baseColorFactor"<br/>
+        /// </para>
+        /// </remarks>
+        public string TargetPointerPath => this._target?.GetPointerPath() ?? null;
+
+        /// <summary>
         /// Gets the <see cref="Node"/> which property is to be bound with this animation.
         /// </summary>
+        [Obsolete("Use TargetPointerPath whenever possible")]
         public Node TargetNode
         {
             get
             {
-                var idx = this._target?._NodeId ?? -1;
+                var idx = this._target?.GetNodeIndex() ?? -1;
                 if (idx < 0) return null;
                 return this.LogicalParent.LogicalParent.LogicalNodes[idx];
             }
@@ -103,11 +105,19 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets which property of the <see cref="Node"/> pointed by <see cref="TargetNode"/> is to be bound with this animation.
         /// </summary>
-        public PropertyPath TargetNodePath => this._target?._NodePath ?? PropertyPath.translation;
+        /// <remarks>
+        /// If the target is anything other than a <see cref="Node"/> transform property, the returned value will be <see cref="PropertyPath.pointer"/>
+        /// </remarks>
+        public PropertyPath TargetNodePath => this._target?.GetNodePath() ?? PropertyPath.translation;
 
         #endregion
 
         #region API
+
+        private void _SetChannelTarget(AnimationChannelTarget target)
+        {
+            new Collections.ChildSetter<AnimationChannel>(this).SetProperty(ref _target, target);
+        }
 
         internal AnimationSampler _GetSampler() { return this.LogicalParent._Samplers[this._sampler]; }
 

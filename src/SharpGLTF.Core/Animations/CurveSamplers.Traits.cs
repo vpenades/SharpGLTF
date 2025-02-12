@@ -18,11 +18,41 @@ namespace SharpGLTF.Animations
 
     static class SamplerTraits
     {
+        sealed class _Scalar : ISamplerTraits<Single>
+        {
+            public Single Clone(Single value) { return value; }
+            public Single InterpolateLinear(Single left, Single right, float amount) { return left * (1f-amount) + right * amount; }
+            public Single InterpolateCubic(Single start, Single outgoingTangent, Single end, Single incomingTangent, Single amount)
+            {
+                return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
+            }
+        }
+
+        sealed class _Vector2 : ISamplerTraits<Vector2>
+        {
+            public Vector2 Clone(Vector2 value) { return value; }
+            public Vector2 InterpolateLinear(Vector2 left, Vector2 right, float amount) { return System.Numerics.Vector2.Lerp(left, right, amount); }
+            public Vector2 InterpolateCubic(Vector2 start, Vector2 outgoingTangent, Vector2 end, Vector2 incomingTangent, Single amount)
+            {
+                return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
+            }
+        }
+
         sealed class _Vector3 : ISamplerTraits<Vector3>
         {
             public Vector3 Clone(Vector3 value) { return value; }
             public Vector3 InterpolateLinear(Vector3 left, Vector3 right, float amount) { return System.Numerics.Vector3.Lerp(left, right, amount); }
             public Vector3 InterpolateCubic(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
+            {
+                return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
+            }
+        }
+
+        sealed class _Vector4 : ISamplerTraits<Vector4>
+        {
+            public Vector4 Clone(Vector4 value) { return value; }
+            public Vector4 InterpolateLinear(Vector4 left, Vector4 right, float amount) { return System.Numerics.Vector4.Lerp(left, right, amount); }
+            public Vector4 InterpolateCubic(Vector4 start, Vector4 outgoingTangent, Vector4 end, Vector4 incomingTangent, Single amount)
             {
                 return CurveSampler.InterpolateCubic(start, outgoingTangent, end, incomingTangent, amount);
             }
@@ -80,7 +110,10 @@ namespace SharpGLTF.Animations
             }
         }
 
+        public static readonly ISamplerTraits<Single> Scalar = new _Scalar();
+        public static readonly ISamplerTraits<Vector2> Vector2 = new _Vector2();
         public static readonly ISamplerTraits<Vector3> Vector3 = new _Vector3();
+        public static readonly ISamplerTraits<Vector4> Vector4 = new _Vector4();
         public static readonly ISamplerTraits<Quaternion> Quaternion = new _Quaternion();
         public static readonly ISamplerTraits<Single[]> Array = new _Array();
         public static readonly ISamplerTraits<SPARSE> Sparse = new _Sparse();

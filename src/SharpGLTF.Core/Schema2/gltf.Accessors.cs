@@ -585,7 +585,7 @@ namespace SharpGLTF.Schema2
         {
             SourceBufferView.ValidateBufferUsagePlainData(validate, false); // as per glTF specification, animation accessors must not have ByteStride
 
-            validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC3, DimensionType.VEC4);
+            validate.IsAnyOf(nameof(Dimensions), Dimensions, DimensionType.SCALAR, DimensionType.VEC2, DimensionType.VEC3, DimensionType.VEC4);
         }
 
         #endregion

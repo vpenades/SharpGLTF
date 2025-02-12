@@ -360,7 +360,28 @@ namespace SharpGLTF.Animations
             return result;
         }
 
+        public static Single InterpolateCubic(Single start, Single outgoingTangent, Single end, Single incomingTangent, Single amount)
+        {
+            var hermite = CreateHermitePointWeights(amount);
+
+            return (start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent);
+        }
+
+        public static Vector2 InterpolateCubic(Vector2 start, Vector2 outgoingTangent, Vector2 end, Vector2 incomingTangent, Single amount)
+        {
+            var hermite = CreateHermitePointWeights(amount);
+
+            return (start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent);
+        }
+
         public static Vector3 InterpolateCubic(Vector3 start, Vector3 outgoingTangent, Vector3 end, Vector3 incomingTangent, Single amount)
+        {
+            var hermite = CreateHermitePointWeights(amount);
+
+            return (start * hermite.StartPosition) + (end * hermite.EndPosition) + (outgoingTangent * hermite.StartTangent) + (incomingTangent * hermite.EndTangent);
+        }
+
+        public static Vector4 InterpolateCubic(Vector4 start, Vector4 outgoingTangent, Vector4 end, Vector4 incomingTangent, Single amount)
         {
             var hermite = CreateHermitePointWeights(amount);
 
@@ -400,6 +421,40 @@ namespace SharpGLTF.Animations
         private static bool _HasZero<T>(this IEnumerable<T> collection) { return collection == null || !collection.Any(); }
         private static bool _HasOne<T>(this IEnumerable<T> collection) { return !collection.Skip(1).Any(); }
 
+        public static ICurveSampler<Single> CreateSampler(this IEnumerable<(Single, Single)> collection, bool isLinear = true, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Single>.Create(collection);
+
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Single>(collection, SamplerTraits.Scalar);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Single>(collection, SamplerTraits.Scalar);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+        }
+
+        public static ICurveSampler<Vector2> CreateSampler(this IEnumerable<(Single, Vector2)> collection, bool isLinear = true, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector2>.Create(collection);
+
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Vector2>(collection, SamplerTraits.Vector2);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Vector2>(collection, SamplerTraits.Vector2);
+                return optimize ? sampler.ToFastSampler() : sampler;    
+            }
+        }
+
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, Vector3)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection._HasZero()) return null;
@@ -413,6 +468,23 @@ namespace SharpGLTF.Animations
             else
             {
                 var sampler = new StepSampler<Vector3>(collection, SamplerTraits.Vector3);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+        }
+
+        public static ICurveSampler<Vector4> CreateSampler(this IEnumerable<(Single, Vector4)> collection, bool isLinear = true, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector4>.Create(collection);
+
+            if (isLinear)
+            {
+                var sampler = new LinearSampler<Vector4>(collection, SamplerTraits.Vector4);
+                return optimize ? sampler.ToFastSampler() : sampler;
+            }
+            else
+            {
+                var sampler = new StepSampler<Vector4>(collection, SamplerTraits.Vector4);
                 return optimize ? sampler.ToFastSampler() : sampler;
             }
         }
@@ -485,12 +557,39 @@ namespace SharpGLTF.Animations
             }
         }
 
+        public static ICurveSampler<Single> CreateSampler(this IEnumerable<(Single, (Single, Single, Single))> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Single>.Create(collection);
+
+            var sampler = new CubicSampler<Single>(collection, SamplerTraits.Scalar);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
+
+        public static ICurveSampler<Vector2> CreateSampler(this IEnumerable<(Single, (Vector2, Vector2, Vector2))> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector2>.Create(collection);
+
+            var sampler = new CubicSampler<Vector2>(collection, SamplerTraits.Vector2);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
+
         public static ICurveSampler<Vector3> CreateSampler(this IEnumerable<(Single, (Vector3, Vector3, Vector3))> collection, bool optimize = false)
         {
             if (collection._HasZero()) return null;
             if (collection._HasOne()) return FixedSampler<Vector3>.Create(collection);
 
             var sampler = new CubicSampler<Vector3>(collection, SamplerTraits.Vector3);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
+
+        public static ICurveSampler<Vector4> CreateSampler(this IEnumerable<(Single, (Vector4, Vector4, Vector4))> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Vector4>.Create(collection);
+
+            var sampler = new CubicSampler<Vector4>(collection, SamplerTraits.Vector4);
             return optimize ? sampler.ToFastSampler() : sampler;
         }
 

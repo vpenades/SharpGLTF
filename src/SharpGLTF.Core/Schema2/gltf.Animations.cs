@@ -10,6 +10,7 @@ using SharpGLTF.Animations;
 using SharpGLTF.Validation;
 
 using WEIGHTS = System.Collections.Generic.IReadOnlyList<float>;
+using System.Xml.Linq;
 
 namespace SharpGLTF.Schema2
 {
@@ -43,23 +44,28 @@ namespace SharpGLTF.Schema2
             return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
         }
 
+        public IEnumerable<AnimationChannel> FindChannels(string rootPath)
+        {
+            return Channels.Where(item => item.TargetPointerPath.StartsWith(rootPath));
+        }
+
         public IEnumerable<AnimationChannel> FindChannels(Node node)
         {
             Guard.NotNull(node, nameof(node));
             Guard.MustShareLogicalParent(this, node, nameof(node));
 
             return Channels.Where(item => item.TargetNode == node);
-        }
-
-        private AnimationChannel _FindChannel(Node node, PropertyPath path)
-        {
-            return FindChannels(node).FirstOrDefault(item => item.TargetNodePath == path);
-        }
+        }        
 
         public AnimationChannel FindScaleChannel(Node node) => _FindChannel(node, PropertyPath.scale);
         public AnimationChannel FindRotationChannel(Node node) => _FindChannel(node, PropertyPath.rotation);
         public AnimationChannel FindTranslationChannel(Node node) => _FindChannel(node, PropertyPath.translation);
         public AnimationChannel FindMorphChannel(Node node) => _FindChannel(node, PropertyPath.weights);
+
+        private AnimationChannel _FindChannel(Node node, PropertyPath path)
+        {
+            return FindChannels(node).FirstOrDefault(item => item.TargetNodePath == path);
+        }
 
         #endregion
 
@@ -90,6 +96,54 @@ namespace SharpGLTF.Schema2
             _channels.Add(channel);
 
             return channel;
+        }
+
+        /// <remarks>
+        /// There can only be one <see cref="AnimationChannel"/> for every node and path
+        /// </remarks>
+        private AnimationChannel _UseChannel(string pointerPath)
+        {
+            var channel = new AnimationChannel(pointerPath);
+
+            _channels.Add(channel);
+
+            return channel;
+        }
+
+        public void CreateMaterialPropertyChannel<T>(Material material, string propertyName, IReadOnlyDictionary<Single, T> keyframes, bool linear = true)
+        {
+            Guard.NotNull(material, nameof(material));
+            Guard.MustShareLogicalParent(this, material, nameof(material));
+            Guard.NotNullOrEmpty(propertyName, nameof(propertyName));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            DangerousCreatePointerChannel<T>($"/materials/{material.LogicalIndex}/{propertyName}", keyframes, linear);
+        }
+
+        /// <summary>
+        /// Creates an animation channel, dynamically targeting an object in the DOM using a KHR_animation_pointer path.
+        /// </summary>
+        /// <typeparam name="T">The type of the property targeted by the path.</typeparam>
+        /// <param name="pointerPath">The path to the porperty, ex: '/nodes/0/rotation'.</param>
+        /// <param name="keyframes">The keyframes to set</param>
+        /// <param name="linear">Whether the keyframes are linearly interporlated or not.</param>        
+        public void DangerousCreatePointerChannel<T>(string pointerPath, IReadOnlyDictionary<Single, T> keyframes, bool linear = true)
+        {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
+
+            switch(keyframes)
+            {
+                case IReadOnlyDictionary<Single, Single> typed:  sampler.SetKeys(typed); break;
+                case IReadOnlyDictionary<Single, Vector2> typed: sampler.SetKeys(typed); break;
+                case IReadOnlyDictionary<Single, Vector3> typed: sampler.SetKeys(typed); break;
+                case IReadOnlyDictionary<Single, Vector4> typed: sampler.SetKeys(typed); break;
+                case IReadOnlyDictionary<Single, Quaternion> typed: sampler.SetKeys(typed); break;
+                default: throw new NotSupportedException(typeof(T).Name);
+            }            
+
+            this._UseChannel(pointerPath).SetSampler(sampler);
         }
 
         public void CreateScaleChannel(Node node, IReadOnlyDictionary<Single, Vector3> keyframes, bool linear = true)
