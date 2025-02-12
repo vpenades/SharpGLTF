@@ -56,13 +56,15 @@ namespace SharpGLTF
             processors.Add(new AgiStkMetadataExtension());
 
             // other
-            processors.Add(new XmpJsonLdExtension());
+            processors.Add(new XmpJsonLdExtension());            
 
             processors.Add(new ExtMeshFeaturesExtension());
 
+            processors.Add(new AnimationPointerExtension());
+
             processors.Add(new ExtInstanceFeaturesExtension());
 
-            processors.Add(new ExtStructuralMetadataExtension());
+            processors.Add(new ExtStructuralMetadataExtension());            
 
 
             // ----------------------------------------------  process all files
