@@ -10,7 +10,6 @@ using SharpGLTF.Geometry.VertexTypes;
 
 using MESHXFORM = SharpGLTF.Transforms.IGeometryTransform;
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SharpGLTF.Schema2
 {
