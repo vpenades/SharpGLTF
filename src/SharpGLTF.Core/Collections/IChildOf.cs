@@ -12,7 +12,7 @@ namespace SharpGLTF.Collections
         where TParent : class
     {
         /// <summary>
-        /// Gets the logical parent that owns the collection containing this object.
+        /// Gets the logical parent that owns this object.
         /// </summary>
         TParent LogicalParent { get; }        
 

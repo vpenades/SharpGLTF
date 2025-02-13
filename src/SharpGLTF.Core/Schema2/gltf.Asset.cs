@@ -7,7 +7,7 @@ using SharpGLTF.Collections;
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("{Version} {MinVersion} {Generator} {Copyright}")]
-    public sealed partial class Asset : Collections.IChildOfList<ModelRoot>
+    public sealed partial class Asset : Collections.IChildOf<ModelRoot>
     {
         #region lifecycle
 
@@ -28,17 +28,9 @@ namespace SharpGLTF.Schema2
             };
         }
 
-        void IChildOfList<ModelRoot>.SetLogicalParent(ModelRoot parent, int index)
-        {
-            _LogicalParent = parent;
-            _LogicalIndex = index;
-        }
+        void IChildOf<ModelRoot>.SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }        
 
-        private ModelRoot _LogicalParent;
-        private int _LogicalIndex;
-
-        ModelRoot IChildOfList<ModelRoot>.LogicalParent => _LogicalParent;
-        int IChildOfList<ModelRoot>.LogicalIndex => _LogicalIndex;
+        public ModelRoot LogicalParent { get; private set; }        
 
         #endregion        
 
@@ -100,7 +92,7 @@ namespace SharpGLTF.Schema2
         public Asset Asset
         {
             get => _asset;
-            set => GetChildSetter(this).SetListProperty(ref _asset, value);
+            set => SetProperty(this, ref _asset, value);
         }
     }
 }

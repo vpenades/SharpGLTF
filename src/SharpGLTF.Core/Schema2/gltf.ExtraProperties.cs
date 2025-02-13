@@ -69,6 +69,14 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        protected static void SetProperty<TParent, TProperty, TValue>(TParent parent, ref TProperty property, TValue value)
+            where TParent : ExtraProperties
+            where TProperty: class
+            where TValue: TProperty
+        {
+            new Collections.ChildSetter<TParent>(parent).SetProperty(ref property, value);
+        }
+
         protected static Collections.ChildSetter<T> GetChildSetter<T>(T owner) where T:ExtraProperties
         {
             return new Collections.ChildSetter<T>(owner);
