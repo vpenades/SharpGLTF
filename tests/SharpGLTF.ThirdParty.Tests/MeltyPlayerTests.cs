@@ -14,6 +14,10 @@ using SharpGLTF.Scenes;
 using SharpGLTF.Schema2;
 using SharpGLTF.Transforms;
 
+
+
+using static Plotly.Literals;
+
 namespace SharpGLTF.ThirdParty
 {    
     internal class MeltyPlayerTests
@@ -91,27 +95,10 @@ namespace SharpGLTF.ThirdParty
 
             // generate texture
             var diffuseImageSize = 2 * gridSize;
-            var occlusionImageSize = gridSize;
+            var occlusionImageSize = gridSize;            
 
-            MemoryImage diffuseImage, occlusionImage;
-            {
-                using var img = new Bitmap(diffuseImageSize, diffuseImageSize, PixelFormat.Format32bppArgb);
-
-                using var mem = new MemoryStream();
-                img.Save(mem, ImageFormat.Png);
-
-                mem.TryGetBuffer(out var bytes);
-                diffuseImage = new MemoryImage(bytes);
-            }
-            {
-                using var img = new Bitmap(occlusionImageSize, occlusionImageSize, PixelFormat.Format32bppArgb);
-
-                using var mem = new MemoryStream();
-                img.Save(mem, ImageFormat.Png);
-
-                mem.TryGetBuffer(out var bytes);
-                occlusionImage = new MemoryImage(bytes);
-            }
+            var diffuseImage = _CreateEmptyImage(diffuseImageSize);
+            var occlusionImage = _CreateEmptyImage(occlusionImageSize);            
 
             var material = MaterialBuilder.CreateDefault().WithSpecularGlossinessShader();
             material.UseChannel(KnownChannel.Diffuse)
@@ -170,6 +157,30 @@ namespace SharpGLTF.ThirdParty
                 GC.Collect();
                 GC.WaitForFullGCComplete();
             }
+        }
+
+        private static MemoryImage _CreateEmptyImage(int diffuseImageSize)
+        {
+            #if NET452_OR_GREATER
+
+            using var img = new Bitmap(diffuseImageSize, diffuseImageSize, PixelFormat.Format32bppArgb);
+
+            using var mem = new MemoryStream();
+            img.Save(mem, System.Drawing.Imaging.ImageFormat.Png);
+
+            mem.TryGetBuffer(out var bytes);
+            return new MemoryImage(bytes);
+            #else
+
+            using var img = new SixLabors.ImageSharp.Image<SixLabors.ImageSharp.PixelFormats.Argb32>(diffuseImageSize, diffuseImageSize);
+
+            using var mem = new MemoryStream();
+            SixLabors.ImageSharp.ImageExtensions.SaveAsPng(img, mem);
+
+            mem.TryGetBuffer(out var bytes);
+            return new MemoryImage(bytes);
+
+#endif
         }
     }
 }
