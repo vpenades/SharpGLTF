@@ -95,7 +95,7 @@ namespace SharpGLTF.ThirdParty
 
             MemoryImage diffuseImage, occlusionImage;
             {
-                var img = new Bitmap(diffuseImageSize, diffuseImageSize, PixelFormat.Format32bppArgb);
+                using var img = new Bitmap(diffuseImageSize, diffuseImageSize, PixelFormat.Format32bppArgb);
 
                 using var mem = new MemoryStream();
                 img.Save(mem, ImageFormat.Png);
@@ -104,7 +104,7 @@ namespace SharpGLTF.ThirdParty
                 diffuseImage = new MemoryImage(bytes);
             }
             {
-                var img = new Bitmap(occlusionImageSize, occlusionImageSize, PixelFormat.Format32bppArgb);
+                using var img = new Bitmap(occlusionImageSize, occlusionImageSize, PixelFormat.Format32bppArgb);
 
                 using var mem = new MemoryStream();
                 img.Save(mem, ImageFormat.Png);

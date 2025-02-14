@@ -38,13 +38,11 @@ namespace SharpGLTF.Collections
             if (Object.ReferenceEquals(value , target)) return;
 
             // orphan the current child
-
-            if (target is IChildOf<TParent> oldChild) oldChild.SetLogicalParent(null);
-            target = null;
+            if (target is IChildOf<TParent> oldChild) oldChild.SetLogicalParent(null);            
 
             // adopt the new child
             target = value;
-            if (target is IChildOf<TParent> newChild) newChild.SetLogicalParent(null);
+            if (target is IChildOf<TParent> newChild) newChild.SetLogicalParent(_Parent);
         }
 
         #endregion
