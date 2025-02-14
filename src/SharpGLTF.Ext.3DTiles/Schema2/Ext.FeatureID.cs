@@ -175,7 +175,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         {
             if (_texture != null) return _texture;
 
-            GetChildSetter(this).SetProperty(ref _texture, new MeshExtMeshFeatureIDTexture());
+            SetProperty(this, ref _texture, new MeshExtMeshFeatureIDTexture());
 
             return _texture;
         }

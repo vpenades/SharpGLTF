@@ -73,7 +73,7 @@ namespace SharpGLTF.Schema2
             internal StructuralMetadataSchema Schema
             {
                 get => _schema;
-                set { GetChildSetter(this).SetProperty(ref _schema, value); }
+                set { SetProperty(this, ref _schema, value); }
             }
 
             internal IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
@@ -112,7 +112,7 @@ namespace SharpGLTF.Schema2
             {
                 // SchemaUri = null;
 
-                if (_schema == null) GetChildSetter(this).SetProperty(ref _schema, new StructuralMetadataSchema());
+                if (_schema == null) SetProperty(this, ref _schema, new StructuralMetadataSchema());
 
                 return _schema;
             }

@@ -133,19 +133,19 @@ namespace SharpGLTF.Schema2
 
         private MaterialNormalTextureInfo _GetNormalTexture(bool create)
         {
-            if (create && _normalTexture == null) _normalTexture = new MaterialNormalTextureInfo();
+            if (create && _normalTexture == null) SetProperty(this, ref _normalTexture, new MaterialNormalTextureInfo());
             return _normalTexture;
         }
 
         private MaterialOcclusionTextureInfo _GetOcclusionTexture(bool create)
         {
-            if (create && _occlusionTexture == null) _occlusionTexture = new MaterialOcclusionTextureInfo();
+            if (create && _occlusionTexture == null) SetProperty(this, ref _occlusionTexture , new MaterialOcclusionTextureInfo());
             return _occlusionTexture;
         }
 
         private TextureInfo _GetEmissiveTexture(bool create)
         {
-            if (create && _emissiveTexture == null) _emissiveTexture = new TextureInfo();
+            if (create && _emissiveTexture == null) SetProperty(this, ref _emissiveTexture, new TextureInfo());
             return _emissiveTexture;
         }
 
@@ -179,13 +179,13 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetBaseTexture(bool create)
         {
-            if (create && _baseColorTexture == null) _baseColorTexture = new TextureInfo();
+            if (create && _baseColorTexture == null) SetProperty(this, ref _baseColorTexture, new TextureInfo());
             return _baseColorTexture;
         }
 
         private TextureInfo _GetMetallicTexture(bool create)
         {
-            if (create && _metallicRoughnessTexture == null) _metallicRoughnessTexture = new TextureInfo();
+            if (create && _metallicRoughnessTexture == null) SetProperty(this, ref _metallicRoughnessTexture, new TextureInfo());
             return _metallicRoughnessTexture;
         }
 
@@ -251,13 +251,13 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetDiffuseTexture(bool create)
         {
-            if (create && _diffuseTexture == null) _diffuseTexture = new TextureInfo();
+            if (create && _diffuseTexture == null) SetProperty(this, ref _diffuseTexture, new TextureInfo());
             return _diffuseTexture;
         }
 
         private TextureInfo _GetGlossinessTexture(bool create)
         {
-            if (create && _specularGlossinessTexture == null) _specularGlossinessTexture = new TextureInfo();
+            if (create && _specularGlossinessTexture == null) SetProperty(this, ref _specularGlossinessTexture, new TextureInfo());
             return _specularGlossinessTexture;
         }
 
@@ -325,19 +325,19 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetClearCoatTexture(bool create)
         {
-            if (create && _clearcoatTexture == null) _clearcoatTexture = new TextureInfo();
+            if (create && _clearcoatTexture == null) SetProperty(this, ref _clearcoatTexture, new TextureInfo());
             return _clearcoatTexture;
         }
 
         private TextureInfo _GetClearCoatRoughnessTexture(bool create)
         {
-            if (create && _clearcoatRoughnessTexture == null) _clearcoatRoughnessTexture = new TextureInfo();
+            if (create && _clearcoatRoughnessTexture == null) SetProperty(this, ref _clearcoatRoughnessTexture, new TextureInfo());
             return _clearcoatRoughnessTexture;
         }
 
         private MaterialNormalTextureInfo _GetClearCoatNormalTexture(bool create)
         {
-            if (create && _clearcoatNormalTexture == null) _clearcoatNormalTexture = new MaterialNormalTextureInfo();
+            if (create && _clearcoatNormalTexture == null) SetProperty(this, ref _clearcoatNormalTexture, new MaterialNormalTextureInfo());
             return _clearcoatNormalTexture;
         }
 
@@ -404,7 +404,7 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetTransmissionTexture(bool create)
         {
-            if (create && _transmissionTexture == null) _transmissionTexture = new TextureInfo();
+            if (create && _transmissionTexture == null) SetProperty(this, ref _transmissionTexture, new TextureInfo());
             return _transmissionTexture;
         }
     }
@@ -460,13 +460,13 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetSheenColorTexture(bool create)
         {
-            if (create && _sheenColorTexture == null) _sheenColorTexture = new TextureInfo();
+            if (create && _sheenColorTexture == null) SetProperty(this, ref _sheenColorTexture, new TextureInfo());
             return _sheenColorTexture;
         }
 
         private TextureInfo _GetSheenRoughnessTexture(bool create)
         {
-            if (create && _sheenRoughnessTexture == null) _sheenRoughnessTexture = new TextureInfo();
+            if (create && _sheenRoughnessTexture == null) SetProperty(this, ref _sheenRoughnessTexture, new TextureInfo());
             return _sheenRoughnessTexture;
         }
     }
@@ -524,13 +524,13 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetSpecularColorTexture(bool create)
         {
-            if (create && _specularColorTexture == null) _specularColorTexture = new TextureInfo();
+            if (create && _specularColorTexture == null) SetProperty(this, ref _specularColorTexture, new TextureInfo());
             return _specularColorTexture;
         }
 
         private TextureInfo _GetSpecularFactorTexture(bool create)
         {
-            if (create && _specularTexture == null) _specularTexture = new TextureInfo();
+            if (create && _specularTexture == null) SetProperty(this, ref _specularTexture, new TextureInfo());
             return _specularTexture;
         }
 
@@ -586,7 +586,7 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetThicknessTexture(bool create)
         {
-            if (create && _thicknessTexture == null) _thicknessTexture = new TextureInfo();
+            if (create && _thicknessTexture == null) SetProperty(this, ref _thicknessTexture, new TextureInfo());
             return _thicknessTexture;
         }
 
@@ -693,13 +693,13 @@ namespace SharpGLTF.Schema2
 
         private TextureInfo _GetIridescenceTexture(bool create)
         {
-            if (create && _iridescenceTexture == null) _iridescenceTexture = new TextureInfo();
+            if (create && _iridescenceTexture == null) SetProperty(this, ref _iridescenceTexture, new TextureInfo());
             return _iridescenceTexture;
         }
 
         private TextureInfo _GetIridescenceThicknessTexture(bool create)
         {
-            if (create && _iridescenceThicknessTexture == null) _iridescenceThicknessTexture = new TextureInfo();
+            if (create && _iridescenceThicknessTexture == null) SetProperty(this, ref _iridescenceThicknessTexture, new TextureInfo());
             return _iridescenceThicknessTexture;
         }
 
