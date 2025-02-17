@@ -68,11 +68,11 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "clearcoatFactor": _clearcoatFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "clearcoatNormalTexture": _clearcoatNormalTexture = DeserializePropertyValue<MaterialNormalTextureInfo>(ref reader); break;
-				case "clearcoatRoughnessFactor": _clearcoatRoughnessFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "clearcoatRoughnessTexture": _clearcoatRoughnessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
-				case "clearcoatTexture": _clearcoatTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "clearcoatFactor": DeserializePropertyValue<MaterialClearCoat, Double?>(ref reader, this, out _clearcoatFactor); break;
+				case "clearcoatNormalTexture": DeserializePropertyValue<MaterialClearCoat, MaterialNormalTextureInfo>(ref reader, this, out _clearcoatNormalTexture); break;
+				case "clearcoatRoughnessFactor": DeserializePropertyValue<MaterialClearCoat, Double?>(ref reader, this, out _clearcoatRoughnessFactor); break;
+				case "clearcoatRoughnessTexture": DeserializePropertyValue<MaterialClearCoat, TextureInfo>(ref reader, this, out _clearcoatRoughnessTexture); break;
+				case "clearcoatTexture": DeserializePropertyValue<MaterialClearCoat, TextureInfo>(ref reader, this, out _clearcoatTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

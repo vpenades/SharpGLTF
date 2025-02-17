@@ -52,7 +52,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "emissiveStrength": _emissiveStrength = DeserializePropertyValue<Double?>(ref reader); break;
+				case "emissiveStrength": DeserializePropertyValue<MaterialEmissiveStrength, Double?>(ref reader, this, out _emissiveStrength); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

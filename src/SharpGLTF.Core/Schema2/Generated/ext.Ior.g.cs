@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "ior": _ior = DeserializePropertyValue<Double?>(ref reader); break;
+				case "ior": DeserializePropertyValue<MaterialIOR, Double?>(ref reader, this, out _ior); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

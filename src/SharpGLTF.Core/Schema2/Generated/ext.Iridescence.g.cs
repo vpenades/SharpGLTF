@@ -74,12 +74,12 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "iridescenceFactor": _iridescenceFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "iridescenceIor": _iridescenceIor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "iridescenceTexture": _iridescenceTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
-				case "iridescenceThicknessMaximum": _iridescenceThicknessMaximum = DeserializePropertyValue<Double?>(ref reader); break;
-				case "iridescenceThicknessMinimum": _iridescenceThicknessMinimum = DeserializePropertyValue<Double?>(ref reader); break;
-				case "iridescenceThicknessTexture": _iridescenceThicknessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "iridescenceFactor": DeserializePropertyValue<MaterialIridescence, Double?>(ref reader, this, out _iridescenceFactor); break;
+				case "iridescenceIor": DeserializePropertyValue<MaterialIridescence, Double?>(ref reader, this, out _iridescenceIor); break;
+				case "iridescenceTexture": DeserializePropertyValue<MaterialIridescence, TextureInfo>(ref reader, this, out _iridescenceTexture); break;
+				case "iridescenceThicknessMaximum": DeserializePropertyValue<MaterialIridescence, Double?>(ref reader, this, out _iridescenceThicknessMaximum); break;
+				case "iridescenceThicknessMinimum": DeserializePropertyValue<MaterialIridescence, Double?>(ref reader, this, out _iridescenceThicknessMinimum); break;
+				case "iridescenceThicknessTexture": DeserializePropertyValue<MaterialIridescence, TextureInfo>(ref reader, this, out _iridescenceThicknessTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

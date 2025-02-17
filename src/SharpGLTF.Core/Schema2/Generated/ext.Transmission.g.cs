@@ -56,8 +56,8 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "transmissionFactor": _transmissionFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "transmissionTexture": _transmissionTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "transmissionFactor": DeserializePropertyValue<MaterialTransmission, Double?>(ref reader, this, out _transmissionFactor); break;
+				case "transmissionTexture": DeserializePropertyValue<MaterialTransmission, TextureInfo>(ref reader, this, out _transmissionTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

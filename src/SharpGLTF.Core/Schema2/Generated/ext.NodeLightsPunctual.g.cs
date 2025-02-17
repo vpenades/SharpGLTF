@@ -47,7 +47,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "light": _light = DeserializePropertyValue<Int32>(ref reader); break;
+				case "light": DeserializePropertyValue<_NodePunctualLight, Int32>(ref reader, this, out _light); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

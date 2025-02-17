@@ -63,10 +63,10 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "sheenColorFactor": _sheenColorFactor = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "sheenColorTexture": _sheenColorTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
-				case "sheenRoughnessFactor": _sheenRoughnessFactor = DeserializePropertyValue<Single?>(ref reader); break;
-				case "sheenRoughnessTexture": _sheenRoughnessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "sheenColorFactor": DeserializePropertyValue<MaterialSheen, Vector3?>(ref reader, this, out _sheenColorFactor); break;
+				case "sheenColorTexture": DeserializePropertyValue<MaterialSheen, TextureInfo>(ref reader, this, out _sheenColorTexture); break;
+				case "sheenRoughnessFactor": DeserializePropertyValue<MaterialSheen, Single?>(ref reader, this, out _sheenRoughnessFactor); break;
+				case "sheenRoughnessTexture": DeserializePropertyValue<MaterialSheen, TextureInfo>(ref reader, this, out _sheenRoughnessTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

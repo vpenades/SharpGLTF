@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "attributes": DeserializePropertyDictionary<Int32>(ref reader, _attributes); break;
+				case "attributes": DeserializePropertyDictionary<MeshGpuInstancing, Int32>(ref reader, this, _attributes); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

@@ -63,10 +63,10 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "offset": _offset = DeserializePropertyValue<Vector2?>(ref reader); break;
-				case "rotation": _rotation = DeserializePropertyValue<Double?>(ref reader); break;
-				case "scale": _scale = DeserializePropertyValue<Vector2?>(ref reader); break;
-				case "texCoord": _texCoord = DeserializePropertyValue<Int32?>(ref reader); break;
+				case "offset": DeserializePropertyValue<TextureTransform, Vector2?>(ref reader, this, out _offset); break;
+				case "rotation": DeserializePropertyValue<TextureTransform, Double?>(ref reader, this, out _rotation); break;
+				case "scale": DeserializePropertyValue<TextureTransform, Vector2?>(ref reader, this, out _scale); break;
+				case "texCoord": DeserializePropertyValue<TextureTransform, Int32?>(ref reader, this, out _texCoord); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

@@ -163,21 +163,21 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "array": _array = DeserializePropertyValue<Boolean?>(ref reader); break;
+				case "array": DeserializePropertyValue<StructuralMetadataClassProperty, Boolean?>(ref reader, this, out _array); break;
 				case "componentType": _componentType = DeserializePropertyValue<DataType>(ref reader); break;
-				case "count": _count = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "default": _default = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
-				case "enumType": _enumType = DeserializePropertyValue<String>(ref reader); break;
-				case "max": _max = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "min": _min = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "noData": _noData = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "normalized": _normalized = DeserializePropertyValue<Boolean?>(ref reader); break;
-				case "offset": _offset = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "required": _required = DeserializePropertyValue<Boolean?>(ref reader); break;
-				case "scale": _scale = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "semantic": _semantic = DeserializePropertyValue<String>(ref reader); break;
+				case "count": DeserializePropertyValue<StructuralMetadataClassProperty, Int32?>(ref reader, this, out _count); break;
+				case "default": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _default); break;
+				case "description": DeserializePropertyValue<StructuralMetadataClassProperty, String>(ref reader, this, out _description); break;
+				case "enumType": DeserializePropertyValue<StructuralMetadataClassProperty, String>(ref reader, this, out _enumType); break;
+				case "max": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _max); break;
+				case "min": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _min); break;
+				case "name": DeserializePropertyValue<StructuralMetadataClassProperty, String>(ref reader, this, out _name); break;
+				case "noData": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _noData); break;
+				case "normalized": DeserializePropertyValue<StructuralMetadataClassProperty, Boolean?>(ref reader, this, out _normalized); break;
+				case "offset": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _offset); break;
+				case "required": DeserializePropertyValue<StructuralMetadataClassProperty, Boolean?>(ref reader, this, out _required); break;
+				case "scale": DeserializePropertyValue<StructuralMetadataClassProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _scale); break;
+				case "semantic": DeserializePropertyValue<StructuralMetadataClassProperty, String>(ref reader, this, out _semantic); break;
 				case "type": _type = DeserializePropertyValue<ElementType>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
@@ -214,9 +214,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "properties": DeserializePropertyDictionary<StructuralMetadataClassProperty>(ref reader, _properties); break;
+				case "description": DeserializePropertyValue<StructuralMetadataClass, String>(ref reader, this, out _description); break;
+				case "name": DeserializePropertyValue<StructuralMetadataClass, String>(ref reader, this, out _name); break;
+				case "properties": DeserializePropertyDictionary<StructuralMetadataClass, StructuralMetadataClassProperty>(ref reader, this, _properties); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -252,9 +252,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "value": _value = DeserializePropertyValue<Int32>(ref reader); break;
+				case "description": DeserializePropertyValue<StructuralMetadataEnumValue, String>(ref reader, this, out _description); break;
+				case "name": DeserializePropertyValue<StructuralMetadataEnumValue, String>(ref reader, this, out _name); break;
+				case "value": DeserializePropertyValue<StructuralMetadataEnumValue, Int32>(ref reader, this, out _value); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -279,7 +279,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		private IntegerType? _valueType = _valueTypeDefault;
 		
 		private const int _valuesMinItems = 1;
-		private ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
+		private readonly ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -295,10 +295,10 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
+				case "description": DeserializePropertyValue<StructuralMetadataEnum, String>(ref reader, this, out _description); break;
+				case "name": DeserializePropertyValue<StructuralMetadataEnum, String>(ref reader, this, out _name); break;
 				case "valueType": _valueType = DeserializePropertyValue<IntegerType>(ref reader); break;
-				case "values": DeserializePropertyList<StructuralMetadataEnumValue>(ref reader, _values); break;
+				case "values": DeserializePropertyList<StructuralMetadataEnum, StructuralMetadataEnumValue>(ref reader, this, _values); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -343,12 +343,12 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "classes": DeserializePropertyDictionary<StructuralMetadataClass>(ref reader, _classes); break;
-				case "description": _description = DeserializePropertyValue<String>(ref reader); break;
-				case "enums": DeserializePropertyDictionary<StructuralMetadataEnum>(ref reader, _enums); break;
-				case "id": _id = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "version": _version = DeserializePropertyValue<String>(ref reader); break;
+				case "classes": DeserializePropertyDictionary<StructuralMetadataSchema, StructuralMetadataClass>(ref reader, this, _classes); break;
+				case "description": DeserializePropertyValue<StructuralMetadataSchema, String>(ref reader, this, out _description); break;
+				case "enums": DeserializePropertyDictionary<StructuralMetadataSchema, StructuralMetadataEnum>(ref reader, this, _enums); break;
+				case "id": DeserializePropertyValue<StructuralMetadataSchema, String>(ref reader, this, out _id); break;
+				case "name": DeserializePropertyValue<StructuralMetadataSchema, String>(ref reader, this, out _name); break;
+				case "version": DeserializePropertyValue<StructuralMetadataSchema, String>(ref reader, this, out _version); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -405,14 +405,14 @@ namespace SharpGLTF.Schema2.Tiles3D
 			switch (jsonPropertyName)
 			{
 				case "arrayOffsetType": _arrayOffsetType = DeserializePropertyValue<ArrayOffsetType>(ref reader); break;
-				case "arrayOffsets": _arrayOffsets = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "max": _max = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "min": _min = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "offset": _offset = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "scale": _scale = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
+				case "arrayOffsets": DeserializePropertyValue<PropertyTableProperty, Int32?>(ref reader, this, out _arrayOffsets); break;
+				case "max": DeserializePropertyValue<PropertyTableProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _max); break;
+				case "min": DeserializePropertyValue<PropertyTableProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _min); break;
+				case "offset": DeserializePropertyValue<PropertyTableProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _offset); break;
+				case "scale": DeserializePropertyValue<PropertyTableProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _scale); break;
 				case "stringOffsetType": _stringOffsetType = DeserializePropertyValue<ArrayOffsetType>(ref reader); break;
-				case "stringOffsets": _stringOffsets = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "values": _values = DeserializePropertyValue<Int32>(ref reader); break;
+				case "stringOffsets": DeserializePropertyValue<PropertyTableProperty, Int32?>(ref reader, this, out _stringOffsets); break;
+				case "values": DeserializePropertyValue<PropertyTableProperty, Int32>(ref reader, this, out _values); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -452,10 +452,10 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "class": _class = DeserializePropertyValue<String>(ref reader); break;
-				case "count": _count = DeserializePropertyValue<Int32>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "properties": DeserializePropertyDictionary<PropertyTableProperty>(ref reader, _properties); break;
+				case "class": DeserializePropertyValue<PropertyTable, String>(ref reader, this, out _class); break;
+				case "count": DeserializePropertyValue<PropertyTable, Int32>(ref reader, this, out _count); break;
+				case "name": DeserializePropertyValue<PropertyTable, String>(ref reader, this, out _name); break;
+				case "properties": DeserializePropertyDictionary<PropertyTable, PropertyTableProperty>(ref reader, this, _properties); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -498,11 +498,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "channels": DeserializePropertyList<Int32>(ref reader, _channels); break;
-				case "max": _max = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "min": _min = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "offset": _offset = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "scale": _scale = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
+				case "channels": DeserializePropertyList<PropertyTextureProperty, Int32>(ref reader, this, _channels); break;
+				case "max": DeserializePropertyValue<PropertyTextureProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _max); break;
+				case "min": DeserializePropertyValue<PropertyTextureProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _min); break;
+				case "offset": DeserializePropertyValue<PropertyTextureProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _offset); break;
+				case "scale": DeserializePropertyValue<PropertyTextureProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _scale); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -538,9 +538,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "class": _class = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "properties": DeserializePropertyDictionary<PropertyTextureProperty>(ref reader, _properties); break;
+				case "class": DeserializePropertyValue<PropertyTexture, String>(ref reader, this, out _class); break;
+				case "name": DeserializePropertyValue<PropertyTexture, String>(ref reader, this, out _name); break;
+				case "properties": DeserializePropertyDictionary<PropertyTexture, PropertyTextureProperty>(ref reader, this, _properties); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -582,11 +582,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "attribute": _attribute = DeserializePropertyValue<String>(ref reader); break;
-				case "max": _max = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "min": _min = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "offset": _offset = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
-				case "scale": _scale = DeserializePropertyValue<System.Text.Json.Nodes.JsonNode>(ref reader); break;
+				case "attribute": DeserializePropertyValue<PropertyAttributeProperty, String>(ref reader, this, out _attribute); break;
+				case "max": DeserializePropertyValue<PropertyAttributeProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _max); break;
+				case "min": DeserializePropertyValue<PropertyAttributeProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _min); break;
+				case "offset": DeserializePropertyValue<PropertyAttributeProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _offset); break;
+				case "scale": DeserializePropertyValue<PropertyAttributeProperty, System.Text.Json.Nodes.JsonNode>(ref reader, this, out _scale); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -622,9 +622,9 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "class": _class = DeserializePropertyValue<String>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "properties": DeserializePropertyDictionary<PropertyAttributeProperty>(ref reader, _properties); break;
+				case "class": DeserializePropertyValue<PropertyAttribute, String>(ref reader, this, out _class); break;
+				case "name": DeserializePropertyValue<PropertyAttribute, String>(ref reader, this, out _name); break;
+				case "properties": DeserializePropertyDictionary<PropertyAttribute, PropertyAttributeProperty>(ref reader, this, _properties); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -642,13 +642,13 @@ namespace SharpGLTF.Schema2.Tiles3D
 	{
 	
 		private const int _propertyAttributesMinItems = 1;
-		private ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
+		private readonly ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
 		
 		private const int _propertyTablesMinItems = 1;
-		private ChildrenList<PropertyTable,EXTStructuralMetadataRoot> _propertyTables;
+		private readonly ChildrenList<PropertyTable,EXTStructuralMetadataRoot> _propertyTables;
 		
 		private const int _propertyTexturesMinItems = 1;
-		private ChildrenList<PropertyTexture,EXTStructuralMetadataRoot> _propertyTextures;
+		private readonly ChildrenList<PropertyTexture,EXTStructuralMetadataRoot> _propertyTextures;
 		
 		private StructuralMetadataSchema _schema;
 		
@@ -669,11 +669,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "propertyAttributes": DeserializePropertyList<PropertyAttribute>(ref reader, _propertyAttributes); break;
-				case "propertyTables": DeserializePropertyList<PropertyTable>(ref reader, _propertyTables); break;
-				case "propertyTextures": DeserializePropertyList<PropertyTexture>(ref reader, _propertyTextures); break;
-				case "schema": _schema = DeserializePropertyValue<StructuralMetadataSchema>(ref reader); break;
-				case "schemaUri": _schemaUri = DeserializePropertyValue<String>(ref reader); break;
+				case "propertyAttributes": DeserializePropertyList<EXTStructuralMetadataRoot, PropertyAttribute>(ref reader, this, _propertyAttributes); break;
+				case "propertyTables": DeserializePropertyList<EXTStructuralMetadataRoot, PropertyTable>(ref reader, this, _propertyTables); break;
+				case "propertyTextures": DeserializePropertyList<EXTStructuralMetadataRoot, PropertyTexture>(ref reader, this, _propertyTextures); break;
+				case "schema": DeserializePropertyValue<EXTStructuralMetadataRoot, StructuralMetadataSchema>(ref reader, this, out _schema); break;
+				case "schemaUri": DeserializePropertyValue<EXTStructuralMetadataRoot, String>(ref reader, this, out _schemaUri); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

@@ -80,10 +80,10 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "initialValue": _initialValue = DeserializePropertyValue<Double>(ref reader); break;
-				case "maximumValue": _maximumValue = DeserializePropertyValue<Double>(ref reader); break;
-				case "minimumValue": _minimumValue = DeserializePropertyValue<Double>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
+				case "initialValue": DeserializePropertyValue<AgiArticulationStage, Double>(ref reader, this, out _initialValue); break;
+				case "maximumValue": DeserializePropertyValue<AgiArticulationStage, Double>(ref reader, this, out _maximumValue); break;
+				case "minimumValue": DeserializePropertyValue<AgiArticulationStage, Double>(ref reader, this, out _minimumValue); break;
+				case "name": DeserializePropertyValue<AgiArticulationStage, String>(ref reader, this, out _name); break;
 				case "type": _type = DeserializePropertyValue<AgiArticulationTransformType>(ref reader); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
@@ -106,7 +106,7 @@ namespace SharpGLTF.Schema2.AGI
 		private Vector3? _pointingVector;
 		
 		private const int _stagesMinItems = 1;
-		private ChildrenList<AgiArticulationStage,AgiArticulation> _stages;
+		private readonly ChildrenList<AgiArticulationStage,AgiArticulation> _stages;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -121,9 +121,9 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
-				case "pointingVector": _pointingVector = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "stages": DeserializePropertyList<AgiArticulationStage>(ref reader, _stages); break;
+				case "name": DeserializePropertyValue<AgiArticulation, String>(ref reader, this, out _name); break;
+				case "pointingVector": DeserializePropertyValue<AgiArticulation, Vector3?>(ref reader, this, out _pointingVector); break;
+				case "stages": DeserializePropertyList<AgiArticulation, AgiArticulationStage>(ref reader, this, _stages); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -141,7 +141,7 @@ namespace SharpGLTF.Schema2.AGI
 	{
 	
 		private const int _articulationsMinItems = 1;
-		private ChildrenList<AgiArticulation,AgiRootArticulations> _articulations;
+		private readonly ChildrenList<AgiArticulation,AgiRootArticulations> _articulations;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -154,7 +154,7 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "articulations": DeserializePropertyList<AgiArticulation>(ref reader, _articulations); break;
+				case "articulations": DeserializePropertyList<AgiRootArticulations, AgiArticulation>(ref reader, this, _articulations); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

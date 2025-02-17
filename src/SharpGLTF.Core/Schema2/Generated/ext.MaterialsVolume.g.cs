@@ -63,10 +63,10 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "attenuationColor": _attenuationColor = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "attenuationDistance": _attenuationDistance = DeserializePropertyValue<Double?>(ref reader); break;
-				case "thicknessFactor": _thicknessFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "thicknessTexture": _thicknessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "attenuationColor": DeserializePropertyValue<MaterialVolume, Vector3?>(ref reader, this, out _attenuationColor); break;
+				case "attenuationDistance": DeserializePropertyValue<MaterialVolume, Double?>(ref reader, this, out _attenuationDistance); break;
+				case "thicknessFactor": DeserializePropertyValue<MaterialVolume, Double?>(ref reader, this, out _thicknessFactor); break;
+				case "thicknessTexture": DeserializePropertyValue<MaterialVolume, TextureInfo>(ref reader, this, out _thicknessTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

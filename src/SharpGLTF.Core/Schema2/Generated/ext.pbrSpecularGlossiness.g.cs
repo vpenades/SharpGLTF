@@ -67,11 +67,11 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "diffuseFactor": _diffuseFactor = DeserializePropertyValue<Vector4?>(ref reader); break;
-				case "diffuseTexture": _diffuseTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
-				case "glossinessFactor": _glossinessFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "specularFactor": _specularFactor = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "specularGlossinessTexture": _specularGlossinessTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "diffuseFactor": DeserializePropertyValue<MaterialPBRSpecularGlossiness, Vector4?>(ref reader, this, out _diffuseFactor); break;
+				case "diffuseTexture": DeserializePropertyValue<MaterialPBRSpecularGlossiness, TextureInfo>(ref reader, this, out _diffuseTexture); break;
+				case "glossinessFactor": DeserializePropertyValue<MaterialPBRSpecularGlossiness, Double?>(ref reader, this, out _glossinessFactor); break;
+				case "specularFactor": DeserializePropertyValue<MaterialPBRSpecularGlossiness, Vector3?>(ref reader, this, out _specularFactor); break;
+				case "specularGlossinessTexture": DeserializePropertyValue<MaterialPBRSpecularGlossiness, TextureInfo>(ref reader, this, out _specularGlossinessTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

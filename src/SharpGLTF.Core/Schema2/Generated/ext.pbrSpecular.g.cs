@@ -63,10 +63,10 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "specularColorFactor": _specularColorFactor = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "specularColorTexture": _specularColorTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
-				case "specularFactor": _specularFactor = DeserializePropertyValue<Double?>(ref reader); break;
-				case "specularTexture": _specularTexture = DeserializePropertyValue<TextureInfo>(ref reader); break;
+				case "specularColorFactor": DeserializePropertyValue<MaterialSpecular, Vector3?>(ref reader, this, out _specularColorFactor); break;
+				case "specularColorTexture": DeserializePropertyValue<MaterialSpecular, TextureInfo>(ref reader, this, out _specularColorTexture); break;
+				case "specularFactor": DeserializePropertyValue<MaterialSpecular, Double?>(ref reader, this, out _specularFactor); break;
+				case "specularTexture": DeserializePropertyValue<MaterialSpecular, TextureInfo>(ref reader, this, out _specularTexture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

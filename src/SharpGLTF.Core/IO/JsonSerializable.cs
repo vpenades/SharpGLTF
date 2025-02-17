@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpGLTF.Collections;
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -401,6 +403,38 @@ namespace SharpGLTF.IO
             return (T)v;
         }
 
+        protected static void DeserializePropertyValue<TParent,
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, TParent owner, out T property)
+            where TParent: class
+        {
+            _TryCastValue<T>(ref reader, out Object v);
+
+            System.Diagnostics.Debug.Assert(reader.TokenType != JSONTOKEN.StartArray);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JSONTOKEN.StartObject);
+            System.Diagnostics.Debug.Assert(reader.TokenType != JSONTOKEN.PropertyName);
+            // System.Diagnostics.Debug.Assert(reader.TokenType != JsonToken.StartConstructor);
+
+            property = (T)v;
+
+            if (property is IChildOf<TParent> child)
+            {
+                child.SetLogicalParent(owner);
+            }
+        }
+
+        protected static void DeserializePropertyList<TParent,
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, TParent owner, IList<T> list)
+            where TParent : class
+        {
+            DeserializePropertyList<T>(ref reader, list);
+        }
+
         protected static void DeserializePropertyList<
             #if !NETSTANDARD
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
@@ -431,13 +465,23 @@ namespace SharpGLTF.IO
             if (list.Count == 0) throw new JSONEXCEPTION("Empty array found.");
 
             System.Diagnostics.Debug.Assert(reader.TokenType == JSONTOKEN.EndArray);
+        }        
+
+        protected static void DeserializePropertyDictionary<TParent,
+            #if !NETSTANDARD
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
+            #endif
+            T>(ref Utf8JsonReader reader, TParent owner, IDictionary<string, T> dict)
+            where TParent : class
+        {
+            DeserializePropertyDictionary<T>(ref reader, dict);
         }
 
         protected static void DeserializePropertyDictionary<
             #if !NETSTANDARD
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.NonPublicConstructors)]
             #endif
-            T>(ref Utf8JsonReader reader, IDictionary<string, T> dict)
+            T>(ref Utf8JsonReader reader, IDictionary<string, T> dict)            
         {
             Guard.NotNull(dict, nameof(dict));
 

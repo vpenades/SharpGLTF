@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "indices": _indices = DeserializePropertyValue<Int32?>(ref reader); break;
+				case "indices": DeserializePropertyValue<CesiumPrimitiveOutline, Int32?>(ref reader, this, out _indices); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

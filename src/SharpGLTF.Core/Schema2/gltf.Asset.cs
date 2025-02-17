@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using SharpGLTF.Collections;
+using SharpGLTF.IO;
 
 namespace SharpGLTF.Schema2
 {
@@ -26,11 +27,11 @@ namespace SharpGLTF.Schema2
                 _version = MINVERSION.ToString(),
                 _minVersion = null
             };
-        }
+        }        
 
         void IChildOf<ModelRoot>.SetLogicalParent(ModelRoot parent) { LogicalParent = parent; }        
 
-        public ModelRoot LogicalParent { get; private set; }        
+        public ModelRoot LogicalParent { get; private set; }
 
         #endregion        
 
@@ -82,7 +83,7 @@ namespace SharpGLTF.Schema2
             validate.IsGreaterOrEqual(nameof(Version), Version, MINVERSION);
 
             // if (MinVersion > MAXVERSION) result.AddSemanticError( $"Maximum supported version is {MAXVERSION} but found:{MinVersion}");
-        }        
+        }                
 
         #endregion
     }

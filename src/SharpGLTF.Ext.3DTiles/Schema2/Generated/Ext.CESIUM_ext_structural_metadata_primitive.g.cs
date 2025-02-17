@@ -55,8 +55,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "propertyAttributes": DeserializePropertyList<Int32>(ref reader, _propertyAttributes); break;
-				case "propertyTextures": DeserializePropertyList<Int32>(ref reader, _propertyTextures); break;
+				case "propertyAttributes": DeserializePropertyList<ExtStructuralMetadataMeshPrimitive, Int32>(ref reader, this, _propertyAttributes); break;
+				case "propertyTextures": DeserializePropertyList<ExtStructuralMetadataMeshPrimitive, Int32>(ref reader, this, _propertyTextures); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

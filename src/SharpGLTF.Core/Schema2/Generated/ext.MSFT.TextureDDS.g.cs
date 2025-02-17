@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "source": _source = DeserializePropertyValue<Int32?>(ref reader); break;
+				case "source": DeserializePropertyValue<TextureDDS, Int32?>(ref reader, this, out _source); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

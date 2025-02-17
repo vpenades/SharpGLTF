@@ -635,18 +635,22 @@ namespace SharpGLTF.CodeGen
         {
             var fname = _Emitter.GetFieldRuntimeName(f);
 
+            var ownerTypeName = _Emitter._GetRuntimeName(f.DeclaringClass);
+
             if (f.FieldType is ArrayType atype)
             {
                 var titem = _Emitter._GetRuntimeName(atype.ItemType);
-                return $"DeserializePropertyList<{titem}>({_READERMODIFIER}reader, {fname});";
+                return $"DeserializePropertyList<{ownerTypeName}, {titem}>({_READERMODIFIER}reader, this, {fname});";
             }
             else if (f.FieldType is DictionaryType dtype)
             {
                 var titem = _Emitter._GetRuntimeName(dtype.ValueType);
-                return $"DeserializePropertyDictionary<{titem}>({_READERMODIFIER}reader, {fname});";
+                return $"DeserializePropertyDictionary<{ownerTypeName}, {titem}>({_READERMODIFIER}reader, this, {fname});";
             }
+            
+            var fieldTypeName = _Emitter._GetRuntimeName(f.FieldType);            
 
-            return $"{fname} = DeserializePropertyValue<{_Emitter._GetRuntimeName(f.FieldType)}>({_READERMODIFIER}reader);";
+            return $"DeserializePropertyValue<{ownerTypeName}, {fieldTypeName}>({_READERMODIFIER}reader, this, out {fname});";
         }        
 
         public void AddFieldSerializerCase(string line) { _SerializerBody.Add(line); }
@@ -711,6 +715,6 @@ namespace SharpGLTF.CodeGen
             yield return "}";
         }
 
-#endregion
+        #endregion
     }
 }

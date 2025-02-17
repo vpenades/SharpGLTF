@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "packet": _packet = DeserializePropertyValue<Int32>(ref reader); break;
+				case "packet": DeserializePropertyValue<XmpPacketReference, Int32>(ref reader, this, out _packet); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

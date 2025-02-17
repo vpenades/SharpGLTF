@@ -65,11 +65,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "attribute": _attribute = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "featureCount": _featureCount = DeserializePropertyValue<Int32>(ref reader); break;
-				case "label": _label = DeserializePropertyValue<String>(ref reader); break;
-				case "nullFeatureId": _nullFeatureId = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "propertyTable": _propertyTable = DeserializePropertyValue<Int32?>(ref reader); break;
+				case "attribute": DeserializePropertyValue<MeshExtInstanceFeatureID, Int32?>(ref reader, this, out _attribute); break;
+				case "featureCount": DeserializePropertyValue<MeshExtInstanceFeatureID, Int32>(ref reader, this, out _featureCount); break;
+				case "label": DeserializePropertyValue<MeshExtInstanceFeatureID, String>(ref reader, this, out _label); break;
+				case "nullFeatureId": DeserializePropertyValue<MeshExtInstanceFeatureID, Int32?>(ref reader, this, out _nullFeatureId); break;
+				case "propertyTable": DeserializePropertyValue<MeshExtInstanceFeatureID, Int32?>(ref reader, this, out _propertyTable); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -87,7 +87,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	{
 	
 		private const int _featureIdsMinItems = 1;
-		private ChildrenList<MeshExtInstanceFeatureID,MeshExtInstanceFeatures> _featureIds;
+		private readonly ChildrenList<MeshExtInstanceFeatureID,MeshExtInstanceFeatures> _featureIds;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -100,7 +100,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "featureIds": DeserializePropertyList<MeshExtInstanceFeatureID>(ref reader, _featureIds); break;
+				case "featureIds": DeserializePropertyList<MeshExtInstanceFeatures, MeshExtInstanceFeatureID>(ref reader, this, _featureIds); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

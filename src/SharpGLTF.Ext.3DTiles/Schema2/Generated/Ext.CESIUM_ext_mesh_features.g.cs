@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "channels": DeserializePropertyList<Int32>(ref reader, _channels); break;
+				case "channels": DeserializePropertyList<MeshExtMeshFeatureIDTexture, Int32>(ref reader, this, _channels); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -99,12 +99,12 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "attribute": _attribute = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "featureCount": _featureCount = DeserializePropertyValue<Int32>(ref reader); break;
-				case "label": _label = DeserializePropertyValue<String>(ref reader); break;
-				case "nullFeatureId": _nullFeatureId = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "propertyTable": _propertyTable = DeserializePropertyValue<Int32?>(ref reader); break;
-				case "texture": _texture = DeserializePropertyValue<MeshExtMeshFeatureIDTexture>(ref reader); break;
+				case "attribute": DeserializePropertyValue<MeshExtMeshFeatureID, Int32?>(ref reader, this, out _attribute); break;
+				case "featureCount": DeserializePropertyValue<MeshExtMeshFeatureID, Int32>(ref reader, this, out _featureCount); break;
+				case "label": DeserializePropertyValue<MeshExtMeshFeatureID, String>(ref reader, this, out _label); break;
+				case "nullFeatureId": DeserializePropertyValue<MeshExtMeshFeatureID, Int32?>(ref reader, this, out _nullFeatureId); break;
+				case "propertyTable": DeserializePropertyValue<MeshExtMeshFeatureID, Int32?>(ref reader, this, out _propertyTable); break;
+				case "texture": DeserializePropertyValue<MeshExtMeshFeatureID, MeshExtMeshFeatureIDTexture>(ref reader, this, out _texture); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -122,7 +122,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	{
 	
 		private const int _featureIdsMinItems = 1;
-		private ChildrenList<MeshExtMeshFeatureID,MeshExtMeshFeatures> _featureIds;
+		private readonly ChildrenList<MeshExtMeshFeatureID,MeshExtMeshFeatures> _featureIds;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -135,7 +135,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		{
 			switch (jsonPropertyName)
 			{
-				case "featureIds": DeserializePropertyList<MeshExtMeshFeatureID>(ref reader, _featureIds); break;
+				case "featureIds": DeserializePropertyList<MeshExtMeshFeatures, MeshExtMeshFeatureID>(ref reader, this, _featureIds); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

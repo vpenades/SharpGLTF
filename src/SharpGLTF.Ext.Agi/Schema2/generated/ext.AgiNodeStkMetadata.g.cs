@@ -53,8 +53,8 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "noObscuration": _noObscuration = DeserializePropertyValue<Boolean?>(ref reader); break;
-				case "solarPanelGroupName": _solarPanelGroupName = DeserializePropertyValue<String>(ref reader); break;
+				case "noObscuration": DeserializePropertyValue<AgiNodeStkMetadata, Boolean?>(ref reader, this, out _noObscuration); break;
+				case "solarPanelGroupName": DeserializePropertyValue<AgiNodeStkMetadata, String>(ref reader, this, out _solarPanelGroupName); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

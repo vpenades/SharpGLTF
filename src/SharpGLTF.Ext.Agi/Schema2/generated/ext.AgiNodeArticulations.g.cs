@@ -53,8 +53,8 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "articulationName": _articulationName = DeserializePropertyValue<String>(ref reader); break;
-				case "isAttachPoint": _isAttachPoint = DeserializePropertyValue<Boolean?>(ref reader); break;
+				case "articulationName": DeserializePropertyValue<AgiNodeArticulations, String>(ref reader, this, out _articulationName); break;
+				case "isAttachPoint": DeserializePropertyValue<AgiNodeArticulations, Boolean?>(ref reader, this, out _isAttachPoint); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "pointer": _pointer = DeserializePropertyValue<String>(ref reader); break;
+				case "pointer": DeserializePropertyValue<AnimationPointer, String>(ref reader, this, out _pointer); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

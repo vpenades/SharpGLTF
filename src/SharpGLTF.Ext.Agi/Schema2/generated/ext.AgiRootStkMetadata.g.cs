@@ -55,8 +55,8 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "efficiency": _efficiency = DeserializePropertyValue<Double>(ref reader); break;
-				case "name": _name = DeserializePropertyValue<String>(ref reader); break;
+				case "efficiency": DeserializePropertyValue<AgiStkSolarPanelGroup, Double>(ref reader, this, out _efficiency); break;
+				case "name": DeserializePropertyValue<AgiStkSolarPanelGroup, String>(ref reader, this, out _name); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -74,7 +74,7 @@ namespace SharpGLTF.Schema2.AGI
 	{
 	
 		private const int _solarPanelGroupsMinItems = 1;
-		private ChildrenList<AgiStkSolarPanelGroup,AgiRootStkMetadata> _solarPanelGroups;
+		private readonly ChildrenList<AgiStkSolarPanelGroup,AgiRootStkMetadata> _solarPanelGroups;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -87,7 +87,7 @@ namespace SharpGLTF.Schema2.AGI
 		{
 			switch (jsonPropertyName)
 			{
-				case "solarPanelGroups": DeserializePropertyList<AgiStkSolarPanelGroup>(ref reader, _solarPanelGroups); break;
+				case "solarPanelGroups": DeserializePropertyList<AgiRootStkMetadata, AgiStkSolarPanelGroup>(ref reader, this, _solarPanelGroups); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

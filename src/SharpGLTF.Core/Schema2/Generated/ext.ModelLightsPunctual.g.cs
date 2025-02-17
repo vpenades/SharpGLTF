@@ -56,8 +56,8 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "innerConeAngle": _innerConeAngle = DeserializePropertyValue<Double?>(ref reader); break;
-				case "outerConeAngle": _outerConeAngle = DeserializePropertyValue<Double?>(ref reader); break;
+				case "innerConeAngle": DeserializePropertyValue<PunctualLightSpot, Double?>(ref reader, this, out _innerConeAngle); break;
+				case "outerConeAngle": DeserializePropertyValue<PunctualLightSpot, Double?>(ref reader, this, out _outerConeAngle); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -103,11 +103,11 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "color": _color = DeserializePropertyValue<Vector3?>(ref reader); break;
-				case "intensity": _intensity = DeserializePropertyValue<Double?>(ref reader); break;
-				case "range": _range = DeserializePropertyValue<Double?>(ref reader); break;
-				case "spot": _spot = DeserializePropertyValue<PunctualLightSpot>(ref reader); break;
-				case "type": _type = DeserializePropertyValue<String>(ref reader); break;
+				case "color": DeserializePropertyValue<PunctualLight, Vector3?>(ref reader, this, out _color); break;
+				case "intensity": DeserializePropertyValue<PunctualLight, Double?>(ref reader, this, out _intensity); break;
+				case "range": DeserializePropertyValue<PunctualLight, Double?>(ref reader, this, out _range); break;
+				case "spot": DeserializePropertyValue<PunctualLight, PunctualLightSpot>(ref reader, this, out _spot); break;
+				case "type": DeserializePropertyValue<PunctualLight, String>(ref reader, this, out _type); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
@@ -135,7 +135,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "lights": DeserializePropertyList<PunctualLight>(ref reader, _lights); break;
+				case "lights": DeserializePropertyList<_ModelPunctualLights, PunctualLight>(ref reader, this, _lights); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

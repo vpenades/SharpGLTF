@@ -51,7 +51,7 @@ namespace SharpGLTF.Schema2
 		{
 			switch (jsonPropertyName)
 			{
-				case "packets": DeserializePropertyList<System.Text.Json.Nodes.JsonNode>(ref reader, _packets); break;
+				case "packets": DeserializePropertyList<XmpPackets, System.Text.Json.Nodes.JsonNode>(ref reader, this, _packets); break;
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}

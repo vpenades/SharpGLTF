@@ -10,6 +10,7 @@ using SharpGLTF.Validation;
 using System.Xml.Linq;
 using System.IO;
 using System.Reflection;
+using SharpGLTF.IO;
 
 namespace SharpGLTF.Schema2
 {
@@ -45,7 +46,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        AnimationChannel IChildOf<AnimationChannel>.LogicalParent => _Parent;
+        AnimationChannel IChildOf<AnimationChannel>.LogicalParent => _Parent;        
 
         void IChildOf<AnimationChannel>.SetLogicalParent(AnimationChannel parent)
         {
@@ -115,8 +116,6 @@ namespace SharpGLTF.Schema2
 
             }
         }
-
-        
 
         #endregion
     }
