@@ -279,7 +279,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 		private IntegerType? _valueType = _valueTypeDefault;
 		
 		private const int _valuesMinItems = 1;
-		private readonly ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
+		private ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
@@ -642,13 +642,13 @@ namespace SharpGLTF.Schema2.Tiles3D
 	{
 	
 		private const int _propertyAttributesMinItems = 1;
-		private readonly ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
+		private ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
 		
 		private const int _propertyTablesMinItems = 1;
-		private readonly ChildrenList<PropertyTable,EXTStructuralMetadataRoot> _propertyTables;
+		private ChildrenList<PropertyTable,EXTStructuralMetadataRoot> _propertyTables;
 		
 		private const int _propertyTexturesMinItems = 1;
-		private readonly ChildrenList<PropertyTexture,EXTStructuralMetadataRoot> _propertyTextures;
+		private ChildrenList<PropertyTexture,EXTStructuralMetadataRoot> _propertyTextures;
 		
 		private StructuralMetadataSchema _schema;
 		

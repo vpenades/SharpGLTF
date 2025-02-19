@@ -74,7 +74,7 @@ namespace SharpGLTF.Schema2.AGI
 	{
 	
 		private const int _solarPanelGroupsMinItems = 1;
-		private readonly ChildrenList<AgiStkSolarPanelGroup,AgiRootStkMetadata> _solarPanelGroups;
+		private ChildrenList<AgiStkSolarPanelGroup,AgiRootStkMetadata> _solarPanelGroups;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)

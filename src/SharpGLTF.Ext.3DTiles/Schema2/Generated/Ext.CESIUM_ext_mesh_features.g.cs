@@ -122,7 +122,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	{
 	
 		private const int _featureIdsMinItems = 1;
-		private readonly ChildrenList<MeshExtMeshFeatureID,MeshExtMeshFeatures> _featureIds;
+		private ChildrenList<MeshExtMeshFeatureID,MeshExtMeshFeatures> _featureIds;
 		
 	
 		protected override void SerializeProperties(Utf8JsonWriter writer)
