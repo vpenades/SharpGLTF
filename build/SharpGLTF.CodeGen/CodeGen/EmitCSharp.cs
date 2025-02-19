@@ -18,7 +18,7 @@ namespace SharpGLTF.CodeGen
     /// </summary>
     class CSharpEmitter
     {
-        #region runtime names
+        #region runtime types
 
         class _RuntimeType
         {
@@ -30,8 +30,10 @@ namespace SharpGLTF.CodeGen
 
             public string RuntimeName { get; set; }
 
+            public List<string> Comments { get; } = new List<string>();
+
             private readonly Dictionary<string, _RuntimeField> _Fields = new Dictionary<string, _RuntimeField>();
-            private readonly Dictionary<string, _RuntimeEnum> _Enums = new Dictionary<string, _RuntimeEnum>();
+            private readonly Dictionary<string, _RuntimeEnum> _Enums = new Dictionary<string, _RuntimeEnum>();            
 
             public _RuntimeField UseField(FieldInfo finfo)
             {
@@ -116,6 +118,13 @@ namespace SharpGLTF.CodeGen
             return rtype;
         }
 
+        private bool _TryGetType(SchemaType stype, out _RuntimeType rtype)
+        {
+            var key = $"{stype.PersistentName}";
+
+            return _Types.TryGetValue(key, out rtype);
+        }
+
         private _RuntimeField _UseField(FieldInfo finfo) { return _UseType(finfo.DeclaringClass).UseField(finfo); }
 
         public void SetRuntimeName(SchemaType stype, string newName, string runtimeNamespace = null)
@@ -124,6 +133,20 @@ namespace SharpGLTF.CodeGen
 
             t.RuntimeNamespace = runtimeNamespace;
             t.RuntimeName = newName;
+        }
+
+        public void AddRuntimeComment(string persistentName, string comment)
+        {
+            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
+
+            t.Comments.Add(comment);           
+        }
+
+        public IReadOnlyList<string> GetRuntimeComments(SchemaType cls)
+        {
+            return !_TryGetType(cls, out var rtype)
+                ? Array.Empty<string>()
+                : (IReadOnlyList<string>)rtype.Comments;
         }
 
         public void SetRuntimeName(string persistentName, string runtimeName, string runtimeNamespace = null)
@@ -462,6 +485,7 @@ namespace SharpGLTF.CodeGen
                 HasBaseClass = type.BaseClass != null
             };
 
+            xclass.AddComments(type);
             xclass.AddFields(type);            
 
             return String.Join("\r\n",xclass.EmitCode().Indent(1));            
@@ -555,7 +579,7 @@ namespace SharpGLTF.CodeGen
 
         public CSharpClassEmitter(CSharpEmitter emitter)
         {
-            _Emitter = emitter;            
+            _Emitter = emitter;
         }
 
         #endregion
@@ -563,6 +587,8 @@ namespace SharpGLTF.CodeGen
         #region data
 
         private readonly CSharpEmitter _Emitter;
+
+        private readonly List<string> _Comments = new List<string>();
 
         private readonly List<string> _Fields = new List<string>();
         private readonly List<string> _SerializerBody = new List<string>();
@@ -579,6 +605,11 @@ namespace SharpGLTF.CodeGen
         #endregion
 
         #region API
+
+        public void AddComments(ClassType type)
+        {
+            _Comments.AddRange(_Emitter.GetRuntimeComments(type));
+        }
 
         public void AddFields(ClassType type)
         {
@@ -670,6 +701,7 @@ namespace SharpGLTF.CodeGen
             var writerType = "Utf8JsonWriter";
             #endif
 
+            foreach (var l in _Comments) yield return $"// {l}";
 
             foreach (var l in ClassSummary.EmitSummary(0)) yield return l;
 
