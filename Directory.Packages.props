@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="System.Text.Json" Version="9.0.2" />
-    <PackageVersion Include="System.Drawing.Common" Version="9.0.2" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.3" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
     <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.6" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.7" />
   </ItemGroup>
 
   <ItemGroup>
