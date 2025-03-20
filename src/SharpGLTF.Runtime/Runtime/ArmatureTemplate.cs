@@ -59,6 +59,18 @@ namespace SharpGLTF.Runtime
                 dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, options);
             }
 
+            // gather materials
+
+            var dstMaterials = srcNodes
+                .Keys
+                .Select(item => item.Mesh)
+                .Where(item => item != null)
+                .SelectMany(mesh => mesh.Primitives)
+                .Select(prim => prim.Material)
+                .Where(mat => mat != null)
+                .Select(mat => new MaterialTemplate(mat, options))
+                .ToArray();
+
             // gather animation durations.
 
             var dstTracks = srcScene.LogicalParent
@@ -66,10 +78,10 @@ namespace SharpGLTF.Runtime
                 .Select(item => new AnimationTrackInfo(item.Name, RuntimeOptions.ConvertExtras(item, options), item.Duration))
                 .ToArray();
 
-            return new ArmatureTemplate(dstNodes, dstTracks);
+            return new ArmatureTemplate(dstNodes, dstMaterials, dstTracks);
         }
 
-        private ArmatureTemplate(NodeTemplate[] nodes, AnimationTrackInfo[] animTracks)
+        private ArmatureTemplate(NodeTemplate[] nodes, MaterialTemplate[] materials, AnimationTrackInfo[] animTracks)
         {
             // check that child nodes always follow parent nodes
 
@@ -89,6 +101,7 @@ namespace SharpGLTF.Runtime
             }
 
             _NodeTemplates = nodes;
+            _MaterialTemplates = materials;
             _AnimationTracks = animTracks;
         }
 
@@ -98,6 +111,9 @@ namespace SharpGLTF.Runtime
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly NodeTemplate[] _NodeTemplates;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly MaterialTemplate[] _MaterialTemplates;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly AnimationTrackInfo[] _AnimationTracks;
@@ -110,6 +126,11 @@ namespace SharpGLTF.Runtime
         /// Gets the flattened list of nodes, ordered so parents appear before children.
         /// </summary>
         public IReadOnlyList<NodeTemplate> Nodes => _NodeTemplates;
+
+        /// <summary>
+        /// Gets the list of materials used by the meshes of this model
+        /// </summary>
+        public IReadOnlyList<MaterialTemplate> Materials => _MaterialTemplates;
 
         /// <summary>
         /// Gets the animations tracks info.

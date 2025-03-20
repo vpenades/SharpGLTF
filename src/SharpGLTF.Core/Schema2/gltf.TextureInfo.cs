@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Numerics;
 
 namespace SharpGLTF.Schema2
@@ -9,31 +10,19 @@ namespace SharpGLTF.Schema2
     /// - <see cref="MaterialOcclusionTextureInfo"/>
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("LogicalTexture[{_LogicalTextureIndex}]")]
-    public partial class TextureInfo
+    public partial class TextureInfo : Collections.IChildOf<Material>
     {
         #region lifecycle
 
-        public TextureInfo() { }
+        public TextureInfo() { }        
 
-        public TextureInfo(TextureInfo other)
+        void Collections.IChildOf<Material>.SetLogicalParent(Material parent)
         {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-
-            _index = other._index;
-            _texCoord = other._texCoord;
-
-            this.Extras = other.Extras;
-
-            // TODO: should copy all extensions, not only TextureTransform.
-
-            var otherXform = other.GetExtension<TextureTransform>();
-
-            if (otherXform != null && !otherXform.IsDefault)
-            {
-                var thisXform = other.UseExtension<TextureTransform>();
-                otherXform.CopyTo(thisXform);
-            }
+            this.LogicalParent = parent;
         }
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        public Material LogicalParent { get; private set; }
 
         #endregion
 
@@ -46,17 +35,7 @@ namespace SharpGLTF.Schema2
         {
             get => _index;
             internal protected set => _index = value;
-        }
-
-        /// <summary>
-        /// Index into <see cref="ModelRoot.LogicalTextures"/>
-        /// </summary>
-        [Obsolete("Use LogicalTextureIndex instead", true)]
-        public int _LogicalTextureIndex
-        {
-            get => _index;
-            internal protected set => _index = value;
-        }
+        }        
 
         /// <summary>
         /// Gets or sets the index of texture's TEXCOORD_[index] attribute used for texture coordinate mapping.
@@ -73,8 +52,16 @@ namespace SharpGLTF.Schema2
 
         #region API
 
+        internal string _GetAnimationPointer()
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation, int? texCoordOverride = null)
         {
+            var oldXform = this.GetExtension<TextureTransform>();
+            if (oldXform != null) oldXform._Parent = null;
+
             var xform = new TextureTransform(this)
             {
                 TextureCoordinateOverride = texCoordOverride,
@@ -83,7 +70,7 @@ namespace SharpGLTF.Schema2
                 Rotation = rotation
             };
 
-            if (xform.IsDefault) this.RemoveExtensions<TextureTransform>();
+            if (xform.IsDefault) this.RemoveExtensions<TextureTransform>(); // TODO: this may no longer be valid because KHR_animation_pointer requires the object to exist.
             else this.SetExtension(xform);
         }
 
@@ -96,87 +83,7 @@ namespace SharpGLTF.Schema2
             validate.IsNullOrIndex("Index", _index, validate.Root.LogicalTextures);
 
             base.OnValidateReferences(validate);
-        }
-
-        #endregion
-    }
-
-    [System.Diagnostics.DebuggerDisplay("TextureTransform {Offset} {Scale} {Rotation} {TextureCoordinate}")]
-    public sealed partial class TextureTransform
-    {
-        #region lifecycle
-
-        #pragma warning disable CA1801 // Review unused parameters
-        internal TextureTransform(TextureInfo parent) { }
-        #pragma warning restore CA1801 // Review unused parameters
-
-        #endregion
-
-        #region properties
-
-        public Vector2 Offset
-        {
-            get => _offset.AsValue(_offsetDefault);
-            set => _offset = value.AsNullable(_offsetDefault);
-        }
-
-        public Vector2 Scale
-        {
-            get => _scale.AsValue(_scaleDefault);
-            set => _scale = value.AsNullable(_scaleDefault);
-        }
-
-        public float Rotation
-        {
-            get => (float)_rotation.AsValue(_rotationDefault);
-            set => _rotation = ((double)value).AsNullable(_rotationDefault);
-        }
-
-        /// <summary>
-        /// Gets or sets a value that overrides <see cref="TextureInfo.TextureCoordinate"/> if supplied, and if this extension is supported.
-        /// </summary>
-        public int? TextureCoordinateOverride
-        {
-            get => _texCoord;
-            set => _texCoord = value;
-        }
-
-        internal bool IsDefault
-        {
-            get
-            {
-                if (_texCoord.HasValue) return false;
-                if (_offset.HasValue) return false;
-                if (_scale.HasValue) return false;
-                if (_rotation.HasValue) return false;
-                return true;
-            }
-        }
-
-        public Matrix3x2 Matrix
-        {
-            get
-            {
-                var s = Matrix3x2.CreateScale(Scale);
-                var r = Matrix3x2.CreateRotation(-Rotation);
-                var t = Matrix3x2.CreateTranslation(Offset);
-
-                return s * r * t;
-            }
-        }
-
-        #endregion
-
-        #region API
-
-        internal void CopyTo(TextureTransform other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-            other.TextureCoordinateOverride = this.TextureCoordinateOverride;
-            other.Rotation = this.Rotation;
-            other.Offset = this.Offset;
-            other.Scale = this.Scale;            
-        }
+        }        
 
         #endregion
     }
@@ -186,12 +93,7 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public MaterialNormalTextureInfo() { }
-
-        public MaterialNormalTextureInfo(MaterialNormalTextureInfo other) :base(other)
-        {
-            _scale = other._scale;
-        }
+        public MaterialNormalTextureInfo() { }        
 
         #endregion
 
@@ -213,12 +115,7 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        public MaterialOcclusionTextureInfo() { }
-
-        public MaterialOcclusionTextureInfo(MaterialOcclusionTextureInfo other) : base(other)
-        {
-            _strength = other._strength;
-        }
+        public MaterialOcclusionTextureInfo() { }        
 
         #endregion
 
@@ -233,5 +130,5 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
-    }
+    }    
 }

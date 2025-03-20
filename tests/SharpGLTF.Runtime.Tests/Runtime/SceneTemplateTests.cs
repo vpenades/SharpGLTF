@@ -124,5 +124,17 @@ namespace SharpGLTF.Runtime
             }
         }
 
+        [Test]
+        public static void TestAnimationPointer()
+        {
+            var modelPath = TestFiles.GetSampleModelsPaths()
+                                .FirstOrDefault(item => item.Contains("AnimationPointerUVs.glb"));
+
+            var model = Schema2.ModelRoot.Load(modelPath);            
+
+            var sceneTemplate = SceneTemplate.Create(model.DefaultScene);
+            var sceneInstance = sceneTemplate.CreateInstance();
+            sceneInstance.Armature.SetAnimationFrame(0, 0.1f);            
+        }
     }
 }

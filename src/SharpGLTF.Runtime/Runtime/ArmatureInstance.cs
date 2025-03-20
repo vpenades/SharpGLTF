@@ -32,6 +32,8 @@ namespace SharpGLTF.Runtime
 
             _NodeInstances = ni;
 
+            _MaterialTemplates = template.Materials;
+
             _AnimationTracks = template.Tracks;
         }
 
@@ -44,6 +46,9 @@ namespace SharpGLTF.Runtime
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IReadOnlyList<NodeInstance> _NodeInstances;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly IReadOnlyList<MaterialTemplate> _MaterialTemplates;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IReadOnlyList<AnimationTrackInfo> _AnimationTracks;

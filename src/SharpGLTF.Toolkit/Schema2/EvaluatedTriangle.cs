@@ -121,27 +121,30 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        public static IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> TransformTextureCoordsByMaterial(IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> triangles)
+        /// <summary>
+        /// Materials may include a <see cref="TextureTransform"/> which affects the texture coordinates.
+        /// </summary>
+        /// <param name="triangles">the triangles to be updated.</param>
+        /// <returns>A new collection fo triangles with transformed uv coordinates (if required)</returns>
+        public static IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> TransformTextureCoordsByMaterial(IEnumerable<EvaluatedTriangle<TvG, TvM, TvS>> triangles, Animation track = null, float time = -1)
         {
             // cache transform for speed up
-            var xformDict = new Dictionary<Material, Matrix3x2>();
+            var diffuseTextureXformDict = new Dictionary<Material, Matrix3x2>();
 
             EvaluatedTriangle<TvG, TvM, TvS> _getTransformedTriangle(EvaluatedTriangle<TvG, TvM, TvS> triangle)
             {
                 if (triangle.Material == null) return triangle;
 
-                if (!xformDict.TryGetValue(triangle.Material, out var xform))
+                if (!diffuseTextureXformDict.TryGetValue(triangle.Material, out var textureXform))
                 {
-                    xform = triangle.Material.GetDiffuseTextureTransform()
-                        ?.Matrix
-                        ?? Matrix3x2.Identity;
+                    textureXform = triangle.Material.GetDiffuseTextureMatrix(track, time) ?? Matrix3x2.Identity;
 
-                    xformDict[triangle.Material] = xform;
+                    diffuseTextureXformDict[triangle.Material] = textureXform;
                 }
 
-                if (xform.IsIdentity) return triangle;
+                if (textureXform.IsIdentity) return triangle;
 
-                return triangle._TransformTextureBy(xform);
+                return triangle._TransformTextureBy(textureXform);
             }
 
             return triangles.Select(tri => _getTransformedTriangle(tri));
@@ -151,7 +154,7 @@ namespace SharpGLTF.Schema2
         {
             var a = this.A;
             var b = this.B;
-            var c = this.C;
+            var c = this.C;            
 
             a.Material.SetTexCoord(0, Vector2.Transform(a.Material.GetTexCoord(0), xform));
             b.Material.SetTexCoord(0, Vector2.Transform(b.Material.GetTexCoord(0), xform));

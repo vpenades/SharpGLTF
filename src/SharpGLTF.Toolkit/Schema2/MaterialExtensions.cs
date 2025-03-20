@@ -577,6 +577,15 @@ namespace SharpGLTF.Schema2
             return null;
         }
 
+        public static Matrix3x2? GetDiffuseTextureMatrix(this Material material, Animation track, float time)
+        {
+            var xform = material.GetDiffuseTextureTransform();
+
+            return xform?.Matrix;
+
+            // return xform.GetMatrix(track, time);
+        }
+
         #endregion
     }
 }

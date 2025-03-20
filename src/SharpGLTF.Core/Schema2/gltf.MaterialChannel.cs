@@ -76,7 +76,7 @@ namespace SharpGLTF.Schema2
 
         public Material LogicalParent => _Material;
 
-        public String Key => _Key;
+        public String Key => _Key;        
 
         public Boolean HasDefaultContent => _CheckHasDefaultContent();
 
@@ -136,6 +136,13 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
+
+        public String GetAnimationPointer()
+        {
+            var ptr = _Material.GetAnimationPointer();
+
+            return ptr + "/" + Key;
+        }
 
         public float GetFactor(string key)
         {

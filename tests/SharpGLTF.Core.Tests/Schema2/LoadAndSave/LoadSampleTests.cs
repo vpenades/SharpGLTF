@@ -274,12 +274,13 @@ namespace SharpGLTF.Schema2.LoadAndSave
             model.AttachToCurrentTest(System.IO.Path.ChangeExtension(System.IO.Path.GetFileName(path), ".glb"));
         }
 
+        [TestCase("AnimationPointerUVs.glb")]
+        [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedFigure.glb")]
         [TestCase("RiggedSimple.glb")]
         [TestCase("BoxAnimated.glb")]
         [TestCase("AnimatedMorphCube.glb")]        
-        [TestCase("CesiumMan.glb")]
-        //[TestCase("Monster.glb")] // temporarily removed from khronos repo
+        [TestCase("CesiumMan.glb")]        
         [TestCase("BrainStem.glb")]
         [TestCase("Fox.glb")]
         public void LoadModelsWithAnimations(string path)
@@ -307,7 +308,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 var t = duration * i / 10;
                 int tt = (int)(t * 1000.0f);
 
-                model.AttachToCurrentTest($"{path} at {tt}.obj",anim, t);
+                model.AttachToCurrentTest($"{path} at {tt}.obj", anim, t);
             }            
         }
 

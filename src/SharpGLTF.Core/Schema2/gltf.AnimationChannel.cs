@@ -119,7 +119,12 @@ namespace SharpGLTF.Schema2
             new Collections.ChildSetter<AnimationChannel>(this).SetProperty(ref _target, target);
         }
 
-        internal AnimationSampler _GetSampler() { return this.LogicalParent._Samplers[this._sampler]; }
+        public IAnimationSampler<T> GetSamplerOrNull<T>()
+        {
+            return _GetSampler() as IAnimationSampler<T>;
+        }
+
+        internal AnimationSampler _GetSampler() { return this.LogicalParent._Samplers[this._sampler]; }        
 
         public IAnimationSampler<Vector3> GetScaleSampler()
         {

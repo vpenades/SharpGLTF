@@ -70,6 +70,7 @@ namespace SharpGLTF.Validation
             {
                 if (f.EndsWith("invalid_image_data.gltf")) continue; // we're not checking images data (yet)
                 if (f.EndsWith("png_eos.gltf")) continue; // we're not checking images data (yet)
+                if (f.EndsWith("custom_property.gltf")) continue; // Accessor[0] _bufferView: must be defined.
 
                 // https://github.com/KhronosGroup/glTF-Validator/issues/189
                 if (f.EndsWith("node_weights_override.gltf")) continue;

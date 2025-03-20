@@ -286,7 +286,7 @@ namespace SharpGLTF.IO
             var triangles = Toolkit.EvaluateTriangles<VGEOMETRY, VMATERIAL>(model.DefaultScene, options, animation, time);
 
             // bake the material transforms into the UV coordinates
-            triangles = EvaluatedTriangle<VGEOMETRY, VMATERIAL, VEMPTY>.TransformTextureCoordsByMaterial(triangles);
+            triangles = EvaluatedTriangle<VGEOMETRY, VMATERIAL, VEMPTY>.TransformTextureCoordsByMaterial(triangles, animation, time);
 
             foreach (var triangle in triangles)
             {
