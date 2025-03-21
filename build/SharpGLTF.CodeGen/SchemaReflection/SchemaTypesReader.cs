@@ -39,8 +39,8 @@ namespace SharpGLTF.SchemaReflection
 
         private static SchemaType _UseType(this SchemaType.Context ctx, JSONSCHEMA schema, bool isRequired = true)
         {
-            if (ctx == null) throw new ArgumentNullException(nameof(ctx));
-            if (schema == null) throw new ArgumentNullException(nameof(schema));            
+            ArgumentNullException.ThrowIfNull(ctx);
+            ArgumentNullException.ThrowIfNull(schema);
 
             if (schema is NJsonSchema.JsonSchemaProperty prop)
             {
@@ -116,6 +116,7 @@ namespace SharpGLTF.SchemaReflection
 
                     var etype = ctx.UseEnum(name, isNullable);
 
+                    etype.Identifier = _GetSchemaIdentifier(schema);
                     etype.Description = schema.Description;
 
                     foreach (var kvp in dict) etype.SetValue(kvp.Key, (int)kvp.Value);
@@ -140,6 +141,7 @@ namespace SharpGLTF.SchemaReflection
             {
                 var classDecl = ctx.UseClass(schema.Title);
 
+                classDecl.Identifier = _GetSchemaIdentifier(schema);
                 classDecl.Description = schema.Description;
 
                 // process base class                
@@ -190,6 +192,26 @@ namespace SharpGLTF.SchemaReflection
             if (schema.Type == NJsonSchema.JsonObjectType.None) return ctx.UseAnyType();
 
             throw new NotImplementedException();
+        }
+
+        private static string _GetSchemaIdentifier(JSONSCHEMA schema)
+        {
+            if (schema.ExtensionData != null)
+            {
+                if (schema.ExtensionData.TryGetValue("$id", out var value) && value is string id)
+                {
+                    return id;
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(schema.DocumentPath))
+            {
+                return System.IO.Path.GetFileName(schema.DocumentPath);
+            }
+
+            return null;
+
+            
         }
 
         private static bool _IsBlittableType(JSONSCHEMA schema)

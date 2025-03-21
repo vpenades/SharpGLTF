@@ -38,13 +38,40 @@ namespace SharpGLTF.SchemaReflection
         /// <summary>
         /// identifier used for serialization and deserialization
         /// </summary>
-        public abstract string PersistentName { get; }        
+        public abstract string PersistentName { get; }
+
+        /// <summary>
+        /// This is the value usually found in the schema's "$id:"
+        /// </summary>
+        /// <example>
+        /// material.occlusionTextureInfo.schema.json
+        /// </example>
+        public string Identifier { get; set; }
+
+        public String Description { get; set; }
 
         #endregion
 
         #region properties
 
-        public String Description { get; set; }
+        /// <summary>
+        /// Short version of <see cref="Identifier"/>
+        /// </summary>
+        /// <example>
+        /// occlusionTextureInfo
+        /// </example>
+        public string ShortIdentifier
+        {
+            get
+            {
+                var id = this.Identifier.Replace(".schema.json","", StringComparison.OrdinalIgnoreCase);
+                var idx = id.LastIndexOf('.');
+                return idx < 0 ? id : id.Substring(idx+1);
+            }
+        }
+            
+
+        
 
         public Context Owner => _Owner;
 
@@ -365,18 +392,19 @@ namespace SharpGLTF.SchemaReflection
 
         private readonly SortedSet<FieldInfo> _Fields = new SortedSet<FieldInfo>(FieldInfo.Comparer);
 
-        private ClassType _BaseClass;
-        
-        public override string PersistentName => _PersistentName;
-
-        public ClassType BaseClass { get => _BaseClass; set => _BaseClass = value; }
-
-        public IEnumerable<FieldInfo> Fields => _Fields;
+        private ClassType _BaseClass;        
 
         /// <summary>
         /// True to prevent to codegen emitter to emit this class
         /// </summary>
         public bool IgnoredByEmitter { get; set; }
+
+        #endregion
+
+        #region properties
+        public override string PersistentName => _PersistentName;
+        public IEnumerable<FieldInfo> Fields => _Fields;
+        public ClassType BaseClass { get => _BaseClass; set => _BaseClass = value; }
 
         #endregion
 
