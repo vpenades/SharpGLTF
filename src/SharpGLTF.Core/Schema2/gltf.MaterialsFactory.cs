@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Text;
 
+using SharpGLTF.Collections;
 using SharpGLTF.Validation;
 
 namespace SharpGLTF.Schema2
@@ -28,7 +29,7 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public void InitializeUnlit()
         {
-            this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
+            SetProperty(this, ref _pbrMetallicRoughness, new MaterialPBRMetallicRoughness());
 
             ClearExtensions();
             this.UseExtension<MaterialUnlit>();
@@ -45,9 +46,9 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(extensionNames, nameof(extensionNames));
 
-            this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
-
             ClearExtensions();
+
+            SetProperty(this, ref _pbrMetallicRoughness, new MaterialPBRMetallicRoughness());            
 
             foreach (var extn in extensionNames)
             {
@@ -65,16 +66,18 @@ namespace SharpGLTF.Schema2
         /// <param name="useFallback">true to add a PBRMetallicRoughness fallback material.</param>
         public void InitializePBRSpecularGlossiness(bool useFallback = false)
         {
+            ClearExtensions();
+
             if (useFallback)
             {
-                this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
+                var value = this._pbrMetallicRoughness ??= new MaterialPBRMetallicRoughness();
+                SetProperty(this, ref _pbrMetallicRoughness, value);                
             }
             else
             {
-                this._pbrMetallicRoughness = null;
+                SetProperty(this, ref _pbrMetallicRoughness, (MaterialPBRMetallicRoughness)null);
             }
-
-            ClearExtensions();
+            
             this.UseExtension<MaterialPBRSpecularGlossiness>();
         }
 
@@ -152,8 +155,45 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    internal sealed partial class MaterialPBRMetallicRoughness
+    internal sealed partial class MaterialPBRMetallicRoughness : IChildOf<Material>
     {
+        #region hierarchy
+
+        Material IChildOf<Material>.LogicalParent => _Parent;
+
+        void IChildOf<Material>.SetLogicalParent(Material parent)
+        {
+            _Parent = parent;
+        }
+
+        private Material _Parent;
+
+        #endregion
+
+        #region properties
+
+        public Vector4 Color
+        {
+            get => _baseColorFactor.AsValue(_baseColorFactorDefault);
+            set => _baseColorFactor = value.AsNullable(_baseColorFactorDefault);
+        }
+
+        public float MetallicFactor
+        {
+            get => (float)_metallicFactor.AsValue(_metallicFactorDefault);
+            set => _metallicFactor = ((double)value).AsNullable(_metallicFactorDefault, _metallicFactorMinimum, _metallicFactorMaximum);
+        }
+
+        public float RoughnessFactor
+        {
+            get => (float)_roughnessFactor.AsValue(_roughnessFactorDefault);
+            set => _roughnessFactor = ((double)value).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum);
+        }
+
+        #endregion
+
+        #region API
+
         protected override IEnumerable<ExtraProperties> GetLogicalChildren()
         {
             return base.GetLogicalChildren().ConcatElements(_baseColorTexture, _metallicRoughnessTexture);
@@ -177,6 +217,16 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var colorParam = new _MaterialParameter<Vector4>(_MaterialParameterKey.RGBA, _baseColorFactorDefault, () => Color, v => Color = v);
+            var metallicParam = new _MaterialParameter<float>(_MaterialParameterKey.MetallicFactor, (float)_metallicFactorDefault, () => MetallicFactor, v => MetallicFactor = v);
+            var roughnessParam = new _MaterialParameter<float>(_MaterialParameterKey.RoughnessFactor, (float)_roughnessFactorDefault, () => RoughnessFactor, v => RoughnessFactor = v);
+
+            yield return new MaterialChannel(material, "BaseColor", _GetBaseTexture, colorParam);
+            yield return new MaterialChannel(material, "MetallicRoughness", _GetMetallicTexture, metallicParam, roughnessParam);
+        }
+
         private TextureInfo _GetBaseTexture(bool create)
         {
             if (create && _baseColorTexture == null) SetProperty(this, ref _baseColorTexture, new TextureInfo());
@@ -187,35 +237,9 @@ namespace SharpGLTF.Schema2
         {
             if (create && _metallicRoughnessTexture == null) SetProperty(this, ref _metallicRoughnessTexture, new TextureInfo());
             return _metallicRoughnessTexture;
-        }
+        }        
 
-        public Vector4 Color
-        {
-            get => _baseColorFactor.AsValue(_baseColorFactorDefault);
-            set => _baseColorFactor = value.AsNullable(_baseColorFactorDefault);
-        }
-
-        public float MetallicFactor
-        {
-            get => (float)_metallicFactor.AsValue(_metallicFactorDefault);
-            set => _metallicFactor = ((double)value).AsNullable(_metallicFactorDefault, _metallicFactorMinimum, _metallicFactorMaximum);
-        }
-
-        public float RoughnessFactor
-        {
-            get => (float)_roughnessFactor.AsValue(_roughnessFactorDefault);
-            set => _roughnessFactor = ((double)value).AsNullable(_roughnessFactorDefault, _roughnessFactorMinimum, _roughnessFactorMaximum);
-        }
-
-        public IEnumerable<MaterialChannel> GetChannels(Material material)
-        {
-            var colorParam = new _MaterialParameter<Vector4>(_MaterialParameterKey.RGBA, _baseColorFactorDefault, () => Color, v => Color = v);
-            var metallicParam = new _MaterialParameter<float>(_MaterialParameterKey.MetallicFactor, (float)_metallicFactorDefault, () => MetallicFactor, v => MetallicFactor = v);
-            var roughnessParam = new _MaterialParameter<float>(_MaterialParameterKey.RoughnessFactor, (float)_roughnessFactorDefault, () => RoughnessFactor, v => RoughnessFactor = v);
-
-            yield return new MaterialChannel(material, "BaseColor", _GetBaseTexture, colorParam);
-            yield return new MaterialChannel(material, "MetallicRoughness", _GetMetallicTexture, metallicParam, roughnessParam);
-        }
+        #endregion
     }
 
     /// <summary>
