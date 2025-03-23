@@ -64,6 +64,8 @@ namespace SharpGLTF.Schema2
         AttenuationDistance,
         AnisotropyStrength,
         AnisotropyRotation,
+        DiffuseTransmissionFactor,
+        DiffuseTransmissionColor,
     }
 
     [System.Diagnostics.DebuggerDisplay("{_Key} = {Value}")]

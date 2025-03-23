@@ -20,6 +20,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialClearCoat>();
             this.RemoveExtensions<MaterialSpecular>();
             this.RemoveExtensions<MaterialTransmission>();
+            this.RemoveExtensions<MaterialDiffuseTransmission>();
             this.RemoveExtensions<MaterialVolume>();
             this.RemoveExtensions<MaterialAnisotropy>();
             this.RemoveExtensions<MaterialIridescence>();
@@ -59,6 +60,7 @@ namespace SharpGLTF.Schema2
                 if (extn == "Specular") this.UseExtension<MaterialSpecular>();
                 if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
+                if (extn == "DiffuseTransmission") this.UseExtension<MaterialDiffuseTransmission>();
                 if (extn == "Volume") this.UseExtension<MaterialVolume>();
                 if (extn == "Anisotropy") this.UseExtension<MaterialAnisotropy>();
                 if (extn == "Iridiscence") this.UseExtension<MaterialIridescence>();
@@ -104,6 +106,9 @@ namespace SharpGLTF.Schema2
             channels = this.GetExtension<MaterialTransmission>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
 
+            channels = this.GetExtension<MaterialDiffuseTransmission>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
+
             channels = this.GetExtension<MaterialSheen>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
 
@@ -117,7 +122,7 @@ namespace SharpGLTF.Schema2
             if (channels != null) { foreach (var c in channels) yield return c; }
 
             channels = this.GetExtension<MaterialAnisotropy>()?.GetChannels(this);
-            if (channels != null) { foreach (var c in channels) yield return c; }
+            if (channels != null) { foreach (var c in channels) yield return c; }            
 
             var normalParam = new _MaterialParameter<float>(
                 _MaterialParameterKey.NormalScale,
@@ -756,6 +761,51 @@ namespace SharpGLTF.Schema2
             var strength = new _MaterialParameter<float>(_MaterialParameterKey.AnisotropyStrength, (float)_anisotropyStrengthDefault, () => AnisotropyStrength, v => AnisotropyStrength = v);
             var rotation = new _MaterialParameter<float>(_MaterialParameterKey.AnisotropyRotation, (float)_anisotropyRotationDefault, () => AnisotropyRotation, v => AnisotropyRotation = v);
             yield return new MaterialChannel(material, "Anisotropy", anisoTexture, strength, rotation);            
+        }
+    }
+
+    internal sealed partial class MaterialDiffuseTransmission
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialDiffuseTransmission(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_diffuseTransmissionTexture, _diffuseTransmissionColorTexture);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_diffuseTransmissionFactor.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_diffuseTransmissionFactor.Value, _diffuseTransmissionFactorMinimum, _diffuseTransmissionFactorMaximum, nameof(_diffuseTransmissionFactor));
+            }
+        }
+
+        public float DiffuseTransmissionFactor
+        {
+            get => (float)this._diffuseTransmissionFactor.AsValue(_diffuseTransmissionFactorDefault);
+            set => this._diffuseTransmissionFactor = ((double)value).AsNullable(_diffuseTransmissionFactorDefault, _diffuseTransmissionFactorMinimum, _diffuseTransmissionFactorMaximum);
+        }
+
+        public Vector3 DiffuseTransmissionColorFactor
+        {
+            get => this._diffuseTransmissionColorFactor.AsValue(_diffuseTransmissionColorFactorDefault);
+            set => this._diffuseTransmissionColorFactor = value.AsNullable(_diffuseTransmissionColorFactorDefault);
+        }        
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var factorTexture = new _MaterialTexture(() => _diffuseTransmissionTexture, () => SetProperty(this, ref _diffuseTransmissionTexture, new TextureInfo()));
+            var factorParameter = new _MaterialParameter<float>(_MaterialParameterKey.DiffuseTransmissionFactor, (float)_diffuseTransmissionFactorDefault, () => DiffuseTransmissionFactor, v => DiffuseTransmissionFactor = v);            
+            yield return new MaterialChannel(material, "DiffuseTransmissionFactor", factorTexture, factorParameter);
+
+            var colorTexture = new _MaterialTexture(() => _diffuseTransmissionColorTexture, () => SetProperty(this, ref _diffuseTransmissionColorTexture, new TextureInfo()));
+            var colorParameter = new _MaterialParameter<Vector3>(_MaterialParameterKey.DiffuseTransmissionColor, _diffuseTransmissionColorFactorDefault, () => DiffuseTransmissionColorFactor, v => DiffuseTransmissionColorFactor = v);            
+            yield return new MaterialChannel(material, "DiffuseTransmissionColor", colorTexture, colorParameter);
         }
     }
 }

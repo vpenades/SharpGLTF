@@ -43,6 +43,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Material, MaterialSpecular>("KHR_materials_specular", p => new MaterialSpecular(p));
             RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat", p => new MaterialClearCoat(p));
             RegisterExtension<Material, MaterialTransmission>("KHR_materials_transmission", p => new MaterialTransmission(p));
+            RegisterExtension<Material, MaterialDiffuseTransmission>("KHR_materials_diffuse_transmission", p => new MaterialDiffuseTransmission(p));
             RegisterExtension<Material, MaterialVolume>("KHR_materials_volume", p => new MaterialVolume(p));
             RegisterExtension<Material, MaterialEmissiveStrength>("KHR_materials_emissive_strength", p => new MaterialEmissiveStrength(p));
             RegisterExtension<Material, MaterialPBRSpecularGlossiness>("KHR_materials_pbrSpecularGlossiness", p => new MaterialPBRSpecularGlossiness(p));
