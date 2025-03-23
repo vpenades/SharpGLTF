@@ -21,6 +21,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialSpecular>();
             this.RemoveExtensions<MaterialTransmission>();
             this.RemoveExtensions<MaterialVolume>();
+            this.RemoveExtensions<MaterialIridescence>();
             this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
         }
 
@@ -57,6 +58,7 @@ namespace SharpGLTF.Schema2
                 if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
                 if (extn == "Volume") this.UseExtension<MaterialVolume>();
+                if (extn == "Iridiscence") this.UseExtension<MaterialIridescence>();
             }
         }
 
@@ -463,6 +465,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    /// <remarks>
+    /// Mapped straight away to <see cref="Material.IndexOfRefraction"/>
+    /// </remarks>    
     internal sealed partial class MaterialIOR
     {
         #pragma warning disable CA1801 // Review unused parameters
@@ -569,7 +574,7 @@ namespace SharpGLTF.Schema2
         public float ThicknessFactor
         {
             get => (float)_thicknessFactor.AsValue(_thicknessFactorDefault);
-            set => _thicknessFactor = ((double)value).AsNullable(_thicknessFactorDefault, _thicknessFactorMinimum, double.PositiveInfinity);
+            set => _thicknessFactor = ((double)value).AsNullable(_thicknessFactorDefault, _thicknessFactorMinimum, double.MaxValue);
         }
 
         public Vector3 AttenuationColor
@@ -580,8 +585,8 @@ namespace SharpGLTF.Schema2
 
         public float AttenuationDistance
         {
-            get => (float)_attenuationDistance.AsValue(float.PositiveInfinity);
-            set => _attenuationDistance = ((double)value).AsNullable(double.PositiveInfinity, _attenuationDistanceExclusiveMinimum, double.PositiveInfinity);
+            get => (float)_attenuationDistance.AsValue(float.MaxValue);
+            set => _attenuationDistance = ((double)value).AsNullable(double.MaxValue, _attenuationDistanceExclusiveMinimum, double.MaxValue);
         }
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
@@ -596,6 +601,9 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    /// <remarks>
+    /// Mapped to the Emissive channel as an additional parameter
+    /// </remarks>    
     internal sealed partial class MaterialEmissiveStrength
     {
         #pragma warning disable CA1801 // Review unused parameters
@@ -614,7 +622,7 @@ namespace SharpGLTF.Schema2
         public float EmissiveStrength
         {
             get => (float)(this._emissiveStrength ?? _emissiveStrengthDefault);
-            set => this._emissiveStrength = ((double)value).AsNullable(_emissiveStrengthDefault);
+            set => this._emissiveStrength = ((double)value).AsNullable(_emissiveStrengthDefault, _emissiveStrengthMinimum, double.MaxValue);
         }
 
         public static _MaterialParameter<float> GetParameter(Material material)
