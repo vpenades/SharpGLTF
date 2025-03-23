@@ -50,18 +50,10 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
-
-        internal string _GetAnimationPointer()
-        {
-            throw new NotImplementedException();
-        }
+        #region API        
 
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation, int? texCoordOverride = null)
         {
-            var oldXform = this.GetExtension<TextureTransform>();
-            if (oldXform != null) oldXform._Parent = null;
-
             var xform = new TextureTransform(this)
             {
                 TextureCoordinateOverride = texCoordOverride,

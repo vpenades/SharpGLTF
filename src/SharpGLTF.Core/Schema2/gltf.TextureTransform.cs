@@ -16,14 +16,12 @@ namespace SharpGLTF.Schema2
         #region lifecycle
 
         #pragma warning disable CA1801 // Review unused parameters
-        internal TextureTransform(TextureInfo parent) { _Parent = parent; }
+        internal TextureTransform(TextureInfo parent) { }
         #pragma warning restore CA1801 // Review unused parameters
 
         #endregion
 
-        #region properties
-
-        internal TextureInfo _Parent;
+        #region properties        
 
         public Vector2 Offset
         {
@@ -77,61 +75,5 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
-
-        #region API
-
-        private string _GetAnimationPointer(string propertyName)
-        {
-            switch (propertyName)
-            {
-                case "offset": break;
-                case "rotation": break;
-                case "scale": break;
-                default: throw new ArgumentException("invalid property", nameof(propertyName));
-            }
-
-            var pointerPath = _Parent._GetAnimationPointer() + $"/extensions/KHR_texture_transform/{propertyName}";
-
-            return pointerPath;
-        }
-
-        public Matrix3x2 GetMatrix(Animation track, float time)
-        {
-            if (track == null) return this.Matrix;
-
-            var scale = track
-                .FindChannels(_GetAnimationPointer("scale"))
-                .FirstOrDefault()?.GetSamplerOrNull<Vector2>()?.CreateCurveSampler()?.GetPoint(time)
-                ?? this.Scale;
-
-            var rotation = track
-                .FindChannels(_GetAnimationPointer("rotation"))
-                .FirstOrDefault()?.GetSamplerOrNull<Single>()?.CreateCurveSampler()?.GetPoint(time)
-                ?? this.Rotation;
-
-            var offset = track
-                .FindChannels(_GetAnimationPointer("offset"))
-                .FirstOrDefault()?.GetSamplerOrNull<Vector2>()?.CreateCurveSampler()?.GetPoint(time)
-                ?? this.Offset;
-
-            var s = Matrix3x2.CreateScale(scale);
-            var r = Matrix3x2.CreateRotation(-rotation);
-            var t = Matrix3x2.CreateTranslation(offset);
-
-            return s * r * t;
-        }
-
-        internal void CopyTo(TextureTransform other)
-        {
-            if (other == null) throw new ArgumentNullException(nameof(other));
-            other.TextureCoordinateOverride = this.TextureCoordinateOverride;
-            other.Rotation = this.Rotation;
-            other.Offset = this.Offset;
-            other.Scale = this.Scale;
-        }
-
-        #endregion
     }
-
-
 }

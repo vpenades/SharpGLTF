@@ -123,12 +123,7 @@ namespace SharpGLTF.Schema2
             }
 
             return null;
-        }
-
-        public string GetAnimationPointer()
-        {
-            return $"/materials/{LogicalIndex}/pbrMetallicRoughness";
-        }
+        }        
 
         #endregion
 

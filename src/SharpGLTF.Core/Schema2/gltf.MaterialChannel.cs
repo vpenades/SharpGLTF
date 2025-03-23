@@ -19,7 +19,7 @@ namespace SharpGLTF.Schema2
     {
         #region lifecycle
 
-        internal MaterialChannel(Material m, String key, Func<Boolean, TextureInfo> texInfo, params IMaterialParameter[] parameters)
+        internal MaterialChannel(Material m, String key, _MaterialTexture texInfo, params IMaterialParameter[] parameters)
         {
             Guard.NotNull(m, nameof(m));
             Guard.NotNullOrEmpty(key, nameof(key));
@@ -45,7 +45,7 @@ namespace SharpGLTF.Schema2
         private readonly String _Key;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly Func<Boolean, TextureInfo> _TextureInfo;
+        private readonly _MaterialTexture _TextureInfo;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly IReadOnlyList<IMaterialParameter> _Parameters;
@@ -100,14 +100,14 @@ namespace SharpGLTF.Schema2
         /// </summary>
         public Texture Texture => _GetTexture();
 
+        public TextureSampler TextureSampler => Texture?.Sampler;
+
         /// <summary>
         /// Gets the index of texture's TEXCOORD_[index] attribute used for texture coordinate mapping.
         /// </summary>
-        public int TextureCoordinate => _TextureInfo?.Invoke(false)?.TextureCoordinate ?? 0;
+        public int TextureCoordinate => _TextureInfo.TextureCoordinate;
 
-        public TextureTransform TextureTransform => _TextureInfo?.Invoke(false)?.Transform;
-
-        public TextureSampler TextureSampler => Texture?.Sampler;
+        public TextureTransform TextureTransform => _TextureInfo.TextureTransform;        
 
         public Vector4 Color
         {
@@ -136,14 +136,7 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
-
-        public String GetAnimationPointer()
-        {
-            var ptr = _Material.GetAnimationPointer();
-
-            return ptr + "/" + Key;
-        }
-
+        
         public float GetFactor(string key)
         {
             return _Parameters
@@ -162,7 +155,7 @@ namespace SharpGLTF.Schema2
 
         private Texture _GetTexture()
         {
-            var texInfo = _TextureInfo?.Invoke(false);
+            var texInfo = _TextureInfo.Info;
             if (texInfo == null) return null;
 
             return _Material.LogicalParent.LogicalTextures[texInfo.LogicalTextureIndex];
@@ -181,7 +174,7 @@ namespace SharpGLTF.Schema2
 
             Guard.NotNull(_Material, nameof(_Material));
 
-            if (_TextureInfo == null) throw new InvalidOperationException();
+            if (_TextureInfo.IsEmpty) throw new InvalidOperationException();
 
             var sampler = _Material.LogicalParent.UseTextureSampler(ws, wt, min, mag);
             var texture = _Material.LogicalParent.UseTexture(primaryImg, fallbackImg, sampler);
@@ -196,9 +189,9 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(tex, nameof(tex));
             Guard.MustShareLogicalParent(_Material, tex, nameof(tex));
 
-            if (_TextureInfo == null) throw new InvalidOperationException();
+            if (_TextureInfo.IsEmpty) throw new InvalidOperationException();
 
-            var texInfo = _TextureInfo(true);
+            var texInfo = _TextureInfo.Use();
 
             texInfo.TextureCoordinate = texSet;
             texInfo.LogicalTextureIndex = tex.LogicalIndex;
@@ -206,9 +199,9 @@ namespace SharpGLTF.Schema2
 
         public void SetTransform(Vector2 offset, Vector2 scale, float rotation = 0, int? texCoordOverride = null)
         {
-            if (_TextureInfo == null) throw new InvalidOperationException();
+            if (_TextureInfo.IsEmpty) throw new InvalidOperationException();
 
-            var texInfo = _TextureInfo(true);
+            var texInfo = _TextureInfo.Use();
 
             texInfo.SetTransform(offset, scale, rotation, texCoordOverride);
         }
@@ -221,5 +214,46 @@ namespace SharpGLTF.Schema2
         }
 
         #endregion
+    }
+
+    readonly struct _MaterialTexture
+    {
+        public static implicit operator _MaterialTexture(Func<Boolean, TextureInfo> getOrUse)
+        {
+            return new _MaterialTexture(getOrUse);
+        }
+
+        public _MaterialTexture(Func<TextureInfo> getter, Action initialize)
+        {
+            _Getter = getter;
+            _Using = () =>
+            {
+                if (getter == null) return null;
+                var value = getter.Invoke();
+                if (value != null) return value;
+                initialize?.Invoke();
+                return getter.Invoke();
+            };
+        }
+
+        public _MaterialTexture(Func<Boolean,TextureInfo> getOrUse)
+        {
+            _Getter = ()=> getOrUse(false);
+            _Using = () => getOrUse(true);
+        }
+
+        private readonly Func<TextureInfo> _Getter;
+        private readonly Func<TextureInfo> _Using;
+        public bool IsEmpty => _Getter == null;
+        public TextureInfo Info => _Getter?.Invoke();
+
+        /// <summary>
+        /// Gets the index of texture's TEXCOORD_[index] attribute used for texture coordinate mapping.
+        /// </summary>
+        public int TextureCoordinate => _Getter?.Invoke()?.TextureCoordinate ?? 0;
+
+        public TextureTransform TextureTransform => _Getter?.Invoke()?.Transform;
+
+        public TextureInfo Use() => _Using?.Invoke();
     }
 }
