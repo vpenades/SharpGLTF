@@ -21,8 +21,10 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<MaterialSpecular>();
             this.RemoveExtensions<MaterialTransmission>();
             this.RemoveExtensions<MaterialVolume>();
+            this.RemoveExtensions<MaterialAnisotropy>();
             this.RemoveExtensions<MaterialIridescence>();
-            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();
+
+            this.RemoveExtensions<MaterialPBRSpecularGlossiness>();            
         }
 
         /// <summary>
@@ -58,6 +60,7 @@ namespace SharpGLTF.Schema2
                 if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
                 if (extn == "Volume") this.UseExtension<MaterialVolume>();
+                if (extn == "Anisotropy") this.UseExtension<MaterialAnisotropy>();
                 if (extn == "Iridiscence") this.UseExtension<MaterialIridescence>();
             }
         }
@@ -111,6 +114,9 @@ namespace SharpGLTF.Schema2
             if (channels != null) { foreach (var c in channels) yield return c; }
 
             channels = this.GetExtension<MaterialIridescence>()?.GetChannels(this);
+            if (channels != null) { foreach (var c in channels) yield return c; }
+
+            channels = this.GetExtension<MaterialAnisotropy>()?.GetChannels(this);
             if (channels != null) { foreach (var c in channels) yield return c; }
 
             var normalParam = new _MaterialParameter<float>(
@@ -641,7 +647,6 @@ namespace SharpGLTF.Schema2
         }
     }
 
-
     internal sealed partial class MaterialIridescence
     {
         #pragma warning disable CA1801 // Review unused parameters
@@ -709,6 +714,48 @@ namespace SharpGLTF.Schema2
             var thkMin = new _MaterialParameter<float>(_MaterialParameterKey.Minimum, (float)_iridescenceThicknessMinimumDefault, () => IridescenceThicknessMinimum, v => IridescenceThicknessMinimum = v);
             var thkMax = new _MaterialParameter<float>(_MaterialParameterKey.Maximum, (float)_iridescenceThicknessMaximumDefault, () => IridescenceThicknessMaximum, v => IridescenceThicknessMaximum = v);
             yield return new MaterialChannel(material, "IridescenceThickness", thicknessTexture, thkMin, thkMax);
+        }
+    }
+
+    internal sealed partial class MaterialAnisotropy
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialAnisotropy(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().ConcatElements(_anisotropyTexture);
+        }
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+
+            if (_anisotropyStrength.HasValue)
+            {
+                Guard.MustBeBetweenOrEqualTo(_anisotropyStrength.Value, _anisotropyStrengthMinimum, _anisotropyStrengthMaximum, nameof(_anisotropyStrength));
+            }
+        }
+
+        public float AnisotropyStrength
+        {
+            get => (float)this._anisotropyStrength.AsValue(_anisotropyStrengthDefault);
+            set => this._anisotropyStrength = ((double)value).AsNullable((float)_anisotropyStrengthDefault, _anisotropyStrengthMinimum, _anisotropyStrengthMaximum);
+        }
+
+        public float AnisotropyRotation
+        {
+            get => (float)this._anisotropyRotation.AsValue(_anisotropyRotationDefault);
+            set => this._anisotropyRotation = value.AsNullable((float)_anisotropyRotationDefault);
+        }
+
+        public IEnumerable<MaterialChannel> GetChannels(Material material)
+        {
+            var anisoTexture = new _MaterialTexture(() => _anisotropyTexture, () => SetProperty(this, ref _anisotropyTexture, new TextureInfo()));
+            var strength = new _MaterialParameter<float>(_MaterialParameterKey.AnisotropyStrength, (float)_anisotropyStrengthDefault, () => AnisotropyStrength, v => AnisotropyStrength = v);
+            var rotation = new _MaterialParameter<float>(_MaterialParameterKey.AnisotropyRotation, (float)_anisotropyRotationDefault, () => AnisotropyRotation, v => AnisotropyRotation = v);
+            yield return new MaterialChannel(material, "Anisotropy", anisoTexture, strength, rotation);            
         }
     }
 }
