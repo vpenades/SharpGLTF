@@ -80,6 +80,10 @@ namespace SharpGLTF.Materials
         TransmissionFactor,
         IridescenceFactor,
         AttenuationDistance,
+        AnisotropyStrength,
+        AnisotropyRotation,
+        DiffuseTransmissionFactor,
+        DiffuseTransmissionColor,
     }
 
     partial class MaterialBuilder
