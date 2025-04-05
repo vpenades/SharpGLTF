@@ -311,9 +311,9 @@ namespace SharpGLTF.CodeGen
             }
         }
 
-        private Object _GetConstantRuntimeValue(SchemaType type, Object value)
+        internal Object _GetConstantRuntimeValue(SchemaType type, Object value)
         {
-            if (value == null) throw new ArgumentNullException(nameof(value));
+            ArgumentNullException.ThrowIfNull(value);
 
             switch (type)
             {
@@ -331,8 +331,8 @@ namespace SharpGLTF.CodeGen
 
                             var str = value as string;
 
-                            if (str.ToUpperInvariant() == "FALSE") return false;
-                            if (str.ToUpperInvariant() == "TRUE") return true;
+                            if (str.Equals("FALSE", StringComparison.OrdinalIgnoreCase)) return false;
+                            if (str.Equals("TRUE", StringComparison.OrdinalIgnoreCase)) return true;
                             throw new NotImplementedException();
                         }
 
@@ -389,14 +389,22 @@ namespace SharpGLTF.CodeGen
             sb.AppendLine("#pragma warning disable SA1508");
             sb.AppendLine("#pragma warning disable SA1652");
 
-            sb.AppendLine();           
+            sb.AppendLine();
 
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using System.Linq;");
             sb.AppendLine("using System.Text;");
             sb.AppendLine("using System.Numerics;");
-            sb.AppendLine("using System.Text.Json;");            
+            sb.AppendLine("using System.Text.Json;");
+
+            sb.AppendLine();
+
+            sb.AppendLine("using JSONREADER = System.Text.Json.Utf8JsonReader;");
+            sb.AppendLine("using JSONWRITER = System.Text.Json.Utf8JsonWriter;");
+            sb.AppendLine("using FIELDINFO = SharpGLTF.Reflection.FieldInfo;");
+
+            sb.AppendLine();
 
             string currentNamespace = null;
 
@@ -481,6 +489,7 @@ namespace SharpGLTF.CodeGen
             var xclass = new CSharpClassEmitter(this)
             {
                 ClassSummary = type.Description,
+                SchemaName = type.ShortIdentifier,
                 ClassDeclaration = _GetClassDeclaration(type),
                 HasBaseClass = type.BaseClass != null
             };
@@ -594,8 +603,19 @@ namespace SharpGLTF.CodeGen
         private readonly List<string> _SerializerBody = new List<string>();
         private readonly List<string> _DeserializerSwitchBody = new List<string>();
 
+        private readonly List<string> _FieldsNamesReflection = new List<string>();
+        private readonly List<string> _FieldsSwitchReflection = new List<string>();
+
         public string ClassSummary { get; set; }
 
+        /// <summary>
+        /// The name used in the schema $id field, minus the prefix and suffix
+        /// </summary>
+        public string SchemaName { get; set; }
+
+        /// <summary>
+        /// Represents the Runtime Class Name
+        /// </summary>
         public string ClassDeclaration { get; set; }
 
         public bool HasBaseClass { get; set; }
@@ -620,7 +640,11 @@ namespace SharpGLTF.CodeGen
 
                 _Fields.AddRange(_Emitter._GetClassField(f));
 
-                if (f.FieldType is EnumType etype)
+                AddFieldReflection(f);
+
+                // serialization
+
+                if (f.FieldType is EnumType etype) // special case for enums
                 {
                     // emit serializer
                     var smethod = etype.UseIntegers ? "SerializePropertyEnumValue" : "SerializePropertyEnumSymbol";
@@ -638,6 +662,31 @@ namespace SharpGLTF.CodeGen
                 this.AddFieldSerializerCase(_GetJSonSerializerMethod(f));
                 this.AddFieldDeserializerCase(f.PersistentName, _GetJSonDeserializerMethod(f));
             }
+        }
+
+        private void AddFieldReflection(FieldInfo finfo)
+        {
+            var trname = _Emitter._GetRuntimeName(finfo.FieldType);
+            var frname = _Emitter.GetFieldRuntimeName(finfo);
+
+            trname = trname.Replace("?", ""); // since we're adding the default value, there's no need for nullable values.
+
+            var vtype = $"typeof({trname})";
+            var getter = $"instance => instance.{frname}";            
+
+            if (finfo.DefaultValue != null)
+            {
+                var vconst = _Emitter._GetConstantRuntimeValue(finfo.FieldType, finfo.DefaultValue);
+                // fix boolean value            
+                if (vconst is Boolean bconst) vconst = bconst ? "true" : "false";                
+
+                getter += FormattableString.Invariant($" ?? {vconst}");
+            }
+
+            // _FieldsReflection.Add($"yield return FIELDINFO.From(\"{finfo.PersistentName}\",this, {getter});");
+
+            _FieldsNamesReflection.Add(finfo.PersistentName);
+            _FieldsSwitchReflection.Add($"case \"{finfo.PersistentName}\": value = FIELDINFO.From(\"{finfo.PersistentName}\",this, {getter}); return true;");
         }
 
         private string _GetJSonSerializerMethod(FieldInfo f)
@@ -697,8 +746,8 @@ namespace SharpGLTF.CodeGen
             var readerType = "JsonReader";
             var writerType = "JsonWriter";
             #else
-            var readerType = "ref Utf8JsonReader";
-            var writerType = "Utf8JsonWriter";
+            var readerType = "ref JSONREADER";
+            var writerType = "JSONWRITER";
             #endif
 
             foreach (var l in _Comments) yield return $"// {l}";
@@ -716,8 +765,46 @@ namespace SharpGLTF.CodeGen
 
             yield return string.Empty;
 
+            yield return "#region reflection".Indent(1);
+            yield return string.Empty;
+
+            yield return $"public const string SCHEMANAME = \"{SchemaName}\";".Indent(1);
+
+            var pointerPathModifier = HasBaseClass ? "override" : "virtual";
+            yield return $"protected {pointerPathModifier} string GetSchemaName() => SCHEMANAME;".Indent(1);            
+
+            yield return string.Empty;
+
+            yield return $"protected override IEnumerable<string> ReflectFieldsNames()".Indent(1);
+            yield return "{".Indent(1);            
+            foreach (var l in _FieldsNamesReflection) yield return $"yield return \"{l}\";".Indent(2);
+            if (HasBaseClass) yield return "foreach(var f in base.ReflectFieldsNames()) yield return f;".Indent(2);
+            yield return "}".Indent(1);
+
+            yield return $"protected override bool TryReflectField(string name, out FIELDINFO value)".Indent(1);
+            yield return "{".Indent(1);
+            yield return "switch(name)".Indent(2);
+            yield return "{".Indent(2);
+            foreach (var l in _FieldsSwitchReflection.Indent(3)) yield return l;
+            if (HasBaseClass) yield return "default: return base.TryReflectField(name, out value);".Indent(3);            
+            yield return "}".Indent(2);
+            yield return "}".Indent(1);
+
+            yield return string.Empty;
+            yield return "#endregion".Indent(1);
+
+            yield return string.Empty;
+
+            yield return "#region data".Indent(1);
+            yield return string.Empty;
+
             foreach (var l in _Fields.Indent(1)) yield return l;
 
+            yield return "#endregion".Indent(1);
+
+            yield return string.Empty;
+
+            yield return "#region serialization".Indent(1);
             yield return string.Empty;
 
             // yield return "/// <inheritdoc />".Indent(1);
@@ -743,6 +830,9 @@ namespace SharpGLTF.CodeGen
             yield return "}".Indent(1);
 
             yield return string.Empty;
+            yield return "#endregion".Indent(1);
+
+            yield return string.Empty;            
 
             yield return "}";
         }

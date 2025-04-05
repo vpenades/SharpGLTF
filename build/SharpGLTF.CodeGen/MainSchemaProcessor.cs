@@ -28,10 +28,16 @@ namespace SharpGLTF
 
             // replace Node.Matrix, Node.Rotation, Node.Scale and Node.Translation with System.Numerics.Vectors types
             var node = ctx.FindClass("Node");
-            node.GetField("matrix").SetDataType(typeof(System.Numerics.Matrix4x4), true).RemoveDefaultValue().SetItemsRange(0);
-            node.GetField("rotation").SetDataType(typeof(System.Numerics.Quaternion), true).RemoveDefaultValue().SetItemsRange(0);
-            node.GetField("scale").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
-            node.GetField("translation").SetDataType(typeof(System.Numerics.Vector3), true).RemoveDefaultValue().SetItemsRange(0);
+
+            // the default values of the transform properties is both a "known value" and null, so
+            // we preffer to set here the "known value" since it's also used to check whether
+            // the value should be serialized.
+            // But then, we need to set the values to null in the Node Constructor,
+            // because Matrix and SRT are mutually exclusive.
+            node.GetField("matrix").SetDataType(typeof(System.Numerics.Matrix4x4), true).SetDefaultValue("System.Numerics.Matrix4x4.Identity").SetItemsRange(0);
+            node.GetField("scale").SetDataType(typeof(System.Numerics.Vector3), true).SetDefaultValue("Vector3.One").SetItemsRange(0);
+            node.GetField("rotation").SetDataType(typeof(System.Numerics.Quaternion), true).SetDefaultValue("Quaternion.Identity").SetItemsRange(0);            
+            node.GetField("translation").SetDataType(typeof(System.Numerics.Vector3), true).SetDefaultValue("Vector3.Zero").SetItemsRange(0);
 
             // replace Material.emissiveFactor with System.Numerics.Vectors types
             ctx.FindClass("Material")

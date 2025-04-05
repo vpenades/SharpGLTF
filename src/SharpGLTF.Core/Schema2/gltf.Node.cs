@@ -73,6 +73,11 @@ namespace SharpGLTF.Schema2
         {
             _children = new List<int>();
             _weights = new List<double>();
+            
+            _scale = null;
+            _rotation = null;
+            _translation = null;
+            _matrix = null;
         }
 
         #endregion

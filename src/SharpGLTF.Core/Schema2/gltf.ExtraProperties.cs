@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text.Json;
 
 using SharpGLTF.IO;
+using SharpGLTF.Reflection;
 
 using JsonToken = System.Text.Json.JsonTokenType;
 
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
-
 
 namespace SharpGLTF.Schema2
 {
@@ -27,8 +27,10 @@ namespace SharpGLTF.Schema2
     /// <remarks>
     /// Defines the <see cref="Extras"/> property for every glTF object.
     /// </remarks>
-    public abstract class ExtraProperties : JsonSerializable,
-        IExtraProperties
+    public abstract class ExtraProperties
+        : JsonSerializable
+        , IExtraProperties
+        , Reflection.IReflectionObject
     {
         #region data
 
@@ -67,7 +69,42 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
+        #region reflection
+
+        protected override string GetSchemaName() => "ExtraProperties";
+
+        IEnumerable<FieldInfo> Reflection.IReflectionObject.GetFields()
+        {
+            foreach (var name in ReflectFieldsNames())
+            {
+                if (TryReflectField(name, out var finfo)) yield return finfo;
+            }
+        }
+
+        bool Reflection.IReflectionObject.TryGetField(string name, out SharpGLTF.Reflection.FieldInfo value)
+        {
+            return TryReflectField(name ,out value);
+        }
+
+        protected virtual IEnumerable<string> ReflectFieldsNames()
+        {
+            yield return "extensions";
+            yield return "extras";
+
+        }
+        protected virtual bool TryReflectField(string name, out Reflection.FieldInfo value)
+        {
+            switch (name)
+            {
+                case "extensions": value = Reflection.FieldInfo.From("extensions", _extensions, exts => new _ExtensionsReflection(exts)); return true;
+                case "extras": value = Reflection.FieldInfo.From("extras", _extras, inst => inst); return true;
+                default: value = default; return false;
+            }
+        }
+
+        #endregion
+
+        #region API        
 
         protected static void SetProperty<TParent, TProperty, TValue>(TParent parent, ref TProperty property, TValue value)
             where TParent : ExtraProperties
@@ -277,6 +314,43 @@ namespace SharpGLTF.Schema2
             }
 
             reader.Skip();
+        }
+
+        #endregion
+
+        #region nested types
+
+        private readonly struct _ExtensionsReflection : Reflection.IReflectionObject
+        {
+            public _ExtensionsReflection(IReadOnlyList<JsonSerializable> extensions)
+            {
+                _Extensions = extensions;
+            }
+
+            private readonly IReadOnlyList<JsonSerializable> _Extensions;
+
+            public bool TryGetField(string name, out FieldInfo value)
+            {
+                var extension = _Extensions.FirstOrDefault(item => item._SchemaName == name);
+                if (extension == null)
+                {
+                    value = default;
+                    return false;
+                }
+
+                value = Reflection.FieldInfo.From(extension._SchemaName, extension, ext => ext);
+                return true;
+            }
+
+            public IEnumerable<FieldInfo> GetFields()
+            {
+                foreach(var extension in _Extensions)
+                {
+                    yield return Reflection.FieldInfo.From(extension._SchemaName, extension, ext => ext);
+                }
+            }
+
+            
         }
 
         #endregion

@@ -25,6 +25,11 @@ namespace SharpGLTF.Schema2
             _samplers = new ChildrenList<AnimationSampler, Animation>(this);
         }
 
+        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
+        }
+
         #endregion
 
         #region properties
@@ -37,16 +42,21 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
-        }
+        #region API        
 
         public IEnumerable<AnimationChannel> FindChannels(string rootPath)
         {
-            return Channels.Where(item => item.TargetPointerPath.StartsWith(rootPath));
+            if (string.IsNullOrWhiteSpace(rootPath)) throw new ArgumentNullException(nameof(rootPath));
+            if (rootPath[0] != '/') throw new ArgumentException($"invalid path: {rootPath}", nameof(rootPath));
+
+            if (rootPath.EndsWith("/"))
+            {
+                return Channels.Where(item => item.TargetPointerPath.StartsWith(rootPath));
+            }
+            else
+            {
+                return Channels.Where(item => item.TargetPointerPath == rootPath);
+            }            
         }
 
         public IEnumerable<AnimationChannel> FindChannels(Node node)
@@ -117,7 +127,7 @@ namespace SharpGLTF.Schema2
             Guard.NotNullOrEmpty(propertyName, nameof(propertyName));
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
 
-            DangerousCreatePointerChannel<T>($"/materials/{material.LogicalIndex}/{propertyName}", keyframes, linear);
+            DangerousCreatePointerChannel($"/materials/{material.LogicalIndex}/{propertyName}", keyframes, linear);
         }
 
         /// <summary>
@@ -127,9 +137,11 @@ namespace SharpGLTF.Schema2
         /// <param name="pointerPath">The path to the porperty, ex: '/nodes/0/rotation'.</param>
         /// <param name="keyframes">The keyframes to set</param>
         /// <param name="linear">Whether the keyframes are linearly interporlated or not.</param>        
-        public void DangerousCreatePointerChannel<T>(string pointerPath, IReadOnlyDictionary<Single, T> keyframes, bool linear = true)
+        public void DangerousCreatePointerChannel<T>(string pointerPath, IReadOnlyDictionary<Single, T> keyframes, bool linear = true, bool verifyBackingFieldExists = true)
         {
-            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));           
+
+            if (verifyBackingFieldExists) Reflection.FieldInfo.Verify(this.LogicalParent, pointerPath);
 
             var sampler = this._CreateSampler(linear ? AnimationInterpolationMode.LINEAR : AnimationInterpolationMode.STEP);
 

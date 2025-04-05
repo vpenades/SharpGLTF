@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
+
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
 
 namespace SharpGLTF.Collections
 {
@@ -13,7 +14,9 @@ namespace SharpGLTF.Collections
     /// <typeparam name="T"></typeparam>
     /// <typeparam name="TParent"></typeparam>
     [System.Diagnostics.DebuggerDisplay("{Count}")]
-    public sealed class ChildrenList<T, TParent> : IList<T>, IReadOnlyList<T>
+    public sealed class ChildrenList<T, TParent>
+        : IList<T>, IReadOnlyList<T>
+        , Reflection.IReflectionArray
         where T : class, IChildOfList<TParent>
         where TParent : class
     {
@@ -211,6 +214,35 @@ namespace SharpGLTF.Collections
             var parent = index >= 0 ? _Parent : null;
 
             System.Diagnostics.Debug.Assert(item.LogicalParent == parent);            
+        }
+
+        #endregion
+
+        #region Reflection
+
+        IEnumerable<FIELDINFO> Reflection.IReflectionObject.GetFields()
+        {
+            for(int i=0; i < Count; ++i)
+            {
+                yield return ((Reflection.IReflectionArray)this).GetField(i);
+            }
+        }
+
+        FIELDINFO Reflection.IReflectionArray.GetField(int index)
+        {
+            return FIELDINFO.From(index.ToString(System.Globalization.CultureInfo.InvariantCulture), this, list => list[index]);
+        }
+
+        public bool TryGetField(string name, out FIELDINFO value)
+        {
+            if (int.TryParse(name, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out var index))
+            {
+                value = FIELDINFO.From(name, this, list => list[index]);
+                return true;
+            }
+
+            value = default;
+            return false;
         }
 
         #endregion

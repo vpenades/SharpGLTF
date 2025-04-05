@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
-using System.Text;
+
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
 
 namespace SharpGLTF.Collections
 {
@@ -13,7 +13,10 @@ namespace SharpGLTF.Collections
     /// An Specialisation of <see cref="Dictionary{TKey, TValue}"/>, which interconnects the dictionary items with the parent of the collection.
     /// </summary>    
     [System.Diagnostics.DebuggerDisplay("{Count}")]
-    public sealed class ChildrenDictionary<T, TParent> : IReadOnlyDictionary<string, T> , IDictionary<string, T>
+    public sealed class ChildrenDictionary<T, TParent>
+        : IReadOnlyDictionary<string, T>
+        , IDictionary<string, T>
+        , Reflection.IReflectionObject
         where T : class, IChildOfDictionary<TParent>
         where TParent : class
     {
@@ -167,6 +170,27 @@ namespace SharpGLTF.Collections
             {
                 array[arrayIndex++] = kvp;
             }
+        }
+
+        #endregion
+
+        #region API . Reflection
+
+        public IEnumerable<FIELDINFO> GetFields()
+        {
+            return this.Select(kvp => FIELDINFO.From(kvp.Key, this, dict => dict[kvp.Key]));
+        }
+
+        public bool TryGetField(string name, out FIELDINFO value)
+        {
+            if (this.TryGetValue(name, out var val))
+            {
+                value = FIELDINFO.From(name, this, dict => dict[name]);
+                return true;
+            }
+
+            value = default;
+            return false;
         }
 
         #endregion

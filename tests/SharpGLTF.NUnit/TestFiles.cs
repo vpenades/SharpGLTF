@@ -89,6 +89,8 @@ namespace SharpGLTF
         private static readonly System.IO.DirectoryInfo _BabylonJsMeshesDir = _UsingExternalFiles("BabylonJS-Assets");
         private static readonly System.IO.DirectoryInfo _GeneratedModelsDir = _UsingExternalFiles("GeneratedReferenceModels", "v_0_6_1");
 
+        private static KhronosSampleModel[] _KhronosSampleModels;
+
         #endregion
 
         #region properties        
@@ -148,9 +150,9 @@ namespace SharpGLTF
 
         public static IReadOnlyList<string> GetSampleModelsPaths()
         {
-            var entries = KhronosSampleModel.Load(_KhronosSampleAssetsDir._DefFile("Models", "model-index.json"));
+            _KhronosSampleModels ??= KhronosSampleModel.Load(_KhronosSampleAssetsDir._DefFile("Models", "model-index.json"));
 
-            var files = entries
+            var files = _KhronosSampleModels
                 .SelectMany(item => item.GetPaths())
                 .ToList();
 
@@ -210,6 +212,7 @@ namespace SharpGLTF
                 "\\meshes\\Tests\\AssetGenerator", // already covered separately.
                 "\\meshes\\KHR_materials_volume_testing.glb", // draco compression-
                 "\\meshes\\Yeti\\MayaExport\\", // validator reports out of bounds accesor
+                "\\meshes\\Demos\\optimized\\", // uses MeshOpt extension
                 "\\meshes\\Demos\\retargeting\\riggedMesh.glb", // validator reports errors
                 "\\meshes\\Buildings\\road gap.glb", // uses KHR_Draco compression  
                 "\\meshes\\Buildings\\Road corner.glb", // uses KHR_Draco compression  
