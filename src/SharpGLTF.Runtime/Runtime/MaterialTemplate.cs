@@ -4,6 +4,8 @@ using System.Numerics;
 using System.Text;
 using System.Xml.Linq;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Runtime
 {
     class MaterialTemplate
@@ -19,62 +21,107 @@ namespace SharpGLTF.Runtime
 
             var isolateMemory = options?.IsolateMemory ?? false;
 
+            // gather animation channels targeting this material
+
+            _PointerPrefix = $"/materials/{srcMaterial.LogicalIndex}/";
+            _IsAnimated = false;
+
             foreach (var srcChannel in srcMaterial.Channels)
             {
-                var key = srcChannel.Key;
+                // loop over animations to find if any animation points
+                // to a property of this material and connect the dots.
 
-                var txform = srcChannel.TextureTransform;                
-                var scale = txform == null ? null : new AnimatableProperty<Vector2>(txform.Scale);
-                var rotation = txform == null ? null : new AnimatableProperty<float>(txform.Rotation);
-                var offset = txform == null ? null : new AnimatableProperty<Vector2>(txform.Offset);                
-
-                foreach (var srcAnim in srcMaterial.LogicalParent.LogicalAnimations)
+                foreach (var srcTrack in srcMaterial.LogicalParent.LogicalAnimations)
                 {
-                    var lidx = srcAnim.LogicalIndex;
+                    var trackIdx = srcTrack.LogicalIndex;
 
-                    // paths look like:
-                    // "/materials/14/pbrMetallicRoughness/metallicRoughnessTexture/extensions/KHR_texture_transform/scale"
+                    var channels = srcTrack.FindChannels(_PointerPrefix);                    
 
-                    var pointerPath = srcChannel.GetAnimationPointer();
-
-                    foreach (var c in srcAnim.FindChannels(pointerPath))
+                    foreach(var channel in channels)
                     {
-                        System.Diagnostics.Trace.WriteLine(c.TargetPointerPath);
+                        var pointerPath = channel.TargetPointerPath;
+                        System.Diagnostics.Debug.Assert(pointerPath.StartsWith(_PointerPrefix));
+                        pointerPath = pointerPath.Substring(_PointerPrefix.Length -1);
 
-                        if (c.TargetPointerPath.EndsWith("/extensions/KHR_texture_transform/scale"))
+                        var fieldInfo = Reflection.FieldInfo.From(srcMaterial, pointerPath);
+
+                        if (fieldInfo.IsEmpty)
                         {
-                            if (scale == null) throw new InvalidOperationException("found pointer to a TextureTransform, but target was not found");
-                            var sampler = c.GetSamplerOrNull<Vector2>().CreateCurveSampler(isolateMemory);
-                            scale.SetCurve(lidx, sampler);
+                            System.Diagnostics.Debug.Fail("If it reaches this point it's probably because it's animating a property of an unregistered extension.");
+                            continue;
+                        }                        
+
+                        if (fieldInfo.Value is float defaultSingle)
+                        {
+                            _ScalarAnimatables ??= new Dictionary<string, AnimatableProperty<float>>();
+                            _AddAnimatableProperty(_ScalarAnimatables, trackIdx, channel, pointerPath, defaultSingle, isolateMemory);
                         }
 
-                        if (c.TargetPointerPath.EndsWith("/extensions/KHR_texture_transform/rotation"))
+                        if (fieldInfo.Value is Vector2 defaultVector2)
                         {
-                            if (rotation == null) throw new InvalidOperationException("found pointer to a TextureTransform, but target was not found");
-                            var sampler = c.GetSamplerOrNull<float>().CreateCurveSampler(isolateMemory);
-                            rotation.SetCurve(lidx, sampler);
+                            _Vector2Animatables ??= new Dictionary<string, AnimatableProperty<Vector2>>();
+                            _AddAnimatableProperty(_Vector2Animatables, trackIdx, channel, pointerPath, defaultVector2, isolateMemory);
                         }
 
-                        if (c.TargetPointerPath.EndsWith("/extensions/KHR_texture_transform/offset"))
+                        if (fieldInfo.Value is Vector3 defaultVector3)
                         {
-                            if (offset == null) throw new InvalidOperationException("found pointer to a TextureTransform, but target was not found");
-                            var sampler = c.GetSamplerOrNull<Vector2>().CreateCurveSampler(isolateMemory);
-                            offset.SetCurve(lidx, sampler);
+                            _Vector3Animatables ??= new Dictionary<string, AnimatableProperty<Vector3>>();
+                            _AddAnimatableProperty(_Vector3Animatables, trackIdx, channel, pointerPath, defaultVector3, isolateMemory);
                         }
-                    }
+
+                        if (fieldInfo.Value is Vector4 defaultVector4)
+                        {
+                            _Vector4Animatables ??= new Dictionary<string, AnimatableProperty<Vector4>>();
+                            _AddAnimatableProperty(_Vector4Animatables, trackIdx, channel, pointerPath, defaultVector4, isolateMemory);
+                        }
+                    }                    
                 }
             }
+        }
+
+        private void _AddAnimatableProperty<T>(Dictionary<string, AnimatableProperty<T>> dict, int trackIdx, AnimationChannel channel, string pointerPath, T defaultSingle, bool isolateMemory)
+            where T : struct
+        {
+            if (!dict.TryGetValue(pointerPath, out var target))
+            {
+                target = new AnimatableProperty<T>(defaultSingle);
+                dict[pointerPath] = target;
+            }
+
+            var sampler = channel.GetSamplerOrNull<T>().CreateCurveSampler(isolateMemory);
+            target.SetCurve(trackIdx, sampler);
+
+            _IsAnimated = true;
         }
 
         #endregion
 
         #region data
-        
-        private readonly int _LogicalSourceIndex;       
+
+        private readonly int _LogicalSourceIndex;
+
+        private readonly string _PointerPrefix;
+
+        private readonly Dictionary<string, AnimatableProperty<float>> _ScalarAnimatables;
+        private readonly Dictionary<string, AnimatableProperty<Vector2>> _Vector2Animatables;
+        private readonly Dictionary<string, AnimatableProperty<Vector3>> _Vector3Animatables;
+        private readonly Dictionary<string, AnimatableProperty<Vector4>> _Vector4Animatables;
+
+        private bool _IsAnimated;
 
         #endregion
 
         #region properties
+
+        /// <summary>
+        /// If true, it means this material is animated.
+        /// </summary>
+        /// <remarks>
+        /// Before rendering a model using this material, you check this property and then call
+        /// <see cref="UpdateRuntimeMaterial(int, float, Action{string, float})"/> to update your
+        /// engine's material properties
+        /// </remarks>
+        public bool IsAnimated => _IsAnimated;
 
         public string Name { get; set; }
 
@@ -89,9 +136,41 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public Matrix3x2 GetTextureTransform(int trackLogicalIndex, float time)
+
+        public void UpdateRuntimeMaterial(int trackLogicalIndex, float time, Action<string, float> target)
         {
-            throw new NotImplementedException();
+            foreach(var kvp in _ScalarAnimatables)
+            {
+                var val = kvp.Value.GetValueAt(trackLogicalIndex, time);
+                target.Invoke(kvp.Key, val);                
+            }
+        }
+
+        public void UpdateRuntimeMaterial(int trackLogicalIndex, float time, Action<string, Vector2> target)
+        {
+            foreach (var kvp in _Vector2Animatables)
+            {
+                var val = kvp.Value.GetValueAt(trackLogicalIndex, time);
+                target.Invoke(kvp.Key, val);
+            }
+        }
+
+        public void UpdateRuntimeMaterial(int trackLogicalIndex, float time, Action<string, Vector3> target)
+        {
+            foreach (var kvp in _Vector3Animatables)
+            {
+                var val = kvp.Value.GetValueAt(trackLogicalIndex, time);
+                target.Invoke(kvp.Key, val);
+            }
+        }
+
+        public void UpdateRuntimeMaterial(int trackLogicalIndex, float time, Action<string, Vector4> target)
+        {
+            foreach (var kvp in _Vector4Animatables)
+            {
+                var val = kvp.Value.GetValueAt(trackLogicalIndex, time);
+                target.Invoke(kvp.Key, val);
+            }
         }
 
         #endregion
