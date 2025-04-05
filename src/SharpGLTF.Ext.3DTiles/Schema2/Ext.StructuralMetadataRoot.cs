@@ -39,19 +39,7 @@ namespace SharpGLTF.Schema2
                 _propertyAttributes = new ChildrenList<PropertyAttribute, EXTStructuralMetadataRoot>(this);
                 _propertyTextures = new ChildrenList<PropertyTexture, EXTStructuralMetadataRoot>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                var items = base.GetLogicalChildren()
-                    .Concat(_propertyTables)
-                    .Concat(_propertyAttributes)
-                    .Concat(_propertyTextures);
-
-                if (Schema != null) items = items.Append(Schema);
-
-                return items;
-            }
-
+            
             #endregion
 
             #region data
@@ -300,13 +288,7 @@ namespace SharpGLTF.Schema2
             {
                 _properties = new ChildrenDictionary<PropertyTextureProperty, PropertyTexture>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren()
-                    .Concat(_properties.Values);
-            }
-
+            
             #endregion
 
             #region child properties
@@ -444,13 +426,7 @@ namespace SharpGLTF.Schema2
             {
                 _properties = new ChildrenDictionary<PropertyAttributeProperty, PropertyAttribute>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren()
-                    .Concat(_properties.Values);
-            }
-
+            
             #endregion
 
             #region child properties
@@ -587,13 +563,7 @@ namespace SharpGLTF.Schema2
 
                 _count = _countMinimum;
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren()
-                    .Concat(_properties.Values);
-            }
-
+            
             #endregion
 
             #region child properties
@@ -928,14 +898,7 @@ namespace SharpGLTF.Schema2
                 _classes = new ChildrenDictionary<StructuralMetadataClass, StructuralMetadataSchema>(this);
                 _enums = new ChildrenDictionary<StructuralMetadataEnum, StructuralMetadataSchema>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren()
-                    .Concat(_classes.Values)
-                    .Concat(_enums.Values);
-            }
-
+            
             #endregion
 
             #region child properties           
@@ -1134,13 +1097,7 @@ namespace SharpGLTF.Schema2
             {
                 _properties = new ChildrenDictionary<StructuralMetadataClassProperty, StructuralMetadataClass>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren()
-                    .Concat(_properties.Values);
-            }
-
+            
             #endregion
 
             #region child properties

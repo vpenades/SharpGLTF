@@ -206,12 +206,7 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_baseColorTexture, _metallicRoughnessTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -253,12 +248,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialPBRSpecularGlossiness(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_diffuseTexture, _specularGlossinessTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -319,12 +309,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialClearCoat(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_clearcoatTexture, _clearcoatRoughnessTexture, _clearcoatNormalTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -393,12 +378,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialTransmission(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_transmissionTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -429,12 +409,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialSheen(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_sheenColorTexture, _sheenRoughnessTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -507,12 +482,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialSpecular(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_specularColorTexture, _specularTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -559,12 +529,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialVolume(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_thicknessTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -657,12 +622,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialIridescence(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_iridescenceTexture, _iridescenceThicknessTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);            
@@ -727,12 +687,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialAnisotropy(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_anisotropyTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);
@@ -769,12 +724,7 @@ namespace SharpGLTF.Schema2
         #pragma warning disable CA1801 // Review unused parameters
         internal MaterialDiffuseTransmission(Material material) { }
         #pragma warning restore CA1801 // Review unused parameters
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_diffuseTransmissionTexture, _diffuseTransmissionColorTexture);
-        }
-
+        
         protected override void OnValidateContent(ValidationContext validate)
         {
             base.OnValidateContent(validate);

@@ -92,12 +92,7 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_normalTexture, _emissiveTexture, _occlusionTexture, _pbrMetallicRoughness);
-        }
-
+        
         /// <summary>
         /// Finds an instance of <see cref="MaterialChannel"/>
         /// </summary>

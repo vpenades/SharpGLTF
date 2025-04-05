@@ -11,12 +11,7 @@ namespace SharpGLTF.Schema2.AGI
         {
             _solarPanelGroups = new ChildrenList<AgiStkSolarPanelGroup, AgiRootStkMetadata>(this);
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_solarPanelGroups);
-        }
-
+        
         public IReadOnlyList<AgiStkSolarPanelGroup> SolarPanelGroups => _solarPanelGroups;
 
         public AgiStkSolarPanelGroup CreateSolarPanelGroup(string name)

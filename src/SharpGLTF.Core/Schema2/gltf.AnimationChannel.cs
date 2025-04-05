@@ -48,16 +48,7 @@ namespace SharpGLTF.Schema2
             LogicalParent = parent;
             LogicalIndex = index;
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            var children = base.GetLogicalChildren();
-
-            if (_target != null) children = children.Append(_target);
-
-            return children;
-        }
-
+        
         #endregion
 
         #region properties

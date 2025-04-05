@@ -112,12 +112,7 @@ namespace SharpGLTF.Schema2
                 _node = node;
                 _featureIds = new ChildrenList<MeshExtInstanceFeatureID, MeshExtInstanceFeatures>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren().Concat(_featureIds);
-            }
-
+            
             #endregion
 
             #region data
@@ -211,12 +206,7 @@ namespace SharpGLTF.Schema2
                 _meshPrimitive = meshPrimitive;
                 _featureIds = new ChildrenList<MeshExtMeshFeatureID, MeshExtMeshFeatures>(this);
             }
-
-            protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-            {
-                return base.GetLogicalChildren().Concat(_featureIds);
-            }
-
+            
             #endregion
 
             #region data

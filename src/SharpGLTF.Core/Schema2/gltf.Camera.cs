@@ -24,12 +24,7 @@ namespace SharpGLTF.Schema2
         #endregion
 
         #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_orthographic, _perspective);
-        }
-
+        
         internal ICamera GetCamera()
         {
             if (this._orthographic != null && this._perspective != null)

@@ -129,29 +129,7 @@ namespace SharpGLTF.Schema2
         public IReadOnlyList<Node>              LogicalNodes            => _nodes;
         public IReadOnlyList<Scene>             LogicalScenes           => _scenes;
         public IReadOnlyList<Animation>         LogicalAnimations       => _animations;
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            var containers = base.GetLogicalChildren();
-
-            containers = containers.ConcatElements(this.Asset);
-            containers = containers.Concat(this.LogicalAccessors);
-            containers = containers.Concat(this.LogicalAnimations);
-            containers = containers.Concat(this.LogicalBuffers);
-            containers = containers.Concat(this.LogicalBufferViews);
-            containers = containers.Concat(this.LogicalCameras);
-            containers = containers.Concat(this.LogicalImages);
-            containers = containers.Concat(this.LogicalMaterials);
-            containers = containers.Concat(this.LogicalMeshes);
-            containers = containers.Concat(this.LogicalNodes);
-            containers = containers.Concat(this.LogicalTextureSamplers);
-            containers = containers.Concat(this.LogicalScenes);
-            containers = containers.Concat(this.LogicalSkins);
-            containers = containers.Concat(this.LogicalTextures);
-
-            return containers;
-        }
-
+        
         internal IEnumerable<ExtraProperties> GetLogicalChildrenFlattened()
         {
             return GetLogicalChildren().SelectMany(item => Flatten(item));

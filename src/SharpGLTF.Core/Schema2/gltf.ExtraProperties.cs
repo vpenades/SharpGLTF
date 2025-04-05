@@ -8,8 +8,7 @@ using System.Text.Json;
 using SharpGLTF.IO;
 using SharpGLTF.Reflection;
 
-using JsonToken = System.Text.Json.JsonTokenType;
-
+using JSONTOKEN = System.Text.Json.JsonTokenType;
 using JSONEXTRAS = System.Text.Json.Nodes.JsonNode;
 
 namespace SharpGLTF.Schema2
@@ -30,7 +29,7 @@ namespace SharpGLTF.Schema2
     public abstract class ExtraProperties
         : JsonSerializable
         , IExtraProperties
-        , Reflection.IReflectionObject
+        , IReflectionObject
     {
         #region data
 
@@ -102,6 +101,53 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets a collection of <see cref="ExtraProperties"/> instances stored by this object.
+        /// </summary>
+        /// <returns>A collection of <see cref="ExtraProperties"/> instances.</returns>
+        /// <remarks>
+        /// This is used to traverse the whole glTF document tree and gather all the objects<br/>
+        /// So we can identify which extensions are used anywhere in the document.
+        /// </remarks>
+        protected IEnumerable<ExtraProperties> GetLogicalChildren()
+        {
+            foreach (var ext in _extensions.OfType<ExtraProperties>())
+            {
+                yield return ext;
+            }
+
+            if (!(this is IReflectionObject robj)) yield break;
+
+            foreach (var field in robj.GetFields())
+            {
+                var value = field.Value;
+
+                if (value is IReflectionArray array)
+                {
+                    for (int i = 0; i < array.Count; ++i)
+                    {
+                        var item = array.GetField(i);
+                        if (item.Value is ExtraProperties itemExtra) yield return itemExtra;
+                    }
+                }
+                else if (value is ExtraProperties extra) yield return extra;
+            }
+        }
+
+        protected static IEnumerable<ExtraProperties> Flatten(ExtraProperties container)
+        {
+            if (container == null) yield break;
+
+            yield return container;
+
+            foreach (var c in container.GetLogicalChildren())
+            {
+                var cc = Flatten(c);
+
+                foreach (var ccc in cc) yield return ccc;
+            }
+        }
+
         #endregion
 
         #region API        
@@ -164,34 +210,7 @@ namespace SharpGLTF.Schema2
             where T : JsonSerializable
         {
             _extensions.RemoveAll(item => item.GetType() == typeof(T));
-        }
-
-        /// <summary>
-        /// Gets a collection of <see cref="ExtraProperties"/> instances stored by this object.
-        /// </summary>
-        /// <returns>A collection of <see cref="ExtraProperties"/> instances.</returns>
-        /// <remarks>
-        /// This is used to traverse the whole glTF document tree and gather all the objects<br/>
-        /// So we can identify which extensions are used anywhere in the document.
-        /// </remarks>
-        protected virtual IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return _extensions.OfType<ExtraProperties>();
-        }
-
-        protected static IEnumerable<ExtraProperties> Flatten(ExtraProperties container)
-        {
-            if (container == null) yield break;
-
-            yield return container;
-
-            foreach (var c in container.GetLogicalChildren())
-            {
-                var cc = Flatten(c);
-
-                foreach (var ccc in cc) yield return ccc;
-            }
-        }
+        }        
 
         #endregion
 
@@ -297,9 +316,9 @@ namespace SharpGLTF.Schema2
         {
             reader.Read();
 
-            if (reader.TokenType == JsonToken.StartObject)
+            if (reader.TokenType == JSONTOKEN.StartObject)
             {
-                while (reader.Read() && reader.TokenType != JsonToken.EndObject)
+                while (reader.Read() && reader.TokenType != JSONTOKEN.EndObject)
                 {
                     var key = reader.GetString();
 

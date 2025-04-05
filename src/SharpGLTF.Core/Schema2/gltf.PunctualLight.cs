@@ -151,20 +151,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        #endregion
-
-        #region API
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            var children = base.GetLogicalChildren();
-
-            if (_spot != null) children = children.Concat(new[] { _spot });
-
-            return children;
-        }
-
-        #endregion
+        #endregion        
 
         #region Validation
 

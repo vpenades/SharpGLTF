@@ -67,12 +67,7 @@ namespace SharpGLTF.Schema2
 
             _weights.SetMorphWeights(count, weights);
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_primitives);
-        }
-
+        
         /// <summary>
         /// Creates a new <see cref="MeshPrimitive"/> instance
         /// and adds it to the current <see cref="Mesh"/>.

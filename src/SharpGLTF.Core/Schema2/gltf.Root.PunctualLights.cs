@@ -14,11 +14,6 @@ namespace SharpGLTF.Schema2
             _lights = new ChildrenList<PunctualLight, ModelRoot>(root);
         }
 
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_lights);
-        }
-
         public IReadOnlyList<PunctualLight> Lights => _lights;
 
         public PunctualLight CreateLight(string name, PunctualLightType ltype)

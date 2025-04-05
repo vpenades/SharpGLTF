@@ -13,12 +13,7 @@ namespace SharpGLTF.Schema2.AGI
         {
             _articulations = new ChildrenList<AgiArticulation, AgiRootArticulations>(this);
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_articulations);
-        }
-
+        
         public IReadOnlyList<AgiArticulation> Articulations => _articulations;
 
         public AgiArticulation CreateArticulation(string name)
@@ -65,12 +60,7 @@ namespace SharpGLTF.Schema2.AGI
         {
             _stages = new ChildrenList<AgiArticulationStage, AgiArticulation>(this);
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_stages);
-        }
-
+        
         public IReadOnlyList<AgiArticulationStage> Stages => _stages;
 
         public AgiArticulationStage CreateArticulationStage(string name, AgiArticulationTransformType transformType)

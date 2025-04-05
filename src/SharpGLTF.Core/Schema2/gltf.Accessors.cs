@@ -144,11 +144,6 @@ namespace SharpGLTF.Schema2
                 : this._sparse._CreateMemoryAccessors(this);
         }
 
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().ConcatElements(_sparse);
-        }
-
         public void UpdateBounds()
         {
             this._min.Clear();

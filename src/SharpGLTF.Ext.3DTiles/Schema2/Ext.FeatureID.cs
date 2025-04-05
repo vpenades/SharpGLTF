@@ -90,16 +90,7 @@ namespace SharpGLTF.Schema2.Tiles3D
         #region lifecycle
 
         internal MeshExtMeshFeatureID() { }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            var items = base.GetLogicalChildren();
-
-            if (_texture != null) items = items.Append(_texture);
-
-            return items;
-        }
-
+        
         #endregion
 
         #region child properties

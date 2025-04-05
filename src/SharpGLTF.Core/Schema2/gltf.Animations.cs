@@ -24,12 +24,7 @@ namespace SharpGLTF.Schema2
             _channels = new ChildrenList<AnimationChannel, Animation>(this);
             _samplers = new ChildrenList<AnimationSampler, Animation>(this);
         }
-
-        protected override IEnumerable<ExtraProperties> GetLogicalChildren()
-        {
-            return base.GetLogicalChildren().Concat(_samplers).Concat(_channels);
-        }
-
+        
         #endregion
 
         #region properties
