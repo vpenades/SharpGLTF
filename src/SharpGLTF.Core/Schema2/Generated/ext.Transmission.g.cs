@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2
 {
 	using Collections;
@@ -37,6 +42,31 @@ namespace SharpGLTF.Schema2
 	partial class MaterialTransmission : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "KHR_materials_transmission";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "transmissionFactor";
+			yield return "transmissionTexture";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "transmissionFactor": value = FIELDINFO.From("transmissionFactor",this, instance => instance._transmissionFactor ?? 0); return true;
+				case "transmissionTexture": value = FIELDINFO.From("transmissionTexture",this, instance => instance._transmissionTexture); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const Double _transmissionFactorDefault = 0;
 		private const Double _transmissionFactorMinimum = 0;
 		private const Double _transmissionFactorMaximum = 1;
@@ -44,15 +74,18 @@ namespace SharpGLTF.Schema2
 		
 		private TextureInfo _transmissionTexture;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "transmissionFactor", _transmissionFactor, _transmissionFactorDefault);
 			SerializePropertyObject(writer, "transmissionTexture", _transmissionTexture);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -61,6 +94,8 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

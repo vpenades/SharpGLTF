@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.AGI
 {
 	using Collections;
@@ -37,19 +42,47 @@ namespace SharpGLTF.Schema2.AGI
 	partial class AgiNodeStkMetadata : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "AGI_stk_metadata";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "noObscuration";
+			yield return "solarPanelGroupName";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "noObscuration": value = FIELDINFO.From("noObscuration",this, instance => instance._noObscuration); return true;
+				case "solarPanelGroupName": value = FIELDINFO.From("solarPanelGroupName",this, instance => instance._solarPanelGroupName); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private Boolean? _noObscuration;
 		
 		private String _solarPanelGroupName;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "noObscuration", _noObscuration);
 			SerializeProperty(writer, "solarPanelGroupName", _solarPanelGroupName);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -58,6 +91,8 @@ namespace SharpGLTF.Schema2.AGI
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

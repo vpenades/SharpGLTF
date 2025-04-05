@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2
 {
 	using Collections;
@@ -37,6 +42,33 @@ namespace SharpGLTF.Schema2
 	partial class MaterialAnisotropy : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "KHR_materials_anisotropy";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "anisotropyRotation";
+			yield return "anisotropyStrength";
+			yield return "anisotropyTexture";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "anisotropyRotation": value = FIELDINFO.From("anisotropyRotation",this, instance => instance._anisotropyRotation ?? 0); return true;
+				case "anisotropyStrength": value = FIELDINFO.From("anisotropyStrength",this, instance => instance._anisotropyStrength ?? 0); return true;
+				case "anisotropyTexture": value = FIELDINFO.From("anisotropyTexture",this, instance => instance._anisotropyTexture); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const Double _anisotropyRotationDefault = 0;
 		private Double? _anisotropyRotation = _anisotropyRotationDefault;
 		
@@ -47,8 +79,11 @@ namespace SharpGLTF.Schema2
 		
 		private TextureInfo _anisotropyTexture;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "anisotropyRotation", _anisotropyRotation, _anisotropyRotationDefault);
@@ -56,7 +91,7 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "anisotropyTexture", _anisotropyTexture);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -66,6 +101,8 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

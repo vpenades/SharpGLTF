@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2
 {
 	using Collections;
@@ -36,6 +41,37 @@ namespace SharpGLTF.Schema2
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MaterialPBRSpecularGlossiness : ExtraProperties
 	{
+	
+		#region reflection
+	
+		public const string SCHEMANAME = "KHR_materials_pbrSpecularGlossiness";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "diffuseFactor";
+			yield return "diffuseTexture";
+			yield return "glossinessFactor";
+			yield return "specularFactor";
+			yield return "specularGlossinessTexture";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "diffuseFactor": value = FIELDINFO.From("diffuseFactor",this, instance => instance._diffuseFactor ?? Vector4.One); return true;
+				case "diffuseTexture": value = FIELDINFO.From("diffuseTexture",this, instance => instance._diffuseTexture); return true;
+				case "glossinessFactor": value = FIELDINFO.From("glossinessFactor",this, instance => instance._glossinessFactor ?? 1); return true;
+				case "specularFactor": value = FIELDINFO.From("specularFactor",this, instance => instance._specularFactor ?? Vector3.One); return true;
+				case "specularGlossinessTexture": value = FIELDINFO.From("specularGlossinessTexture",this, instance => instance._specularGlossinessTexture); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
 	
 		private static readonly Vector4 _diffuseFactorDefault = Vector4.One;
 		private Vector4? _diffuseFactor = _diffuseFactorDefault;
@@ -52,8 +88,11 @@ namespace SharpGLTF.Schema2
 		
 		private TextureInfo _specularGlossinessTexture;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "diffuseFactor", _diffuseFactor, _diffuseFactorDefault);
@@ -63,7 +102,7 @@ namespace SharpGLTF.Schema2
 			SerializePropertyObject(writer, "specularGlossinessTexture", _specularGlossinessTexture);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -75,6 +114,8 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

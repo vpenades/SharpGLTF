@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
@@ -37,17 +42,43 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class MeshExtMeshFeatureIDTexture : TextureInfo
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "featureIdTexture";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "channels";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "channels": value = FIELDINFO.From("channels",this, instance => instance._channels); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _channelsMinItems = 1;
 		private List<Int32> _channels;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "channels", _channels, _channelsMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -55,6 +86,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -67,6 +100,39 @@ namespace SharpGLTF.Schema2.Tiles3D
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class MeshExtMeshFeatureID : ExtraProperties
 	{
+	
+		#region reflection
+	
+		public const string SCHEMANAME = "featureId";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "attribute";
+			yield return "featureCount";
+			yield return "label";
+			yield return "nullFeatureId";
+			yield return "propertyTable";
+			yield return "texture";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "attribute": value = FIELDINFO.From("attribute",this, instance => instance._attribute); return true;
+				case "featureCount": value = FIELDINFO.From("featureCount",this, instance => instance._featureCount); return true;
+				case "label": value = FIELDINFO.From("label",this, instance => instance._label); return true;
+				case "nullFeatureId": value = FIELDINFO.From("nullFeatureId",this, instance => instance._nullFeatureId); return true;
+				case "propertyTable": value = FIELDINFO.From("propertyTable",this, instance => instance._propertyTable); return true;
+				case "texture": value = FIELDINFO.From("texture",this, instance => instance._texture); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
 	
 		private Int32? _attribute;
 		
@@ -83,8 +149,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private MeshExtMeshFeatureIDTexture _texture;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "attribute", _attribute);
@@ -95,7 +164,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializePropertyObject(writer, "texture", _texture);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -109,6 +178,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 			}
 		}
 	
+		#endregion
+	
 	}
 
 	/// <summary>
@@ -121,17 +192,43 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class MeshExtMeshFeatures : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "EXT_mesh_features";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "featureIds";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "featureIds": value = FIELDINFO.From("featureIds",this, instance => instance._featureIds); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _featureIdsMinItems = 1;
 		private ChildrenList<MeshExtMeshFeatureID,MeshExtMeshFeatures> _featureIds;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "featureIds", _featureIds, _featureIdsMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -139,6 +236,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.AGI
 {
 	using Collections;
@@ -37,19 +42,47 @@ namespace SharpGLTF.Schema2.AGI
 	partial class AgiNodeArticulations : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "AGI_articulations";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "articulationName";
+			yield return "isAttachPoint";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "articulationName": value = FIELDINFO.From("articulationName",this, instance => instance._articulationName); return true;
+				case "isAttachPoint": value = FIELDINFO.From("isAttachPoint",this, instance => instance._isAttachPoint); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _articulationName;
 		
 		private Boolean? _isAttachPoint;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "articulationName", _articulationName);
 			SerializeProperty(writer, "isAttachPoint", _isAttachPoint);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -58,6 +91,8 @@ namespace SharpGLTF.Schema2.AGI
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

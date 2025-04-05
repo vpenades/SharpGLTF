@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2
 {
 	using Collections;
@@ -34,6 +39,31 @@ namespace SharpGLTF.Schema2
 	partial class PunctualLightSpot : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "spot";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "innerConeAngle";
+			yield return "outerConeAngle";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "innerConeAngle": value = FIELDINFO.From("innerConeAngle",this, instance => instance._innerConeAngle ?? 0); return true;
+				case "outerConeAngle": value = FIELDINFO.From("outerConeAngle",this, instance => instance._outerConeAngle ?? 0.7853981633974483); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const Double _innerConeAngleDefault = 0;
 		private const Double _innerConeAngleMinimum = 0;
 		private const Double _innerConeAngleExclusiveMaximum = 1.5707963267948966;
@@ -44,15 +74,18 @@ namespace SharpGLTF.Schema2
 		private const Double _outerConeAngleMaximum = 1.5707963267948966;
 		private Double? _outerConeAngle = _outerConeAngleDefault;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "innerConeAngle", _innerConeAngle, _innerConeAngleDefault);
 			SerializeProperty(writer, "outerConeAngle", _outerConeAngle, _outerConeAngleDefault);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -61,6 +94,8 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -73,6 +108,37 @@ namespace SharpGLTF.Schema2
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class PunctualLight : LogicalChildOfRoot
 	{
+	
+		#region reflection
+	
+		public const string SCHEMANAME = "light";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "color";
+			yield return "intensity";
+			yield return "range";
+			yield return "spot";
+			yield return "type";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "color": value = FIELDINFO.From("color",this, instance => instance._color ?? Vector3.One); return true;
+				case "intensity": value = FIELDINFO.From("intensity",this, instance => instance._intensity ?? 1); return true;
+				case "range": value = FIELDINFO.From("range",this, instance => instance._range); return true;
+				case "spot": value = FIELDINFO.From("spot",this, instance => instance._spot); return true;
+				case "type": value = FIELDINFO.From("type",this, instance => instance._type); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
 	
 		private static readonly Vector3 _colorDefault = Vector3.One;
 		private Vector3? _color = _colorDefault;
@@ -88,8 +154,11 @@ namespace SharpGLTF.Schema2
 		
 		private String _type;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "color", _color, _colorDefault);
@@ -99,7 +168,7 @@ namespace SharpGLTF.Schema2
 			SerializeProperty(writer, "type", _type);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -112,6 +181,8 @@ namespace SharpGLTF.Schema2
 			}
 		}
 	
+		#endregion
+	
 	}
 
 	#if NET6_0_OR_GREATER
@@ -121,17 +192,43 @@ namespace SharpGLTF.Schema2
 	partial class _ModelPunctualLights : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "KHR_lights_punctual";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "lights";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "lights": value = FIELDINFO.From("lights",this, instance => instance._lights); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _lightsMinItems = 1;
 		private ChildrenList<PunctualLight,ModelRoot> _lights;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "lights", _lights, _lightsMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -139,6 +236,8 @@ namespace SharpGLTF.Schema2
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

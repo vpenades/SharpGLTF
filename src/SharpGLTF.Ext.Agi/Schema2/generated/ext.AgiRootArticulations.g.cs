@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.AGI
 {
 	using Collections;
@@ -55,6 +60,37 @@ namespace SharpGLTF.Schema2.AGI
 	partial class AgiArticulationStage : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "stage";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "initialValue";
+			yield return "maximumValue";
+			yield return "minimumValue";
+			yield return "name";
+			yield return "type";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "initialValue": value = FIELDINFO.From("initialValue",this, instance => instance._initialValue); return true;
+				case "maximumValue": value = FIELDINFO.From("maximumValue",this, instance => instance._maximumValue); return true;
+				case "minimumValue": value = FIELDINFO.From("minimumValue",this, instance => instance._minimumValue); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "type": value = FIELDINFO.From("type",this, instance => instance._type); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private Double _initialValue;
 		
 		private Double _maximumValue;
@@ -65,8 +101,11 @@ namespace SharpGLTF.Schema2.AGI
 		
 		private AgiArticulationTransformType _type;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "initialValue", _initialValue);
@@ -76,7 +115,7 @@ namespace SharpGLTF.Schema2.AGI
 			SerializePropertyEnumSymbol<AgiArticulationTransformType>(writer, "type", _type);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -88,6 +127,8 @@ namespace SharpGLTF.Schema2.AGI
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -101,6 +142,33 @@ namespace SharpGLTF.Schema2.AGI
 	partial class AgiArticulation : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "articulation";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "name";
+			yield return "pointingVector";
+			yield return "stages";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "pointingVector": value = FIELDINFO.From("pointingVector",this, instance => instance._pointingVector); return true;
+				case "stages": value = FIELDINFO.From("stages",this, instance => instance._stages); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _name;
 		
 		private Vector3? _pointingVector;
@@ -108,8 +176,11 @@ namespace SharpGLTF.Schema2.AGI
 		private const int _stagesMinItems = 1;
 		private ChildrenList<AgiArticulationStage,AgiArticulation> _stages;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "name", _name);
@@ -117,7 +188,7 @@ namespace SharpGLTF.Schema2.AGI
 			SerializeProperty(writer, "stages", _stages, _stagesMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -127,6 +198,8 @@ namespace SharpGLTF.Schema2.AGI
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -140,17 +213,43 @@ namespace SharpGLTF.Schema2.AGI
 	partial class AgiRootArticulations : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "AGI_articulations";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "articulations";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "articulations": value = FIELDINFO.From("articulations",this, instance => instance._articulations); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _articulationsMinItems = 1;
 		private ChildrenList<AgiArticulation,AgiRootArticulations> _articulations;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "articulations", _articulations, _articulationsMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -158,6 +257,8 @@ namespace SharpGLTF.Schema2.AGI
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

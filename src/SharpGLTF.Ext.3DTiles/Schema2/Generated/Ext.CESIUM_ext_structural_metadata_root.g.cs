@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
@@ -101,6 +106,59 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class StructuralMetadataClassProperty : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "property";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "array";
+			yield return "componentType";
+			yield return "count";
+			yield return "default";
+			yield return "description";
+			yield return "enumType";
+			yield return "max";
+			yield return "min";
+			yield return "name";
+			yield return "noData";
+			yield return "normalized";
+			yield return "offset";
+			yield return "required";
+			yield return "scale";
+			yield return "semantic";
+			yield return "type";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "array": value = FIELDINFO.From("array",this, instance => instance._array ?? false); return true;
+				case "componentType": value = FIELDINFO.From("componentType",this, instance => instance._componentType); return true;
+				case "count": value = FIELDINFO.From("count",this, instance => instance._count); return true;
+				case "default": value = FIELDINFO.From("default",this, instance => instance._default); return true;
+				case "description": value = FIELDINFO.From("description",this, instance => instance._description); return true;
+				case "enumType": value = FIELDINFO.From("enumType",this, instance => instance._enumType); return true;
+				case "max": value = FIELDINFO.From("max",this, instance => instance._max); return true;
+				case "min": value = FIELDINFO.From("min",this, instance => instance._min); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "noData": value = FIELDINFO.From("noData",this, instance => instance._noData); return true;
+				case "normalized": value = FIELDINFO.From("normalized",this, instance => instance._normalized ?? false); return true;
+				case "offset": value = FIELDINFO.From("offset",this, instance => instance._offset); return true;
+				case "required": value = FIELDINFO.From("required",this, instance => instance._required ?? false); return true;
+				case "scale": value = FIELDINFO.From("scale",this, instance => instance._scale); return true;
+				case "semantic": value = FIELDINFO.From("semantic",this, instance => instance._semantic); return true;
+				case "type": value = FIELDINFO.From("type",this, instance => instance._type); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private static readonly Boolean _arrayDefault = false;
 		private Boolean? _array = _arrayDefault;
 		
@@ -137,8 +195,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private ElementType _type;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "array", _array, _arrayDefault);
@@ -159,7 +220,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializePropertyEnumSymbol<ElementType>(writer, "type", _type);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -183,6 +244,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 			}
 		}
 	
+		#endregion
+	
 	}
 
 	/// <summary>
@@ -195,14 +258,44 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class StructuralMetadataClass : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "class";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "description";
+			yield return "name";
+			yield return "properties";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "description": value = FIELDINFO.From("description",this, instance => instance._description); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "properties": value = FIELDINFO.From("properties",this, instance => instance._properties); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _description;
 		
 		private String _name;
 		
 		private ChildrenDictionary<StructuralMetadataClassProperty,StructuralMetadataClass> _properties;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "description", _description);
@@ -210,7 +303,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "properties", _properties);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -220,6 +313,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -233,14 +328,44 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class StructuralMetadataEnumValue : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "value";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "description";
+			yield return "name";
+			yield return "value";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "description": value = FIELDINFO.From("description",this, instance => instance._description); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "value": value = FIELDINFO.From("value",this, instance => instance._value); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _description;
 		
 		private String _name;
 		
 		private Int32 _value;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "description", _description);
@@ -248,7 +373,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "value", _value);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -258,6 +383,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -271,6 +398,35 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class StructuralMetadataEnum : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "enum";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "description";
+			yield return "name";
+			yield return "valueType";
+			yield return "values";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "description": value = FIELDINFO.From("description",this, instance => instance._description); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "valueType": value = FIELDINFO.From("valueType",this, instance => instance._valueType ?? IntegerType.UINT16); return true;
+				case "values": value = FIELDINFO.From("values",this, instance => instance._values); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _description;
 		
 		private String _name;
@@ -281,8 +437,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		private const int _valuesMinItems = 1;
 		private ChildrenList<StructuralMetadataEnumValue,StructuralMetadataEnum> _values;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "description", _description);
@@ -291,7 +450,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "values", _values, _valuesMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -302,6 +461,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -315,6 +476,39 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class StructuralMetadataSchema : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "schema";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "classes";
+			yield return "description";
+			yield return "enums";
+			yield return "id";
+			yield return "name";
+			yield return "version";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "classes": value = FIELDINFO.From("classes",this, instance => instance._classes); return true;
+				case "description": value = FIELDINFO.From("description",this, instance => instance._description); return true;
+				case "enums": value = FIELDINFO.From("enums",this, instance => instance._enums); return true;
+				case "id": value = FIELDINFO.From("id",this, instance => instance._id); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "version": value = FIELDINFO.From("version",this, instance => instance._version); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private ChildrenDictionary<StructuralMetadataClass,StructuralMetadataSchema> _classes;
 		
 		private String _description;
@@ -327,8 +521,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private String _version;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "classes", _classes);
@@ -339,7 +536,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "version", _version);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -353,6 +550,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 			}
 		}
 	
+		#endregion
+	
 	}
 
 	/// <summary>
@@ -364,6 +563,45 @@ namespace SharpGLTF.Schema2.Tiles3D
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class PropertyTableProperty : ExtraProperties
 	{
+	
+		#region reflection
+	
+		public const string SCHEMANAME = "property";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "arrayOffsetType";
+			yield return "arrayOffsets";
+			yield return "max";
+			yield return "min";
+			yield return "offset";
+			yield return "scale";
+			yield return "stringOffsetType";
+			yield return "stringOffsets";
+			yield return "values";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "arrayOffsetType": value = FIELDINFO.From("arrayOffsetType",this, instance => instance._arrayOffsetType ?? ArrayOffsetType.UINT32); return true;
+				case "arrayOffsets": value = FIELDINFO.From("arrayOffsets",this, instance => instance._arrayOffsets); return true;
+				case "max": value = FIELDINFO.From("max",this, instance => instance._max); return true;
+				case "min": value = FIELDINFO.From("min",this, instance => instance._min); return true;
+				case "offset": value = FIELDINFO.From("offset",this, instance => instance._offset); return true;
+				case "scale": value = FIELDINFO.From("scale",this, instance => instance._scale); return true;
+				case "stringOffsetType": value = FIELDINFO.From("stringOffsetType",this, instance => instance._stringOffsetType ?? ArrayOffsetType.UINT32); return true;
+				case "stringOffsets": value = FIELDINFO.From("stringOffsets",this, instance => instance._stringOffsets); return true;
+				case "values": value = FIELDINFO.From("values",this, instance => instance._values); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
 	
 		private const ArrayOffsetType _arrayOffsetTypeDefault = ArrayOffsetType.UINT32;
 		private ArrayOffsetType? _arrayOffsetType = _arrayOffsetTypeDefault;
@@ -385,8 +623,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private Int32 _values;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializePropertyEnumSymbol<ArrayOffsetType>(writer, "arrayOffsetType", _arrayOffsetType, _arrayOffsetTypeDefault);
@@ -400,7 +641,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "values", _values);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -417,6 +658,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 			}
 		}
 	
+		#endregion
+	
 	}
 
 	/// <summary>
@@ -429,6 +672,35 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class PropertyTable : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "propertyTable";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "class";
+			yield return "count";
+			yield return "name";
+			yield return "properties";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "class": value = FIELDINFO.From("class",this, instance => instance._class); return true;
+				case "count": value = FIELDINFO.From("count",this, instance => instance._count); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "properties": value = FIELDINFO.From("properties",this, instance => instance._properties); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _class;
 		
 		private const Int32 _countMinimum = 1;
@@ -438,8 +710,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private ChildrenDictionary<PropertyTableProperty,PropertyTable> _properties;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "class", _class);
@@ -448,7 +723,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "properties", _properties);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -459,6 +734,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -472,6 +749,37 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class PropertyTextureProperty : TextureInfo
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "propertyTexture";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "channels";
+			yield return "max";
+			yield return "min";
+			yield return "offset";
+			yield return "scale";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "channels": value = FIELDINFO.From("channels",this, instance => instance._channels); return true;
+				case "max": value = FIELDINFO.From("max",this, instance => instance._max); return true;
+				case "min": value = FIELDINFO.From("min",this, instance => instance._min); return true;
+				case "offset": value = FIELDINFO.From("offset",this, instance => instance._offset); return true;
+				case "scale": value = FIELDINFO.From("scale",this, instance => instance._scale); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _channelsMinItems = 1;
 		private List<Int32> _channels;
 		
@@ -483,8 +791,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private System.Text.Json.Nodes.JsonNode _scale;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "channels", _channels, _channelsMinItems);
@@ -494,7 +805,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "scale", _scale);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -506,6 +817,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -519,14 +832,44 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class PropertyTexture : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "propertyTexture";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "class";
+			yield return "name";
+			yield return "properties";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "class": value = FIELDINFO.From("class",this, instance => instance._class); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "properties": value = FIELDINFO.From("properties",this, instance => instance._properties); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _class;
 		
 		private String _name;
 		
 		private ChildrenDictionary<PropertyTextureProperty,PropertyTexture> _properties;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "class", _class);
@@ -534,7 +877,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "properties", _properties);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -544,6 +887,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -557,6 +902,37 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class PropertyAttributeProperty : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "property";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "attribute";
+			yield return "max";
+			yield return "min";
+			yield return "offset";
+			yield return "scale";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "attribute": value = FIELDINFO.From("attribute",this, instance => instance._attribute); return true;
+				case "max": value = FIELDINFO.From("max",this, instance => instance._max); return true;
+				case "min": value = FIELDINFO.From("min",this, instance => instance._min); return true;
+				case "offset": value = FIELDINFO.From("offset",this, instance => instance._offset); return true;
+				case "scale": value = FIELDINFO.From("scale",this, instance => instance._scale); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _attribute;
 		
 		private System.Text.Json.Nodes.JsonNode _max;
@@ -567,8 +943,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private System.Text.Json.Nodes.JsonNode _scale;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "attribute", _attribute);
@@ -578,7 +957,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "scale", _scale);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -590,6 +969,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -603,14 +984,44 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class PropertyAttribute : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "propertyAttribute";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "class";
+			yield return "name";
+			yield return "properties";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "class": value = FIELDINFO.From("class",this, instance => instance._class); return true;
+				case "name": value = FIELDINFO.From("name",this, instance => instance._name); return true;
+				case "properties": value = FIELDINFO.From("properties",this, instance => instance._properties); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private String _class;
 		
 		private String _name;
 		
 		private ChildrenDictionary<PropertyAttributeProperty,PropertyAttribute> _properties;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "class", _class);
@@ -618,7 +1029,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "properties", _properties);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -628,6 +1039,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
@@ -640,6 +1053,37 @@ namespace SharpGLTF.Schema2.Tiles3D
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
 	partial class EXTStructuralMetadataRoot : ExtraProperties
 	{
+	
+		#region reflection
+	
+		public const string SCHEMANAME = "EXT_structural_metadata";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "propertyAttributes";
+			yield return "propertyTables";
+			yield return "propertyTextures";
+			yield return "schema";
+			yield return "schemaUri";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "propertyAttributes": value = FIELDINFO.From("propertyAttributes",this, instance => instance._propertyAttributes); return true;
+				case "propertyTables": value = FIELDINFO.From("propertyTables",this, instance => instance._propertyTables); return true;
+				case "propertyTextures": value = FIELDINFO.From("propertyTextures",this, instance => instance._propertyTextures); return true;
+				case "schema": value = FIELDINFO.From("schema",this, instance => instance._schema); return true;
+				case "schemaUri": value = FIELDINFO.From("schemaUri",this, instance => instance._schemaUri); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
 	
 		private const int _propertyAttributesMinItems = 1;
 		private ChildrenList<PropertyAttribute,EXTStructuralMetadataRoot> _propertyAttributes;
@@ -654,8 +1098,11 @@ namespace SharpGLTF.Schema2.Tiles3D
 		
 		private String _schemaUri;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "propertyAttributes", _propertyAttributes, _propertyAttributesMinItems);
@@ -665,7 +1112,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 			SerializeProperty(writer, "schemaUri", _schemaUri);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -677,6 +1124,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 

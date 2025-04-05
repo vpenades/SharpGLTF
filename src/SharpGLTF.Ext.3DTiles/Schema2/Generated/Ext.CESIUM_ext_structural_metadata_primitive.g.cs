@@ -23,6 +23,11 @@ using System.Text;
 using System.Numerics;
 using System.Text.Json;
 
+using JSONREADER = System.Text.Json.Utf8JsonReader;
+using JSONWRITER = System.Text.Json.Utf8JsonWriter;
+using FIELDINFO = SharpGLTF.Reflection.FieldInfo;
+
+
 namespace SharpGLTF.Schema2.Tiles3D
 {
 	using Collections;
@@ -37,21 +42,49 @@ namespace SharpGLTF.Schema2.Tiles3D
 	partial class ExtStructuralMetadataMeshPrimitive : ExtraProperties
 	{
 	
+		#region reflection
+	
+		public const string SCHEMANAME = "EXT_structural_metadata";
+		protected override string GetSchemaName() => SCHEMANAME;
+	
+		protected override IEnumerable<string> ReflectFieldsNames()
+		{
+			yield return "propertyAttributes";
+			yield return "propertyTextures";
+			foreach(var f in base.ReflectFieldsNames()) yield return f;
+		}
+		protected override bool TryReflectField(string name, out FIELDINFO value)
+		{
+			switch(name)
+			{
+				case "propertyAttributes": value = FIELDINFO.From("propertyAttributes",this, instance => instance._propertyAttributes); return true;
+				case "propertyTextures": value = FIELDINFO.From("propertyTextures",this, instance => instance._propertyTextures); return true;
+				default: return base.TryReflectField(name, out value);
+			}
+		}
+	
+		#endregion
+	
+		#region data
+	
 		private const int _propertyAttributesMinItems = 1;
 		private List<Int32> _propertyAttributes;
 		
 		private const int _propertyTexturesMinItems = 1;
 		private List<Int32> _propertyTextures;
 		
+		#endregion
 	
-		protected override void SerializeProperties(Utf8JsonWriter writer)
+		#region serialization
+	
+		protected override void SerializeProperties(JSONWRITER writer)
 		{
 			base.SerializeProperties(writer);
 			SerializeProperty(writer, "propertyAttributes", _propertyAttributes, _propertyAttributesMinItems);
 			SerializeProperty(writer, "propertyTextures", _propertyTextures, _propertyTexturesMinItems);
 		}
 	
-		protected override void DeserializeProperty(string jsonPropertyName, ref Utf8JsonReader reader)
+		protected override void DeserializeProperty(string jsonPropertyName, ref JSONREADER reader)
 		{
 			switch (jsonPropertyName)
 			{
@@ -60,6 +93,8 @@ namespace SharpGLTF.Schema2.Tiles3D
 				default: base.DeserializeProperty(jsonPropertyName,ref reader); break;
 			}
 		}
+	
+		#endregion
 	
 	}
 
