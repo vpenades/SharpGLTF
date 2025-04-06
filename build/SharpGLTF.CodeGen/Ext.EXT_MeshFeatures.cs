@@ -22,7 +22,7 @@ namespace SharpGLTF
             newEmitter.SetFieldToChildrenList(ctx, "EXT_mesh_features glTF Mesh Primitive extension", "featureIds");
         }
     
-        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
+        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> ReadSchema()
         {
             yield return ("Ext.CESIUM_ext_mesh_features.g", ProcessNode());
         }

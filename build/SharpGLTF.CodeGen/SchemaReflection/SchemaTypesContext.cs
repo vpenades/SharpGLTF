@@ -93,8 +93,18 @@ namespace SharpGLTF.SchemaReflection
             {
                 var ct = Classes.FirstOrDefault(item => item.PersistentName == persistentName);
 
-                if (ct != null) ct.IgnoredByEmitter = true;
+                if (ct != null) ct.IgnoredByEmitter = true;            
             }
+
+            public void IgnoredByCodeEmittierMainSchema()
+            {
+                IgnoredByCodeEmitter("glTF Property");                
+                IgnoredByCodeEmitter("glTF Child of Root Property");
+                IgnoredByCodeEmitter("Texture Info");
+                IgnoredByCodeEmitter("Material Normal Texture Info");
+            }
+
+
 
             #endregion
         }

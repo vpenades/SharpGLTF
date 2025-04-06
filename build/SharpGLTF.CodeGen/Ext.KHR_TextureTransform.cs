@@ -12,11 +12,9 @@ namespace SharpGLTF
 
         private const string ExtensionRootClassName = "KHR_texture_transform glTF TextureInfo Extension";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);
 
             var tex = ctx.FindClass(ExtensionRootClassName);
 

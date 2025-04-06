@@ -9,10 +9,9 @@ namespace SharpGLTF
     class TextureDDSExtension : SchemaProcessor
     {
         private static string SchemaUri => Constants.VendorExtensionPath("MSFT_texture_dds", "glTF.MSFT_texture_dds.schema.json");
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);
 
             yield return ("ext.MSFT.TextureDDS.g", ctx);
         }

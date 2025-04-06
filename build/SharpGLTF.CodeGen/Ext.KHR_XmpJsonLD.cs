@@ -17,7 +17,7 @@ namespace SharpGLTF
         private const string ExtensionRootClassName = "KHR_xmp_json_ld glTF Document Extension";
         private const string ExtensionPropClassName = "KHR_xmp_json_ld glTF Extension";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
             yield return ("ext.XmpJsonLinkedData.Root.g", ProcessModel());
             yield return ("ext.XmpJsonLinkedData.Prop.g", ProcessProps());
@@ -25,9 +25,7 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessModel()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
 
             var packets = ctx.FindClass(ExtensionRootClassName).GetField("packets");
 
@@ -36,9 +34,8 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessProps()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(PropSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(PropSchemaUri);
+
             return ctx;
         }
 

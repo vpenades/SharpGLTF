@@ -9,10 +9,9 @@ namespace SharpGLTF
     class TextureWebpExtension : SchemaProcessor
     {
         private static string SchemaUri => Constants.VendorExtensionPath("EXT_texture_webp", "glTF.EXT_texture_webp.schema.json");
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);            
 
             yield return ("ext.TextureWEBP.g", ctx);
         }

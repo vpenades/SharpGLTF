@@ -15,16 +15,14 @@ namespace SharpGLTF
             newEmitter.SetRuntimeName("CESIUM_primitive_outline glTF primitive extension", "CesiumPrimitiveOutline", Constants.CesiumNameSpace);
         }        
 
-        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
+        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> ReadSchema()
         {
             yield return ("Ext.CESIUM_primitive_outline.g", ProcessRoot());
         }
 
         private static SchemaType.Context ProcessRoot()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
 
             return ctx;
         }

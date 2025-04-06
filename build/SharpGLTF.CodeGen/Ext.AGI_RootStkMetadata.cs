@@ -12,7 +12,7 @@ namespace SharpGLTF
         private static string RootSchemaUri => Constants.VendorExtensionPath("AGI_stk_metadata", "glTF.AGI_stk_metadata.schema.json");
         private static string NodeSchemaUri => Constants.VendorExtensionPath("AGI_stk_metadata", "node.AGI_stk_metadata.schema.json");
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
             yield return ("ext.AgiRootStkMetadata.g", ProcessRoot());
             yield return ("ext.AgiNodeStkMetadata.g", ProcessNode());
@@ -20,17 +20,13 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessRoot()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
             return ctx;
         }
 
         private static SchemaType.Context ProcessNode()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(NodeSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(NodeSchemaUri);            
             return ctx;
         }
 

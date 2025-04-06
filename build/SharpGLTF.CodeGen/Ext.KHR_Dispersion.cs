@@ -12,11 +12,9 @@ namespace SharpGLTF
 
         private const string ExtensionRootClassName = "KHR_materials_dispersion glTF Material Extension";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");            
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);   
 
             yield return ("ext.Dispersion.g", ctx);
         }

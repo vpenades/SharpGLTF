@@ -18,6 +18,13 @@ namespace SharpGLTF
     {
         #region schema loader
 
+        public static SchemaType.Context LoadExtensionSchemaContext(string srcSchema)
+        {
+            var context = LoadSchemaContext(srcSchema);
+            context.IgnoredByCodeEmittierMainSchema();
+            return context;
+        }
+
         public static SchemaType.Context LoadSchemaContext(string srcSchema)
         {
             var schema = LoadSchema(srcSchema);

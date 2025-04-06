@@ -14,13 +14,9 @@ namespace SharpGLTF
 
         private const string ExtensionRootClassName = "KHR_materials_iridescence glTF Material Extension";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
-            ctx.IgnoredByCodeEmitter("Texture Info");
-            ctx.IgnoredByCodeEmitter("Material Normal Texture Info");            
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);    
 
             yield return ("ext.Iridescence.g", ctx);
         }

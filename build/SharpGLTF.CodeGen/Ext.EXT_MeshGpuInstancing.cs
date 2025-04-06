@@ -9,11 +9,9 @@ namespace SharpGLTF
     class MeshGpuInstancingExtension : SchemaProcessor
     {
         private static string SchemaUri => Constants.VendorExtensionPath("EXT_mesh_gpu_instancing", "glTF.EXT_mesh_gpu_instancing.schema.json");
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);
 
             yield return ("ext.MeshGpuInstancing.g", ctx);
         }

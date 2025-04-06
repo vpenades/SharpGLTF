@@ -74,7 +74,7 @@ namespace SharpGLTF
 
             foreach (var processor in processors)
             {
-                foreach (var (targetFileName, schema) in processor.Process())
+                foreach (var (targetFileName, schema) in processor.ReadSchema())
                 {
                     System.Console.WriteLine($"Emitting {targetFileName}...");
 

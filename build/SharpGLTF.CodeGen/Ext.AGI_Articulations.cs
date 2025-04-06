@@ -12,7 +12,7 @@ namespace SharpGLTF
         private static string RootSchemaUri => Constants.VendorExtensionPath("AGI_articulations", "glTF.AGI_articulations.schema.json");
         private static string NodeSchemaUri => Constants.VendorExtensionPath("AGI_articulations", "node.AGI_articulations.schema.json");
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
             yield return ("ext.AgiRootArticulations.g", ProcessRoot());
             yield return ("ext.AgiNodeArticulations.g", ProcessNode());
@@ -20,9 +20,7 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessRoot()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
 
             ctx.FindClass("Articulation")
                 .GetField("pointingVector")
@@ -34,9 +32,7 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessNode()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(NodeSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(NodeSchemaUri);
 
             return ctx;
         }

@@ -13,6 +13,32 @@ namespace SharpGLTF
         private static string RootSchemaUri => Constants.CustomExtensionsPath("EXT_structural_metadata", "glTF.EXT_structural_metadata.schema.json");
         private static string MeshPrimitiveSchemaUri => Constants.CustomExtensionsPath("EXT_structural_metadata", "mesh.primitive.EXT_structural_metadata.schema.json");
 
+        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> ReadSchema()
+        {
+            yield return ("Ext.CESIUM_ext_structural_metadata_root.g", ProcessRoot());
+            yield return ("Ext.CESIUM_ext_structural_metadata_primitive.g", ProcessMeshPrimitive());
+        }
+
+        private static SchemaType.Context ProcessRoot()
+        {
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
+
+            // for now we simply remove the default value, it can be set
+            // in the constructor or on demand when the APIs are Called.
+            var fld = ctx.FindClass(ExtensionPropertyTexturePropertyName).GetField("channels");
+            fld.RemoveDefaultValue();
+
+            return ctx;
+        }
+
+        private static SchemaType.Context ProcessMeshPrimitive()
+        {
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(MeshPrimitiveSchemaUri);
+            return ctx;
+        }
+
+
+
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
             newEmitter.SetRuntimeName("EXT_structural_metadata glTF Mesh Primitive extension", "ExtStructuralMetadataMeshPrimitive", Constants.CesiumNameSpace);
@@ -50,35 +76,7 @@ namespace SharpGLTF
             newEmitter.SetFieldToChildrenDictionary(ctx, "Schema in EXT_structural_metadata", "enums");
         }
 
-        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
-        {
-            yield return ("Ext.CESIUM_ext_structural_metadata_root.g", ProcessRoot());
-            yield return ("Ext.CESIUM_ext_structural_metadata_primitive.g", ProcessMeshPrimitive());
-        }
-
-        private static SchemaType.Context ProcessRoot()
-        {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
-            ctx.IgnoredByCodeEmitter("Texture Info");
-            var fld = ctx.FindClass(ExtensionPropertyTexturePropertyName).GetField("channels");
-
-            // for now we simply remove the default value, it can be set
-            // in the constructor or on demand when the APIs are Called.
-            fld.RemoveDefaultValue();
-
-            return ctx;
-        }
-
-        private static SchemaType.Context ProcessMeshPrimitive()
-        {
-            var ctx = SchemaProcessing.LoadSchemaContext(MeshPrimitiveSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
-            ctx.IgnoredByCodeEmitter("Texture Info");
-            return ctx;
-        }
+        
 
 
     }

@@ -16,22 +16,21 @@ namespace SharpGLTF
         private const string ExtensionLightClassName = "KHR_lights_punctual Light Properties";
         private const string ExtensionLightSpotClassName = "KHR_lights_punctual Light Spot Properties";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {            
             yield return ("ext.ModelLightsPunctual.g", ProcessModel());
             yield return ("ext.NodeLightsPunctual.g", ProcessNode());
         }
         private static SchemaType.Context ProcessModel()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(RootSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(RootSchemaUri);
 
             ctx.FindClass(ExtensionLightClassName)
                 .GetField("color")
                 .SetDataType(typeof(System.Numerics.Vector3), true)
                 .SetDefaultValue("Vector3.One")
                 .SetItemsRange(0);
+
             return ctx;
         }
 

@@ -10,7 +10,7 @@ namespace SharpGLTF
 {
     class MainSchemaProcessor : SchemaProcessor
     {
-        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
+        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> ReadSchema()
         {
             // load and process schema
             var ctx = SchemaProcessing.LoadSchemaContext(Constants.MainSchemaFile);

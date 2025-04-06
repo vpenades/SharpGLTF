@@ -18,17 +18,14 @@ namespace SharpGLTF
             newEmitter.SetFieldToChildrenList(ctx, "EXT_instance_features glTF Node extension", "featureIds");
         }
 
-        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> Process()
+        public override IEnumerable<(string TargetFileName, SchemaType.Context Schema)> ReadSchema()
         {
             yield return ("Ext.CESIUM_ext_instance_features.g", ProcessNode());
         }
 
         private static SchemaType.Context ProcessNode()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(NodeSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
-            ctx.IgnoredByCodeEmitter("Texture Info");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(NodeSchemaUri);
             return ctx;
         }
     }

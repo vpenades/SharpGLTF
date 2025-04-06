@@ -14,10 +14,9 @@ namespace SharpGLTF
 
         private const string ExtensionRootClassName = "KHR_animation_pointer glTF Animation Channel Target Extension";
 
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");            
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);
 
             yield return ("ext.AnimPointer.g", ctx);
         }

@@ -9,12 +9,9 @@ namespace SharpGLTF
     class SpecularGlossinessExtension : SchemaProcessor
     {
         private static string SchemaUri => Constants.ArchivedExtensionPath("KHR_materials_pbrSpecularGlossiness", "glTF.KHR_materials_pbrSpecularGlossiness.schema.json");
-        public override IEnumerable<(string, SchemaType.Context)> Process()
+        public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(SchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
-            ctx.IgnoredByCodeEmitter("Texture Info");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(SchemaUri);
 
             ctx.FindClass("KHR_materials_pbrSpecularGlossiness glTF extension")
                 .GetField("diffuseFactor")
