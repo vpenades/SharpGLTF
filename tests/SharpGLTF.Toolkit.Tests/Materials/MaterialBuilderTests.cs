@@ -110,6 +110,8 @@ namespace SharpGLTF.Materials
             // https://github.com/vpenades/SharpGLTF/issues/246
             material.IndexOfRefraction = 7;
 
+            material.Dispersion = 2;
+
             Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
             Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
 

@@ -40,6 +40,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit", p => new MaterialUnlit(p));
             RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen", p => new MaterialSheen(p));
             RegisterExtension<Material, MaterialIOR>("KHR_materials_ior", p => new MaterialIOR(p));
+            RegisterExtension<Material, MaterialDispersion>("KHR_materials_dispersion", p => new MaterialDispersion(p));
             RegisterExtension<Material, MaterialSpecular>("KHR_materials_specular", p => new MaterialSpecular(p));
             RegisterExtension<Material, MaterialClearCoat>("KHR_materials_clearcoat", p => new MaterialClearCoat(p));
             RegisterExtension<Material, MaterialTransmission>("KHR_materials_transmission", p => new MaterialTransmission(p));
@@ -174,8 +175,10 @@ namespace SharpGLTF.Schema2
             return null;
         }
 
+        [System.Diagnostics.DebuggerDisplay("{Name} {ParentType} {ExtType}")]
         internal readonly struct ExtensionEntry
         {
+            #region lifecycle
             public static ExtensionEntry Create
                 <
                 TParent,
@@ -213,10 +216,18 @@ namespace SharpGLTF.Schema2
                 Factory = f;
             }
 
+            #endregion
+
+            #region data
+
             public readonly string Name;
             public readonly Type ParentType;
             public readonly Type ExtType;
             public readonly Func<JsonSerializable, JsonSerializable> Factory;
+
+            #endregion
+
+            #region API
 
             public readonly bool IsMatch(Type parentType, string extensionName)
             {
@@ -227,6 +238,8 @@ namespace SharpGLTF.Schema2
             {
                 return this.ParentType.IsAssignableFrom(parentType) && this.ExtType == extensionType;
             }
+
+            #endregion
         }
 
         #endregion

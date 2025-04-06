@@ -77,8 +77,8 @@ namespace SharpGLTF.Schema2
                 if (this.GetExtension<MaterialUnlit>() != null) return;
                 if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) return;
 
-                // setting the IOR to its default value essentially
-                // makes the extension unneccesary
+                // setting the IOR to its default value
+                // essentially makes the extension unneccesary.
                 if (value == MaterialIOR.DefaultIndexOfRefraction)
                 {
                     this.RemoveExtensions<MaterialIOR>();
@@ -89,10 +89,36 @@ namespace SharpGLTF.Schema2
             }
         }
 
+        /// <summary>
+        /// Gets or sets the Dispersion.
+        /// </summary>
+        /// <remarks>
+        /// This property backs KHR_Materials_Dispersion extension.
+        /// </remarks>
+        public float Dispersion
+        {
+            get => this.GetExtension<MaterialDispersion>()?.Dispersion ?? MaterialDispersion.DefaultDispersion;
+            set
+            {
+                if (this.GetExtension<MaterialUnlit>() != null) return;
+                if (this.GetExtension<MaterialPBRSpecularGlossiness>() != null) return;
+
+                // setting the Dispersion to its default value
+                // essentially makes the extension unneccesary.
+                if (value == MaterialDispersion.DefaultDispersion)
+                {
+                    this.RemoveExtensions<MaterialDispersion>();
+                    return;
+                }
+
+                this.UseExtension<MaterialDispersion>().Dispersion = value;
+            }
+        }
+
         #endregion
 
         #region API
-        
+
         /// <summary>
         /// Finds an instance of <see cref="MaterialChannel"/>
         /// </summary>

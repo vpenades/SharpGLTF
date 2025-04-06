@@ -477,6 +477,31 @@ namespace SharpGLTF.Schema2
         }
     }
 
+    /// <remarks>
+    /// Mapped straight away to <see cref="Material.Dispersion"/>
+    /// </remarks>    
+    internal sealed partial class MaterialDispersion
+    {
+        #pragma warning disable CA1801 // Review unused parameters
+        internal MaterialDispersion(Material material) { }
+        #pragma warning restore CA1801 // Review unused parameters
+
+        protected override void OnValidateContent(ValidationContext validate)
+        {
+            base.OnValidateContent(validate);
+            
+            if (_dispersion < _dispersionMinimum) throw new ArgumentOutOfRangeException(nameof(Dispersion));
+        }
+
+        public static float DefaultDispersion => (float)_dispersionDefault;
+
+        public float Dispersion
+        {
+            get => (float)(this._dispersion ?? _dispersionDefault);
+            set => this._dispersion = Math.Max(_dispersionMinimum, value).AsNullable(_dispersionDefault);
+        }
+    }
+
     internal sealed partial class MaterialSpecular
     {
         #pragma warning disable CA1801 // Review unused parameters

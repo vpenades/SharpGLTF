@@ -310,7 +310,9 @@ namespace SharpGLTF.Schema2
             dstMaterial.AlphaMode = srcMaterial.Alpha.ToToolkit();
             dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
             dstMaterial.DoubleSided = srcMaterial.DoubleSided;
+            dstMaterial.Dispersion = srcMaterial.Dispersion;
             dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
+            
 
             srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
         }
@@ -457,6 +459,10 @@ namespace SharpGLTF.Schema2
                 defMaterial = srcMaterial.CompatibilityFallback;
             }
 
+            // Dispersion must be set after dst material initialization,
+            // otherwise it's erased since it's stored in an extension
+            dstMaterial.Dispersion = srcMaterial.Dispersion;
+
             // IOR must be set after dst material initialization,
             // otherwise it's erased since it's stored in an extension
             dstMaterial.IndexOfRefraction = srcMaterial.IndexOfRefraction;
@@ -477,6 +483,7 @@ namespace SharpGLTF.Schema2
 
             // final validation
 
+            System.Diagnostics.Debug.Assert(dstMaterial.Dispersion == srcMaterial.Dispersion, "set Dispersion after dst material initialization");
             System.Diagnostics.Debug.Assert(dstMaterial.IndexOfRefraction == srcMaterial.IndexOfRefraction, "set IOR after dst material initialization");            
         }
 
