@@ -44,7 +44,7 @@ namespace SharpGLTF.Materials
             bag.Add(clnMaterial);
 
             Assert.That(bag, Has.Count.EqualTo(2));
-        }
+        }        
 
         [Test]
         public void CreateUnlit()
@@ -53,64 +53,6 @@ namespace SharpGLTF.Materials
 
             Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
             Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
-        }        
-
-        [Test]
-        public void CreateMetallicRoughness()
-        {
-            var material = _CreateMetallicRoughnessMaterial();
-
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
-        }        
-
-        [Test]
-        public void CreateClearCoat()
-        {
-            var material = _CreateClearCoatMaterial();
-
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
-        }        
-
-        [Test]
-        public void CreateVolume()
-        {
-            var material = _CreateVolumeMaterial();
-
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
-        }        
-
-        [Test]
-        public void CreateSpecularGlossiness()
-        {
-            var material = _CreateSpecularGlossinessMaterial();
-
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
-        }        
-
-        [Test]
-        public void CreateSpecularGlossinessWithFallback()
-        {
-            var material = _CreateSpecularGlossinessMaterialWithFallback();
-
-            // check
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
-        }
-
-        [Test]
-        public void CreateIORWithFallback()
-        {
-            // https://github.com/vpenades/SharpGLTF/issues/246
-
-            var material = new MaterialBuilder("MaterialWithIOR");
-            material.IndexOfRefraction = 7;
-
-            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
-            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);            
         }
 
         private static MaterialBuilder _CreateUnlitMaterial()
@@ -127,12 +69,21 @@ namespace SharpGLTF.Materials
             return material;
         }
 
+        [Test]
+        public void CreateMetallicRoughness()
+        {
+            var material = _CreateMetallicRoughnessMaterial();
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }        
+
         private static MaterialBuilder _CreateMetallicRoughnessMaterial()
         {
             var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder("Metallic Roughness Material")
-                .WithAlpha(AlphaMode.MASK, 0.6f)
+                .WithAlpha(AlphaMode.MASK, 0.6f) // Note: this is just an example, for a default opaque material, use WithAlpha(AlphaMode.OPAQUE, 0.5)
                 .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f), 6)
                 .WithNormal(tex1, 0.3f)
                 .WithOcclusion(tex1, 0.4f);
@@ -151,66 +102,139 @@ namespace SharpGLTF.Materials
             return material;
         }
 
-        private static MaterialBuilder _CreateVolumeMaterial()
+        [Test]
+        public void CreateMaterialWithExtensions()
         {
-            var tex1 = ResourceInfo.From("shannon.png").FilePath;
+            var material = _CreateMetallicRoughnessMaterial();
 
-            var material = new MaterialBuilder("Volume Material")
-                .WithAlpha(AlphaMode.MASK, 0.6f);
+            // https://github.com/vpenades/SharpGLTF/issues/246
+            material.IndexOfRefraction = 7;
 
-            material.WithMetallicRoughnessShader()
-                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+
+            _AddClearCoat(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+
+            _AddVolume(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));                        
+
+            _AddIridescence(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+
+            _AddAnisotropy(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+
+            _AddTransmission(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+
+            _AddDiffuseTransmission(material);
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }
+
+        private static void _AddVolume(MaterialBuilder material)
+        {
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;            
 
             material.WithVolumeAttenuation(Vector3.One * 0.3f, 0.6f)
-                .WithVolumeThickness(tex1, 0.4f);
+                .WithVolumeThickness(tex1, 0.4f);            
+        }        
 
-            return material;
+        private static void _AddClearCoat(MaterialBuilder material)
+        {            
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;            
+
+            material.WithClearCoat(tex1, 0.9f)
+                .WithClearCoatNormal(tex1)
+                .WithClearCoatRoughness(tex1, 0.9f);
+        }       
+
+        private static void _AddIridescence(MaterialBuilder material)
+        {
+            material
+                .WithIridescence(default, 0.2f, 1.5f)
+                .WithIridescenceThickness(default, 120, 330);
         }
 
-        private static MaterialBuilder _CreateIridescenceMaterial()
+        private static void _AddAnisotropy(MaterialBuilder material)
         {
             var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
-            var material = new MaterialBuilder("Volume Material")
-                .WithAlpha(AlphaMode.OPAQUE);
-
-            material.WithMetallicRoughnessShader()
-                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
-
-            material
-                .WithIridiscence(default, 0, 1.3f)
-                .WithIridiscenceThickness(default, 100, 400);
-
-            return material;
+            material.WithAnisotropy(tex1, 0.2f, 3f);
         }
 
-        private static MaterialBuilder _CreateClearCoatMaterial()
-        {            
+        private static void _AddTransmission(MaterialBuilder material)
+        {
             var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
-            var material = new MaterialBuilder("Clear Coat Material")
-                .WithAlpha(AlphaMode.MASK, 0.6f)
-                .WithEmissive(tex1, new Vector3(0.2f, 0.3f, 0.1f))
-                .WithNormal(tex1, 0.3f)
-                .WithOcclusion(tex1, 0.4f);
+            material.WithTransmission(tex1, 0.9f);
+        }
 
-            material.WithMetallicRoughnessShader()
-                .WithBaseColor(tex1, new Vector4(0.7f, 0, 0f, 0.8f))
-                .WithMetallicRoughness(tex1, 0.2f, 0.4f);
+        private static void _AddDiffuseTransmission(MaterialBuilder material)
+        {
+            var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
-            material.WithClearCoat(tex1, 1)
-                .WithClearCoatNormal(tex1)
-                .WithClearCoatRoughness(tex1, 1);
-
-            return material;
+            material.WithDiffuseTransmissionFactor(tex1, 0.9f);
+            material.WithDiffuseTransmissionColor(tex1, Vector3.One * 0.2f);
         }        
+
+        private static MaterialBuilder _Schema2Roundtrip(MaterialBuilder srcMaterial)
+        {
+            // converts a MaterialBuilder to a Schema2.Material and back to a MaterialBuilder
+
+            var dstModel = Schema2.ModelRoot.CreateModel();
+            var dstMaterial = dstModel.CreateMaterial(srcMaterial.Name);
+
+            srcMaterial.CopyTo(dstMaterial); // copy MaterialBuilder to Schema2.Material.
+
+            var ctx = new ValidationResult(dstModel,ValidationMode.Strict, true);
+            dstModel.ValidateReferences(ctx.GetContext());
+            dstModel.ValidateContent(ctx.GetContext());
+
+            var rtpMaterial = new MaterialBuilder(dstMaterial.Name);
+
+            dstMaterial.CopyTo(rtpMaterial);// copy Schema2.Material to MaterialBuilder.
+
+            return rtpMaterial;
+        }
+
+        #region obsolete (kept for backwards compatibility)
+
+        [Test]
+        public void CreateSpecularGlossiness()
+        {
+            var material = _CreateSpecularGlossinessMaterial();
+
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }
+
+        [Test]
+        public void CreateSpecularGlossinessWithFallback()
+        {
+            var material = _CreateSpecularGlossinessMaterialWithFallback();
+
+            // check
+            Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)), Is.True);
+            Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()), Is.True);
+        }
 
         [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         private static MaterialBuilder _CreateSpecularGlossinessMaterialWithFallback()
         {
-            
+
             var tex1 = ResourceInfo.From("shannon.webp").FilePath;
             var tex2 = ResourceInfo.From("shannon.png").FilePath;
 
@@ -245,7 +269,7 @@ namespace SharpGLTF.Materials
         [Obsolete("SpecularGlossiness has been deprecated by Khronos")]
         private static MaterialBuilder _CreateSpecularGlossinessMaterial()
         {
-            
+
             var tex1 = ResourceInfo.From("shannon.png").FilePath;
 
             var material = new MaterialBuilder()
@@ -259,26 +283,8 @@ namespace SharpGLTF.Materials
                 .WithSpecularGlossiness(tex1, new Vector3(0.7f, 0, 0f), 0.8f);
 
             return material;
-        }        
-
-        private static MaterialBuilder _Schema2Roundtrip(MaterialBuilder srcMaterial)
-        {
-            // converts a MaterialBuilder to a Schema2.Material and back to a MaterialBuilder
-
-            var dstModel = Schema2.ModelRoot.CreateModel();
-            var dstMaterial = dstModel.CreateMaterial(srcMaterial.Name);
-
-            srcMaterial.CopyTo(dstMaterial); // copy MaterialBuilder to Schema2.Material.
-
-            var ctx = new ValidationResult(dstModel,ValidationMode.Strict, true);
-            dstModel.ValidateReferences(ctx.GetContext());
-            dstModel.ValidateContent(ctx.GetContext());
-
-            var rtpMaterial = new MaterialBuilder(dstMaterial.Name);
-
-            dstMaterial.CopyTo(rtpMaterial);// copy Schema2.Material to MaterialBuilder.
-
-            return rtpMaterial;
         }
+
+        #endregion
     }
 }

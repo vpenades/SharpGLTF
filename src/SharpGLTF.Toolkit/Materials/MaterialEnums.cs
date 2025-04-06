@@ -48,6 +48,11 @@ namespace SharpGLTF.Materials
 
         Iridescence,
         IridescenceThickness,
+
+        Anisotropy,
+
+        DiffuseTransmissionColor,
+        DiffuseTransmissionFactor
     }
 
     /// <summary>
@@ -63,11 +68,12 @@ namespace SharpGLTF.Materials
         RGB,
         RGBA,
 
+        Minimum, Maximum,
+
         NormalScale,
+
         OcclusionStrength,
         EmissiveStrength,
-
-        Minimum, Maximum,
 
         IndexOfRefraction,
 
@@ -80,10 +86,11 @@ namespace SharpGLTF.Materials
         TransmissionFactor,
         IridescenceFactor,
         AttenuationDistance,
-        AnisotropyStrength,
-        AnisotropyRotation,
         DiffuseTransmissionFactor,
-        DiffuseTransmissionColor,
+
+        AnisotropyStrength,
+
+        AnisotropyRotation,
     }
 
     partial class MaterialBuilder
@@ -127,7 +134,12 @@ namespace SharpGLTF.Materials
             KnownChannel.SpecularColor,
             KnownChannel.SpecularFactor,
             KnownChannel.VolumeThickness,
-            KnownChannel.VolumeAttenuation
+            KnownChannel.VolumeAttenuation,
+            KnownChannel.Iridescence,
+            KnownChannel.IridescenceThickness,
+            KnownChannel.Anisotropy,
+            KnownChannel.DiffuseTransmissionColor,
+            KnownChannel.DiffuseTransmissionFactor
         };
 
         [Obsolete("Deprecated by Khronos")]
@@ -195,6 +207,23 @@ namespace SharpGLTF.Materials
                     yield return new _Property(KnownProperty.RGB, Vector3.One);
                     yield return new _Property(KnownProperty.AttenuationDistance, float.PositiveInfinity);
                     break;
+
+                case KnownChannel.Iridescence:
+                    yield return new _Property(KnownProperty.IridescenceFactor, 0f);
+                    yield return new _Property(KnownProperty.IndexOfRefraction, 1.3f);
+                    break;
+                case KnownChannel.IridescenceThickness:
+                    yield return new _Property(KnownProperty.Minimum, 100);
+                    yield return new _Property(KnownProperty.Maximum, 400);
+                    break;
+
+                case KnownChannel.Anisotropy:
+                    yield return new _Property(KnownProperty.AnisotropyStrength, 0f);
+                    yield return new _Property(KnownProperty.AnisotropyRotation, 0f);
+                    break;
+
+                case KnownChannel.DiffuseTransmissionFactor: yield return new _Property(KnownProperty.DiffuseTransmissionFactor, 20); break;
+                case KnownChannel.DiffuseTransmissionColor: yield return new _Property(KnownProperty.RGB, Vector3.One); break;                    
 
                 default: throw new NotImplementedException();
             }

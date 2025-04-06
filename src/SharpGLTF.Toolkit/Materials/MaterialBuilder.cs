@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace SharpGLTF.Materials
 {
@@ -90,6 +88,7 @@ namespace SharpGLTF.Materials
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private string _ShaderStyle = SHADERPBRMETALLICROUGHNESS;
 
+
         public AlphaMode AlphaMode { get; set; } = AlphaMode.OPAQUE;
 
         public Single AlphaCutoff { get; set; } = 0.5f;
@@ -130,7 +129,8 @@ namespace SharpGLTF.Materials
             if (!BaseBuilder.AreEqualByContent(x, y)) return false;
 
             if (x.AlphaMode != y.AlphaMode) return false;
-            if (x.AlphaCutoff != y.AlphaCutoff) return false;
+            // AlphaCutoff only has meaning when AlphaMode = Mask
+            if (x.AlphaMode == AlphaMode.MASK && x.AlphaCutoff != y.AlphaCutoff) return false;
             if (x.DoubleSided != y.DoubleSided) return false;
             if (x.IndexOfRefraction != y.IndexOfRefraction) return false;
             if (x._ShaderStyle != y._ShaderStyle) return false;
@@ -218,10 +218,28 @@ namespace SharpGLTF.Materials
             }
         }
 
+        [Obsolete("Use GetChannel with KnownChannel whenever possible")]
+        public ChannelBuilder GetChannel(string channelKey)
+        {
+            Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
+            var key = (KnownChannel)Enum.Parse(typeof(KnownChannel), channelKey, true);
+
+            return GetChannel(key);
+        }
+
+        [Obsolete("Use UseChannel with KnownChannel whenever possible")]
+        public ChannelBuilder UseChannel(string channelKey)
+        {
+            Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
+            var key = (KnownChannel)Enum.Parse(typeof(KnownChannel), channelKey, true);
+
+            return UseChannel(key);
+        }
+
         public ChannelBuilder GetChannel(KnownChannel channelKey)
         {
             return _Channels.FirstOrDefault(item => item.Key == channelKey);
-        }
+        }        
 
         public ChannelBuilder UseChannel(KnownChannel channelKey)
         {
@@ -234,23 +252,7 @@ namespace SharpGLTF.Materials
             _Channels.Add(ch);
 
             return ch;
-        }
-
-        public ChannelBuilder GetChannel(string channelKey)
-        {
-            Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
-            var key = (KnownChannel)Enum.Parse(typeof(KnownChannel), channelKey, true);
-
-            return GetChannel(key);
-        }
-
-        public ChannelBuilder UseChannel(string channelKey)
-        {
-            Guard.NotNullOrEmpty(channelKey, nameof(channelKey));
-            var key = (KnownChannel)Enum.Parse(typeof(KnownChannel), channelKey, true);
-
-            return UseChannel(key);
-        }
+        }        
 
         public void RemoveChannel(KnownChannel key)
         {
@@ -261,11 +263,11 @@ namespace SharpGLTF.Materials
 
         internal void ValidateForSchema2()
         {
-            var hasClearCoat = this.GetChannel("ClearCoat") != null
-                || this.GetChannel("ClearCoatRoughness") != null
-                || this.GetChannel("ClearCoatNormal") != null;
+            var hasClearCoat = this.GetChannel(KnownChannel.ClearCoat) != null
+                || this.GetChannel(KnownChannel.ClearCoatNormal) != null
+                || this.GetChannel(KnownChannel.ClearCoatRoughness) != null;
 
-            var hasTransmission = this.GetChannel("Transmission") != null;
+            var hasTransmission = this.GetChannel(KnownChannel.Transmission) != null;
 
             if (this.ShaderStyle == SHADERPBRSPECULARGLOSSINESS)
             {
@@ -365,11 +367,21 @@ namespace SharpGLTF.Materials
             return this;
         }
 
+        [Obsolete("Use WithChannelImage(KnownChannel channelKey, ImageBuilder primaryImage)")]
+        public MaterialBuilder WithChannelImage(string channelKey, ImageBuilder primaryImage)
+        {
+            this.UseChannel(channelKey)
+                .UseTexture()
+                .WithPrimaryImage(primaryImage);
+
+            return this;
+        }
+
         public MaterialBuilder WithChannelParam(KnownChannel channelKey, KnownProperty propertyName, Object parameter)
         {
             this.UseChannel(channelKey).Parameters[propertyName] = MaterialValue.CreateFrom(parameter);
             return this;
-        }
+        }        
 
         public MaterialBuilder WithChannelImage(KnownChannel channelKey, ImageBuilder primaryImage)
         {
@@ -386,14 +398,7 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithChannelImage(string channelKey, ImageBuilder primaryImage)
-        {
-            this.UseChannel(channelKey)
-                .UseTexture()
-                .WithPrimaryImage(primaryImage);
-
-            return this;
-        }
+        
 
         /// <summary>
         /// Defines a fallback <see cref="MaterialBuilder"/> instance for the current <see cref="MaterialBuilder"/>.
@@ -490,61 +495,68 @@ namespace SharpGLTF.Materials
 
         public MaterialBuilder WithClearCoat(ImageBuilder imageFile, float intensity)
         {
-            WithChannelImage(KnownChannel.ClearCoat, imageFile);
-            // WithChannelParam(KnownChannel.ClearCoat, new Vector4(intensity, 0, 0, 0));
+            WithChannelImage(KnownChannel.ClearCoat, imageFile);            
             WithChannelParam(KnownChannel.ClearCoat, KnownProperty.ClearCoatFactor, intensity);
             return this;
         }
 
         public MaterialBuilder WithClearCoatRoughness(ImageBuilder imageFile, float roughness)
         {
-            WithChannelImage(KnownChannel.ClearCoatRoughness, imageFile);
-            // WithChannelParam(KnownChannel.ClearCoatRoughness, new Vector4(roughness, 0, 0, 0));
+            WithChannelImage(KnownChannel.ClearCoatRoughness, imageFile);            
             WithChannelParam(KnownChannel.ClearCoatRoughness, KnownProperty.RoughnessFactor, roughness);
             return this;
         }
 
         public MaterialBuilder WithTransmission(ImageBuilder imageFile, float intensity)
         {
-            WithChannelImage(KnownChannel.Transmission, imageFile);
-            // WithChannelParam(KnownChannel.Transmission, new Vector4(intensity, 0, 0, 0));
+            WithChannelImage(KnownChannel.Transmission, imageFile);            
             WithChannelParam(KnownChannel.Transmission, KnownProperty.TransmissionFactor, intensity);
+            return this;
+        }
+
+        public MaterialBuilder WithDiffuseTransmissionFactor(ImageBuilder imageFile, float factor)
+        {
+            WithChannelImage(KnownChannel.DiffuseTransmissionFactor, imageFile);
+            WithChannelParam(KnownChannel.DiffuseTransmissionFactor, KnownProperty.DiffuseTransmissionFactor, factor);
+            return this;
+        }
+
+        public MaterialBuilder WithDiffuseTransmissionColor(ImageBuilder imageFile, Vector3? rgb = null)
+        {
+            WithChannelImage(KnownChannel.DiffuseTransmissionColor, imageFile);
+            if (rgb.HasValue) WithChannelParam(KnownChannel.DiffuseTransmissionColor, KnownProperty.RGB, rgb.Value);
             return this;
         }
 
         public MaterialBuilder WithSpecularColor(ImageBuilder imageFile, Vector3? rgb = null)
         {
-            WithChannelImage(KnownChannel.SpecularColor, imageFile);
-            // if (rgb.HasValue) WithChannelParam(KnownChannel.SpecularColor, new Vector4(rgb.Value, 0));
+            WithChannelImage(KnownChannel.SpecularColor, imageFile);            
             if (rgb.HasValue) WithChannelParam(KnownChannel.SpecularColor, KnownProperty.RGB, rgb.Value);
             return this;
         }
 
         public MaterialBuilder WithSpecularFactor(ImageBuilder imageFile, float factor)
         {
-            WithChannelImage(KnownChannel.SpecularFactor, imageFile);
-            // WithChannelParam(KnownChannel.SpecularFactor, new Vector4(factor, 0, 0, 0));
+            WithChannelImage(KnownChannel.SpecularFactor, imageFile);            
             WithChannelParam(KnownChannel.SpecularFactor, KnownProperty.SpecularFactor, factor);
             return this;
         }
 
         public MaterialBuilder WithVolumeThickness(ImageBuilder imageFile, float factor)
         {
-            WithChannelImage(KnownChannel.VolumeThickness, imageFile);
-            // WithChannelParam(KnownChannel.VolumeThickness, new Vector4(factor, 0, 0, 0));
+            WithChannelImage(KnownChannel.VolumeThickness, imageFile);            
             WithChannelParam(KnownChannel.VolumeThickness, KnownProperty.ThicknessFactor, factor);
             return this;
         }
 
         public MaterialBuilder WithVolumeAttenuation(Vector3 color, float distance)
-        {
-            // WithChannelParam(KnownChannel.VolumeAttenuation, new Vector4(color, distance));
+        {            
             WithChannelParam(KnownChannel.VolumeAttenuation, KnownProperty.RGB, color);
             WithChannelParam(KnownChannel.VolumeAttenuation, KnownProperty.AttenuationDistance, distance);
             return this;
         }
 
-        public MaterialBuilder WithIridiscence(ImageBuilder imageFile, float factor = 0f, float ior = 1.3f)
+        public MaterialBuilder WithIridescence(ImageBuilder imageFile, float factor = 0f, float ior = 1.3f)
         {
             WithChannelImage(KnownChannel.Iridescence, imageFile);            
             WithChannelParam(KnownChannel.Iridescence, KnownProperty.IridescenceFactor, factor);
@@ -552,11 +564,19 @@ namespace SharpGLTF.Materials
             return this;
         }
 
-        public MaterialBuilder WithIridiscenceThickness(ImageBuilder imageFile, float min = 100f, float max = 400f)
+        public MaterialBuilder WithIridescenceThickness(ImageBuilder imageFile, float min = 100f, float max = 400f)
         {
             WithChannelImage(KnownChannel.IridescenceThickness, imageFile);
             WithChannelParam(KnownChannel.IridescenceThickness, KnownProperty.Minimum, min);
             WithChannelParam(KnownChannel.IridescenceThickness, KnownProperty.Maximum, max);
+            return this;
+        }
+
+        public MaterialBuilder WithAnisotropy(ImageBuilder imageFile, float strength = 0f, float rotation = 0f)
+        {
+            WithChannelImage(KnownChannel.Anisotropy, imageFile);
+            WithChannelParam(KnownChannel.Anisotropy, KnownProperty.AnisotropyStrength, strength);
+            WithChannelParam(KnownChannel.Anisotropy, KnownProperty.AnisotropyRotation, rotation);
             return this;
         }
 

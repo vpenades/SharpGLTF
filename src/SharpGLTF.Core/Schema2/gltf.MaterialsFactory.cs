@@ -57,13 +57,13 @@ namespace SharpGLTF.Schema2
             foreach (var extn in extensionNames)
             {
                 if (extn == "Sheen") this.UseExtension<MaterialSheen>();
+                if (extn == "Volume") this.UseExtension<MaterialVolume>();
                 if (extn == "Specular") this.UseExtension<MaterialSpecular>();
-                if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();
+                if (extn == "ClearCoat") this.UseExtension<MaterialClearCoat>();                
+                if (extn == "Anisotropy") this.UseExtension<MaterialAnisotropy>();
+                if (extn == "Iridescence") this.UseExtension<MaterialIridescence>();
                 if (extn == "Transmission") this.UseExtension<MaterialTransmission>();
                 if (extn == "DiffuseTransmission") this.UseExtension<MaterialDiffuseTransmission>();
-                if (extn == "Volume") this.UseExtension<MaterialVolume>();
-                if (extn == "Anisotropy") this.UseExtension<MaterialAnisotropy>();
-                if (extn == "Iridiscence") this.UseExtension<MaterialIridescence>();
             }
         }
 
@@ -670,10 +670,10 @@ namespace SharpGLTF.Schema2
 
         public IEnumerable<MaterialChannel> GetChannels(Material material)
         {
-            var iridisTexture = new _MaterialTexture(() => _iridescenceTexture, () => SetProperty(this, ref _iridescenceTexture, new TextureInfo()));
+            var iridesTexture = new _MaterialTexture(() => _iridescenceTexture, () => SetProperty(this, ref _iridescenceTexture, new TextureInfo()));
             var factor = new _MaterialParameter<float>(_MaterialParameterKey.IridescenceFactor, (float)_iridescenceFactorDefault, () => IridescenceFactor, v => IridescenceFactor = v);
             var idxRef = new _MaterialParameter<float>(_MaterialParameterKey.IndexOfRefraction, (float)_iridescenceIorDefault, () => IridescenceIndexOfRefraction, v => IridescenceIndexOfRefraction = v);
-            yield return new MaterialChannel(material, "Iridescence", iridisTexture, factor, idxRef);
+            yield return new MaterialChannel(material, "Iridescence", iridesTexture, factor, idxRef);
 
             var thicknessTexture = new _MaterialTexture(() => _iridescenceThicknessTexture, () => SetProperty(this, ref _iridescenceThicknessTexture, new TextureInfo()));
             var thkMin = new _MaterialParameter<float>(_MaterialParameterKey.Minimum, (float)_iridescenceThicknessMinimumDefault, () => IridescenceThicknessMinimum, v => IridescenceThicknessMinimum = v);
@@ -754,7 +754,7 @@ namespace SharpGLTF.Schema2
             yield return new MaterialChannel(material, "DiffuseTransmissionFactor", factorTexture, factorParameter);
 
             var colorTexture = new _MaterialTexture(() => _diffuseTransmissionColorTexture, () => SetProperty(this, ref _diffuseTransmissionColorTexture, new TextureInfo()));
-            var colorParameter = new _MaterialParameter<Vector3>(_MaterialParameterKey.DiffuseTransmissionColor, _diffuseTransmissionColorFactorDefault, () => DiffuseTransmissionColorFactor, v => DiffuseTransmissionColorFactor = v);            
+            var colorParameter = new _MaterialParameter<Vector3>(_MaterialParameterKey.RGB, _diffuseTransmissionColorFactorDefault, () => DiffuseTransmissionColorFactor, v => DiffuseTransmissionColorFactor = v);            
             yield return new MaterialChannel(material, "DiffuseTransmissionColor", colorTexture, colorParameter);
         }
     }

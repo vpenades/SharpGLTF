@@ -323,12 +323,14 @@ namespace SharpGLTF.Schema2
 
             foreach (var k in channelKeys)
             {
+                if (!Enum.TryParse<KnownChannel>(k, true, out var knownChannel)) continue;
+
                 var src = srcMaterial.FindChannel(k);
-                if (!src.HasValue) continue;
+                if (!src.HasValue) continue;                
 
-                if (src.Value.HasDefaultContent) continue;
+                if (src.Value.HasDefaultContent) continue;                
 
-                var dst = dstMaterial.UseChannel(k);
+                var dst = dstMaterial.UseChannel(knownChannel);
 
                 src.Value.CopyTo(dst);
             }
@@ -388,49 +390,62 @@ namespace SharpGLTF.Schema2
             srcMaterial.TryCopyNameAndExtrasTo(dstMaterial);
 
             dstMaterial.Alpha = srcMaterial.AlphaMode.ToSchema2();
-            dstMaterial.AlphaCutoff = srcMaterial.AlphaCutoff;
-            dstMaterial.DoubleSided = srcMaterial.DoubleSided;
-            
+            dstMaterial.AlphaCutoff = dstMaterial.Alpha == ALPHAMODEGLTF2.MASK ? srcMaterial.AlphaCutoff : 0.5f;
+            dstMaterial.DoubleSided = srcMaterial.DoubleSided;            
 
             var hasClearCoat
-                = srcMaterial.GetChannel("ClearCoat") != null
-                || srcMaterial.GetChannel("ClearCoatRoughness") != null
-                || srcMaterial.GetChannel("ClearCoatNormal") != null;
-
-            var hasTransmission = srcMaterial.GetChannel("Transmission") != null;
+                =  srcMaterial.GetChannel(KnownChannel.ClearCoat) != null
+                || srcMaterial.GetChannel(KnownChannel.ClearCoatNormal) != null
+                || srcMaterial.GetChannel(KnownChannel.ClearCoatRoughness) != null;            
 
             var hasSheen
-                = srcMaterial.GetChannel("SheenColor") != null
-                || srcMaterial.GetChannel("SheenRoughness") != null;
+                =  srcMaterial.GetChannel(KnownChannel.SheenColor) != null
+                || srcMaterial.GetChannel(KnownChannel.SheenRoughness) != null;
 
             var hasSpecular
-                = srcMaterial.GetChannel("SpecularColor") != null
-                || srcMaterial.GetChannel("SpecularFactor") != null;
+                =  srcMaterial.GetChannel(KnownChannel.SpecularColor) != null
+                || srcMaterial.GetChannel(KnownChannel.SpecularFactor) != null;
 
             var hasVolume
-                = srcMaterial.GetChannel("VolumeThickness") != null
-                || srcMaterial.GetChannel("VolumeAttenuation") != null;
+                =  srcMaterial.GetChannel(KnownChannel.VolumeThickness) != null
+                || srcMaterial.GetChannel(KnownChannel.VolumeAttenuation) != null;
 
-            srcMaterial.CopyChannelsTo(dstMaterial, "Normal", "Occlusion", "Emissive");
+            var hasIridescence
+                =  srcMaterial.GetChannel(KnownChannel.Iridescence) != null
+                || srcMaterial.GetChannel(KnownChannel.IridescenceThickness) != null;
+
+            var hasAnisotropy = srcMaterial.GetChannel(KnownChannel.Anisotropy) != null;
+
+            var hasTransmission = srcMaterial.GetChannel(KnownChannel.Transmission) != null;
+
+            var hasDiffuseTransmission
+                =  srcMaterial.GetChannel(KnownChannel.DiffuseTransmissionColor) != null
+                || srcMaterial.GetChannel(KnownChannel.DiffuseTransmissionFactor) != null;
+            
+            srcMaterial.CopyChannelsTo(dstMaterial, KnownChannel.Normal, KnownChannel.Occlusion, KnownChannel.Emissive);
 
             MaterialBuilder defMaterial = null;
 
             if (srcMaterial.ShaderStyle == "Unlit")
             {
                 dstMaterial.InitializeUnlit();
-                srcMaterial.CopyChannelsTo(dstMaterial, "BaseColor");
+                srcMaterial.CopyChannelsTo(dstMaterial, KnownChannel.BaseColor);
                 return;
             }
 
             if (srcMaterial.ShaderStyle == "PBRMetallicRoughness")
             {
                 dstMaterial.InitializePBRMetallicRoughness
-                    (
-                    hasClearCoat ? "ClearCoat" : null,
-                    hasTransmission ? "Transmission" : null,
-                    hasSheen ? "Sheen" : null,
+                    (                    
+                    hasSheen ? "Sheen" : null,                    
+                    hasVolume ? "Volume" : null,
                     hasSpecular ? "Specular" : null,
-                    hasVolume ? "Volume" : null);
+                    hasClearCoat ? "ClearCoat" : null,
+                    hasAnisotropy ? "Anisotropy" : null,
+                    hasIridescence ? "Iridescence" : null,                    
+                    hasTransmission ? "Transmission" : null,
+                    hasDiffuseTransmission ? "DiffuseTransmission" : null
+                    );
 
                 defMaterial = srcMaterial;
             }
@@ -438,7 +453,7 @@ namespace SharpGLTF.Schema2
             if (srcMaterial.ShaderStyle == "PBRSpecularGlossiness")
             {
                 dstMaterial.InitializePBRSpecularGlossiness(srcMaterial.CompatibilityFallback != null);
-                srcMaterial.CopyChannelsTo(dstMaterial, "Diffuse", "SpecularGlossiness");
+                srcMaterial.CopyChannelsTo(dstMaterial, KnownChannel.Diffuse, KnownChannel.SpecularGlossiness);
                 defMaterial = srcMaterial.CompatibilityFallback;
             }
 
@@ -449,12 +464,15 @@ namespace SharpGLTF.Schema2
             if (defMaterial != null)
             {
                 if (defMaterial.ShaderStyle != "PBRMetallicRoughness") throw new ArgumentException(nameof(srcMaterial.CompatibilityFallback.ShaderStyle));
-                defMaterial.CopyChannelsTo(dstMaterial, "BaseColor", "MetallicRoughness");
-                defMaterial.CopyChannelsTo(dstMaterial, "ClearCoat", "ClearCoatRoughness", "ClearCoatNormal");
-                defMaterial.CopyChannelsTo(dstMaterial, "Transmission");
-                defMaterial.CopyChannelsTo(dstMaterial, "SheenColor", "SheenRoughness");
-                defMaterial.CopyChannelsTo(dstMaterial, "SpecularColor", "SpecularFactor");
-                defMaterial.CopyChannelsTo(dstMaterial, "VolumeThickness", "VolumeAttenuation");
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.BaseColor, KnownChannel.MetallicRoughness);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.ClearCoat, KnownChannel.ClearCoatNormal, KnownChannel.ClearCoatRoughness);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.Transmission);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.SheenColor, KnownChannel.SheenRoughness);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.SpecularColor, KnownChannel.SpecularFactor);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.VolumeThickness, KnownChannel.VolumeAttenuation);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.Iridescence, KnownChannel.IridescenceThickness);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.Anisotropy);
+                defMaterial.CopyChannelsTo(dstMaterial, KnownChannel.DiffuseTransmissionColor, KnownChannel.DiffuseTransmissionFactor);
             }
 
             // final validation
@@ -462,18 +480,25 @@ namespace SharpGLTF.Schema2
             System.Diagnostics.Debug.Assert(dstMaterial.IndexOfRefraction == srcMaterial.IndexOfRefraction, "set IOR after dst material initialization");            
         }
 
-        public static void CopyChannelsTo(this MaterialBuilder srcMaterial, Material dstMaterial, params string[] channelKeys)
+        [Obsolete]
+        public static void CopyChannelsTo(this MaterialBuilder srcMaterial, Material dstMaterial, params string[] channels)
+        {
+            var channelKeys = channels.Select(key => Enum.TryParse<KnownChannel>(key, out var val) ? val : default).ToArray();
+            CopyChannelsTo(srcMaterial, dstMaterial, channelKeys);
+        }
+
+        public static void CopyChannelsTo(this MaterialBuilder srcMaterial, Material dstMaterial, params KnownChannel[] channels)
         {
             Guard.NotNull(srcMaterial, nameof(srcMaterial));
             Guard.NotNull(dstMaterial, nameof(dstMaterial));
-            Guard.NotNull(channelKeys, nameof(channelKeys));
+            Guard.NotNull(channels, nameof(channels));
 
-            foreach (var k in channelKeys)
+            foreach (var k in channels)
             {
                 var src = srcMaterial.GetChannel(k);
                 if (src == null) continue;
 
-                var dst = dstMaterial.FindChannel(k);
+                var dst = dstMaterial.FindChannel(k.ToString());
                 if (dst == null) continue;
 
                 src.CopyTo(dst.Value);
@@ -589,3 +614,4 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 }
+
