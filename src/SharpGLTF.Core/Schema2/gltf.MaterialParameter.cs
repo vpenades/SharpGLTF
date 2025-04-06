@@ -49,13 +49,10 @@ namespace SharpGLTF.Schema2
 
         NormalScale,
 
-        IndexOfRefraction,
-
-        AnisotropyRotation,
-
         OcclusionStrength,
         EmissiveStrength,
-        AnisotropyStrength,
+
+        IndexOfRefraction,
 
         MetallicFactor,
         RoughnessFactor,
@@ -65,8 +62,12 @@ namespace SharpGLTF.Schema2
         ThicknessFactor,
         TransmissionFactor,
         IridescenceFactor,
-        AttenuationDistance,        
-        DiffuseTransmissionFactor,        
+        AttenuationDistance,
+        DiffuseTransmissionFactor,
+
+        AnisotropyStrength,
+
+        AnisotropyRotation,
     }
 
     [System.Diagnostics.DebuggerDisplay("{_Key} = {Value}")]
