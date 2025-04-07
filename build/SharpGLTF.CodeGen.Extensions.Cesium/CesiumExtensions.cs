@@ -19,9 +19,7 @@ namespace SharpGLTF
 
         #endregion
 
-        #region root paths
-
-        public static string RemoteSchemaRepo = "https://github.com/KhronosGroup/glTF.git";
+        #region root paths        
 
         /// <summary>
         /// Program directory
@@ -36,19 +34,8 @@ namespace SharpGLTF
         #endregion        
 
         #region extension paths        
-        private static string ArchivedSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Archived");
-        private static string KhronosSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Khronos");
-        private static string VendorSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Vendor");
-
-        internal static string ArchivedExtensionPath(string ext, string json)
-        {
-            return System.IO.Path.Combine(ArchivedSchemaDir, ext, "schema", json);
-        }
-
-        internal static string KhronosExtensionPath(string ext, string json)
-        {
-            return System.IO.Path.Combine(KhronosSchemaDir, ext, "schema", json);
-        }
+        
+        private static string VendorSchemaDir => System.IO.Path.Combine(LocalRepoDirectory, "extensions", "2.0", "Vendor");        
         
         internal static string VendorExtensionPath(string ext, string json)
         {
@@ -69,12 +56,9 @@ namespace SharpGLTF
         /// directory within the solution where the generated code is emitted
         /// </summary>
         
-        public static string CesiumProjectDirectory => "src\\SharpGLTF.Ext.3DTiles\\Schema2\\Generated";
-        public static string AgiProjectDirectory => "src\\SharpGLTF.Ext.Agi\\Schema2\\Generated";        
+        public static string CesiumProjectDirectory => "src\\SharpGLTF.Ext.3DTiles\\Schema2\\Generated";            
 
-        public static string CesiumNameSpace => "SharpGLTF.Schema2.Tiles3D";
-
-        public static string AgiNameSpace => "SharpGLTF.Schema2.AGI";
+        public static string CesiumNameSpace => "SharpGLTF.Schema2.Tiles3D";        
 
         #endregion
     }

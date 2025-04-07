@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Microsoft.VisualBasic.FileIO;
-
 using SharpGLTF.SchemaReflection;
 
 namespace SharpGLTF
