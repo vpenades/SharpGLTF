@@ -6,14 +6,16 @@
     <RootNamespace>SharpGLTF</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="LibGit2Sharp" />    
-    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" />
-    <PackageReference Include="NJsonSchema.NewtonsoftJson" />
-  </ItemGroup>
+  <PropertyGroup>
+    <Description>
+      Contains code generation utilities used to parse glTF schemas and transpile them into c# code.
+    </Description>
+  </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Schemas\" />
-	<None Update="Schemas\**\*" CopyToOutputDirectory="PreserveNewest" />
+  <ItemGroup>    
+    <ProjectReference Include="..\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />    
+    <ProjectReference Include="..\SharpGLTF.CodeGen.Extensions.AGI\SharpGLTF.CodeGen.Extensions.AGI.csproj" />    
+    <ProjectReference Include="..\SharpGLTF.CodeGen.Extensions.Cesium\SharpGLTF.CodeGen.Extensions.Cesium.csproj" />    
+    <ProjectReference Include="..\SharpGLTF.codeGen.Extensions.Khronos\SharpGLTF.codeGen.Extensions.Khronos.csproj" />    
   </ItemGroup>
 </Project>

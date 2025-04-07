@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SharpGLTF</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="LibGit2Sharp" />
+    <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" />
+    <PackageReference Include="NJsonSchema.NewtonsoftJson" />
+  </ItemGroup>  
+
+</Project>

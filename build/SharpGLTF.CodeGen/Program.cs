@@ -23,52 +23,14 @@ namespace SharpGLTF
 
             processors.Add(new MainSchemaProcessor());
 
-            // ---------------------------------------------- Add extensions            
+            // ---------------------------------------------- Add Khronos Extensions
 
-            // material extensions       
-            processors.Add(new UnlitExtension());
-            processors.Add(new IorExtension());
-            processors.Add(new SheenExtension());            
-            processors.Add(new VolumeExtension());
-            processors.Add(new SpecularExtension());
-            processors.Add(new ClearCoatExtension());
-            processors.Add(new DispersionExtension());
-            processors.Add(new AnisotropyExtension());
-            processors.Add(new IridescenceExtension());            
-            processors.Add(new TransmissionExtension());
-            processors.Add(new DiffuseTransmissionExtension());
-            processors.Add(new EmissiveStrengthExtension());
-            processors.Add(new SpecularGlossinessExtension());
+            processors.AddRange(KhronosExtensions.GetExtensionsProcessors());
 
-            // cesium outlines
-            processors.Add(new CesiumPrimitiveOutlineExtension());
+            // ---------------------------------------------- Add third party extensions
 
-            // lights
-            processors.Add(new LightsPunctualExtension());
-
-            // gpu mesh instancing
-            processors.Add(new MeshGpuInstancingExtension());
-
-            // textures
-            processors.Add(new TextureTransformExtension());
-            processors.Add(new TextureDDSExtension());
-            processors.Add(new TextureWebpExtension());
-            processors.Add(new TextureKtx2Extension());
-
-            processors.Add(new AgiArticulationsExtension());
-            processors.Add(new AgiStkMetadataExtension());
-
-            // other
-            processors.Add(new XmpJsonLdExtension());            
-
-            processors.Add(new ExtMeshFeaturesExtension());
-
-            processors.Add(new AnimationPointerExtension());
-
-            processors.Add(new ExtInstanceFeaturesExtension());
-
-            processors.Add(new ExtStructuralMetadataExtension());            
-
+            processors.AddRange(AgiExtensions.GetExtensionsProcessors());
+            processors.AddRange(CesiumExtensions.GetExtensionsProcessors());
 
             // ----------------------------------------------  process all files
 

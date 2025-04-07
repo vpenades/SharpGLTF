@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>SharpGLTF</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />
+  </ItemGroup>
+
+</Project>
