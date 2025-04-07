@@ -36,9 +36,7 @@ namespace SharpGLTF
 
         private static SchemaType.Context ProcessNode()
         {
-            var ctx = SchemaProcessing.LoadSchemaContext(NodeSchemaUri);
-            ctx.IgnoredByCodeEmitter("glTF Property");
-            ctx.IgnoredByCodeEmitter("glTF Child of Root Property");
+            var ctx = SchemaProcessing.LoadExtensionSchemaContext(NodeSchemaUri);
             return ctx;
         }
 
