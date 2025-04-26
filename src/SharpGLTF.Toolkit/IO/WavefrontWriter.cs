@@ -174,6 +174,12 @@ namespace SharpGLTF.IO
                 sw.WriteLine(Invariant($"Kd {m.DiffuseColor.X} {m.DiffuseColor.Y} {m.DiffuseColor.Z}"));
                 sw.WriteLine(Invariant($"Ks {m.SpecularColor.X} {m.SpecularColor.Y} {m.SpecularColor.Z}"));
 
+                if (m.Opacity != 1)
+                {
+                    sw.WriteLine(Invariant($"d {m.Opacity}"));
+                    sw.WriteLine(Invariant($"Tr {1.0f-m.Opacity}"));
+                }                
+
                 if (m.DiffuseTexture.IsValid)
                 {
                     var imgName = imageNameByImage[m.DiffuseTexture];
@@ -307,6 +313,12 @@ namespace SharpGLTF.IO
 
             dstMaterial.DiffuseColor = new Vector3(diffuse.X, diffuse.Y, diffuse.Z);
             dstMaterial.SpecularColor = new Vector3(0.2f);
+            dstMaterial.Opacity = 1.0f;
+
+            if (srcMaterial.Alpha == AlphaMode.BLEND && diffuse.W < 1)
+            {
+                dstMaterial.Opacity = Math.Max(0, diffuse.W);
+            }
 
             dstMaterial.DiffuseTexture = srcMaterial.GetDiffuseTexture()?.PrimaryImage?.Content ?? default;
 
@@ -322,11 +334,12 @@ namespace SharpGLTF.IO
         {
             public Vector3 DiffuseColor;
             public Vector3 SpecularColor;
+            public float Opacity;
             public Memory.MemoryImage DiffuseTexture;            
 
             public readonly override int GetHashCode()
             {
-                return DiffuseColor.GetHashCode() ^ SpecularColor.GetHashCode() ^ DiffuseTexture.GetHashCode();
+                return DiffuseColor.GetHashCode() ^ SpecularColor.GetHashCode() ^ DiffuseTexture.GetHashCode() ^ Opacity.GetHashCode();
             }
 
             public readonly override bool Equals(object obj) { return obj is Material other && this.Equals(other); }
@@ -335,6 +348,7 @@ namespace SharpGLTF.IO
             {
                 if (this.DiffuseColor != other.DiffuseColor) return false;
                 if (this.SpecularColor != other.SpecularColor) return false;
+                if (this.Opacity != other.Opacity) return false;
                 if (this.DiffuseTexture != other.DiffuseTexture) return false;
                 return true;
             }
