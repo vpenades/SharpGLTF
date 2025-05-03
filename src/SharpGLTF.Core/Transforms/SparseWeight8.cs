@@ -33,8 +33,7 @@ namespace SharpGLTF.Transforms
 
         private string _GetDebuggerDisplay()
         {
-            var iw = this.GetIndexedWeights()
-                .Where(item => item.Weight != 0)
+            var iw = this.GetNonZeroWeights()
                 .Select(item => $"[{item.Index}]={item.Weight}");
 
             var txt = string.Join(" ", iw);
