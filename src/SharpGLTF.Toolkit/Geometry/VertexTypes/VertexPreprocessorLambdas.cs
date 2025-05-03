@@ -64,17 +64,17 @@ namespace SharpGLTF.Geometry.VertexTypes
             for (int i = 0; i < vertex.MaxColors; ++i)
             {
                 var c = vertex.GetColor(i);
-                Guard.IsTrue(c._IsFinite(), $"Color{i}", "Values are not finite.");
-                Guard.MustBeBetweenOrEqualTo(c.X, 0, 1, $"Color{i}.R");
-                Guard.MustBeBetweenOrEqualTo(c.Y, 0, 1, $"Color{i}.G");
-                Guard.MustBeBetweenOrEqualTo(c.Z, 0, 1, $"Color{i}.B");
-                Guard.MustBeBetweenOrEqualTo(c.W, 0, 1, $"Color{i}.A");
+                if (!c._IsFinite()) throw new ArgumentException("Values are not finite.", $"Color{i}");
+                if (c.X < 0 || c.X > 1) throw new ArgumentOutOfRangeException($"Color{i}.R");
+                if (c.Y < 0 || c.Y > 1) throw new ArgumentOutOfRangeException($"Color{i}.G");
+                if (c.Z < 0 || c.Z > 1) throw new ArgumentOutOfRangeException($"Color{i}.B");
+                if (c.W < 0 || c.W > 1) throw new ArgumentOutOfRangeException($"Color{i}.A");
             }
 
             for (int i = 0; i < vertex.MaxTextCoords; ++i)
             {
                 var t = vertex.GetTexCoord(i);
-                Guard.IsTrue(t._IsFinite(), $"TexCoord{i}", "Values are not finite.");
+                if (!t._IsFinite()) throw new ArgumentException("Values are not finite.", $"TexCoord{i}");
             }
 
             if (vertex is IVertexCustom custom) custom.Validate();
@@ -119,8 +119,8 @@ namespace SharpGLTF.Geometry.VertexTypes
             {
                 var (index, weight) = vertex.GetBinding(i);
 
-                Guard.MustBeGreaterThanOrEqualTo(index, 0, $"Joint{i}");
-                Guard.IsTrue(weight._IsFinite(), $"Weight{i}", "Values are not finite.");
+                if (index < 0) throw new ArgumentOutOfRangeException($"Joint{i}");
+                if (!weight._IsFinite()) throw new ArgumentException("Values are not finite.", $"Weight{i}");
                 if (weight == 0) Guard.IsTrue(index == 0, "joints with weight zero must be set to zero");
 
                 weightsSum += weight;
@@ -128,7 +128,7 @@ namespace SharpGLTF.Geometry.VertexTypes
                 if (weight > 0) threshold += 2e-7f;
             }
 
-            Guard.MustBeLessThan(Math.Abs(weightsSum - 1), threshold, $"Weights must sum 1, but found {weightsSum}");
+            if (Math.Abs(weightsSum - 1) >= threshold) throw new ArgumentOutOfRangeException($"Weights must sum 1, but found {weightsSum}");
 
             // TODO: check that joints are unique
 
