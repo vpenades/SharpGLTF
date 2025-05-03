@@ -158,9 +158,10 @@ namespace SharpGLTF.Schema2
 
         internal static bool AreEqual(BufferView bv, BYTES content, int byteStride, BufferMode? target)
         {
-            if (bv.Content.Array != content.Array) return false;
-            if (bv.Content.Offset != content.Offset) return false;
-            if (bv.Content.Count != content.Count) return false;
+            var bvContent = bv.Content;
+            if (bvContent.Array != content.Array) return false;
+            if (bvContent.Offset != content.Offset) return false;
+            if (bvContent.Count != content.Count) return false;
             if (bv.ByteStride != byteStride) return false;
             if (bv._target != target) return false;
             return true;
