@@ -177,9 +177,16 @@ namespace SharpGLTF.Schema2
         /// <returns>A <see cref="Image"/> instance.</returns>
         public static Image UseImageWithFile(this ModelRoot root, string filePath)
         {
-            var content = System.IO.File.ReadAllBytes(filePath);
+            try
+            {
+                var content = System.IO.File.ReadAllBytes(filePath);
 
-            return root.UseImageWithContent(content);
+                return root.UseImageWithContent(content);
+            }
+            catch(System.IO.FileNotFoundException)
+            {
+                return root.UseImageWithContent(Array.Empty<byte>());
+            }
         }
 
         /// <summary>

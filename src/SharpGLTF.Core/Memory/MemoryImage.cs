@@ -125,11 +125,19 @@ namespace SharpGLTF.Memory
             {
                 filePath = System.IO.Path.GetFullPath(filePath);
 
-                var data = System.IO.File.ReadAllBytes(filePath);
+                try
+                {
+                    var data = System.IO.File.ReadAllBytes(filePath);
 
-                Guard.IsTrue(_IsImage(data), nameof(filePath), GuardError_MustBeValidImage);
+                    Guard.IsTrue(_IsImage(data), nameof(filePath), GuardError_MustBeValidImage);
 
-                _LazyImage = _ToLazy(data);
+                    _LazyImage = _ToLazy(data);
+                }
+                catch(System.IO.FileNotFoundException)
+                {
+                    _LazyImage = _ToLazy(default(BYTES));
+                }
+
                 _SourcePathHint = filePath;
             }
         }        
@@ -331,6 +339,12 @@ namespace SharpGLTF.Memory
 
         internal static void _Verify(MemoryImage image, string paramName)
         {
+            //If the source path is not null and the content is empty then we just failed to load the image but know where it is
+            if(image._SourcePathHint != null && image.Content.IsEmpty)
+            {
+                return;
+            }
+
             Guard.IsTrue(_IsImage(image._Image), paramName, $"{paramName} must be a valid image byte stream.");
 
             if (image.IsKtx2) Ktx2Header.Verify(image._Image, paramName);

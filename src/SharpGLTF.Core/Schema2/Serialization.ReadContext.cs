@@ -48,8 +48,17 @@ namespace SharpGLTF.Schema2
             BYTES _loadFile(string rawUri)
             {
                 var path = _uriSolver(rawUri);
-                var content = File.ReadAllBytes(path);
-                return new BYTES(content);
+
+                try
+                {
+                    var content = File.ReadAllBytes(path);
+
+                    return new BYTES(content);
+                }
+                catch(FileNotFoundException)
+                {
+                    return new BYTES(Array.Empty<byte>());
+                }
             }
 
             return new ReadContext(_loadFile, _uriSolver);
