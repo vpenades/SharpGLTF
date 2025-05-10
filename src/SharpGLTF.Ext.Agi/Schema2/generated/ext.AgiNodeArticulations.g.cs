@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.AGI
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "AGI_articulations";
+		public new const string SCHEMANAME = "AGI_articulations";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

@@ -680,7 +680,7 @@ namespace SharpGLTF.CodeGen
                 // fix boolean value            
                 if (vconst is Boolean bconst) vconst = bconst ? "true" : "false";                
 
-                getter += FormattableString.Invariant($" ?? {vconst}");
+                getter += Invariant($" ?? {vconst}");
             }
 
             // _FieldsReflection.Add($"yield return FIELDINFO.From(\"{finfo.PersistentName}\",this, {getter});");
@@ -768,9 +768,18 @@ namespace SharpGLTF.CodeGen
             yield return "#region reflection".Indent(1);
             yield return string.Empty;
 
-            yield return $"public const string SCHEMANAME = \"{SchemaName}\";".Indent(1);
+            if (this.HasBaseClass)
+            {
+                yield return $"public new const string SCHEMANAME = \"{SchemaName}\";".Indent(1);
+            }
+            else
+            {
+                yield return $"public const string SCHEMANAME = \"{SchemaName}\";".Indent(1);
+            }
 
-            var pointerPathModifier = HasBaseClass ? "override" : "virtual";
+
+
+                var pointerPathModifier = HasBaseClass ? "override" : "virtual";
             yield return $"protected {pointerPathModifier} string GetSchemaName() => SCHEMANAME;".Indent(1);            
 
             yield return string.Empty;

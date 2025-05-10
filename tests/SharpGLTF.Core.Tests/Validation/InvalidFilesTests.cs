@@ -24,7 +24,7 @@ namespace SharpGLTF.Validation
                 var report = GltfValidator.ValidationReport.Parse(json);
 
                 TestContext.Progress.WriteLine($"{f}...");
-                TestContext.Write($"{f}...");
+                TestContext.Out.Write($"{f}...");
 
                 var result = Schema2.ModelRoot.Validate(f);
 
@@ -50,7 +50,7 @@ namespace SharpGLTF.Validation
                 }
 
                 TestContext.Progress.WriteLine($"{f}...");
-                TestContext.WriteLine($"{f}...");
+                TestContext.Out.WriteLine($"{f}...");
 
                 var result = Schema2.ModelRoot.Validate(f);
 
@@ -88,8 +88,8 @@ namespace SharpGLTF.Validation
 
                 if (result.HasErrors != report.Issues.NumErrors > 0)
                 {
-                    TestContext.WriteLine($"Failed: {f}");
-                    foreach (var e in report.Issues.Messages.Where(item => item.Severity == 0)) TestContext.WriteLine($"    {e.Text}");
+                    TestContext.Out.WriteLine($"Failed: {f}");
+                    foreach (var e in report.Issues.Messages.Where(item => item.Severity == 0)) TestContext.Out.WriteLine($"    {e.Text}");
                 }
 
                 Assert.That(result.HasErrors, Is.EqualTo(report.Issues.NumErrors > 0), result.Errors.FirstOrDefault()?.Message);                                

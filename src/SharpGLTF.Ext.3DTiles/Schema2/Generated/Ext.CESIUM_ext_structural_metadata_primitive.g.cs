@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "EXT_structural_metadata";
+		public new const string SCHEMANAME = "EXT_structural_metadata";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

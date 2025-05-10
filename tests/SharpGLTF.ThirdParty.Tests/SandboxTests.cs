@@ -47,7 +47,7 @@ namespace SharpGLTF.ThirdParty
             var model = ModelRoot.CreateModel();
             model.CreateMaterial(material);
 
-            TestContext.WriteLine(model.GetJsonPreview());
+            TestContext.Out.WriteLine(model.GetJsonPreview());
         }
 
         [Test]
@@ -101,7 +101,7 @@ namespace SharpGLTF.ThirdParty
 
             var json = model.GetJsonPreview();
             AttachmentInfo.From("model.json").WriteAllText(json);
-            TestContext.WriteLine(json);
+            TestContext.Out.WriteLine(json);
 
             model.DeepClone();
 

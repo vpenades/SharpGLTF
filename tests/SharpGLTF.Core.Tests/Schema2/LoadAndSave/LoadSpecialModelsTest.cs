@@ -83,7 +83,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                 var bn = pollyNormals[b];
                 var cn = pollyNormals[c];
 
-                TestContext.WriteLine($"Triangle {ap} {an} {bp} {bn} {cp} {cn}");
+                TestContext.Out.WriteLine($"Triangle {ap} {an} {bp} {bn} {cp} {cn}");
             }
 
             // create a clone and apply a global axis transform.

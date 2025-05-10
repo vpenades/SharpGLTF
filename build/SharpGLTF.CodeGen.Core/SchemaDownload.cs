@@ -13,11 +13,11 @@ namespace SharpGLTF
         {
             if (LibGit2Sharp.Repository.Discover(localDirectory) == null)
             {
-                Console.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
+                Console.Out.WriteLine($"Cloning {remoteUrl} can take several minutes; Please wait...");
 
                 LibGit2Sharp.Repository.Clone(remoteUrl, localDirectory);
 
-                Console.WriteLine($"... Clone Completed");
+                Console.Out.WriteLine($"... Clone Completed");
 
                 return;
             }
@@ -31,7 +31,7 @@ namespace SharpGLTF
 
                 var r = LibGit2Sharp.Commands.Pull(repo, new LibGit2Sharp.Signature("Anonymous", "anon@anon.com", new DateTimeOffset(DateTime.Now)), options);
 
-                Console.WriteLine($"{remoteUrl} is {r.Status}");
+                Console.Out.WriteLine($"{remoteUrl} is {r.Status}");
             }
         }
     }

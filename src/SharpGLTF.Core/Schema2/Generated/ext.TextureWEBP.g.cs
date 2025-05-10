@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "EXT_texture_webp";
+		public new const string SCHEMANAME = "EXT_texture_webp";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

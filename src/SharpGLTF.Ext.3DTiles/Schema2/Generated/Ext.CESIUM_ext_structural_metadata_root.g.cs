@@ -108,7 +108,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "property";
+		public new const string SCHEMANAME = "property";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -260,7 +260,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "class";
+		public new const string SCHEMANAME = "class";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -330,7 +330,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "value";
+		public new const string SCHEMANAME = "value";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -400,7 +400,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "enum";
+		public new const string SCHEMANAME = "enum";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -478,7 +478,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "schema";
+		public new const string SCHEMANAME = "schema";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -566,7 +566,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "property";
+		public new const string SCHEMANAME = "property";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -674,7 +674,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "propertyTable";
+		public new const string SCHEMANAME = "propertyTable";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -751,7 +751,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "propertyTexture";
+		public new const string SCHEMANAME = "propertyTexture";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -834,7 +834,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "propertyTexture";
+		public new const string SCHEMANAME = "propertyTexture";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -904,7 +904,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "property";
+		public new const string SCHEMANAME = "property";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -986,7 +986,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "propertyAttribute";
+		public new const string SCHEMANAME = "propertyAttribute";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -1056,7 +1056,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "EXT_structural_metadata";
+		public new const string SCHEMANAME = "EXT_structural_metadata";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

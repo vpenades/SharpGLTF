@@ -194,7 +194,7 @@ namespace SharpGLTF.IO
 
             // checks
 
-            TestContext.WriteLine(roundtripJson);
+            TestContext.Out.WriteLine(roundtripJson);
 
             Assert.That(roundtripJson, Does.Contain("你好"));
             

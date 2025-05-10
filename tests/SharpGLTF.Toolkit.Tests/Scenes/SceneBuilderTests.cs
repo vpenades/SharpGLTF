@@ -527,7 +527,7 @@ namespace SharpGLTF.Scenes
 
             var gltf = scene.ToGltf2();
 
-            TestContext.WriteLine(gltf.GetJsonPreview());
+            TestContext.Out.WriteLine(gltf.GetJsonPreview());
 
             var meshIdx = 1;
 

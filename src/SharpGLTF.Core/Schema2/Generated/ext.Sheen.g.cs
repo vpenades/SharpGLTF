@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "KHR_materials_sheen";
+		public new const string SCHEMANAME = "KHR_materials_sheen";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

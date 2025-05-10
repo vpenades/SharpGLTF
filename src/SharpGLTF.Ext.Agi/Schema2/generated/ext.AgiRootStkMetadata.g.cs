@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.AGI
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "solarPanelGroup";
+		public new const string SCHEMANAME = "solarPanelGroup";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -110,7 +110,7 @@ namespace SharpGLTF.Schema2.AGI
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "AGI_stk_metadata";
+		public new const string SCHEMANAME = "AGI_stk_metadata";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

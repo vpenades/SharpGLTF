@@ -107,7 +107,7 @@ namespace SharpGLTF
 
                 if (report.Severity == GltfValidator.Severity.Error || report.Severity == GltfValidator.Severity.Warning)
                 {
-                    TestContext.WriteLine(report.ToString());
+                    TestContext.Out.WriteLine(report.ToString());
                 }
 
                 Assert.That(report.Severity, Is.Not.EqualTo(GltfValidator.Severity.Error));

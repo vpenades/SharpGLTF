@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "featureIdTexture";
+		public new const string SCHEMANAME = "featureIdTexture";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -103,7 +103,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "featureId";
+		public new const string SCHEMANAME = "featureId";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -194,7 +194,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "EXT_mesh_features";
+		public new const string SCHEMANAME = "EXT_mesh_features";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

@@ -41,7 +41,7 @@ namespace SharpGLTF.Schema2
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "spot";
+		public new const string SCHEMANAME = "spot";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -111,7 +111,7 @@ namespace SharpGLTF.Schema2
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "light";
+		public new const string SCHEMANAME = "light";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()
@@ -194,7 +194,7 @@ namespace SharpGLTF.Schema2
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "KHR_lights_punctual";
+		public new const string SCHEMANAME = "KHR_lights_punctual";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

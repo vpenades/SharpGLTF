@@ -14,6 +14,7 @@ namespace SharpGLTF.Schema2.Authoring
 
     [TestFixture]
     [Category("Model Authoring")]
+    [Description("These tests contain tests and examples on how to create glTF models from scratch, using only basic Toolkit facilities")]
     public class BasicSceneCreationTests
     {
         [Test(Description = "Creates an empty model")]
@@ -27,7 +28,7 @@ namespace SharpGLTF.Schema2.Authoring
             Assert.That(root.DefaultScene.Name, Is.EqualTo("Empty Scene"));
         }
 
-        [Test(Description = "Creates an empty model")]
+        [Test(Description = "Creates an empty model with an extras field")]
         public void CreateSceneWithExtras()
         {
             var root = ModelRoot.CreateModel();
@@ -85,7 +86,8 @@ namespace SharpGLTF.Schema2.Authoring
             var rnode = scene.CreateNode("Triangle Node");
 
             // create material
-            var material = model.CreateMaterial("Default")
+            var material = model
+                .CreateMaterial("Default")
                 .WithDefault(new Vector4(0, 1, 0, 1))
                 .WithDoubleSide(true);
 
@@ -104,7 +106,8 @@ namespace SharpGLTF.Schema2.Authoring
             var indices = new[] { 0, 1, 2 };
 
             // create mesh primitive
-            var primitive = rmesh.CreatePrimitive()
+            var primitive = rmesh
+                .CreatePrimitive()
                 .WithVertexAccessor("POSITION", positions)
                 .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
                 .WithMaterial(material);
@@ -127,7 +130,8 @@ namespace SharpGLTF.Schema2.Authoring
             var rnode = scene.CreateNode("Triangle Node");
             var rmesh = rnode.Mesh = model.CreateMesh("Triangle Mesh");
 
-            var material = model.CreateMaterial("Default")
+            var material = model
+                .CreateMaterial("Default")
                 .WithPBRMetallicRoughness(Vector4.One, imagePath)
                 .WithDoubleSide(true);
 
@@ -148,7 +152,8 @@ namespace SharpGLTF.Schema2.Authoring
             };
 
             // create a mesh primitive and assgin the accessors and other properties
-            var primitive = rmesh.CreatePrimitive()
+            var primitive = rmesh
+                .CreatePrimitive()
                 .WithVertexAccessor("POSITION", positions)
                 .WithVertexAccessor("TEXCOORD_0", texCoords)
                 .WithIndicesAutomatic(PrimitiveType.TRIANGLES)

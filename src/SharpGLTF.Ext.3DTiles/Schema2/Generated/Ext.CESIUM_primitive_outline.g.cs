@@ -44,7 +44,7 @@ namespace SharpGLTF.Schema2.Tiles3D
 	
 		#region reflection
 	
-		public const string SCHEMANAME = "CESIUM_primitive_outline";
+		public new const string SCHEMANAME = "CESIUM_primitive_outline";
 		protected override string GetSchemaName() => SCHEMANAME;
 	
 		protected override IEnumerable<string> ReflectFieldsNames()

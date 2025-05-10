@@ -142,8 +142,8 @@ namespace SharpGLTF.Transforms
             var srt_ab = AffineTransform.Multiply(srt_a, srt_b);
             var srt_ba = AffineTransform.Multiply(srt_b, srt_a);
 
-            TestContext.WriteLine($"A({sa},{ra}) x B({sb},{rb}) = {srt_ab.IsSRT}");
-            TestContext.WriteLine($"B({sb},{rb}) x A({sa},{ra}) = {srt_ba.IsSRT}");
+            TestContext.Out.WriteLine($"A({sa},{ra}) x B({sb},{rb}) = {srt_ab.IsSRT}");
+            TestContext.Out.WriteLine($"B({sb},{rb}) x A({sa},{ra}) = {srt_ba.IsSRT}");
 
             NumericsAssert.AreEqual(mat_ab, srt_ab.Matrix, 0.00001f);
             NumericsAssert.AreEqual(mat_ba, srt_ba.Matrix, 0.00001f);
@@ -176,7 +176,7 @@ namespace SharpGLTF.Transforms
             #endif
 
             var diff = NumericsAssert.AreGeometryicallyEquivalent(mi, xmi, tolerance);
-            TestContext.WriteLine(diff);
+            TestContext.Out.WriteLine(diff);
 
             Assert.That(AffineTransform.AreGeometricallyEquivalent(mi, xi, tolerance), Is.True);
         }

@@ -17,16 +17,16 @@ namespace SharpGLTF
 
             var fileName = ResourceInfo.From("_");
 
-            TestContext.WriteLine("Dumping current Resource context:");
+            TestContext.Out.WriteLine("Dumping current Resource context:");
 
             foreach(var f in fileName.File.Directory.EnumerateDirectories("*",System.IO.SearchOption.AllDirectories))
             {
-                TestContext.WriteLine($"{f.Exists} {f.FullName}");
+                TestContext.Out.WriteLine($"{f.Exists} {f.FullName}");
             }
 
             foreach (var f in fileName.File.Directory.EnumerateFiles("*", System.IO.SearchOption.AllDirectories))
             {
-                TestContext.WriteLine($"{f.Exists} {f.FullName}");
+                TestContext.Out.WriteLine($"{f.Exists} {f.FullName}");
             }
 
         }

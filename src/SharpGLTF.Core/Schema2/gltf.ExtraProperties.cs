@@ -70,7 +70,9 @@ namespace SharpGLTF.Schema2
 
         #region reflection
 
-        protected override string GetSchemaName() => "ExtraProperties";
+        public const string SCHEMANAME = "ExtraProperties";
+
+        protected override string GetSchemaName() => SCHEMANAME;
 
         IEnumerable<FieldInfo> Reflection.IReflectionObject.GetFields()
         {

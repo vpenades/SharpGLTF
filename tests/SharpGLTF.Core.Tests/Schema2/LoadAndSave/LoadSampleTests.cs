@@ -347,7 +347,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
                 var nodexform = instance.GetDrawableInstance(0).Transform;
 
-                TestContext.WriteLine($"Animation at {t}");
+                TestContext.Out.WriteLine($"Animation at {t}");
 
                 var curves = node.GetCurveSamplers(anim);
 
@@ -357,14 +357,14 @@ namespace SharpGLTF.Schema2.LoadAndSave
                         .CreateCurveSampler()
                         .GetPoint(t);            
                     
-                    TestContext.WriteLine($"    Morph Weights: {mw[0]} {mw[1]}");
+                    TestContext.Out.WriteLine($"    Morph Weights: {mw[0]} {mw[1]}");
                 }
 
                 var msw = curves.GetMorphingSampler<Transforms.SparseWeight8>()
                     .CreateCurveSampler()
                     .GetPoint(t);
 
-                TestContext.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
+                TestContext.Out.WriteLine($"    Morph Sparse : {msw.Weight0} {msw.Weight1}");
 
                 var triangles = model.DefaultScene
                     .EvaluateTriangles<Geometry.VertexTypes.VertexPosition, Geometry.VertexTypes.VertexEmpty>(null, anim, t)
@@ -375,9 +375,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     .Distinct()
                     .ToList();
 
-                foreach (var v in vertices) TestContext.WriteLine($"{v}");
+                foreach (var v in vertices) TestContext.Out.WriteLine($"{v}");
 
-                TestContext.WriteLine();
+                TestContext.Out.WriteLine();
             }
 
 
@@ -409,16 +409,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             foreach (var f in TestFiles.GetBabylonJSModelsPaths())
             {
-                TestContext.WriteLine(f);
+                TestContext.Out.WriteLine(f);
 
                 var dependencies = ModelRoot.GetSatellitePaths(f);
 
                 foreach(var d in dependencies)
                 {
-                    TestContext.WriteLine($"    {d}");
+                    TestContext.Out.WriteLine($"    {d}");
                 }
 
-                TestContext.WriteLine();
+                TestContext.Out.WriteLine();
             }
         }
     }

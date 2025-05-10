@@ -58,7 +58,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     }
                     else
                     {
-                        TestContext.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");                        
+                        TestContext.Out.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");                        
                     }                    
                 }
                 catch (Exception ex)
@@ -71,8 +71,8 @@ namespace SharpGLTF.Schema2.LoadAndSave
                     }
                     else
                     {
-                        TestContext.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");
-                        TestContext.WriteLine($"   Expected Exception: {ex.Message}");
+                        TestContext.Out.WriteLine($"{filePath.ToShortDisplayPath()} 🙂👍");
+                        TestContext.Out.WriteLine($"   Expected Exception: {ex.Message}");
                     }                    
                 }
 

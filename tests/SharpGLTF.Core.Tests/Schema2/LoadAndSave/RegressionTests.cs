@@ -28,7 +28,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.That(model1, Is.Not.Null);
             Assert.That(model1.LogicalImages, Has.Count.EqualTo(4));
 
-            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+            TestContext.Out.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
             // local path            
 
@@ -39,7 +39,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.That(model2, Is.Not.Null);
             Assert.That(model2.LogicalImages, Has.Count.EqualTo(4));
 
-            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+            TestContext.Out.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
             // relative path:
 
@@ -50,7 +50,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             Assert.That(model3, Is.Not.Null);
             Assert.That(model3.LogicalImages, Has.Count.EqualTo(4));
 
-            TestContext.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
+            TestContext.Out.WriteLine(string.Join("   ", ModelRoot.GetSatellitePaths(modelPath)));
 
             // restore current directory
 

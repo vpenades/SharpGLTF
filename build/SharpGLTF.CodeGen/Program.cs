@@ -38,7 +38,7 @@ namespace SharpGLTF
             {
                 foreach (var (targetFileName, schema) in processor.ReadSchema())
                 {
-                    System.Console.WriteLine($"Emitting {targetFileName}...");
+                    System.Console.Out.WriteLine($"Emitting {targetFileName}...");
 
                     SchemaProcessing.EmitCodeFromSchema(processor.GetTargetProject(), targetFileName, schema, processors);
                 }

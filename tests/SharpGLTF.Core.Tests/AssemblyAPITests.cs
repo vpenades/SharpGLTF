@@ -58,7 +58,7 @@ namespace SharpGLTF
 
             foreach (var l in API)
             {
-                TestContext.WriteLine(l);
+                TestContext.Out.WriteLine(l);
             }
         }
 
@@ -109,7 +109,7 @@ namespace SharpGLTF
             {
                 if (!newLines.Contains(l))
                 {
-                    TestContext.WriteLine($"Missing:  {l}");
+                    TestContext.Out.WriteLine($"Missing:  {l}");
                     backwardsCompatible = false;
                 }                
             }
