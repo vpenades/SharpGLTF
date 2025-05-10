@@ -128,7 +128,7 @@ namespace SharpGLTF.Schema2
 
         #region API
 
-        private Accessor _CreateInputAccessor(IReadOnlyList<Single> input)
+        private Accessor _CreateInputAccessor(ROLIST input)
         {
             Guard.NotNull(input, nameof(input));
             Guard.MustBeGreaterThan(input.Count, 0, nameof(input.Count));
@@ -147,7 +147,7 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(IReadOnlyList<Single> output)
+        private Accessor _CreateOutputAccessor(ROLIST output)
         {
             Guard.NotNull(output, nameof(output));
             Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));

@@ -204,6 +204,42 @@ namespace SharpGLTF
             if (comparison == StringComparison.Ordinal) return text.Replace(oldText, newText);
             throw new NotImplementedException();
         }
+
+        internal static int IndexOf(this string text, string value, StringComparison comparison)
+        {
+            switch(comparison)
+            {
+                case StringComparison.OrdinalIgnoreCase:
+                case StringComparison.InvariantCultureIgnoreCase:
+                    text = text.ToUpperInvariant();
+                    value = value.ToUpperInvariant();
+                    break;
+                case StringComparison.CurrentCultureIgnoreCase:
+                    text = text.ToUpper();
+                    value = value.ToUpper();
+                    break;                  
+            }
+
+            return text.IndexOf(value);
+        }
+
+        internal static int IndexOf(this string text, char value, StringComparison comparison)
+        {
+            switch (comparison)
+            {
+                case StringComparison.OrdinalIgnoreCase:
+                case StringComparison.InvariantCultureIgnoreCase:
+                    text = text.ToUpperInvariant();
+                    value = char.ToUpperInvariant(value);
+                    break;
+                case StringComparison.CurrentCultureIgnoreCase:
+                    text = text.ToUpper();
+                    value = char.ToUpper(value);
+                    break;
+            }
+
+            return text.IndexOf(value);
+        }
         #endif
 
         #endregion

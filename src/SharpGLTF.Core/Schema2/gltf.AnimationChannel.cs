@@ -80,9 +80,9 @@ namespace SharpGLTF.Schema2
         public string TargetPointerPath => this._target?.GetPointerPath() ?? null;
 
         /// <summary>
-        /// Gets the <see cref="Node"/> which property is to be bound with this animation.
-        /// </summary>
-        [Obsolete("Use TargetPointerPath whenever possible")]
+        /// Gets the <see cref="Node"/> which property is to be bound with this animation,
+        /// or NULL if the target is not a <see cref="Node"/>
+        /// </summary>        
         public Node TargetNode
         {
             get
