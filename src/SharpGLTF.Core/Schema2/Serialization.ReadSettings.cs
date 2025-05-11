@@ -131,7 +131,7 @@ namespace SharpGLTF.Schema2
                 filePath = finfo.Name;
             }
 
-            // at this point, filePath must be a path "relative to context"            
+            System.Diagnostics.Debug.Assert(Uri.TryCreate(filePath, UriKind.Relative, out _), "at this point, filePath must be a path relative to 'context'");
 
             return context.ReadSchema2(filePath);
         }

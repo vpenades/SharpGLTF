@@ -167,7 +167,7 @@ namespace SharpGLTF.Schema2
                 // full path could not be resolved, use direct load instead.
                 else
                 {
-                    _SatelliteContent = context.ReadAllBytesToEnd(_uri);
+                    _SatelliteContent = new SharpGLTF.Memory.MemoryImage(context.ReadAllBytesToEnd(_uri), _uri);
                 }
             }
 

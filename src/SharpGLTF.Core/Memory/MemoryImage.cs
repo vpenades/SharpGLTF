@@ -224,11 +224,16 @@ namespace SharpGLTF.Memory
         /// <para><b>⚠️ DO NOT USE AS AN OBJECT ID ⚠️</b> see remarks.</para>
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Not all images are expected to have a source path.<br/>
         /// Specifically images embedded in a GLB file or encoded with BASE64
         /// will not have any source path at all.<br/>
         /// So if your code depends on images having a path, it might crash
         /// on gltf files with embedded images.
+        /// </para>
+        /// <para>
+        /// If SourcePath has a value, it may be relative or absolute depending on the read context.
+        /// </para>
         /// </remarks>
         public string SourcePath => _SourcePathHint;
 
