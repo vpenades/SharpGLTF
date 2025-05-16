@@ -85,6 +85,9 @@ namespace SharpGLTF
 
         public static void EmitCodeFromSchema(string projectPath, string dstFile, SchemaType.Context ctx, IReadOnlyList<SchemaProcessor> extensions)
         {
+            var dstDir = _FindTargetDirectory(projectPath);
+            if (dstDir == null) return; // if the target directory does not exist, do not emit code
+
             var newEmitter = new CSharpEmitter();
             newEmitter.DeclareContext(ctx);           
 
@@ -93,9 +96,8 @@ namespace SharpGLTF
                 ext.PrepareTypes(newEmitter, ctx);
             }
 
-            var textOut = newEmitter.EmitContext(ctx);
+            var textOut = newEmitter.EmitContext(ctx);            
 
-            var dstDir = _FindTargetDirectory(projectPath);
             var dstPath = System.IO.Path.Combine(dstDir, $"{dstFile}.cs");
 
             System.IO.File.WriteAllText(dstPath, textOut);

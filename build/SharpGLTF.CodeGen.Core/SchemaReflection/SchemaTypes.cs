@@ -64,9 +64,10 @@ namespace SharpGLTF.SchemaReflection
         {
             get
             {
-                var id = this.Identifier.Replace(".schema.json","", StringComparison.OrdinalIgnoreCase);
+                if (string.IsNullOrWhiteSpace(this.Identifier)) return null;
+                var id = this.Identifier.Replace(".schema.json", "", StringComparison.OrdinalIgnoreCase);
                 var idx = id.LastIndexOf('.');
-                return idx < 0 ? id : id.Substring(idx+1);
+                return idx < 0 ? id : id.Substring(idx + 1);
             }
         }
             
@@ -326,6 +327,8 @@ namespace SharpGLTF.SchemaReflection
         public FieldInfo SetDataType(Type type, bool isNullable)
         {
             if (type == typeof(string)) { _FieldType = DeclaringClass.Owner.UseString(); return this; }
+
+            if (type.IsEnum) { _FieldType = DeclaringClass.Owner.UseEnum(type.Name, isNullable); return this; }
 
             _FieldType = DeclaringClass.Owner.UseBlittable(type.GetTypeInfo(), isNullable);
             return this;
