@@ -28,7 +28,7 @@ namespace SharpGLTF.Reflection
             if (path.Contains("/extras/", StringComparison.Ordinal)) return;
 
             var backingField = From(reflectionObject, path);
-            if (!backingField.IsEmpty) throw new ArgumentException($"{path} not found in the current model, add objects before animations, or disable verification.", nameof(path));
+            if (backingField.IsEmpty) throw new ArgumentException($"{path} not found in the current model, add objects before animations, or disable verification.", nameof(path));
         }
 
         #endregion
