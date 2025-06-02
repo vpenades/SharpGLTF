@@ -8,12 +8,12 @@ namespace SharpGLTF.Memory
     public class BinaryTableTests
     {
         [Test]
-        public void ConvertListofListofBoolsToBytes()
+        public void ConvertJaggedListOfBoolsToBytes()
         {
             var values = new List<List<bool>>();
             values.Add(new List<bool>() { true, false });
             values.Add(new List<bool>() { false, true });
-            var bytes = BinaryTable.GetBytesForArray(values);
+            var bytes = BinaryTable.ConvertJaggedListToBytes(values);
             // Check size, should be 1 byte for 4 bits
             Assert.That(bytes.Count, Is.EqualTo(1));
 
@@ -31,7 +31,7 @@ namespace SharpGLTF.Memory
             var values = new List<List<int>>();
             values.Add(new List<int>() { 0, 1 });
             values.Add(new List<int>() { 2, 3 });
-            var bytes = BinaryTable.GetBytesForArray(values);
+            var bytes = BinaryTable.ConvertJaggedListToBytes(values);
             Assert.That(bytes.Count, Is.EqualTo(BinaryTable.GetSize<int>() * 4));
         }
 

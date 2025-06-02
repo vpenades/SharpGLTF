@@ -14,12 +14,12 @@ namespace SharpGLTF.Memory
     /// </summary>
     public static class BinaryTable
     {
-        public static List<byte> GetBytesForArray<T>(List<List<T>> values)
+        public static List<byte> ConvertJaggedListToBytes<T>(List<List<T>> values)
         {
             var type = typeof(T);
             if(type == typeof(bool))
             {
-                var booleanBytes = GetBytesBooleans(values.Cast<List<bool>>().ToList());
+                var booleanBytes = ConvertJaggedListOfBooleansToBytes(values.Cast<List<bool>>().ToList());
                 return booleanBytes;
             }
             var bytes = new List<byte>();
@@ -86,7 +86,7 @@ namespace SharpGLTF.Memory
             }
         }
 
-        private static List<byte> GetBytesBooleans(List<List<bool>> values)
+        private static List<byte> ConvertJaggedListOfBooleansToBytes(List<List<bool>> values)
         {
             var bits = new BitArray(values.SelectMany(x => x).ToArray());
             var boolBytes = new byte[(bits.Length - 1) / 8 + 1];

@@ -874,7 +874,7 @@ namespace SharpGLTF.Schema2
 
             private static int GetBufferView<T>(ModelRoot model, List<List<T>> values)
             {
-                List<byte> bytes = BinaryTable.GetBytesForArray(values);
+                List<byte> bytes = BinaryTable.ConvertJaggedListToBytes(values);
                 var bufferView = model.UseBufferView(bytes.ToArray());
                 int logicalIndex = bufferView.LogicalIndex;
                 return logicalIndex;
