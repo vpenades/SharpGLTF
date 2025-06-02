@@ -14,8 +14,14 @@ namespace SharpGLTF.Memory
     /// </summary>
     public static class BinaryTable
     {
-        public static List<byte> GetBytesForArray<T>(List<List<T>> values)
+        public static List<byte> ConvertJaggedListToBytes<T>(List<List<T>> values)
         {
+            var type = typeof(T);
+            if(type == typeof(bool))
+            {
+                var booleanBytes = ConvertJaggedListOfBooleansToBytes(values.Cast<List<bool>>().ToList());
+                return booleanBytes;
+            }
             var bytes = new List<byte>();
             foreach (var value in values)
             {
@@ -25,7 +31,6 @@ namespace SharpGLTF.Memory
 
             return bytes;
         }
-
 
         /// <summary>
         /// Converts a list of primitive types into a byte array
@@ -79,6 +84,14 @@ namespace SharpGLTF.Memory
                 // see https://github.com/CesiumGS/3d-tiles/tree/main/specification/Metadata#binary-table-format
                 throw new NotImplementedException();
             }
+        }
+
+        private static List<byte> ConvertJaggedListOfBooleansToBytes(List<List<bool>> values)
+        {
+            var bits = new BitArray(values.SelectMany(x => x).ToArray());
+            var boolBytes = new byte[(bits.Length - 1) / 8 + 1];
+            bits.CopyTo(boolBytes, 0);
+            return boolBytes.ToList();
         }
 
         private static byte[] Matrix4x4ToBytes<T>(IReadOnlyList<T> values)
