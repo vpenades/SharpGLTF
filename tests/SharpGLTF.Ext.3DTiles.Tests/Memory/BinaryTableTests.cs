@@ -26,7 +26,7 @@ namespace SharpGLTF.Memory
         }
 
         [Test]
-        public void ConvertListofListofIntToBytes()
+        public void ConvertJaggedListOfIntsToBytes()
         {
             var values = new List<List<int>>();
             values.Add(new List<int>() { 0, 1 });
