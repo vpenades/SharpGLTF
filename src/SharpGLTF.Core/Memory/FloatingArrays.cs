@@ -225,10 +225,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{single}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{single}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Float[{Count}]")]
-    public readonly struct ScalarArray : IList<Single>, IReadOnlyList<Single>
+    public readonly struct ScalarArray : IAccessorArray<Single>
     {
         #region constructors
 
@@ -321,10 +321,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector2}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Vector2}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector2[{Count}]")]
-    public readonly struct Vector2Array : IList<Vector2>, IReadOnlyList<Vector2>
+    public readonly struct Vector2Array : IAccessorArray<Vector2>
     {
         #region constructors
 
@@ -425,10 +425,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector3}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Vector3}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector3[{Count}]")]
-    public readonly struct Vector3Array : IList<Vector3>, IReadOnlyList<Vector3>
+    public readonly struct Vector3Array : IAccessorArray<Vector3>
     {
         #region constructors
 
@@ -530,10 +530,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Vector4}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Vector4}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Vector4[{Count}]")]
-    public readonly struct Vector4Array : IList<Vector4>, IReadOnlyList<Vector4>
+    public readonly struct Vector4Array : IAccessorArray<Vector4>
     {
         #region constructors
 
@@ -636,10 +636,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Quaternion}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Quaternion}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Quaternion[{Count}]")]
-    public readonly struct QuaternionArray : IList<Quaternion>, IReadOnlyList<Quaternion>
+    public readonly struct QuaternionArray : IAccessorArray<Quaternion>
     {
         #region constructors
 
@@ -720,14 +720,14 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix3x2}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Matrix3x2}"/>.
     /// </summary>
     /// <remarks>
     /// <see cref="Vector"/> namespace doesn't support a 2x2 matrix, so the array is<br/>
     /// decoded as a Matrix2x2 matrix internally, but exposed as a <see cref="Matrix3x2"/>.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Matrix2x2[{Count}]")]
-    public readonly struct Matrix2x2Array : IList<Matrix3x2>, IReadOnlyList<Matrix3x2>
+    public readonly struct Matrix2x2Array : IAccessorArray<Matrix3x2>
     {
         #region constructors
 
@@ -813,10 +813,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix3x2}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Matrix3x2}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Matrix3x2[{Count}]")]
-    public readonly struct Matrix3x2Array : IList<Matrix3x2>, IReadOnlyList<Matrix3x2>
+    public readonly struct Matrix3x2Array : IAccessorArray<Matrix3x2>
     {
         #region constructors
 
@@ -904,14 +904,14 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Matrix4x4}"/>.
     /// </summary>
     /// <remarks>
     /// <see cref="Vector"/> namespace doesn't support a 3x3 matrix, so the array is<br/>
     /// decoded as a Matrix3x3 matrix internally, but exposed as a <see cref="Matrix4x4"/>.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Matrix3x3[{Count}]")]
-    public readonly struct Matrix3x3Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
+    public readonly struct Matrix3x3Array : IAccessorArray<Matrix4x4>
     {
         #region constructors
 
@@ -1003,14 +1003,14 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Matrix4x4}"/>.
     /// </summary>
     /// <remarks>
     /// <see cref="Vector"/> namespace doesn't support a 4x3 matrix, so the array is<br/>
     /// decoded as a Matrix4x3 matrix internally, but exposed as a <see cref="Matrix4x4"/>.
     /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Matrix4x3[{Count}]")]
-    public readonly struct Matrix4x3Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
+    public readonly struct Matrix4x3Array : IAccessorArray<Matrix4x4>
     {
         #region constructors
 
@@ -1105,10 +1105,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{Matrix4x4}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Matrix4x4}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Matrix4x4[{Count}]")]
-    public readonly struct Matrix4x4Array : IList<Matrix4x4>, IReadOnlyList<Matrix4x4>
+    public readonly struct Matrix4x4Array : IAccessorArray<Matrix4x4>
     {
         #region constructors
 
@@ -1207,10 +1207,10 @@ namespace SharpGLTF.Memory
     }
 
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an IList{Single[]}/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{Single[]}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Float[][{Count}]")]
-    public readonly struct MultiArray : IList<Single[]>, IReadOnlyList<Single[]>
+    public readonly struct MultiArray : IAccessorArray<Single[]>
     {
         #region constructors
         public MultiArray(BYTES source, int byteOffset, int itemsCount, int byteStride, int dimensions, ENCODING encoding, Boolean normalized)

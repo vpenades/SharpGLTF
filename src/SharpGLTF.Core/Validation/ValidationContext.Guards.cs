@@ -293,7 +293,7 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE ArePositions(PARAMNAME pname, IList<System.Numerics.Vector3> positions)
+        public OUTTYPE ArePositions(PARAMNAME pname, IReadOnlyList<System.Numerics.Vector3> positions)
         {
             Guard.NotNull(positions, nameof(positions));
 
@@ -305,7 +305,7 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE AreNormals(PARAMNAME pname, IList<System.Numerics.Vector3> normals)
+        public OUTTYPE AreNormals(PARAMNAME pname, IReadOnlyList<System.Numerics.Vector3> normals)
         {
             Guard.NotNull(normals, nameof(normals));
 
@@ -317,7 +317,7 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE AreTangents(PARAMNAME pname, IList<System.Numerics.Vector4> tangents)
+        public OUTTYPE AreTangents(PARAMNAME pname, IReadOnlyList<System.Numerics.Vector4> tangents)
         {
             Guard.NotNull(tangents, nameof(tangents));
 
@@ -329,7 +329,7 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE AreRotations(PARAMNAME pname, IList<System.Numerics.Quaternion> rotations)
+        public OUTTYPE AreRotations(PARAMNAME pname, IReadOnlyList<System.Numerics.Quaternion> rotations)
         {
             Guard.NotNull(rotations, nameof(rotations));
 
@@ -341,7 +341,7 @@ namespace SharpGLTF.Validation
             return this;
         }
 
-        public OUTTYPE AreJoints(PARAMNAME pname, IList<System.Numerics.Vector4> joints, int skinsMaxJointCount)
+        public OUTTYPE AreJoints(PARAMNAME pname, IReadOnlyList<System.Numerics.Vector4> joints, int skinsMaxJointCount)
         {
             Guard.NotNull(joints, nameof(joints));
 

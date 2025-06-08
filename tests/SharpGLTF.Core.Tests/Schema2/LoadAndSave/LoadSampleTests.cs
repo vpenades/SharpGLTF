@@ -251,7 +251,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var accessor = primitive.GetVertexAccessor("POSITION");
 
-            var basePositions = accessor._GetMemoryAccessor().AsVector3Array();
+            if (!accessor._TryGetMemoryAccessor(out var baseMem)) Assert.Fail("can't get underlaying data");
+
+            var basePositions = baseMem.AsVector3Array();
 
             var positions = accessor.AsVector3Array();
         }
