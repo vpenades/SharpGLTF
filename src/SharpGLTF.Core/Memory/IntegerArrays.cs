@@ -10,10 +10,10 @@ using ENCODING = SharpGLTF.Schema2.IndexEncodingType;
 namespace SharpGLTF.Memory
 {
     /// <summary>
-    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IList{UInt32}"/>.
+    /// Wraps an encoded <see cref="BYTES"/> and exposes it as an <see cref="IAccessorArray{UInt32}"/>.
     /// </summary>
     [System.Diagnostics.DebuggerDisplay("Integer[{Count}]")]
-    public readonly struct IntegerArray : IList<UInt32>, IReadOnlyList<UInt32>
+    public readonly struct IntegerArray : IAccessorArray<UInt32>
     {
         #region constructors
 

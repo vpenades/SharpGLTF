@@ -53,7 +53,7 @@ namespace SharpGLTF.Diagnostics
 
         public String Identity => $"Accessor[{_Value.LogicalIndex}] {_Value.Name}";
 
-        public Schema2.BufferView Source => _Value.SourceBufferView;
+        public Schema2.BufferView Source => _Value.TryGetBufferView(out var bv) ? bv : null;
 
         public (Schema2.DimensionType Dimensions, Schema2.EncodingType Encoding, bool Normalized) Format => (_Value.Dimensions, _Value.Encoding, _Value.Normalized);
 
@@ -62,14 +62,15 @@ namespace SharpGLTF.Diagnostics
             get
             {
                 if (_Value == null) return null;
-                if (Source == null) return null;
 
-                if (Source.IsIndexBuffer)
+                if (!_Value.TryGetBufferView(out var bv)) return null;                
+
+                if (bv.IsIndexBuffer)
                 {
                     return _Value.AsIndicesArray().Cast<Object>().ToArray();
                 }
 
-                if (Source.IsVertexBuffer)
+                if (bv.IsVertexBuffer)
                 {
                     if (_Value.Dimensions == Schema2.DimensionType.SCALAR) return _Value.AsScalarArray().Cast<Object>().ToArray();
                     if (_Value.Dimensions == Schema2.DimensionType.VEC2) return _Value.AsVector2Array().Cast<Object>().ToArray();
@@ -79,15 +80,21 @@ namespace SharpGLTF.Diagnostics
 
                 if (_Value.Dimensions == Schema2.DimensionType.MAT4) return _Value.AsMatrix4x4Array().Cast<Object>().ToArray();
 
-                var itemByteSz = _Value.Format.ByteSize;
-                var byteStride = Math.Max(_Value.SourceBufferView.ByteStride, itemByteSz);
+                // fallback to plain bytes
+
                 var items = new ArraySegment<Byte>[_Value.Count];
 
-                var buffer = _Value.SourceBufferView.Content.Slice(_Value.ByteOffset, _Value.Count * byteStride);
-
-                for (int i = 0; i < items.Length; ++i )
+                if (_Value.TryGetBufferView(out var bufferView))
                 {
-                    items[i] = buffer.Slice(i * byteStride, itemByteSz);
+                    var itemByteSz = _Value.Format.ByteSize;
+                    var byteStride = Math.Max(bufferView.ByteStride, itemByteSz);
+
+                    var buffer = bufferView.Content.Slice(_Value.ByteOffset, _Value.Count * byteStride);
+
+                    for (int i = 0; i < items.Length; ++i)
+                    {
+                        items[i] = buffer.Slice(i * byteStride, itemByteSz);
+                    }
                 }
 
                 return items.Cast<Object>().ToArray();

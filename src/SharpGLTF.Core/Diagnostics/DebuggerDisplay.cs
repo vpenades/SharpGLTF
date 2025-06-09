@@ -72,14 +72,15 @@ namespace SharpGLTF.Diagnostics
 
         public static string ToReportLong(this Accessor accessor)
         {
-            var path = string.Empty;
+            var path = string.Empty;            
 
-            var bv = accessor.SourceBufferView;
-
-            if (bv.IsVertexBuffer) path += "VertexBuffer";
-            else if (bv.IsIndexBuffer) path += "IndexBuffer";
-            else path += "BufferView";
-            path += $"[{bv.LogicalIndex}ᴵᵈˣ] ⇨";
+            if (accessor.TryGetBufferView(out var bv))
+            {
+                if (bv.IsVertexBuffer) path += "VertexBuffer";
+                else if (bv.IsIndexBuffer) path += "IndexBuffer";
+                else path += "BufferView";
+                path += $"[{bv.LogicalIndex}ᴵᵈˣ] ⇨";
+            }
 
             path += $" Accessor[{accessor.LogicalIndex}ᴵᵈˣ] Offset:{accessor.ByteOffset}ᴮʸᵗᵉˢ ⇨";
 
@@ -140,12 +141,16 @@ namespace SharpGLTF.Diagnostics
                 case PrimitiveType.LINES:
                 case PrimitiveType.LINE_LOOP:
                 case PrimitiveType.LINE_STRIP:
-                    pcount = indices.HasValue ? prim.DrawPrimitiveType.GetLinesIndices(indices.Value).Count() : prim.DrawPrimitiveType.GetLinesIndices(vcount).Count();
+                    pcount = indices != null
+                        ? prim.DrawPrimitiveType.GetLinesIndices(indices).Count()
+                        : prim.DrawPrimitiveType.GetLinesIndices(vcount).Count();
                     break;
                 case PrimitiveType.TRIANGLES:
                 case PrimitiveType.TRIANGLE_FAN:
                 case PrimitiveType.TRIANGLE_STRIP:
-                    pcount = indices.HasValue ? prim.DrawPrimitiveType.GetTrianglesIndices(indices.Value).Count() : prim.DrawPrimitiveType.GetTrianglesIndices(vcount).Count();
+                    pcount = indices != null
+                        ? prim.DrawPrimitiveType.GetTrianglesIndices(indices).Count()
+                        : prim.DrawPrimitiveType.GetTrianglesIndices(vcount).Count();
                     break;
             }
 

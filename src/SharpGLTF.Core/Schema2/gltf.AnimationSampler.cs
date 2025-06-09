@@ -119,7 +119,7 @@ namespace SharpGLTF.Schema2
         {
             get
             {
-                var keys = Input.AsScalarArray();
+                IReadOnlyList<float> keys = Input.AsScalarArray();
                 return keys.Count == 0 ? 0 : keys[keys.Count - 1];
             }
         }
@@ -286,7 +286,7 @@ namespace SharpGLTF.Schema2
 
             accessor.SetData(buffer, 0, itemCount * itemsStride, DimensionType.SCALAR, EncodingType.FLOAT, false);
 
-            var dst = accessor.AsScalarArray();
+            IList<float> dst = accessor.AsScalarArray();
 
             for (int y = 0; y < itemCount; ++y)
             {

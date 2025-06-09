@@ -10,17 +10,18 @@ namespace SharpGLTF.Memory
     /// </summary>
     /// <typeparam name="T">An unmanage structure type.</typeparam>
     [System.Diagnostics.DebuggerDisplay("Sparse {typeof(T).Name} Accessor {Count}")]
-    public readonly struct SparseArray<T> : IList<T>, IReadOnlyList<T>
+    public readonly struct SparseArray<T> : IAccessorArray<T>
         where T : unmanaged
     {
         #region lifecycle
 
-        public SparseArray(IList<T> bottom, IList<T> top, IntegerArray topMapping)
+        public SparseArray(IReadOnlyList<T> bottom, IReadOnlyList<T> top, IReadOnlyList<uint> topMapping)
         {
             _BottomItems = bottom;
             _TopItems = top;
-            _Mapping = new Dictionary<int, int>();
 
+            // expand indices for fast access
+            _Mapping = new Dictionary<int, int>();
             for (int val = 0; val < topMapping.Count; ++val)
             {
                 var key = (int)topMapping[val];
@@ -33,10 +34,10 @@ namespace SharpGLTF.Memory
         #region data
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IList<T> _BottomItems;
+        private readonly IReadOnlyList<T> _BottomItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
-        private readonly IList<T> _TopItems;
+        private readonly IReadOnlyList<T> _TopItems;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly Dictionary<int, int> _Mapping;

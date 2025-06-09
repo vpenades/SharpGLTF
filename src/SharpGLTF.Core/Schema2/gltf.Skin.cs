@@ -62,7 +62,7 @@ namespace SharpGLTF.Schema2
 
                 System.Diagnostics.Debug.Assert(matrices.Count == _joints.Count, "IBM and Joints count mismatch");
 
-                return matrices.AsMatrix4x4ReadOnlyList();
+                return matrices.AsMatrix4x4Array();
             }
         }
 
@@ -125,11 +125,11 @@ namespace SharpGLTF.Schema2
 
             var node = this.LogicalParent.LogicalNodes[nodeIdx];
 
-            var matrices = GetInverseBindMatricesAccessor();
+            IReadOnlyList<Matrix4x4> matrices = GetInverseBindMatricesAccessor()?.AsMatrix4x4Array();
 
             var matrix = matrices == null
                 ? Matrix4x4.Identity
-                : matrices.AsMatrix4x4Array()[idx];
+                : matrices[idx];
 
             return (node, matrix);
         }

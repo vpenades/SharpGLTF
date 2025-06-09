@@ -29,4 +29,10 @@
     <ProjectReference Include="..\SharpGLTF.NUnit\SharpGLTF.NUnit.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="TestFixtures\tower.glb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

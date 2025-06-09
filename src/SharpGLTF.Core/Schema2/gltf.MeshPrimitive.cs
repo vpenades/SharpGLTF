@@ -153,9 +153,11 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public Memory.MemoryAccessor GetVertices(string attributeKey)
+        internal IReadOnlyList<T> GetVertices<T>(string attributeKey)
         {
-            return GetVertexAccessor(attributeKey)._GetMemoryAccessor(attributeKey);
+            var accessor = GetVertexAccessor(attributeKey);
+
+            return accessor.AsVertexArray<T>();
         }
 
         #endregion
@@ -403,7 +405,10 @@ namespace SharpGLTF.Schema2
                 }
                 else
                 {
-                    var memories = group.Select(item => item._GetMemoryAccessor());
+                    var memories = group
+                        .Select(item => item._TryGetMemoryAccessor(out var mem) ? mem : null)
+                        .Where(item => item != null);
+
                     var overlap = Memory.MemoryAccessor.HaveOverlappingBuffers(memories);
                     if (overlap)
                     {
@@ -417,7 +422,8 @@ namespace SharpGLTF.Schema2
             if (validate.TryFix)
             {
                 var vattributes = this.VertexAccessors
-                    .Select(item => item.Value._GetMemoryAccessor(item.Key))
+                    .Select(item => item.Value._TryGetMemoryAccessor(item.Key, out var mem) ? mem : null)
+                    .Where(item => item != null)
                     .ToArray();
 
                 Memory.MemoryAccessor.SanitizeVertexAttributes(vattributes);
