@@ -30,6 +30,10 @@ namespace SharpGLTF.Schema2
         {
             _min = new List<double>();
             _max = new List<double>();
+
+            // this is required because when ByteOffset in the schema is defined, even if it's zero, it triggers requiring a BufferView
+            _byteOffset = null;
+            _normalized = null;
         }
 
         #endregion
@@ -505,18 +509,26 @@ namespace SharpGLTF.Schema2
 
         protected override void OnValidateReferences(VALIDATIONCTX validate)
         {
-            base.OnValidateReferences(validate);
+            base.OnValidateReferences(validate);            
 
-            validate
-                // .IsDefined(nameof(_bufferView), _bufferView) as per specification, this is not required to be defined.
-                .NonNegative(nameof(_byteOffset), _byteOffset)
-                .IsGreaterOrEqual(nameof(_count), _count, _countMinimum)
-                .IsNullOrIndex(nameof(_bufferView), _bufferView, this.LogicalParent.LogicalBufferViews);
+            if (_byteOffset.HasValue)
+            {
+                validate
+                    .IsDefined(nameof(_bufferView), _bufferView)
+                    .IsNullOrIndex(nameof(_bufferView), _bufferView, this.LogicalParent.LogicalBufferViews);                    
+            }            
         }
 
         protected override void OnValidateContent(VALIDATIONCTX validate)
         {
             base.OnValidateContent(validate);
+
+            validate.IsGreaterOrEqual(nameof(_count), _count, _countMinimum);
+
+            if (_byteOffset.HasValue)
+            {
+                validate.NonNegative(nameof(_byteOffset), _byteOffset);
+            }
 
             // if Accessor.Type uses a custom dimension,
             // we cannot check the rest of the accessor.
@@ -529,8 +541,18 @@ namespace SharpGLTF.Schema2
 
             if (_TryGetMemoryAccessor(out var mem))
             {
-                validate.That(() => MemoryAccessor.VerifyAccessorBounds(mem, _min, _max));
-            }            
+                validate.That(() => MemoryAccessor.VerifyAccessorBounds(mem, _min, _max));                
+            }
+
+            if (this._normalized == true)
+            {
+                bool isNormalizable = false;
+                isNormalizable |= Encoding == EncodingType.BYTE;
+                isNormalizable |= Encoding == EncodingType.UNSIGNED_BYTE;
+                isNormalizable |= Encoding == EncodingType.SHORT;
+                isNormalizable |= Encoding == EncodingType.UNSIGNED_SHORT;
+                validate.That(isNormalizable, "Normalized", "Only Byte and Short can be normalized");
+            }
 
             // at this point we don't know which kind of data we're accessing, so it's up to the components
             // using this accessor to validate the data.

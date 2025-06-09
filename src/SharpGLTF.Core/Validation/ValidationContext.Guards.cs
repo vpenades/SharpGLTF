@@ -376,6 +376,16 @@ namespace SharpGLTF.Validation
             return this;
         }
 
+        public OUTTYPE That(bool result, string paramName, string msg)
+        {
+            if (!result)
+            {
+                _DataThrow(paramName, msg);
+            }
+
+            return this;
+        }
+
         #endregion
     }
 }
