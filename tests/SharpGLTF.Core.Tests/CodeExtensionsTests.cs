@@ -14,7 +14,7 @@ namespace SharpGLTF
 
     [TestFixture]
     [Category("Core")]
-    public class InternalExtensionsTests
+    public class CodeExtensionsTests
     {
         internal static int _WordPadded(int length)
         {

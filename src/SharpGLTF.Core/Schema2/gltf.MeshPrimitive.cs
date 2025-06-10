@@ -157,7 +157,7 @@ namespace SharpGLTF.Schema2
         {
             var accessor = GetVertexAccessor(attributeKey);
 
-            return accessor.AsVertexArray<T>();
+            return accessor.AsArrayOf<T>();
         }
 
         #endregion

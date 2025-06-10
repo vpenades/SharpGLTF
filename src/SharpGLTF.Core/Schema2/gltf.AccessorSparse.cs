@@ -11,16 +11,6 @@ namespace SharpGLTF.Schema2
 
         internal AccessorSparse() { }
 
-        #endregion
-
-        #region properties
-
-        public int Count => _count;
-
-        #endregion
-
-        #region API
-        
         internal AccessorSparse(BufferView indices, int indicesOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesOffset, int count)
         {
             Guard.NotNull(indices, nameof(indices));
@@ -31,6 +21,16 @@ namespace SharpGLTF.Schema2
             this._indices = new AccessorSparseIndices(indices, indicesOffset, indicesEncoding);
             this._values = new AccessorSparseValues(values, valuesOffset);
         }
+
+        #endregion
+
+        #region properties
+
+        public int Count => _count;
+
+        #endregion
+
+        #region API        
 
         internal KeyValuePair<Memory.IntegerArray, Memory.MemoryAccessor> _CreateMemoryAccessors(Accessor baseAccessor)
         {

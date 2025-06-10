@@ -49,27 +49,10 @@ namespace SharpGLTF.Schema2
 
         #region properties
 
-        internal int _SourceBufferViewIndex => this._bufferView.AsValue(-1);
-
-        /// <summary>
-        /// Gets the number of bytes, starting at <see cref="ByteOffset"/> use by this <see cref="Accessor"/>
-        /// </summary>
-        public int ByteLength => BufferView.GetAccessorByteLength(Format, Count, SourceBufferView);
-
-        /// <summary>
-        /// Gets the <see cref="BufferView"/> buffer that contains the items as an encoded byte array.
-        /// </summary>
-        public BufferView SourceBufferView => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;
-
         /// <summary>
         /// Gets the number of items.
         /// </summary>
         public int Count => this._count;
-
-        /// <summary>
-        /// Gets the starting byte offset within the byte data.
-        /// </summary>
-        public int ByteOffset => this._byteOffset.AsValue(0);        
 
         /// <summary>
         /// Gets the <see cref="DimensionType"/> of an item.
@@ -85,6 +68,27 @@ namespace SharpGLTF.Schema2
         /// Gets a value indicating whether the items values are normalized.
         /// </summary>
         public Boolean Normalized => this._normalized.AsValue(false);
+
+        /// <summary>
+        /// Index to the BufferView, or -1 if the bufferview is not defined.
+        /// </summary>
+        internal int _SourceBufferViewIndex => this._bufferView.AsValue(-1);
+
+        /// <summary>
+        /// Gets the number of bytes, starting at <see cref="ByteOffset"/> use by this <see cref="Accessor"/>
+        /// </summary>
+        public int ByteLength => BufferView.GetAccessorByteLength(Format, Count, SourceBufferView);
+
+        /// <summary>
+        /// Gets the <see cref="BufferView"/> buffer that contains the items as an encoded byte array,
+        /// or null if the buffer is not defined, in which case the accessor must be interpreted as a sequence of zero values.
+        /// </summary>
+        public BufferView SourceBufferView => this._bufferView.HasValue ? this.LogicalParent.LogicalBufferViews[this._bufferView.Value] : null;        
+
+        /// <summary>
+        /// Gets the starting byte offset within <see cref="SourceBufferView"/>
+        /// </summary>
+        public int ByteOffset => this._byteOffset.AsValue(0);
 
         /// <summary>
         /// Gets a value indicating whether this <see cref="Accessor"/> has a sparse structure.
@@ -176,39 +180,79 @@ namespace SharpGLTF.Schema2
 
             var dimensions = this.Dimensions.DimCount();
 
+            if (dimensions != 3) return; // temporary hack to not calculate dimensions for all type, im truth it is only required for positions.
+
             for (int i = 0; i < dimensions; ++i)
             {
                 this._min.Add(double.MaxValue);
                 this._max.Add(double.MinValue);
             }
 
-            if (this.TryGetBufferView(out var view))
+            if (dimensions ==  3)
             {
-                var array = new MultiArray(view.Content, this.ByteOffset, this.Count, view.ByteStride, dimensions, this.Encoding, false);
+                var v3 = this.AsVector3Array();
 
-                var current = new float[dimensions];
-
-                for (int i = 0; i < array.Count; ++i)
+                for (int i = 0; i < v3.Count; ++i)
                 {
-                    array.CopyItemTo(i, current);
+                    var current = v3[i];
 
-                    for (int j = 0; j < current.Length; ++j)
-                    {
-                        this._min[j] = Math.Min(this._min[j], current[j]);
-                        this._max[j] = Math.Max(this._max[j], current[j]);
-                    }
-                }
+                    this._min[0] = Math.Min(this._min[0], current.X);
+                    this._max[0] = Math.Max(this._max[0], current.X);
+
+                    this._min[1] = Math.Min(this._min[1], current.Y);
+                    this._max[1] = Math.Max(this._max[1], current.Y);
+
+                    this._min[2] = Math.Min(this._min[2], current.Z);
+                    this._max[2] = Math.Max(this._max[2], current.Z);
+                }                
             }
-            else
+
+
+            /*
+            var multiArray = this.AsMultiArray(dimensions);
+
+            for (int i = 0; i < multiArray.Count; ++i)
             {
-                for (int i = 0; i < this._min.Count; ++i) this._min[i] = 0;
-                for (int i = 0; i < this._max.Count; ++i) this._max[i] = 0;
-            }
+                var current = multiArray[i];
+
+                for (int j = 0; j < current.Length; ++j)
+                {
+                    this._min[j] = Math.Min(this._min[j], current[j]);
+                    this._max[j] = Math.Max(this._max[j], current[j]);
+                }
+            }*/
         }
 
         #endregion
 
         #region Data Buffer API
+
+        /// <summary>
+        /// Associates this <see cref="Accessor"/> with an array of zero values.
+        /// </summary>        
+        /// <remarks>
+        /// This can be used to set the base data for sparse data.
+        /// </remarks>
+        /// <param name="itemCount">The number of items in the accessor.</param>
+        /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
+        /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
+        /// <param name="normalized">The item normalization mode.</param>
+        public void SetZeros(int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
+        {            
+            Guard.MustBeGreaterThanOrEqualTo(itemCount, _countMinimum, nameof(itemCount));
+
+            this._bufferView = null;
+            this._byteOffset = null;
+            this._count = itemCount;
+
+            this._CachedType = dimensions;
+            this._type = Enum.GetName(typeof(DimensionType), dimensions);
+
+            this._componentType = encoding;
+            this._normalized = normalized.AsNullable(_normalizedDefault);
+
+            UpdateBounds();
+        }
 
         /// <summary>
         /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
@@ -239,83 +283,71 @@ namespace SharpGLTF.Schema2
             UpdateBounds();
         }
 
-        public IAccessorArray<Matrix3x2> AsMatrix2x2Array()
+
+        public void RemoveSparseData()
         {
-            return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix2x2Array()
-                : new ZeroAccessorArray<Matrix3x2>(this._count);
+            _sparse = null;
+
+            UpdateBounds();
         }
 
-        public IAccessorArray<Matrix4x4> AsMatrix3x3Array()
+        public void CreateSparseData<T>(IReadOnlyDictionary<int,T> data)
         {
-            return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix3x3Array()
-                : new ZeroAccessorArray<Matrix4x4>(this._count);
-        }
-
-        public IAccessorArray<Matrix4x4> AsMatrix4x3Array()
-        {
-            /*
-            const int dimsize = 4 * 3;
-
-            var view = SourceBufferView;
-            var stride = Math.Max(dimsize * this.Encoding.ByteLength(), view.ByteStride);
-            var content = view.Content.Slice(this.ByteOffset, Count * stride);
-
-            return new Matrix4x3Array(content, stride, this.Encoding, this.Normalized);
-            */
-
-            return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix4x3Array()
-                : new ZeroAccessorArray<Matrix4x4>(this._count);
-        }
-
-        public IAccessorArray<Matrix4x4> AsMatrix4x4Array()
-        {
-            return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix4x4Array()
-                : new ZeroAccessorArray<Matrix4x4>(this._count);
-        }
-
-        [Obsolete("Use AsMatrix4x4Array instead", true)]
-        internal IReadOnlyList<Matrix4x4> AsMatrix4x4ReadOnlyList()
-        {
-            return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix4x4Array()
-                : new ZeroAccessorArray<Matrix4x4>(this._count);
-        }
-
-        public IAccessorArray<Quaternion> AsQuaternionArray()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
+            if (!Enum.IsDefined(typeof(EncodingType), this._componentType))
             {
-                if (this._sparse == null) return memory.AsQuaternionArray();
-
-                throw new NotImplementedException();
+                throw new InvalidOperationException("The Accessor's Format must be set before setting sparse data");
             }
-            else
+
+            var indicesEncoding = new MemoryAccessInfo("Indices", 0, data.Count, 0, DimensionType.SCALAR, EncodingType.UNSIGNED_INT);
+            var indices = new MemoryAccessor(new byte[data.Count * 4], indicesEncoding);
+            var indicesEncoder = indices.AsIntegerArray();
+
+            var valuesEncoding = new MemoryAccessInfo(null, 0, data.Count, 0, this.Format);
+            var values = new MemoryAccessor(new byte[data.Count * valuesEncoding.ItemByteLength], valuesEncoding);
+            var valuesEncoder = values.AsArrayOf<T>();
+
+            int idx = 0;
+            foreach (var kvp in data.OrderBy(data => data.Key))
             {
-                if (this._sparse == null) return new ZeroAccessorArray<Quaternion>(this._count);
-
-                throw new NotImplementedException();
+                indicesEncoder[idx] = (uint)kvp.Key;
+                valuesEncoder[idx] = kvp.Value;
+                ++idx;
             }
+
+            SetSparseData(data.Count, indices, values);
         }
 
-        public IAccessorArray<Single[]> AsMultiArray(int dimensions)
+        public void SetSparseData(int count, MemoryAccessor indices, MemoryAccessor values)
         {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
+            Guard.MustBeGreaterThan(count, 0, nameof(count));
 
-                if (this._sparse == null) return memory.AsMultiArray(dimensions);
+            var indicesBV = this.LogicalParent.UseBufferView(indices.Data);
+            var valuesBV = this.LogicalParent.UseBufferView(values.Data);
 
-                throw new NotImplementedException();
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Single[]>(this._count);
+            SetSparseData(count, indicesBV, 0, indices.Attribute.Encoding.ToIndex(), valuesBV, 0);
+        }
 
-                throw new NotImplementedException();
-            }
+        public void SetSparseData(int count, BufferView indices, int indicesByteOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesByteOffset)
+        {
+            Guard.MustBeGreaterThan(count, 0, nameof(count));
+
+            Guard.NotNull(indices, nameof(indices));
+            Guard.MustShareLogicalParent(this, indices, nameof(indices));
+            Guard.IsFalse(indices.IsVertexBuffer, nameof(indices));
+            Guard.IsFalse(indices.IsIndexBuffer, nameof(indices));
+
+            Guard.MustBeGreaterThanOrEqualTo(indicesByteOffset, 0, nameof(indicesByteOffset));
+
+            Guard.NotNull(values, nameof(values));
+            Guard.MustShareLogicalParent(this, values, nameof(values));
+            Guard.IsFalse(values.IsVertexBuffer, nameof(indices));
+            Guard.IsFalse(values.IsIndexBuffer, nameof(indices));
+
+            Guard.MustBeGreaterThanOrEqualTo(valuesByteOffset, 0, nameof(valuesByteOffset));
+
+            this._sparse = new AccessorSparse(indices, indicesByteOffset, indicesEncoding, values, valuesByteOffset, count);
+
+            UpdateBounds();
         }
 
         #endregion
@@ -344,16 +376,6 @@ namespace SharpGLTF.Schema2
             Guard.IsFalse(buffer.IsVertexBuffer, nameof(buffer));
 
             SetData(buffer, bufferByteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
-        }
-
-        public IAccessorArray<UInt32> AsIndicesArray()
-        {
-            Guard.IsFalse(this.IsSparse, nameof(IsSparse));
-            Guard.IsTrue(this.Dimensions == DimensionType.SCALAR, nameof(Dimensions));
-
-            return _TryGetMemoryAccessor(out var mem)
-                ? new IntegerArray(SourceBufferView.Content, this.ByteOffset, this._count, this.Encoding.ToIndex())
-                : new ZeroAccessorArray<UInt32>(this._count);
         }
 
         #endregion
@@ -386,121 +408,6 @@ namespace SharpGLTF.Schema2
             Guard.IsFalse(buffer.IsIndexBuffer, nameof(buffer));
 
             SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
-        }
-
-        internal IAccessorArray<T> AsVertexArray<T>()
-        {
-            if (typeof(T) == typeof(float)) return (IAccessorArray<T>)AsScalarArray();
-            if (typeof(T) == typeof(Vector2)) return (IAccessorArray<T>)AsVector2Array();
-            if (typeof(T) == typeof(Vector3)) return (IAccessorArray<T>)AsVector3Array();
-            if (typeof(T) == typeof(Vector4)) return (IAccessorArray<T>)AsVector4Array();
-
-            throw new NotImplementedException();
-        }
-
-        public IAccessorArray<Single> AsScalarArray()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-                if (this._sparse == null) return memory.AsScalarArray();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Single>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateScalarSparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }            
-        }
-
-        public IAccessorArray<Vector2> AsVector2Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-                if (this._sparse == null) return memory.AsVector2Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector2>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector2SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-
-        public IAccessorArray<Vector3> AsVector3Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-
-                if (this._sparse == null) return memory.AsVector3Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector3>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector3SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-
-        public IAccessorArray<Vector4> AsVector4Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-                if (this._sparse == null) return memory.AsVector4Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector4>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector4SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-
-        public IAccessorArray<Vector4> AsColorArray(Single defaultW = 1)
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-
-                if (this._sparse == null) return memory.AsColorArray(defaultW);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateColorSparseArray(memory, sparseKV.Key, sparseKV.Value, defaultW);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector4>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateColorSparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-        
-        public ArraySegment<Byte> TryGetVertexBytes(int vertexIdx)
-        {
-            if (_sparse != null) throw new InvalidOperationException("Can't be used on Acessors with Sparse Data");
-
-            if (!this.TryGetBufferView(out var bufferView)) return default;
-
-            var itemByteSz = Encoding.ByteLength() * Dimensions.DimCount();
-            var byteStride = Math.Max(itemByteSz, bufferView.ByteStride);
-            var byteOffset = vertexIdx * byteStride;
-
-            return bufferView.Content.Slice(this.ByteOffset + (vertexIdx * byteStride), itemByteSz);
         }
 
         #endregion

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 
 using BYTES = System.ArraySegment<System.Byte>;
 
@@ -325,6 +326,14 @@ namespace SharpGLTF.Memory
 
         #region constructor
 
+        #if NETSTANDARD
+        public MemoryAccessor(Byte[] data, MemoryAccessInfo info)
+        {
+            this._Slicer = info;
+            this._Data = new ArraySegment<Byte>(data);
+        }
+        #endif
+
         public MemoryAccessor(BYTES data, MemoryAccessInfo info)
         {
             this._Slicer = info;
@@ -475,6 +484,24 @@ namespace SharpGLTF.Memory
         {
             this._Slicer = encoding;
             this._Data = data;
+        }
+
+        public IAccessorArray<T> AsArrayOf<T>()
+        {
+            if (typeof(T) == typeof(int)) return AsIntegerArray() as IAccessorArray<T>;
+            if (typeof(T) == typeof(float)) return AsScalarArray() as IAccessorArray<T>;
+            if (typeof(T) == typeof(Vector2)) return AsVector2Array() as IAccessorArray<T>;
+            if (typeof(T) == typeof(Vector3)) return AsVector3Array() as IAccessorArray<T>;
+
+            // AsColorArray is able to handle both Vector3 and Vector4 underlaying data
+            if (typeof(T) == typeof(Vector4)) return AsColorArray() as IAccessorArray<T>;
+            
+            if (typeof(T) == typeof(Quaternion)) return AsQuaternionArray() as IAccessorArray<T>;
+
+            // we should create the equivalent of AsColorArray for Matrices
+            if (typeof(T) == typeof(Matrix4x4)) return AsMatrix4x4Array() as IAccessorArray<T>;
+
+            throw new NotSupportedException(typeof(T).Name);
         }
 
         public IntegerArray AsIntegerArray()
