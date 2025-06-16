@@ -227,6 +227,21 @@ namespace SharpGLTF.Schema2
 
         #region Data Buffer API
 
+        public void SetDataFrom(Accessor other)
+        {
+            Guard.NotNull(other, nameof(other));
+            Guard.MustShareLogicalParent(this, other, nameof(other));
+
+            if (_bufferView.HasValue)
+            {
+                SetData(other.SourceBufferView, other.ByteOffset, other.Count, other.Dimensions, other.Encoding, other.Normalized);
+            }
+            else
+            {
+                SetZeros(other.Count, other.Dimensions, other.Encoding, other.Normalized);
+            }
+        }
+
         /// <summary>
         /// Associates this <see cref="Accessor"/> with an array of zero values.
         /// </summary>        
@@ -252,7 +267,7 @@ namespace SharpGLTF.Schema2
             this._normalized = normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
-        }
+        }        
 
         /// <summary>
         /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>

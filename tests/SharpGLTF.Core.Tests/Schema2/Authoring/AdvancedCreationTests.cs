@@ -51,13 +51,13 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithIndicesAccessor(PrimitiveType.TRIANGLES, indices)
                 .WithMaterial(material);
 
-            // create morph target
+            // create morph target 0
             
-            var morphs0Pos = new Dictionary<int, Vector3>();
-            morphs0Pos[2] = new Vector3(11, -11, 0);
+            var morphs0Pos = new Dictionary<int, Vector3>(); // <VertexIndex, Position>
+            morphs0Pos[2] = new Vector3(15, -15, 0);
 
             var morphs0Acc = model.CreateAccessor();
-            morphs0Acc.SetZeros(3, DimensionType.VEC3, EncodingType.FLOAT, false);
+            morphs0Acc.SetDataFrom(primitive.GetVertexAccessor("POSITION")); // set base data from position attribute accessor
             morphs0Acc.CreateSparseData(morphs0Pos);
 
             var morphs0 = new Dictionary<string, Accessor>();
@@ -65,7 +65,23 @@ namespace SharpGLTF.Schema2.Authoring
 
             primitive.SetMorphTargetAccessors(0, morphs0);
 
-            rnode.SetMorphWeights(Transforms.SparseWeight8.Create(  (0, 0.75f) ));
+            // create morph target 1
+
+            var morphs1Pos = new Dictionary<int, Vector3>(); // <VertexIndex, Position>
+            morphs0Pos[0] = new Vector3(0, 15, 0);
+
+            var morphs1Acc = model.CreateAccessor();
+            morphs1Acc.SetDataFrom(primitive.GetVertexAccessor("POSITION")); // set base data from position attribute accessor
+            morphs1Acc.CreateSparseData(morphs0Pos);
+
+            var morphs1 = new Dictionary<string, Accessor>();
+            morphs1["POSITION"] = morphs1Acc;
+
+            primitive.SetMorphTargetAccessors(1, morphs1);
+
+            // initialize node with a specific weights blend
+
+            rnode.SetMorphWeights(Transforms.SparseWeight8.Create(  (0, 0.95f), (1, 0.75f) )); // morph 0 at 0.95, morph 1 at 0.75
 
             model.AttachToCurrentTest("result.glb");
             model.AttachToCurrentTest("result.gltf");
