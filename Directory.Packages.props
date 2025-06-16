@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="System.Text.Json" Version="9.0.4" />
-    <PackageVersion Include="System.Drawing.Common" Version="9.0.4" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.6" />
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.6" />
   </ItemGroup>
 
   <ItemGroup>
@@ -21,18 +21,18 @@
   <ItemGroup>
     <PackageVersion Include="Plotly.Sharp" Version="0.0.8196" />
     <PackageVersion Include="LibGit2Sharp" Version="0.31.0" />
-    <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.3" />
+    <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.4" />
     <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.8" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.10" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageVersion Include="NUnit" Version="4.3.2" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.7.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.9.1" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20241018-1255" />
   </ItemGroup>
 
@@ -41,6 +41,7 @@
     <PackageVersion Update="System.Text.Json" Version="8.0.5" />
     <PackageVersion Update="System.Drawing.Common" Version="8.0.11" />
     <PackageVersion Update="MonoGame.Framework.DesktopGL" Version="3.8.1.303" />
+    <PackageVersion Update="Microsoft.NET.Test.Sdk" Version="17.13.0" />
   </ItemGroup>
 
 
