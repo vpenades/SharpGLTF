@@ -55,7 +55,10 @@ namespace SharpGLTF.Schema2
                 var path = Uri.UnescapeDataString(rawUri);
                 path = Path.Combine(dinfo.FullName, path);
 
-                File.WriteAllBytes(path, data.ToUnderlayingArray());
+                using (var s = System.IO.File.Create(path))
+                {
+                    s.Write(data.Array, data.Offset, data.Count);
+                }
             }
 
             System.IO.Stream _OpenStream(string rawUri)

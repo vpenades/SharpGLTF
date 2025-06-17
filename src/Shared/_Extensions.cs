@@ -822,19 +822,19 @@ namespace SharpGLTF
 
         #endregion
 
-        #region serialization
-        
-        public static Byte[] ToUnderlayingArray(this ArraySegment<Byte> segment)
-        {
-            if (segment.Offset == 0 && segment.Count == segment.Array.Length) return segment.Array;
+        #region serialization        
 
-            return segment.ToArray();
+        public static bool TryGetUnderlayingArray<T>(this ArraySegment<T> segment, out T[] array)
+        {
+            array = segment.Array ?? Array.Empty<T>();
+            return segment.Offset == 0 && segment.Count == segment.Array.Length;
         }
 
         public static ArraySegment<Byte> ToArraySegment(this System.IO.MemoryStream m)
         {
-            if (m.TryGetBuffer(out ArraySegment<Byte> data)) return data;
-            return new ArraySegment<byte>(m.ToArray());
+            return m.TryGetBuffer(out ArraySegment<Byte> data)
+                ? data
+                : new ArraySegment<byte>(m.ToArray());
         }
 
         public static Byte[] GetPaddedContent(this Byte[] content)
@@ -902,7 +902,7 @@ namespace SharpGLTF
 #pragma warning restore SYSLIB0013 // Type or member is obsolete
         }
 
-#if NET6_0
+        #if NET6_0
 
         /// <summary>
         /// Creates a new instance of the <see cref="JsonNode"/>.
@@ -914,11 +914,10 @@ namespace SharpGLTF
         /// </remarks>
         /// <param name="node">The node to clone.</param>
         /// <returns>A clone of <paramref name="node"/>.</returns>        
-#if NET6_0_OR_GREATER
+
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonValue))]
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonArray))]
         [System.Diagnostics.CodeAnalysis.DynamicDependency(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.All, typeof(System.Text.Json.Nodes.JsonObject))]
-#endif
         public static System.Text.Json.Nodes.JsonNode DeepClone(this System.Text.Json.Nodes.JsonNode node)
         {
             // issue tracking both DeepClone and DeepEquals: https://github.com/dotnet/runtime/issues/56592            
@@ -927,14 +926,14 @@ namespace SharpGLTF
 
             System.Text.Json.Nodes.JsonNode clone = null;            
 
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
             switch(node)
             {
                 case System.Text.Json.Nodes.JsonValue asValue: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonValue>(asValue); break;
                 case System.Text.Json.Nodes.JsonArray asArray: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonArray>(asArray); break;
                 case System.Text.Json.Nodes.JsonObject asObject: clone = System.Text.Json.JsonSerializer.Deserialize<System.Text.Json.Nodes.JsonObject>(asObject); break;
             }            
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+            #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
 
             if (clone == null) throw new NotImplementedException();
 
@@ -943,15 +942,13 @@ namespace SharpGLTF
             return clone;
         }
 
-#endif
+        #endif
 
         public static bool DeepEquals(this System.Text.Json.Nodes.JsonNode x, System.Text.Json.Nodes.JsonNode y, double precission)
         {
-#if !NET6_0
-
+            #if !NET6_0
             return System.Text.Json.Nodes.JsonNode.DeepEquals(x, y);
-
-#else
+            #else
 
             if (x == y) return true;
             if (x == null) return false;
@@ -1008,7 +1005,7 @@ namespace SharpGLTF
 
             return false;
 
-#endif
+            #endif
         }
 
         #endregion
