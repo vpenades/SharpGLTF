@@ -52,9 +52,12 @@ namespace SharpGLTF.Schema2
             var data = uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
             if (data != null) return data;
 
-            return context
-                .ReadAllBytesToEnd(uri)
-                .ToUnderlayingArray();
+            var segment = context
+                .ReadAllBytesToEnd(uri);
+
+            return segment.TryGetUnderlayingArray(out var array)
+                ? array
+                : segment.ToArray();
         }
 
         #endregion

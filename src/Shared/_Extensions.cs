@@ -607,7 +607,7 @@ namespace SharpGLTF
                 case IndexEncodingType.UNSIGNED_SHORT: return EncodingType.UNSIGNED_SHORT;
                 case IndexEncodingType.UNSIGNED_INT: return EncodingType.UNSIGNED_INT;
 
-                default: throw new NotImplementedException();
+                default: throw new NotSupportedException();
             }
         }
 
@@ -619,7 +619,7 @@ namespace SharpGLTF
                 case EncodingType.UNSIGNED_SHORT: return IndexEncodingType.UNSIGNED_SHORT;
                 case EncodingType.UNSIGNED_INT: return IndexEncodingType.UNSIGNED_INT;
 
-                default: throw new NotImplementedException();
+                default: throw new NotSupportedException();
             }
         }
 
@@ -638,9 +638,9 @@ namespace SharpGLTF
             }
         }
 
-        internal static DimensionType ToDimension(this int l)
+        public static DimensionType ToDimension(this int len)
         {
-            switch (l)
+            switch (len)
             {
                 case 1: return DimensionType.SCALAR;
                 case 2: return DimensionType.VEC2;
@@ -651,6 +651,27 @@ namespace SharpGLTF
                 case 16: return DimensionType.MAT4;
                 default: throw new NotImplementedException();
             }
+        }
+
+        public static DimensionType ToDimension(this Type t)
+        {
+            if (t == typeof(SByte)) return DimensionType.SCALAR;
+            if (t == typeof(Byte)) return DimensionType.SCALAR;
+            if (t == typeof(Int16)) return DimensionType.SCALAR;
+            if (t == typeof(UInt16)) return DimensionType.SCALAR;
+            if (t == typeof(Int32)) return DimensionType.SCALAR;
+            if (t == typeof(UInt32)) return DimensionType.SCALAR;
+            if (t == typeof(Single)) return DimensionType.SCALAR;
+            if (t == typeof(Double)) return DimensionType.SCALAR;
+
+            if (t == typeof(Vector2)) return DimensionType.VEC2;
+            if (t == typeof(Vector3)) return DimensionType.VEC3;
+            if (t == typeof(Vector4)) return DimensionType.VEC4;
+            if (t == typeof(Quaternion)) return DimensionType.VEC4;
+            // return ElementType.MAT2;
+            // return DimensionType.MAT3;
+            if (t == typeof(Matrix4x4)) return DimensionType.MAT4;
+            throw new NotImplementedException();
         }
 
         public static int GetPrimitiveVertexSize(this PrimitiveType ptype)

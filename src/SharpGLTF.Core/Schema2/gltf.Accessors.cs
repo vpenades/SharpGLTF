@@ -178,49 +178,76 @@ namespace SharpGLTF.Schema2
 
             // https://github.com/KhronosGroup/glTF-Validator/issues/79
 
-            var dimensions = this.Dimensions.DimCount();
+            var dimensions = this.Dimensions.DimCount();            
+            
+            if (dimensions == 1)
+            {
+                _ResetBounds();
+                var array = this.AsScalarArray();
+                for (int i = 0; i < array.Count; ++i) { _AppendToBounds(array[i]); }
+                return;
+            }
 
-            if (dimensions != 3) return; // temporary hack to not calculate dimensions for all type, im truth it is only required for positions.
+            if (dimensions == 2)
+            {
+                _ResetBounds();
+                var array = this.AsVector2Array();
+                for (int i = 0; i < array.Count; ++i) { _AppendToBounds(array[i]); }
+                return;
+            }
+
+            if (dimensions == 3)
+            {
+                _ResetBounds();
+                var array = this.AsVector3Array();
+                for (int i = 0; i < array.Count; ++i) { _AppendToBounds(array[i]); }
+                return;
+            }
+
+            /*
+            var multiArray = this.AsMultiArray(dimensions);
+            _ResetBounds();
+
+            for (int i = 0; i < multiArray.Count; ++i)
+            {
+                var current = multiArray[i];
+
+                _AppendToBounds(current);
+            }*/
+        }
+
+        private void _ResetBounds()
+        {
+            var dimensions = this.Dimensions.DimCount();
 
             for (int i = 0; i < dimensions; ++i)
             {
                 this._min.Add(double.MaxValue);
                 this._max.Add(double.MinValue);
             }
+        }
 
-            if (dimensions ==  3)
+        private void _AppendToBounds<T>(T value) where T:unmanaged
+        {
+            switch(value)
             {
-                var v3 = this.AsVector3Array();
-
-                for (int i = 0; i < v3.Count; ++i)
-                {
-                    var current = v3[i];
-
-                    this._min[0] = Math.Min(this._min[0], current.X);
-                    this._max[0] = Math.Max(this._max[0], current.X);
-
-                    this._min[1] = Math.Min(this._min[1], current.Y);
-                    this._max[1] = Math.Max(this._max[1], current.Y);
-
-                    this._min[2] = Math.Min(this._min[2], current.Z);
-                    this._max[2] = Math.Max(this._max[2], current.Z);
-                }                
+                case float current: _AppendToBounds(current); break;
+                case Vector2 current: _AppendToBounds(current.X, current.Y); break;
+                case Vector3 current: _AppendToBounds(current.X, current.Y, current.Z); break;
+                case Vector4 current: _AppendToBounds(current.X, current.Y, current.Z, current.W); break;
+                case Quaternion current: _AppendToBounds(current.X, current.Y, current.Z, current.W); break;
             }
+        }
 
+        private void _AppendToBounds(params float[] values)
+        {
+            if (values.Length != _min.Count) throw new ArgumentException(nameof(values));
 
-            /*
-            var multiArray = this.AsMultiArray(dimensions);
-
-            for (int i = 0; i < multiArray.Count; ++i)
+            for (int i = 0; i < values.Length; ++i)
             {
-                var current = multiArray[i];
-
-                for (int j = 0; j < current.Length; ++j)
-                {
-                    this._min[j] = Math.Min(this._min[j], current[j]);
-                    this._max[j] = Math.Max(this._max[j], current[j]);
-                }
-            }*/
+                this._min[i] = Math.Min(this._min[i], values[i]);
+                this._max[i] = Math.Max(this._max[i], values[i]);
+            }
         }
 
         #endregion
@@ -232,8 +259,10 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(other, nameof(other));
             Guard.MustShareLogicalParent(this, other, nameof(other));
 
-            if (_bufferView.HasValue)
+            if (other._bufferView.HasValue)
             {
+                if (other.SourceBufferView.ByteStride == 0) throw new ArgumentException("When a BufferView is shared by more than one Accessor, its ByteStride must be explicitly set.", nameof(Accessor));
+
                 SetData(other.SourceBufferView, other.ByteOffset, other.Count, other.Dimensions, other.Encoding, other.Normalized);
             }
             else
@@ -258,7 +287,7 @@ namespace SharpGLTF.Schema2
 
             this._bufferView = null;
             this._byteOffset = null;
-            this._count = itemCount;
+            this._count = itemCount;            
 
             this._CachedType = dimensions;
             this._type = Enum.GetName(typeof(DimensionType), dimensions);
@@ -363,7 +392,7 @@ namespace SharpGLTF.Schema2
             this._sparse = new AccessorSparse(indices, indicesByteOffset, indicesEncoding, values, valuesByteOffset, count);
 
             UpdateBounds();
-        }
+        }        
 
         #endregion
 

@@ -221,8 +221,7 @@ namespace SharpGLTF.Schema2
                 .IsNullOrIndex(nameof(Buffer), _buffer, this.LogicalParent.LogicalBuffers)
                 .NonNegative("ByteOffset", _byteOffset)
                 .IsGreaterOrEqual("ByteLength", _byteLength, _byteLengthMinimum);
-
-            // ByteStride must defined only with BufferMode.ARRAY_BUFFER, be multiple of 4, and between 4 and 252
+            
             if (!_byteStride.HasValue) return;
 
             validate

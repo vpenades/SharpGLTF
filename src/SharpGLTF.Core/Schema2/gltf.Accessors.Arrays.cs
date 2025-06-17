@@ -79,7 +79,6 @@ namespace SharpGLTF.Schema2
         {
             if (_TryGetMemoryAccessor(out var memory))
             {
-
                 if (this._sparse == null) return memory.AsMultiArray(dimensions);
 
                 throw new NotImplementedException();

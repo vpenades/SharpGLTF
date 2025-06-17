@@ -138,87 +138,44 @@ namespace SharpGLTF.Schema2
             return primitive;
         }
 
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Single> values)
+        public static unsafe MeshPrimitive WithVertexAccessor<T>(this MeshPrimitive primitive, string attribute, IReadOnlyList<T> values, bool useExplicitByteStride = false)
+            where T:unmanaged
         {
             Guard.NotNull(primitive, nameof(primitive));
             Guard.NotNull(values, nameof(values));
 
             var root = primitive.LogicalParent.LogicalParent;
+            Guard.NotNull(root, nameof(primitive), "not initialized.");
 
-            // create a vertex buffer and fill it
-            var view = root.CreateBufferView(4 * values.Count, 0, BufferMode.ARRAY_BUFFER);
-            var array = new ScalarArray(view.Content);
-            array.Fill(values);
+            void _initialize(DimensionType dims, Action<BufferView> fillFunc)
+            {
+                var byteSize = sizeof(T);
 
-            var accessor = root.CreateAccessor();
-            primitive.SetVertexAccessor(attribute, accessor);
+                // create a BufferView
+                var view = root.CreateBufferView(byteSize * values.Count, useExplicitByteStride ? byteSize : 0, BufferMode.ARRAY_BUFFER);
 
-            accessor.SetVertexData(view, 0, values.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
+                fillFunc(view);                
 
-            return primitive;
-        }
+                var accessor = root.CreateAccessor();
+                primitive.SetVertexAccessor(attribute, accessor);
 
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector2> values)
-        {
-            Guard.NotNull(primitive, nameof(primitive));
-            Guard.NotNull(values, nameof(values));
+                accessor.SetVertexData(view, 0, values.Count, dims, EncodingType.FLOAT, false);
+            }
+            
+            switch (values)
+            {
+                case IReadOnlyList<Single> typedValues: _initialize(DimensionType.SCALAR, view=> new ScalarArray(view.Content).Fill(typedValues)); break;
+                case IReadOnlyList<Vector2> typedValues: _initialize(DimensionType.VEC2, view => new Vector2Array(view.Content).Fill(typedValues)); break;
+                case IReadOnlyList<Vector3> typedValues: _initialize(DimensionType.VEC3, view => new Vector3Array(view.Content).Fill(typedValues)); break;
+                case IReadOnlyList<Vector4> typedValues: _initialize(DimensionType.VEC4, view => new Vector4Array(view.Content).Fill(typedValues)); break;
+                case IReadOnlyList<Quaternion> typedValues: _initialize(DimensionType.VEC4, view => new QuaternionArray(view.Content).Fill(typedValues)); break;
 
-            var root = primitive.LogicalParent.LogicalParent;
-
-            // create a vertex buffer and fill it
-            var view = root.CreateBufferView(8 * values.Count, 0, BufferMode.ARRAY_BUFFER);
-            var array = new Vector2Array(view.Content);
-            array.Fill(values);
-
-            var accessor = root.CreateAccessor();
-            primitive.SetVertexAccessor(attribute, accessor);
-
-            accessor.SetVertexData(view, 0, values.Count, DimensionType.VEC2, EncodingType.FLOAT, false);
+                default: throw new InvalidOperationException($"Unsupported type {typeof(T).Name}");
+            }
 
             return primitive;
-        }
-
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector3> values)
-        {
-            Guard.NotNull(primitive, nameof(primitive));
-            Guard.NotNull(values, nameof(values));
-
-            var root = primitive.LogicalParent.LogicalParent;
-
-            // create a vertex buffer and fill it
-            var view = root.CreateBufferView(12 * values.Count, 0, BufferMode.ARRAY_BUFFER);
-            var array = new Vector3Array(view.Content);
-            array.Fill(values);
-
-            var accessor = root.CreateAccessor();
-
-            accessor.SetVertexData(view, 0, values.Count, DimensionType.VEC3, EncodingType.FLOAT, false);
-
-            primitive.SetVertexAccessor(attribute, accessor);
-
-            return primitive;
-        }
-
-        public static MeshPrimitive WithVertexAccessor(this MeshPrimitive primitive, string attribute, IReadOnlyList<Vector4> values)
-        {
-            Guard.NotNull(primitive, nameof(primitive));
-            Guard.NotNull(values, nameof(values));
-
-            var root = primitive.LogicalParent.LogicalParent;
-
-            // create a vertex buffer and fill it
-            var view = root.CreateBufferView(16 * values.Count, 0, BufferMode.ARRAY_BUFFER);
-            var array = new Vector4Array(view.Content);
-            array.Fill(values);
-
-            var accessor = root.CreateAccessor();
-
-            accessor.SetVertexData(view, 0, values.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
-
-            primitive.SetVertexAccessor(attribute, accessor);
-
-            return primitive;
-        }
+        }       
+        
 
         public static MeshPrimitive WithVertexAccessors(this MeshPrimitive primitive, IReadOnlyList<VertexPosition> vertices)
         {
@@ -342,23 +299,13 @@ namespace SharpGLTF.Schema2
             }
             else
             {
-                var dt = DimensionType.CUSTOM;
-                if (typeof(T) == typeof(Single)) dt = DimensionType.SCALAR;
-                if (typeof(T) == typeof(Vector2)) dt = DimensionType.VEC2;
-                if (typeof(T) == typeof(Vector3)) dt = DimensionType.VEC3;
-                if (typeof(T) == typeof(Vector4)) dt = DimensionType.VEC4;
-                if (typeof(T) == typeof(Quaternion)) dt = DimensionType.VEC4;
-                if (typeof(T) == typeof(Matrix4x4)) dt = DimensionType.MAT4;
-
-                if (dt == DimensionType.CUSTOM) throw new ArgumentException(typeof(T).Name);
-
-                accessor.SetVertexData(view, 0, values.Count, dt, EncodingType.FLOAT, false);
+                accessor.SetVertexData(view, 0, values.Count, typeof(T).ToDimension(), EncodingType.FLOAT, false);
             }
 
             instancing.SetAccessor(attribute, accessor);
 
             return instancing;
-        }
+        }        
 
         public static MeshGpuInstancing WithInstanceAccessors(this MeshGpuInstancing instancing, IReadOnlyList<Transforms.AffineTransform> transforms)
         {
