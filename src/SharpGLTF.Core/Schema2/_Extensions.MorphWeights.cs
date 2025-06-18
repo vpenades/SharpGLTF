@@ -24,8 +24,8 @@ namespace SharpGLTF.Schema2
                     list[i] = 0;
                 }
 
-                foreach (var (index, weight) in weights.GetIndexedWeights())
-                {
+                foreach (var (index, weight) in weights.GetNonZeroWeights())
+                {                    
                     list[index] = weight;
                 }
             }
