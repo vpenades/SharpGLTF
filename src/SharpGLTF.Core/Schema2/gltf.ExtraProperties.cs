@@ -27,9 +27,8 @@ namespace SharpGLTF.Schema2
     /// Defines the <see cref="Extras"/> property for every glTF object.
     /// </remarks>
     public abstract class ExtraProperties
-        : JsonSerializable
+        : JsonReflectable
         , IExtraProperties
-        , IReflectionObject
     {
         #region data
 
@@ -70,36 +69,24 @@ namespace SharpGLTF.Schema2
 
         #region reflection
 
-        public const string SCHEMANAME = "ExtraProperties";
+        public new const string SCHEMANAME = "ExtraProperties";
 
-        protected override string GetSchemaName() => SCHEMANAME;
+        protected override string GetSchemaName() => SCHEMANAME;        
 
-        IEnumerable<FieldInfo> Reflection.IReflectionObject.GetFields()
-        {
-            foreach (var name in ReflectFieldsNames())
-            {
-                if (TryReflectField(name, out var finfo)) yield return finfo;
-            }
-        }
-
-        bool Reflection.IReflectionObject.TryGetField(string name, out SharpGLTF.Reflection.FieldInfo value)
-        {
-            return TryReflectField(name ,out value);
-        }
-
-        protected virtual IEnumerable<string> ReflectFieldsNames()
+        protected override IEnumerable<string> ReflectFieldsNames()
         {
             yield return "extensions";
             yield return "extras";
+            foreach (var name in base.ReflectFieldsNames()) yield return name;
 
         }
-        protected virtual bool TryReflectField(string name, out Reflection.FieldInfo value)
+        protected override bool TryReflectField(string name, out Reflection.FieldInfo value)
         {
             switch (name)
             {
                 case "extensions": value = Reflection.FieldInfo.From("extensions", _extensions, exts => new _ExtensionsReflection(exts)); return true;
                 case "extras": value = Reflection.FieldInfo.From("extras", _extras, inst => inst); return true;
-                default: value = default; return false;
+                default: return base.TryReflectField(name, out value);
             }
         }
 
