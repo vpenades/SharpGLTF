@@ -30,7 +30,7 @@
 
   <ItemGroup>
     <PackageVersion Include="NUnit" Version="4.3.2" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.9.1" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.9.2" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20241018-1255" />
