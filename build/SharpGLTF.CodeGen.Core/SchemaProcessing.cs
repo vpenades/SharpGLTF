@@ -16,7 +16,7 @@ namespace SharpGLTF
 {
     public static class SchemaProcessing
     {
-        #region schema loader
+        #region Schema Loader
 
         public static SchemaType.Context LoadExtensionSchemaContext(string srcSchema)
         {
@@ -55,33 +55,18 @@ namespace SharpGLTF
                 .GetResult();
         }
 
-        static NJsonSchema.JsonReferenceResolver _Resolver(JSONSCHEMA schema, string basePath)
+        private static NJsonSchema.JsonReferenceResolver _Resolver(JSONSCHEMA schema, string basePath)
         {
             var generator = new NJsonSchema.NewtonsoftJson.Generation.NewtonsoftJsonSchemaGeneratorSettings();
 
             var solver = new NJsonSchema.JsonSchemaAppender(schema, generator.TypeNameGenerator);
 
             return new MyReferenceResolver(solver);
-        }
-
-        class MyReferenceResolver : NJsonSchema.JsonReferenceResolver
-        {
-            public MyReferenceResolver(NJsonSchema.JsonSchemaAppender resolver) : base(resolver) { }
-
-            public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath, System.Threading.CancellationToken cancellationToken)
-            {
-                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
-
-                filePath = System.IO.Path.GetFileName(filePath);
-                filePath = System.IO.Path.Combine(Constants.MainSchemaDir, filePath);
-
-                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
-
-                throw new System.IO.FileNotFoundException(filePath);
-            }
-        }
+        }        
 
         #endregion
+
+        #region Code Emitter
 
         public static void EmitCodeFromSchema(string projectPath, string dstFile, SchemaType.Context ctx, IReadOnlyList<SchemaProcessor> extensions)
         {
@@ -117,5 +102,28 @@ namespace SharpGLTF
 
             return null;
         }
+
+        #endregion
+
+        #region nested types
+
+        class MyReferenceResolver : NJsonSchema.JsonReferenceResolver
+        {
+            public MyReferenceResolver(NJsonSchema.JsonSchemaAppender resolver) : base(resolver) { }
+
+            public override Task<IJsonReference> ResolveFileReferenceAsync(string filePath, System.Threading.CancellationToken cancellationToken)
+            {
+                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
+
+                filePath = System.IO.Path.GetFileName(filePath);
+                filePath = System.IO.Path.Combine(Constants.MainSchemaDir, filePath);
+
+                if (System.IO.File.Exists(filePath)) return base.ResolveFileReferenceAsync(filePath, cancellationToken);
+
+                throw new System.IO.FileNotFoundException(filePath);
+            }
+        }
+
+        #endregion
     }
 }

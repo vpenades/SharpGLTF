@@ -74,7 +74,7 @@ namespace SharpGLTF
 
         public override void PrepareTypes(CSharpEmitter newEmitter, SchemaType.Context ctx)
         {
-            newEmitter.SetCollectionContainer("List<TItem>");
+            newEmitter.SetDefaultCollectionContainer("List<TItem>");
 
             const string rootName = "ModelRoot";
 

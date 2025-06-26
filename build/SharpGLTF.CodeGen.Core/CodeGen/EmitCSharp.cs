@@ -16,86 +16,140 @@ namespace SharpGLTF.CodeGen
     /// Takes a <see cref="SchemaReflection.SchemaType.Context"/> and emits
     /// all its enums and classes as c# source code
     /// </summary>
-    public class CSharpEmitter
+    public partial class CSharpEmitter
     {
-        #region runtime types
-
-        class _RuntimeType
-        {
-            internal _RuntimeType(SchemaType t) { _PersistentType = t; }
-
-            private readonly SchemaType _PersistentType;
-
-            public string RuntimeNamespace { get; set; }
-
-            public string RuntimeName { get; set; }
-
-            public List<string> Comments { get; } = new List<string>();
-
-            private readonly Dictionary<string, _RuntimeField> _Fields = new Dictionary<string, _RuntimeField>();
-            private readonly Dictionary<string, _RuntimeEnum> _Enums = new Dictionary<string, _RuntimeEnum>();            
-
-            public _RuntimeField UseField(FieldInfo finfo)
-            {
-                var key = $"{finfo.PersistentName}";
-
-                if (_Fields.TryGetValue(key, out _RuntimeField rfield)) return rfield;
-
-                rfield = new _RuntimeField(finfo);
-
-                _Fields[key] = rfield;
-
-                return rfield;
-            }
-
-            public _RuntimeEnum UseEnum(string name)
-            {
-                var key = name;
-
-                if (_Enums.TryGetValue(key, out _RuntimeEnum renum)) return renum;
-
-                renum = new _RuntimeEnum(name);
-
-                _Enums[key] = renum;
-
-                return renum;
-            }
-        }
-
-        class _RuntimeEnum
-        {
-            internal _RuntimeEnum(string name) { _Name = name; }
-
-            private readonly string _Name;
-        }
-
-        class _RuntimeField
-        {
-            internal _RuntimeField(FieldInfo f) { _PersistentField = f; }
-
-            private readonly FieldInfo _PersistentField;
-
-            public string PrivateField { get; set; }
-            public string PublicProperty { get; set; }
-
-            public string CollectionContainer { get; set; }
-            public string DictionaryContainer { get; set; }
-
-            // MinVal, MaxVal, readonly, static
-
-            // serialization sections
-            // deserialization sections
-            // validation sections
-            // clone sections
-        }        
+        #region data             
 
         private readonly Dictionary<string, _RuntimeType> _Types = new Dictionary<string, _RuntimeType>();
-
+        
         private string _DefaultCollectionContainer = "TItem[]";
+
+        private System.Diagnostics.DebuggerBrowsableState? _FieldsBrowsableState;
 
         #endregion
 
-        #region setup & declaration        
+        #region setup & declaration - types
+
+        public void SetRuntimeName(string persistentName, string runtimeName, string runtimeNamespace = null)
+        {
+            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
+
+            t.RuntimeNamespace = runtimeNamespace;
+            t.RuntimeName = runtimeName;
+        }
+
+        public void SetRuntimeName(SchemaType stype, string runtimeName, string runtimeNamespace = null)
+        {
+            var t = _UseType(stype);
+
+            t.RuntimeNamespace = runtimeNamespace;
+            t.RuntimeName = runtimeName;
+        }
+
+        public void AddRuntimeComment(string persistentName, string comment)
+        {
+            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
+
+            t.RuntimeComments.Add(comment);
+        }
+
+        public IReadOnlyList<string> GetRuntimeComments(SchemaType cls)
+        {
+            return !_TryGetType(cls, out var rtype)
+                ? Array.Empty<string>()
+                : (IReadOnlyList<string>)rtype.RuntimeComments;
+        }
+
+        /// <summary>
+        /// Gets the runtime name associated to the type with the given <paramref name="persistentName"/>
+        /// </summary>
+        /// <param name="persistentName">The persistent name of the type.</param>
+        /// <returns>The runtime name associated to the type.</returns>
+        public string GetRuntimeName(string persistentName)
+        {
+            return _Types[persistentName].RuntimeName;
+        }
+
+        /// <summary>
+        /// Gets the runtime namespace associated to the type with the given <paramref name="persistentName"/>
+        /// </summary>
+        /// <param name="persistentName">The persistent name of the type.</param>
+        /// <returns>The runtime namespace associated to the type.</returns>
+        public string GetRuntimeNamespace(string persistentName)
+        {
+            return _Types[persistentName].RuntimeNamespace ?? Constants.OutputNamespace;
+        }
+
+
+
+        public void SetDefaultCollectionContainer(string container) { _DefaultCollectionContainer = container; }
+
+        public void SetFieldToChildrenList(SchemaType.Context ctx, string persistentName, string fieldName)
+        {
+            var classType = ctx.FindClass(persistentName);
+            if (classType == null) return;
+            var field = classType.UseField(fieldName);
+            var runtimeName = this.GetRuntimeName(persistentName);
+            this.SetCollectionContainer(field, $"ChildrenList<TItem,{runtimeName}>");
+        }
+
+        public void SetFieldToChildrenDictionary(SchemaType.Context ctx, string persistentName, string fieldName)
+        {
+            var classType = ctx.FindClass(persistentName);
+            if (classType == null) return;
+            var field = classType.UseField(fieldName);
+            var runtimeName = this.GetRuntimeName(persistentName);
+            this.SetCollectionContainer(field, $"ChildrenDictionary<TItem,{runtimeName}>");
+        }
+
+        public void DeclareClass(ClassType type)
+        {
+            _UseType(type);
+
+            foreach (var f in type.Fields)
+            {
+                var runtimeName = _SanitizeName(f.PersistentName).Replace("@", "at", StringComparison.Ordinal);
+
+                SetFieldRuntimeName(f, $"_{runtimeName}");
+                SetPropertyName(f, runtimeName);
+            }
+        }
+
+        public void DeclareEnum(EnumType type)
+        {
+            _UseType(type);
+
+            foreach (var f in type.Values)
+            {
+                // SetFieldName(f, $"_{runtimeName}");
+                // SetPropertyName(f, runtimeName);
+            }
+        }
+
+        public void DeclareContext(SchemaType.Context context)
+        {
+            foreach (var ctype in context.Classes) { DeclareClass(ctype); }
+
+            foreach (var etype in context.Enumerations) { DeclareEnum(etype); }
+        }
+
+        #endregion
+
+        #region setup & declaration - fields
+
+        public void SetFieldRuntimeName(FieldInfo finfo, string name) { _UseField(finfo).PrivateField = name; }
+
+        public string GetFieldRuntimeName(FieldInfo finfo) { return _UseField(finfo).PrivateField; }
+
+        public void SetPropertyName(FieldInfo finfo, string name) { _UseField(finfo).PublicProperty = name; }
+
+        public string GetPropertyName(FieldInfo finfo) { return _UseField(finfo).PublicProperty; }
+
+        public void SetCollectionContainer(FieldInfo finfo, string container) { _UseField(finfo).CollectionContainer = container; }
+
+        #endregion
+
+        #region core API
 
         private static string _SanitizeName(string name)
         {
@@ -126,115 +180,6 @@ namespace SharpGLTF.CodeGen
         }
 
         private _RuntimeField _UseField(FieldInfo finfo) { return _UseType(finfo.DeclaringClass).UseField(finfo); }
-
-        public void SetRuntimeName(SchemaType stype, string newName, string runtimeNamespace = null)
-        {
-            var t = _UseType(stype);
-
-            t.RuntimeNamespace = runtimeNamespace;
-            t.RuntimeName = newName;
-        }
-
-        public void AddRuntimeComment(string persistentName, string comment)
-        {
-            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
-
-            t.Comments.Add(comment);           
-        }
-
-        public IReadOnlyList<string> GetRuntimeComments(SchemaType cls)
-        {
-            return !_TryGetType(cls, out var rtype)
-                ? Array.Empty<string>()
-                : (IReadOnlyList<string>)rtype.Comments;
-        }
-
-        public void SetRuntimeName(string persistentName, string runtimeName, string runtimeNamespace = null)
-        {
-            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
-
-            t.RuntimeNamespace = runtimeNamespace;
-            t.RuntimeName = runtimeName;
-        }
-
-        public string GetRuntimeName(string persistentName)
-        {
-            return _Types[persistentName].RuntimeName;
-        }
-
-        public string GetRuntimeNamespace(string persistentName)
-        {
-            return _Types[persistentName].RuntimeNamespace ?? Constants.OutputNamespace;
-        }
-
-        public void SetFieldName(FieldInfo finfo, string name) { _UseField(finfo).PrivateField = name; }
-
-        public string GetFieldRuntimeName(FieldInfo finfo) { return _UseField(finfo).PrivateField; }
-
-        public void SetPropertyName(FieldInfo finfo, string name) { _UseField(finfo).PublicProperty = name; }
-
-        public string GetPropertyName(FieldInfo finfo) { return _UseField(finfo).PublicProperty; }
-
-
-
-        public void SetCollectionContainer(string container) { _DefaultCollectionContainer = container; }
-
-        public void SetCollectionContainer(FieldInfo finfo, string container) { _UseField(finfo).CollectionContainer = container; }        
-
-        public void SetFieldToChildrenList(SchemaType.Context ctx, string persistentName, string fieldName)
-        {
-            var classType = ctx.FindClass(persistentName);
-            if (classType == null) return;
-            var field = classType.UseField(fieldName);
-            var runtimeName = this.GetRuntimeName(persistentName);
-            this.SetCollectionContainer(field, $"ChildrenList<TItem,{runtimeName}>");
-        }
-
-        public void SetFieldToChildrenDictionary(SchemaType.Context ctx, string persistentName, string fieldName)
-        {
-            var classType = ctx.FindClass(persistentName);
-            if (classType == null) return;
-            var field = classType.UseField(fieldName);
-            var runtimeName = this.GetRuntimeName(persistentName);
-            this.SetCollectionContainer(field, $"ChildrenDictionary<TItem,{runtimeName}>");
-        }
-
-        public void DeclareClass(ClassType type)
-        {
-            _UseType(type);
-
-            foreach(var f in type.Fields)
-            {
-                var runtimeName = _SanitizeName(f.PersistentName).Replace("@","at", StringComparison.Ordinal);
-
-                SetFieldName(f, $"_{runtimeName}");
-                SetPropertyName(f, runtimeName);
-            }
-        }
-
-        public void DeclareEnum(EnumType type)
-        {
-            _UseType(type);
-
-            foreach (var f in type.Values)
-            {
-                // SetFieldName(f, $"_{runtimeName}");
-                // SetPropertyName(f, runtimeName);
-            }
-        }
-
-        public void DeclareContext(SchemaType.Context context)
-        {
-            foreach(var ctype in context.Classes)
-            {
-                DeclareClass(ctype);
-            }
-
-            foreach (var etype in context.Enumerations)
-            {
-                DeclareEnum(etype);
-            }
-        }
 
         internal string _GetRuntimeName(SchemaType type) { return _GetRuntimeName(type, null); }
 
@@ -509,9 +454,14 @@ namespace SharpGLTF.CodeGen
             if (type.BaseClass != null) classDecl += $" : {_GetRuntimeName(type.BaseClass)}";
             return classDecl;
         }
+        
+        internal IEnumerable<string> _EmitClassField(FieldInfo f)
+        {
+            if (_FieldsBrowsableState.HasValue)
+            {
+                yield return $"[System.Diagnostics.DebuggerBrowsable({_FieldsBrowsableState.Value})]";
+            }
 
-        internal IEnumerable<string> _GetClassField(FieldInfo f)
-        {            
             var tdecl = _GetRuntimeName(f.FieldType, _UseField(f));
             var fname = GetFieldRuntimeName(f);
 
@@ -638,7 +588,7 @@ namespace SharpGLTF.CodeGen
                 var trname = _Emitter._GetRuntimeName(f.FieldType);
                 var frname = _Emitter.GetFieldRuntimeName(f);
 
-                _Fields.AddRange(_Emitter._GetClassField(f));
+                _Fields.AddRange(_Emitter._EmitClassField(f));
 
                 AddFieldReflection(f);
 

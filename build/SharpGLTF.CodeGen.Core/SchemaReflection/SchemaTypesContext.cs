@@ -96,6 +96,19 @@ namespace SharpGLTF.SchemaReflection
                 if (ct != null) ct.IgnoredByEmitter = true;            
             }
 
+            public void IgnoredByCodeEmitter(Context otherContext)
+            {
+                foreach (var type in otherContext.Classes)
+                {
+                    IgnoredByCodeEmitter(type.PersistentName);
+                }
+
+                foreach (var type in otherContext.Enumerations)
+                {
+                    IgnoredByCodeEmitter(type.PersistentName);
+                }
+            }
+
             public void IgnoredByCodeEmittierMainSchema()
             {
                 IgnoredByCodeEmitter("glTF Property");                

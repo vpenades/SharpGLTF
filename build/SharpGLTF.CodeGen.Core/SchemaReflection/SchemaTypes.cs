@@ -54,6 +54,8 @@ namespace SharpGLTF.SchemaReflection
 
         #region properties
 
+        public Context Owner => _Owner;
+
         /// <summary>
         /// Short version of <see cref="Identifier"/>
         /// </summary>
@@ -70,11 +72,6 @@ namespace SharpGLTF.SchemaReflection
                 return idx < 0 ? id : id.Substring(idx + 1);
             }
         }
-            
-
-        
-
-        public Context Owner => _Owner;
 
         #endregion
     }
@@ -328,7 +325,30 @@ namespace SharpGLTF.SchemaReflection
         {
             if (type == typeof(string)) { _FieldType = DeclaringClass.Owner.UseString(); return this; }
 
-            if (type.IsEnum) { _FieldType = DeclaringClass.Owner.UseEnum(type.Name, isNullable); return this; }
+            if (type.IsEnum)
+            {
+                var enumType = DeclaringClass.Owner.UseEnum(type.Name, isNullable);
+                _FieldType = enumType;                
+
+                if (!enumType.Values.Any())
+                {
+                    var names = Enum.GetNames(type);
+                    var values = Enum.GetValues(type).OfType<IConvertible>().Select(item => item.ToInt32(System.Globalization.CultureInfo.InvariantCulture)).ToList();
+
+                    var isSequential = values.Count == 0 || Enumerable.Range(0, names.Length).SequenceEqual(values);
+                    
+                    if (isSequential)
+                    {
+                        for (int i = 0; i < names.Length; i++)
+                        {
+                            var key = names[i];
+                            enumType.SetValue(key, i);
+                        }
+                    }                    
+                }
+
+                return this;
+            }
 
             _FieldType = DeclaringClass.Owner.UseBlittable(type.GetTypeInfo(), isNullable);
             return this;
@@ -382,6 +402,11 @@ namespace SharpGLTF.SchemaReflection
     {
         #region constructor
 
+        public static ClassType FromRuntimeClass(Context ctx, string name)
+        {
+            return new ClassType(ctx, name);
+        }
+
         internal ClassType(Context ctx, string name) : base(ctx)
         {
             _PersistentName = name;            
@@ -395,10 +420,10 @@ namespace SharpGLTF.SchemaReflection
 
         private readonly SortedSet<FieldInfo> _Fields = new SortedSet<FieldInfo>(FieldInfo.Comparer);
 
-        private ClassType _BaseClass;        
+        public ClassType BaseClass { get; set; }
 
         /// <summary>
-        /// True to prevent to codegen emitter to emit this class
+        /// True to prevent codegen emitter to emit this class
         /// </summary>
         public bool IgnoredByEmitter { get; set; }
 
@@ -406,8 +431,7 @@ namespace SharpGLTF.SchemaReflection
 
         #region properties
         public override string PersistentName => _PersistentName;
-        public IEnumerable<FieldInfo> Fields => _Fields;
-        public ClassType BaseClass { get => _BaseClass; set => _BaseClass = value; }
+        public IEnumerable<FieldInfo> Fields => _Fields;        
 
         #endregion
 
@@ -415,7 +439,11 @@ namespace SharpGLTF.SchemaReflection
 
         public FieldInfo GetField(string name)
         {
-            return _Fields.First(item => item.PersistentName == name);
+            var field = _Fields.FirstOrDefault(item => item.PersistentName == name);
+            if (field != null) return field;
+
+            var names = string.Join("\r\n", _Fields.Select(item => item.PersistentName));
+            throw new ArgumentException($"{name} not found, expected one of:\r\n{names}");
         }
 
         public FieldInfo UseField(string name)
