@@ -76,11 +76,11 @@ namespace SharpGLTF.ThirdParty
             // save the output glb for test
             if (use_temp_fix)
             {
-                model.SaveGLB("../../../../Assets/InconsistentMorphTargets_trick_fixed.glb");
+                AttachmentInfo.From("InconsistentMorphTargets_trick_fixed.glb").WriteObject(f=>model.SaveGLB(f));                
             }
             else
             {
-                model.SaveGLB("../../../../Assets/InconsistentMorphTargets_unfixed.glb");
+                AttachmentInfo.From("InconsistentMorphTargets_unfixed.glb").WriteObject(f => model.SaveGLB(f));                
             }
 
             Assert.That(model.LogicalMeshes.Count, Is.EqualTo(1), "The model should have only one mesh");
