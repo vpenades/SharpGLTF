@@ -5,7 +5,11 @@
     <RootNamespace>SharpGLTF</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
+	<PropertyGroup>		
+		<Description>SharpGLTF.CodeGen.Core is part of the SharpGLTF development kit, and it's used to generate code for glTF extensions.</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
     <PackageReference Include="LibGit2Sharp" />
     <PackageReference Include="NJsonSchema.CodeGeneration.CSharp" />
     <PackageReference Include="NJsonSchema.NewtonsoftJson" />

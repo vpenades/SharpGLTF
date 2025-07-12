@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <ProjectReference Include="..\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />    
+    <ProjectReference Include="..\..\src\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />    
     <ProjectReference Include="..\SharpGLTF.CodeGen.Extensions.AGI\SharpGLTF.CodeGen.Extensions.AGI.csproj" />    
     <ProjectReference Include="..\SharpGLTF.CodeGen.Extensions.Cesium\SharpGLTF.CodeGen.Extensions.Cesium.csproj" />    
     <ProjectReference Include="..\SharpGLTF.codeGen.Extensions.Khronos\SharpGLTF.codeGen.Extensions.Khronos.csproj" />    

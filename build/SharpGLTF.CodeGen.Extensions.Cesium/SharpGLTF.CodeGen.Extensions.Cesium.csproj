@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />
+    <ProjectReference Include="..\..\src\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
