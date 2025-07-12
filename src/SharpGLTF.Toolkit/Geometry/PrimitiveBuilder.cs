@@ -146,6 +146,8 @@ namespace SharpGLTF.Geometry
 
         #region API - morph targets
 
+        internal IReadOnlyList<PrimitiveMorphTargetBuilder<TvG, TvM>> MorphTargets => _MorphTargets;
+
         internal PrimitiveMorphTargetBuilder<TvG, TvM> _UseMorphTarget(int morphTargetIndex)
         {
             while (this._MorphTargets.Count <= morphTargetIndex)
@@ -160,6 +162,11 @@ namespace SharpGLTF.Geometry
 
         public void Validate()
         {
+            // check that this primitive has the same amount
+            // of morph targets than the rest of the rest of primitives.
+            var sharedMorphCount = this.Mesh.Primitives.Max(item => item.MorphTargets.Count);
+            Guard.MustBeEqualTo(this.MorphTargets.Count, sharedMorphCount, nameof(MorphTargets));
+
             foreach (var v in _Vertices)
             {
                 v.Validate();
