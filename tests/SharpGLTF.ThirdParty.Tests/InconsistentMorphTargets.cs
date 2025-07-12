@@ -9,45 +9,34 @@ using SharpGLTF.Materials;
 
 namespace SharpGLTF.ThirdParty
 {
-    [TestFixture]
-    public class BugRepro_InconsistentMorphTargets
+    
+    public class InconsistentMorphTargets
     {
-        [Test(Description = "check if all primitives has the same number of morph target.")]
-        public void BuildMesh_WithPartiallyAppliedMorphTargets_AllPrimitivesShouldHaveSameTargetCount()
+        
+        [TestCase(false, Description = "check if all primitives has the same number of morph target.")]
+        [TestCase(true, Description = "check if all primitives has the same number of morph target. use_temp_fix to fix the problem with a trick.")]
+        public void BuildMesh_WithPartiallyAppliedMorphTargets_AllPrimitivesShouldHaveSameTargetCount(bool use_temp_fix)
         {
-            // use_temp_fix decide whether fix the problem with a trick.
-            bool use_temp_fix = false;
-            var meshBuilder = new MeshBuilder<VertexPosition>("mesh with partial morph targets");
-
-
-            // here we will construct 3 primitive and 2 morph targets.
-            // And the first morph target only involve p_0 and p_1
-            // The 2nd morph target only involve p_1 and p_2
+            
 
             var material1 = new MaterialBuilder("material1");
             var material2 = new MaterialBuilder("material2");
             var material3 = new MaterialBuilder("material3");
 
+            // here we will construct 3 primitive and 2 morph targets.
+            // And the first morph target only involve p_0 and p_1
+            // The 2nd morph target only involve p_1 and p_2
+
+            var meshBuilder = new MeshBuilder<VertexPosition>("mesh with partial morph targets");
+
             var prim0 = meshBuilder.UsePrimitive(material1);
-            prim0.AddTriangle(
-                new VertexPosition(-1, 0, 0),
-                new VertexPosition(-2, 0, 0),
-                new VertexPosition(-1, 1, 0)
-            ); 
+            prim0.AddTriangle( new VertexPosition(-1, 0, 0), new VertexPosition(-2, 0, 0), new VertexPosition(-1, 1, 0) ); 
 
             var prim1 = meshBuilder.UsePrimitive(material2);
-            prim1.AddTriangle(
-                new VertexPosition(0, 0, 0),
-                new VertexPosition(1, 0, 0),
-                new VertexPosition(0, 1, 0)
-            ); 
+            prim1.AddTriangle( new VertexPosition(0, 0, 0), new VertexPosition(1, 0, 0), new VertexPosition(0, 1, 0) ); 
 
             var prim2 = meshBuilder.UsePrimitive(material3);
-            prim2.AddTriangle(
-                new VertexPosition(2, 0, 0),
-                new VertexPosition(3, 0, 0),
-                new VertexPosition(2, 1, 0)
-            ); 
+            prim2.AddTriangle( new VertexPosition(2, 0, 0), new VertexPosition(3, 0, 0), new VertexPosition(2, 1, 0) ); 
 
             var morphTarget0 = meshBuilder.UseMorphTarget(0);
             var morphTarget1 = meshBuilder.UseMorphTarget(1);
@@ -71,17 +60,11 @@ namespace SharpGLTF.ThirdParty
             
             var sceneBuilder = new SceneBuilder();
             sceneBuilder.AddRigidMesh(meshBuilder, Matrix4x4.Identity);
+
             var model = sceneBuilder.ToGltf2();
 
             // save the output glb for test
-            if (use_temp_fix)
-            {
-                AttachmentInfo.From("InconsistentMorphTargets_trick_fixed.glb").WriteObject(f=>model.SaveGLB(f));                
-            }
-            else
-            {
-                AttachmentInfo.From("InconsistentMorphTargets_unfixed.glb").WriteObject(f => model.SaveGLB(f));                
-            }
+            AttachmentInfo.From("InconsistentMorphTargets_unfixed.glb").WriteObject(f => model.SaveGLB(f));
 
             Assert.That(model.LogicalMeshes.Count, Is.EqualTo(1), "The model should have only one mesh");
             var logicalMesh = model.LogicalMeshes[0];
