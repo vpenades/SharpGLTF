@@ -288,9 +288,15 @@ namespace SharpGLTF.Geometry
         {
             _Mesh = mesh;
             _MorphTargetIndex = morphTargetIndex;
-
+            
             foreach (var prim in _Mesh.Primitives)
             {
+                // this is required to ensure that all primitives are aligned
+                // by having the same amount of morph targets regardless of whether
+                // they're used or not.
+                prim._UseMorphTarget(morphTargetIndex);
+
+                // create a global position table to be used for morph target keys.
                 for (int vidx = 0; vidx < prim.Vertices.Count; ++vidx)
                 {
                     var key = prim.Vertices[vidx].Geometry;
