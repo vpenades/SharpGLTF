@@ -37,6 +37,18 @@ namespace SharpGLTF.Memory
 
         #endregion
 
+        #region predefined values
+
+        public static readonly AttributeFormat Float1 = new AttributeFormat(ENCODING.FLOAT);
+        public static readonly AttributeFormat Float2 = new AttributeFormat(DIMENSIONS.VEC2 ,ENCODING.FLOAT);
+        public static readonly AttributeFormat Float3 = new AttributeFormat(DIMENSIONS.VEC3, ENCODING.FLOAT);
+        public static readonly AttributeFormat Float4 = new AttributeFormat(DIMENSIONS.VEC4, ENCODING.FLOAT);
+        public static readonly AttributeFormat Float2x2 = new AttributeFormat(DIMENSIONS.MAT2, ENCODING.FLOAT);
+        public static readonly AttributeFormat Float3x3 = new AttributeFormat(DIMENSIONS.MAT3, ENCODING.FLOAT);
+        public static readonly AttributeFormat Float4x4 = new AttributeFormat(DIMENSIONS.MAT4, ENCODING.FLOAT);
+
+        #endregion
+
         #region constructors
 
         public static implicit operator AttributeFormat(ENCODING enc) { return new AttributeFormat(enc); }
