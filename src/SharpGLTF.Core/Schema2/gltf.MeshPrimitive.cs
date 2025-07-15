@@ -154,6 +154,7 @@ namespace SharpGLTF.Schema2
         }
 
         internal IReadOnlyList<T> GetVertices<T>(string attributeKey)
+            where T : unmanaged
         {
             var accessor = GetVertexAccessor(attributeKey);
 

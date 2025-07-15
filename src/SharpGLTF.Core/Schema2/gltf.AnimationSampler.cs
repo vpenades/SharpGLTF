@@ -6,6 +6,7 @@ using System.Text;
 
 using SharpGLTF.Animations;
 using SharpGLTF.Collections;
+using SharpGLTF.Memory;
 using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 
@@ -138,7 +139,7 @@ namespace SharpGLTF.Schema2
             var buffer = root.CreateBufferView(input.Count * 4);
             var accessor = root.CreateAccessor("Animation.Input");
 
-            accessor.SetData(buffer, 0, input.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, input.Count, AttributeFormat.Float1);
 
             Memory.EncodedArrayUtils._CopyTo(input, accessor.AsScalarArray());
 
@@ -160,7 +161,7 @@ namespace SharpGLTF.Schema2
 
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Float1);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsScalarArray());
 
@@ -182,7 +183,7 @@ namespace SharpGLTF.Schema2
 
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC2, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Float2);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsVector2Array());
 
@@ -204,7 +205,7 @@ namespace SharpGLTF.Schema2
 
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC3, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Float3);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsVector3Array());
 
@@ -226,7 +227,7 @@ namespace SharpGLTF.Schema2
 
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Float4);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsVector4Array());
 
@@ -245,7 +246,7 @@ namespace SharpGLTF.Schema2
             var buffer = root.CreateBufferView(output.Count * 4 * 4);
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, output.Count, DimensionType.VEC4, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Float4);
 
             Memory.EncodedArrayUtils._CopyTo(output, accessor.AsQuaternionArray());
 
@@ -284,7 +285,7 @@ namespace SharpGLTF.Schema2
             var buffer = root.CreateBufferView(itemCount * 4 * itemsStride);
             var accessor = root.CreateAccessor("Animation.Output");
 
-            accessor.SetData(buffer, 0, itemCount * itemsStride, DimensionType.SCALAR, EncodingType.FLOAT, false);
+            accessor.SetData(buffer, 0, itemCount * itemsStride, AttributeFormat.Float1);
 
             IList<float> dst = accessor.AsScalarArray();
 

@@ -13,6 +13,10 @@ namespace SharpGLTF.Memory
     /// <summary>
     /// Wraps an encoded <see cref="BYTES"/> and exposes it as an array of <see cref="Vector4"/> values.
     /// </summary>
+    /// <remarks>
+    /// When wrapping colors, it is possible to use a <see cref="Vector3"/> RGB or <see cref="Vector4"/> RGBA inputs.
+    /// In case the input data is of type <see cref="Vector3"/>, a <see cref="_DefaultW"/> value is provided to fill the output W.
+    /// </remarks>
     [System.Diagnostics.DebuggerDisplay("Color4[{Count}]")]
     public readonly struct ColorArray : IAccessorArray<Vector4>
     {

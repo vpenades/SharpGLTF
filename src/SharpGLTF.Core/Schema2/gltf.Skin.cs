@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
+using SharpGLTF.Memory;
+
 namespace SharpGLTF.Schema2
 {
     [System.Diagnostics.DebuggerDisplay("Skin[{LogicalIndex}] {Name}")]
@@ -208,7 +210,7 @@ namespace SharpGLTF.Schema2
 
             var ibmsView = LogicalParent.UseBufferView(data);
 
-            UseInverseBindMatricesAccessor().SetData(ibmsView, 0, joints.Count, DimensionType.MAT4, EncodingType.FLOAT, false);            
+            UseInverseBindMatricesAccessor().SetData(ibmsView, 0, joints.Count, AttributeFormat.Float4x4);            
 
             // joints
 

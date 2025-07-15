@@ -263,12 +263,17 @@ namespace SharpGLTF.Schema2
             {
                 if (other.SourceBufferView.ByteStride == 0) throw new ArgumentException("When a BufferView is shared by more than one Accessor, its ByteStride must be explicitly set.", nameof(Accessor));
 
-                SetData(other.SourceBufferView, other.ByteOffset, other.Count, other.Dimensions, other.Encoding, other.Normalized);
+                SetData(other.SourceBufferView, other.ByteOffset, other.Count, other.Format);
             }
             else
             {
-                SetZeros(other.Count, other.Dimensions, other.Encoding, other.Normalized);
+                SetZeros(other.Count, other.Format);
             }
+        }
+
+        public void SetZeros(MemoryAccessInfo accessor)
+        {
+            SetZeros(accessor.ItemsCount, accessor.Format);
         }
 
         /// <summary>
@@ -278,10 +283,8 @@ namespace SharpGLTF.Schema2
         /// This can be used to set the base data for sparse data.
         /// </remarks>
         /// <param name="itemCount">The number of items in the accessor.</param>
-        /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
-        /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
-        /// <param name="normalized">The item normalization mode.</param>
-        public void SetZeros(int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
+        /// <param name="format">item data format</param>
+        public void SetZeros(int itemCount, AttributeFormat format)
         {            
             Guard.MustBeGreaterThanOrEqualTo(itemCount, _countMinimum, nameof(itemCount));
 
@@ -289,14 +292,14 @@ namespace SharpGLTF.Schema2
             this._byteOffset = null;
             this._count = itemCount;            
 
-            this._CachedType = dimensions;
-            this._type = Enum.GetName(typeof(DimensionType), dimensions);
+            this._CachedType = format.Dimensions;
+            this._type = Enum.GetName(typeof(DimensionType), format.Dimensions);
 
-            this._componentType = encoding;
-            this._normalized = normalized.AsNullable(_normalizedDefault);
+            this._componentType = format.Encoding;
+            this._normalized = format.Normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
-        }        
+        }
 
         /// <summary>
         /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
@@ -307,7 +310,20 @@ namespace SharpGLTF.Schema2
         /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
         /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
         /// <param name="normalized">The item normalization mode.</param>
+        [Obsolete("Use SetData with AttributeFormat. This will be removed soon.")]
         public void SetData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions, EncodingType encoding, Boolean normalized)
+        {
+            SetData(buffer, bufferByteOffset, itemCount, (dimensions, encoding, normalized));
+        }
+
+        /// <summary>
+        /// Associates this <see cref="Accessor"/> with a <see cref="BufferView"/>
+        /// </summary>
+        /// <param name="buffer">The <see cref="BufferView"/> source.</param>
+        /// <param name="bufferByteOffset">The start byte offset within <paramref name="buffer"/>.</param>
+        /// <param name="itemCount">The number of items in the accessor.</param>
+        /// <param name="format">The item data format.</param>
+        public void SetData(BufferView buffer, int bufferByteOffset, int itemCount, AttributeFormat format)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
@@ -318,11 +334,11 @@ namespace SharpGLTF.Schema2
             this._byteOffset = bufferByteOffset.AsNullable(_byteOffsetDefault, _byteOffsetMinimum, int.MaxValue);
             this._count = itemCount;
 
-            this._CachedType = dimensions;
-            this._type = Enum.GetName(typeof(DimensionType), dimensions);
+            this._CachedType = format.Dimensions;
+            this._type = Enum.GetName(typeof(DimensionType), format.Dimensions);
 
-            this._componentType = encoding;
-            this._normalized = normalized.AsNullable(_normalizedDefault);
+            this._componentType = format.Encoding;
+            this._normalized = format.Normalized.AsNullable(_normalizedDefault);
 
             UpdateBounds();
         }
@@ -336,6 +352,7 @@ namespace SharpGLTF.Schema2
         }
 
         public void CreateSparseData<T>(IReadOnlyDictionary<int,T> data)
+            where T:unmanaged
         {
             if (!Enum.IsDefined(typeof(EncodingType), this._componentType))
             {
@@ -358,38 +375,49 @@ namespace SharpGLTF.Schema2
                 ++idx;
             }
 
-            SetSparseData(data.Count, indices, values);
+            SetSparseData(indices, values);
         }
 
-        public void SetSparseData(int count, MemoryAccessor indices, MemoryAccessor values)
+        public void SetSparseData(MemoryAccessor sparseIndices, MemoryAccessor sparseValues)
         {
-            Guard.MustBeGreaterThan(count, 0, nameof(count));
+            Guard.MustBeGreaterThan(sparseIndices.Attribute.ItemsCount, 0, nameof(sparseIndices));
+            Guard.MustBeLessThanOrEqualTo(sparseIndices.Attribute.ItemsCount, _count, nameof(sparseIndices));
 
-            var indicesBV = this.LogicalParent.UseBufferView(indices.Data);
-            var valuesBV = this.LogicalParent.UseBufferView(values.Data);
+            Guard.MustBeEqualTo(sparseIndices.Attribute.ItemsCount, sparseValues.Attribute.ItemsCount, nameof(sparseValues));
 
-            SetSparseData(count, indicesBV, 0, indices.Attribute.Encoding.ToIndex(), valuesBV, 0);
+            var indicesBV = this.LogicalParent.UseBufferView(sparseIndices.Data);
+            var valuesBV = this.LogicalParent.UseBufferView(sparseValues.Data);
+
+            SetSparseData(sparseIndices.Attribute.ItemsCount, indicesBV, 0, sparseIndices.Attribute.Encoding.ToIndex(), valuesBV, 0);
         }
 
-        public void SetSparseData(int count, BufferView indices, int indicesByteOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesByteOffset)
+        public void SetSparseData(int sparseCount, BufferView indices, int indicesByteOffset, IndexEncodingType indicesEncoding, BufferView values, int valuesByteOffset)
         {
-            Guard.MustBeGreaterThan(count, 0, nameof(count));
+            Guard.MustBeGreaterThan(sparseCount, 0, nameof(sparseCount));
+            Guard.MustBeLessThanOrEqualTo(sparseCount, _count, nameof(sparseCount));
 
             Guard.NotNull(indices, nameof(indices));
             Guard.MustShareLogicalParent(this, indices, nameof(indices));
             Guard.IsFalse(indices.IsVertexBuffer, nameof(indices));
             Guard.IsFalse(indices.IsIndexBuffer, nameof(indices));
-
             Guard.MustBeGreaterThanOrEqualTo(indicesByteOffset, 0, nameof(indicesByteOffset));
 
             Guard.NotNull(values, nameof(values));
             Guard.MustShareLogicalParent(this, values, nameof(values));
-            Guard.IsFalse(values.IsVertexBuffer, nameof(indices));
-            Guard.IsFalse(values.IsIndexBuffer, nameof(indices));
-
+            Guard.IsFalse(values.IsVertexBuffer, nameof(values));
+            Guard.IsFalse(values.IsIndexBuffer, nameof(values));
             Guard.MustBeGreaterThanOrEqualTo(valuesByteOffset, 0, nameof(valuesByteOffset));
 
-            this._sparse = new AccessorSparse(indices, indicesByteOffset, indicesEncoding, values, valuesByteOffset, count);
+            var sparseData = new AccessorSparse(sparseCount, indices, indicesByteOffset, indicesEncoding, values, valuesByteOffset);
+
+            // validation
+            var sparseResult = sparseData._CreateMemoryAccessors(this);
+
+            Guard.MustBeEqualTo(sparseResult.Key.Count, sparseCount, nameof(indices));
+            Guard.MustBeEqualTo(sparseResult.Value.Attribute.ItemsCount, sparseCount, nameof(indices));
+
+            // assign and update
+            this._sparse = sparseData;
 
             UpdateBounds();
         }        
@@ -419,20 +447,26 @@ namespace SharpGLTF.Schema2
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
             Guard.IsFalse(buffer.IsVertexBuffer, nameof(buffer));
 
-            SetData(buffer, bufferByteOffset, itemCount, DimensionType.SCALAR, encoding.ToComponent(), false);
+            SetData(buffer, bufferByteOffset, itemCount, encoding.ToComponent());
         }
 
         #endregion
 
         #region Vertex Buffer API
-
+        
         public void SetVertexData(MemoryAccessor src)
         {
             Guard.NotNull(src, nameof(src));
 
             var bv = this.LogicalParent.UseBufferView(src.Data, src.Attribute.StepByteLength, BufferMode.ARRAY_BUFFER);
 
-            SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Dimensions, src.Attribute.Encoding, src.Attribute.Normalized);
+            SetVertexData(bv, src.Attribute.ByteOffset, src.Attribute.ItemsCount, src.Attribute.Format);
+        }
+
+        [Obsolete("Use SetVertexData with AttributeFormat. This will be removed soon.")]
+        public void SetVertexData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions = DimensionType.VEC3, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
+        {
+            SetVertexData(buffer, bufferByteOffset, itemCount, (dimensions, encoding, normalized));
         }
 
         /// <summary>
@@ -441,17 +475,15 @@ namespace SharpGLTF.Schema2
         /// <param name="buffer">The <see cref="BufferView"/> source.</param>
         /// <param name="bufferByteOffset">The start byte offset within <paramref name="buffer"/>.</param>
         /// <param name="itemCount">The number of items in the accessor.</param>
-        /// <param name="dimensions">The <see cref="DimensionType"/> item type.</param>
-        /// <param name="encoding">The <see cref="EncodingType"/> item encoding.</param>
-        /// <param name="normalized">The item normalization mode.</param>
-        public void SetVertexData(BufferView buffer, int bufferByteOffset, int itemCount, DimensionType dimensions = DimensionType.VEC3, EncodingType encoding = EncodingType.FLOAT, Boolean normalized = false)
+        /// <param name="format">The item format.</param>        
+        public void SetVertexData(BufferView buffer, int bufferByteOffset, int itemCount, AttributeFormat format)
         {
             Guard.NotNull(buffer, nameof(buffer));
             Guard.MustShareLogicalParent(this, buffer, nameof(buffer));
-            Guard.MustBePositiveAndMultipleOf(dimensions.DimCount() * encoding.ByteLength(), 4, nameof(encoding));
+            Guard.MustBePositiveAndMultipleOf(format.ByteSize, 4, nameof(format));
             Guard.IsFalse(buffer.IsIndexBuffer, nameof(buffer));
 
-            SetData(buffer, bufferByteOffset, itemCount, dimensions, encoding, normalized);
+            SetData(buffer, bufferByteOffset, itemCount, format);
         }
 
         #endregion

@@ -51,6 +51,11 @@ namespace SharpGLTF.Memory
 
         #region constructors
 
+        public static implicit operator AttributeFormat(Schema2.IndexEncodingType indexer)
+        {
+            return new AttributeFormat(indexer.ToComponent());
+        }
+
         public static implicit operator AttributeFormat(ENCODING enc) { return new AttributeFormat(enc); }
 
         public static implicit operator AttributeFormat(DIMENSIONS dim) { return new AttributeFormat(dim); }

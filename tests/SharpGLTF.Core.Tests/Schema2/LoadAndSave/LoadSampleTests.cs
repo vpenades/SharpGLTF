@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 
 using NUnit.Framework;
@@ -253,9 +254,9 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             if (!accessor._TryGetMemoryAccessor(out var baseMem)) Assert.Fail("can't get underlaying data");
 
-            var basePositions = baseMem.AsVector3Array();
+            var basePositions = baseMem.AsArrayOf<Vector3>();
 
-            var positions = accessor.AsVector3Array();
+            var positions = accessor.AsArrayOf<Vector3>();
         }
 
         [Test]

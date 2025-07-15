@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
 
 using BYTES = System.ArraySegment<System.Byte>;
-
 using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
@@ -24,7 +22,7 @@ namespace SharpGLTF.Memory
             return _Slicer._GetDebuggerDisplay();
         }
 
-        #endregion
+        #endregion        
 
         #region constructor
 
@@ -46,119 +44,7 @@ namespace SharpGLTF.Memory
         {
             this._Slicer = info;
             this._Data = default;
-        }
-
-        public static IAccessorArray<Single> CreateScalarSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
-        {
-            Guard.NotNull(bottom, nameof(bottom));
-            Guard.NotNull(topValues, nameof(topValues));
-            Guard.IsTrue(bottom._Slicer.Dimensions == topValues._Slicer.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom._Slicer.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Slicer.ItemsCount), nameof(topKeys));
-
-            return new SparseArray<Single>(bottom.AsScalarArray(), topValues.AsScalarArray(), topKeys);
-        }
-
-        public static IAccessorArray<Single> CreateScalarSparseArray(int bottomCount, IntegerArray topKeys, MemoryAccessor topValues)
-        {            
-            Guard.NotNull(topValues, nameof(topValues));            
-            Guard.IsTrue(topKeys.Count <= bottomCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottomCount), nameof(topKeys));
-
-            return new SparseArray<Single>(new ZeroAccessorArray<float>(bottomCount), topValues.AsScalarArray(), topKeys);
-        }
-
-
-        public static IAccessorArray<Vector2> CreateVector2SparseArray(int bottomCount, IntegerArray topKeys, MemoryAccessor topValues)
-        {            
-            Guard.NotNull(topValues, nameof(topValues));            
-            Guard.IsTrue(topKeys.Count <= bottomCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottomCount), nameof(topKeys));
-
-            return new SparseArray<Vector2>(new ZeroAccessorArray<Vector2>(bottomCount), topValues.AsVector2Array(), topKeys);
-        }
-
-        public static IAccessorArray<Vector2> CreateVector2SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
-        {
-            Guard.NotNull(bottom, nameof(bottom));
-            Guard.NotNull(topValues, nameof(topValues));
-            Guard.IsTrue(bottom._Slicer.Dimensions == topValues._Slicer.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom._Slicer.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Slicer.ItemsCount), nameof(topKeys));
-
-            return new SparseArray<Vector2>(bottom.AsVector2Array(), topValues.AsVector2Array(), topKeys);
-        }
-
-
-        public static IAccessorArray<Vector3> CreateVector3SparseArray(int bottomCount, IntegerArray topKeys, MemoryAccessor topValues)
-        {            
-            Guard.NotNull(topValues, nameof(topValues));            
-            Guard.IsTrue(topKeys.Count <= bottomCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottomCount), nameof(topKeys));
-
-            return new SparseArray<Vector3>(new ZeroAccessorArray<Vector3>(bottomCount), topValues.AsVector3Array(), topKeys);
-        }
-
-        public static IAccessorArray<Vector3> CreateVector3SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
-        {
-            Guard.NotNull(bottom, nameof(bottom));
-            Guard.NotNull(topValues, nameof(topValues));
-            Guard.IsTrue(bottom._Slicer.Dimensions == topValues._Slicer.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom._Slicer.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Slicer.ItemsCount), nameof(topKeys));
-
-            return new SparseArray<Vector3>(bottom.AsVector3Array(), topValues.AsVector3Array(), topKeys);
-        }
-
-        public static IAccessorArray<Vector4> CreateVector4SparseArray(int bottomCount, IntegerArray topKeys, MemoryAccessor topValues)
-        {            
-            Guard.NotNull(topValues, nameof(topValues));            
-            Guard.IsTrue(topKeys.Count <= bottomCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottomCount), nameof(topKeys));
-
-            return new SparseArray<Vector4>(new ZeroAccessorArray<Vector4>(bottomCount), topValues.AsVector4Array(), topKeys);
-        }
-
-        public static IAccessorArray<Vector4> CreateVector4SparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues)
-        {
-            Guard.NotNull(bottom, nameof(bottom));
-            Guard.NotNull(topValues, nameof(topValues));
-            Guard.IsTrue(bottom._Slicer.Dimensions == topValues._Slicer.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom._Slicer.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Slicer.ItemsCount), nameof(topKeys));
-
-            return new SparseArray<Vector4>(bottom.AsVector4Array(), topValues.AsVector4Array(), topKeys);
-        }
-
-        public static IAccessorArray<Vector4> CreateColorSparseArray(int bottomCount, IntegerArray topKeys, MemoryAccessor topValues, Single defaultW = 1)
-        {            
-            Guard.NotNull(topValues, nameof(topValues));            
-            Guard.IsTrue(topKeys.Count <= bottomCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottomCount), nameof(topKeys));
-
-            return new SparseArray<Vector4>(new ZeroAccessorArray<Vector4>(bottomCount), topValues.AsColorArray(defaultW), topKeys);
-        }
-
-        public static IAccessorArray<Vector4> CreateColorSparseArray(MemoryAccessor bottom, IntegerArray topKeys, MemoryAccessor topValues, Single defaultW = 1)
-        {
-            Guard.NotNull(bottom, nameof(bottom));
-            Guard.NotNull(topValues, nameof(topValues));
-            Guard.IsTrue(bottom._Slicer.Dimensions == topValues._Slicer.Dimensions, nameof(topValues));
-            Guard.IsTrue(topKeys.Count <= bottom._Slicer.ItemsCount, nameof(topKeys));
-            Guard.IsTrue(topKeys.Count == topValues._Slicer.ItemsCount, nameof(topValues));
-            Guard.IsTrue(topKeys.All(item => item < (uint)bottom._Slicer.ItemsCount), nameof(topKeys));
-
-            return new SparseArray<Vector4>(bottom.AsColorArray(defaultW), topValues.AsColorArray(defaultW), topKeys);
-        }
+        }        
 
         #endregion
 
@@ -189,19 +75,33 @@ namespace SharpGLTF.Memory
         }
 
         public IAccessorArray<T> AsArrayOf<T>()
+            where T: unmanaged
         {
-            if (typeof(T) == typeof(int)) return AsIntegerArray() as IAccessorArray<T>;
-            if (typeof(T) == typeof(float)) return AsScalarArray() as IAccessorArray<T>;
+            if (typeof(T) == typeof(UInt32)) return AsIntegerArray() as IAccessorArray<T>;
+            if (typeof(T) == typeof(Single)) return AsScalarArray() as IAccessorArray<T>;
             if (typeof(T) == typeof(Vector2)) return AsVector2Array() as IAccessorArray<T>;
             if (typeof(T) == typeof(Vector3)) return AsVector3Array() as IAccessorArray<T>;
-
-            // AsColorArray is able to handle both Vector3 and Vector4 underlaying data
-            if (typeof(T) == typeof(Vector4)) return AsColorArray() as IAccessorArray<T>;
+            
+            if (typeof(T) == typeof(Vector4))
+            {
+                if (this.Attribute.Dimensions == DIMENSIONS.VEC4) return AsVector4Array() as IAccessorArray<T>;
+                if (this.Attribute.Dimensions == DIMENSIONS.VEC3) return AsColorArray() as IAccessorArray<T>;
+            }
             
             if (typeof(T) == typeof(Quaternion)) return AsQuaternionArray() as IAccessorArray<T>;
 
-            // we should create the equivalent of AsColorArray for Matrices
-            if (typeof(T) == typeof(Matrix4x4)) return AsMatrix4x4Array() as IAccessorArray<T>;
+            // TODO: we should create the equivalent of AsColorArray for Matrices
+
+            if (typeof(T) == typeof(Matrix3x2))
+            {
+                return AsMatrix2x2Array() as IAccessorArray<T>;                
+            }
+
+            if (typeof(T) == typeof(Matrix4x4))
+            {                
+                if (this.Attribute.Dimensions == DIMENSIONS.MAT3) return AsMatrix3x3Array() as IAccessorArray<T>;
+                if (this.Attribute.Dimensions == DIMENSIONS.MAT4) return AsMatrix4x4Array() as IAccessorArray<T>;
+            }
 
             throw new NotSupportedException(typeof(T).Name);
         }
@@ -239,14 +139,7 @@ namespace SharpGLTF.Memory
             Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
             Guard.IsTrue(_Slicer.Dimensions == DIMENSIONS.VEC4, nameof(_Slicer));
             return new Vector4Array(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Encoding, _Slicer.Normalized);
-        }
-
-        public ColorArray AsColorArray(Single defaultW = 1)
-        {
-            Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
-            Guard.IsTrue(_Slicer.Dimensions == DIMENSIONS.VEC3 || _Slicer.Dimensions == DIMENSIONS.VEC4, nameof(_Slicer));
-            return new ColorArray(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Dimensions.DimCount(), _Slicer.Encoding, _Slicer.Normalized, defaultW);
-        }
+        }        
 
         public QuaternionArray AsQuaternionArray()
         {
@@ -284,6 +177,22 @@ namespace SharpGLTF.Memory
             return new Matrix4x4Array(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Encoding, _Slicer.Normalized);
         }
 
+
+        /// <summary>
+        /// Gets an array of "colors"
+        /// </summary>
+        /// <remarks>
+        /// This can be used either on <see cref="Vector3"/> and <see cref="Vector4"/> input data.
+        /// </remarks>
+        /// <param name="defaultW">default value for the W component if missing.</param>
+        /// <returns>An array of colors</returns>
+        public ColorArray AsColorArray(Single defaultW = 1)
+        {
+            Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
+            Guard.IsTrue(_Slicer.Dimensions == DIMENSIONS.VEC3 || _Slicer.Dimensions == DIMENSIONS.VEC4, nameof(_Slicer));
+            return new ColorArray(_Data, _Slicer.ByteOffset, _Slicer.ItemsCount, _Slicer.ByteStride, _Slicer.Dimensions.DimCount(), _Slicer.Encoding, _Slicer.Normalized, defaultW);
+        }
+
         public MultiArray AsMultiArray(int dimensions)
         {
             Guard.IsTrue(_Slicer.IsValidVertexAttribute, nameof(_Slicer));
@@ -304,16 +213,116 @@ namespace SharpGLTF.Memory
             }
         }
 
-        internal BYTES _GetBytes()
+        #endregion
+
+        #region sparse API
+
+        public (MemoryAccessor indices, MemoryAccessor values) ConvertToSparse()
         {
-            var o = this._Slicer.ByteOffset;
-            var l = this._Slicer.StepByteLength * this._Slicer.ItemsCount;
+            var indices = new List<uint>();
+            var values = new List<BYTES>();
 
-            var data = _Data.Slice(o);
+            uint index = 0;
 
-            data = data.Slice(0, Math.Min(data.Count, l));
+            foreach (var item in GetItemsAsRawBytes())
+            {
+                if (!RepresentsZeroValue(item))
+                {
+                    indices.Add(index);
+                    values.Add(item);
+                }
 
-            return data;
+                ++index;
+            }
+
+            var indicesBuffer = new byte[indices.Count * 4];
+            for (int i = 0; i < indices.Count; ++i)
+            {
+                System.Buffers.Binary.BinaryPrimitives.WriteUInt32LittleEndian(indicesBuffer.Slice(i * 4), indices[i]);
+            }
+
+            var blen = Attribute.ItemByteLength;
+
+            var vertexBuffer = new byte[values.Count * blen];
+            for (int i = 0; i < values.Count; ++i)
+            {
+                var src = values[i];
+                var dst = new BYTES(vertexBuffer, i * blen, blen);
+
+                src.AsSpan().CopyTo(dst);
+            }
+
+            var indicesMem = new MemoryAccessor(indicesBuffer, new MemoryAccessInfo("SparseIndices", 0, values.Count, 0, ENCODING.UNSIGNED_INT));
+            var valuesMem = new MemoryAccessor(vertexBuffer, new MemoryAccessInfo("SparseValues", 0, values.Count, 0, this.Attribute.Format));
+
+            return (indicesMem, valuesMem);
+        }
+
+        private bool RepresentsZeroValue(BYTES bytes)
+        {
+            // we handle floats separately to support negative zero.
+            if (this.Attribute.Encoding == ENCODING.FLOAT)
+            {
+                var floats = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, float>(bytes);
+                foreach (var f in floats)
+                {
+                    if (f != 0) return false;
+                }
+                return true;
+            }
+
+            return bytes.All(b => b == 0);
+        }
+
+        public static IAccessorArray<T> CreateSparseArray<T>(MemoryAccessor denseValues, IntegerArray sparseKeys, MemoryAccessor sparseValues)
+            where T : unmanaged
+        {
+            return _CreateSparseArray(denseValues, sparseKeys, sparseValues, m => m.AsArrayOf<T>());
+        }
+
+        public static IAccessorArray<T> CreateSparseArray<T>(int denseCount, IntegerArray sparseKeys, MemoryAccessor sparseValues)
+            where T : unmanaged
+        {
+            return _CreateSparseArray(denseCount, sparseKeys, sparseValues, m => m.AsArrayOf<T>());
+        }
+
+        public static IAccessorArray<Vector4> CreateColorSparseArray(int denseCount, IntegerArray sparseKeys, MemoryAccessor sparseValues, Single defaultW = 1)
+        {
+            return _CreateSparseArray(denseCount, sparseKeys, sparseValues, m => m.AsColorArray(defaultW));
+        }
+
+        public static IAccessorArray<Vector4> CreateColorSparseArray(MemoryAccessor denseValues, IntegerArray sparseKeys, MemoryAccessor sparseValues, Single defaultW = 1)
+        {
+            return _CreateSparseArray(denseValues, sparseKeys, sparseValues, m => m.AsColorArray(defaultW));
+        }
+
+        private static IAccessorArray<T> _CreateSparseArray<T>(int denseCount, IntegerArray sparseKeys, MemoryAccessor sparseValues, Func<MemoryAccessor, IAccessorArray<T>> toAccessor)
+            where T : unmanaged
+        {
+            Guard.NotNull(sparseValues, nameof(sparseValues));
+            Guard.IsTrue(sparseKeys.Count <= denseCount, nameof(sparseKeys));
+            System.Diagnostics.Debug.Assert(sparseKeys.All(item => item < (uint)denseCount), nameof(sparseKeys), "index keys exceed bottomCount");
+
+            var typedSparseValues = toAccessor(sparseValues);
+            Guard.IsTrue(sparseKeys.Count == typedSparseValues.Count, nameof(sparseValues));
+
+            return new SparseArray<T>(new ZeroAccessorArray<T>(denseCount), typedSparseValues, sparseKeys);
+        }
+
+        private static IAccessorArray<T> _CreateSparseArray<T>(MemoryAccessor denseValues, IntegerArray sparseKeys, MemoryAccessor sparseValues, Func<MemoryAccessor, IAccessorArray<T>> toAccessor)
+            where T : unmanaged
+        {
+            Guard.NotNull(denseValues, nameof(denseValues));
+            Guard.NotNull(sparseValues, nameof(sparseValues));
+
+            var typedDenseValues = toAccessor(denseValues);
+            var typedSparseValues = toAccessor(sparseValues);
+
+            Guard.IsTrue(sparseKeys.Count <= typedDenseValues.Count, nameof(sparseKeys));
+            Guard.IsTrue(sparseKeys.Count == typedSparseValues.Count, nameof(sparseValues));
+            System.Diagnostics.Debug.Assert(sparseKeys.All(item => item < (uint)typedDenseValues.Count), nameof(sparseKeys), "index keys exceed bottomCount");
+
+            return new SparseArray<T>(typedDenseValues, typedSparseValues, sparseKeys);
         }
 
         #endregion

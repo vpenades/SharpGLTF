@@ -47,7 +47,7 @@ namespace SharpGLTF.Schema2
         public IAccessorArray<Matrix4x4> AsMatrix4x4Array()
         {
             return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix4x4Array()
+                ? mem.AsArrayOf<Matrix4x4>()
                 : new ZeroAccessorArray<Matrix4x4>(this._count);
         }
 
@@ -55,7 +55,7 @@ namespace SharpGLTF.Schema2
         internal IReadOnlyList<Matrix4x4> AsMatrix4x4ReadOnlyList()
         {
             return _TryGetMemoryAccessor(out var mem)
-                ? mem.AsMatrix4x4Array()
+                ? mem.AsArrayOf<Matrix4x4>()
                 : new ZeroAccessorArray<Matrix4x4>(this._count);
         }
 
@@ -108,98 +108,34 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region Vertex Buffer Arrays        
+        #region Vertex Buffer Arrays
 
-        internal IAccessorArray<T> AsArrayOf<T>()
-        {
-            if (typeof(T) == typeof(int)) return AsIndicesArray() as IAccessorArray<T>;
-            if (typeof(T) == typeof(float)) return AsScalarArray() as IAccessorArray<T>;
-            if (typeof(T) == typeof(Vector2)) return AsVector2Array() as IAccessorArray<T>;
-            if (typeof(T) == typeof(Vector3)) return AsVector3Array() as IAccessorArray<T>;
+        public IAccessorArray<Single> AsScalarArray() => AsArrayOf<Single>();
 
-            // AsColorArray is able to handle both Vector3 and Vector4 underlaying data
-            if (typeof(T) == typeof(Vector4)) return AsColorArray() as IAccessorArray<T>;
+        public IAccessorArray<Vector2> AsVector2Array() => AsArrayOf<Vector2>();
 
-            if (typeof(T) == typeof(Quaternion)) return AsQuaternionArray() as IAccessorArray<T>;
+        public IAccessorArray<Vector3> AsVector3Array() => AsArrayOf<Vector3>();
 
-            // we should create the equivalent of AsColorArray for Matrices
-            if (typeof(T) == typeof(Matrix4x4)) return AsMatrix4x4Array() as IAccessorArray<T>;
+        public IAccessorArray<Vector4> AsVector4Array() => AsArrayOf<Vector4>();
 
-            throw new NotSupportedException(typeof(T).Name);
-        }
-
-        public IAccessorArray<Single> AsScalarArray()
+        public IAccessorArray<T> AsArrayOf<T>()
+            where T:unmanaged
         {
             if (_TryGetMemoryAccessor(out var memory))
             {
-                if (this._sparse == null) return memory.AsScalarArray();
+                if (this._sparse == null) return memory.AsArrayOf<T>();
 
                 var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateScalarSparseArray(memory, sparseKV.Key, sparseKV.Value);
+                return MemoryAccessor.CreateSparseArray<T>(memory, sparseKV.Key, sparseKV.Value);
             }
             else
             {
-                if (this._sparse == null) return new ZeroAccessorArray<Single>(this._count);
+                if (this._sparse == null) return new ZeroAccessorArray<T>(this._count);
 
                 var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateScalarSparseArray(this._count, sparseKV.Key, sparseKV.Value);
+                return MemoryAccessor.CreateSparseArray<T>(this._count, sparseKV.Key, sparseKV.Value);
             }
-        }
-
-        public IAccessorArray<Vector2> AsVector2Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-                if (this._sparse == null) return memory.AsVector2Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector2SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector2>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector2SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-
-        public IAccessorArray<Vector3> AsVector3Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-
-                if (this._sparse == null) return memory.AsVector3Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector3SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector3>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector3SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
-
-        public IAccessorArray<Vector4> AsVector4Array()
-        {
-            if (_TryGetMemoryAccessor(out var memory))
-            {
-                if (this._sparse == null) return memory.AsVector4Array();
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector4SparseArray(memory, sparseKV.Key, sparseKV.Value);
-            }
-            else
-            {
-                if (this._sparse == null) return new ZeroAccessorArray<Vector4>(this._count);
-
-                var sparseKV = this._sparse._CreateMemoryAccessors(this);
-                return MemoryAccessor.CreateVector4SparseArray(this._count, sparseKV.Key, sparseKV.Value);
-            }
-        }
+        }        
 
         public IAccessorArray<Vector4> AsColorArray(Single defaultW = 1)
         {

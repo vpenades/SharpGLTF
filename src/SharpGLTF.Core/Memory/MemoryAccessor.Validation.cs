@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using BYTES = System.ArraySegment<System.Byte>;
 using DIMENSIONS = SharpGLTF.Schema2.DimensionType;
 using ENCODING = SharpGLTF.Schema2.EncodingType;
 
@@ -37,6 +38,18 @@ namespace SharpGLTF.Memory
             if (bb.Offset >= aa.Offset + aa.Count) return false;
 
             return true;
+        }
+
+        internal BYTES _GetBytes()
+        {
+            var o = this._Slicer.ByteOffset;
+            var l = this._Slicer.StepByteLength * this._Slicer.ItemsCount;
+
+            var data = _Data.Slice(o);
+
+            data = data.Slice(0, Math.Min(data.Count, l));
+
+            return data;
         }
 
         public static bool HaveOverlappingBuffers(IEnumerable<MemoryAccessor> abc)

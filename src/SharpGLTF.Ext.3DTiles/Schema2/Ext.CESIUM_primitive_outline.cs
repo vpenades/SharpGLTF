@@ -29,7 +29,7 @@ namespace SharpGLTF.Schema2
             var bview = model.UseBufferView(dstData);
             var accessor = model.CreateAccessor(accessorName);
 
-            accessor.SetData(bview, 0, dstArray.Count, DimensionType.SCALAR, EncodingType.UNSIGNED_INT, false);
+            accessor.SetData(bview, 0, dstArray.Count, IndexEncodingType.UNSIGNED_INT);
 
             primitive.SetCesiumOutline(accessor);
         }

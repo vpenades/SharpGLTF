@@ -159,7 +159,7 @@ namespace SharpGLTF.Schema2
                 var accessor = root.CreateAccessor();
                 primitive.SetVertexAccessor(attribute, accessor);
 
-                accessor.SetVertexData(view, 0, values.Count, dims, EncodingType.FLOAT, false);
+                accessor.SetVertexData(view, 0, values.Count, new AttributeFormat(dims, EncodingType.FLOAT, false));
             }
             
             switch (values)
@@ -275,7 +275,7 @@ namespace SharpGLTF.Schema2
 
             var root = primitive.LogicalParent.LogicalParent;
 
-            var accessors = memAccessors.ToDictionary(item => item.Attribute.Name, item => root.CreateVertexAccessor(item));
+            var accessors = memAccessors.ToDictionary(item => item.Attribute.Name, item => root.CreateMorphTargetAccessor(item));
             
             primitive.SetMorphTargetAccessors(targetIndex, accessors);
 
@@ -299,7 +299,7 @@ namespace SharpGLTF.Schema2
             }
             else
             {
-                accessor.SetVertexData(view, 0, values.Count, typeof(T).ToDimension(), EncodingType.FLOAT, false);
+                accessor.SetVertexData(view, 0, values.Count,new AttributeFormat(typeof(T).ToDimension()));
             }
 
             instancing.SetAccessor(attribute, accessor);

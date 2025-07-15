@@ -7,6 +7,54 @@ namespace SharpGLTF.Schema2
 {
     public static partial class Toolkit
     {
+        /// <summary>
+        /// Creates a new <see cref="Accessor"/> and fills it with data from <paramref name="memAccessor"/>
+        /// </summary>
+        /// <remarks>
+        /// If enough number of zero values is detected, a sparse accessor will be created instead.
+        /// </remarks>
+        /// <param name="root">the model where the <see cref="Accessor"/> will be created.</param>
+        /// <param name="memAccessor">the data to be used to fill the <see cref="Accessor"/>.</param>
+        /// <param name="sparsityPercent">The percentage threshold of zero values that determine whether to use sparse accessors. Or -1 to disable sparse accessors creation</param>
+        /// <returns>The created <see cref="Accessor"/>.</returns>
+        public static Accessor CreateMorphTargetAccessor(this ModelRoot root, Memory.MemoryAccessor memAccessor, int sparsityPercent = 60)
+        {
+            Guard.NotNull(root, nameof(root));
+            Guard.NotNull(memAccessor, nameof(memAccessor));
+
+            var accessor = root.CreateAccessor(memAccessor.Attribute.Name);            
+
+            var (indices, values) = memAccessor.ConvertToSparse();
+
+            if (indices.Attribute.ItemsCount == 0)
+            {
+                accessor.SetZeros(memAccessor.Attribute);
+                return accessor;
+            }
+
+            var sparsity = indices.Attribute.ItemsCount * 100 / memAccessor.Attribute.ItemsCount;
+
+            if (sparsity > sparsityPercent)
+            {
+                accessor.SetVertexData(memAccessor);
+                return accessor;
+            }
+
+            // set base data (all zeros)
+            accessor.SetZeros(memAccessor.Attribute);
+
+            // set sparse data on top of base data
+            accessor.SetSparseData(indices, values);            
+
+            return accessor;            
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="Accessor"/> and fills it with data from <paramref name="memAccessor"/>
+        /// </summary>
+        /// <param name="root">the model where the <see cref="Accessor"/> will be created.</param>
+        /// <param name="memAccessor">the data to be used to fill the <see cref="Accessor"/>.</param>
+        /// <returns>The created <see cref="Accessor"/>.</returns>
         public static Accessor CreateVertexAccessor(this ModelRoot root, Memory.MemoryAccessor memAccessor)
         {
             Guard.NotNull(root, nameof(root));

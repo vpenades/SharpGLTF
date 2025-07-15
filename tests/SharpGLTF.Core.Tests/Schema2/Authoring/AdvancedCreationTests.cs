@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
+using SharpGLTF.Memory;
+
 namespace SharpGLTF.Schema2.Authoring
 {
     internal class AdvancedCreationTests
@@ -162,7 +164,7 @@ namespace SharpGLTF.Schema2.Authoring
         private static Accessor _SetMorphTarget(MeshPrimitive primitive, int morphTargetIndex, Dictionary<int, Vector3> morphs1Pos)
         {
             var accessor = primitive.LogicalParent.LogicalParent.CreateAccessor();
-            accessor.SetZeros(3, DimensionType.VEC3, EncodingType.FLOAT, false);
+            accessor.SetZeros(3, AttributeFormat.Float3);
             accessor.CreateSparseData(morphs1Pos);
 
             var attributes = new Dictionary<string, Accessor>();
