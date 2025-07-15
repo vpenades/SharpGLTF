@@ -51,10 +51,7 @@ namespace SharpGLTF.Memory
 
         #region constructors
 
-        public static implicit operator AttributeFormat(Schema2.IndexEncodingType indexer)
-        {
-            return new AttributeFormat(indexer.ToComponent());
-        }
+        public static implicit operator AttributeFormat(Schema2.IndexEncodingType indexer) { return new AttributeFormat(indexer); }        
 
         public static implicit operator AttributeFormat(ENCODING enc) { return new AttributeFormat(enc); }
 
@@ -63,6 +60,14 @@ namespace SharpGLTF.Memory
         public static implicit operator AttributeFormat((DIMENSIONS dim, ENCODING enc) fmt) { return new AttributeFormat(fmt.dim, fmt.enc); }
 
         public static implicit operator AttributeFormat((DIMENSIONS dim, ENCODING enc, Boolean nrm) fmt) { return new AttributeFormat(fmt.dim, fmt.enc, fmt.nrm); }
+
+        public AttributeFormat(Schema2.IndexEncodingType enc)
+        {
+            Dimensions = DIMENSIONS.SCALAR;
+            Encoding = enc.ToComponent();
+            Normalized = false;
+            ByteSize = Dimensions.DimCount() * Encoding.ByteLength();
+        }
 
         public AttributeFormat(ENCODING enc)
         {
@@ -90,6 +95,11 @@ namespace SharpGLTF.Memory
 
         public AttributeFormat(DIMENSIONS dim, ENCODING enc, Boolean nrm)
         {
+            if (nrm)
+            {
+                Guard.IsFalse(enc == ENCODING.FLOAT, nameof(nrm), "Float encoding must not be normalized");
+            }
+
             Dimensions = dim;
             Encoding = enc;
             Normalized = nrm;

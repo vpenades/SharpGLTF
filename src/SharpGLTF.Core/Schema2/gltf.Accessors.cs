@@ -364,7 +364,7 @@ namespace SharpGLTF.Schema2
             var indicesEncoder = indices.AsIntegerArray();
 
             var valuesEncoding = new MemoryAccessInfo(null, 0, data.Count, 0, this.Format);
-            var values = new MemoryAccessor(new byte[data.Count * valuesEncoding.ItemByteLength], valuesEncoding);
+            var values = new MemoryAccessor(new byte[data.Count * valuesEncoding.ByteLength], valuesEncoding);
             var valuesEncoder = values.AsArrayOf<T>();
 
             int idx = 0;

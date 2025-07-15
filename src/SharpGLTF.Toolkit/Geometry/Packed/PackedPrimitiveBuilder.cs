@@ -216,7 +216,7 @@ namespace SharpGLTF.Geometry
                 foreach (var v in vvv)
                 {
                     var k = v.Attribute.Name;
-                    var s = v.Attribute.ItemByteLength;
+                    var s = v.Attribute.PaddedByteLength;
 
                     if (!vertexBuffers.TryGetValue((k,s), out PackedBuffer packed))
                     {

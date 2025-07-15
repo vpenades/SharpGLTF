@@ -17,7 +17,7 @@ namespace SharpGLTF.Memory
     [System.Diagnostics.DebuggerDisplay("{_GetDebuggerDisplay(),nq}")]
     public struct MemoryAccessInfo
     {
-        #region debug
+        #region diagnostics
 
         internal readonly string _GetDebuggerDisplay()
         {
@@ -69,9 +69,7 @@ namespace SharpGLTF.Memory
             this.ByteOffset = byteOffset;
             this.ItemsCount = itemsCount;
             this.ByteStride = byteStride;
-            this.Dimensions = format.Dimensions;
-            this.Encoding = format.Encoding;
-            this.Normalized = format.Normalized;
+            this.Format = format;
         }
 
         public MemoryAccessInfo(string name, int byteOffset, int itemsCount, int byteStride, DIMENSIONS dimensions, ENCODING encoding = ENCODING.FLOAT, Boolean normalized = false)
@@ -80,20 +78,23 @@ namespace SharpGLTF.Memory
             this.ByteOffset = byteOffset;
             this.ItemsCount = itemsCount;
             this.ByteStride = byteStride;
-            this.Dimensions = dimensions;
-            this.Encoding = encoding;
-            this.Normalized = normalized;
+            this.Format = (dimensions, encoding, normalized);
         }
 
         public readonly MemoryAccessInfo Slice(int itemStart, int itemCount)
         {
-            var stride = _GetRowByteLength();
+            var stride = this.StepByteLength;
 
             var clone = this;
             clone.ByteOffset += itemStart * stride;
             clone.ItemsCount = Math.Min(clone.ItemsCount, itemCount);
 
             return clone;
+        }
+
+        public readonly MemoryAccessInfo WithFormat(AttributeFormat newFormat)
+        {
+            return new MemoryAccessInfo(this.Name, this.ByteOffset, this.ItemsCount, this.ByteStride, newFormat);
         }
 
         #endregion
@@ -119,34 +120,47 @@ namespace SharpGLTF.Memory
         /// number of bytes to advance to the beginning of the next item
         /// </summary>
         public int ByteStride;
-
+        
         /// <summary>
-        /// number of sub-elements of each item.
+        /// Item encoding format.
         /// </summary>
-        public DIMENSIONS Dimensions;
-
-        /// <summary>
-        /// byte encoding of sub-elements of each item.
-        /// </summary>
-        public ENCODING Encoding;
-
-        /// <summary>
-        /// normalization of sub-elements of each item.
-        /// </summary>
-        public Boolean Normalized;
+        public AttributeFormat Format;
 
         #endregion
 
         #region properties
 
-        public AttributeFormat Format => new AttributeFormat(this.Dimensions, this.Encoding, this.Normalized);
+        /// <summary>
+        /// number of sub-elements of each item.
+        /// </summary>
+        public readonly DIMENSIONS Dimensions => Format.Dimensions;
+
+        /// <summary>
+        /// byte encoding of sub-elements of each item.
+        /// </summary>
+        public readonly ENCODING Encoding => Format.Encoding;
+
+        /// <summary>
+        /// normalization of sub-elements of each item.
+        /// </summary>
+        public readonly Boolean Normalized => Format.Normalized;
+
+        /// <summary>
+        /// Actual item byte length.
+        /// </summary>
+        public readonly int ByteLength => Format.ByteSize;
+
+
+        /// <summary>
+        /// item byte size, padded to 4 bytes.
+        /// </summary>
+        public readonly int PaddedByteLength => Format.ByteSizePadded;        
 
         /// <summary>
         /// number of bytes to advance to the next item.
         /// </summary>
-        public readonly int StepByteLength => _GetRowByteLength();
-
-        public readonly int ItemByteLength => _GetItemByteLength();
+        public readonly int StepByteLength => Math.Max(ByteStride, Format.ByteSize);
+        
 
         public readonly Boolean IsValidVertexAttribute
         {
@@ -188,25 +202,7 @@ namespace SharpGLTF.Memory
 
         #endregion
 
-        #region API
-
-        private readonly int _GetItemByteLength()
-        {
-            var xlen = Encoding.ByteLength();
-
-            if (Dimensions != DIMENSIONS.SCALAR || Name != "INDEX")
-            {
-                xlen *= this.Dimensions.DimCount();
-                xlen = xlen.WordPadded();
-            }
-
-            return xlen;
-        }
-
-        private readonly int _GetRowByteLength()
-        {
-            return Math.Max(ByteStride, _GetItemByteLength());
-        }
+        #region API        
 
         /// <summary>
         /// Assuming that <paramref name="attributes"/> are sequential and adyacent,

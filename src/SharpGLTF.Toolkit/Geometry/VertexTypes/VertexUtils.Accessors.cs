@@ -120,8 +120,9 @@ namespace SharpGLTF.Geometry.VertexTypes
                 {
                     if (vertexEncoding.ColorEncoding.HasValue)
                     {
-                        a.Encoding = vertexEncoding.ColorEncoding.Value;
-                        a.Normalized = a.Encoding != ENCODING.FLOAT;
+                        var enc = vertexEncoding.ColorEncoding.Value;
+                        var fmt = new AttributeFormat(a.Dimensions, enc, enc != ENCODING.FLOAT);
+                        a = a.WithFormat(fmt);
                     }
                 }
 
@@ -130,14 +131,24 @@ namespace SharpGLTF.Geometry.VertexTypes
 
             foreach (var finfo in tvs)
             {
-                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);                
-                
-                if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase)) a.Encoding = vertexEncoding.JointsEncoding.Value;
+                var a = new MemoryAccessInfo(finfo.Key, 0, 0, 0, finfo.Value);
+
+                var fmt = a.Format;
+
+                if (a.Name.StartsWith("JOINTS_", StringComparison.OrdinalIgnoreCase))
+                {
+                    var enc = vertexEncoding.JointsEncoding.Value;
+                    Guard.IsFalse(fmt.Normalized, nameof(firstVertex), "indices should not be normalized");
+                    fmt = (fmt.Dimensions, enc, false);
+                }
+
                 if (a.Name.StartsWith("WEIGHTS_", StringComparison.OrdinalIgnoreCase))
                 {
-                    a.Encoding = vertexEncoding.WeightsEncoding.Value;
-                    if (a.Encoding != ENCODING.FLOAT) a.Normalized = true;
+                    var enc = vertexEncoding.WeightsEncoding.Value;
+                    fmt = (fmt.Dimensions, enc, enc != ENCODING.FLOAT);
                 }
+
+                a = a.WithFormat(fmt);
 
                 attributes.Add(a);
                 
