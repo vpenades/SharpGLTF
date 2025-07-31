@@ -9,7 +9,7 @@ assignees: vpenades
 
 **Before submitting a bug**
 
-It is fairly common that loading issues are produced by malformed glTF files, so YOU MUST check the model you're trying to load with glTF Validator before submitting a bug report.
+It is fairly common that model loading issues are produced by malformed glTF files, so YOU MUST check the model you're trying to load with glTF Validator before submitting a bug report.
 
     https://github.khronos.org/glTF-Validator
 
@@ -17,6 +17,10 @@ It is fairly common that loading issues are produced by malformed glTF files, so
 - If glTF Validator reports no errors, then you can proceed to report the issue here.
 
 I also recomend to preview the model using  https://sandbox.babylonjs.com  to ensure the model looks correct. Some tools like Windows viewer or Blender Importer have issues with some models and might mislead into thinking the model is wrong.
+
+Any questions related to DRACO compression or MeshOpt Compression need to be asked in [this discussion thread](https://github.com/vpenades/SharpGLTF/discussions/235)
+
+When asking about examples on how to do this or that, please, review the Unit Tests of the repository, there's plenty of examples on how to do almost everything.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
@@ -26,4 +30,4 @@ If the issue is complex, or depends on loading or processing a specific model, p
 
 **please complete the following information:**
  - OS: [e.g. iOS]
- - SharpGLTF Version [e.g. Alpha-025, or From Source]
+ - SharpGLTF Version [e.g. SharpGLTF-1.0.5, or From Source]
