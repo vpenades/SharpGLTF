@@ -14,8 +14,8 @@
   <ItemGroup>
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageVersion Include="NJsonSchema.CodeGeneration.CSharp" Version="11.3.2" />
-    <PackageVersion Include="NJsonSchema.NewtonsoftJson" Version="11.3.2" />
+    <PackageVersion Include="NJsonSchema.CodeGeneration.CSharp" Version="11.4.0" />
+    <PackageVersion Include="NJsonSchema.NewtonsoftJson" Version="11.4.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,7 +25,7 @@
     <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.10" />
+    <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.11" />
   </ItemGroup>
 
   <ItemGroup>
