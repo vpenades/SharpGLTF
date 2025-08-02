@@ -67,7 +67,7 @@ namespace SharpGLTF.IO
             foreach (var fileNameAndGenerator in _GetFileGenerators(System.IO.Path.GetFileNameWithoutExtension(filePath)))
             {
                 var fpath = System.IO.Path.Combine(dir, fileNameAndGenerator.Key);
-                using var fs = File.OpenWrite(fpath);
+                using var fs = File.Create(fpath);
                 fileNameAndGenerator.Value(fs);
             }
         }
