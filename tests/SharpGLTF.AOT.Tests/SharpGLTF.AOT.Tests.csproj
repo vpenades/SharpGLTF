@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+		<RootNamespace>SharpGLTF</RootNamespace>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net8.0</TargetFramework>		
+		<Nullable>enable</Nullable>
+		<InvariantGlobalization>true</InvariantGlobalization>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		
+		<!-- https://github.com/nunit/nunit/issues/4987 -->
+		<!--
+		<PublishAot>true</PublishAot>
+		-->
+
+		<PublishTrimmed>true</PublishTrimmed>
+		<SelfContained>true</SelfContained>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NUnitLite" />
+		<PackageReference Include="TestAttachments.NUnit" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\src\SharpGLTF.Toolkit\SharpGLTF.Toolkit.csproj" />
+	</ItemGroup>
+
+</Project>
