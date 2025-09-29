@@ -38,15 +38,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
 
             var perf = System.Diagnostics.Stopwatch.StartNew();
 
-            try
-            {
-                model = ModelRoot.Load(f, settings);                
-            }
-            catch (Exception ex)
-            {
-                TestContext.Progress.WriteLine($"Failed {f.ToShortDisplayPath()}");
-                Assert.Fail(ex.Message);
-            }
+            model = ModelRoot.Load(f, settings);
 
             Assert.That(model, Is.Not.Null);
 
