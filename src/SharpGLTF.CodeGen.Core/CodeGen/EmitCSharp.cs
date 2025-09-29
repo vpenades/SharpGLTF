@@ -193,6 +193,8 @@ namespace SharpGLTF.CodeGen
 
                 case StringType strType: return strType.PersistentName;
 
+                case UriType uriType: return uriType.PersistentName;
+
                 case BlittableType blitType:
                     {
                         var tname = blitType.DataType.Name;

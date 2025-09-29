@@ -53,6 +53,8 @@ namespace SharpGLTF.SchemaReflection
 
             public StringType UseString() { return (StringType)_UseOrCreate( new StringType(this) ); }
 
+            public UriType UseUri() { return (UriType)_UseOrCreate(new UriType(this)); }
+
             public EnumType FindEnum(string persistentName) { return Enumerations.FirstOrDefault(item => item.PersistentName == persistentName); }
 
             public ArrayType UseArray(SchemaType elementType) { return (ArrayType)_UseOrCreate( new ArrayType(this, elementType) ); }

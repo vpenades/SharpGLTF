@@ -96,6 +96,25 @@ namespace SharpGLTF.SchemaReflection
     }
 
     /// <summary>
+    /// Represents a <see cref="Uri"/> type.
+    /// </summary>
+    [System.Diagnostics.DebuggerDisplay("StringType {PersistentName}")]
+    public sealed class UriType : SchemaType
+    {
+        #region constructor
+
+        internal UriType(Context ctx) : base(ctx) { }
+
+        #endregion
+
+        #region properties
+
+        public override string PersistentName => typeof(Uri).Name;
+
+        #endregion
+    }
+
+    /// <summary>
     /// Represents an undefined <see cref="Object"/> type.
     /// </summary>
     /// <remarks>
@@ -324,6 +343,7 @@ namespace SharpGLTF.SchemaReflection
         public FieldInfo SetDataType(Type type, bool isNullable)
         {
             if (type == typeof(string)) { _FieldType = DeclaringClass.Owner.UseString(); return this; }
+            if (type == typeof(Uri)) { _FieldType = DeclaringClass.Owner.UseUri(); return this; }
 
             if (type.IsEnum)
             {

@@ -101,6 +101,25 @@ namespace SharpGLTF
             var propertyPathEnum = ctx.FindEnum("rotation-scale-translation-weights");            
             propertyPathEnum?.SetValue("pointer", 0);
 
+            // we might be able to enable this in the future when we're past Net10,
+            // which is the 1st framework to remove the 65535 limit on Uri sizes.
+            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/networking/10.0/uri-length-limits-removed
+            if (false) 
+            {
+                var imageClass = ctx.FindClass("Image");
+                if (imageClass != null)
+                {
+                    imageClass.GetField("uri").SetDataType(typeof(Uri), true);
+                }
+
+                var bufferClass = ctx.FindClass("Buffer");
+                if (bufferClass != null)
+                {
+                    bufferClass.GetField("uri").SetDataType(typeof(Uri), true);
+                }
+            }
+
+
             var meshClass = ctx.FindClass("Mesh");
             if (meshClass != null)
             {
