@@ -147,7 +147,7 @@ namespace SharpGLTF.Schema2
         internal void _ResolveUri(ReadContext context)
         {
             // No uri to decode.
-            if (String.IsNullOrWhiteSpace(_uri)) return;
+            if (_uri == null) return;
 
             // Try decode Base64 embedded image.
             if (Memory.MemoryImage.TryParseMime64(_uri, out var memImage))
@@ -158,8 +158,10 @@ namespace SharpGLTF.Schema2
             // Then it's a regular URI
             else
             {
+                var satelliteUri = _uri;
+
                 // try resolve the full path
-                if (context.TryGetFullPath(_uri, out string fullPath))
+                if (context.TryGetFullPath(satelliteUri, out string fullPath))
                 {
                     _SatelliteContent = fullPath;
                 }
@@ -167,7 +169,8 @@ namespace SharpGLTF.Schema2
                 // full path could not be resolved, use direct load instead.
                 else
                 {
-                    _SatelliteContent = new SharpGLTF.Memory.MemoryImage(context.ReadAllBytesToEnd(_uri), _uri);
+                    var data = context.ReadAllBytesToEnd(satelliteUri);
+                    _SatelliteContent = new SharpGLTF.Memory.MemoryImage(data, satelliteUri);
                 }
             }
 
@@ -236,9 +239,8 @@ namespace SharpGLTF.Schema2
             }            
 
             satelliteUri = writer.WriteImage(satelliteUri, imimg);
-
-            satelliteUri = satelliteUri.Replace("\\", "/", StringComparison.Ordinal);
-            _uri = satelliteUri._EscapeStringInternal();
+            
+            _uri = UriKind.RelativeOrAbsolute.ToUri(satelliteUri).OriginalString;
             _mimeType = null;
         }
 
@@ -331,16 +333,19 @@ namespace SharpGLTF.Schema2
         }
 
         /// <summary>
-        /// Transfers all the <see cref="ModelRoot.LogicalImages"/> content into <see cref="BufferView"/> instances
+        /// Transfers all the <see cref="LogicalImages"/> content into <see cref="BufferView"/> instances
         /// </summary>
         /// <remarks>
-        /// Images can be stored in three different ways:
-        /// - As satellite files.
-        /// - Embedded as MIME64 into the JSON document
-        /// - Referenced with <see cref="BufferView"/>
-        ///
-        /// This call ensures all images will be internalized as <see cref="BufferView"/> instances.
-        ///
+        /// Images can be stored in three different ways:<br/>
+        /// - As satellite files.<br/>
+        /// - Embedded as MIME64 into the JSON document<br/>
+        /// - Referenced with <see cref="BufferView"/><br/>
+        /// </remarks>
+        /// <remarms>
+        /// This call ensures all images will be internalized as <see cref="BufferView"/> instances.<br/>
+        /// To write a GLB file, it is advised to call <see cref="MergeImages"/> before <see cref="MergeBuffers()"/>
+        /// </remarms>        
+        /// <remarks>
         /// This action cannot be reversed.
         /// </remarks>
         public void MergeImages()

@@ -49,8 +49,11 @@ namespace SharpGLTF.Schema2
 
         private static Byte[] _LoadBinaryBufferUnchecked(string uri, ReadContext context)
         {
-            var data = uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
-            if (data != null) return data;
+            if (uri != null)
+            {
+                var data = uri.TryParseBase64Unchecked(EMBEDDEDGLTFBUFFER, EMBEDDEDOCTETSTREAM);
+                if (data != null) return data;
+            }            
 
             var segment = context
                 .ReadAllBytesToEnd(uri);
@@ -73,7 +76,7 @@ namespace SharpGLTF.Schema2
         {
             writer.WriteAllBytesToEnd(satelliteUri, new ArraySegment<byte>(_Content.GetPaddedContent()));
 
-            this._uri = satelliteUri._EscapeStringInternal();
+            this._uri = UriKind.RelativeOrAbsolute.ToUri(satelliteUri).OriginalString;
             this._byteLength = _Content.Length;
         }
 
@@ -170,7 +173,7 @@ namespace SharpGLTF.Schema2
 
         /// <summary>
         /// Creates or reuses a <see cref="Buffer"/> instance
-        /// at <see cref="ModelRoot.LogicalBuffers"/>.
+        /// at <see cref="LogicalBuffers"/>.
         /// </summary>
         /// <param name="content">the byte array to be wrapped as a buffer</param>
         /// <returns>A <see cref="Buffer"/> instance.</returns>

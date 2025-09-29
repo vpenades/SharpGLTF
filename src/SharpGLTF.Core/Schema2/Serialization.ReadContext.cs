@@ -57,7 +57,12 @@ namespace SharpGLTF.Schema2
 
         public static ReadContext CreateFromDictionary(IReadOnlyDictionary<string, BYTES> dictionary, bool checkExtensions = true)
         {
-            return new ReadContext(rawUri => dictionary[rawUri], null, checkExtensions);
+            BYTES getBytes(string rawUri)
+            {
+                return dictionary[rawUri];
+            }
+
+            return new ReadContext(getBytes, null, checkExtensions);
         }
 
         private ReadContext(FileReaderCallback reader, UriResolver uriResolver = null, bool checkExtensions = true)

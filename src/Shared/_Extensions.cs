@@ -894,13 +894,18 @@ namespace SharpGLTF
 
         #region json
 
-        public static string _EscapeStringInternal(this string uri)
+        public static Uri ToUri(this UriKind kind, string value)
         {
-            // https://stackoverflow.com/questions/4396598/whats-the-difference-between-escapeuristring-and-escapedatastring
-#pragma warning disable SYSLIB0013 // Type or member is obsolete
-            return Uri.EscapeUriString(uri);
-#pragma warning restore SYSLIB0013 // Type or member is obsolete
-        }
+            var uri = new Uri(value, kind);
+
+            if (!uri.IsAbsoluteUri || uri.IsFile)
+            {
+                value = value.Replace(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
+                uri = new Uri(value, kind);
+            }
+
+            return uri;
+        }        
 
         #if NET6_0
 

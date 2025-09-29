@@ -79,6 +79,11 @@ namespace SharpGLTF.Memory
 
         public static implicit operator MemoryImage(string filePath) { return new MemoryImage(filePath); }
 
+        public static bool TryParseMime64(Uri mime64content, out MemoryImage image)
+        {
+            return TryParseMime64(mime64content?.OriginalString, out image);
+        }
+
         /// <summary>
         /// Tries to parse a Mime64 string to <see cref="MemoryImage"/>
         /// </summary>
