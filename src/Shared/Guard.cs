@@ -244,11 +244,9 @@ namespace SharpGLTF
                 }
             }
 
-            if (gltfURI.Any(c => _InvalidRelativePathChars.Contains(c))) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+            if (gltfURI.Any(c => _InvalidRelativePathChars.Contains(c))) throw new ArgumentException($"Invalid URI '{gltfURI}'.");            
 
-            if (gltfURI.Any(chr => char.IsWhiteSpace(chr))) gltfURI = gltfURI._EscapeStringInternal();
-
-            if (!Uri.TryCreate(gltfURI, UriKind.Relative, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
+            if (!Uri.TryCreate(gltfURI, UriKind.RelativeOrAbsolute, out Uri xuri)) throw new ArgumentException($"Invalid URI '{gltfURI}'.");
 
             return;
         }
