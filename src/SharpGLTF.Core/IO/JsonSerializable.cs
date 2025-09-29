@@ -540,7 +540,11 @@ namespace SharpGLTF.IO
 
             // known types            
 
+            // this sequence is duplicated in reader.GetValueAs(typeof(T)); TODO: Deduplicate
+
             if (vtype == typeof(String)) { value = reader.AsString(); return true; }
+            if (vtype == typeof(Uri)) { value = reader.AsStringUri(); return true; }           
+
             if (vtype == typeof(Boolean)) { value = reader.AsBoolean(); return true; }
 
             if (vtype == typeof(Int16)) { value = reader.GetInt16(); return true; }

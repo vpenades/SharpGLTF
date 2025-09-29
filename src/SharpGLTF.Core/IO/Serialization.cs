@@ -18,7 +18,7 @@ namespace SharpGLTF.IO
                 case JsonTokenType.Number: return reader.GetInt32() != 0;
                 default: throw new NotImplementedException();
             }
-        }
+        }        
 
         public static String AsString(this in Utf8JsonReader reader)
         {
@@ -80,6 +80,7 @@ namespace SharpGLTF.IO
             if (reader.TokenType == JsonTokenType.Null) return null;
 
             if (vtype == typeof(String)) { return reader.AsString(); }
+            if (vtype == typeof(Uri)) { return reader.AsStringUri(); }
             if (vtype == typeof(Boolean)) { return reader.AsBoolean(); }
             if (vtype == typeof(Int16)) { return reader.GetInt16(); }
             if (vtype == typeof(Int32)) { return reader.GetInt32(); }
@@ -94,6 +95,8 @@ namespace SharpGLTF.IO
             return Convert.ChangeType(reader.GetString(), vtype, System.Globalization.CultureInfo.InvariantCulture);
         }
 
+        
+
         public static T GetValueAs<T>(this in Utf8JsonReader reader)
             where T : struct
         {
@@ -105,6 +108,7 @@ namespace SharpGLTF.IO
             switch (value)
             {
                 case string vstr: writer.WriteString(property, vstr); return true;
+                case Uri uri: writer.WriteString(property, uri.OriginalString); return true;
                 case bool vbol: writer.WriteBoolean(property, vbol); return true;
                 case byte vu8: writer.WriteNumber(property, vu8); return true;
                 case ushort vu16: writer.WriteNumber(property, vu16); return true;
@@ -131,6 +135,7 @@ namespace SharpGLTF.IO
             switch (value)
             {
                 case string vstr: writer.WriteStringValue(vstr); return true;
+                case Uri uri: writer.WriteUri(uri); return true;
                 case bool vbol: writer.WriteBooleanValue(vbol); return true;
                 case byte vu8: writer.WriteNumberValue(vu8); return true;
                 case ushort vu16: writer.WriteNumberValue(vu16); return true;
@@ -209,6 +214,33 @@ namespace SharpGLTF.IO
             writer.WriteNumberValue(m.M43);
             writer.WriteNumberValue(m.M44);
             writer.WriteEndArray();
+        }
+
+        public static Uri AsStringUri(this in Utf8JsonReader reader)
+        {
+            // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Converters/Value/UriConverter.cs
+
+            var uriString = reader.GetString();
+
+            if (!Uri.TryCreate(uriString, UriKind.RelativeOrAbsolute, out Uri value))
+            {
+                value = new Uri(uriString, UriKind.RelativeOrAbsolute);                
+            }
+
+            return value;
+        }
+
+        public static void WriteUri(this Utf8JsonWriter writer, Uri value)
+        {
+            // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Text.Json/src/System/Text/Json/Serialization/Converters/Value/UriConverter.cs
+
+            if (value is null)
+            {
+                writer.WriteNullValue();
+                return;
+            }
+
+            writer.WriteStringValue(value.OriginalString);
         }
     }
 }
