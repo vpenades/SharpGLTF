@@ -1,0 +1,51 @@
+<Solution>
+  <Folder Name="/build/">
+    <File Path="build/Directory.Build.props" />
+    <Project Path="build/SharpGLTF.CodeGen.Extensions.AGI/SharpGLTF.CodeGen.Extensions.AGI.csproj" />
+    <Project Path="build/SharpGLTF.CodeGen.Extensions.Cesium/SharpGLTF.CodeGen.Extensions.Cesium.csproj" />
+    <Project Path="build/SharpGLTF.codeGen.Extensions.Khronos/SharpGLTF.codeGen.Extensions.Khronos.csproj" />
+    <Project Path="build/SharpGLTF.CodeGen/SharpGLTF.CodeGen.csproj" />
+  </Folder>
+  <Folder Name="/examples/">
+    <File Path="examples/Directory.Build.props" />
+    <Project Path="examples/Example1/Example1.csproj" />
+    <Project Path="examples/InfiniteSkinnedTentacle/InfiniteSkinnedTentacle.csproj" />
+    <Project Path="examples/PointCloudGalaxy/PointCloudGalaxy.csproj" />
+    <Project Path="examples/SharpGLTF.Plotly/SharpGLTF.Plotly.csproj" />
+    <Project Path="examples/SharpGLTF.Runtime.MonoGame/SharpGLTF.Runtime.MonoGame.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".github/actions/Build/action.yml" />
+    <File Path=".github/workflows/IncrementAlpha.yml" />
+    <File Path=".github/workflows/IncrementVersion.yml" />
+    <File Path=".github/workflows/PublishMainToNuget.yml" />
+    <File Path=".github/workflows/PublishToGithub.yml" />
+    <File Path=".github/workflows/PublishToNuget.yml" />
+    <File Path=".github/workflows/TestCommit.yml" />
+    <File Path="Directory.Packages.props" />
+    <File Path="README.md" />
+    <File Path="SharpGLTF.Build.sh" />
+    <File Path="SharpGLTF.ruleset" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <Project Path="src/SharpGLTF.CodeGen.Core/SharpGLTF.CodeGen.Core.csproj" />
+    <Project Path="src/SharpGLTF.Core/SharpGLTF.Core.csproj" />
+    <Project Path="src/SharpGLTF.Ext.3DTiles/SharpGLTF.Ext.3DTiles.csproj" />
+    <Project Path="src/SharpGLTF.Ext.Agi/SharpGLTF.Ext.Agi.csproj" />
+    <Project Path="src/SharpGLTF.Runtime/SharpGLTF.Runtime.csproj" />
+    <Project Path="src/SharpGLTF.Toolkit/SharpGLTF.Toolkit.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/SharpGLTF.AOT.Tests/SharpGLTF.AOT.Tests.csproj" />
+    <Project Path="tests/SharpGLTF.Core.Tests/SharpGLTF.Core.Tests.csproj" />
+    <Project Path="tests/SharpGLTF.DownloadTestFiles/SharpGLTF.DownloadTestFiles.csproj" />
+    <Project Path="tests/SharpGLTF.Ext.3DTiles.Tests/SharpGLTF.Ext.3DTiles.Tests.csproj" />
+    <Project Path="tests/SharpGLTF.NUnit/SharpGLTF.NUnit.csproj" />
+    <Project Path="tests/SharpGLTF.Runtime.Tests/SharpGLTF.Runtime.Tests.csproj" />
+    <Project Path="tests/SharpGLTF.ThirdParty.Tests/SharpGLTF.ThirdParty.Tests.csproj" />
+    <Project Path="tests/SharpGLTF.Toolkit.Tests/SharpGLTF.Toolkit.Tests.csproj" />
+  </Folder>
+</Solution>
