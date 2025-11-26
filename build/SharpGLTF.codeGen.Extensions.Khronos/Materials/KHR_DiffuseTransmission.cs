@@ -12,9 +12,9 @@ namespace SharpGLTF
         // file naming issues and it's subject to change anytime.
         // https://github.com/KhronosGroup/glTF/issues/2482
 
-        private static string SchemaUri => KhronosExtensions.KhronosExtensionPath("KHR_materials_diffuse_transmission", "glTF.KHR_materials_diffuse_transmission.schema.json");
+        private static string SchemaUri => KhronosExtensions.KhronosExtensionPath("KHR_materials_diffuse_transmission", "material.KHR_materials_diffuse_transmission.schema.json");
 
-        private const string ExtensionRootClassName = "KHR_materials_diffuse_transmission glTF extension"; // not correctly named?
+        private const string ExtensionRootClassName = "KHR_materials_diffuse_transmission glTF Material Extension";
 
         public override IEnumerable<(string, SchemaType.Context)> ReadSchema()
         {
