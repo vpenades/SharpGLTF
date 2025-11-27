@@ -33,9 +33,11 @@ namespace SharpGLTF.Schema2
         static ExtensionsFactory()
         {
             RegisterExtension<ModelRoot, _ModelPunctualLights>("KHR_lights_punctual", p=> new _ModelPunctualLights(p));
-            RegisterExtension<Node, _NodePunctualLight>("KHR_lights_punctual", p=> new _NodePunctualLight(p));
+            RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld", p => new XmpPackets(p));
 
+            RegisterExtension<Node, _NodePunctualLight>("KHR_lights_punctual", p=> new _NodePunctualLight(p));
             RegisterExtension<Node, MeshGpuInstancing>("EXT_mesh_gpu_instancing", p=> new MeshGpuInstancing(p));
+            RegisterExtension<Node, _NodeVisibility>(_NodeVisibility.SCHEMANAME, p => new _NodeVisibility(p));
 
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit", p => new MaterialUnlit(p));
             RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen", p => new MaterialSheen(p));
@@ -57,7 +59,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp", p => new TextureWEBP(p));
             RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu", p => new TextureKTX2(p));
 
-            RegisterExtension<ModelRoot, XmpPackets>("KHR_xmp_json_ld", p => new XmpPackets(p));
+            
             RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld", p => new XmpPacketReference(p));
 
             RegisterExtension<AnimationChannelTarget, AnimationPointer>("KHR_animation_pointer", p => new AnimationPointer(p));

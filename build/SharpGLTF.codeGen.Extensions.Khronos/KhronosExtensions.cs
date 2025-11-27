@@ -41,6 +41,8 @@ namespace SharpGLTF
             yield return new XmpJsonLdExtension();
 
             yield return new AnimationPointerExtension();
+
+            yield return new NodeVisibilityExtension();
         }
 
         #endregion
