@@ -34,7 +34,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20241018-1255" />
+    <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20251201-2057" />
   </ItemGroup>
 
   <ItemGroup Condition="$(TargetFramework.StartsWith('net6.0'))">
