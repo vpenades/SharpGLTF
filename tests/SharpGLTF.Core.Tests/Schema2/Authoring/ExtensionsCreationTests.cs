@@ -59,6 +59,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannel.MetallicRoughness, System.IO.Path.Combine(basePath, "WaterBottle_roughnessMetallic.png"));
 
             // wrap the fallback material with a PBR Specular Glossiness material.
+            #pragma warning disable CS0618 // explicitly calling obsolete methods for the sake of testing SpecularGlossiness
             material = new Materials.MaterialBuilder("material1")
                 .WithFallback(material)
                 .WithSpecularGlossinessShader()
@@ -67,6 +68,7 @@ namespace SharpGLTF.Schema2.Authoring
                 .WithChannelImage(Materials.KnownChannel.Occlusion, System.IO.Path.Combine(basePath, "WaterBottle_occlusion.png"))
                 .WithChannelImage(Materials.KnownChannel.Diffuse, System.IO.Path.Combine(basePath, "WaterBottle_diffuse.png"))
                 .WithChannelImage(Materials.KnownChannel.SpecularGlossiness, System.IO.Path.Combine(basePath, "WaterBottle_specularGlossiness.png"));
+            #pragma warning restore CS0618 // Type or member is obsolete
 
             var mesh = new Geometry.MeshBuilder<VPOS, VTEX>("mesh1");
             mesh.UsePrimitive(material).AddQuadrangle
