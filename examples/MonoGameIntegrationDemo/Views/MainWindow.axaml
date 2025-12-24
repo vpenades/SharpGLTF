@@ -1,0 +1,36 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:MonoGameIntegrationDemo.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:monoGame="using:AvaloniaInside.MonoGame"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="MonoGameIntegrationDemo.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="MonoGameIntegrationDemo">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <Grid RowDefinitions="auto * auto">
+        <Menu Grid.Row="0">
+			<MenuItem Header="File">
+				<MenuItem Icon="📁" Header="Load Model..." >
+                    <Interaction.Behaviors>
+						<MenuItemOpenFilePickerBehavior FileTypeFilter="glTF files|*.glTF|glb files|*.glb" AllowMultiple="False" Command="{Binding LoadModelCommand}" />
+                    </Interaction.Behaviors>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+
+	    <monoGame:MonoGameControl Grid.Row="1" Game="{Binding CurrentGame}" />
+
+        <ContentControl Grid.Row="2" Content="{Binding ModelControls}" />		
+        
+    </Grid>     
+
+</Window>

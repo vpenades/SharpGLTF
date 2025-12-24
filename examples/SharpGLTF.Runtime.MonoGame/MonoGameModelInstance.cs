@@ -5,12 +5,15 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using SharpGLTF.Runtime.Template;
+
+
 #if USINGMONOGAMEMODEL
 using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
 using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
 #else
-using MODELMESH = SharpGLTF.Runtime.RuntimeModelMesh;
-using MODELMESHPART = SharpGLTF.Runtime.RuntimeModelMeshPart;
+using MODELMESH = SharpGLTF.Runtime.Template.RuntimeModelMesh;
+using MODELMESHPART = SharpGLTF.Runtime.Template.RuntimeModelMeshPart;
 #endif
 
 namespace SharpGLTF.Runtime
@@ -30,7 +33,7 @@ namespace SharpGLTF.Runtime
         #region data
 
         private readonly MonoGameModelTemplate _Template;
-        private readonly SceneInstance _Controller;
+        private readonly SceneInstance _Controller;        
 
         #endregion
 
@@ -96,20 +99,11 @@ namespace SharpGLTF.Runtime
                 matrices.Projection = projectionXform;
                 matrices.View = viewXform;
                 matrices.World = worldXform;
-            }
-
-            if (effect is SkinnedEffect skin && skinTransforms != null)
-            {
-                var xposed = skinTransforms.Select(item => Matrix.Transpose(item)).ToArray();
-
-                skin.SetBoneTransforms(skinTransforms);
-            }
+            }            
 
             if (effect is IEffectBones iskin && skinTransforms != null)
             {
-                var xposed = skinTransforms.Select(item => Matrix.Transpose(item)).ToArray();
-
-                iskin.SetBoneTransforms(skinTransforms, 0, skinTransforms.Length);
+                iskin.SetBoneTransforms(skinTransforms);
             }            
         }
 

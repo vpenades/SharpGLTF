@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MonoGame.Framework.DesktopGL" />    
+    <PackageReference Include="MonoGame.Framework.DesktopGL" PrivateAssets="all" />    
   </ItemGroup>
 
   <ItemGroup>

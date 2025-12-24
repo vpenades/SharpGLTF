@@ -10,6 +10,7 @@
     <File Path="examples/Directory.Build.props" />
     <Project Path="examples/Example1/Example1.csproj" />
     <Project Path="examples/InfiniteSkinnedTentacle/InfiniteSkinnedTentacle.csproj" />
+    <Project Path="examples/MonoGameIntegrationDemo/MonoGameIntegrationDemo.csproj" Id="4290940f-087c-434d-b108-0bcd85031cca" />
     <Project Path="examples/PointCloudGalaxy/PointCloudGalaxy.csproj" />
     <Project Path="examples/SharpGLTF.Plotly/SharpGLTF.Plotly.csproj" />
     <Project Path="examples/SharpGLTF.Runtime.MonoGame/SharpGLTF.Runtime.MonoGame.csproj" />
