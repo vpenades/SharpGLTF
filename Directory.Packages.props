@@ -7,8 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageVersion Include="System.Text.Json" Version="10.0.0" />
-    <PackageVersion Include="System.Drawing.Common" Version="10.0.0" />
+    <PackageVersion Include="System.Text.Json" Version="10.0.1" />
+    <PackageVersion Include="System.Drawing.Common" Version="10.0.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,15 +24,26 @@
     <PackageVersion Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
     <PackageVersion Include="GltfValidator" Version="2.0.0-dev.3.10.202411282031" />
     <PackageVersion Include="ErrorProne.NET.Structs" Version="0.6.1-beta.1" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.100" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.101" />
     <PackageVersion Include="SixLabors.ImageSharp" Version="3.1.12" />
   </ItemGroup>
+
+	<ItemGroup>
+		<PackageVersion Include="Avalonia" Version="11.3.10" />
+		<PackageVersion Include="Avalonia.Desktop" Version="11.3.10" />
+		<PackageVersion Include="Avalonia.Themes.Fluent" Version="11.3.10" />
+		<PackageVersion Include="Avalonia.Fonts.Inter" Version="11.3.10" />		
+		<PackageVersion Include="Avalonia.Diagnostics" Version="11.3.10" />
+		<PackageVersion Include="Xaml.Behaviors.Avalonia" Version="11.3.9" />
+		<PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />		
+		<PackageVersion Include="AvaloniaInside.MonoGame" Version="1.0.2" />
+	</ItemGroup>
 
   <ItemGroup>
     <PackageVersion Include="NUnit" Version="4.4.0" />
 		<PackageVersion Include="NUnitLite" Version="4.4.0" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.11.2" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.2.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="6.0.1" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageVersion Include="TestAttachments.NUnit" Version="4.0.0-preview-20251201-2057" />
   </ItemGroup>
