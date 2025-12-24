@@ -110,6 +110,8 @@ namespace SharpGLTF.Schema2
 
         #region Vertex Buffer Arrays
 
+        public IAccessorArray<UInt32> AsIndexArray() => AsArrayOf<UInt32>();
+
         public IAccessorArray<Single> AsScalarArray() => AsArrayOf<Single>();
 
         public IAccessorArray<Vector2> AsVector2Array() => AsArrayOf<Vector2>();

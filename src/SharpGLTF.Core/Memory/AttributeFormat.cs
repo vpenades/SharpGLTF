@@ -39,6 +39,8 @@ namespace SharpGLTF.Memory
 
         #region predefined values
 
+        public static readonly AttributeFormat Byte1 = new AttributeFormat(ENCODING.UNSIGNED_BYTE);
+
         public static readonly AttributeFormat Float1 = new AttributeFormat(ENCODING.FLOAT);
         public static readonly AttributeFormat Float2 = new AttributeFormat(DIMENSIONS.VEC2 ,ENCODING.FLOAT);
         public static readonly AttributeFormat Float3 = new AttributeFormat(DIMENSIONS.VEC3, ENCODING.FLOAT);

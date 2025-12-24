@@ -66,7 +66,7 @@ namespace SharpGLTF.Memory
 
         public IAccessorArray<T> AsArrayOf<T>()
             where T: unmanaged
-        {
+        {            
             if (typeof(T) == typeof(UInt32)) return AsIntegerArray() as IAccessorArray<T>;
             if (typeof(T) == typeof(Single)) return AsScalarArray() as IAccessorArray<T>;
             if (typeof(T) == typeof(Vector2)) return AsVector2Array() as IAccessorArray<T>;

@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using SharpGLTF.Transforms;
-
 using XFORM = System.Numerics.Matrix4x4;
 
 namespace SharpGLTF.Runtime
@@ -18,6 +16,7 @@ namespace SharpGLTF.Runtime
 
         internal ArmatureInstance(ArmatureTemplate template)
         {
+            _Template = template;
             _NodeTemplates = template.Nodes;
 
             var ni = new NodeInstance[_NodeTemplates.Count];
@@ -40,6 +39,9 @@ namespace SharpGLTF.Runtime
         #endregion
 
         #region data
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        internal readonly ArmatureTemplate _Template;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly IReadOnlyList<NodeTemplate> _NodeTemplates;
@@ -105,7 +107,7 @@ namespace SharpGLTF.Runtime
         /// </summary>
         public void SetPoseTransforms()
         {
-            foreach (var n in _NodeInstances) n.SetPoseTransform();
+            _Template.ApplyAnimationTo(this, -1, 0);
         }
 
         /// <summary>
@@ -116,42 +118,13 @@ namespace SharpGLTF.Runtime
         /// <param name="looped">True to use the animation as a looped animation.</param>
         public void SetAnimationFrame(int trackLogicalIndex, float time, bool looped = true)
         {
-            if (looped)
-            {
-                var duration = AnimationTracks[trackLogicalIndex].Duration;
-                if (duration > 0) time %= duration;
-            }
-
-            foreach (var n in _NodeInstances) n.SetAnimationFrame(trackLogicalIndex, time);
+            _Template.ApplyAnimationTo(this, trackLogicalIndex, time, looped);
         }
 
         public void SetAnimationFrame(params (int TrackIdx, float Time, float Weight)[] blended)
         {
-            SetAnimationFrame(_NodeInstances, blended);
-        }
-
-        public static void SetAnimationFrame(IEnumerable<NodeInstance> nodes, params (int TrackIdx, float Time, float Weight)[] blended)
-        {
-            Guard.NotNull(nodes, nameof(nodes));
-            Guard.NotNull(blended, nameof(blended));
-
-            Span<int> tracks = stackalloc int[blended.Length];
-            Span<float> times = stackalloc float[blended.Length];
-            Span<float> weights = stackalloc float[blended.Length];
-
-            float w = blended.Sum(item => item.Weight);
-
-            w = w == 0 ? 1 : 1 / w;
-
-            for (int i = 0; i < blended.Length; ++i)
-            {
-                tracks[i] = blended[i].TrackIdx;
-                times[i] = blended[i].Time;
-                weights[i] = blended[i].Weight * w;
-            }
-
-            foreach (var n in nodes) n.SetAnimationFrame(tracks, times, weights);
-        }
+            _Template.ApplyAnimationTo(this, blended);
+        }        
 
         #endregion
     }

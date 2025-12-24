@@ -83,6 +83,17 @@ namespace SharpGLTF.Diagnostics
         protected abstract T GetTangent(T a, T b);
     }
 
+    sealed class _CurveBuilderDebugProxyBoolean : _CurveBuilderDebugProxy<Boolean>
+    {
+        public _CurveBuilderDebugProxyBoolean(Animations.CurveBuilder<Boolean> curve)
+            : base(curve) { }
+
+        protected override Boolean GetTangent(Boolean a, Boolean b)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
     sealed class _CurveBuilderDebugProxyVector3 : _CurveBuilderDebugProxy<Vector3>
     {
         public _CurveBuilderDebugProxyVector3(Animations.CurveBuilder<Vector3> curve)

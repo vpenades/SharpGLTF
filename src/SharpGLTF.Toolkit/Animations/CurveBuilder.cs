@@ -105,6 +105,8 @@ namespace SharpGLTF.Animations
 
         public void SetPoint(float offset, T value, bool isLinear = true)
         {
+            if (typeof(T) == typeof(bool) && isLinear) throw new ArgumentException("must be false for Boolean types", nameof(isLinear));
+
             value = CloneValue(value);
 
             if (_Keys.TryGetValue(offset, out _CurveNode<T> existing))

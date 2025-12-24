@@ -6,8 +6,6 @@ using System.Text;
 
 using NUnit.Framework;
 
-using Plotly;
-
 namespace SharpGLTF.Runtime
 {
     [Category("Core.Runtime")]

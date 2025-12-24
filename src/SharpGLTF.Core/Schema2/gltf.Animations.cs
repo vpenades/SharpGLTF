@@ -295,6 +295,23 @@ namespace SharpGLTF.Schema2
                 .SetSampler(sampler);
         }
 
+        public void CreateVisibilityChannel(Node node, IReadOnlyDictionary<Single, Boolean> keyframes)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.MustShareLogicalParent(this, node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var sampler = this._CreateSampler(AnimationInterpolationMode.STEP);
+
+            sampler.SetKeys(keyframes);
+
+            var ext = node.GetExtension<_NodeVisibility>();
+
+            var pointerPath = $"/nodes/{node.LogicalIndex}/extensions/{_NodeVisibility.SCHEMANAME}/visible";
+
+            this._UseChannel(pointerPath).SetSampler(sampler);
+        }
+
         #endregion
 
         #region Validation

@@ -655,7 +655,7 @@ namespace SharpGLTF.Scenes
 
             _Nodes[srcNode] = dstNode;
 
-            if (srcNode.HasAnimations)
+            if (srcNode.HasTransformAnimations)
             {
                 dstNode.LocalTransform = srcNode.LocalTransform.GetDecomposed();
 
@@ -667,6 +667,12 @@ namespace SharpGLTF.Scenes
             else
             {
                 dstNode.LocalTransform = srcNode.LocalTransform;
+            }
+
+            dstNode.SetVisibility(srcNode.IsVisible);
+            if (srcNode.Visibility != null)
+            {
+                foreach (var v in srcNode.Visibility.Tracks) dstNode.WithVisibilityAnimation(v.Key, v.Value);
             }
 
             foreach (var c in srcNode.VisualChildren) CreateArmature(c, () => dstNode.CreateNode());
@@ -703,9 +709,7 @@ namespace SharpGLTF.Scenes
         public void AddScene(Scene dstScene, SceneBuilder srcScene)
         {
             _Nodes.Clear();
-            AddArmatureResources(new[] { srcScene }, () => dstScene.CreateNode());
-
-            
+            AddArmatureResources(new[] { srcScene }, () => dstScene.CreateNode());            
 
             AddMeshes(dstScene, srcScene);
             AddLightsAndCameras(dstScene, srcScene);

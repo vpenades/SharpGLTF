@@ -276,5 +276,31 @@ namespace SharpGLTF
             var c = sampler.GetPoint(2);
         }
 
+        [Test]
+        public void TestBooleanCurve()
+        {
+            var anim = new[]
+            {
+                (2.1f, true),
+                (2.2f, false),
+                (3.2f, true),
+                (3.3f, false),
+                (4.0f, true),
+                (4.1f, false),
+                (5.0f, true),
+            };            
+
+            var r0 = Animations.CurveSampler.SplitByTime(anim).ToArray();
+            Assert.That(r0, Has.Length.EqualTo(6));            
+
+            var sampler = Animations.CurveSampler.CreateSampler(anim);
+            Assert.That(sampler.GetPoint(0), Is.EqualTo(true));
+            Assert.That(sampler.GetPoint(2.1f), Is.EqualTo(true));
+            Assert.That(sampler.GetPoint(2.12f), Is.EqualTo(true));
+            Assert.That(sampler.GetPoint(2.18f), Is.EqualTo(true));
+            Assert.That(sampler.GetPoint(2.22f), Is.EqualTo(false));
+            Assert.That(sampler.GetPoint(6), Is.EqualTo(true));
+        }
+
     }
 }

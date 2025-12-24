@@ -105,4 +105,62 @@ namespace SharpGLTF.Memory
 
         bool ICollection<T>.Remove(T item) { throw new NotSupportedException(); }
     }
+
+    readonly struct BooleanArrayOverIntegerArray : IAccessorArray<Boolean>
+    {
+        public BooleanArrayOverIntegerArray(IAccessorArray<uint> source) : this()
+        {
+            _Source = source;
+        }
+
+        private readonly IAccessorArray<uint> _Source;        
+
+        public bool this[int index]
+        {
+            get => _Source[index] != 0;
+            set => _Source[index] = value ? (uint)1 : 0;
+        }
+
+        public bool IsReadOnly => true;
+
+        public int Count => _Source.Count;
+
+        public bool Contains(Boolean item) { return IndexOf(item) >= 0; }
+
+        public int IndexOf(Boolean item)
+        {
+            var value = item ? (uint)1 : 0;
+            return _Source.IndexOf(value);
+        }        
+
+        public void CopyTo(Boolean[] array, int arrayIndex)
+        {
+            for (int i = 0; i < Count; ++i)
+            {
+                array[i + arrayIndex] = this[i];
+            }
+        }
+
+        public IEnumerator<Boolean> GetEnumerator()
+        {
+            var c = _Source.Count;
+            for (int i = 0; i < c; ++i) yield return this[i];
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            var c = _Source.Count;
+            for (int i = 0; i < c; ++i) yield return this[i];
+        }
+
+        void IList<Boolean>.Insert(int index, Boolean item) { throw new NotSupportedException(); }
+
+        void IList<Boolean>.RemoveAt(int index) { throw new NotSupportedException(); }
+
+        void ICollection<Boolean>.Add(Boolean item) { throw new NotSupportedException(); }
+
+        void ICollection<Boolean>.Clear() { throw new NotSupportedException(); }
+
+        bool ICollection<Boolean>.Remove(Boolean item) { throw new NotSupportedException(); }
+    }
 }

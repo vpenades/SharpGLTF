@@ -22,6 +22,7 @@ namespace SharpGLTF.Animations
         public static CurveBuilder<T> CreateCurveBuilder<T>()
             where T : struct
         {
+            if (typeof(T) == typeof(Boolean)) return new BooleanCurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(Vector3)) return new Vector3CurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(Quaternion)) return new QuaternionCurveBuilder() as CurveBuilder<T>;
             if (typeof(T) == typeof(SPARSE)) return new SparseCurveBuilder() as CurveBuilder<T>;
@@ -33,10 +34,21 @@ namespace SharpGLTF.Animations
         public static CurveBuilder<T> CreateCurveBuilder<T>(ICurveSampler<T> curve)
             where T : struct
         {
-            if (curve is Vector3CurveBuilder v3cb) return v3cb.Clone() as CurveBuilder<T>;
-            if (curve is QuaternionCurveBuilder q4cb) return q4cb.Clone() as CurveBuilder<T>;
-            if (curve is SparseCurveBuilder sscb) return sscb.Clone() as CurveBuilder<T>;
-            if (curve is SegmentCurveBuilder xscb) return xscb.Clone() as CurveBuilder<T>;
+            switch (curve)
+            {
+                case BooleanCurveBuilder typedCurve: return typedCurve.Clone() as CurveBuilder<T>;
+                case Vector3CurveBuilder typedCurve: return typedCurve.Clone() as CurveBuilder<T>;
+                case QuaternionCurveBuilder typedCurve: return typedCurve.Clone() as CurveBuilder<T>;
+                case SparseCurveBuilder typedCurve: return typedCurve.Clone() as CurveBuilder<T>;
+                case SegmentCurveBuilder typedCurve: return typedCurve.Clone() as CurveBuilder<T>;
+            }
+
+            if (typeof(T) == typeof(Boolean))
+            {
+                var cb = new BooleanCurveBuilder();
+                cb.SetCurve(curve as ICurveSampler<Boolean>);
+                return cb as CurveBuilder<T>;
+            }
 
             if (typeof(T) == typeof(Vector3))
             {
@@ -68,6 +80,52 @@ namespace SharpGLTF.Animations
 
             throw new InvalidOperationException($"{typeof(T).Name} not supported.");
         }
+    }
+
+    [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxyBoolean))]
+    sealed class BooleanCurveBuilder : CurveBuilder<Boolean>, ICurveSampler<Boolean>
+    {
+        #region lifecycle
+        public BooleanCurveBuilder() { }
+
+        private BooleanCurveBuilder(BooleanCurveBuilder other)
+            : base(other) { }
+
+        public override CurveBuilder<Boolean> Clone() { return new BooleanCurveBuilder(this); }
+
+        #endregion
+
+        #region API
+
+        protected override bool AreEqual(Boolean left, Boolean right) { return left == right; }
+        protected override Boolean CloneValue(Boolean value) { return value; }
+        protected override Boolean CreateValue(IReadOnlyList<float> values)
+        {
+            Guard.NotNull(values, nameof(values));
+            Guard.IsTrue(values.Count == 1, nameof(values));
+            return values[0] != 0;
+        }
+
+        protected override Boolean GetTangent(Boolean fromValue, Boolean toValue)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override Boolean GetPoint(Single offset)
+        {
+            var sample = FindSample(offset);
+
+            switch (sample.A.Degree)
+            {
+                case 0: return sample.A.Point;
+                case 1: return sample.Amount < 0.5f ? sample.A.Point : sample.B.Point;
+                case 3: return sample.Amount < 0.5f ? sample.A.Point : sample.B.Point;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        #endregion
     }
 
     [System.Diagnostics.DebuggerTypeProxy(typeof(Diagnostics._CurveBuilderDebugProxyVector3))]

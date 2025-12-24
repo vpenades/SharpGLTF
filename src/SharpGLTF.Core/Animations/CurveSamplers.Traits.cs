@@ -18,6 +18,16 @@ namespace SharpGLTF.Animations
 
     static class SamplerTraits
     {
+        sealed class _Boolean : ISamplerTraits<Boolean>
+        {
+            public Boolean Clone(Boolean value) { return value; }
+            public Boolean InterpolateLinear(Boolean left, Boolean right, float amount) { return amount < 0.5f ? left :right; }
+            public Boolean InterpolateCubic(Boolean start, Boolean outgoingTangent, Boolean end, Boolean incomingTangent, float amount)
+            {
+                return amount < 0.5f ? start : end;
+            }
+        }
+
         sealed class _Scalar : ISamplerTraits<Single>
         {
             public Single Clone(Single value) { return value; }
@@ -110,6 +120,7 @@ namespace SharpGLTF.Animations
             }
         }
 
+        public static readonly ISamplerTraits<Boolean> Boolean = new _Boolean();
         public static readonly ISamplerTraits<Single> Scalar = new _Scalar();
         public static readonly ISamplerTraits<Vector2> Vector2 = new _Vector2();
         public static readonly ISamplerTraits<Vector3> Vector3 = new _Vector3();

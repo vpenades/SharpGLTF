@@ -6,6 +6,8 @@ using System.Text;
 
 using NUnit.Framework;
 
+using SharpGLTF.Scenes;
+
 namespace SharpGLTF.Animations
 {
     [Category("Toolkit.Animations")]
@@ -162,6 +164,21 @@ namespace SharpGLTF.Animations
                 .WithLineType(Plotting.LineType.Continuous)
                 .AttachToCurrentTest("plot.html");
         }
+
+        [Test]
+        public void CreateVisibilityCurve1()
+        {
+            // Create a Vector3 curve
+
+            var curve = CurveFactory.CreateCurveBuilder<Boolean>();
+
+            curve.WithPoint(0, false, false);
+            curve.WithPoint(1, true, false);
+            curve.WithPoint(2, false, false);
+
+            var _0_6 = curve.GetPoint(0.6f);
+            Assert.That(_0_6, Is.EqualTo(false));
+        }
     }
 
     [Category("Toolkit.Animations")]
@@ -172,25 +189,54 @@ namespace SharpGLTF.Animations
         {
             var node = new Scenes.NodeBuilder("someNode");
 
-            var tb = node.UseTranslation().UseTrackBuilder("track1");
+            // define translation curve
+            var tb_trans = node.UseTranslation().UseTrackBuilder("track1");
+            tb_trans.SetPoint(0, new Vector3(1,2,3));
 
-            tb.SetPoint(0, new Vector3(1,2,3));
+            // define visibility curve
+            var tb_vis = node.UseVisibility().UseTrackBuilder("track1");
+            tb_vis.SetPoint(0, true, false);
+            tb_vis.SetPoint(2, false,false);
+            tb_vis.SetPoint(3, true, false);
+
+            // create gltf scene
 
             var scene = new Scenes.SceneBuilder();
-            scene.AddNode(node);            
+            scene.AddNode(node);
 
-            var glTF = scene.ToGltf2();
+            var gltfSettings = new SceneBuilderSchema2Settings();            
+            var glTF = scene.ToGltf2(gltfSettings);
+
+            var rootNode = glTF.DefaultScene.VisualChildren.FirstOrDefault();
+
+            var rootNodeSamplers = rootNode.GetCurveSamplers(glTF.LogicalAnimations[0]);
+
+            var rootNodeTrans = rootNodeSamplers.Translation.CreateCurveSampler().GetPoint(2.5f);
+            Assert.That(rootNodeTrans, Is.EqualTo(new Vector3(1, 2, 3)));
+
+            var rootNodeVis = rootNodeSamplers.Visibility.CreateCurveSampler().GetPoint(2.5f);
+            Assert.That(rootNodeVis, Is.EqualTo(false));
+
+            // create runtime template
 
             var options = new Runtime.RuntimeOptions { IsolateMemory = true };
-            var runtime = Runtime.SceneTemplate.Create(glTF.DefaultScene, options);
-            var instance = runtime.CreateInstance();
+            var template = Runtime.SceneTemplate.Create(glTF.DefaultScene, options);
+
+            // create runtime instance       
+
+            var instance = template.CreateInstance();
 
             var instanceNode = instance.Armature.LogicalNodes.First(n => n.Name == "someNode");
 
-            instanceNode.SetAnimationFrame(0, 7);
+            instance.Armature.SetAnimationFrame(0, 0);
             var nodeMatrix = instanceNode.LocalMatrix;
-
             Assert.That(nodeMatrix.Translation, Is.EqualTo(new Vector3(1, 2, 3)));
+            Assert.That(instanceNode.IsVisible, Is.EqualTo(true));
+
+            instance.Armature.SetAnimationFrame(0, 2.5f);
+            nodeMatrix = instanceNode.LocalMatrix;
+            Assert.That(nodeMatrix.Translation, Is.EqualTo(new Vector3(1, 2, 3)));
+            Assert.That(instanceNode.IsVisible, Is.EqualTo(false));
         }
 
     }

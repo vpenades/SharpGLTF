@@ -421,6 +421,15 @@ namespace SharpGLTF.Animations
         private static bool _HasZero<T>(this IEnumerable<T> collection) { return collection == null || !collection.Any(); }
         private static bool _HasOne<T>(this IEnumerable<T> collection) { return !collection.Skip(1).Any(); }
 
+        public static ICurveSampler<Boolean> CreateSampler(this IEnumerable<(Single, Boolean)> collection, bool optimize = false)
+        {
+            if (collection._HasZero()) return null;
+            if (collection._HasOne()) return FixedSampler<Boolean>.Create(collection);
+
+            var sampler = new StepSampler<Boolean>(collection, SamplerTraits.Boolean);
+            return optimize ? sampler.ToFastSampler() : sampler;
+        }
+
         public static ICurveSampler<Single> CreateSampler(this IEnumerable<(Single, Single)> collection, bool isLinear = true, bool optimize = false)
         {
             if (collection._HasZero()) return null;

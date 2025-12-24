@@ -62,6 +62,17 @@ namespace SharpGLTF.Memory
             }
         }
 
+        public static void _CopyTo(this IEnumerable<Boolean> src, IList<UInt32> dst, int dstOffset = 0)
+        {
+            using (var ptr = src.GetEnumerator())
+            {
+                while (dstOffset < dst.Count && ptr.MoveNext())
+                {
+                    dst[dstOffset++] = (Byte)(ptr.Current ? 1 : 0);
+                }
+            }
+        }
+
         public static void _CopyTo<T>(this IEnumerable<T> src, IList<T> dst, int dstOffset = 0)
         {
             using (var ptr = src.GetEnumerator())

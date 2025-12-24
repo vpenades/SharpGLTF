@@ -161,6 +161,8 @@ namespace SharpGLTF.Animations
 
         private static T _Convert(float[] elements)
         {
+            if (typeof(T) == typeof(Boolean)) return (T)(Object)(elements[0] != 0);
+
             if (typeof(T) == typeof(Vector3)) return (T)(Object)new Vector3(elements[0], elements[1], elements[2]);
             if (typeof(T) == typeof(Vector4)) return (T)(Object)new Vector4(elements[0], elements[1], elements[2], elements[3]);
             if (typeof(T) == typeof(Quaternion)) return (T)(Object)new Quaternion(elements[0], elements[1], elements[2], elements[3]);

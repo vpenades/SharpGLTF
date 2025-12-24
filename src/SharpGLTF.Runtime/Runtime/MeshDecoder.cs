@@ -327,6 +327,11 @@ namespace SharpGLTF.Runtime
 
             var decodedMeshes = scene.LogicalParent.LogicalMeshes.Decode();
             var sceneTemplate = SceneTemplate.Create(scene);
+            return EvaluateBoundingSphere(sceneTemplate, decodedMeshes, samplingTimeStep);
+        }
+
+        public static (XYZ Center, float Radius) EvaluateBoundingSphere(this SceneTemplate sceneTemplate, IMeshDecoder<Schema2.Material>[] decodedMeshes, float samplingTimeStep = 1.0f)
+        {
             var sceneInstance = sceneTemplate.CreateInstance();
             var armatureInst = sceneInstance.Armature;
 

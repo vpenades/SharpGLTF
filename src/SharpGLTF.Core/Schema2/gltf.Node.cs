@@ -791,6 +791,10 @@ namespace SharpGLTF.Schema2
             _TranslationSampler = null;
             _MorphSampler = null;
 
+            _VisibilitySampler = null;
+
+            var visPath = $"/nodes/{node.LogicalIndex}/extensions/KHR_node_visibility/visible";
+
             foreach (var c in animation.FindChannels(node))
             {
                 switch (c.TargetNodePath)
@@ -799,7 +803,12 @@ namespace SharpGLTF.Schema2
                     case PropertyPath.rotation: _RotationSampler = c._GetSampler(); break;
                     case PropertyPath.translation: _TranslationSampler = c._GetSampler(); break;
                     case PropertyPath.weights: _MorphSampler = c._GetSampler(); break;
-                }
+                    case PropertyPath.pointer:
+                        {
+                            if (c.TargetPointerPath == visPath) _VisibilitySampler = c._GetSampler();
+                            break;
+                        }
+                }                
             }
 
             // if we have morphing animation, we might require to check this...
@@ -818,6 +827,8 @@ namespace SharpGLTF.Schema2
         private readonly AnimationSampler _RotationSampler;
         private readonly AnimationSampler _TranslationSampler;
         private readonly AnimationSampler _MorphSampler;
+
+        private readonly AnimationSampler _VisibilitySampler;
 
         /// <inheritdoc />
         public override int GetHashCode()
@@ -882,6 +893,9 @@ namespace SharpGLTF.Schema2
         /// </summary>
         [Obsolete("Use GetMorphingSampler<T>()", true)]
         public IAnimationSampler<Transforms.SparseWeight8> MorphingSparse => GetMorphingSampler<Transforms.SparseWeight8>();
+
+
+        public IAnimationSampler<Boolean> Visibility => _VisibilitySampler;
 
         #endregion
 

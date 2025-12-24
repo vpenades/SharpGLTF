@@ -30,7 +30,7 @@ namespace SharpGLTF.Runtime
         private readonly NodeInstance _Parent;
 
         private XFORM _LocalMatrix;
-        private XFORM? _WorldMatrix;
+        private XFORM? _WorldMatrix;        
 
         private SparseWeight8 _MorphWeights;
 
@@ -42,7 +42,7 @@ namespace SharpGLTF.Runtime
 
         public Object Extras => _Template.Extras;
 
-        public NodeInstance VisualParent => _Parent;
+        public NodeInstance VisualParent => _Parent;        
 
         public SparseWeight8 MorphWeights
         {
@@ -71,6 +71,8 @@ namespace SharpGLTF.Runtime
             get => _GetModelMatrix();
             set => _SetModelMatrix(value);
         }
+
+        public Boolean IsVisible { get; set; }
 
         /// <summary>
         /// Gets a value indicating whether any of the transforms down the scene tree has been modified.
@@ -105,21 +107,13 @@ namespace SharpGLTF.Runtime
             XFORM.Invert(_Parent._GetModelMatrix(), out XFORM ipwm);
 
             LocalMatrix = XFORM.Multiply(xform, ipwm);
-        }
-
-        public void SetPoseTransform() { SetAnimationFrame(-1, 0); }
+        }        
 
         public void SetAnimationFrame(int trackLogicalIndex, float time)
         {
             this.MorphWeights = _Template.GetMorphWeights(trackLogicalIndex, time);
-            this.LocalMatrix = _Template.GetLocalMatrix(trackLogicalIndex, time);
-        }
-
-        public void SetAnimationFrame(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
-        {
-            this.MorphWeights = _Template.GetMorphWeights(track, time, weight);
-            this.LocalMatrix = _Template.GetLocalMatrix(track, time, weight);
-        }
+            this.LocalMatrix = _Template.GetLocalMatrix(trackLogicalIndex, time);            
+        }        
 
         #endregion
     }

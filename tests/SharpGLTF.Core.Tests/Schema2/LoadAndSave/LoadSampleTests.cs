@@ -340,7 +340,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 instance.Armature.SetAnimationFrame(anim.LogicalIndex, t);
 
-                var nodexform = instance.GetDrawableInstance(0).Transform;
+                var nodexform = instance.AsEnumerable().First().Transform;
 
                 TestContext.Out.WriteLine($"Animation at {t}");
 

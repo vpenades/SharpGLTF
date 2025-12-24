@@ -11,8 +11,10 @@ namespace SharpGLTF.Animations
     /// <typeparam name="T">The value sampled at any offset</typeparam>
     readonly struct FastCurveSampler<T> : ICurveSampler<T>
     {
+        #region lifecycle
+
         /// <summary>
-        /// Creates a new, read only <see cref="ICurveSampler{T}"/> that has been optimized for fast sampling.
+        /// Creates a new, read only <see cref="ICurveSampler{T}"/> that has been optimized for fast sampling
         /// </summary>
         /// <remarks>
         /// Sampling a raw curve with a large number of keys can be underperformant. This code splits the keys into 1 second
@@ -24,8 +26,15 @@ namespace SharpGLTF.Animations
         /// <returns>The new, optimized curve sampler.</returns>
         public static ICurveSampler<T> CreateFrom<TKey>(IEnumerable<(float, TKey)> sequence, Func<(float, TKey)[], ICurveSampler<T>> chunkFactory)
         {
-            // not enough keys, or not worth optimizing it.
-            if (!sequence.Skip(3).Any()) return null;
+            if (sequence == null) throw new ArgumentNullException(nameof(sequence));
+            if (chunkFactory == null) throw new ArgumentNullException(nameof(chunkFactory));
+
+            #pragma warning disable CA1851            
+            if (!sequence.Skip(3).Any()) // not enough keys, or not worth optimizing it, use a standard sampler
+            {
+                return chunkFactory.Invoke(sequence.ToArray());
+            }
+            #pragma warning restore CA1851
 
             var split = sequence
                 .SplitByTime()
@@ -40,8 +49,16 @@ namespace SharpGLTF.Animations
             _Samplers = samplers.ToArray();
         }
 
+        #endregion
+
+        #region data
+
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.RootHidden)]
         private readonly ICurveSampler<T>[] _Samplers;
+
+        #endregion
+
+        #region API
 
         public T GetPoint(float offset)
         {
@@ -53,5 +70,7 @@ namespace SharpGLTF.Animations
 
             return _Samplers[index].GetPoint(offset);
         }
+
+        #endregion
     }
 }

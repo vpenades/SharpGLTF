@@ -323,7 +323,7 @@ namespace SharpGLTF.Scenes
                 if (node.Scale != null) return true;
                 if (node.Rotation != null) return true;
                 if (node.Translation != null) return true;
-                if (node.HasAnimations) return true;
+                if (node.HasTransformAnimations) return true;
                 return false;
             }
 

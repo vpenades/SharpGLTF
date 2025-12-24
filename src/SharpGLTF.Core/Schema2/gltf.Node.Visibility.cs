@@ -7,6 +7,8 @@ namespace SharpGLTF.Schema2
 {
     partial class _NodeVisibility
     {
+        // https://github.com/KhronosGroup/glTF/issues/1314
+
         #region lifecycle
         internal _NodeVisibility(Node node)
         {

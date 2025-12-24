@@ -129,6 +129,25 @@ namespace SharpGLTF.Schema2
             return node;
         }
 
+        public static Node WithVisibilityAnimation(this Node node, string animationName, Animations.ICurveSampler<bool> sampler)
+        {
+            Guard.NotNull(node, nameof(node));
+
+            if (sampler is Animations.IConvertibleCurve<bool> curve)
+            {
+                var animation = node.LogicalParent.UseAnimation(animationName);
+
+                var degree = curve.MaxDegree;
+                if (degree == 0) animation.CreateVisibilityChannel(node, curve.ToStepCurve());                
+            }
+            else
+            {
+                throw new ArgumentException("Must implement IConvertibleCurve<bool>", nameof(sampler));
+            }
+
+            return node;
+        }
+
         public static Node WithScaleAnimation(this Node node, string animationName, params (Single Key, Vector3 Value)[] keyframes)
         {
             Guard.NotNull(node, nameof(node));
@@ -197,6 +216,20 @@ namespace SharpGLTF.Schema2
             var animation = root.UseAnimation(animationName);
 
             animation.CreateTranslationChannel(node, keyframes);
+
+            return node;
+        }
+
+        public static Node WithVisibilityAnimation(this Node node, string animationName, IReadOnlyDictionary<Single, bool> keyframes)
+        {
+            Guard.NotNull(node, nameof(node));
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var root = node.LogicalParent;
+
+            var animation = root.UseAnimation(animationName);
+
+            animation.CreateVisibilityChannel(node, keyframes);
 
             return node;
         }

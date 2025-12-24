@@ -67,6 +67,7 @@ namespace SharpGLTF.Schema2
     /// </remarks>
     sealed partial class AnimationSampler :
         IChildOfList<Animation>,
+        IAnimationSampler<Boolean>,
         IAnimationSampler<Single>,
         IAnimationSampler<Vector2>,
         IAnimationSampler<Vector3>,
@@ -148,7 +149,29 @@ namespace SharpGLTF.Schema2
             return accessor;
         }
 
-        private Accessor _CreateOutputAccessor(ROLIST output)
+        private Accessor _CreateOutputAccessor(IReadOnlyList<Boolean> output)
+        {
+            Guard.NotNull(output, nameof(output));
+            Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
+
+            var root = LogicalParent.LogicalParent;
+
+            var buffer = root.CreateBufferView(output.Count * 1 * 1);
+
+            System.Diagnostics.Debug.Assert(buffer.ByteStride == 0);
+
+            var accessor = root.CreateAccessor("Animation.Output");
+
+            accessor.SetData(buffer, 0, output.Count, AttributeFormat.Byte1);
+
+            Memory.EncodedArrayUtils._CopyTo(output, accessor.AsArrayOf<UInt32>());
+
+            accessor.UpdateBounds();
+
+            return accessor;
+        }
+
+        private Accessor _CreateOutputAccessor(IReadOnlyList<Single> output)
         {
             Guard.NotNull(output, nameof(output));
             Guard.MustBeGreaterThan(output.Count, 0, nameof(output.Count));
@@ -344,6 +367,15 @@ namespace SharpGLTF.Schema2
             return (keys, vals);
         }
 
+        internal void SetKeys(IReadOnlyDictionary<Single, Boolean> keyframes)
+        {
+            Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
+
+            var (keys, values) = _Split(keyframes);
+            _input = this._CreateInputAccessor(keys).LogicalIndex;
+            _output = this._CreateOutputAccessor(values).LogicalIndex;
+        }
+
         internal void SetKeys(IReadOnlyDictionary<Single, Single> keyframes)
         {
             Guard.NotNullOrEmpty(keyframes, nameof(keyframes));
@@ -534,6 +566,20 @@ namespace SharpGLTF.Schema2
         }
 
         /// <inheritdoc/>
+        IEnumerable<(Single, Boolean)> IAnimationSampler<Boolean>.GetLinearKeys()
+        {
+            Guard.IsTrue(this.InterpolationMode == AnimationInterpolationMode.STEP, nameof(InterpolationMode));
+
+            var keys = this.Input.AsScalarArray();
+            var frames = this.Output.AsIndexArray();
+            var boolFrames = new BooleanArrayOverIntegerArray(frames);
+            System.Diagnostics.Debug.Assert(frames.Count == boolFrames.Count);
+            System.Diagnostics.Debug.Assert(frames.Count() == boolFrames.Count());
+
+            return keys.Zip(boolFrames, (key, val) => (key, val));
+        }
+
+        /// <inheritdoc/>
         IEnumerable<(Single, Single)> IAnimationSampler<Single>.GetLinearKeys()
         {
             Guard.IsFalse(this.InterpolationMode == AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -628,6 +674,12 @@ namespace SharpGLTF.Schema2
         }
 
         /// <inheritdoc/>
+        IEnumerable<(Single, (Boolean, Boolean, Boolean))> IAnimationSampler<Boolean>.GetCubicKeys()
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <inheritdoc/>
         IEnumerable<(Single, (Single, Single, Single))> IAnimationSampler<Single>.GetCubicKeys()
         {
             Guard.IsFalse(this.InterpolationMode != AnimationInterpolationMode.CUBICSPLINE, nameof(InterpolationMode));
@@ -718,6 +770,19 @@ namespace SharpGLTF.Schema2
             var frames = _GroupByTangentValueTangent(this.Output.AsMultiArray(dimensions));
 
             return keys.Zip(frames, (key, val) => (key, SPARSE8.AsTuple(val.TangentIn, val.Value, val.TangentOut)) );
+        }
+
+        /// <inheritdoc/>
+        ICurveSampler<Boolean> IAnimationSampler<Boolean>.CreateCurveSampler(bool isolateMemory)
+        {
+            var xsampler = this as IAnimationSampler<Boolean>;
+
+            switch (this.InterpolationMode)
+            {
+                case AnimationInterpolationMode.STEP: return xsampler.GetLinearKeys().CreateSampler(isolateMemory);
+            }
+
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc/>

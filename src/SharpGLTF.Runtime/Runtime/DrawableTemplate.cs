@@ -21,8 +21,9 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        protected DrawableTemplate(Schema2.Node node)
+        protected DrawableTemplate(Schema2.Node node, int nodeIndex)
         {
+            _LogicalNodeIndex = nodeIndex;
             _LogicalMeshIndex = node.Mesh.LogicalIndex;
 
             _NodeName = node.Name;
@@ -36,6 +37,9 @@ namespace SharpGLTF.Runtime
         private readonly String _NodeName;
 
         [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
+        private readonly int _LogicalNodeIndex;
+
+        [System.Diagnostics.DebuggerBrowsable(System.Diagnostics.DebuggerBrowsableState.Never)]
         private readonly int _LogicalMeshIndex;
 
         #endregion
@@ -43,6 +47,11 @@ namespace SharpGLTF.Runtime
         #region properties
 
         public String NodeName => _NodeName;
+
+        /// <summary>
+        /// Gets the index of a <see cref="Schema2.Node"/> in <see cref="Schema2.ModelRoot.LogicalNodes"/>
+        /// </summary>
+        public int LogicalNodeIndex => _LogicalNodeIndex;
 
         /// <summary>
         /// Gets the index of a <see cref="Schema2.Mesh"/> in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
@@ -68,7 +77,7 @@ namespace SharpGLTF.Runtime
         #region lifecycle
 
         internal RigidDrawableTemplate(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
-            : base(node)
+            : base(node, indexFunc(node))
         {
             _NodeIndex = indexFunc(node);
         }
@@ -151,7 +160,7 @@ namespace SharpGLTF.Runtime
         #region lifecycle
 
         internal SkinnedDrawableTemplate(Schema2.Node node, Func<Schema2.Node, int> indexFunc)
-            : base(node)
+            : base(node, indexFunc(node))
         {
             var skin = node.Skin;
 

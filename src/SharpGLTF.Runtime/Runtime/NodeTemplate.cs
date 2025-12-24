@@ -16,6 +16,8 @@ namespace SharpGLTF.Runtime
 
         internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, RuntimeOptions options)
         {
+            var isolateMemory = options?.IsolateMemory ?? false;
+
             _LogicalSourceIndex = srcNode.LogicalIndex;
 
             _ParentIndex = parentIdx;
@@ -24,19 +26,14 @@ namespace SharpGLTF.Runtime
             Name = srcNode.Name;
             Extras = RuntimeOptions.ConvertExtras(srcNode, options);
 
-            _LocalTransform = srcNode.LocalTransform;
+            _IsVisible = srcNode.TryGetVisibility(out var visibility) ? visibility : null;
+            _Visibility = new AnimatableProperty<bool>(_IsVisible ?? true);
 
-            if (_LocalTransform.TryDecompose(out TRANSFORM lxform))
-            {
-                _Scale = new AnimatableProperty<Vector3>(lxform.Scale);
-                _Rotation = new AnimatableProperty<Quaternion>(lxform.Rotation);
-                _Translation = new AnimatableProperty<Vector3>(lxform.Translation);
-            }
+            _LocalTransform = srcNode.LocalTransform;
+            _LocalTransformAnimation = new _NodeTemplateTransforms(srcNode);            
 
             var mw = Transforms.SparseWeight8.Create(srcNode.MorphWeights);
-            _Morphing = new AnimatableProperty<Transforms.SparseWeight8>(mw);
-
-            var isolateMemory = options?.IsolateMemory ?? false;
+            _Morphing = new AnimatableProperty<Transforms.SparseWeight8>(mw);            
 
             foreach (var anim in srcNode.LogicalParent.LogicalAnimations)
             {
@@ -44,20 +41,16 @@ namespace SharpGLTF.Runtime
 
                 var curves = srcNode.GetCurveSamplers(anim);
 
-                _Scale.SetCurve(index, curves.Scale?.CreateCurveSampler(isolateMemory));
-                _Rotation.SetCurve(index, curves.Rotation?.CreateCurveSampler(isolateMemory));
-                _Translation.SetCurve(index, curves.Translation?.CreateCurveSampler(isolateMemory));
+                _LocalTransformAnimation.SetCurves(curves, index, isolateMemory);
+
                 _Morphing.SetCurve(index, curves.GetMorphingSampler<Transforms.SparseWeight8>()?.CreateCurveSampler(isolateMemory));
-            }
 
-            _UseAnimatedTransforms = _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;
+                _Visibility.SetCurve(index, curves.Visibility?.CreateCurveSampler(isolateMemory));
+            }            
 
-            if (!_UseAnimatedTransforms)
-            {
-                _Scale = null;
-                _Rotation = null;
-                _Translation = null;
-            }
+            if (!_LocalTransformAnimation.IsAnimated) _LocalTransformAnimation = null;
+
+            if (!_Visibility.IsAnimated) _Visibility = null;
         }
 
         #endregion
@@ -76,12 +69,12 @@ namespace SharpGLTF.Runtime
         private readonly int[] _ChildIndices;
 
         private readonly TRANSFORM _LocalTransform;
+        private readonly _NodeTemplateTransforms _LocalTransformAnimation;
 
-        private readonly bool _UseAnimatedTransforms;
-        private readonly AnimatableProperty<Vector3> _Scale;
-        private readonly AnimatableProperty<Quaternion> _Rotation;
-        private readonly AnimatableProperty<Vector3> _Translation;
         private readonly AnimatableProperty<Transforms.SparseWeight8> _Morphing;
+
+        private readonly Boolean? _IsVisible;
+        private readonly AnimatableProperty<Boolean> _Visibility;
 
         #endregion
 
@@ -135,18 +128,14 @@ namespace SharpGLTF.Runtime
 
         public TRANSFORM GetLocalTransform(int trackLogicalIndex, float time)
         {
-            if (!_UseAnimatedTransforms || trackLogicalIndex < 0) return _LocalTransform;
-
-            var s = _Scale?.GetValueAt(trackLogicalIndex, time);
-            var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
-            var t = _Translation?.GetValueAt(trackLogicalIndex, time);
-
-            return new TRANSFORM(s, r, t);
+            return _LocalTransformAnimation == null || trackLogicalIndex < 0
+                ? _LocalTransform
+                : _LocalTransformAnimation.GetTransform(trackLogicalIndex, time);
         }
 
         public TRANSFORM GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
-            if (!_UseAnimatedTransforms) return _LocalTransform;
+            if (_LocalTransformAnimation == null) return _LocalTransform;
 
             Span<TRANSFORM> xforms = stackalloc TRANSFORM[track.Length];
 
@@ -160,16 +149,96 @@ namespace SharpGLTF.Runtime
 
         public Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
         {
-            if (!_UseAnimatedTransforms || trackLogicalIndex < 0) return _LocalTransform.Matrix;
-
-            return GetLocalTransform(trackLogicalIndex, time).Matrix;
+            return _LocalTransformAnimation == null || trackLogicalIndex < 0
+                ? _LocalTransform.Matrix
+                : GetLocalTransform(trackLogicalIndex, time).Matrix;
         }
 
         public Matrix4x4 GetLocalMatrix(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
-            if (!_UseAnimatedTransforms) return _LocalTransform.Matrix;
+            return _LocalTransformAnimation == null
+                ? _LocalTransform.Matrix
+                : GetLocalTransform(track, time, weight).Matrix;
+        }
 
-            return GetLocalTransform(track, time, weight).Matrix;
+        public bool? GetVisibility(int trackLogicalIndex, float time)
+        {
+            return _Visibility == null
+                ? _IsVisible
+                : _Visibility.GetValueAt(trackLogicalIndex, time);
+        }
+
+        public bool? GetVisibility(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            if (_Visibility == null) return _IsVisible;
+
+            float falseCount = 0;
+            float trueCount = 0;
+
+            for (int i = 0; i < track.Length; ++i)
+            {
+                var val = _Visibility.GetValueAt(track[i], time[i]);
+                if (val) trueCount++;
+                else falseCount++;
+            }
+
+            return trueCount >= falseCount;
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// Contains the transform animation curves of the node.
+    /// </summary>
+    class _NodeTemplateTransforms
+    {
+        #region lifecycle
+
+        public _NodeTemplateTransforms(Schema2.Node srcNode)
+        {
+            if (!srcNode.LocalTransform.TryDecompose(out TRANSFORM lxform))
+            {
+                lxform = Matrix4x4.Identity;
+            }
+
+            _Scale = new AnimatableProperty<Vector3>(lxform.Scale);
+            _Rotation = new AnimatableProperty<Quaternion>(lxform.Rotation);
+            _Translation = new AnimatableProperty<Vector3>(lxform.Translation);
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly AnimatableProperty<Vector3> _Scale;
+        private readonly AnimatableProperty<Quaternion> _Rotation;
+        private readonly AnimatableProperty<Vector3> _Translation;
+
+        #endregion
+
+        #region properties
+
+        public bool IsAnimated => _Scale.IsAnimated | _Rotation.IsAnimated | _Translation.IsAnimated;
+
+        #endregion
+
+        #region API
+
+        public void SetCurves(Schema2.NodeCurveSamplers curves, int index, bool isolateMemory)
+        {
+            _Scale.SetCurve(index, curves.Scale?.CreateCurveSampler(isolateMemory));
+            _Rotation.SetCurve(index, curves.Rotation?.CreateCurveSampler(isolateMemory));
+            _Translation.SetCurve(index, curves.Translation?.CreateCurveSampler(isolateMemory));
+        }
+
+        public TRANSFORM GetTransform(int trackLogicalIndex, float time)
+        {
+            var s = _Scale?.GetValueAt(trackLogicalIndex, time);
+            var r = _Rotation?.GetValueAt(trackLogicalIndex, time);
+            var t = _Translation?.GetValueAt(trackLogicalIndex, time);
+
+            return new TRANSFORM(s, r, t);
         }
 
         #endregion

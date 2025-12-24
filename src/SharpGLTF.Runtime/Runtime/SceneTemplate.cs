@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+
+using SharpGLTF.Schema2;
 
 namespace SharpGLTF.Runtime
 {
@@ -25,7 +28,7 @@ namespace SharpGLTF.Runtime
         {
             Guard.NotNull(srcScene, nameof(srcScene));
 
-            if (options == null) options = new RuntimeOptions();
+            options ??= new RuntimeOptions();
 
             var armature = ArmatureTemplate.Create(srcScene, options);
 
@@ -81,9 +84,15 @@ namespace SharpGLTF.Runtime
                 }
             }
 
-            var extras = RuntimeOptions.ConvertExtras(srcScene, options);
+            var extras = RuntimeOptions.ConvertExtras(srcScene, options);            
 
-            return new SceneTemplate(srcScene.Name, extras, armature, drawables.ToArray());
+            var template = new SceneTemplate(srcScene.Name, extras, armature, drawables.ToArray());
+
+            #pragma warning disable GLTFRT1000 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            template.SphereBounds = template.EvaluateBoundingSphere(srcScene.LogicalParent.LogicalMeshes.Decode());
+            #pragma warning restore GLTFRT1000 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+            return template;
         }
 
         private SceneTemplate(string name, Object extras, ArmatureTemplate armature, DrawableTemplate[] drawables)
@@ -101,7 +110,7 @@ namespace SharpGLTF.Runtime
         private readonly String _Name;
         private readonly Object _Extras;
         private readonly ArmatureTemplate _Armature;
-        private readonly DrawableTemplate[] _DrawableReferences;
+        private readonly DrawableTemplate[] _DrawableReferences;        
 
         #endregion
 
@@ -111,8 +120,13 @@ namespace SharpGLTF.Runtime
 
         public Object Extras => _Extras;
 
+        #if NET8_0_OR_GREATER
+        [Experimental("GLTFRT1000")] // I will probably change the return type and the way this value is accessed
+        #endif
+        public (System.Numerics.Vector3 center, float radius) SphereBounds { get; set; }
+
         /// <summary>
-        /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/>
+        /// Gets the unique indices of <see cref="Schema2.Mesh"/> instances in <see cref="Schema2.ModelRoot.LogicalMeshes"/> used by this template.
         /// </summary>
         public IEnumerable<int> LogicalMeshIds => _DrawableReferences.Select(item => item.LogicalMeshIndex).Distinct();
 

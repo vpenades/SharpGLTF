@@ -138,5 +138,90 @@ namespace SharpGLTF.Runtime
         public IReadOnlyList<AnimationTrackInfo> Tracks => _AnimationTracks;
 
         #endregion
+
+        #region Core
+
+        internal void ApplyDefaultPoseTo(ArmatureInstance instance)
+        {
+            ApplyAnimationTo(instance, -1, 0);
+        }
+
+        internal void ApplyAnimationTo(ArmatureInstance instance, int trackLogicalIndex, float time, bool looped = true)
+        {
+            System.Diagnostics.Debug.Assert(instance._Template == this, "instance and template mismatch");
+
+            if (looped && trackLogicalIndex >= 0)
+            {
+                var duration = _AnimationTracks[trackLogicalIndex].Duration;
+                if (duration > 0) time %= duration;
+            }
+
+            // apply            
+
+            for (int i = 0; i < _NodeTemplates.Length; i++)
+            {
+                var srcTemplate = _NodeTemplates[i];
+                var dstInstance = instance.LogicalNodes[i];
+
+                dstInstance.MorphWeights = srcTemplate.GetMorphWeights(trackLogicalIndex, time);
+                dstInstance.LocalMatrix = srcTemplate.GetLocalMatrix(trackLogicalIndex, time);                
+
+                var v = srcTemplate.GetVisibility(trackLogicalIndex, time) ?? true;
+                v &= dstInstance?.VisualParent?.IsVisible ?? true;
+
+                dstInstance.IsVisible = v;                
+            }
+        }
+
+        internal void ApplyAnimationTo(ArmatureInstance instance, (int TrackIdx, float Time, float Weight)[] blended)
+        {
+            System.Diagnostics.Debug.Assert(instance._Template == this, "instance and template mismatch");
+
+            Guard.NotNull(blended, nameof(blended));
+
+            // prepare weights
+
+            Span<int> tracks = stackalloc int[blended.Length];
+            Span<float> times = stackalloc float[blended.Length];
+            Span<float> weights = stackalloc float[blended.Length];
+
+            float w = blended.Sum(item => item.Weight);
+
+            w = w == 0 ? 1 : 1 / w;
+
+            for (int i = 0; i < blended.Length; ++i)
+            {
+                tracks[i] = blended[i].TrackIdx;
+                times[i] = blended[i].Time;
+                weights[i] = blended[i].Weight * w;
+            }
+
+            // apply
+
+            for (int i = 0; i < _NodeTemplates.Length; i++)
+            {
+                var srcTemplate = _NodeTemplates[i];
+                var dstInstance = instance.LogicalNodes[i];
+
+                dstInstance.MorphWeights = srcTemplate.GetMorphWeights(tracks, times, weights);
+                dstInstance.LocalMatrix = srcTemplate.GetLocalMatrix(tracks, times, weights);
+
+                var v = srcTemplate.GetVisibility(tracks, times, weights);
+                if (v.HasValue) _SetVisibility(instance, i, v.Value);
+            }
+        }
+
+        private void _SetVisibility(ArmatureInstance instance, int index, bool isVisible)
+        {
+            var node = instance.LogicalNodes[index];
+            node.IsVisible = isVisible;
+
+            foreach(var chidx in _NodeTemplates[index].ChildIndices)
+            {
+                _SetVisibility(instance, chidx, isVisible);
+            }
+        }
+
+        #endregion
     }
 }
