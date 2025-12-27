@@ -20,16 +20,16 @@ namespace SharpGLTF.Runtime.Template
     {
         #region lifecycle
 
-        public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath, Pipeline.LoaderContext context = null)
+        public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath, Pipeline.MeshesFactory context = null)
         {
             var model = Schema2.ModelRoot.Load(filePath, Validation.ValidationMode.TryFix);
 
             return CreateDeviceModel(device, model, context);
         }
 
-        public static MonoGameDeviceContent<MonoGameModelTemplate> CreateDeviceModel(GraphicsDevice device, Schema2.ModelRoot srcModel, Pipeline.LoaderContext context = null)
+        public static MonoGameDeviceContent<MonoGameModelTemplate> CreateDeviceModel(GraphicsDevice device, Schema2.ModelRoot srcModel, Pipeline.MeshesFactory context = null)
         {
-            context ??= new Pipeline.BasicEffectsLoaderContext(device);
+            context ??= new Pipeline.DefaultMeshesFactory(device);
 
             context.Reset();
 
@@ -42,14 +42,9 @@ namespace SharpGLTF.Runtime.Template
             var srcMeshes = templates
                 .SelectMany(item => item.LogicalMeshIds)
                 .Distinct()
-                .Select(idx => srcModel.LogicalMeshes[idx]);
+                .Select(idx => srcModel.LogicalMeshes[idx]);            
 
-            foreach(var srcMesh in srcMeshes)
-            {
-                context._WriteMesh(srcMesh);
-            }
-
-            var dstMeshes = context.CreateRuntimeModels();
+            var dstMeshes = context.CreateRuntimeMeshes(srcMeshes);
 
             var mdl = new MonoGameModelTemplate(templates,srcModel.DefaultScene.LogicalIndex, dstMeshes);
 
@@ -158,7 +153,33 @@ namespace SharpGLTF.Runtime.Template
 
             return bounds;
         }
+
+        #endregion
+
+        #region shared lights and effects
         
-        #endregion        
-    }    
+        public void ConfigureLightsAndFog(Action<IEffectLights> configureLights, Action<IEffectFog> configureFog)
+        {
+            configureLights ??= l => l.EnableDefaultLighting();
+            configureFog ??= f => f.FogEnabled = false;
+
+            foreach (var mesh in _Meshes.Values)
+            {
+                foreach (var effect in _Effects)
+                {
+                    if (effect is IEffectLights lights)
+                    {
+                        configureLights.Invoke(lights);
+                    }
+
+                    if (effect is IEffectFog fog)
+                    {
+                        configureFog.Invoke(fog);
+                    }
+                }
+            }
+        }
+
+        #endregion
+    }
 }

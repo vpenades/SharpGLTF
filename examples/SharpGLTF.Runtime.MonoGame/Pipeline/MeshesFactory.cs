@@ -4,14 +4,13 @@ using System.Linq;
 
 using Microsoft.Xna.Framework.Graphics;
 
-using SharpGLTF.Schema2;
 using SharpGLTF.Runtime.Template;
-
-using SRCMESH = SharpGLTF.Schema2.Mesh;
-using SRCPRIM = SharpGLTF.Schema2.MeshPrimitive;
-using SRCMATERIAL = SharpGLTF.Schema2.Material;
+using SharpGLTF.Schema2;
 
 using MODELMESH = SharpGLTF.Runtime.Template.RuntimeModelMesh;
+using SRCMATERIAL = SharpGLTF.Schema2.Material;
+using SRCMESH = SharpGLTF.Schema2.Mesh;
+using SRCPRIM = SharpGLTF.Schema2.MeshPrimitive;
 
 
 namespace SharpGLTF.Runtime.Pipeline
@@ -20,13 +19,13 @@ namespace SharpGLTF.Runtime.Pipeline
     /// Helper class used to import a glTF meshes and materials into MonoGame
     /// </summary>
     /// <remarks>
-    /// derived types: <see cref="BasicEffectsLoaderContext"/>
+    /// derived types: <see cref="DefaultMeshesFactory"/>
     /// </remarks>
-    public abstract class LoaderContext
+    public abstract class MeshesFactory
     {
-        #region lifecycle
+        #region lifecycle        
 
-        public LoaderContext(GraphicsDevice device)
+        protected MeshesFactory(GraphicsDevice device)
         {
             _Device = device;
         }
@@ -50,10 +49,11 @@ namespace SharpGLTF.Runtime.Pipeline
 
         #endregion
 
-        #region properties
-
-        protected GraphicsDevice Device => _Device;
+        #region properties        
         
+        /// <summary>
+        /// Gets the collection of disposables accumulated by processing meshes, effects and textures.
+        /// </summary>
         internal IReadOnlyList<GraphicsResource> Disposables => _Disposables.Disposables;
 
         #endregion
@@ -62,16 +62,27 @@ namespace SharpGLTF.Runtime.Pipeline
 
         internal void Reset()
         {
-            _Disposables = new GraphicsResourceTracker();
-            _EffectsFactory = new EffectsFactory(_Device, _Disposables);
+            _Disposables = new GraphicsResourceTracker();            
+            _EffectsFactory = EffectsFactory.Create(_Device, _Disposables);            
+        }
+
+        internal IReadOnlyDictionary<int, MODELMESH> CreateRuntimeMeshes(IEnumerable<SRCMESH> srcMeshes)
+        {
             _MeshWriter = new MeshPrimitiveWriter();
+
+            foreach (var srcMesh in srcMeshes)
+            {
+                _WriteMesh(srcMesh);
+            }
+
+            return _MeshWriter.GetRuntimeMeshes(_Device, _Disposables);
         }
 
         #endregion
 
         #region Mesh API
 
-        internal void _WriteMesh(SRCMESH srcMesh)
+        private void _WriteMesh(SRCMESH srcMesh)
         {
             if (_Device == null) throw new InvalidOperationException();            
 
@@ -109,56 +120,17 @@ namespace SharpGLTF.Runtime.Pipeline
         {
             srcMaterial ??= GetDefaultMaterial();
 
-            var effect = _EffectsFactory.GetMaterial(srcMaterial, srcPrim.IsSkinned);
-
-            if (effect == null)
-            {
-                effect = CreateEffect(srcMaterial, srcPrim.IsSkinned);
-                _EffectsFactory.Register(srcMaterial, srcPrim.IsSkinned, effect);
-            }
+            var effect = _EffectsFactory.UseEffect(srcMaterial, srcPrim.IsSkinned);
 
             WriteMeshPrimitive(srcPrim, effect);
         }        
-
-        protected abstract void WriteMeshPrimitive(MeshPrimitiveReader srcPrimitive, Effect effect);
+        
 
         protected void WriteMeshPrimitive<TVertex>(Effect effect, MeshPrimitiveReader primitive)
             where TVertex : unmanaged, IVertexType
         {
             _MeshWriter.WriteMeshPrimitive<TVertex>(_CurrentMeshIndex, effect, primitive);
-        }
-
-        #endregion
-
-        #region EFfects API
-
-        /// <summary>
-        /// Called when finding a new material that needs to be converted to an <see cref="Effect"/>
-        /// </summary>
-        /// <param name="srcMaterial">The material to convert.</param>
-        /// <param name="isSkinned">Indicates that the material is used in a skinned mesh.</param>
-        /// <returns>An effect to be used in place of <paramref name="srcMaterial"/>. </returns>
-        protected abstract Effect CreateEffect(SRCMATERIAL srcMaterial, bool isSkinned);
-
-        /// <summary>
-        /// Called when finding a new texture that needs to be converted to a <see cref="Texture2D"/>
-        /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        protected virtual Texture2D UseTexture(MaterialChannel? channel, string name)
-        {
-            return _EffectsFactory.UseTexture(channel, name);
-        }
-
-        #endregion
-
-        #region resources API
-
-        internal IReadOnlyDictionary<int, MODELMESH> CreateRuntimeModels()
-        {
-            return _MeshWriter.GetRuntimeMeshes(_Device, _Disposables);
-        }
+        }             
 
         private SRCMATERIAL GetDefaultMaterial()
         {
@@ -169,10 +141,41 @@ namespace SharpGLTF.Runtime.Pipeline
             }
             
             return _DummyModel.LogicalMaterials[0];
-        }           
+        }
+
+        #endregion
+
+        #region overridable API
+
+        /// <summary>
+        /// Converts a <see cref="MeshPrimitiveReader"/> to a device primitive.
+        /// </summary>
+        /// <param name="srcPrimitive">The mesh primitive to read and convert</param>
+        /// <param name="effect">The <see cref="Effect"/> used by the primitive.</param>
+        protected abstract void WriteMeshPrimitive(MeshPrimitiveReader srcPrimitive, Effect effect);
 
         #endregion
     }
 
-    
+
+    class DefaultMeshesFactory : MeshesFactory
+    {
+        #region lifecycle
+
+        public DefaultMeshesFactory(GraphicsDevice device) : base(device) { }
+
+        #endregion        
+
+        #region meshes creation
+
+        protected override void WriteMeshPrimitive(MeshPrimitiveReader srcPrimitive, Effect effect)
+        {
+            if (srcPrimitive.IsSkinned) WriteMeshPrimitive<VertexSkinned>(effect, srcPrimitive);
+            else WriteMeshPrimitive<VertexPositionNormalTexture>(effect, srcPrimitive);
+        }
+
+        #endregion        
+    }
+
+
 }

@@ -72,7 +72,13 @@ namespace MonoGameIntegrationDemo.Models
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(Color.CornflowerBlue);            
+
+            // setup lights and fog for the effects in the template
+
+            _CurrentModelInstance?.Template?.ConfigureLightsAndFog(null, null);
+
+            // rendering
 
             if (_CurrentModelInstance != null)
             {

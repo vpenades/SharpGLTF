@@ -14,7 +14,7 @@ using XYZW = System.Numerics.Vector4;
 namespace SharpGLTF.Runtime.Pipeline
 {
     /// <summary>
-    /// Reads the content of a glTF <see cref="MeshPrimitive"/> object into a structure that's easier to consume by MonoGame.
+    /// Reads the content of a glTF <see cref="MeshPrimitive"/> into a structure that's easier to consume by MonoGame.
     /// </summary>
     public sealed class MeshPrimitiveReader
         : VertexNormalsFactory.IMeshPrimitive

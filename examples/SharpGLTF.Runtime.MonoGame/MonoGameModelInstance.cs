@@ -6,6 +6,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 using SharpGLTF.Runtime.Template;
+using SharpGLTF.Schema2;
+using SharpGLTF.Transforms;
+
+
 
 
 #if USINGMONOGAMEMODEL
