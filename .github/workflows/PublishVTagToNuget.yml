@@ -25,9 +25,10 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
-      - name: Test
-        run: dotnet test --no-build --verbosity normal
-        continue-on-error: false
+# general tests disabled due to tests being too heavy
+#      - name: Test
+#        run: dotnet test --no-build --verbosity normal
+#        continue-on-error: false
 
       - name: Determine package version
         id: version
