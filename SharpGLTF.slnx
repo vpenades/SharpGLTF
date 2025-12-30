@@ -23,6 +23,7 @@
     <File Path=".github/workflows/PublishMainToNuget.yml" />
     <File Path=".github/workflows/PublishToGithub.yml" />
     <File Path=".github/workflows/PublishToNuget.yml" />
+    <File Path=".github/workflows/PublishVTagToNuget.yml" />
     <File Path=".github/workflows/TestCommit.yml" />
     <File Path="Directory.Packages.props" />
     <File Path="README.md" />

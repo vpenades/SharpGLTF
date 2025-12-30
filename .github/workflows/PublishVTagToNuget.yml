@@ -1,0 +1,61 @@
+name: Publish V.Tag to NuGet.org
+
+on:
+  push:
+    # publish only on tags like v1.2.3 (or v1.2)
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+        continue-on-error: false
+
+      - name: Determine package version
+        id: version
+        run: |
+          # If this run was triggered by a tag, extract the tag name and strip a leading "v" if present.
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag=${GITHUB_REF#refs/tags/}
+            # strip leading v if present
+            tag=${tag#v}
+            echo "PACKAGE_VERSION=$tag" >> $GITHUB_ENV
+          else
+            # fallback CI version if not a tag
+            echo "PACKAGE_VERSION=0.0.0-ci-${GITHUB_SHA::7}" >> $GITHUB_ENV
+          fi
+          echo "Determined PACKAGE_VERSION=$PACKAGE_VERSION"
+
+      - name: Pack
+        run: |
+          mkdir -p artifacts
+          # pack all projects that should produce nuget packages, or specify a project file instead of '.'
+          dotnet pack --configuration Release --no-build -o artifacts /p:PackageVersion=${PACKAGE_VERSION}
+
+      - name: Publish to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.SharpGLTF_PublishToNuget }}
+        run: |
+          # push all packages created in artifacts to nuget.org
+          dotnet nuget push "artifacts/*.nupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source "https://api.nuget.org/v3/index.json" \
+            --skip-duplicate
