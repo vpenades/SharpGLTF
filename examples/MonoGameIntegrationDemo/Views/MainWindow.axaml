@@ -21,13 +21,16 @@
 			<MenuItem Header="File">
 				<MenuItem Icon="📁" Header="Load Model..." >
                     <Interaction.Behaviors>
-						<MenuItemOpenFilePickerBehavior FileTypeFilter="glTF files|*.glTF|glb files|*.glb" AllowMultiple="False" Command="{Binding LoadModelCommand}" />
+						<MenuItemOpenFilePickerBehavior FileTypeFilter="glTF files|*.gltf;*.glb;*.vrm" AllowMultiple="False" Command="{Binding LoadModelCommand}" />
                     </Interaction.Behaviors>
                 </MenuItem>
             </MenuItem>
         </Menu>
 
-	    <monoGame:MonoGameControl Grid.Row="1" Game="{Binding CurrentGame}" />
+        <Border Grid.Row="1" CornerRadius="4" BorderThickness="2" BorderBrush="Black" Padding="3" Margin="3" >
+		  <monoGame:MonoGameControl  Game="{Binding CurrentGame}" />	
+        </Border>
+	    
 
         <ContentControl Grid.Row="2" Content="{Binding ModelControls}" />		
         

@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 using SharpGLTF.Schema2;
 
@@ -96,14 +95,16 @@ namespace SharpGLTF.Runtime.Pipeline
 
         protected Texture2D UseTexture(MaterialChannel? channel, string name)
         {
-            if (!channel.HasValue) return _TexFactory.UseWhiteImage();
+            if (!channel.HasValue) return UseWhiteTexture();
 
             if (channel.HasValue && name == null)
             {
                 name = channel.Value.LogicalParent.Name;
-                if (name == null) name = "null";
+                name ??= "null";
                 name += $"-{channel.Value.Key}";
             }
+
+            if (channel.Value.Texture?.PrimaryImage?.Content.IsEmpty ?? true) return UseWhiteTexture();
 
             return _TexFactory.UseTexture(channel.Value.Texture?.PrimaryImage?.Content ?? default, name);
         }

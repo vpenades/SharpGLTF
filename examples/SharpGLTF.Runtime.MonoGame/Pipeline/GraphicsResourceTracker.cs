@@ -30,8 +30,8 @@ namespace SharpGLTF.Runtime.Pipeline
         #region API        
         public void AddDisposable(GraphicsResource resource)
         {
-            if (resource == null) throw new ArgumentNullException();
-            if (_Disposables.Contains(resource)) throw new ArgumentException();
+            ArgumentNullException.ThrowIfNull(resource);
+            if (_Disposables.Contains(resource)) throw new ArgumentException($"resource used more than once {resource}");
             _Disposables.Add(resource);
         }
 

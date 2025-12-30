@@ -25,6 +25,20 @@ namespace SharpGLTF.Runtime.Pipeline
     {
         #region lifecycle        
 
+        /// <summary>
+        /// Register here your own <see cref="MeshesFactory"/> derived class to override mesh creation
+        /// </summary>
+        public static Func<GraphicsDevice, MeshesFactory> InstanceBuilder { get; set; }
+
+        public static MeshesFactory Create(GraphicsDevice device)
+        {
+            ArgumentNullException.ThrowIfNull(device);
+
+            var mf = InstanceBuilder?.Invoke(device);
+            mf ??= new DefaultMeshesFactory(device);
+            return mf;
+        }
+
         protected MeshesFactory(GraphicsDevice device)
         {
             _Device = device;
@@ -176,6 +190,4 @@ namespace SharpGLTF.Runtime.Pipeline
 
         #endregion        
     }
-
-
 }

@@ -9,8 +9,13 @@ using Microsoft.Xna.Framework.Graphics;
 namespace SharpGLTF.Runtime.Template
 {
     /// <summary>
-    /// Replaces <see cref="ModelMeshPart"/>.
-    /// </summary>    
+    /// Replaces Monogame's <see cref="ModelMeshPart"/>.
+    /// </summary>
+    /// <remarks>
+    /// We need to duplicate <see cref="ModelMeshPart"/> because it has
+    /// a constructor to be declared as internal, because this class is
+    /// intended to be instantiated by loading an XNB file
+    /// </remarks>
     sealed class RuntimeModelMeshPart
     {
         #region lifecycle
@@ -92,8 +97,13 @@ namespace SharpGLTF.Runtime.Template
     }
 
     /// <summary>
-    /// Replaces <see cref="ModelMesh"/>
+    /// Replaces Monogame's <see cref="ModelMesh"/>
     /// </summary>
+    /// <remarks>
+    /// We need to duplicate <see cref="ModelMesh"/> because it depends
+    /// on <see cref="ModelMeshPart"/> which is intended to be used only
+    /// by the content loader.
+    /// </remarks>
     sealed class RuntimeModelMesh
     {
         #region lifecycle

@@ -8,14 +8,6 @@
              x:Class="MonoGameIntegrationDemo.Views.ModelControlsView"
              x:DataType="vm:ModelControlsViewModel">
 
-    <Grid ColumnDefinitions="auto * auto" >
-
-        <ComboBox ItemsSource="{Binding AnimationTracks}" DisplayMemberBinding="{Binding Name}" x:Name="mySelectedTrack" SelectedValue="{Binding SelectedTrack}" />
-        
-        <Slider Grid.Column="1" Minimum="0" Maximum="{Binding SelectedTrack.Duration}" Value="{Binding AnimationTime}" VerticalAlignment="Center" />        
-
-        <TextBlock Grid.Column="2" Text="{Binding SelectedTrack.Duration}" />
-		
-    </Grid>
+    <ContentControl Content="{Binding AnimationControls}" />
   
 </UserControl>

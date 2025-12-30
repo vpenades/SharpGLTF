@@ -5,51 +5,13 @@ using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-
-#if USINGMONOGAMEMODEL
-using MODELMESH = Microsoft.Xna.Framework.Graphics.ModelMesh;
-using MODELMESHPART = Microsoft.Xna.Framework.Graphics.ModelMeshPart;
-#else
 using MODELMESH = SharpGLTF.Runtime.Template.RuntimeModelMesh;
-using MODELMESHPART = SharpGLTF.Runtime.Template.RuntimeModelMeshPart;
-#endif
 
 namespace SharpGLTF.Runtime.Template
 {
     public class MonoGameModelTemplate
     {
-        #region lifecycle
-
-        public static MonoGameDeviceContent<MonoGameModelTemplate> LoadDeviceModel(GraphicsDevice device, string filePath, Pipeline.MeshesFactory context = null)
-        {
-            var model = Schema2.ModelRoot.Load(filePath, Validation.ValidationMode.TryFix);
-
-            return CreateDeviceModel(device, model, context);
-        }
-
-        public static MonoGameDeviceContent<MonoGameModelTemplate> CreateDeviceModel(GraphicsDevice device, Schema2.ModelRoot srcModel, Pipeline.MeshesFactory context = null)
-        {
-            context ??= new Pipeline.DefaultMeshesFactory(device);
-
-            context.Reset();
-
-            var options = new RuntimeOptions { IsolateMemory = true };
-
-            var templates = srcModel.LogicalScenes
-                .Select(item => SceneTemplate.Create(item, options))
-                .ToArray();            
-
-            var srcMeshes = templates
-                .SelectMany(item => item.LogicalMeshIds)
-                .Distinct()
-                .Select(idx => srcModel.LogicalMeshes[idx]);            
-
-            var dstMeshes = context.CreateRuntimeMeshes(srcMeshes);
-
-            var mdl = new MonoGameModelTemplate(templates,srcModel.DefaultScene.LogicalIndex, dstMeshes);
-
-            return new MonoGameDeviceContent<MonoGameModelTemplate>(mdl, context.Disposables.ToArray());
-        }
+        #region lifecycle        
         
         internal MonoGameModelTemplate(SceneTemplate[] scenes, int defaultSceneIndex, IReadOnlyDictionary<int, MODELMESH> meshes)
         {
@@ -110,8 +72,17 @@ namespace SharpGLTF.Runtime.Template
 
         public BoundingSphere GetBounds(int sceneIndex) => _Bounds[sceneIndex];        
 
+        /// <summary>
+        /// Creates an instance from the default model's scene.
+        /// </summary>
+        /// <returns>A model instance.</returns>
         public MonoGameModelInstance CreateInstance() => CreateInstance(_DefaultSceneIndex);
 
+        /// <summary>
+        /// Creates an instance from the given model scene.
+        /// </summary>
+        /// <param name="sceneIndex">The scene index.</param>
+        /// <returns>A model instance.</returns>
         public MonoGameModelInstance CreateInstance(int sceneIndex)
         {
             return new MonoGameModelInstance(this, _Scenes[sceneIndex].CreateInstance());

@@ -60,6 +60,12 @@ namespace SharpGLTF.Runtime.Pipeline
         /// <returns></returns>
         public Texture2D UseWhiteImage()
         {
+            var tex = _Disposables
+                .Disposables
+                .OfType<Texture2D>()
+                .FirstOrDefault(item => item.Name == "_InternalSolidWhite");
+            if (tex != null) return tex;
+
             const string solidWhitePNg = "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAFHpUWHRUaXRsZQAACJkrz8gsSQUABoACIippo0oAAAAoelRYdEF1dGhvcgAACJkLy0xOzStJVQhIzUtMSS1WcCzKTc1Lzy8BAG89CQyAoFAQAAAAGklEQVQoz2P8//8/AymAiYFEMKphVMPQ0QAAVW0DHZ8uFaIAAAAASUVORK5CYII=";
 
             var toBytes = Convert.FromBase64String(solidWhitePNg);
@@ -72,6 +78,8 @@ namespace SharpGLTF.Runtime.Pipeline
             if (_Device == null) throw new InvalidOperationException();
 
             if (!image.IsValid) return null;
+            if (image.MimeType == "image/webp") return UseWhiteImage();
+            if (image.MimeType == "image/ktx2") return UseWhiteImage();
 
             if (_Textures.TryGetValue(image, out Texture2D tex)) return tex;
 
@@ -97,13 +105,8 @@ namespace SharpGLTF.Runtime.Pipeline
         /// </summary>        
         protected virtual Texture2D LoadTexture(GraphicsDevice device, System.IO.Stream image, string imageMimeType)
         {
-            if (imageMimeType == "image/webp") return UseWhiteImage();
-            if (imageMimeType == "image/ktx2") return UseWhiteImage();
-
-            // ToDO: A MonoGame friendly solution would be to support .XNB textures straight await into glTF.
-            // that would require a simple glTF extension to allow XNB textures to be used by glTF.
-            // finally, the content pipeline would take glTF's as input, and convert its images to .XNB
-            // outputting a modified, monogame friendly, glTF
+            if (imageMimeType == "image/webp") throw new NotSupportedException("webp images not supported");
+            if (imageMimeType == "image/ktx2") throw new NotSupportedException("ktx2 images not supported");
 
             return Texture2D.FromStream(device, image);
         }

@@ -19,7 +19,10 @@ namespace MonoGameIntegrationDemo.ViewModels
             _LoadModel = loadModel;
             _Instance = instance;
 
-            _SelectedTrack = AnimationTracks.FirstOrDefault();
+            if (instance.Controller.Armature.AnimationTracks.Count > 0)
+            {
+                AnimationControls = new ModelAnimationControlsViewModel(_Instance);
+            }
         }
         #endregion
 
@@ -32,12 +35,37 @@ namespace MonoGameIntegrationDemo.ViewModels
 
         #region Properties
 
+        [ObservableProperty]
+        private ModelAnimationControlsViewModel? _AnimationControls;
+
+        #endregion
+    }
+
+    public partial class ModelAnimationControlsViewModel : ViewModelBase
+    {
+        #region lifecycle
+        public ModelAnimationControlsViewModel(MonoGameModelInstance instance)
+        {
+            _Instance = instance;
+            _SelectedTrack = AnimationTracks.FirstOrDefault();
+        }
+
+        #endregion
+
+        #region data
+
+        private readonly MonoGameModelInstance _Instance;
+
+        #endregion
+
+        #region Properties
+
         public IReadOnlyList<AnimationTrackInfo> AnimationTracks => _Instance.Controller.Armature.AnimationTracks;
 
         [ObservableProperty]
         private AnimationTrackInfo? _SelectedTrack;
-        
-        private float _AnimationTime;
+
+        private float _AnimationTime;        
 
         public float AnimationTime
         {

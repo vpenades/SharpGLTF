@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:MonoGameIntegrationDemo.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="MonoGameIntegrationDemo.Views.ModelAnimationControlsView"
+             x:DataType="vm:ModelAnimationControlsViewModel">
+
+  <Grid ColumnDefinitions="auto * auto" >
+
+        <ComboBox ItemsSource="{Binding AnimationTracks}" DisplayMemberBinding="{Binding Name}" x:Name="mySelectedTrack" SelectedValue="{Binding SelectedTrack}" />
+        
+        <Slider Grid.Column="1" Minimum="0" Maximum="{Binding SelectedTrack.Duration}" Value="{Binding AnimationTime}" VerticalAlignment="Center" />        
+
+        <TextBlock Grid.Column="2" Text="{Binding SelectedTrack.Duration}" />
+		
+    </Grid>
+
+</UserControl>
