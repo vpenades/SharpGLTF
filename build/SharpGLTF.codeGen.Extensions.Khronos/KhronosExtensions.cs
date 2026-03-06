@@ -30,6 +30,7 @@ namespace SharpGLTF
 
             // gpu mesh instancing
             yield return new MeshGpuInstancingExtension();
+            yield return new GaussianSplattingExtension();
 
             // textures
             yield return new TextureTransformExtension();

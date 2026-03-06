@@ -332,6 +332,8 @@ namespace SharpGLTF.Schema2
         {
             base.OnValidateContent(validate);
 
+            _ValidateGaussianSplatting(validate);
+
             // all vertices must have the same vertex count
 
             int vertexCount = -1;
