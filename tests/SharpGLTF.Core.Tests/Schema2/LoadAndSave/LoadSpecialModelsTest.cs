@@ -114,7 +114,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             var model = ModelRoot.Load(path);
             Assert.That(model, Is.Not.Null);
 
-            var flattenExtensions = model.GatherUsedExtensions().ToArray();
+            var flattenExtensions = model.GatherUsedAndRequiredExtensions().ToArray();
 
             model.AttachToCurrentTest("AliceModel.glb");
         }

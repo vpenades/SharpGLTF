@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using System.Text;
 
@@ -144,6 +145,30 @@ namespace SharpGLTF.Materials
 
             Assert.That(MaterialBuilder.AreEqualByContent(material, _Schema2Roundtrip(material)));
             Assert.That(MaterialBuilder.AreEqualByContent(material, material.Clone()));
+        }
+
+        [Test]
+        public void TestMaterialWithDDS()
+        {
+            var material = new MaterialBuilder();
+
+            material                
+                .UseChannel(KnownChannel.BaseColor)
+                .UseTexture()
+                .WithPrimaryImage(ResourceInfo.From("shannon-dxt5.dds").FilePath);
+
+            var gltf = ModelRoot.CreateModel();
+            var gltfMaterial = gltf.CreateMaterial(material);
+
+            Assert.That(gltfMaterial.TryGetChannel("BaseColor", out var gltfBaseColor));
+
+            var gltfBaseTexture = gltfBaseColor.Texture;
+
+            Assert.That(gltfBaseTexture.FallbackImage, Is.Null); // regression https://github.com/vpenades/SharpGLTF/issues/296            
+
+            AttachmentInfo.From("result.gltf").WriteObject(f => gltf.SaveGLTF(f));
+
+            TestContext.Out.WriteLine(gltf.GetJsonPreview());
         }
 
         private static void _AddVolume(MaterialBuilder material)

@@ -67,32 +67,39 @@ namespace SharpGLTF.Schema2
             Guard.NotNull(primaryImage, nameof(primaryImage));
             Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
 
+            ClearImages();
+
             if (primaryImage.Content.IsExtendedFormat)
-            {
-                var fallback = LogicalParent.UseImage(Memory.MemoryImage.DefaultPngImage);
-                SetImages(primaryImage, fallback);
+            {                
+                _SetExtendedImage(primaryImage);
             }
             else
-            {
-                ClearImages();
+            {                
                 _source = primaryImage.LogicalIndex;
-            }
+            }            
         }
 
         public void SetImages(Image primaryImage, Image fallbackImage)
         {
-            Guard.NotNull(primaryImage, nameof(primaryImage));
-            Guard.NotNull(fallbackImage, nameof(fallbackImage));
-            Guard.MustShareLogicalParent(this, primaryImage, nameof(primaryImage));
-            Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));
-            Guard.IsTrue(primaryImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP or KTX2");
+            Guard.NotNull(fallbackImage, nameof(fallbackImage));            
+            Guard.MustShareLogicalParent(this, fallbackImage, nameof(fallbackImage));            
             Guard.IsTrue(fallbackImage.Content.IsJpg || fallbackImage.Content.IsPng, nameof(fallbackImage), "Fallback image must be PNG or JPEG");
 
-            if (primaryImage.Content.IsDds) { _UseDDSTexture().Image = primaryImage; }
-            if (primaryImage.Content.IsWebp) { _UseWEBPTexture().Image = primaryImage; }
-            if (primaryImage.Content.IsKtx2) { _UseKTX2Texture().Image = primaryImage; }
-
+            _SetExtendedImage(primaryImage);
             _source = fallbackImage.LogicalIndex;
+        }
+
+        private void _SetExtendedImage(Image extendedImage)
+        {
+            Guard.NotNull(extendedImage, nameof(extendedImage));
+            Guard.MustShareLogicalParent(this, extendedImage, nameof(extendedImage));
+            Guard.IsTrue(extendedImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP or KTX2");
+
+            if (extendedImage.Content.IsDds) { _UseDDSTexture().Image = extendedImage; return; }
+            if (extendedImage.Content.IsWebp) { _UseWEBPTexture().Image = extendedImage; return; }
+            if (extendedImage.Content.IsKtx2) { _UseKTX2Texture().Image = extendedImage; return; }
+
+            throw new NotImplementedException("Unknown image format");
         }
 
         public void ClearImages()
@@ -149,7 +156,7 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
-    partial class TextureDDS
+    partial class TextureDDS : IExtensionTypeInfo
     {
         internal TextureDDS(Texture parent)
         {
@@ -172,9 +179,16 @@ namespace SharpGLTF.Schema2
                 _source = value?.LogicalIndex;
             }
         }
+
+        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            if (extensionOwner is not Texture tex) return false;
+
+            return tex.FallbackImage == null;
+        }
     }
 
-    partial class TextureWEBP
+    partial class TextureWEBP : IExtensionTypeInfo
     {
         internal TextureWEBP(Texture parent)
         {
@@ -197,9 +211,16 @@ namespace SharpGLTF.Schema2
                 _source = value?.LogicalIndex;
             }
         }
+
+        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            if (extensionOwner is not Texture tex) return false;
+
+            return tex.FallbackImage == null;
+        }
     }
 
-    partial class TextureKTX2
+    partial class TextureKTX2 : IExtensionTypeInfo
     {
         internal TextureKTX2(Texture parent)
         {
@@ -221,6 +242,13 @@ namespace SharpGLTF.Schema2
 
                 _source = value?.LogicalIndex;
             }
+        }
+
+        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            if (extensionOwner is not Texture tex) return false;
+
+            return tex.FallbackImage == null;
         }
     }
 
@@ -409,6 +437,9 @@ namespace SharpGLTF.Schema2
             else tex.SetImages(primary, fallback);
 
             tex.Sampler = sampler;
+
+            System.Diagnostics.Debug.Assert((primary != null) == (tex.PrimaryImage != null), "primary image incorrectly set");
+            System.Diagnostics.Debug.Assert((fallback != null) == (tex.FallbackImage != null), "fallback image incorrectly set");
 
             return tex;
         }

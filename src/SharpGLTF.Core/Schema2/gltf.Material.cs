@@ -138,13 +138,40 @@ namespace SharpGLTF.Schema2
         [System.Diagnostics.DebuggerStepThrough]
         public MaterialChannel? FindChannel(string channelKey)
         {
+            return TryGetChannel(channelKey, out var channel) ? channel : null;
+        }
+
+        /// <summary>
+        /// Finds an instance of <see cref="MaterialChannel"/>
+        /// </summary>
+        /// <param name="channelKey">
+        /// The channel key. Currently, these values are used:
+        /// - "Normal"
+        /// - "Occlusion"
+        /// - "Emissive"
+        /// - When material is <see cref="MaterialPBRMetallicRoughness"/>:
+        ///   - "BaseColor"
+        ///   - "MetallicRoughness"
+        /// - When material is <see cref="MaterialPBRSpecularGlossiness"/>:
+        ///   - "Diffuse"
+        ///   - "SpecularGlossiness"
+        /// </param>
+        /// <returns>true if found</returns>
+        [System.Diagnostics.DebuggerStepThrough]
+        public bool TryGetChannel(string channelKey, out MaterialChannel channel)
+        {
             foreach (var ch in Channels)
             {
-                if (ch.Key.Equals(channelKey, StringComparison.OrdinalIgnoreCase)) return ch;
+                if (ch.Key.Equals(channelKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    channel = ch;
+                    return true;
+                }
             }
 
-            return null;
-        }        
+            channel = default;
+            return false;
+        }
 
         #endregion
 

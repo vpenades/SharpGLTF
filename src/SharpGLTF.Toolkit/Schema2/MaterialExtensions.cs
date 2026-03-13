@@ -505,10 +505,9 @@ namespace SharpGLTF.Schema2
                 var src = srcMaterial.GetChannel(k);
                 if (src == null) continue;
 
-                var dst = dstMaterial.FindChannel(k.ToString());
-                if (dst == null) continue;
+                if (!dstMaterial.TryGetChannel(k.ToString(), out var dst)) continue;
 
-                src.CopyTo(dst.Value);
+                src.CopyTo(dst);
             }
         }
 
@@ -549,7 +548,7 @@ namespace SharpGLTF.Schema2
             if (srcXform != null)
             {
                 dstChannel.SetTransform(srcXform.Offset, srcXform.Scale, srcXform.Rotation, srcXform.CoordinateSetOverride);
-            }
+            }            
         }
 
         private static Image _ConvertToImage(MaterialChannel dstChannel, ImageBuilder srcImage)

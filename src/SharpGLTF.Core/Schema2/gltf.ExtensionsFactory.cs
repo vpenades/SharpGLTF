@@ -259,16 +259,19 @@ namespace SharpGLTF.Schema2
 
         internal void UpdateExtensionsSupport()
         {
-            var used = GatherUsedExtensions();
+            var used = GatherUsedAndRequiredExtensions();
 
             // update the used list
             this._extensionsUsed.Clear();
-            this._extensionsUsed.AddRange(used);
+            this._extensionsUsed.AddRange(used.Select(item => item.ext));
 
-            _SetExtensionUsage("KHR_mesh_quantization", this._extensionsUsed.Contains("KHR_mesh_quantization"), true);
+            this._extensionsRequired.Clear();
+            this._extensionsRequired.AddRange(used.Where(item => item.isRequired == true).Select(item => item.ext));
         }
 
-        internal IEnumerable<string> GatherUsedExtensions()
+        
+
+        internal IEnumerable<(string ext, bool isRequired)> GatherUsedAndRequiredExtensions()
         {
             // retrieve ALL the property based objects of the whole model.
             var allObjects = new[] { this }
@@ -276,45 +279,42 @@ namespace SharpGLTF.Schema2
                 .ToList();
 
             // check all the extensions used by each object
-            var used = new HashSet<string>();
-
-            // search for known extensions
-            foreach (var c in allObjects)
-            {
-                var ids = c.Extensions
-                    .Select(item => ExtensionsFactory.Identify(c.GetType(), item.GetType()))
-                    .Where(item => !string.IsNullOrWhiteSpace(item));
-
-                used.UnionWith(ids);
-            }
+            var exts = new Dictionary<string, bool>();
 
             // search for unknown extensions
             foreach (var unk in allObjects.SelectMany(item => item.Extensions).OfType<UnknownNode>())
             {
-                used.Add(unk.Name);
+                exts[unk.Name] = false;
             }
+
+            // search for known extensions
+            foreach (var c in allObjects)
+            {
+                foreach(var ext in c.Extensions)
+                {
+                    var id = ExtensionsFactory.Identify(c.GetType(), ext.GetType());
+                    if (string.IsNullOrWhiteSpace(id)) continue;
+
+                    bool isRequired = false;
+
+                    if (ext is IExtensionTypeInfo extInfo)
+                    {
+                        isRequired = extInfo.CheckIsRequiredExtension(c);
+                    }
+
+                    if (exts.TryGetValue(id, out var stored)) { isRequired |= stored; }
+
+                    exts[id] = isRequired;
+                }
+            }            
 
             // search for special cases
-
             var isQuantized = MeshPrimitive.CheckAttributesQuantizationRequired(this);
-            if (isQuantized) used.Add("KHR_mesh_quantization");
+            if (isQuantized) exts["KHR_mesh_quantization"] = true;
 
-            return used;
+            return exts.Select(kvp => (kvp.Key, kvp.Value));
         }
-
-        private void _SetExtensionUsage(string extension, bool used, bool required)
-        {
-            if (!used)
-            {
-                this._extensionsUsed.Remove(extension);
-                this._extensionsRequired.Remove(extension);
-                return;
-            }
-
-            if (!this._extensionsUsed.Contains(extension)) this._extensionsUsed.Add(extension);
-            if (required && !this._extensionsRequired.Contains(extension)) this._extensionsRequired.Add(extension);
-        }
-
+        
         internal void _ValidateExtensions(Validation.ValidationContext validate)
         {
             foreach (var iex in this.IncompatibleExtensions)
@@ -322,12 +322,33 @@ namespace SharpGLTF.Schema2
                 validate._LinkThrow("Extensions", iex);
             }
 
-            foreach (var ext in GatherUsedExtensions())
+            foreach (var ext in GatherUsedAndRequiredExtensions().Select(item => item.ext))
             {
                 if (!this._extensionsUsed.Contains(ext)) validate._LinkThrow("Extensions", ext);
+            }
+
+            foreach (var ext in GatherUsedAndRequiredExtensions().Where(item => item.isRequired).Select(item => item.ext))
+            {
+                if (!this._extensionsRequired.Contains(ext)) validate._LinkThrow("Extensions", ext);
             }
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// Implemented by extensions
+    /// </summary>
+    public interface IExtensionTypeInfo
+    {
+        /// <summary>
+        /// Checks whether the extension instance implementing this interface should be tagged as required.
+        /// </summary>
+        /// <param name="extensionOwner">the owner of the extension</param>
+        /// <returns>true if the extension should be tagged as required</returns>
+        /// <remarks>
+        /// This is called just before saving the model.
+        /// </remarks>
+        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner);
     }
 }

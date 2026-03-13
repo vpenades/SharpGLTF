@@ -223,15 +223,13 @@ namespace SharpGLTF.Schema2
             context.WriteTextSchema2(name, this);
         }
 
-        [Obsolete("Use GetJsonPreview", true)]
-        public string GetJSON(bool indented) { return GetJsonPreview(); }
-
         /// <summary>
         /// Gets the JSON document of this <see cref="MODEL"/>.
         /// </summary>
         /// <returns>A JSON content.</returns>
         /// <remarks>
-        /// ⚠ Beware: this method serializes the current model into a json, without taking care of the binary buffers,
+        /// ⚠ Beware: the generated json is intended to be used for debugging purposes only;
+        /// this method serializes the current model into a json, without taking care of the binary buffers and images,<br/>
         /// so the produced json might not be usable!
         /// </remarks>
         public string GetJsonPreview()
