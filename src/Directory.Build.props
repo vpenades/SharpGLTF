@@ -24,6 +24,10 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+
   <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props" />
 
   <!-- Testing & Analysers =================================================================================== -->
@@ -50,15 +54,8 @@
     
   </PropertyGroup>
 
-  <ItemGroup>
-    
+  <ItemGroup>    
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
-    
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net6.0-windows'">
