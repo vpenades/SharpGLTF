@@ -300,10 +300,12 @@ namespace SharpGLTF.Schema2
 
                     bool isRequired = false;
 
+                    #pragma warning disable GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
                     if (ext is IExtensionTypeInfo extInfo)
                     {
                         isRequired = extInfo.CheckIsRequiredExtension(c);
                     }
+                    #pragma warning restore GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
                     if (exts.TryGetValue(id, out var stored)) { isRequired |= stored; }
 

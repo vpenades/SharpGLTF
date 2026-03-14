@@ -156,6 +156,8 @@ namespace SharpGLTF.Schema2
         #endregion
     }
 
+    #pragma warning disable GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
     partial class TextureDDS : IExtensionTypeInfo
     {
         internal TextureDDS(Texture parent)
@@ -251,6 +253,8 @@ namespace SharpGLTF.Schema2
             return tex.FallbackImage == null;
         }
     }
+
+#pragma warning restore GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     [System.Diagnostics.DebuggerDisplay("TextureSampler[{LogicalIndex}] {Name}")]
     public sealed partial class TextureSampler
