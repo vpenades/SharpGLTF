@@ -5,6 +5,9 @@ using System.Linq;
 
 using SharpGLTF.IO;
 
+using System.Diagnostics.CodeAnalysis;
+
+
 #if NET6_0_OR_GREATER
 using DYNAMICMEMBERS = System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembersAttribute;
 using DYNAMICTYPES = System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes;
@@ -322,12 +325,14 @@ namespace SharpGLTF.Schema2
                 validate._LinkThrow("Extensions", iex);
             }
 
-            foreach (var ext in GatherUsedAndRequiredExtensions().Select(item => item.ext))
+            var extensions = GatherUsedAndRequiredExtensions().ToList();
+
+            foreach (var ext in extensions.Select(item => item.ext))
             {
                 if (!this._extensionsUsed.Contains(ext)) validate._LinkThrow("Extensions", ext);
             }
 
-            foreach (var ext in GatherUsedAndRequiredExtensions().Where(item => item.isRequired).Select(item => item.ext))
+            foreach (var ext in extensions.Where(item => item.isRequired).Select(item => item.ext))
             {
                 if (!this._extensionsRequired.Contains(ext)) validate._LinkThrow("Extensions", ext);
             }
@@ -339,6 +344,9 @@ namespace SharpGLTF.Schema2
     /// <summary>
     /// Implemented by extensions
     /// </summary>
+    #if NET8_0_OR_GREATER
+    [Experimental("GLTF1001")] // I might move this functionality to an "ExtensionBase" class
+    #endif
     public interface IExtensionTypeInfo
     {
         /// <summary>
