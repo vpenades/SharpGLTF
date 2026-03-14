@@ -130,7 +130,16 @@ namespace SharpGLTF.Schema2.LoadAndSave
             {
                 _LoadModel(f, true);
             }
-        }        
+        }
+
+        [Explicit]
+        [TestCase("YetiSmall.glb")]
+        public void DebugModelsFromBabylonJs(string modelPath)
+        {
+            modelPath = TestFiles.GetBabylonJSModelsPaths().FirstOrDefault(item => item.EndsWith(modelPath));
+
+            _LoadModel(modelPath, true);
+        }
 
         [TestCase("TeapotsGalore.gltf")]
         [TestCase("GrassFieldInstanced.glb")]

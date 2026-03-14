@@ -208,6 +208,9 @@ namespace SharpGLTF
             {                
                 "ClearCoatTest.gltf", // validator reports errors.
                 "ClearCoatTest.glb", // validator reports errors.
+                "YetiSmall.glb", // draco compression
+                "FlightHelmetKTX\\FlightHelmet.gltf", // missing ExtensionsRequired
+                "StandardShaderBall\\StandardShaderBall.gltf", // missing .bin file
                 "\\Elf\\Elf.gltf", // validator reports invalid inverse bind matrices.
                 "\\meshes\\Bee.glb", // validator reports errors.
                 "\\meshes\\Tests\\AssetGenerator", // already covered separately.
@@ -223,8 +226,8 @@ namespace SharpGLTF
             var files = _FindModelInDirectory(_BabylonJsMeshesDir);
 
             return files
-                .Where(item => !item.ToUpperInvariant().Contains("GLTF-DRACO"))
-                .Where(item => !item.ToUpperInvariant().Contains("GLTF-MESHOPT")) // not supported yet
+                .Where(item => !item.Contains("GLTF-DRACO", StringComparison.OrdinalIgnoreCase))
+                .Where(item => !item.Contains("GLTF-MESHOPT", StringComparison.OrdinalIgnoreCase)) // not supported yet
                 .Where(item => skipAlways.All(f => !item.Contains(f)))                
                 .OrderBy(item => item)                
                 .ToList();
