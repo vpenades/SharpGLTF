@@ -34,15 +34,8 @@
     
   </PropertyGroup>
 
-  <ItemGroup>
-    
-    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
-    
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    
+  <ItemGroup>    
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />    
   </ItemGroup>  
   
 </Project>

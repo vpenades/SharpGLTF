@@ -24,9 +24,9 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
-    <IsAotCompatible>true</IsAotCompatible>
-  </PropertyGroup>
+	<PropertyGroup Condition=" '$(TargetFramework)' == 'net10.0' ">
+		<IsAotCompatible>true</IsAotCompatible>
+	</PropertyGroup>
 
   <Import Project="$(MsBuildThisFileDirectory)Shared\SharpGLTF.PublicKey.props" />
 
@@ -55,10 +55,10 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)..\stylecop.json" />    
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' or '$(TargetFramework)' == 'net6.0-windows'">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net10.0' or '$(TargetFramework)' == 'net10.0-windows'">
     
     <!-- Optimization analysis only makes sense on platforms that will be actually ran -->
 
