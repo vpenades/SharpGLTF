@@ -441,7 +441,8 @@ namespace SharpGLTF.Scenes
         private void SetJoints(TRANSFORM meshWorldTransform, NodeBuilder[] joints)
         {
             Guard.NotNull(joints, nameof(joints));
-            Guard.IsTrue(NodeBuilder.IsValidArmature(joints), nameof(joints));
+            var jr = NodeBuilder.IsValidArmature(joints, out string errorMsg);
+            Guard.IsTrue(jr, nameof(joints), errorMsg);
 
             _MeshPoseWorldTransform = meshWorldTransform;
             _Joints.Clear();
@@ -451,7 +452,8 @@ namespace SharpGLTF.Scenes
         private void SetJoints((NodeBuilder Joint, Matrix4x4 InverseBindMatrix)[] joints)
         {
             Guard.NotNull(joints, nameof(joints));
-            Guard.IsTrue(NodeBuilder.IsValidArmature(joints.Select(item => item.Joint)), nameof(joints));
+            var jr = NodeBuilder.IsValidArmature(joints.Select(item => item.Joint), out string errorMsg);
+            Guard.IsTrue(jr, nameof(joints), errorMsg);
 
             for(int i=0; i < joints.Length; ++i)
             {

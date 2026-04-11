@@ -290,25 +290,25 @@ namespace SharpGLTF.Scenes
         /// </summary>
         /// <param name="joints">A collection of joints.</param>
         /// <returns>True if the joints can be used for skinning.</returns>
-        public static bool IsValidArmature(IEnumerable<NodeBuilder> joints)
+        public static bool IsValidArmature(IEnumerable<NodeBuilder> joints, out string reason)
         {
-            if (joints == null) return false;
+            reason = null;
+
+            if (joints == null) { reason = "null collection"; return false; }
 
             joints = joints.EnsureList();
 
-            if (!joints.Any()) return false;
-            if (joints.Any(item => item == null)) return false;
+            if (!joints.Any()) { reason = "empty collection"; return false; }
+            if (joints.Any(item => item == null)) { reason = "collection has null items"; return false; }
 
             var root = joints.First().Root;
 
             // check if all joints share the same root
-            if (!joints.All(item => Object.ReferenceEquals(item.Root, root))) return false;
-
-            var nameGroups = Flatten(root)
-                .Where(item => item.Name != null)
-                .GroupBy(item => item.Name);
-
-            if (nameGroups.Any(group => group.Count() > 1)) return false;
+            if (!joints.All(item => Object.ReferenceEquals(item.Root, root)))
+            {
+                reason = "all joints must be part of the same node tree";
+                return false;
+            }            
 
             return true;
         }

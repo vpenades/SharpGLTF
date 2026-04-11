@@ -68,6 +68,26 @@ namespace SharpGLTF.Scenes
         /// Default value is TRUE.
         /// </summary>
         public bool MergeBuffers { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to check for duplicated names within an armature node tree
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// glTF specification allows joints to have duplicated names.
+        /// </para>        
+        /// <para>
+        /// But in practice there's a lot of engines that have issues with duplicated names, so this is a safeguard
+        /// to warn the user that some nodes have duplicated names.
+        /// </para>
+        /// <para>
+        /// The default is set to false (disallow duplications) but,
+        /// if for some reason you require name duplication, like importing assets for which
+        /// you want to preserve their names, you can enable this property.
+        /// </para>
+        /// <see href="https://github.com/KhronosGroup/glTF-Validator/issues/93">glTF-Validator issue 93</see>
+        /// </remarks>
+        public bool AllowArmatureDuplicatedNames { get; set; }
     }
 
     public partial class SceneBuilder : IConvertibleToGltf2
@@ -101,7 +121,14 @@ namespace SharpGLTF.Scenes
         /// <returns>A new <see cref="ModelRoot"/> instance.</returns>
         public static ModelRoot ToGltf2(IEnumerable<SceneBuilder> srcScenes, SceneBuilderSchema2Settings settings)
         {
+            if (srcScenes is not IReadOnlyCollection<SceneBuilder>) srcScenes = srcScenes.ToList();
+
             Guard.NotNull(srcScenes, nameof(srcScenes));
+
+            if (!settings.AllowArmatureDuplicatedNames)
+            {
+                foreach (var ss in srcScenes) ss._VerifySkinJointDuplicatedNames();
+            }
 
             var context = new Schema2SceneBuilder();
             context.GpuMeshInstancingMinCount = settings.GpuMeshInstancingMinCount;
@@ -422,6 +449,29 @@ namespace SharpGLTF.Scenes
         #endregion
 
         #region utilities
+
+        private void _VerifySkinJointDuplicatedNames()
+        {
+            var armatures = this
+                .Instances
+                .Select(item => item.Content?.GetArmatureRoot())
+                .Where(item => item != null)
+                .Select(item => item.Root)
+                .Distinct()
+                .ToList();
+
+            foreach(var armature in armatures)
+            {
+                var groupedNames = NodeBuilder.Flatten(armature)
+                    .Where(node => !string.IsNullOrEmpty(node.Name))
+                    .GroupBy(item => item.Name);
+
+                foreach(var groupedName in groupedNames)
+                {
+                    if (groupedName.Skip(1).Any()) throw new ArgumentException($"More than two nodes have the same name: {groupedName.Key}. Set {nameof(SceneBuilderSchema2Settings)}.{nameof(SceneBuilderSchema2Settings.AllowArmatureDuplicatedNames)} to true to allow name duplication.");
+                }
+            }            
+        }
 
         internal static void _VerifyCurveConversion<T>(IAnimationSampler<T> a, Animations.IConvertibleCurve<T> b, Func<T, T, bool> equalityComparer)
         {

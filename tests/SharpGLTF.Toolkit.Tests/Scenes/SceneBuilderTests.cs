@@ -1040,5 +1040,62 @@ namespace SharpGLTF.Scenes
             gltf.AttachToCurrentTest("Three cubes.glb");
         }
 
+        [Test]
+        public void CreateNodesWithNameCollision()
+        {
+            // https://github.com/vpenades/SharpGLTF/issues/299
+
+            // create a simple skinned mesh with a sigle triangle
+
+            const int jointIdx0 = 0; // index of joint node 0
+            const int jointIdx1 = 1; // index of joint node 1
+            const int jointIdx2 = 2; // index of joint node 2
+
+            var v1 = new SKINNEDVERTEX4(new Vector3(-10, 0, +10), (jointIdx0, 1));
+            var v2 = new SKINNEDVERTEX4(new Vector3(+10, 0, +10), (jointIdx1, 1));
+            var v3 = new SKINNEDVERTEX4(new Vector3(+10, 0, -10), (jointIdx2, 1));
+
+            var mesh = SKINNEDVERTEX4.CreateCompatibleMesh("mesh1");
+
+            var material = new MaterialBuilder("material1")
+                .WithChannelParam(KnownChannel.BaseColor, KnownProperty.RGBA, new Vector4(1, 0, 1, 1));
+
+            mesh.UsePrimitive(material).AddTriangle(v1, v2, v3);
+            mesh.Validate();
+
+            // create armature
+
+            var armature = new NodeBuilder("Skeleton");
+            var joint0 = armature.CreateNode("Joint 0").WithLocalTranslation(new Vector3(0, 0, 0)); // jointIdx0
+            var joint1 = joint0.CreateNode("Collision").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx1
+            var joint2 = joint1.CreateNode("Collision").WithLocalTranslation(new Vector3(0, 40, 0));  // jointIdx2
+
+            // create scene
+
+            var scene = new SceneBuilder();            
+
+            scene.AddSkinnedMesh
+                (
+                mesh,
+                Matrix4x4.Identity,
+                joint0, // joint used for skinning joint index 0
+                joint1, // joint used for skinning joint index 1
+                joint2  // joint used for skinning joint index 2
+                );
+
+            // roundtrip
+
+            var settings = new SceneBuilderSchema2Settings();
+
+            // false should throw
+            settings.AllowArmatureDuplicatedNames = false;
+            Assert.Throws<ArgumentException>(() => scene.ToGltf2());
+
+            settings.AllowArmatureDuplicatedNames = true;
+            var gltf = scene.ToGltf2(settings);
+
+            var roundtrip = SceneBuilder.CreateFrom(gltf);
+        }
+
     }
 }
