@@ -162,7 +162,7 @@ namespace SharpGLTF.CodeGen
 
             if (_Types.TryGetValue(key, out _RuntimeType rtype)) return rtype;
 
-            rtype = new _RuntimeType(stype)
+            rtype = new _RuntimeType()
             {
                 RuntimeName = _SanitizeName(stype.PersistentName)
             };

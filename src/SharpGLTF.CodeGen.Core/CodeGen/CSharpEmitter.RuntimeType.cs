@@ -17,16 +17,11 @@ namespace SharpGLTF.CodeGen
         class _RuntimeType
         {
             #region lifecycle
-            internal _RuntimeType(SchemaType t) { _PersistentType = t; }
+            internal _RuntimeType() { }
 
             #endregion
 
-            #region data
-
-            /// <summary>
-            /// Schema type used for serialization
-            /// </summary>
-            private readonly SchemaType _PersistentType;
+            #region data            
 
             /// <summary>
             /// Namespace in which the source code will be generated.
