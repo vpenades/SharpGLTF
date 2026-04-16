@@ -80,38 +80,7 @@ namespace SharpGLTF.Schema2
 
         public static IEnumerable<string> SupportedExtensions => _Extensions
             .Select(item => item.Name)
-            .Concat(new[] { "KHR_mesh_quantization" }); // special case because it's a "typeless" extension.
-
-        /// <summary>
-        /// Registers a new extensions to be used globally.
-        /// </summary>
-        /// <typeparam name="TParent">The parent type to which this extension is attached.</typeparam>
-        /// <typeparam name="TExtension">The extension type.</typeparam>
-        /// <param name="persistentName">The extension name.</param>
-        /// <remarks>
-        /// The <paramref name="persistentName"/> is the value used for serialization<br/>
-        /// and it must meet <see href="https://github.com/KhronosGroup/glTF/blob/master/extensions/Prefixes.md">extension naming constraints</see>.
-        /// </remarks>
-        [Obsolete("Use RegisterExtension(name, factory) instead.")]
-        public static void RegisterExtension
-            <TParent,
-                #if NET6_0_OR_GREATER
-                [DYNAMICMEMBERS(DYNAMICCONSTRUCTORS)]
-                #endif
-            TExtension>
-            (string persistentName)
-            where TParent : JsonSerializable
-            where TExtension : JsonSerializable
-        {
-            Guard.NotNullOrEmpty(persistentName, nameof(persistentName));
-            Guard.MustBeNull(Identify(typeof(TParent), typeof(TExtension)), $"{nameof(TExtension)} already registered for {nameof(TParent)}");
-
-            // TODO: check that persistentName has a valid extension name.
-
-            var ext = ExtensionEntry.Create<TParent,TExtension>(persistentName);
-
-            _Extensions.Add(ext);
-        }
+            .Concat(new[] { "KHR_mesh_quantization" }); // special case because it's a "typeless" extension.        
 
         /// <summary>
         /// Registers a new extensions to be used globally.
@@ -126,7 +95,7 @@ namespace SharpGLTF.Schema2
         /// </remarks>
         public static void RegisterExtension<TParent,TExtension>(string persistentName, Func<TParent, JsonSerializable> factory)
             where TParent : JsonSerializable
-            where TExtension : JsonSerializable
+            where TExtension : ExtensionBase
         {
             Guard.NotNullOrEmpty(persistentName, nameof(persistentName));
             Guard.MustBeNull(Identify(typeof(TParent), typeof(TExtension)), $"{nameof(TExtension)} already registered for {nameof(TParent)}");
@@ -299,13 +268,11 @@ namespace SharpGLTF.Schema2
                     if (string.IsNullOrWhiteSpace(id)) continue;
 
                     bool isRequired = false;
-
-                    #pragma warning disable GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-                    if (ext is IExtensionTypeInfo extInfo)
+                    
+                    if (ext is ExtensionBase extInfo)
                     {
                         isRequired = extInfo.CheckIsRequiredExtension(c);
-                    }
-                    #pragma warning restore GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+                    }                    
 
                     if (exts.TryGetValue(id, out var stored)) { isRequired |= stored; }
 
@@ -344,21 +311,15 @@ namespace SharpGLTF.Schema2
     }
 
     /// <summary>
-    /// Implemented by extensions
+    /// Base class for extensions
     /// </summary>
-    #if NET8_0_OR_GREATER
-    [Experimental("GLTF1001")] // I might move this functionality to an "ExtensionBase" class
-    #endif
-    public interface IExtensionTypeInfo
+    public abstract class ExtensionBase : ExtraProperties
     {
-        /// <summary>
-        /// Checks whether the extension instance implementing this interface should be tagged as required.
-        /// </summary>
-        /// <param name="extensionOwner">the owner of the extension</param>
-        /// <returns>true if the extension should be tagged as required</returns>
-        /// <remarks>
-        /// This is called just before saving the model.
-        /// </remarks>
-        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner);
-    }
+        protected ExtensionBase() { }
+
+        public virtual bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            return false;
+        }
+    }    
 }

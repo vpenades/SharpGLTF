@@ -44,7 +44,7 @@ namespace SharpGLTF.CodeGen
 
             t.RuntimeNamespace = runtimeNamespace;
             t.RuntimeName = runtimeName;
-        }
+        }        
 
         /// <summary>
         /// Gets the runtime name associated to the type with the given <paramref name="persistentName"/>
@@ -162,7 +162,7 @@ namespace SharpGLTF.CodeGen
 
             rtype = new _RuntimeType()
             {
-                RuntimeName = _SanitizeName(stype.PersistentName)
+                RuntimeName = _SanitizeName(stype.PersistentName)                
             };
 
             _Types[key] = rtype;
@@ -451,7 +451,26 @@ namespace SharpGLTF.CodeGen
             classDecl += "partial ";
             classDecl += "class ";
             classDecl += _GetRuntimeName(type);
-            if (type.BaseClass != null) classDecl += $" : {_GetRuntimeName(type.BaseClass)}";
+
+            if (type.BaseClass != null)
+            {
+                var baseClass = _GetRuntimeName(type.BaseClass);
+
+                // if type is an extension, replace ExtraProperties base class
+                // with the more meaningful ExtensionBase class
+                if (baseClass == "ExtraProperties" && type.PersistentName.EndsWith(" EXTENSION", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parentIdentifier = type.Identifier.Split('.')[0];
+                    // parentIdentifier is glTF, material, node, etc
+                    // var parentClass = type._Owner.FindClass(parentIdentifier);
+                    // var parentName = _GetRuntimeName(parentClass);
+
+                    baseClass = "ExtensionBase";
+                }
+
+                classDecl += $" : {baseClass}";
+            }
+
             return classDecl;
         }
         

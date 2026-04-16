@@ -158,7 +158,7 @@ namespace SharpGLTF.Schema2
 
     #pragma warning disable GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
-    partial class TextureDDS : IExtensionTypeInfo
+    partial class TextureDDS
     {
         internal TextureDDS(Texture parent)
         {
@@ -182,7 +182,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        public override bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
         {
             if (extensionOwner is not Texture tex) return false;
 
@@ -190,7 +190,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    partial class TextureWEBP : IExtensionTypeInfo
+    partial class TextureWEBP
     {
         internal TextureWEBP(Texture parent)
         {
@@ -214,7 +214,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        public override bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
         {
             if (extensionOwner is not Texture tex) return false;
 
@@ -222,7 +222,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-    partial class TextureKTX2 : IExtensionTypeInfo
+    partial class TextureKTX2
     {
         internal TextureKTX2(Texture parent)
         {
@@ -246,7 +246,7 @@ namespace SharpGLTF.Schema2
             }
         }
 
-        public bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        public override bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
         {
             if (extensionOwner is not Texture tex) return false;
 
