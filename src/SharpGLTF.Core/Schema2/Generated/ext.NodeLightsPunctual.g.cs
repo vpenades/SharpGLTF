@@ -36,7 +36,7 @@ namespace SharpGLTF.Schema2
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class _NodePunctualLight : ExtraProperties
+	partial class _NodePunctualLight : ExtensionBase
 	{
 	
 		#region reflection

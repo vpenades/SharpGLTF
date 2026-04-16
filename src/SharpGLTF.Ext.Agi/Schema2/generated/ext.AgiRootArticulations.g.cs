@@ -210,7 +210,7 @@ namespace SharpGLTF.Schema2.AGI
 	[System.Diagnostics.CodeAnalysis.DynamicallyAccessedMembers(System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.NonPublicConstructors | System.Diagnostics.CodeAnalysis.DynamicallyAccessedMemberTypes.PublicConstructors)]
 	#endif
 	[global::System.CodeDom.Compiler.GeneratedCodeAttribute("SharpGLTF.CodeGen", "1.0.0.0")]
-	partial class AgiRootArticulations : ExtraProperties
+	partial class AgiRootArticulations : ExtensionBase
 	{
 	
 		#region reflection
