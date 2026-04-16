@@ -46,20 +46,6 @@ namespace SharpGLTF.CodeGen
             t.RuntimeName = runtimeName;
         }
 
-        public void AddRuntimeComment(string persistentName, string comment)
-        {
-            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
-
-            t.RuntimeComments.Add(comment);
-        }
-
-        public IReadOnlyList<string> GetRuntimeComments(SchemaType cls)
-        {
-            return !_TryGetType(cls, out var rtype)
-                ? Array.Empty<string>()
-                : (IReadOnlyList<string>)rtype.RuntimeComments;
-        }
-
         /// <summary>
         /// Gets the runtime name associated to the type with the given <paramref name="persistentName"/>
         /// </summary>
@@ -80,8 +66,6 @@ namespace SharpGLTF.CodeGen
             return _Types[persistentName].RuntimeNamespace ?? Constants.OutputNamespace;
         }
 
-
-
         public void SetDefaultCollectionContainer(string container) { _DefaultCollectionContainer = container; }
 
         public void SetFieldToChildrenList(SchemaType.Context ctx, string persistentName, string fieldName)
@@ -100,6 +84,20 @@ namespace SharpGLTF.CodeGen
             var field = classType.UseField(fieldName);
             var runtimeName = this.GetRuntimeName(persistentName);
             this.SetCollectionContainer(field, $"ChildrenDictionary<TItem,{runtimeName}>");
+        }
+
+        public void AddRuntimeComment(string persistentName, string comment)
+        {
+            if (!_Types.TryGetValue(persistentName, out _RuntimeType t)) return;
+
+            t.RuntimeComments.Add(comment);
+        }
+
+        public IReadOnlyList<string> GetRuntimeComments(SchemaType cls)
+        {
+            return !_TryGetType(cls, out var rtype)
+                ? Array.Empty<string>()
+                : (IReadOnlyList<string>)rtype.RuntimeComments;
         }
 
         public void DeclareClass(ClassType type)
