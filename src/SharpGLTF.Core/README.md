@@ -50,6 +50,22 @@ It also handles the way a mesh is brought from its local space to world space, i
 - [x] [KHR_lights_punctual](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_lights_punctual)
 - [x] [KHR_mesh_quantization](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_mesh_quantization)
 - [x] [EXT_mesh_gpu_instancing](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Vendor/EXT_mesh_gpu_instancing)
+- [x] [KHR_gaussian_splatting](https://github.com/KhronosGroup/glTF/tree/main/extensions/2.0/Khronos/KHR_gaussian_splatting)
+
+#### KHR_gaussian_splatting quick usage
+
+```c#
+var primitive = mesh.CreatePrimitive().WithIndicesAutomatic(PrimitiveType.POINTS);
+primitive.WithVertexAccessor("POSITION", positions);
+primitive.WithVertexAccessor(GaussianSplatting.AttributeRotation, rotations);
+primitive.WithVertexAccessor(GaussianSplatting.AttributeScale, scales);
+primitive.WithVertexAccessor(GaussianSplatting.AttributeOpacity, opacities);
+primitive.WithVertexAccessor(GaussianSplatting.AttributeSHDegree0Coef0, shDegree0);
+
+var gaussian = primitive.UseGaussianSplatting();
+gaussian.Kernel = GaussianSplatting.KernelEllipse;
+gaussian.ColorSpace = GaussianSplatting.ColorSpaceSrgbRec709Display;
+```
 
 - [x] [KHR_materials_pbrSpecularGlossiness](https://github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_pbrSpecularGlossiness)
   - This extension has been declared _obsolete_ by Khronos, in favour of KHR_materials_specular + KHR_materials_IOR
