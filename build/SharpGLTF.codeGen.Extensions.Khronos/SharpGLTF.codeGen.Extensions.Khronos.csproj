@@ -6,6 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Schemas\glTF.MSFT_texture_xnb.schema.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Schemas\glTF.MSFT_texture_xnb.schema.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\SharpGLTF.CodeGen.Core\SharpGLTF.CodeGen.Core.csproj" />
   </ItemGroup>  
 

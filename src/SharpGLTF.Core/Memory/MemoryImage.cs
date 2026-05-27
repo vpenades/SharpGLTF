@@ -268,6 +268,11 @@ namespace SharpGLTF.Memory
         public bool IsKtx2 => _IsKtx2Image(_Image);
 
         /// <summary>
+        /// Gets a value indicating whether this object represents a valid XNA XNB image.
+        /// </summary>
+        public bool IsXnb => _IsXnbImage(_Image);
+
+        /// <summary>
         /// Gets a value indicating whether this object represents an image backed by a glTF extension.
         /// </summary>
         public bool IsExtendedFormat => IsDds || IsWebp || IsKtx2;
@@ -431,6 +436,8 @@ namespace SharpGLTF.Memory
 
         private static bool _IsPngImage(IReadOnlyList<Byte> data)
         {
+            if (data.Count < 4) return false;
+
             if (data[0] != 0x89) return false;
             if (data[1] != 0x50) return false;
             if (data[2] != 0x4e) return false;
@@ -441,6 +448,8 @@ namespace SharpGLTF.Memory
 
         private static bool _IsJpgImage(IReadOnlyList<Byte> data)
         {
+            if (data.Count < 2) return false;
+
             if (data[0] != 0xff) return false;
             if (data[1] != 0xd8) return false;
 
@@ -449,6 +458,8 @@ namespace SharpGLTF.Memory
 
         private static bool _IsDdsImage(IReadOnlyList<Byte> data)
         {
+            if (data.Count < 4) return false;
+
             if (data[0] != 0x44) return false;
             if (data[1] != 0x44) return false;
             if (data[2] != 0x53) return false;
@@ -458,6 +469,8 @@ namespace SharpGLTF.Memory
 
         private static bool _IsWebpImage(IReadOnlyList<Byte> data)
         {
+            if (data.Count < 12) return false;
+
             // RIFF
             if (data[0] != 0x52) return false;
             if (data[1] != 0x49) return false;
@@ -478,6 +491,16 @@ namespace SharpGLTF.Memory
             try { if (!Ktx2Header.TryGetHeader(data, out Ktx2Header header)) return false;
                 return header.IsValidHeader; }
             catch { return false; }
+        }
+
+        private static bool _IsXnbImage(IReadOnlyList<Byte> data)
+        {
+            if (data.Count < 3) return false;
+            if (data[0] != 0x58) return false;
+            if (data[1] != 0x4E) return false;
+            if (data[2] != 0x42) return false;
+
+            return true;
         }
 
         private static bool _IsImage(IReadOnlyList<Byte> data)

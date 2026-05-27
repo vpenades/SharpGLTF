@@ -51,6 +51,9 @@ namespace SharpGLTF.Schema2
             var ktximg = this.GetExtension<TextureKTX2>()?.Image;
             if (ktximg != null) return ktximg;
 
+            var xnbimg = this.GetExtension<TextureXNB>()?.Image;
+            if (xnbimg != null) return xnbimg;
+
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }
 
@@ -93,11 +96,12 @@ namespace SharpGLTF.Schema2
         {
             Guard.NotNull(extendedImage, nameof(extendedImage));
             Guard.MustShareLogicalParent(this, extendedImage, nameof(extendedImage));
-            Guard.IsTrue(extendedImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP or KTX2");
+            Guard.IsTrue(extendedImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP, KTX2 or XNB");
 
             if (extendedImage.Content.IsDds) { _UseDDSTexture().Image = extendedImage; return; }
             if (extendedImage.Content.IsWebp) { _UseWEBPTexture().Image = extendedImage; return; }
             if (extendedImage.Content.IsKtx2) { _UseKTX2Texture().Image = extendedImage; return; }
+            if (extendedImage.Content.IsXnb) { _UseXNBTexture().Image = extendedImage; return; }
 
             throw new NotImplementedException("Unknown image format");
         }
@@ -106,6 +110,7 @@ namespace SharpGLTF.Schema2
         {
             _source = null;
             this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureWEBP>();
             this.RemoveExtensions<TextureKTX2>();
         }
@@ -113,13 +118,23 @@ namespace SharpGLTF.Schema2
         private TextureDDS _UseDDSTexture()
         {
             this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureKTX2>();
             return this.UseExtension<TextureDDS>();
+        }
+
+        private TextureXNB _UseXNBTexture()
+        {
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureKTX2>();
+            return this.UseExtension<TextureXNB>();
         }
 
         private TextureWEBP _UseWEBPTexture()
         {
             this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureKTX2>();
             return this.UseExtension<TextureWEBP>();
         }
@@ -127,6 +142,7 @@ namespace SharpGLTF.Schema2
         private TextureKTX2 _UseKTX2Texture()
         {
             this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureWEBP>();
             return this.UseExtension<TextureKTX2>();
         }
@@ -161,6 +177,38 @@ namespace SharpGLTF.Schema2
     partial class TextureDDS
     {
         internal TextureDDS(Texture parent)
+        {
+            _Parent = parent;
+        }
+
+        private readonly Texture _Parent;
+
+        public Image Image
+        {
+            get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
+            set
+            {
+                if (value != null)
+                {
+                    Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                    Guard.IsTrue(value.Content.IsDds, nameof(value));
+                }
+
+                _source = value?.LogicalIndex;
+            }
+        }
+
+        public override bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            if (extensionOwner is not Texture tex) return false;
+
+            return tex.FallbackImage == null;
+        }
+    }
+
+    partial class TextureXNB
+    {
+        internal TextureXNB(Texture parent)
         {
             _Parent = parent;
         }
@@ -254,7 +302,7 @@ namespace SharpGLTF.Schema2
         }
     }
 
-#pragma warning restore GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+    #pragma warning restore GLTF1001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 
     [System.Diagnostics.DebuggerDisplay("TextureSampler[{LogicalIndex}] {Name}")]
     public sealed partial class TextureSampler

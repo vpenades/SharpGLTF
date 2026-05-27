@@ -59,6 +59,7 @@ namespace SharpGLTF.Schema2
             RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform", p => new TextureTransform(p));
 
             RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds", p => new TextureDDS(p));
+            RegisterExtension<Texture, TextureXNB>("MSFT_texture_xnb", p => new TextureXNB(p));
             RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp", p => new TextureWEBP(p));
             RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu", p => new TextureKTX2(p));
 
