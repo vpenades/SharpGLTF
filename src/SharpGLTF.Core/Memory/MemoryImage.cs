@@ -27,6 +27,7 @@ namespace SharpGLTF.Memory
             if (IsDds) return $"DDS {_Image.Count}ᴮʸᵗᵉˢ";
             if (IsWebp) return $"WEBP {_Image.Count}ᴮʸᵗᵉˢ";
             if (IsKtx2) return $"KTX2 {_Image.Count}ᴮʸᵗᵉˢ";
+            if (IsXnb) return $"XNB {_Image.Count}ᴮʸᵗᵉˢ";
 
             return "Undefined";
         }
@@ -40,12 +41,14 @@ namespace SharpGLTF.Memory
         const string EMBEDDED_JPEG_BUFFER = "data:image/jpeg";
         const string EMBEDDED_PNG_BUFFER = "data:image/png";
         const string EMBEDDED_DDS_BUFFER = "data:image/vnd-ms.dds";
+        const string EMBEDDED_XNB_BUFFER = "data:image/vnd-ms.xnb";
         const string EMBEDDED_WEBP_BUFFER = "data:image/webp";
         const string EMBEDDED_KTX2_BUFFER = "data:image/ktx2";
 
         const string MIME_PNG = "image/png";
         const string MIME_JPG = "image/jpeg";
         const string MIME_DDS = "image/vnd-ms.dds";
+        const string MIME_XNB = "image/vnd-ms.xnb";
         const string MIME_WEBP = "image/webp";
         const string MIME_KTX2 = "image/ktx2";
 
@@ -62,6 +65,7 @@ namespace SharpGLTF.Memory
             EMBEDDED_JPEG_BUFFER,
             EMBEDDED_PNG_BUFFER,
             EMBEDDED_DDS_BUFFER,
+            EMBEDDED_XNB_BUFFER,
             EMBEDDED_WEBP_BUFFER,
             EMBEDDED_KTX2_BUFFER };
 
@@ -103,6 +107,7 @@ namespace SharpGLTF.Memory
             if (mime64content.StartsWith(EMBEDDED_PNG_BUFFER, StringComparison.Ordinal) && !_IsPngImage(data)) throw new ArgumentException("Invalid PNG Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_JPEG_BUFFER, StringComparison.Ordinal) && !_IsJpgImage(data)) throw new ArgumentException("Invalid JPG Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_DDS_BUFFER, StringComparison.Ordinal) && !_IsDdsImage(data)) throw new ArgumentException("Invalid DDS Content", nameof(mime64content));
+            if (mime64content.StartsWith(EMBEDDED_XNB_BUFFER, StringComparison.Ordinal) && !_IsXnbImage(data)) throw new ArgumentException("Invalid XNB Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_WEBP_BUFFER, StringComparison.Ordinal) && !_IsWebpImage(data)) throw new ArgumentException("Invalid WEBP Content", nameof(mime64content));
             if (mime64content.StartsWith(EMBEDDED_KTX2_BUFFER, StringComparison.Ordinal) && !_IsKtx2Image(data)) throw new ArgumentException("Invalid KTX2 Content", nameof(mime64content));
 
@@ -300,8 +305,9 @@ namespace SharpGLTF.Memory
                 if (IsPng) return "png";
                 if (IsJpg) return "jpg";
                 if (IsDds) return "dds";
+                if (IsXnb) return "xnb";
                 if (IsWebp) return "webp";
-                if (IsKtx2) return "ktx2";
+                if (IsKtx2) return "ktx2";                
                 throw new InvalidOperationException("Image format not recognized.");
             }
         }
@@ -317,6 +323,7 @@ namespace SharpGLTF.Memory
                 if (IsPng) return MIME_PNG;
                 if (IsJpg) return MIME_JPG;
                 if (IsDds) return MIME_DDS;
+                if (IsXnb) return MIME_XNB;
                 if (IsWebp) return MIME_WEBP;
                 if (IsKtx2) return MIME_KTX2;
                 throw new InvalidOperationException("Image format not recognized.");
@@ -332,7 +339,7 @@ namespace SharpGLTF.Memory
         {
             if (path == null) return null;
 
-            foreach (var ext in new string[] { ".jpg",".jpeg",".png",".dds",".webp",".ktx2" })
+            foreach (var ext in new string[] { ".jpg",".jpeg",".png",".dds",".webp",".ktx2", ".xnb" })
             {
                 if (path.EndsWith(ext, StringComparison.OrdinalIgnoreCase)) return path.Substring(0, path.Length - ext.Length);
             }
@@ -400,8 +407,9 @@ namespace SharpGLTF.Memory
                 if (this.IsPng) mimeContent = EMBEDDED_PNG_BUFFER;
                 if (this.IsJpg) mimeContent = EMBEDDED_JPEG_BUFFER;
                 if (this.IsDds) mimeContent = EMBEDDED_DDS_BUFFER;
+                if (this.IsXnb) mimeContent = EMBEDDED_XNB_BUFFER;
                 if (this.IsWebp) mimeContent = EMBEDDED_WEBP_BUFFER;
-                if (this.IsKtx2) mimeContent = EMBEDDED_KTX2_BUFFER;
+                if (this.IsKtx2) mimeContent = EMBEDDED_KTX2_BUFFER;                
 
                 mimeContent += ";base64,";
             }
@@ -424,6 +432,7 @@ namespace SharpGLTF.Memory
             if (format.EndsWith("jpg", StringComparison.OrdinalIgnoreCase)) return IsJpg;
             if (format.EndsWith("jpeg", StringComparison.OrdinalIgnoreCase)) return IsJpg;
             if (format.EndsWith("dds", StringComparison.OrdinalIgnoreCase)) return IsDds;
+            if (format.EndsWith("xnb", StringComparison.OrdinalIgnoreCase)) return IsXnb;
             if (format.EndsWith("webp", StringComparison.OrdinalIgnoreCase)) return IsWebp;
             if (format.EndsWith("ktx2", StringComparison.OrdinalIgnoreCase)) return IsKtx2;
 
