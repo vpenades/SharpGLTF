@@ -36,6 +36,7 @@ namespace SharpGLTF
             yield return new TextureDDSExtension();
             yield return new TextureXNBExtension();
             yield return new TextureWebpExtension();
+            yield return new TextureAstcExtension();
             yield return new TextureKtx2Extension();            
 
             // other

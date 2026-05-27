@@ -45,14 +45,17 @@ namespace SharpGLTF.Schema2
             var ddsimg = this.GetExtension<TextureDDS>()?.Image;
             if (ddsimg != null) return ddsimg;
 
-            var wbpimg = this.GetExtension<TextureWEBP>()?.Image;
-            if (wbpimg != null) return wbpimg;
+            var xnbimg = this.GetExtension<TextureXNB>()?.Image;
+            if (xnbimg != null) return xnbimg;
+
+            var webpimg = this.GetExtension<TextureWEBP>()?.Image;
+            if (webpimg != null) return webpimg;
 
             var ktximg = this.GetExtension<TextureKTX2>()?.Image;
             if (ktximg != null) return ktximg;
 
-            var xnbimg = this.GetExtension<TextureXNB>()?.Image;
-            if (xnbimg != null) return xnbimg;
+            var astcimg = this.GetExtension<TextureASTC>()?.Image;
+            if (astcimg != null) return astcimg;
 
             return _source.HasValue ? LogicalParent.LogicalImages[_source.Value] : null;
         }
@@ -99,9 +102,16 @@ namespace SharpGLTF.Schema2
             Guard.IsTrue(extendedImage.Content.IsExtendedFormat, "Primary image must be DDS, WEBP, KTX2 or XNB");
 
             if (extendedImage.Content.IsDds) { _UseDDSTexture().Image = extendedImage; return; }
-            if (extendedImage.Content.IsWebp) { _UseWEBPTexture().Image = extendedImage; return; }
-            if (extendedImage.Content.IsKtx2) { _UseKTX2Texture().Image = extendedImage; return; }
             if (extendedImage.Content.IsXnb) { _UseXNBTexture().Image = extendedImage; return; }
+            if (extendedImage.Content.IsWebp) { _UseWEBPTexture().Image = extendedImage; return; }
+            if (extendedImage.Content.IsKtx2)
+            {
+                // ToDo: if the Ktx2 image uses ASTC compression we could do:
+                // _UseASTCTexture().Image = extendedImage; return;
+
+                _UseKTX2Texture().Image = extendedImage;
+                return;
+            }
 
             throw new NotImplementedException("Unknown image format");
         }
@@ -113,6 +123,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureWEBP>();
             this.RemoveExtensions<TextureKTX2>();
+            this.RemoveExtensions<TextureASTC>();
         }
 
         private TextureDDS _UseDDSTexture()
@@ -120,6 +131,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<TextureWEBP>();
             this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureKTX2>();
+            this.RemoveExtensions<TextureASTC>();
             return this.UseExtension<TextureDDS>();
         }
 
@@ -128,6 +140,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<TextureDDS>();
             this.RemoveExtensions<TextureWEBP>();
             this.RemoveExtensions<TextureKTX2>();
+            this.RemoveExtensions<TextureASTC>();
             return this.UseExtension<TextureXNB>();
         }
 
@@ -136,6 +149,7 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<TextureDDS>();
             this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureKTX2>();
+            this.RemoveExtensions<TextureASTC>();
             return this.UseExtension<TextureWEBP>();
         }
 
@@ -144,7 +158,17 @@ namespace SharpGLTF.Schema2
             this.RemoveExtensions<TextureDDS>();
             this.RemoveExtensions<TextureXNB>();
             this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureASTC>();
             return this.UseExtension<TextureKTX2>();
+        }
+
+        private TextureASTC _UseASTCTexture()
+        {
+            this.RemoveExtensions<TextureDDS>();
+            this.RemoveExtensions<TextureXNB>();
+            this.RemoveExtensions<TextureWEBP>();
+            this.RemoveExtensions<TextureKTX2>();
+            return this.UseExtension<TextureASTC>();
         }
 
         internal bool _IsEqualentTo(Image primary, Image fallback, TextureSampler sampler)
@@ -273,6 +297,38 @@ namespace SharpGLTF.Schema2
     partial class TextureKTX2
     {
         internal TextureKTX2(Texture parent)
+        {
+            _Parent = parent;
+        }
+
+        private readonly Texture _Parent;
+
+        public Image Image
+        {
+            get => _source.HasValue ? _Parent.LogicalParent.LogicalImages[_source.Value] : null;
+            set
+            {
+                if (value != null)
+                {
+                    Guard.MustShareLogicalParent(_Parent, value, nameof(value));
+                    Guard.IsTrue(value.Content.IsKtx2, nameof(value));
+                }
+
+                _source = value?.LogicalIndex;
+            }
+        }
+
+        public override bool CheckIsRequiredExtension(ExtraProperties extensionOwner)
+        {
+            if (extensionOwner is not Texture tex) return false;
+
+            return tex.FallbackImage == null;
+        }
+    }
+
+    partial class TextureASTC
+    {
+        internal TextureASTC(Texture parent)
         {
             _Parent = parent;
         }

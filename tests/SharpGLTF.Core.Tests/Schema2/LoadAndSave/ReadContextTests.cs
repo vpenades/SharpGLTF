@@ -56,7 +56,7 @@ namespace SharpGLTF.Schema2.LoadAndSave
             // this is a very tiny, placeholder PNG image to be used as replacement
             // of the actual image. This ensures a valid image is passed to the model for
             // the tests to pass.
-            var placeHolderImage = new ArraySegment<byte>(MemoryImage.DefaultPngImage);
+            var placeHolderImage = new ArraySegment<byte>(PngFormatInfo.DefaultPngImage);
 
             ArraySegment<byte> _fileReader(string assetName)
             {

@@ -58,12 +58,13 @@ namespace SharpGLTF.Schema2
 
             RegisterExtension<TextureInfo, TextureTransform>("KHR_texture_transform", p => new TextureTransform(p));
 
-            RegisterExtension<Texture, TextureDDS>("MSFT_texture_dds", p => new TextureDDS(p));
-            RegisterExtension<Texture, TextureXNB>("MSFT_texture_xnb", p => new TextureXNB(p));
-            RegisterExtension<Texture, TextureWEBP>("EXT_texture_webp", p => new TextureWEBP(p));
-            RegisterExtension<Texture, TextureKTX2>("KHR_texture_basisu", p => new TextureKTX2(p));
+            RegisterExtension<Texture, TextureDDS>(TextureDDS.SCHEMANAME, p => new TextureDDS(p));
+            RegisterExtension<Texture, TextureXNB>(TextureXNB.SCHEMANAME, p => new TextureXNB(p));
+            RegisterExtension<Texture, TextureWEBP>(TextureWEBP.SCHEMANAME, p => new TextureWEBP(p));
+            RegisterExtension<Texture, TextureKTX2>(TextureKTX2.SCHEMANAME, p => new TextureKTX2(p));
+            RegisterExtension<Texture, TextureASTC>(TextureASTC.SCHEMANAME, p => new TextureASTC(p));           
 
-            
+
             RegisterExtension<ExtraProperties, XmpPacketReference>("KHR_xmp_json_ld", p => new XmpPacketReference(p));
 
             RegisterExtension<AnimationChannelTarget, AnimationPointer>("KHR_animation_pointer", p => new AnimationPointer(p));
