@@ -378,7 +378,7 @@ namespace SharpGLTF.Geometry
         }
 
         [Test(Description ="Simulates animating mesh visibility by setting scale to (0,0,0)")]
-        public void CreateSceneWithAnimatedVisibility()
+        public void CreateSceneWithFakeAnimatedVisibility()
         {            
             TestContext.CurrentContext.AttachGltfValidatorLinks();            
 
