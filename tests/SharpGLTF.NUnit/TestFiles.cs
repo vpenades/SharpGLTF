@@ -211,8 +211,7 @@ namespace SharpGLTF
                 "YetiSmall.glb", // draco compression
                 "FlightHelmetKTX\\FlightHelmet.gltf", // missing ExtensionsRequired
                 "StandardShaderBall\\StandardShaderBall.gltf", // missing .bin file
-                "\\Elf\\Elf.gltf", // validator reports invalid inverse bind matrices.
-                "\\meshes\\Bee.glb", // validator reports errors.
+                "\\Elf\\Elf.gltf", // validator reports invalid inverse bind matrices.                
                 "\\meshes\\Tests\\AssetGenerator", // already covered separately.
                 "\\meshes\\KHR_materials_volume_testing.glb", // draco compression-
                 "\\meshes\\Yeti\\MayaExport\\", // validator reports out of bounds accesor
@@ -221,6 +220,10 @@ namespace SharpGLTF
                 "\\meshes\\Buildings\\road gap.glb", // uses KHR_Draco compression  
                 "\\meshes\\Buildings\\Road corner.glb", // uses KHR_Draco compression  
                 "\\meshes\\Tests\\BadDraco\\Box-draco.glb", // uses KHR_Draco compression  
+                "\\mixamo\\Characters\\Big Vegas_optimized.glb", // draco
+                "\\mixamo\\Characters\\goblin_d_shareyko_optimized.glb", // draco
+
+               
             };            
 
             var files = _FindModelInDirectory(_BabylonJsMeshesDir);
