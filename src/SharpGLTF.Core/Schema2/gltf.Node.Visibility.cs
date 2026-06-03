@@ -23,7 +23,7 @@ namespace SharpGLTF.Schema2
 
         #endregion
 
-        #region properties
+        #region properties        
 
         public bool IsVisible
         {
@@ -36,14 +36,40 @@ namespace SharpGLTF.Schema2
 
     partial class Node
     {
-        public bool TryGetVisibility(out bool isVisible)
+        /// <summary>
+        /// Gets the evaluated visibility state of this node.
+        /// </summary>
+        public bool IsVisible
         {
-            var ext = this.GetExtension<_NodeVisibility>();
-            if (ext == null) { isVisible = true; return false; }
-            isVisible = ext.IsVisible;
-            return true;
+            get
+            {
+                if (!this.VisualParent.IsVisible) return false;
+                return GetVisibility() ?? true;
+            }
         }
 
+        public bool GetVisibility(Animation animation, float time)
+        {
+            if (animation == null) return IsVisible;
+
+            if (!this.VisualParent.GetVisibility(animation,time)) return false;            
+
+            return this.GetCurveSamplers(animation).GetVisibility(time);
+        }        
+
+        /// <summary>
+        /// Gets the visibility value of this node.
+        /// </summary>
+        /// <returns>if null, it inherits the value from the parent node.</returns>
+        public bool? GetVisibility()
+        {
+            return this.GetExtension<_NodeVisibility>()?.IsVisible ?? null;
+        }
+
+        /// <summary>
+        /// Sets the visibility value of this node.
+        /// </summary>
+        /// <param name="isVisible">true/false or null to inherit from the parent node.</param>
         public void SetVisibility(bool? isVisible)
         {
             if (isVisible == null)

@@ -14,19 +14,27 @@ namespace SharpGLTF.Runtime
     {
         #region lifecycle
 
-        internal NodeTemplate(Schema2.Node srcNode, int parentIdx, int[] childIndices, RuntimeOptions options)
+        internal NodeTemplate(Schema2.Node srcNode, int selfIdx, int parentIdx, int[] childIndices, RuntimeOptions options)
         {
+            // memory isolation
             var isolateMemory = options?.IsolateMemory ?? false;
 
-            _LogicalSourceIndex = srcNode.LogicalIndex;
+            _Source = new WeakReference<Schema2.Node>(srcNode);
 
-            _ParentIndex = parentIdx;
+            // indices
+
+            SelfIndex = selfIdx;
+            ParentIndex = parentIdx;
             _ChildIndices = childIndices;
+
+            // properties
 
             Name = srcNode.Name;
             Extras = RuntimeOptions.ConvertExtras(srcNode, options);
 
-            _IsVisible = srcNode.TryGetVisibility(out var visibility) ? visibility : null;
+            // animatables
+
+            _IsVisible = srcNode.GetVisibility();
             _Visibility = new AnimatableProperty<bool>(_IsVisible ?? true);
 
             _LocalTransform = srcNode.LocalTransform;
@@ -57,15 +65,8 @@ namespace SharpGLTF.Runtime
 
         #region data
 
-        /// <summary>
-        /// the index of this node within <see cref="SceneTemplate._Armature"/>
-        /// </summary>
-        private readonly int _LogicalSourceIndex;
-
-        /// <summary>
-        /// the index of the parent node within <see cref="SceneTemplate._Armature"/>
-        /// </summary>
-        private readonly int _ParentIndex;
+        private WeakReference<Schema2.Node> _Source;
+        
         private readonly int[] _ChildIndices;
 
         private readonly TRANSFORM _LocalTransform;
@@ -82,20 +83,20 @@ namespace SharpGLTF.Runtime
 
         public string Name { get; set; }
 
-        public Object Extras { get; set; }
+        public Object Extras { get; set; }        
 
         /// <summary>
-        /// Gets the index of the source <see cref="Schema2.Node"/> in <see cref="Schema2.ModelRoot.LogicalNodes"/>
+        /// Gets the index of this <see cref="NodeTemplate"/> within <see cref="ArmatureTemplate.Nodes"/>
         /// </summary>
-        public int LogicalNodeIndex => _LogicalSourceIndex;
+        public int SelfIndex { get; }
 
         /// <summary>
-        /// Gets the index of the parent <see cref="NodeTemplate"/> in <see cref="SceneTemplate._Armature"/>
+        /// Gets the index of the parent <see cref="NodeTemplate"/> within <see cref="ArmatureTemplate.Nodes"/>
         /// </summary>
-        public int ParentIndex => _ParentIndex;
+        public int ParentIndex { get; }
 
         /// <summary>
-        /// Gets the list of indices of the children <see cref="NodeTemplate"/> in <see cref="SceneTemplate._Armature"/>
+        /// Gets the list of indices of the children <see cref="NodeTemplate"/> within <see cref="ArmatureTemplate.Nodes"/>
         /// </summary>
         public IReadOnlyList<int> ChildIndices => _ChildIndices;
 
@@ -105,14 +106,46 @@ namespace SharpGLTF.Runtime
 
         #region API
 
-        public Transforms.SparseWeight8 GetMorphWeights(int trackLogicalIndex, float time)
+        /// <summary>
+        /// Gets the source <see cref="Schema2.Node"/> that was used to create this object.
+        /// </summary>
+        /// <param name="node">The source node used to create this object.</param>
+        /// <returns>true if success</returns>
+        /// <remarks>
+        /// This is backed by a weak reference, so it is not guaranteed to return true.<br/>
+        /// Best practice is to call <see cref="GC.KeepAlive(object)"/> with <see cref="Schema2.ModelRoot"/>
+        /// AFTER any call to <see cref="TryGetSourceNode(out Schema2.Node)"/>.
+        /// </remarks>
+        #if NET8_0_OR_GREATER
+        [System.Diagnostics.CodeAnalysis.Experimental("GLTFRT1001")]
+        #endif
+        public bool TryGetSourceNode(out Schema2.Node node)
+        {
+            return _Source.TryGetTarget(out node);
+        }
+
+        public void ApplyAnimationFrame(NodeInstance instance, int trackLogicalIndex, float time)
+        {
+            instance.MorphWeights = GetMorphWeights(trackLogicalIndex, time);
+            instance.LocalMatrix = GetLocalMatrix(trackLogicalIndex, time);
+            instance.IsVisible = GetVisibility(trackLogicalIndex, time) ?? true;
+        }
+
+        public void ApplyAnimationFrame(NodeInstance instance, ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            instance.MorphWeights = GetMorphWeights(track, time, weight);
+            instance.LocalMatrix = GetLocalMatrix(track, time, weight);
+            instance.IsVisible = GetVisibility(track, time, weight) ?? true;
+        }
+
+        private Transforms.SparseWeight8 GetMorphWeights(int trackLogicalIndex, float time)
         {
             if (trackLogicalIndex < 0) return _Morphing.Value;
 
             return _Morphing.GetValueAt(trackLogicalIndex, time);
         }
 
-        public Transforms.SparseWeight8 GetMorphWeights(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        private Transforms.SparseWeight8 GetMorphWeights(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
             if (!_Morphing.IsAnimated) return _Morphing.Value;
 
@@ -126,14 +159,28 @@ namespace SharpGLTF.Runtime
             return Transforms.SparseWeight8.Blend(xforms, weight);
         }
 
-        public TRANSFORM GetLocalTransform(int trackLogicalIndex, float time)
+        private Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
+        {
+            return _LocalTransformAnimation == null || trackLogicalIndex < 0
+                ? _LocalTransform.Matrix
+                : GetLocalTransform(trackLogicalIndex, time).Matrix;
+        }
+
+        private TRANSFORM GetLocalTransform(int trackLogicalIndex, float time)
         {
             return _LocalTransformAnimation == null || trackLogicalIndex < 0
                 ? _LocalTransform
                 : _LocalTransformAnimation.GetTransform(trackLogicalIndex, time);
         }
 
-        public TRANSFORM GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        private Matrix4x4 GetLocalMatrix(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        {
+            return _LocalTransformAnimation == null
+                ? _LocalTransform.Matrix
+                : GetLocalTransform(track, time, weight).Matrix;
+        }
+
+        private TRANSFORM GetLocalTransform(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
             if (_LocalTransformAnimation == null) return _LocalTransform;
 
@@ -147,28 +194,14 @@ namespace SharpGLTF.Runtime
             return TRANSFORM.Blend(xforms, weight);
         }
 
-        public Matrix4x4 GetLocalMatrix(int trackLogicalIndex, float time)
-        {
-            return _LocalTransformAnimation == null || trackLogicalIndex < 0
-                ? _LocalTransform.Matrix
-                : GetLocalTransform(trackLogicalIndex, time).Matrix;
-        }
-
-        public Matrix4x4 GetLocalMatrix(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
-        {
-            return _LocalTransformAnimation == null
-                ? _LocalTransform.Matrix
-                : GetLocalTransform(track, time, weight).Matrix;
-        }
-
-        public bool? GetVisibility(int trackLogicalIndex, float time)
+        private bool? GetVisibility(int trackLogicalIndex, float time)
         {
             return _Visibility == null
                 ? _IsVisible
                 : _Visibility.GetValueAt(trackLogicalIndex, time);
         }
 
-        public bool? GetVisibility(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
+        private bool? GetVisibility(ReadOnlySpan<int> track, ReadOnlySpan<float> time, ReadOnlySpan<float> weight)
         {
             if (_Visibility == null) return _IsVisible;
 

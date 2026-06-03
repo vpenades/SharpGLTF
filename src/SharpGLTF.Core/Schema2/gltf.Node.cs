@@ -880,19 +880,7 @@ namespace SharpGLTF.Schema2
         /// <summary>
         /// Gets the Translation sampler, or null if there's no curve defined.
         /// </summary>
-        public IAnimationSampler<Vector3> Translation => _TranslationSampler;
-
-        /// <summary>
-        /// Gets the raw Morphing sampler, or null if there's no curve defined.
-        /// </summary>
-        [Obsolete("Use GetMorphingSampler<T>()", true)]
-        public IAnimationSampler<Single[]> Morphing => GetMorphingSampler<Single[]>();
-
-        /// <summary>
-        /// Gets the SparseWeight8 Morphing sampler, or null if there's no curve defined.
-        /// </summary>
-        [Obsolete("Use GetMorphingSampler<T>()", true)]
-        public IAnimationSampler<Transforms.SparseWeight8> MorphingSparse => GetMorphingSampler<Transforms.SparseWeight8>();
+        public IAnimationSampler<Vector3> Translation => _TranslationSampler;       
 
 
         public IAnimationSampler<Boolean> Visibility => _VisibilitySampler;
@@ -943,6 +931,11 @@ namespace SharpGLTF.Schema2
                 ?.CreateCurveSampler()
                 ?.GetPoint(time)
                 ?? Transforms.SparseWeight8.Create(TargetNode.MorphWeights);
+        }
+
+        public bool GetVisibility(Single time)
+        {
+            return Visibility.CreateCurveSampler()?.GetPoint(time) ?? true;
         }
 
         #endregion

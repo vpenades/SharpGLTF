@@ -4,7 +4,8 @@ using System.Text;
 
 using SharpGLTF.Transforms;
 
-using XFORM = System.Numerics.Matrix4x4;
+using M4x4XFORM = System.Numerics.Matrix4x4;
+using TRANSFORM = SharpGLTF.Transforms.AffineTransform;
 
 namespace SharpGLTF.Runtime
 {
@@ -20,6 +21,9 @@ namespace SharpGLTF.Runtime
         {
             _Template = template;
             _Parent = parent;
+
+            _LocalVisible = true;
+            _ModelMatrixIsDirty = true;
         }
 
         #endregion
@@ -29,10 +33,13 @@ namespace SharpGLTF.Runtime
         private readonly NodeTemplate _Template;
         private readonly NodeInstance _Parent;
 
-        private XFORM _LocalMatrix;
-        private XFORM? _WorldMatrix;        
+        private SparseWeight8 _MorphWeights;        
 
-        private SparseWeight8 _MorphWeights;
+        private TRANSFORM _LocalTransform;        
+        private M4x4XFORM _ModelMatrix;
+        private bool _ModelMatrixIsDirty;
+
+        private bool _LocalVisible;        
 
         #endregion
 
@@ -53,66 +60,96 @@ namespace SharpGLTF.Runtime
         /// <summary>
         /// Gets or sets the transform matrix of this node in Local Space.
         /// </summary>
-        public XFORM LocalMatrix
+        public M4x4XFORM LocalMatrix
         {
-            get => _LocalMatrix;
+            get => _LocalTransform.Matrix;
             set
             {
-                _LocalMatrix = value;
-                _WorldMatrix = null;
+                _LocalTransform = value;
+                _ModelMatrixIsDirty = true;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the transform matrix of this node in Local Space.
+        /// </summary>
+        public TRANSFORM LocalTransform
+        {
+            get => _LocalTransform;
+            set
+            {
+                _LocalTransform = value;
+                _ModelMatrixIsDirty = true;
             }
         }
 
         /// <summary>
         /// Gets or sets the transform matrix of this node in Model Space.
         /// </summary>
-        public XFORM ModelMatrix
+        public M4x4XFORM ModelMatrix
         {
             get => _GetModelMatrix();
             set => _SetModelMatrix(value);
         }
 
-        public Boolean IsVisible { get; set; }
-
         /// <summary>
-        /// Gets a value indicating whether any of the transforms down the scene tree has been modified.
+        /// Gets or sets whether this node, and all its children are visible
         /// </summary>
-        private bool TransformChainIsDirty
+        /// <remarks>
+        /// In order for this node to be visible not only this property must be true;
+        /// all the parent nodes up to the root must also be visible
+        /// </remarks>
+        public bool IsVisible
         {
-            get
-            {
-                if (!_WorldMatrix.HasValue) return true;
-
-                return _Parent == null ? false : _Parent.TransformChainIsDirty;
-            }
-        }
+            get => _LocalVisible && (_Parent?.IsVisible ?? true);
+            set => _LocalVisible = value;
+        }        
 
         #endregion
 
-        #region API
-
-        private XFORM _GetModelMatrix()
-        {
-            if (!TransformChainIsDirty) return _WorldMatrix.Value;
-
-            _WorldMatrix = _Parent == null ? _LocalMatrix : XFORM.Multiply(_LocalMatrix, _Parent.ModelMatrix);
-
-            return _WorldMatrix.Value;
-        }
-
-        private void _SetModelMatrix(XFORM xform)
-        {
-            if (_Parent == null) { LocalMatrix = xform; return; }
-
-            XFORM.Invert(_Parent._GetModelMatrix(), out XFORM ipwm);
-
-            LocalMatrix = XFORM.Multiply(xform, ipwm);
-        }        
+        #region API             
 
         public void SetAnimationFrame(int trackLogicalIndex, float time)
         {
-            this.MorphWeights = _Template.GetMorphWeights(trackLogicalIndex, time);
-            this.LocalMatrix = _Template.GetLocalMatrix(trackLogicalIndex, time);            
+            _Template.ApplyAnimationFrame(this, trackLogicalIndex, time);
+        }
+
+        private void _SetModelMatrix(M4x4XFORM xform)
+        {
+            if (_Parent == null) { LocalMatrix = xform; return; }
+
+            M4x4XFORM.Invert(_Parent._GetModelMatrix(), out M4x4XFORM ipwm);
+
+            LocalMatrix = M4x4XFORM.Multiply(xform, ipwm);
+        }
+
+        private M4x4XFORM _GetModelMatrix()
+        {
+            UpdateTransformChain();
+
+            return _ModelMatrix;
+        }        
+
+        private bool UpdateTransformChain()
+        {
+            var isDirty = _ModelMatrixIsDirty;
+            _ModelMatrixIsDirty = false;
+
+            if (_Parent != null)
+            {
+                isDirty |= _Parent.UpdateTransformChain();
+
+                if (isDirty)
+                {
+                    _ModelMatrix = M4x4XFORM.Multiply(_LocalTransform.Matrix, _Parent.ModelMatrix);
+                }
+            }
+            else if (isDirty)
+            {
+                _ModelMatrix = _LocalTransform.Matrix;
+            }
+
+            return isDirty;
         }        
 
         #endregion

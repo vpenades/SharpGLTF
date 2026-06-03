@@ -191,7 +191,7 @@ namespace SharpGLTF.Transforms
 
         public AffineTransform(Matrix4x4 matrix)
         {
-            Matrix4x4Factory.GuardMatrix(nameof(matrix), matrix, Matrix4x4Factory.MatrixCheck.WorldTransform);
+            // Matrix4x4Factory.GuardMatrix(nameof(matrix), matrix, Matrix4x4Factory.MatrixCheck.WorldTransform);
 
             _Representation = DATA_MAT;
 

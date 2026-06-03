@@ -48,32 +48,38 @@ namespace SharpGLTF.Runtime
             {
                 var nidx = srcNode.Value;
 
+                var selfIdx = indexSolver(srcNode.Key);
+
                 // parent index
-                var pidx = indexSolver(srcNode.Key.VisualParent);
+                var parentIdx = indexSolver(srcNode.Key.VisualParent);
 
                 // child indices
-                var cidx = srcNode.Key.VisualChildren
+                var childIndices = srcNode.Key.VisualChildren
                     .Select(n => indexSolver(n))
                     .ToArray();
 
-                dstNodes[nidx] = new NodeTemplate(srcNode.Key, pidx, cidx, options);
+                dstNodes[nidx] = new NodeTemplate(srcNode.Key, selfIdx, parentIdx, childIndices, options);
             }
 
             // gather materials
 
-            var dstMaterials = srcNodes
+            var srcMaterials = srcNodes
                 .Keys
                 .Select(item => item.Mesh)
                 .Where(item => item != null)
                 .SelectMany(mesh => mesh.Primitives)
                 .Select(prim => prim.Material)
                 .Where(mat => mat != null)
+                .Distinct();
+
+            var dstMaterials = srcMaterials
                 .Select(mat => new MaterialTemplate(mat, options))
                 .ToArray();
 
             // gather animation durations.
 
-            var dstTracks = srcScene.LogicalParent
+            var dstTracks = srcScene
+                .LogicalParent
                 .LogicalAnimations
                 .Select(item => new AnimationTrackInfo(item.Name, RuntimeOptions.ConvertExtras(item, options), item.Duration))
                 .ToArray();
@@ -163,13 +169,7 @@ namespace SharpGLTF.Runtime
                 var srcTemplate = _NodeTemplates[i];
                 var dstInstance = instance.LogicalNodes[i];
 
-                dstInstance.MorphWeights = srcTemplate.GetMorphWeights(trackLogicalIndex, time);
-                dstInstance.LocalMatrix = srcTemplate.GetLocalMatrix(trackLogicalIndex, time);                
-
-                var v = srcTemplate.GetVisibility(trackLogicalIndex, time) ?? true;
-                v &= dstInstance?.VisualParent?.IsVisible ?? true;
-
-                dstInstance.IsVisible = v;                
+                srcTemplate.ApplyAnimationFrame(dstInstance, trackLogicalIndex, time);
             }
         }
 
@@ -203,24 +203,9 @@ namespace SharpGLTF.Runtime
                 var srcTemplate = _NodeTemplates[i];
                 var dstInstance = instance.LogicalNodes[i];
 
-                dstInstance.MorphWeights = srcTemplate.GetMorphWeights(tracks, times, weights);
-                dstInstance.LocalMatrix = srcTemplate.GetLocalMatrix(tracks, times, weights);
-
-                var v = srcTemplate.GetVisibility(tracks, times, weights);
-                if (v.HasValue) _SetVisibility(instance, i, v.Value);
+                srcTemplate.ApplyAnimationFrame(dstInstance, tracks, times, weights);
             }
-        }
-
-        private void _SetVisibility(ArmatureInstance instance, int index, bool isVisible)
-        {
-            var node = instance.LogicalNodes[index];
-            node.IsVisible = isVisible;
-
-            foreach(var chidx in _NodeTemplates[index].ChildIndices)
-            {
-                _SetVisibility(instance, chidx, isVisible);
-            }
-        }
+        }        
 
         #endregion
     }
