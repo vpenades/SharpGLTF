@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using NUnit.Framework;
 
+using SharpGLTF.Schema2;
+
 namespace SharpGLTF.Runtime
 {
     [Category("Core.Runtime")]
@@ -44,9 +46,11 @@ namespace SharpGLTF.Runtime
                 TestContext.Out.WriteLine(string.Empty);
 
                 Assert.That(drawables.Length, Is.EqualTo(val != 0 ? 2 : 1));
-            }
 
-            
+                // evaluate triangles:                
+
+                AttachmentInfo.From($"animated_frame_{time}.obj").WriteObject(f => model.SaveAsWavefront(f, model.LogicalAnimations[0], time));
+            }            
         }
     }
 }
