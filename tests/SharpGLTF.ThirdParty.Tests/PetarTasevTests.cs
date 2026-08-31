@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using NUnit.Framework;
@@ -7,6 +8,7 @@ using SharpGLTF.Geometry.VertexTypes;
 using SharpGLTF.Materials;
 using SharpGLTF.Runtime;
 using SharpGLTF.Schema2;
+using SharpGLTF.Transforms;
 using SharpGLTF.Validation;
 
 namespace SharpGLTF.ThirdParty
@@ -15,6 +17,38 @@ namespace SharpGLTF.ThirdParty
     
     public class PetarTasevTests
     {
+
+        [Test]
+        public void SkewedMatrix()
+        {
+            var skewedMatrix = new Matrix4x4
+            {
+                M11 = 0.92487437f,  M12 = -0.020702988f, M13 = -0.07374853f, M14 = 0f,
+                M21 = 0.049406692f, M22 = 0.75778115f,   M23 = 0.02921307f,  M24 = 0f,
+                M31 = -0.060421363f, M32 = 0.045907855f, M33 = 0.8235954f, M34 = 0f,
+                M41 = 0.56907547f, M42 = 1.1176939f, M43 = 0.31836793f, M44 = 1f
+            };
+
+            var affine = new AffineTransform(skewedMatrix);
+            Assert.That(!affine.IsDecomposable);
+
+            var mesh = new MeshBuilder<VertexPosition>("mesh");
+            var material = new MaterialBuilder("mat1")
+               .WithMetallicRoughnessShader();
+            var prim1 = mesh.UsePrimitive(material, 1);
+            prim1.AddPoint(new VertexPosition(0, 0, 0));
+
+            var scene = new Scenes.SceneBuilder();
+            scene.AddRigidMesh(mesh, skewedMatrix);
+
+            var m = scene.ToGltf2();
+
+            var result = AttachmentInfo.From("skewedMatrix.glb").WriteObject(path => m.Save(path));
+
+            var m2 = ModelRoot.Load(result.FullName);
+        }
+
+
         [Test]
         public void MorphColor_MultiplePrimitives()
         {

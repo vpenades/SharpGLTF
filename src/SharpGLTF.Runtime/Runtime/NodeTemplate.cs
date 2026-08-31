@@ -232,7 +232,7 @@ namespace SharpGLTF.Runtime
         {
             if (!srcNode.LocalTransform.TryDecompose(out TRANSFORM lxform))
             {
-                lxform = Matrix4x4.Identity;
+                lxform = TRANSFORM.Identity;
             }
 
             _Scale = new AnimatableProperty<Vector3>(lxform.Scale);

@@ -454,6 +454,8 @@ namespace SharpGLTF.Transforms
             }
         }
 
+        public bool IsDecomposable => !IsMatrix || Matrix4x4.Decompose(_GetMatrix(), out _, out _, out _);
+
         public bool IsIdentity
         {
             get

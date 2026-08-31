@@ -630,7 +630,7 @@ namespace SharpGLTF.Schema2
                     .IsUndefined(nameof(_scale), _scale)
                     .IsUndefined(nameof(_rotation), _rotation)
                     .IsUndefined(nameof(_translation), _translation)
-                    .IsNullOrMatrix4x3("Matrix", _matrix);
+                    .IsNullOrMatrix4x3("Matrix", _matrix, true, false); // a matrix transform used on a node should be allowed to be skewed
             }
 
             validate
