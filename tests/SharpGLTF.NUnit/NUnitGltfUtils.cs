@@ -62,7 +62,7 @@ namespace SharpGLTF
                 validationPath = fileName = AttachmentInfo
                     .From(fileName)
                     .WriteObject(f => model.SaveGLB(f, settings))
-                    .FullName;
+                    .FullName;                
             }
             else if (fileName.ToUpperInvariant().EndsWith(".GLTF"))
             {
@@ -97,7 +97,10 @@ namespace SharpGLTF
                     .From(fileName)
                     .WriteAllText(html)
                     .FullName;
-            }           
+            }
+
+            // validator is unable to analyze models with gaussian splatting
+            if (model.ExtensionsUsed.Contains("KHR_gaussian_splatting")) validationPath = null;
 
             if (validationPath != null)
             {
@@ -110,7 +113,7 @@ namespace SharpGLTF
                     TestContext.Out.WriteLine(report.ToString());
                 }
 
-                Assert.That(report.Severity, Is.Not.EqualTo(GltfValidator.Severity.Error));
+                Assert.That(report.Severity, Is.Not.EqualTo(GltfValidator.Severity.Error), message: $"on file: {fileName}");
             }
 
             return fileName;
