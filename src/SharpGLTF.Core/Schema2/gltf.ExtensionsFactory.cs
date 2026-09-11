@@ -42,6 +42,10 @@ namespace SharpGLTF.Schema2
             RegisterExtension<Node, MeshGpuInstancing>("EXT_mesh_gpu_instancing", p=> new MeshGpuInstancing(p));
             RegisterExtension<Node, _NodeVisibility>(_NodeVisibility.SCHEMANAME, p => new _NodeVisibility(p));
 
+            #pragma warning disable GLTFRT1002
+            RegisterExtension<MeshPrimitive, GaussianSplatting>(GaussianSplatting.SCHEMANAME, p => new GaussianSplatting(p));
+            #pragma warning restore GLTFRT1002
+
             RegisterExtension<Material, MaterialUnlit>("KHR_materials_unlit", p => new MaterialUnlit(p));
             RegisterExtension<Material, MaterialSheen>("KHR_materials_sheen", p => new MaterialSheen(p));
             RegisterExtension<Material, MaterialIOR>("KHR_materials_ior", p => new MaterialIOR(p));

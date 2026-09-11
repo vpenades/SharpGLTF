@@ -45,6 +45,8 @@ namespace SharpGLTF
             yield return new AnimationPointerExtension();
 
             yield return new NodeVisibilityExtension();
+
+            yield return new GaussianSplattingExtension();
         }
 
         #endregion
