@@ -70,6 +70,16 @@ namespace SharpGLTF.IO
             _SerializeProperty(writer, name, value);
         }
 
+        protected static void SerializeProperty(JSONWRITER writer, string name, string value, string defval = null)
+        {
+            if (value == null) return;
+            if (defval.Equals(defval, StringComparison.Ordinal)) return;
+
+            Guard.NotNull(writer, nameof(writer));
+
+            _SerializeProperty(writer, name, value);
+        }
+
         protected static void SerializeProperty(JSONWRITER writer, string name, Boolean? value, Boolean? defval = null)
         {
             if (!value.HasValue) return;

@@ -10,6 +10,8 @@ using static System.FormattableString;
 
 namespace SharpGLTF.CodeGen
 {
+    using System.Runtime.CompilerServices;
+
     using SchemaReflection;
 
     /// <summary>
@@ -231,7 +233,7 @@ namespace SharpGLTF.CodeGen
             }
         }
 
-        private string _GetConstantRuntimeName(SchemaType type)
+        internal string _GetConstantRuntimeName(SchemaType type)
         {
             switch (type)
             {
@@ -494,6 +496,9 @@ namespace SharpGLTF.CodeGen
                 // fix boolean value
                 if (vconst is Boolean bconst) vconst = bconst ? "true" : "false";
 
+                // tconst is "const String" here
+                if (tconst.EndsWith("String") && vconst is string sconst) vconst = "\"" + sconst + "\"";
+
                 defval = $"{fname}Default";
 
                 yield return Invariant($"private {tconst} {defval} = {vconst};");
@@ -539,7 +544,9 @@ namespace SharpGLTF.CodeGen
 
             if (f.FieldType is EnumType etype && etype.IsNullable) tdecl = tdecl + "?";            
 
-            yield return string.IsNullOrEmpty(defval) ? $"private {tdecl} {fname};" : $"private {tdecl} {fname} = {defval};";
+            yield return string.IsNullOrEmpty(defval)
+                ? $"private {tdecl} {fname};"
+                : $"private {tdecl} {fname} = {defval};";
 
             yield return string.Empty;
         }            
@@ -638,16 +645,23 @@ namespace SharpGLTF.CodeGen
             var trname = _Emitter._GetRuntimeName(finfo.FieldType);
             var frname = _Emitter.GetFieldRuntimeName(finfo);
 
-            trname = trname.Replace("?", ""); // since we're adding the default value, there's no need for nullable values.
+            trname = trname.Replace("?", "", StringComparison.Ordinal); // since we're adding the default value, there's no need for nullable values.
 
             var vtype = $"typeof({trname})";
             var getter = $"instance => instance.{frname}";            
 
             if (finfo.DefaultValue != null)
             {
+                // TODO: use constant instead of direct value
+
+                var tconst = _Emitter._GetConstantRuntimeName(finfo.FieldType);
                 var vconst = _Emitter._GetConstantRuntimeValue(finfo.FieldType, finfo.DefaultValue);
+
                 // fix boolean value            
-                if (vconst is Boolean bconst) vconst = bconst ? "true" : "false";                
+                if (vconst is Boolean bconst) vconst = bconst ? "true" : "false";
+
+                // tconst is "const String" here
+                if (tconst.EndsWith("String") && vconst is string sconst) vconst = "\"" + sconst + "\"";
 
                 getter += Invariant($" ?? {vconst}");
             }
@@ -748,7 +762,7 @@ namespace SharpGLTF.CodeGen
 
 
 
-                var pointerPathModifier = HasBaseClass ? "override" : "virtual";
+            var pointerPathModifier = HasBaseClass ? "override" : "virtual";
             yield return $"protected {pointerPathModifier} string GetSchemaName() => SCHEMANAME;".Indent(1);            
 
             yield return string.Empty;
