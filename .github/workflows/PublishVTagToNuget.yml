@@ -10,6 +10,10 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read  # required for private repos
+      id-token: write # enable GitHub OIDC token issuance for this job
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -51,12 +55,14 @@ jobs:
           # pack all projects that should produce nuget packages, or specify a project file instead of '.'
           dotnet pack --configuration Release --no-build -o artifacts /p:PackageVersion=${PACKAGE_VERSION}
 
-      - name: Publish to nuget.org
-        env:
-          NUGET_API_KEY: ${{ secrets.SharpGLTF_PublishToNuget }}
-        run: |
-          # push all packages created in artifacts to nuget.org
-          dotnet nuget push "artifacts/*.nupkg" \
-            --api-key "$NUGET_API_KEY" \
-            --source "https://api.nuget.org/v3/index.json" \
-            --skip-duplicate
+      # ------------------------------------------ Push packages
+
+      # Get a short-lived NuGet API key
+      - name: NuGet login
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER_NAME }}
+
+      - name: NuGet push
+        run: dotnet nuget push "artifacts/*.nupkg" --skip-duplicate --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
