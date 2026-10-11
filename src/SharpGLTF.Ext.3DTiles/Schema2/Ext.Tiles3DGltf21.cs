@@ -13,7 +13,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_georeference extension, attached to a <see cref="Node"/>.
     /// </summary>
-    partial class ExtGeoreferenceNode
+    public partial class ExtGeoreferenceNode
     {
         /// <summary>Longitude in degrees, in the range [-180, 180].</summary>
         public double Longitude
@@ -37,7 +37,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// EXT_geospatial_crs extension, attached to a <see cref="ModelRoot"/>.
     /// The CRS definition is provided by a child extension like <see cref="ExtGeospatialCrsWkid"/> or <see cref="ExtGeospatialCrsWkt2"/>.
     /// </summary>
-    partial class ExtGeospatialCrs
+    public partial class ExtGeospatialCrs
     {
         /// <summary>The CRS format, usually "wkid" or "wkt2".</summary>
         public string Format { get => _format; set => _format = value; }
@@ -46,7 +46,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_geospatial_crs_wkid extension, attached to a <see cref="ExtGeospatialCrs"/>.
     /// </summary>
-    partial class ExtGeospatialCrsWkid
+    public partial class ExtGeospatialCrsWkid
     {
         public string Authority { get => _authority; set => _authority = value; }
 
@@ -61,7 +61,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_geospatial_crs_wkt2 extension, attached to a <see cref="ExtGeospatialCrs"/>.
     /// </summary>
-    partial class ExtGeospatialCrsWkt2
+    public partial class ExtGeospatialCrsWkt2
     {
         /// <summary>A Well-Known Text (version 2) string.</summary>
         public string Wkt2 { get => _wkt2; set => _wkt2 = value; }
@@ -74,7 +74,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// A bounding volume, as defined in glTF 2.1.
     /// </summary>
-    partial class Tiles3DBoundingVolume
+    public partial class Tiles3DBoundingVolume
     {
         public Quaternion Rotation { get => _rotation ?? _rotationDefault; set => _rotation = value == _rotationDefault ? null : value; }
 
@@ -89,7 +89,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_node_visibility_volume extension, an extension of KHR_node_visibility.
     /// </summary>
-    partial class ExtNodeVisibilityVolume
+    public partial class ExtNodeVisibilityVolume
     {
         public Tiles3DBoundingVolume BoundingVolume { get => _boundingVolume; set => _boundingVolume = value; }
     }
@@ -97,7 +97,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_node_visibility_conditions extension, an extension of KHR_node_visibility.
     /// </summary>
-    partial class ExtNodeVisibilityConditions
+    public partial class ExtNodeVisibilityConditions
     {
         public ExtNodeVisibilityConditions() { _conditions = new Dictionary<string, JsonNode>(); }
 
@@ -112,7 +112,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_node_visibility_conditions extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class ExtNodeVisibilityConditionsRoot
+    public partial class ExtNodeVisibilityConditionsRoot
     {
         public ExtNodeVisibilityConditionsRoot() { _dimensions = new List<JsonNode>(); }
 
@@ -211,7 +211,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_horizon_occlusion_point extension.
     /// </summary>
-    partial class Tiles3DHorizonOcclusionPoint
+    public partial class Tiles3DHorizonOcclusionPoint
     {
         public Tiles3DHorizonOcclusionPoint() { _horizonOcclusionPoint = new List<double>(); }
 
@@ -226,7 +226,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_implicit_tiling extension, attached to a <see cref="Node"/>.
     /// </summary>
-    partial class Tiles3DImplicitTiling
+    public partial class Tiles3DImplicitTiling
     {
         public string ContentUri { get => _contentUri; set => _contentUri = value; }
 
@@ -250,7 +250,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_tileset extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class Tiles3DTilesetRoot
+    public partial class Tiles3DTilesetRoot
     {
         public double GeometricError
         {
@@ -262,7 +262,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// Content of a 3DTILES_tileset node extension.
     /// </summary>
-    partial class Tiles3DTilesetContent
+    public partial class Tiles3DTilesetContent
     {
         public Tiles3DBoundingVolume BoundingVolume { get => _boundingVolume; set => _boundingVolume = value; }
     }
@@ -270,7 +270,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_tileset extension, attached to a <see cref="Node"/>.
     /// </summary>
-    partial class Tiles3DTilesetNode
+    public partial class Tiles3DTilesetNode
     {
         public double GeometricError
         {
@@ -286,7 +286,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_tileset_vectors extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class Tiles3DTilesetVectors
+    public partial class Tiles3DTilesetVectors
     {
         /// <summary>Whether content should be clipped to tile bounds when rendering.</summary>
         public bool Clip { get => _clip ?? _clipDefault; set => _clip = value == _clipDefault ? null : value; }
@@ -299,14 +299,14 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// A layer defined in <see cref="Tiles3DLayersRoot"/>.
     /// </summary>
-    partial class Tiles3DLayer
+    public partial class Tiles3DLayer
     {
     }
 
     /// <summary>
     /// 3DTILES_layers extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class Tiles3DLayersRoot
+    public partial class Tiles3DLayersRoot
     {
         public Tiles3DLayersRoot() { _layers = new List<Tiles3DLayer>(); }
 
@@ -320,7 +320,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_layers extension, attached to a <see cref="Node"/>.
     /// </summary>
-    partial class Tiles3DLayersNode
+    public partial class Tiles3DLayersNode
     {
         /// <summary>Index of the layer in <see cref="Tiles3DLayersRoot.Layers"/>.</summary>
         public int Layer { get => _layer; set => _layer = value; }
@@ -333,7 +333,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// Availability of a set of elements in a <see cref="Tiles3DSubtree"/>.
     /// </summary>
-    partial class Tiles3DSubtreeAvailability
+    public partial class Tiles3DSubtreeAvailability
     {
         /// <summary>Index of the buffer view containing the availability bitstream.</summary>
         public int? Bitstream { get => _bitstream; set => _bitstream = value; }
@@ -351,7 +351,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_subtree extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class Tiles3DSubtree
+    public partial class Tiles3DSubtree
     {
         public Tiles3DSubtree()
         {
@@ -393,7 +393,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_shape_cylinder_region extension.
     /// </summary>
-    partial class Tiles3DShapeCylinderRegion
+    public partial class Tiles3DShapeCylinderRegion
     {
         public double MinimumRadius
         {
@@ -423,7 +423,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_shape_ellipsoid_region extension.
     /// </summary>
-    partial class Tiles3DShapeEllipsoidRegion
+    public partial class Tiles3DShapeEllipsoidRegion
     {
         public double MinimumHeight { get => _minimumHeight; set => _minimumHeight = value; }
 
@@ -453,7 +453,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_shape_s2 extension.
     /// </summary>
-    partial class Tiles3DShapeS2
+    public partial class Tiles3DShapeS2
     {
         /// <summary>Hexadecimal representation of the S2CellId.</summary>
         public string Token { get => _token; set => _token = value; }
