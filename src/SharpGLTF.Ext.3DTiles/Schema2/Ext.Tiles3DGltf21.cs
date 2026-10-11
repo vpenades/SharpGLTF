@@ -131,7 +131,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// Voxel padding.
     /// </summary>
-    partial class Tiles3DVoxelPadding
+    public partial class Tiles3DVoxelPadding
     {
         public Tiles3DVoxelPadding()
         {
@@ -153,7 +153,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// EXT_voxels extension, attached to a <see cref="Node"/>.
     /// </summary>
-    partial class ExtVoxelsNode
+    public partial class ExtVoxelsNode
     {
         public ExtVoxelsNode()
         {
@@ -188,7 +188,7 @@ namespace SharpGLTF.Schema2.Tiles3D
     /// <summary>
     /// 3DTILES_tileset_voxels extension, attached to a <see cref="ModelRoot"/>.
     /// </summary>
-    partial class Tiles3DTilesetVoxels
+    public partial class Tiles3DTilesetVoxels
     {
         public Tiles3DTilesetVoxels() { _dimensions = new List<int>(); }
 

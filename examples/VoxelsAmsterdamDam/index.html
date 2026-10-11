@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <title>EXT_voxels - Dam, Amsterdam</title>
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.146/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.146/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    html, body, #cesiumContainer { width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden; font-family: sans-serif; }
+    #panel { position: absolute; top: 10px; left: 10px; background: rgba(30, 30, 30, 0.85); color: #eee; padding: 10px 14px; border-radius: 4px; font-size: 13px; }
+    #panel h3 { margin: 0 0 8px 0; font-size: 15px; }
+    #panel label { display: block; margin: 6px 0; }
+    #panel input[type=range] { width: 160px; vertical-align: middle; }
+    #panel .legend { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+    #info { margin-top: 10px; padding-top: 8px; border-top: 1px solid #666; font-family: monospace; white-space: pre; }
+    #error { color: #f88; }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <div id="panel">
+    <h3>EXT_voxels &ndash; Dam, Amsterdam</h3>
+    <label>Basemap opacity <input id="opacity" type="range" min="0" max="1" step="0.05" value="1"></label>
+    <label><input id="bbox" type="checkbox"> Show bounding box</label>
+    <label><input id="edges" type="checkbox" checked> Show voxel edges</label>
+    <label>Vertical exaggeration <input id="exaggeration" type="range" min="1" max="5" step="0.5" value="1"></label>
+    <div>Voxel colors</div>
+    <div class="legend"><input id="c1" type="color" value="#c8a165"> class 1 (base)</div>
+    <div class="legend"><input id="c2" type="color" value="#e6542f"> class 2</div>
+    <div class="legend"><input id="c3" type="color" value="#4f9d4f"> class 3</div>
+    <div class="legend"><input id="c4" type="color" value="#3b78c8"> class 4 (top)</div>
+    <div id="info">Klik op een voxel voor de attributen</div>
+    <div id="error"></div>
+  </div>
+
+<script>
+// Recent CesiumJS has no loader for EXT_voxels (glTF 2.1 draft) yet. This page reads tileset.json and the EXT_voxels
+// node of tile.glb itself and feeds the data into Cesium's VoxelPrimitive through a small custom provider.
+
+const viewer = new Cesium.Viewer("cesiumContainer", {
+  baseLayer: new Cesium.ImageryLayer(new Cesium.UrlTemplateImageryProvider({
+    url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    maximumLevel: 19,
+    credit: "© OpenStreetMap contributors",
+  })),
+  baseLayerPicker: false,
+  geocoder: false,
+  homeButton: false,
+  navigationHelpButton: false,
+  sceneModePicker: false,
+  animation: false,
+  timeline: false,
+});
+const baseLayer = viewer.imageryLayers.get(0);
+
+async function loadGlbVoxels(url) {
+  const buffer = await (await fetch(url)).arrayBuffer();
+  const view = new DataView(buffer);
+  const jsonLength = view.getUint32(12, true);
+  const gltf = JSON.parse(new TextDecoder().decode(new Uint8Array(buffer, 20, jsonLength)));
+  const binStart = 20 + jsonLength + 8;
+
+  const voxels = gltf.nodes.map((n) => n.extensions?.EXT_voxels).find((e) => e);
+  if (!voxels) throw new Error("No EXT_voxels node found in " + url);
+
+  const [name, accessorIndex] = Object.entries(voxels.attributes)[0];
+  const accessor = gltf.accessors[accessorIndex];
+  const bufferView = gltf.bufferViews[accessor.bufferView];
+  const bytes = new Uint8Array(buffer, binStart + (bufferView.byteOffset ?? 0) + (accessor.byteOffset ?? 0), accessor.count);
+  return { name, dimensions: voxels.dimensions, noData: voxels.noData?.[name], values: Float32Array.from(bytes) };
+}
+
+async function main() {
+  const tileset = await (await fetch("tileset.json")).json();
+  const root = tileset.root;
+  const voxels = await loadGlbVoxels(root.content.uri);
+
+  const obb = Cesium.OrientedBoundingBox.unpack(root.boundingVolume.box);
+  const scale = Cesium.Matrix3.getScale(obb.halfAxes, new Cesium.Cartesian3());
+  const rotation = Cesium.Matrix3.getRotation(obb.halfAxes, new Cesium.Matrix3());
+  const globalTransform = Cesium.Matrix4.unpack(root.transform);
+  const dims = voxels.dimensions;
+  const gridDimensions = new Cesium.Cartesian3(dims[0], dims[1], dims[2]);
+
+  const provider = new Cesium.Cesium3DTilesVoxelProvider({
+    className: "voxel",
+    names: ["classId"],
+    types: [Cesium.MetadataType.SCALAR],
+    componentTypes: [Cesium.MetadataComponentType.FLOAT32],
+    shape: Cesium.VoxelShapeType.BOX,
+    dimensions: gridDimensions,
+    globalTransform: globalTransform,
+    shapeTransform: Cesium.Matrix4.fromRotationTranslation(rotation, obb.center),
+    minBounds: Cesium.Cartesian3.negate(scale, new Cesium.Cartesian3()),
+    maxBounds: Cesium.Cartesian3.clone(scale),
+    minimumValues: [[0]],
+    maximumValues: [[4]],
+    maximumTileCount: 1,
+  });
+  provider._availableLevels = 1;
+  // the data is laid out x, y(north), z(up), so don't let Cesium treat it as y-up ordered
+  provider._metadataOrder = Cesium.VoxelMetadataOrder?.Z_UP ?? 0;
+  provider.requestData = (options) =>
+    (options?.tileLevel ?? 0) > 0
+      ? Promise.reject("Only one tile available")
+      : Promise.resolve(Cesium.VoxelContent.fromMetadataArray([voxels.values]));
+
+  const hex = (id) => Cesium.Color.fromCssColorString(document.getElementById(id).value);
+  const toVec3 = (c) => new Cesium.Cartesian3(c.red, c.green, c.blue);
+
+  const customShader = new Cesium.CustomShader({
+    uniforms: {
+      u_color1: { type: Cesium.UniformType.VEC3, value: toVec3(hex("c1")) },
+      u_color2: { type: Cesium.UniformType.VEC3, value: toVec3(hex("c2")) },
+      u_color3: { type: Cesium.UniformType.VEC3, value: toVec3(hex("c3")) },
+      u_color4: { type: Cesium.UniformType.VEC3, value: toVec3(hex("c4")) },
+      u_edges: { type: Cesium.UniformType.FLOAT, value: 1.0 },
+      u_eyeToGrid: { type: Cesium.UniformType.MAT4, value: new Cesium.Matrix4() },
+      u_selectedTile: { type: Cesium.UniformType.INT, value: -1 },
+      u_selectedSample: { type: Cesium.UniformType.INT, value: -1 },
+    },
+    fragmentShaderText: `
+      void fragmentMain(FragmentInput fsInput, inout czm_modelMaterial material)
+      {
+        float c = floor(fsInput.metadata.classId + 0.5);
+        if (c < 0.5) { material.alpha = 0.0; return; }
+
+        vec3 color = u_color1;
+        if (c > 3.5) color = u_color4;
+        else if (c > 2.5) color = u_color3;
+        else if (c > 1.5) color = u_color2;
+
+        float light = 0.6 + 0.4 * max(0.0, dot(fsInput.attributes.normalEC, czm_lightDirectionEC));
+        color *= light;
+        if (fsInput.voxel.tileIndex == u_selectedTile && fsInput.voxel.sampleIndex == u_selectedSample) {
+          color = mix(color, vec3(1.0), 0.6);
+        }
+
+        if (u_edges > 0.5) {
+          vec3 g = (u_eyeToGrid * vec4(fsInput.attributes.positionEC, 1.0)).xyz;
+          vec3 d = abs(fract(g + 0.5) - 0.5);
+          float near = step(d.x, 0.04) + step(d.y, 0.04) + step(d.z, 0.04);
+          if (near >= 2.0) color = vec3(0.05);
+        }
+
+        material.diffuse = color;
+        material.alpha = 1.0;
+      }`,
+  });
+
+  const primitive = viewer.scene.primitives.add(new Cesium.VoxelPrimitive({ provider, customShader }));
+  primitive.nearestSampling = true;
+
+  // grid coordinates (0..dimensions) from eye coordinates
+  const toGrid = new Cesium.Matrix4();
+  const gridMatrix = Cesium.Matrix4.multiply(
+    Cesium.Matrix4.fromScale(new Cesium.Cartesian3(dims[0] / (2 * scale.x), dims[1] / (2 * scale.y), dims[2] / (2 * scale.z))),
+    Cesium.Matrix4.fromTranslation(scale),
+    new Cesium.Matrix4());
+  const shapeToWorld = new Cesium.Matrix4();
+  const shapeTransform = provider.shapeTransform;
+
+  viewer.scene.preRender.addEventListener(() => {
+    Cesium.Matrix4.multiply(globalTransform, primitive.modelMatrix, shapeToWorld);
+    Cesium.Matrix4.multiply(shapeToWorld, shapeTransform, shapeToWorld);
+    Cesium.Matrix4.multiply(viewer.camera.viewMatrix, shapeToWorld, toGrid);
+    Cesium.Matrix4.inverse(toGrid, toGrid);
+    Cesium.Matrix4.multiply(gridMatrix, toGrid, toGrid);
+    customShader.setUniform("u_eyeToGrid", Cesium.Matrix4.clone(toGrid));
+  });
+
+  // click: show the attributes of the voxel under the cursor
+  const info = document.getElementById("info");
+  const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction((click) => {
+    const cell = viewer.scene.pickVoxel(click.position);
+    if (!Cesium.defined(cell)) {
+      customShader.setUniform("u_selectedTile", -1);
+      customShader.setUniform("u_selectedSample", -1);
+      info.textContent = "Klik op een voxel voor de attributen";
+      return;
+    }
+    const i = cell.sampleIndex;
+    const ix = i % dims[0];
+    const iy = Math.floor(i / dims[0]) % dims[1];
+    const iz = Math.floor(i / (dims[0] * dims[1]));
+    const carto = Cesium.Cartographic.fromCartesian(cell.orientedBoundingBox.center);
+    const value = cell.getProperty("classId");
+    info.textContent =
+      `${voxels.name}: ${value}${value === voxels.noData?.[0] ? " (noData)" : ""}\n` +
+      `index: [${ix}, ${iy}, ${iz}] (sample ${i})\n` +
+      `lon/lat: ${Cesium.Math.toDegrees(carto.longitude).toFixed(6)}, ${Cesium.Math.toDegrees(carto.latitude).toFixed(6)}\n` +
+      `height: ${carto.height.toFixed(1)} m`;
+    customShader.setUniform("u_selectedTile", cell.tileIndex);
+    customShader.setUniform("u_selectedSample", cell.sampleIndex);
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  // controls
+  document.getElementById("opacity").oninput = (e) => (baseLayer.alpha = Number(e.target.value));
+  document.getElementById("bbox").onchange = (e) => (primitive.debugDraw = e.target.checked);
+  document.getElementById("edges").onchange = (e) => customShader.setUniform("u_edges", e.target.checked ? 1.0 : 0.0);
+  ["c1", "c2", "c3", "c4"].forEach((id, i) => {
+    document.getElementById(id).oninput = () => customShader.setUniform("u_color" + (i + 1), toVec3(hex(id)));
+  });
+
+  // modelMatrix is applied in the local (east-north-up) frame, so scaling z exaggerates around the ground
+  document.getElementById("exaggeration").oninput = (e) => {
+    const k = Number(e.target.value);
+    primitive.modelMatrix = Cesium.Matrix4.fromScale(new Cesium.Cartesian3(1, 1, k));
+  };
+
+  const center = Cesium.Matrix4.multiplyByPoint(globalTransform, obb.center, new Cesium.Cartesian3());
+  viewer.camera.flyToBoundingSphere(new Cesium.BoundingSphere(center, 70), {
+    duration: 0,
+    offset: new Cesium.HeadingPitchRange(Cesium.Math.toRadians(30), Cesium.Math.toRadians(-30), 220),
+  });
+}
+
+main().catch((e) => {
+  console.error(e);
+  document.getElementById("error").textContent = String(e);
+});
+</script>
+</body>
+</html>
