@@ -64,7 +64,7 @@ namespace SharpGLTF.Schema2
                 set { SetProperty(this, ref _schema, value); }
             }
 
-            internal IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
+            public IReadOnlyList<PropertyTable> PropertyTables => _propertyTables;
             internal IReadOnlyList<PropertyAttribute> PropertyAttributes => _propertyAttributes;
             internal IReadOnlyList<PropertyTexture> PropertyTextures => _propertyTextures;
 
@@ -646,6 +646,23 @@ namespace SharpGLTF.Schema2
                 return value;
             }
 
+            /// <summary>
+            /// Gets all values of a property (column) of this table.
+            /// </summary>
+            public IReadOnlyList<object> GetColumn(string key)
+            {
+                return _properties[key].GetValues();
+            }
+
+            /// <summary>
+            /// Gets the values of all properties for a given row (feature).
+            /// </summary>
+            public IReadOnlyDictionary<string, object> GetRow(int index)
+            {
+                Guard.MustBeBetweenOrEqualTo(index, 0, Count - 1, nameof(index));
+                return _properties.ToDictionary(p => p.Key, p => p.Value.GetValues()[index]);
+            }
+
             #endregion
         }
 
@@ -755,6 +772,126 @@ namespace SharpGLTF.Schema2
                     int offsets = GetBufferView(root, stringOffsets);
                     StringOffsets = offsets;
                 }
+            }
+
+            /// <summary>
+            /// Reads the (raw) values of a non-array property. T must match the schema type.
+            /// </summary>
+            public IReadOnlyList<T> GetValues<T>()
+            {
+                var metadataProperty = GetSchemaProperty();
+                CheckElementTypes<T>(metadataProperty);
+                return ReadFlat<T>(LogicalParent.Count);
+            }
+
+            /// <summary>
+            /// Reads the (raw) values of an array property. T must match the schema type.
+            /// </summary>
+            public IReadOnlyList<IReadOnlyList<T>> GetArrayValues<T>()
+            {
+                var metadataProperty = GetSchemaProperty();
+                CheckElementTypes<T>(metadataProperty);
+
+                var root = _GetModelRoot();
+                var rows = LogicalParent.Count;
+
+                List<int> offsets;
+                if (ArrayOffsets.HasValue)
+                {
+                    offsets = BinaryTable.ReadOffsets(GetBytes(root, ArrayOffsets.Value));
+                }
+                else
+                {
+                    var n = metadataProperty.Count ?? 0;
+                    offsets = Enumerable.Range(0, rows + 1).Select(i => i * n).ToList();
+                }
+
+                var flat = ReadFlat<T>(offsets[offsets.Count - 1]);
+
+                var result = new List<IReadOnlyList<T>>(rows);
+                for (int i = 0; i < rows; i++)
+                {
+                    result.Add(flat.Skip(offsets[i]).Take(offsets[i + 1] - offsets[i]).ToList());
+                }
+                return result;
+            }
+
+            /// <summary>
+            /// Reads the values using the type defined in the schema.
+            /// Array properties return a list per row. Enum values are returned as short.
+            /// </summary>
+            public IReadOnlyList<object> GetValues()
+            {
+                var metadataProperty = GetSchemaProperty();
+                var t = GetClrType(metadataProperty);
+
+                var name = metadataProperty.Array ? nameof(GetArrayValues) : nameof(GetValues);
+                var method = typeof(PropertyTableProperty)
+                    .GetMethods()
+                    .First(m => m.Name == name && m.IsGenericMethodDefinition)
+                    .MakeGenericMethod(t);
+
+                return ((System.Collections.IEnumerable)method.Invoke(this, null)).Cast<object>().ToList();
+            }
+
+            private IReadOnlyList<T> ReadFlat<T>(int count)
+            {
+                var root = _GetModelRoot();
+                var bytes = GetBytes(root, Values);
+
+                if (typeof(T) == typeof(string))
+                {
+                    Guard.IsTrue(StringOffsets.HasValue, nameof(StringOffsets), "string properties require stringOffsets");
+                    var offsets = BinaryTable.ReadOffsets(GetBytes(root, StringOffsets.Value));
+                    return BinaryTable.ReadStrings(bytes, offsets).Cast<T>().ToList();
+                }
+
+                return BinaryTable.ReadValues<T>(bytes, count);
+            }
+
+            private static byte[] GetBytes(ModelRoot root, int bufferViewIndex)
+            {
+                return root.LogicalBufferViews[bufferViewIndex].Content.ToArray();
+            }
+
+            private StructuralMetadataClassProperty GetSchemaProperty()
+            {
+                var className = LogicalParent.ClassName;
+                var metadataClass = LogicalParent.LogicalParent.Schema.Classes[className];
+                Guard.IsTrue(metadataClass != null, nameof(className), $"Schema class {className} must be defined");
+                metadataClass.Properties.TryGetValue(LogicalKey, out var metadataProperty);
+                Guard.IsTrue(metadataProperty != null, nameof(LogicalKey), $"Property {LogicalKey} in {className} must be defined");
+                return metadataProperty;
+            }
+
+            private static Type GetClrType(StructuralMetadataClassProperty p)
+            {
+                switch (p.Type)
+                {
+                    case ELEMENTTYPE.ENUM: return typeof(short);
+                    case ELEMENTTYPE.STRING: return typeof(string);
+                    case ELEMENTTYPE.BOOLEAN: return typeof(bool);
+                    case ELEMENTTYPE.VEC2: return typeof(Vector2);
+                    case ELEMENTTYPE.VEC3: return typeof(Vector3);
+                    case ELEMENTTYPE.VEC4: return typeof(Vector4);
+                    case ELEMENTTYPE.MAT4: return typeof(Matrix4x4);
+                    case ELEMENTTYPE.SCALAR:
+                        switch (p.ComponentType)
+                        {
+                            case DATATYPE.INT8: return typeof(sbyte);
+                            case DATATYPE.UINT8: return typeof(byte);
+                            case DATATYPE.INT16: return typeof(short);
+                            case DATATYPE.UINT16: return typeof(ushort);
+                            case DATATYPE.INT32: return typeof(int);
+                            case DATATYPE.UINT32: return typeof(uint);
+                            case DATATYPE.INT64: return typeof(long);
+                            case DATATYPE.UINT64: return typeof(ulong);
+                            case DATATYPE.FLOAT32: return typeof(float);
+                            case DATATYPE.FLOAT64: return typeof(double);
+                        }
+                        break;
+                }
+                throw new NotSupportedException($"Unsupported property type {p.Type}");
             }
 
             private StructuralMetadataClassProperty GetProperty<T>(string className, string key)

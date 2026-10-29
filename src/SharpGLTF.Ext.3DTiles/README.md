@@ -60,6 +60,20 @@ When writing glTF files with 3D Tiles extensions the resulting files should be v
     var meshFeaturesExtension = model.LogicalMeshes[0].Primitives[0].GetExtension<MeshExtMeshFeatures>();
 ```
 
+### Reading property table values
+
+Property table values are stored in binary buffer views. Use `GetValues<T>()`, `GetArrayValues<T>()` (typed) or `GetValues()` (type taken from the schema) to decode them. Values are returned raw: noData, default, offset and scale are not applied.
+
+```csharp
+    var root = model.GetExtension<EXTStructuralMetadataRoot>();
+    var table = root.PropertyTables[0];
+
+    var names = table.Properties["name"].GetValues<string>();
+    var tags = table.Properties["tags"].GetArrayValues<string>();
+    var column = table.GetColumn("height");   // IReadOnlyList<object>
+    var row = table.GetRow(0);                // property name -> value
+```
+
 ## Writing a 3D Tiles glTF file with attribute metadata
 
 In the following sample a glTF with 1 triangle is created. The triangle contains metadata with

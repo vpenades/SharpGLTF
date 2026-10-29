@@ -208,6 +208,86 @@ namespace SharpGLTF.Memory
             return offsets;
         }
 
+        /// <summary>
+        /// Reads <paramref name="count"/> values of type T from a binary buffer (inverse of <see cref="GetBytes{T}"/>).
+        /// Not applicable to strings, see <see cref="ReadStrings"/>.
+        /// </summary>
+        public static List<T> ReadValues<T>(byte[] bytes, int count)
+        {
+            var type = typeof(T);
+            var result = new List<T>(count);
+
+            if (type == typeof(bool))
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    result.Add((T)(object)((bytes[i / 8] & (1 << (i % 8))) != 0));
+                }
+            }
+            else if (type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) || type == typeof(Matrix4x4))
+            {
+                var floatsPer = type == typeof(Vector2) ? 2 : type == typeof(Vector3) ? 3 : type == typeof(Vector4) ? 4 : 16;
+                var f = new float[count * floatsPer];
+                Buffer.BlockCopy(bytes, 0, f, 0, f.Length * 4);
+                for (int i = 0; i < count; i++)
+                {
+                    var o = i * floatsPer;
+                    object item;
+                    if (type == typeof(Vector2)) item = new Vector2(f[o], f[o + 1]);
+                    else if (type == typeof(Vector3)) item = new Vector3(f[o], f[o + 1], f[o + 2]);
+                    else if (type == typeof(Vector4)) item = new Vector4(f[o], f[o + 1], f[o + 2], f[o + 3]);
+                    else
+                    {
+                        item = new Matrix4x4(
+                            f[o], f[o + 1], f[o + 2], f[o + 3],
+                            f[o + 4], f[o + 5], f[o + 6], f[o + 7],
+                            f[o + 8], f[o + 9], f[o + 10], f[o + 11],
+                            f[o + 12], f[o + 13], f[o + 14], f[o + 15]);
+                    }
+                    result.Add((T)item);
+                }
+            }
+            else if (type.IsPrimitive)
+            {
+                var size = GetSize<T>();
+                var arr = new T[count];
+                Buffer.BlockCopy(bytes, 0, arr, 0, count * size);
+                result.AddRange(arr);
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Reads uint32 offsets (as written by <see cref="GetArrayOffsets{T}"/> and <see cref="GetStringOffsets(IReadOnlyList{string})"/>).
+        /// </summary>
+        public static List<int> ReadOffsets(byte[] bytes)
+        {
+            var result = new List<int>(bytes.Length / 4);
+            for (int i = 0; i + 4 <= bytes.Length; i += 4)
+            {
+                result.Add(BitConverter.ToInt32(bytes, i));
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Splits the concatenated UTF8 string data using the given offsets.
+        /// </summary>
+        public static List<string> ReadStrings(byte[] bytes, IReadOnlyList<int> offsets)
+        {
+            var result = new List<string>();
+            for (int i = 0; i + 1 < offsets.Count; i++)
+            {
+                result.Add(Encoding.UTF8.GetString(bytes, offsets[i], offsets[i + 1] - offsets[i]));
+            }
+            return result;
+        }
+
         public static int GetSize<T>()
         {
 #if NETSTANDARD2_0

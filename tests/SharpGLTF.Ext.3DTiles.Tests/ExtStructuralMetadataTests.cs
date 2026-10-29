@@ -917,6 +917,60 @@ namespace SharpGLTF.Schema2.Tiles3D
         }
 
         // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/
+        [Test(Description = "Read back property table values (round trip)")]
+        public void ReadPropertyTableValuesTest()
+        {
+            var model = ModelRoot.CreateModel();
+            var root = model.UseStructuralMetadata();
+            var schema = root.UseEmbeddedSchema("schema");
+            var cls = schema.UseClassMetadata("c");
+
+            var pInt = cls.UseProperty("i").WithInt32Type();
+            var pStr = cls.UseProperty("s").WithStringType();
+            var pVec = cls.UseProperty("v").WithVector3Type();
+            var pBool = cls.UseProperty("b").WithBooleanType();
+            var pArr = cls.UseProperty("a").WithUInt8ArrayType();
+            var en = schema.UseEnumMetadata("e", ("A", 0), ("B", 1));
+            var pEnum = cls.UseProperty("e").WithEnumeration(en);
+            var pMat = cls.UseProperty("m").WithMatrix4x4Type();
+            var pStrArr = cls.UseProperty("sa").WithStringArrayType();
+
+            var table = cls.AddPropertyTable(3, "t");
+            table.UseProperty(pInt).SetValues(1, 2, 3);
+            table.UseProperty(pStr).SetValues("a", "bb", "ccc");
+            table.UseProperty(pVec).SetValues(new Vector3(1, 2, 3), new Vector3(4, 5, 6), new Vector3(7, 8, 9));
+            table.UseProperty(pBool).SetValues(true, false, true);
+            table.UseProperty(pArr).SetArrayValues(new List<List<byte>> { new() { 1 }, new() { 2, 3 }, new() { 4, 5, 6 } });
+            table.UseProperty(pEnum).SetValues<short>(1, 0, 1);
+
+            var m1 = Matrix4x4.CreateTranslation(1, 2, 3);
+            var m2 = Matrix4x4.CreateScale(2, 3, 4);
+            table.UseProperty(pMat).SetValues(m1, m2, Matrix4x4.Identity);
+
+            table.UseProperty(pStrArr).SetArrayValues(new List<List<string>> { new() { "a", "b" }, new() { "cc" }, new() { "d", "ee", "fff" } });
+
+            var read = ModelRoot.ParseGLB(model.WriteGLB());
+            var t = read.UseStructuralMetadata().PropertyTables[0];
+
+            Assert.That(t.Properties["i"].GetValues<int>(), Is.EqualTo(new[] { 1, 2, 3 }));
+            Assert.That(t.Properties["s"].GetValues<string>(), Is.EqualTo(new[] { "a", "bb", "ccc" }));
+            Assert.That(t.Properties["v"].GetValues<Vector3>()[2], Is.EqualTo(new Vector3(7, 8, 9)));
+            Assert.That(t.Properties["b"].GetValues<bool>(), Is.EqualTo(new[] { true, false, true }));
+            Assert.That(t.Properties["a"].GetArrayValues<byte>()[2], Is.EqualTo(new byte[] { 4, 5, 6 }));
+            Assert.That(t.Properties["e"].GetValues<short>(), Is.EqualTo(new short[] { 1, 0, 1 }));
+            Assert.That(t.Properties["m"].GetValues<Matrix4x4>(), Is.EqualTo(new[] { m1, m2, Matrix4x4.Identity }));
+
+            var sa = t.Properties["sa"].GetArrayValues<string>();
+            Assert.That(sa[0], Is.EqualTo(new[] { "a", "b" }));
+            Assert.That(sa[1], Is.EqualTo(new[] { "cc" }));
+            Assert.That(sa[2], Is.EqualTo(new[] { "d", "ee", "fff" }));
+
+            var row = t.GetRow(1);
+            Assert.That(row["i"], Is.EqualTo(2));
+            Assert.That(row["s"], Is.EqualTo("bb"));
+        }
+
+        // Sample see https://github.com/CesiumGS/3d-tiles-samples/blob/main/glTF/EXT_structural_metadata/MultipleClasses/
         [Test(Description = "ext_structural_metadata with multiple classes")]        
         public void MultipleClassesTest()
         {
