@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "shape.3DTILES_shape_ellipsoid_region.schema.json",
+    "title": "3DTILES_shape_ellipsoid_region",
+    "type": "object",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "minimumHeight": {
+            "type": "number",
+            "description": "The minimum height of the region relative to the ellipsoid's surface, in meters. May be negative."
+        },
+        "maximumHeight": {
+            "type": "number",
+            "description": "The maximum height of the region relative to the ellipsoid's surface, in meters. May be negative."
+        },
+        "minimumLatitude": {
+            "type": "number",
+            "description": "The minimum latitude of the region, in radians. Must be in the range [-pi/2, pi/2].",
+            "minimum": -1.57079632679,
+            "maximum": 1.57079632679,
+            "default": -1.57079632679
+        },
+        "maximumLatitude": {
+            "type": "number",
+            "description": "The maximum latitude of the region, in radians. Must be in the range [-pi/2, pi/2].",
+            "minimum": -1.57079632679,
+            "maximum": 1.57079632679,
+            "default": 1.57079632679
+        },
+        "minimumLongitude": {
+            "type": "number",
+            "description": "The minimum longitude of the region, in radians. Minimum and maximum longitude must evaluate to (0 <= abs(maximumLongitude - minimumLongitude) <= 2 * pi).",
+            "default": -3.14159265359
+        },
+        "maximumLongitude": {
+            "type": "number",
+            "description": "The maximum longitude of the region, in radians. Minimum and maximum longitude must evaluate to (0 <= abs(maximumLongitude - minimumLongitude) <= 2 * pi).",
+            "default": 3.14159265359
+        }
+    },
+    "required": [
+        "minimumHeight",
+        "maximumHeight"
+    ]
+}

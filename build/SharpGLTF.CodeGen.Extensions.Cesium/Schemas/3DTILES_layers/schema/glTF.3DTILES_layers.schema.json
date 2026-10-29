@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "glTF.3DTILES_layers.schema.json",
+    "title": "3DTILES_layers glTF Document extension",
+    "type": "object",
+    "description": "glTF extension that defines layers that nodes may belong to.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "layers": {
+            "type": "array",
+            "description": "An array of layers that nodes may belong to.",
+            "items": {
+                "$ref": "layer.schema.json"
+            },
+            "minItems": 1
+        }
+    },
+    "required": [ "layers" ]
+}

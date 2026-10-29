@@ -1,0 +1,40 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "node.3DTILES_tileset.schema.json",
+    "title": "node.3DTILES_tileset",
+    "type": "object",
+    "description": "Node-level 3DTILES_tileset extension.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "geometricError": {
+            "type": "number",
+            "minimum": 0.0,
+            "description": "A nonnegative number that defines the error, in meters, introduced if this tile is rendered and its children are not.",
+            "gltf_detailedDescription": "The tile geometric error. A nonnegative number that defines the error, in meters, introduced if this tile is rendered and its children are not. At runtime, the geometric error is used to compute Screen-Space Error (SSE), the error measured in pixels. The SSE determines if a tile is sufficiently detailed for the current view or if its children should be considered."
+        },
+        "refine": {
+            "description": "Refinement determines the process by which a lower resolution parent tile renders when its higher resolution children are selected.",
+            "gltf_detailedDescription": "Specifies the refinement type. A string that is either \"REPLACE\" for replacement refinement or \"ADD\" for additive refinement. It is required for the root tile of a tileset; it is optional for all other tiles. A tileset can use any combination of additive and replacement refinement. When the refine property is omitted, it is inherited from the parent tile.",
+            "anyOf": [
+                {
+                    "const": "REPLACE",
+                    "type": "string"
+                },
+                {
+                    "const": "ADD",
+                    "type": "string"
+                },
+                {
+                    "type": "string"
+                }
+            ]
+        },
+        "content": {
+            "description": "An object that provides additional information about the tile's content. If the tile does not have content (i.e. the node's `externalAsset` property is not defined) then `content` **MUST** be omitted.",
+            "$ref": "content.schema.json"
+        }
+    },
+    "required": [
+        "geometricError"
+    ]
+}

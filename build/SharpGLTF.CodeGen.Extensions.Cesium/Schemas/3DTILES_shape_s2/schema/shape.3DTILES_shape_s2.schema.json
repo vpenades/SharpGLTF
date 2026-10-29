@@ -1,0 +1,26 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "shape.3DTILES_shape_s2.schema.json",
+    "title": "3DTILES_shape_s2",
+    "type": "object",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "token": {
+            "type": "string",
+            "description": "A hexadecimal representation of the S2CellId. Tokens shall be lower-case, shall not contain whitespace and shall have trailing zeros stripped."
+        },
+        "minimumHeight": {
+            "type": "number",
+            "description": "The minimum height of the tile, specified in meters above (or below) the WGS84 ellipsoid."
+        },
+        "maximumHeight": {
+            "type": "number",
+            "description": "The maximum height of the tile, specified in meters above (or below) the WGS84 ellipsoid."
+        }
+    },
+    "required": [
+        "token",
+        "minimumHeight",
+        "maximumHeight"
+    ]
+}

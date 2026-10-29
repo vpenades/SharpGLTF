@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "EXT_geospatial_crs.schema.json",
+    "title": "EXT_geospatial_crs",
+    "type": "object",
+    "description": "This extension declares the Coordinate Reference System (CRS) in which a glTF 2.1 asset was authored.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "format": {
+            "type": "string",
+            "description": "The coordinate reference system format, whose value must be defined by additional extensions."
+        }
+    },
+    "required": [
+        "format"
+    ]
+}

@@ -1,0 +1,50 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "node.EXT_voxels.schema.json",
+    "title": "EXT_voxels glTF Node extension",
+    "type": "object",
+    "description": "`EXT_voxels` extension for a node in a glTF model to indicate voxel-based volumetric data",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "dimensions": {
+            "type": "array",
+            "description": "Dimensions of the voxel grid. The values are interpreted with respect to the shape indicated by `shape`.",
+            "items": {
+                "type": "integer",
+                "minimum": 1
+            },
+            "minItems": 3,
+            "maxItems": 3
+        },
+        "padding": {
+            "description": "The optional padding of the voxels.",
+            "$ref": "padding.schema.json"
+        },
+        "attributes": {
+            "type": "object",
+            "description": "A plain JSON object, where each key corresponds to an attribute semantic and each value is the index of the accessor containing the attribute's data.",
+            "minProperties": 1,
+            "additionalProperties": {
+                "$ref": "glTFid.schema.json"
+            }
+        },
+        "noData": {
+            "description": "A plain JSON object, where each key corresponds to an existing semantic in `attributes`, and each value is the attribute's `noData` value. A `noData` value represents missing data—also known as a sentinel value—wherever it appears.",
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+                "type": "array",
+                "description": "The `noData` value for the corresponding attribute. Array elements **MUST** follow the accessor's `componentType`, and its length must align with the accessor's `type`.",
+                "items": {
+                    "type": "number"
+                },
+                "minItems": 1,
+                "maxItems": 16
+            }
+        }
+    },
+    "required": [
+        "dimensions",
+        "attributes"
+    ]
+}

@@ -1,0 +1,23 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "3DTILES_horizon_occlusion_point.schema.json",
+    "title": "3DTILES_horizon_occlusion_point",
+    "type": "object",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "horizonOcclusionPoint": {
+            "type": "array",
+            "items": {
+                "type": "number",
+                "minimum": -1.0,
+                "maximum": 1.0
+            },
+            "description": "The horizon occlusion point expressed in an ellipsoid-scaled fixed frame. If this point is below the horizon, the entire tile is below the horizon.",
+            "minItems": 3,
+            "maxItems": 3
+        }
+    },
+    "required": [
+        "horizonOcclusionPoint"
+    ]
+}

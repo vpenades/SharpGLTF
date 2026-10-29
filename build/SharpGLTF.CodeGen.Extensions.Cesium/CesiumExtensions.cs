@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -15,6 +15,8 @@ namespace SharpGLTF
             yield return new ExtMeshFeaturesExtension();
             yield return new ExtInstanceFeaturesExtension();
             yield return new ExtStructuralMetadataExtension();
+
+            foreach (var p in Tiles3D21Extensions.GetProcessors()) yield return p;
         }
 
         #endregion

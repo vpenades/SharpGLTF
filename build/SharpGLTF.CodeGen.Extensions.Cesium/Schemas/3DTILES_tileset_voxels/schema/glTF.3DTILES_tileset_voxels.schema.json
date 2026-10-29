@@ -1,0 +1,33 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "glTF.3DTILES_tileset_voxels.schema.json",
+    "title": "3DTILES_tileset_voxels",
+    "type": "object",
+    "description": "3D Tiles voxel content extension. Indicates the presence of voxel content and associates it with metadata definitions in the tileset's schema.",
+    "gltf_detailedDescription": "Voxels are stored as glTFs with the EXT_voxels extension and are paired with EXT_structural_metadata to unify the schema between a tileset and its tiles. This extension is paired with Implicit Tiling for efficient representation of massive sparse voxel datasets. This extension lets runtimes detect voxel content in advance to allocate necessary resources before tiles load.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "dimensions": {
+            "type": "array",
+            "description": "Dimensions of the voxel grid.",
+            "items": {
+                "type": "integer",
+                "minimum": 1
+            },
+            "minItems": 3,
+            "maxItems": 3
+        },
+        "padding": {
+            "description": "The optional padding of the voxels.",
+            "$ref": "padding.schema.json"
+        },
+        "class": {
+            "type": "string",
+            "description": "The class that property values conform to. The value shall be a class ID declared in the `classes` dictionary."
+        }
+    },
+    "required": [
+        "dimensions",
+        "class"
+    ]
+}

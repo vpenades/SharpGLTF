@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "node.EXT_georeference.schema.json",
+    "title": "node.EXT_georeference",
+    "type": "object",
+    "description": "This extension georeferences a node to the provided geographic coordinates.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "longitude": {
+            "type": "number",
+            "minimum": -180.0,
+            "maximum": 180.0,
+            "description": "Longitude in degrees."
+        },
+        "latitude": {
+            "type": "number",
+            "minimum": -90.0,
+            "maximum": 90.0,
+            "description": "Latitude in degrees."
+        },
+        "height": {
+            "type": "number",
+            "description": "Height above (or below) the ellipsoid specified in meters."
+        }
+    },
+    "required": [
+        "longitude",
+        "latitude"
+    ]
+}

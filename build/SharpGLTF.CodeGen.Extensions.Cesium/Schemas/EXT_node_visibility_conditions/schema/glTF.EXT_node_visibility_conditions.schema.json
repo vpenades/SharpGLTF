@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "glTF.EXT_node_visibility_conditions.schema.json",
+  "title": "EXT_node_visibility_conditions extension",
+  "description": "Defines the structure of the extension object that is stored as the EXT_node_visibility_conditions extension.",
+  "type": "object",
+  "$ref": "glTFProperty.schema.json",
+  "properties": {
+    "dimensions": {
+      "description": "The dimensions of the conditions, each consisting of the name and domain of the respective property.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "The name of the property that is used for defining the condition.",
+            "type": "string"
+          },
+          "domain": {
+            "description": "The set of all possible values for this dimension.",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": [ "string", "number", "boolean" ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "domain"
+        ]
+      }
+    }
+  },
+  "required": [
+    "dimensions"
+  ]
+}

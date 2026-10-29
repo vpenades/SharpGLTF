@@ -1,0 +1,39 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "shape.3DTILES_shape_cylinder_region.schema.json",
+    "title": "3DTILES_shape_cylinder_region",
+    "type": "object",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "minimumRadius": {
+            "type": "number",
+            "description": "The inner radius of the cylinder region along the X and Z axes, in meters.",
+            "minimum": 0
+        },
+        "maximumRadius": {
+            "type": "number",
+            "description": "The outer radius of the cylinder region along the X and Z axes, in meters.",
+            "minimum": 0
+        },
+        "height": {
+            "type": "number",
+            "description": "The height of the cylinder along the Y-axis, in meters.",
+            "minimum": 0
+        },
+        "minimumAngle": {
+            "type": "number",
+            "description": "The minimum angle of the cylinder region in radians. In other words, this is the angle where the cylinder region starts. Together with maximumAngle this must satisfy (0 <= abs(maximumAngle - minimumAngle) <= 2 * pi).",
+            "default": -3.14159265359
+        },
+        "maximumAngle": {
+            "type": "number",
+            "description": "The maximum angle of the cylinder region in radians. In other words, this is the angle where the cylinder region ends. Together with maximumAngle this must satisfy (0 <= abs(maximumAngle - minimumAngle) <= 2 * pi).",
+            "default": 3.14159265359
+        }
+    },
+    "required": [
+        "minimumRadius",
+        "maximumRadius",
+        "height"
+    ]
+}

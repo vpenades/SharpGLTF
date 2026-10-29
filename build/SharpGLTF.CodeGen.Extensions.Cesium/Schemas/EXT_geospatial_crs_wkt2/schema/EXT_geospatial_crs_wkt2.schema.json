@@ -1,0 +1,17 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "EXT_geospatial_crs_wkt2.schema.json",
+    "title": "EXT_geospatial_crs_wkt2",
+    "type": "object",
+    "description": "This extension declares the Coordinate Reference System (CRS) in which a glTF 2.1 asset was authored. The CRS is provided as a Well-Known Text (version 2) string.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "wkt2": {
+            "type": "string",
+            "description": "The Coordinate Reference System provided as a Well-Known Text (version 2) string."
+        }
+    },
+    "required": [
+        "wkt2"
+    ]
+}

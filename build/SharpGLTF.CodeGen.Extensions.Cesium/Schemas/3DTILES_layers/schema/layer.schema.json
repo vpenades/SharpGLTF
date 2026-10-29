@@ -1,0 +1,9 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "layer.schema.json",
+    "title": "Layer in 3DTILES_layers",
+    "type": "object",
+    "description": "An object defining a layer.",
+    "$ref": "glTFChildOfRootProperty.schema.json",
+    "properties": {}
+}

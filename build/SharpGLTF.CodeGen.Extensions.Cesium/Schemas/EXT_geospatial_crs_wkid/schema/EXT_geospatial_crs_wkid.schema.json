@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "EXT_geospatial_crs_wkid.schema.json",
+    "title": "EXT_geospatial_crs_wkid",
+    "type": "object",
+    "description": "This extension declares the Coordinate Reference System (CRS) in which a glTF 2.1 asset was authored. The CRS is provided as a Well-Known ID (WKID), commonly an EPSG code.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "authority": {
+            "type": "string",
+            "description": "The organization that defines and manages a specific CRS identifier."
+        },
+        "wkid": {
+            "type": "integer",
+            "description": "An integer that identifies the CRS."
+        },
+        "vcsWkid": {
+            "type": "integer",
+            "description": "An integer that identifies the vertical CRS if wkid identifies a horizontal CRS."
+        },
+        "epoch": {
+            "type": "string",
+            "description": "An epoch for coordinates that are referenced to a dynamic CRS such as WGS 84. Expressed as a decimal year (e.g. '2019.81')."
+        }
+    },
+    "required": [
+        "authority",
+        "wkid"
+    ]
+}

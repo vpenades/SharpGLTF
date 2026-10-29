@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "glTF.3DTILES_tileset_vectors.schema.json",
+    "title": "3DTILES_tileset_vectors",
+    "type": "object",
+    "description": "3D Tiles vector content extension. Specifies that a tileset's tiles contains vector point, line, or polygon geometries with intrinsic semantic meaning, but without intrinsic rendering intent.",
+    "gltf_detailedDescription": "Applied to geospatial domains, vector data refers to geometric topologies (points, polylines, or polygons) rather than pixel grids. Unlike typical glTF geometry, vector data geometry does not directly convey rendering intent; it serves as a vehicle for topology or for associated properties (e.g., labels, dashes, extrusions). This extension defines a mechanism for encoding vector data in 3D Tiles using glTF content, and for distinguishing such vector data from general glTF content.",
+    "$ref": "glTFProperty.schema.json",
+    "properties": {
+        "clip": {
+            "type": "boolean",
+            "description": "Whether content should be clipped to tile bounds when rendering",
+            "default": false
+        }
+    }
+}
